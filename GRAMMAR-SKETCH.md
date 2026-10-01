@@ -238,3 +238,139 @@ sentence the decoder can produce.
   as the charter says, and unchanged enough not to need a sketch.
 - **The profile clause** (`profile softanza`) and the migration profile's `inferred`
   intents -- decision D3 and H-6; their spelling waits on the ruling.
+
+---
+
+## v0.2 -- the declaring and declared altitudes, sketched
+
+**2026-10-01.** Everything above is the computing altitude (v0.1). What follows sketches the
+two altitudes the author's ruling added. The declaring altitude's form is stzu v0.1's,
+verbatim, so the first block below is real and judged today; the seats marked *(v0.2)* are
+this charter's proposals and parse nowhere yet.
+
+### 10. A language declared, in a dozen lines (the real form, stzu v0.1)
+
+```
+-- tontine.stzu -- a savings circle, declared as a language
+
+DEFINE LANGUAGE tontine AS (
+  VERSION "0.1", GRAMMAR "0.1",
+  COURT "tontine/fixtures.json",
+  EXTENSION ".tontine"
+) RATIONALE "A circle of members who deposit each round and take turns receiving the pot"
+
+DEFINE DECLARATION member AS (
+  VERB "MEMBER", SEATS [name: text, joined: text]
+) RATIONALE "One person in the circle"
+
+DEFINE EXPRESSION amount_rule AS (
+  OPERATORS [cmp, and], OPERANDS [number, var], VARIABLES [amount]
+) RATIONALE "A bounded condition on a deposit; no call, no loop, no host"
+
+DEFINE DECLARATION norm AS (
+  VERB "NORM", SEATS [rule: amount_rule, message: text]
+) RATIONALE "A rule the court enforces, with the sentence it speaks when it refuses"
+
+DEFINE REFUSAL unknown_verb AS (
+  MESSAGE "The tontine speaks MEMBER, DEPOSIT, NORM and ROUND; nothing else."
+) RATIONALE "Destruction is not forbidden; it is unparseable"
+```
+
+The meta-court checks closure at every layer, one `LANGUAGE` first, one namespace, seat
+types resolving, required clauses and menu coherence [R, stzu GRAMMAR.md, "The checks"].
+
+### 11. The seats v0.2 adds *(proposed; parse nowhere today)*
+
+```
+DEFINE WORLD tontine AS (
+  ENTITIES [member, deposit, round],
+  RELATIONS [deposit belongs_to member, deposit in round],
+  CONSTRAINTS [round has_at_least 2 member]
+) RATIONALE "The ontology, versioned beside the grammar, shipped in the binary; never a store"
+
+DEFINE ASK tontine AS (
+  QUERY "q",                            -- the Q letter, the closed query grammar
+  LANGUAGES [fr, ar, ha, en]            -- the human languages the natural door speaks
+) RATIONALE "NL asks, never declares; the engine compiles to q, never to host code"
+
+DEFINE NARRATE tontine AS (
+  VOICE "stzn", SCENES [round_opened, deposit_taken, payout_made]
+) RATIONALE "Every run narrates itself; the narration is the court's voice"
+
+DEFINE REFINE tontine AS (
+  POINTS [norm.rule: policy, deposit.amount: parameter],
+  FLOOR  [norm.rule: trusted]
+) RATIONALE "Which declared things may be refined, by whom; a policy point refuses model-composed proposals by construction"
+```
+
+### 12. A sentence of the declared language, and its refusal
+
+```
+-- circle.tontine -- the maker's own world, in its own words
+
+MEMBER amina AS (name: "Amina", joined: "2026-10")
+MEMBER moussa AS (name: "Moussa", joined: "2026-10")
+NORM positive_deposit AS (
+  rule: amount > 0,
+  message: "A deposit must bring something to the circle"
+)
+DEPOSIT d1 AS (member: amina, round: 1, amount: 0)
+```
+
+```
+tontine (line 8): A deposit must bring something to the circle
+  code     NORM_VIOLATED            severity error        language tontine
+  cites    norm:positive_deposit
+  why      the norm's rule is `amount > 0` and the deposit brings 0
+  todo     set amount to a value above 0, or withdraw the deposit
+```
+
+The refusal is the maker's own sentence, declared in the `NORM`; the envelope is C2's; the
+`language` is `tontine`, not `haro`.
+
+### 13. A refinement, as a sentence *(proposed)*
+
+```
+REFINE deposit.d1.amount AS (
+  from: 0, to: 5000,
+  author: "aicha", posture: llm,
+  reason: "Amina's first deposit, recorded from the ledger photo"
+) RATIONALE "A parameter point; bounded by the norm; reversible"
+```
+
+```
+admitted: deposit.d1.amount 0 -> 5000 [llm] (structural + constraint + derivation +
+          governance + trust passed); inverse recorded; revert with REVERT r-0001
+```
+
+And the same sentence against a policy point:
+
+```
+REFINE norm.positive_deposit.rule AS (from: "amount > 0", to: "amount >= 0",
+  author: "aicha", posture: llm, reason: "allow a zero placeholder")
+```
+
+```
+tontine (line 1): trust: posture :llm below the required floor for 'norm.positive_deposit'
+  code     TRUST_FLOOR               severity error
+  why      a policy point refuses model-composed proposals by construction (REFINE ... FLOOR)
+  todo     a trusted actor may propose it; or propose a parameter change instead
+```
+
+### 14. The machine, the real customer
+
+`harobanda/declarative/machine/machine.stzu` declares the machine language in 79 lines; a
+machine is then one sentence of it:
+
+```
+DEFINE SERVICE kds AS (
+  RUN ["/stzr", "/app/kds.luau"],
+  RESTART always,
+  READY "/run/kds.ready"
+) RATIONALE "The kitchen display world; it says when it is serving"
+```
+
+Under Haro the `RUN` seat names `/rnx` and a Haro world; a change to `RESTART` is a
+refinement judged by the gate and tried in the second slot before it is committed -- which is
+what the two boot slots already do [R, 07-SYSTEM]. The spike of the charter's section 10 is
+exactly this file, forged on `rnx`.

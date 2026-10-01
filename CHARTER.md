@@ -1,757 +1,541 @@
 # Haro -- the charter
 
-**Status: v0.1 DRAFT, 2026-09-26, awaiting the author's ratification.** Written by the
-`haro-charter` session (task `COMPASS-HARO-CHARTER-01`, launch prompt of 2026-09-25) on
-branch `next` of `ringpp`, under the visibility rule: nothing here reaches `main` or any
-public remote. Nothing is built. No parser, no compiler, no VM change exists for Haro.
+**Status: v0.2 DRAFT, 2026-10-01, awaiting the author's ratification.** v0.1 was written
+2026-09-26 (commit 7c772ee) by the `haro-charter` session; this version answers the author's
+note of 2026-10-01 and the vision he published on the Softanza site the same day. Nothing is
+built. No parser, no compiler, no VM change exists for Haro beyond the `rnx` VM and `rnxc`
+compiler that run the platform's code today.
 
-**How to read it.** Every claim is one of three things, and says which: **[M] measured**
-(a number, with the file and date it came from), **[R] recorded** (a ruling, a finding or a
-correction already in the estate's record, cited), or **[D] designed** (this charter's own
-proposal, which the author may reverse by name). A number quoted without a source is a
-defect in this document.
+**What changed since v0.1, in the author's words (2026-10-01):** "Haro is actually a
+language of languages as designed in the Ringua project. The idea is that the agentic makers
+will define a language for their domain and start programming in it, or let their agents
+(including Aicha, our Softanza agentic model and conversational agent) program in it. Haro
+is also embracing the refinement-oriented paradigm developed in the Refine project and the
+Refine book. It works hand in hand with the other stack of our technology, from Harobanda
+OS to any application and any target platform." And on the site, read 2026-10-01: "Haro --
+the language of languages: you declare the language of your own domain, and Haro runs it";
+"one engine and one language covering twenty-eight areas"; the estate drawn as hardware,
+Harobanda, Haro, Softanza, Aicha, applications, with Takamba beside.
 
-**The one sentence.** Haro is the language an agent writes and a human governs, on the
-`rnx` register VM: every sentence it can write is grammatical by construction, every
-refusal tells the writer what to do next, every definition says what it is for, and
-nothing a program does can change what its own words mean.
+**So v0.1's first decision is reversed by the author, and this charter records it as such.**
+v0.1 chartered Haro as the general-purpose floor and left the family of declared languages to
+stzu above it (its H-1 and H-9, its D1). The ruling is the other way round: Haro IS the
+family's language. What v0.1 designed survives as one of Haro's three altitudes (section 6);
+everything else is re-centred below.
 
----
+**How to read it.** Every claim is **[M] measured** (a number, with file and date), **[R]
+recorded** (a ruling, finding or correction in the estate's record, cited) or **[D] designed**
+(this charter's proposal, reversible by name). A number without a source is a defect in this
+document. The spelling of the intelligence layer's name follows the site (Aicha); the author's
+note spells it Aiha, and the author rules the spelling.
 
-## 0. Provenance -- what this charter stands on
-
-Read in the order the launch prompt gave, each a source cited below by its path:
-
-- `ringpp/CLAUDE.md` (the five commitments, the oracle, the corrections C-1..C-16, the
-  wide clock), `ringpp/README.md`, `ringpp/NOTES.md` (the F-39 rows and *What flatters the
-  spike*), `ringpp/docs/CORRECTIONS.md`, `ringpp/docs/FINDINGS.md`, `ringpp/src/check.zig`,
-  `types.zig`, `why.zig`.
-- `softanza/memos/2026-08-30-ringpp-design-charter.md` -- the Ring++ design charter: the
-  defect catalogue, principles P1..P10, Rules A..E. Haro inherits all ten (section 2.0).
-- `softanza/memos/2026-08-30-ring-critical-analysis.md` -- *Ring, Judged by the Record*:
-  sections 2.1-2.18, 3.1-3.3, 4.x, 5.2, 5.3, 6. The "leaves" list (section 3) uses that
-  document's numbering, so every item can be checked against its evidence grade.
-- `softanza/vision/01-KERNEL.md`, `02-STACK.md`, `08-NORTH-STAR.md`.
-- `stzlib/CLAUDE.md` "What NOT to do" and "Editing discipline".
-- `stzlib/.../doc/design/SOFTANZA_INTELLIGENCE_ARCHITECTURE.md` LAW 1-6; `NNL_REVIEW.md`;
-  `doc/narrations/stz-functions-as-linguistic-expressions.md`; `meta/stzCodeRules.ring`;
-  `natural/stzNatural.ring`; `agentic/stzAgentDeclaration.ring`;
-  `neural/SOFTANZA_STRUCTURED_OUTPUT.md` (C9); the engine's `gbnf_machine.zig`,
-  `schema_gbnf.zig`, `neural_gen.zig`.
-- `ringua/README.md`, `docs/mission.md`, `docs/design.md`, `docs/commons.md` (the Grammar
-  Commons C6); `stzzql/GRAMMAR.md`, `conformance/fixtures.json`; `stz/declarative/stzu/
-  GRAMMAR.md` (stzu v0.1); `stzzui/doc/diagnostic-contract.md` (C2 v1.2.0) and its schema.
-- The two compass pages (the manual-vs-agentic check of 2026-09-26; the programming model).
-- The field, read and not copied: Luau's sandbox and gradual types; Rust's ownership;
-  Lean 4; DHH's Rails World keynote of 2026-09-23 as the compass page reports it.
-
-Where a source and this charter disagree, the source is right and the disagreement is
-listed in `haro/FINDINGS.md`. The findings that belong to other repositories are routed
-through Central, not fixed here.
+**The one sentence.** Haro is one language with three altitudes: in it a maker declares the
+language of a world, an agent speaks that language under a grammar it cannot break, a human
+governs what the world becomes, and every change to any of them is a refinement judged before
+it lands; it runs on the `rnx` VM, from the declared machine to any application and any
+target.
 
 ---
 
-## 1. Who speaks, who reads, and what each is owed
+## 0. Provenance -- what this version stands on, beyond v0.1's list
 
-### 1.1 The speaker is an agent
+- The author's note of 2026-10-01 and the site pages `stzsite/content/en/vision.md`,
+  `agentic.md`, `platform.md`, `tour.md`, the journal, and `doc/LEARNING-FROM-WOLFRAM.md`.
+- `ringua/README.md`, `docs/mission.md` (ratified 2026-08-06, amended 2026-08-10 and 14),
+  `docs/design.md`, `docs/commons.md` (C6), `docs/exemplar-zql.md`.
+- `softanza/vision/06-ALPHABET.md` (ratified 2026-09-27: the letters Z W Q F A N, the two
+  venues, the totality doctrine, N's ink lines), `03-PRODUCTS.md`, `07-SYSTEM.md` (ratified
+  2026-09-27 by delegation).
+- `stz/declarative/stzu/GRAMMAR.md` (stzu v0.1), `harobanda/declarative/machine/
+  machine.stzu` (79 lines, judged by the meta-court), `harobanda/README.md`,
+  `harobase/README.md`.
+- `refine/README.md`, `START_HERE.md`, `REFINE_INTRODUCTION.md`, `specs/REFINEMENT_
+  CENTERED_PROGRAMMING_v3.md`, `docs/REFINE_RFN_LANGUAGE_v0_1.md`, `docs/THE_REFINEMENT_
+  COMPILER_v1_0.md`, `specs/DECLARATIVE_FOUNDATIONS_FOR_REFINEMENT_v1_0.md`; the book
+  `ayouni/BOOK.md`, `manuscript/rop-book.md`, `manuscript/rop-manifesto.md`;
+  `stzlib/.../base/refine/stzRefinableCode.ring`.
+- v0.1's own list: Ring++'s record, *Ring, Judged by the Record*, the Ring++ design charter,
+  the kernel, the traps, LAW 3 and LAW 6, C2 v1.2.0, C9, the forms document.
 
-Not a metaphor: the estate's own record. The author wrote 300,000 lines of Ring by hand
-before any assistant existed and has written none by hand for more than a year [R,
-launch prompt section 1]; the same estate was built by "one human, one machine, about
-fifteen sessions" [R, Bangalo, quoted in the compass page]. DHH said the same thing about
-Rails on 2026-09-23. So the speaker of Haro is a program that:
-
-- **iterates by running.** It does not read the manual first; it writes, runs, reads the
-  verdict, and writes again. The loop is the interface.
-- **reads errors as instructions.** An error it cannot act on is a wasted turn; an error
-  that names the edit is a turn saved.
-- **emits tokens under a sampler.** Contract C9 [R] can constrain that sampler to a
-  grammar, so a token outside the grammar is never produced. This is the one property no
-  human-first language could have, because no human writes under a decoder.
-- **cannot be trusted with a silent global**, or with any silent semantics: it writes at
-  volume, and what a human would catch once it reproduces a hundred times (the critics'
-  answer to DHH, "the same Swiss cheese failures at higher volume" [R, compass page]).
-- **has no memory of what it did not read**, so the language's tables, not its comments,
-  must carry what a definition is and does.
-
-**What the speaker is owed**, each traced to a paid-for lesson in section 2:
-
-| owed | which principle pays it |
-|---|---|
-| a grammar the decoder holds, at the grain of the edit it is making | 3 |
-| a refusal that is an instruction: where, what, why, and what to do | 4 |
-| a verdict at compile time where the fact is compile-time, in milliseconds | 6 |
-| one obvious spelling, so no token is spent choosing between equivalents | 2 |
-| the language's own tables answering *what is this* and *how do I* | 5 |
-| no silent success: nothing that is wrong runs quietly | 1 |
-
-### 1.2 The reader is a human who governs
-
-The human directs, reviews and governs, and does not type. The reader must be able to
-read a Haro program as a sentence, decide whether it is the program wanted, and stop it
-from doing what was not wanted. **What the reader is owed:**
-
-- **a canonical text that reads as prose.** The Softanza vocabulary is already that
-  text: `Q("ring").RemoveQ("x").Uppercase()` is a sentence because the function-name
-  grammar (principle 7) makes the name carry the parameters, their order and the
-  execution mode. The reader's surface is the same text the agent writes (section 2.8:
-  there is one grammar, not two).
-- **every definition saying what it is for**, in the definition, not in a comment the
-  harvester infers (principle 5).
-- **a narration of every run** (stzn, "how the machine speaks back" [R, 01-KERNEL]), so
-  what happened is readable without reading code.
-- **governance by construction**: effects declared and gated (the `.pia` posture model
-  [R]), a change judged before it lands (Refine), an agent that proposes while only a
-  gate commits.
-
-### 1.3 The third party: the court
-
-Between the two stands the court -- the compiler and its fixtures. It is owed
-determinism (the same text, the same verdict, on every machine, "nothing is believed,
-everything is judged" [R, 02-STACK]) and the C2 envelope for every refusal (section 5).
+Where a source and this charter disagree, the source is right and the disagreement is in
+`haro/FINDINGS.md`.
 
 ---
 
-## 2. The eight principles, answered
+## 1. Haro in one picture: three altitudes, one law
 
-Each principle is **kept**, **amended** or **refused**, with the lesson it comes from.
-`haro/PRINCIPLES.md` carries the full text; this is the verdict table.
+```
+                 the human GOVERNS            the court JUDGES everything
+                       |                              |
+   DECLARING   def language tontine ...  Haro's meta-language: Ringua realised.
+   altitude    a maker (or Aicha) declares a language: its grammar, its world,
+               its questions, its refusals, its narration. The forge turns it
+               into a court, a GBNF, a printer, a knowledge graph, a runtime.
+                       |
+   DECLARED    DEFINE ENTITY deposit ...  the maker's own language, in its jargon.
+   altitude    Closed, total, judged. The agent speaks it under its GBNF. The
+               estate's first six are the alphabet: Z W Q F A N. A machine
+               (.machine) is one. A world (Z) is one. A course is one.
+                       |
+   COMPUTING   Q("ring").RemoveQ("x")...   the Softanza vocabulary on rnx: the
+   altitude    expert venue, the 28 areas, where courts, forges and runtimes
+               are themselves written. v0.1's design, kept whole.
+                       |
+   REFINEMENT  across all three: every named thing is a refinement point; every
+               change is a typed, bounded, gated, attributed, reversible
+               refinement; the compiler takes refinements as a source language.
+                       |
+   THE STACK   Harobanda (the declared machine) -- HaroBase (governed data) --
+               stzApp/stzSuperApp worlds -- stzp projections (app, server,
+               page, device, constellation) -- one static binary per language.
+```
 
-### 2.0 Before the eight: the ten Haro inherits
+**The law across the altitudes** is the estate's own, unchanged: *everything is a
+declaration; every declaration is judged; computation is the judged evaluation of declared
+sentences over declared worlds; anything beyond passes through one governed door per level*
+[R, 06-ALPHABET, "One computational model"].
 
-The Ring++ design charter [R, 2026-08-30 section 3] stated ten principles, each answering
-a numbered defect. Haro inherits all ten unchanged; three are sharpened because Haro is not
-bound by Ring's surface:
+**Why three altitudes and not one grammar.** The two-surface doctrine, RingFace's founding
+decision imported by Ringua as its rule 4 and elevated by the alphabet to a product
+principle: "the programmable, expressive layer lives on the designer's side; what ships is
+always the closed plain-text artifact, re-judged. Programmability and closure never occupy
+the same surface" [R, ringua/docs/mission.md 4; 06-ALPHABET, "The two venues"]. So Haro has
+one *law* and three *surfaces*: a declared language's text can never contain computing-
+altitude code (closure, Ringua contract 1), and computing code reaches a declared world only
+through the doors the forge generates (Q, the API) -- never by evaluating text. v0.1's "one
+grammar, one text" stands *within* each altitude; across them the doctrine forbids it, and
+v0.1 was wrong to put the family outside the language.
 
-| Ring++ | Haro |
-|---|---|
-| P1 strict by default; any relaxation opt-in, never silent | inherited; the relaxations are a declared **profile**, never a flag |
-| P2 a read never writes | inherited (C-13 already decided it; "Haro will not have it" [R]) |
-| P3 values are values | inherited (the value model is `rnx`'s) |
-| P4 resolve at compile time; runtime search reported | **sharpened**: runtime name search does not exist; no `eval`, no `loadlib` hole, so the four absence rules are refusals, never "NOT checked" |
-| P5 one mechanism per concept | inherited (`for/in` and `for/to` one machine) |
-| P6 order-free declarations | inherited (F-21's position rules are gone) |
-| P7 Unicode is not a dependency | inherited |
-| P8 one binary, every target | inherited (commitment 5) |
-| P9 performance stays inside the language | inherited |
-| P10 decisions documented and contestable | **sharpened**: a Haro decision is a C-number in `docs/CORRECTIONS.md` or an H-number here, never prose alone |
+---
 
-### 2.1 No silent global -- KEPT, and made structural
+## 2. Who makes, who speaks, who governs -- and what each is owed
 
-**The lesson [R].** `nL = len(cPixels)` replaced the `NL` constant with a number for the
-whole process; `cR = 7` did the same to `CR`; `TRUE = 0` inverts every comparison and
-nothing errors; 2,898 reads of `NL`/`TAB`/`CR` were swept and 4,460 reads of
-`TRUE`/`FALSE`/`NULL` remain exposed [stzlib/CLAUDE.md "What NOT to do"; analysis 2.1].
-The library itself clobbered `NL` four times [R, the `writes-a-mutable-constant` rule's
-first run].
+v0.1 had a speaker and a reader. The ruling adds the maker, and makes the agent a speaker of
+*declared* languages first and of the computing altitude only as an expert.
 
-**Haro [D].** There are no predefined *variables*. `true`, `false`, `nil` are literals of
-a boolean type and of an absence type (analysis 3.1: "one type, absent, is carrying an
-entire family of production hazards"). Newline, tab and return are string escapes
-(`"\n"`, F-55 closed), so no name stands for them. A global is declared at the top level
-and spelled `$name` wherever it is read or written (Rule A [R]); an attribute is
-`@name`; a bare name is a local and resolves nowhere else, in a function, a method or a
-lambda alike (analysis 2.7; C-2's accepted divergence becomes the rule, and C-14's
-lambda exception is not carried). A read of a name nothing declared is a compile-time
-refusal (P4), and it cannot be silenced by a hole, because the language has none.
-**Shadowing is refused**: a local may not reuse the name of a global or an attribute
-visible at that point; the refusal names both sites.
+**The maker** (the site's first word: "someone who turns what they know about a world into
+something that runs, without waiting for the software industry ... not defined by programming
+skill but by ownership" [R, vision.md]) declares the language of a world -- its things, its
+rules, its flows, its questions -- and programs in it, or lets an agent program in it. Owed:
+that declaring a language is as easy as declaring a variable; that the declaration is plain
+text the maker keeps; that the court judges it in the maker's own words; that the artefact
+ships as one binary and expires never.
 
-**What it costs.** Softanza's Rule A migration surface: 160 bare-name sites classified
-2026-09-09 [M, ringpp/CLAUDE.md], 90 of them class attributes without `@` -- the `rnxc
-migrate` surface -- plus C-14's seven top-level-lambda sites. Nothing at run time.
+**The agent** -- Aicha, the estate's own intelligence layer and conversational agent, named
+and not yet shipped [R, vision.md "Aicha: named"], or any agent under C9 -- speaks the
+declared language. Owed, as in v0.1: a grammar the decoder holds (now emitted by the forge
+for every declared language, by construction); refusals that are instructions, in the
+domain's jargon; verdicts in milliseconds; one spelling; the language's own tables. And one
+thing more: **a write surface that is a refinement** -- "a typed proposal against a declared
+point is the safest write surface you can hand an autonomous system: bounded, discoverable,
+gate-validated, reversible, attributed" [R, rop-book.md 557]. The agent proposes; it never
+commits [R, the estate's loop, agentic.md].
 
-### 2.2 One obvious spelling -- KEPT, with the case rule decided
+**The human governor** reads the declared world as sentences in its jargon, reads every run
+as a narration, ratifies or refuses a refinement, and holds the capability to commit. Owed:
+the Zui law's non-accusatory pathfinding in every refusal; the audit chain as a query ("who
+decided this three years ago"); reversibility built into the data model, never layered on.
 
-**The lesson [R].** `N` and `n` are the same variable (F-18); 887 of the classic suites'
-errors are C22 case collisions [compass page]; `NthStz` and `NthSTZ` collide [stzlib
-"Editing discipline" 2]; `oK` and `oR` are keywords because `ok` and `or` are; `cAll`
-was a C13 error for containing `call`; and Ring accepts two or three spellings of almost
-every construct, measured at 32,180 `ok/next/off/done` against 859 `end`, 36,543 `def`
-against 7,872 `func` [M, Ring++ charter 4c].
+**The court** -- the forge's generated judge for each declared language, the compiler for the
+computing altitude, the gate for every refinement -- is owed determinism and the C2 envelope.
+
+---
+
+## 3. The declaring altitude: Ringua, realised in Haro
+
+**The lesson [R].** Ringua's mission: "allow anyone to design a domain language, give it a
+knowledge base, and start using it -- a computable language, deployable on any platform as
+one static binary ... the description of the application's world stops being imperative code
+owned by programmers and becomes a declared, judged, auditable asset owned by the business"
+[mission.md 3]. Its five contracts, each learned from a named industry failure: closed, plain
+text, jargon-fluent both ways, judged, free-standing [README.md 27-33]. Its three strata:
+syntax, knowledge-graph semantics, conversational pragmatics [mission.md 1]. Its status:
+"blueprint and studies only; no code exists in this repository yet" [README.md]. And what
+does exist: stzu v0.1, the meta-language in which W, ZQL and the machine language are
+declared and judged today [R, stz/declarative/stzu/GRAMMAR.md; harobanda machine.stzu, "7
+declarations, 5 forms, 0 expressions"].
+
+**Haro [D]: stzu v0.1's grammar is Haro's declaring altitude, kept verbatim and grown.** Not
+redesigned: the grammar is pinned, its fixtures are the judge, and the machine language and
+W already conform to it. What Haro adds is what Ringua's three strata and the refinement
+paradigm require and stzu v0.1 refuses by design (its "Refused, by design" names no logic,
+no expression position, no escape):
+
+| seat | stzu v0.1 | Haro's declaring altitude |
+|---|---|---|
+| `LANGUAGE`, `DECLARATION`, `FORM`, `EXPRESSION`, `REFUSAL` | the five meta-kinds | kept, with their menus, their meta-court and their refusal channel |
+| `RATIONALE` on every declaration | mandatory (C6 3.8) | kept; it is principle 5 at this altitude |
+| **`WORLD`** (the knowledge stratum) | absent | the ontology declared beside the grammar: entities, relations, constraints, as versioned data (C1, `world.json`); never a mutable runtime store [R, mission.md rule 3] |
+| **`ASK`** (the pragmatics stratum) | absent | the language's own closed query grammar (the Q letter) and the human languages its natural door speaks; NL asks, never declares; the engine compiles to this grammar and never to host code [R, mission.md rules 1-2] |
+| **`NARRATE`** | absent | how a run of the language is narrated back (stzn); the court's voice |
+| **`REFINE`** | absent | which declared points of a sentence may be refined, by whom, within what bounds, at what trust floor (section 7) |
+| **`FORMS` inside a vocabulary** | absent | the function-name grammar of principle 7 declared as data for the computing altitude's families |
+
+**What the forge produces from one declaration** (Ringua's kit, 02-STACK's L1, now Haro's
+compiler verbs rather than separate organs): the parser; the court with the fixtures as its
+constitution and the runner as its drift alarm; the canonical printer (the round-trip
+fixpoint of contract 2); the GBNF, so an agent is sampler-constrained to valid sentences (C9);
+the knowledge graph on the engine's substrate; the query grammar and the natural door; the
+narration; and the runtime on `rnx`, shippable as **one static binary per language**
+(Ringua's fifth property, which is Ring++'s commitment 5 in another register: `rnxc` plus the
+image is that binary).
+
+**The alphabet is the estate's first six declared languages, and composition is the normal
+way to declare one.** Z declares the world, W constrains it, Q asks it, F moves it, A steps it,
+N speaks to it [R, 06-ALPHABET, ratified 2026-09-27]. A maker's domain language -- the tontine,
+a shop, a clinic, a machine -- is a vocabulary over those letters: its entities and norms in
+Z, its conditions in W, its flows in F, its questions in Q, its conversation in N. "Declaring
+a language is as easy as declaring a variable" means exactly this: the letters are the types
+and the maker's declaration is the value. One vocabulary registry, every word belonging to
+one letter [R, 06-ALPHABET, execution route 4].
+
+**The totality doctrine is kept, and it is the point.** The declared altitude is deliberately
+not Turing-complete: W's evaluator is total; F has no expression production; A iterates over
+declared collections only, so no unbounded loop is expressible [R, 06-ALPHABET, "The totality
+doctrine"]. An agent constrained to it has "expressive power without the pathology:
+malformedness dies at the sampler, falsehood dies at the court, and non-termination is
+unexpressible". Computation that needs the halting problem passes through one governed door
+to the computing altitude -- and that door is itself declared (an `A` step naming a
+computing-altitude verb, with its capability).
+
+---
+
+## 4. The declared altitude: a sentence in your own language
+
+A declared language's sentence is what the maker writes and what the agent emits. It is
+closed (unknown verbs are unparseable, "destructive or unrecognized operations are not part
+of the grammar" [R, stzzql/GRAMMAR.md 15-16]), plain text in the Commons' lexical form (C6:
+`--` comments, double-quoted strings, UPPER_SNAKE keywords, `lower_snake` identifiers,
+case-sensitive, UTF-8, LF or CRLF never diagnosed), judged by its court in its own jargon
+("mydsl (line N): the money received must cover the total" [R, ringua/docs/design.md 24]),
+and spoken by the agent under the GBNF the forge emitted for it.
+
+What a sentence can do: declare (Z), constrain (W), ask (Q), move (F), step (A), converse
+(N). What it cannot do: call host code, evaluate text, loop without bound, mutate a store at
+run time. Where it lives: a file the maker keeps; the machine's `/etc/machine`; a world's
+`.zknw`; a course; a fleet. How it reaches people: stzp's five projections (section 8).
+
+**The eight principles at this altitude** are mostly consequences of the five contracts
+(section 11's table); two deserve the sentence: *no silent global* becomes "a dangling
+reference is a check failure with a jargon phrase, not a runtime surprise" [R, commons.md
+5.2, exemplar gap G6]; *refuse, then explain* becomes "what a language says when it refuses is
+declared beside its grammar, not authored per runtime" [R, stzu GRAMMAR.md, DEFINE REFUSAL].
+
+---
+
+## 5. The computing altitude: v0.1, kept whole as the expert venue
+
+v0.1's design -- the Softanza vocabulary as the canonical text, forms as grammar, the intent
+clause, Rule A's sigils, no `eval`, the C2 error, the GBNF at three grains, the corrections
+C-1..C-20 carried or dropped by name -- is this altitude, and `haro/PRINCIPLES.md` carries it
+in full. What the ruling changes about it:
+
+- **It is the expert venue, not the product.** "The default venue is the product. The expert
+  venue is the honesty about what the product stands on" [R, 06-ALPHABET]. The 28 areas of
+  the engine, the courts, the forges, the runtimes and the projections are written here;
+  a maker reaches it through one governed door, never by default.
+- **Its surface today is the Ring-shaped one `rnxc` compiles.** The site labels that code
+  "Softanza" and says "every code block on this site is Softanza code as it runs on the
+  platform today" [R, platform.md]. The 531,012 lines of library and the 306,302 lines of
+  tests [M, stzsite journal, 0e72e2e2c] are its compatibility specification. v0.1's rules
+  land on it as **profiles** (P1: relaxations declared, never silent), each a refinement of
+  the library judged by the wide suite [M, 3,231 of 5,112 programs agree with the oracle on
+  every stable line; Ring++ passes 8,501 of Ring's 8,507 assertions, ringpp CLAUDE.md
+  2026-09-30].
+- **Its families are declared.** The forms (`Verb`, `Verbed`, `VerbQ`, `CS`, `ST`, `W`, `X`,
+  `Many`, `Except`...) are the computing altitude's own closed vocabulary, declared at the
+  declaring altitude (`FORMS`) and generated by the compiler, which is the compile-time
+  metaprogramming the Ring++ charter asked for [R, 4e.6] and the 10,600 hand-typed spelling
+  variants it retires [M, analysis 5.3].
+
+---
+
+## 6. Refinement: the change model at every altitude
+
+**The lesson [R].** "AI removed the bottleneck on producing code and created a new one:
+trusting code -- yours or an agent's -- that arrives faster than anyone can review" [refine/
+README.md 3-5]. "Stop trying to govern the intelligence, and govern the change" [rop-book.md
+93]. "A refinement is a typed, bounded change to a declared point in a system, validated
+against declared rules before it lands, attributed to its author, aware of everything it
+affects, and reversible by construction" [rop-book.md 205]. "The declarative approach makes
+the declaration itself the refinement surface. There is no separate annotation layer ...
+Every named thing is a candidate refinement point. The boundaries are not author-chosen;
+they are language-required" [DECLARATIVE_FOUNDATIONS 32, 64]. "A refinement compiler takes
+a stream of refinements as its source language" [THE_REFINEMENT_COMPILER 18]. "The rules
+themselves are refinable ... graphs all the way down, and one gate over all of it"
+[rop-book.md 677]. At the floor: "a change to a machine is a refinement -- the two slots
+exist so that an update is a trial before it is a commitment, which is refine's gate at the
+floor" [07-SYSTEM].
 
 **Haro [D].**
-- **Identifiers are case-sensitive, and a case-only collision is refused.** Two names in
-  one scope that differ only by case are a refusal naming both (the C22 class becomes a
-  `todo`). Softanza's mixed-case method names stay exactly as written.
-- **Keywords are a closed set, reserved in every casing**, and no keyword is a valid
-  identifier or a valid prefix trap: `cAll` is a name. The mixed-case keyword trap is
-  closed at the tokenizer, as stzu v0.1 already does [R, stz/declarative/stzu/GRAMMAR.md,
-  "Lexical form"].
-- **One spelling per construct** (Rule C [R], adopted whole): one block closer, one
-  comment form, one print, one logical-operator family, one definition keyword, one
-  string quote. The table is in `haro/GRAMMAR-SKETCH.md`; the choices are the author's
-  to ratify, the rule is not.
-- **A symbol keeps its text** (Rule D1 [R]): `:StartingAt` is `StartingAt`; comparison
-  stays case-insensitive symbol-to-symbol, which keeps the 27,807 sites working [M].
-- **No redefinition is silently accepted**: a second definition of a name is a refusal
-  naming the first (Ring dies at load with C22; Ring++ took one silently [R, CLAUDE.md
-  "Named, not done"]; Haro refuses at compile time).
-- **Refused, by design: the Misspelled Form.** The forms document lists typo-tolerant
-  names (`WithoutSapces`, `NearstTo`) as a form [R, stz-functions-as-linguistic-
-  expressions.md, "Misspelled Form"]. An agent must be corrected, not accommodated; the
-  refusal carries the suggestion (`did you mean`) exactly as `NaturallyStrict` does.
 
-### 2.3 Grammar the decoder can hold -- KEPT, with its limit stated and one grain added
+1. **Every named thing is a refinement point, by the language.** Not an annotation in a
+   comment: `<R:PARAM name="vat" ...>` in a comment is the *lift* for foreign code (the
+   language-agnostic form stzlib carries today [R, stzRefinableCode.ring 410]); in Haro a
+   declaration *is* its point. A `DEFINE NORM` is a policy point; a seat's value is a
+   parameter point; an `A` step's verb is an algorithm point; a `FORM` is a composite point;
+   a `LANGUAGE`'s `GRAMMAR` version is a point whose cascade is its fixtures and its
+   consumers' pins. The kinds are Refine's eight (parameter, block, algorithm, function,
+   pipeline, variable type, library, custom [R, RCP v3 71-80]) at the computing altitude and
+   the book's six (knob, field, symbol, policy, composite, pipeline [R, rop-manifesto 277])
+   at the declared one -- the two taxonomies are a finding (HF-20), and the author picks one
+   name per kind.
+2. **A refinement is a sentence of Haro.** Its required fields are RFN's: `target`, `from`,
+   `to`, `author`, `reason`; optional `policy`, `cascade` (stated, it becomes an assertion),
+   `gates`, `reverts` [R, REFINE_RFN_LANGUAGE 97-120]. RFN "does not compute: no loops, no
+   conditionals against runtime state, no I/O" [R, 599] -- so it is a declared language of
+   the alphabet's kind, total by construction, and its GBNF is the agent's write surface.
+3. **The compiler takes refinements as a second source language.** `haro refine <file>` is
+   as first-class as `haro run <file>`: the diff is a derived view, the cascade the primary
+   one [R, START_HERE 18-21].
+4. **The gate is one gate over all altitudes**, with the structural stage "delegated back to
+   the language itself" [R, rop-book.md 687] -- the declared language's own court, or the
+   computing altitude's compiler -- then constraint (bounds), derivation (the declared
+   rules), governance (who may turn which knob, risk tier and reversibility class as two
+   axes [R, agentic.md]), and trust posture (a point may declare a trust floor; `policy/*`
+   refuses model-composed proposals "not by convention, by construction" [R, rop-book.md
+   565]). The record disagrees on whether this is four or five stages (HF-19); the five of
+   `stzRefinableCode.ring` are the ones that run today, and this charter names five.
+5. **Reversibility is in the data model**: the inverse is computed before the refinement
+   lands; a revert is its own event; nothing is erased [R, RCP v3 94-96]. The audit chain --
+   author, authority, rule, verdict -- is a by-product [R, REFINE_INTRODUCTION 29].
+6. **v0.1's "scoped hole" is the refinement point's grammar.** v0.1 asked for a GBNF of a
+   hole with the names in scope inlined, so an agent's edit is grammatical by construction.
+   A hole is a point; the names in scope are the point's bounds; grain 3 is the refinement
+   grammar. One mechanism, not two: the agent never edits text, it proposes a refinement
+   against a point, under that point's GBNF.
+7. **A refinement of a language is a refinement.** Bumping `GRAMMAR "0.1"` to `"0.2"` is a
+   typed change whose cascade is every fixture and every consumer pinned by hash (stzzql's
+   discipline: "a pinned copy that drifts from its recorded sha256 is a finding" [R,
+   stzzql/README.md 24-27]); the gate runs the court; the consumers re-pin. This is how a
+   maker's language evolves without a maker's world breaking silently.
 
-**The lesson [R].** C9: "a declared grammar makes a violating token unemittable"; measured
-10 of 10 valid on first attempt against 2 of 10 unconstrained [M, SOFTANZA_STRUCTURED_
-OUTPUT.md 88-97]. Today the kernel promises this for every declared grammar and ships it
-only for C9's schemas [R, compass page lane 09]; no `.pia`, W, `-ex` or `.zknw` surface
-emits a grammar [R, haro/FINDINGS.md HF-8].
-
-**Haro [D].** The grammar is written **once**, in one source file, and one generator
-emits from it (a) the parser tables `rnxc` uses, (b) the GBNF the sampler holds, (c) the
-editor grammar. A gate proves the three agree on the fixtures (section 4). The GBNF is
-emitted at **three grains**:
-
-1. **the file** -- a whole Haro program;
-2. **the hole** -- one statement, expression or definition, for an agent editing in
-   place;
-3. **the scoped hole** -- the hole's grammar with the names in scope inlined as
-   terminals, each with its arity and its parameter names. At this grain an undefined
-   name, a wrong arity and an unknown named parameter are all *unemittable*, not merely
-   refused. This is the one grain that is new to the estate, and it is the one an agent
-   needs most.
-
-**The limit, stated on the face of the claim** (C9's own amendment, clause 8): a
-context-free grammar kills malformedness and structural absence. It does not kill type
-errors, does not know a value, and does not know truth. Those are the court's. Two
-constraints of the machine itself: `gbnf_machine.zig` cannot express non-ASCII inside a
-character class [R, its lines 40-47], so Haro identifiers are ASCII (Softanza's already
-are) and string literals go through byte ranges; and the cost of a scoped grammar grows
-with the names in scope -- a Softanza unit has about 45,000 function names -- so the
-grain-3 grammar for a hole lists the *reachable* names (this class, this unit's
-functions, the imports), and its cost per alternative in the pushdown machine is a
-number the spike measures before the grain is promised.
-
-### 2.4 Refuse, then explain -- KEPT; the shape is C2 plus two fields
-
-**The lesson [R].** `StzRaise([:Where, :What, :Why, :Todo])` is the right shape and is
-used in 5 of 3,956 calls [compass page]; Ring's error is a string, and the string is a
-global (analysis 2.17); where it happened is qualified only by discipline (2.18); an
-ambiguity that guesses is LAW 3's own failure; ZQL refuses with "the verb set is closed
--- destructive or unrecognized operations are not part of the grammar" [R, stzzql/
-GRAMMAR.md 15-16].
-
-**Haro [D].** A Haro error is a **value**, not a string, and it is a **C2 v1.2.0
-envelope** [R, stzzui/doc/diagnostic-contract.md] -- `code`, `severity`, `message`,
-`span`, `cites`, `language: "haro"` -- with extension fields C2 permits: `why` (the
-rule, and the finding it descends from, as `cites` entries plus one sentence) and `todo`
-(an applicable edit when the fix is mechanical, a sentence otherwise). Section 5 gives
-the record and three examples. **Ambiguity refuses**: a sentence with two parses is
-unparseable, never resolved by precedence folklore (the `:` that is a range, a pair and
-a lowercase operator at once [R, analysis 2.14, Rule D] is three different tokens in
-Haro).
-
-### 2.5 Self-describing by construction -- KEPT, and it is already family law
-
-**The lesson [R].** About 41% of Softanza's public methods carry their own doc-comment;
-the harvester infers the rest by forward, suffix and sibling inheritance [compass page];
-`Ask`/`HowTo`/`ExplainMethod` are deterministic and zero-hallucination *because* they
-read tables, and they would be better with better tables. The Grammar Commons legislates
-`RATIONALE` as a mandatory trailing clause on every declaration [R, ringua/docs/
-commons.md 3.8], and stzu v0.1 is the first family language to carry it on every
-declaration [R].
-
-**Haro [D].** A definition -- function, method, class, global, form family -- carries an
-**intent clause**, and a definition without one does not compile. The intent is prose,
-never compared, never parsed for meaning (the standing C2 gives `message`). The compiled
-image carries, per definition: name, form (parsed from the name), typed signature with
-parameter names, intent, owner, and the fixtures that call it. `Ask`, `HowTo` and
-`ExplainMethod` read those tables. Softanza's `#@` tags and the harvester's inferred
-prose survive as the **migration source**: an intent the harvester inferred is marked
-`inferred` and is legal under the migration profile only (a decision for the author,
-section 8).
-
-### 2.6 Cheap to be wrong -- KEPT, and the number is corrected
-
-**The lesson [R].** 2-3 s of process start times 277 files was fourteen minutes of
-nothing [stzlib/CLAUDE.md PX]; a Softanza program paid 7.28 s of read, parse and compile
-before its first statement, against Ring's 3.06 s, until the compiled image took it to
-0.12 s and the prefix took a never-run child to 0.25 s [M, ringpp/CLAUDE.md 2026-09-14
-and 2026-09-23].
-
-**Measured today [M], because the launch prompt quotes "12-156x" and that number is the
-hand-compiled spike's, not the shipped compiler's** (haro/FINDINGS.md HF-9):
-
-    a six-line program, no library, minima of 15 runs, 2026-09-26 01:40, this machine
-      oracle  runtime/win64/ring.exe          26.7 ms
-      rnxc exec (zig-out/bin/rnxc.exe)        18.4 ms
-      rnxc <file>                             16.2 ms
-    process start dominates both; the difference is inside one scheduler tick
-
-    the shipped rnxc against Luau, x64, 2026-09-13 [M, softanza/memos/2026-09-13.md]
-      Luau leads all six F-39 rows, 1.04-1.88x. Ring++ is in Luau's class, which no
-      Ring ever was; the 12-156x over Ring 1.27 is the spike's, with its caveats in
-      NOTES.md "What flatters the spike"
-
-So "cheap to be wrong" is not a speed claim about a toy; on a toy both runtimes are
-already inside a tick. It is three things: **(1)** the verdict arrives at *compile*
-time wherever the fact is compile-time (P4), so being wrong costs a parse, not a run;
-**(2)** the library is *resident* -- the prefix and the image -- so a Softanza program's
-verdict is not paid for 613 files at a time; **(3)** the guard measures the
-library-loaded case, never the toy. The spike's target (section 7): a verdict under
-100 ms on a one-file Haro program with the Softanza prefix resident, minima of 15,
-against the oracle's number for the Ring twin. A target, not a claim, until measured.
-
-### 2.7 Forms as execution modes -- KEPT, corrected, and made the language's
-
-**The lesson [R].** The forms document is a designed grammar: `Remove` acts, `Removed`
-copies, `RemoveQ` chains, `@Removed` works on the selected part, `Many` takes a
-collection, `Except` subtracts, `CS`/`ST` fix the parameters and their order, `W` takes
-a condition, `X` asserts, `viz` draws, `Deep` recurses, `rnd` randomises, `F`/`FF`
-defer. **Two corrections to the launch prompt:** the document catalogues 22 to 23 forms
-in 23 sections, not 24, and it contains no usage percentage -- "71% live" has no source
-in the tree [R, HF-1]. And the price of writing the grammar by hand is 46,493
-definitions of which about 10,600 exist only as a spelling variant of a base, 35
-spellings of `find` alone [M, analysis 5.3].
-
-**Haro [D].** The forms whose semantics are mechanical become **grammar and type rules**:
-
-| form | Haro rule |
-|---|---|
-| `Verb()` / `Verbed()` | the active form may mutate its receiver; the passive form returns a value and may not (checked: a passive body that writes `@attr` is refused) |
-| `VerbQ()` | returns the receiver; a `Q` body that returns anything else is refused (`q-returns-object` as a compile rule); `VerbQ` requires `Verb` (`q-has-plain-twin`) |
-| `...CS`, `...ST`, `...XT`, `...IB` | suffix order is parameter order; the suffix declares the parameter, so a call cannot omit or reorder it |
-| `...W(cond)` | the argument is a W literal, parsed at compile time by the W grammar |
-| `...X()` | an assertion; its failure is a Haro error, not a printed line |
-| `...Many`, `...Except`, `IsNot...`, `Deep...`, `viz...`, `rnd...` | naming rules the checker verifies against the base definition |
-
-And the families are **derived from a rule, once**: a definition declares the forms it
-offers (`forms [Many, CS, Q]`) and the compiler generates the members and checks each
-against the base -- the compile-time metaprogramming the Ring++ charter asked for [R,
-4e.6 and analysis 5.3]. **Refused as grammar**: the Misspelled Form (2.2), free-order
-parameters (the same call meaning the same thing in two orders is two spellings), and
-per-language method names (packs of data for the natural door, not identifiers).
-
-### 2.8 Humans read; agents write -- AMENDED: one grammar, one text, two audiences
-
-**The lesson [R].** "In NNL the human is the parser" [NNL_REVIEW.md 25]; `Naturally()`
-is "the exact mirror image", where the machine parses and must refuse; NaturalLib failed
-because natural code was not data and executed as it appeared [analysis 6]; and the
-estate keeps relearning that "a format the tooling reads is not prose" and that a drift a
-human eye forgives is the one that survives [R, mailbox/README.md, CENTRAL-BLOCKHEAD-01].
-
-**Haro [D]. One language, one grammar, one canonical text.** The launch prompt's "two
-surfaces" is answered without a second parser, because a second parsed surface is two
-courts that drift:
-
-- the **canonical text** is what the agent writes and what the human reads; it reads as a
-  sentence because the forms and the NNL device catalogue (articles, prepositions,
-  conjunction, agreement, anaphora as method conventions) are the vocabulary. The human
-  is still the parser of the *sentence*; the machine is the parser of the *text*.
-- the **narration** (stzn) is a projection *from* the program and its runs -- never
-  parsed back. It is where the governing reader lives.
-- the **natural door** (`Naturally`, `HowTo`) stays a library feature over a closed
-  vocabulary: it parses, refuses ambiguity and unresolved words, and produces a **Haro
-  program judged by the same compiler**. It never produces source text for an `eval`,
-  because Haro has no `eval`; today it does end in `eval()` [R, HF-3], so this is a
-  change the natural plane must make on the way to Haro.
-
-Refused: natural syntax *in* the grammar (Inform 7's lesson runs the other way: a
-whole-text compiler with referential context is what stzNatural already is, and it
-belongs beside the language, not inside it).
+**What it costs.** Every declaration carries its kind and bounds, which the Commons' form
+already carries for the most part (seats are typed; `RATIONALE` is mandatory). The gate's
+five stages run on every change; today's stzlib gate judges a refinement in milliseconds
+[M, gate_deepening_narrated, 40 lines byte-identical on both runtimes]. The cost that is new
+is authorship: trust floors and risk tiers declared per point, which a profile can default.
 
 ---
 
-## 3. Carry, leave, decide
+## 7. The stack: hand in hand, from the declared machine to any target
 
-### 3.1 Carried [R, author's ruling 2026-09-12 in 01-KERNEL; this charter's reading]
-
-- **Ring's simplicity**: a small statement set (`if/but/else`, `for`, `while`, `switch/on`,
-  `try/catch`, `return`, `?`), one aggregate literal (the list), the `obj { }` block, no
-  ceremony to move between styles (Ring++ charter 4e.7 refuses a paradigm keyword).
-- **Multiparadigm expressiveness**: classes with attributes and `This`; first-class
-  functions and lambdas; the declarative brace form, given its missing reading direction
-  (4e.5: "a DSL author defines a shape once and gets both a text reader and the brace
-  form"); operator overloading, declared (F-69).
-- **The Softanza vocabulary as the compatibility specification**: every Softanza public
-  signature is a Haro signature; the migration is a census, and `rnxc census` already
-  measures it (118,638 statements, 118,413 compiled, 224 refused [M, 2026-09-25]).
-- **Rule A's sigils** (`$global`, `@attribute`, bare local), Rule C (one spelling), Rule D1
-  (symbols keep their text), the two-element pair as the one destructuring shape (532 of
-  556 sites [M, charter 4g.4]).
-- **Named arguments as a call protocol** (analysis 5.2: 6.3-7.8 us per call in Ring,
-  550x Python's), spelled as Softanza spells them, `:Name = value`, resolved at compile
-  time -- see decision D4.
-
-### 3.2 Left -- each item is a section of *Ring, Judged by the Record* or a finding
-
-| left behind | Haro's answer | source |
+| member | what it is (stage, as the site reads it 2026-10-01) | its relation to Haro |
 |---|---|---|
-| truth is a variable | boolean type, literals, unassignable | 2.1, 3.1 |
-| a read that writes (`aHash[k]` inserts) | P2; C-13 already decided | 2.2, F-49 |
-| the language redefinable from inside (`ChangeRingKeyword`, `eval`) | closed grammar; no `eval`, no keyword change; C-9's own text says the rule "belongs to HARO" | 2.3, C-9 |
-| equality that does not compare (`[1,2] = [1,2]` is 0) | structural equality for values; identity (`is`) for objects | 2.4, 2.9 |
-| case-insensitivity at scale | decided at parse (2.2) | 2.5, F-18 |
-| names resolve at run time and die at run time | P4; the four absence rules are refusals | 2.6 |
-| a method cannot own a name | a bare name is a local, always | 2.7 |
-| equality that converts (`"" = 0` is true; `1 = "01.01"`) | no implicit string-number conversion; C-8 kept it for the bridge and named the strict build as the place it goes | 2.8, C-8 |
-| rounding is a mutable process-global | `decimals` is a formatting argument | 2.10, C-10 |
-| `switch` takes one value per `on`, silently | multi-value `on` (Ring++ has it) | 2.11 |
-| the loop variable after the loop, four rules | scoped to the loop (C-11) | 2.12 |
-| block comments do not nest | one comment form (Rule C) | 2.13 |
-| a bare colon lowercases the next word | symbols keep text (Rule D1); the three jobs are three tokens | 2.14 |
-| the range answers with the wrong type | typed ranges | 2.15, C-5 |
-| `sort` is not stable | stable by contract | 2.16 |
-| an error is a string, and a global | the C2 record (section 5) | 2.17, F-68, C-15 |
-| where the error happened, qualified | exact spans, the frame chain, the callee's line rule (C-8, 2026-09-22) | 2.18 |
-| four types asked to carry more | the Lua-sized answer already demonstrated: boolean, integer, float, string, array, map, object, plus `nil` | 3.2, 3.3 |
-| doubles for everything | integer and float; a number carries its own precision | 4.5, 4.6 |
-| no named parameters | named parameters (3.1) | 5.2, F-59 |
-| no static metaprogramming | form families from a rule (2.7) | 5.3 |
-| natural programming that executes as it appears | the natural door beside the language (2.8) | 6 |
-| every `func` after the first `class` becomes a method; bodies by position | P6 order-free; a definition owns its body by structure, closed by `end` | F-21, NOTES "four findings" 1 |
-| `get`/`put` cannot be method names | no accidental reservations: keywords are the closed set and nothing else | F-20 |
-| no string escapes; `\"` fails silently | escapes (`\n`, `\t`, `\"`) | F-55 |
-| `char()` wraps modulo 256 | refuse out of range | F-56 |
-| `n++` as a value is a pre-increment | `++` is a statement only | F-64 |
-| `if cond : stmt` builds a list that is always true | a list is not a truth: a condition must be boolean | F-65 |
-| a function with no `return` yields `""` | it yields `nil`, and its type says so | F-66 |
-| `aList + v` appends in place anywhere | `+` never mutates; append is a verb | F-68 |
-| reading an unknown name in a class body creates the attribute | refused at compile time | F-70 |
-| `substr(s, a, b)` is find with two arguments and replace with three | no arity-changes-meaning; the forms fix parameters | stzlib "What NOT to do" |
-| a method named `len` shadows the builtin for every caller | a method may not take a builtin's name (`no-len-method` as grammar) | stzlib, F-17 |
-| `for x in list` re-evaluates its source | one loop machine, bounds once (P5) | stzlib, F-43 |
-| non-ASCII console output garbles | UTF-8 out by default (P7) | stzlib |
-| Ring's runtime, governance, OpenGL-era bindings | not carried (01-KERNEL) | ruling |
-
-### 3.3 Decided by this charter, reversible by name (H-numbers)
-
-- **H-1** one language, one grammar, one canonical text (2.8).
-- **H-2** case-sensitive identifiers, case-only collisions refused, keywords reserved in
-  every casing (2.2).
-- **H-3** no `eval`, no `loadlib` from the language; foreign code through stzx's one door.
-- **H-4** a bare name is a local everywhere; `$` and `@` are the only ways up.
-- **H-5** the error is a C2 envelope with `why` and `todo` (section 5).
-- **H-6** the intent clause is mandatory; `inferred` is legal under the migration profile
-  only.
-- **H-7** the forms in 2.7 are grammar; families derive from a rule.
-- **H-8** the GBNF is generated from the one grammar source at three grains (2.3).
-- **H-9** Haro is the floor of the family; declared languages embed as typed literals
-  (section 6).
-
-### 3.4 Put to the author -- section 8.
+| **Harobanda** | the declared machine: one text file boots exactly that and judges every boot; Linux pinned beneath, PID 1 the one binary, no shell, no login (built, MIT) [R] | its language, `.machine`, is declared in stzu v0.1 -- 79 lines, 7 declarations, 5 forms, 0 expressions, 54 fixtures [R, machine.stzu; 07-SYSTEM] -- so it is Haro's first customer at the declaring altitude; a machine update through two slots is a refinement; the worlds it runs are Luau under `stzr` today (four reference machines) and become Haro worlds on `rnx` as "the image's second binary" [R, 08-NORTH-STAR, the Ring++ row] |
+| **HaroBase** | the governed data store: SQLite in the process, governed, a Zig library with a C ABI, no Ring inside (specification; HB1 and HB2 built) [R, harobase/README.md] | the data refinement domain's store; a world's records persist through it; "shared by every face of the estate (Haro, Zin, and Softanza's engine while Ring lasts)" [R] |
+| **the worlds** | stzApp ("an application is a living world of meaning"), stzSuperApp ("a living constellation of worlds") [R, 02-STACK L3] | declared in the alphabet; governed by Z's norms and Zui's constitution; refined through the gate |
+| **the projections** | stzp: app, server/service, edge/browser via wasm, device, constellation [R, 03-PRODUCTS] | one Haro world, five targets; one static binary per language (contract 5 = commitment 5) |
+| **Zin** | the constitutional federation: 56 pillars under a compile-time constitution; ZML the meta-language behind its pillar DSLs; ZinScript its scripting language (built, commercial) [R] | ZML and Haro's declaring altitude elevate losslessly by construction (the stzu-to-ZML table [R, stzu GRAMMAR.md]); "ZinScript may stay close to Zin or embrace Haro" is Zin's call [R, stz/CLAUDE.md, author 2026-09-13]; the convergence point is refine's gate enforcing zin's constitution [R, 03-PRODUCTS] |
+| **Refine** | refinement-oriented programming: a corpus of over a hundred specifications, a prototype, the first module of a Zig engine, a book in manuscript (specification) [R] | section 6 is Refine's paradigm made the language's own; Refine the product is the governed-change environment over it |
+| **Aicha** | the coming intelligence layer and conversational agent: knowledge, models and agents on your own device, "bound by the rule that a model proposes and never commits" (named) [R, vision.md] | the speaker of declared languages: it drafts sentences of Z/W/Q/F/A through the closed compile target (N's governed middle [R, 06-ALPHABET]), proposes refinements against declared points, and holds no `effectful` capability [R, agentic.md, 610 deletions proposed and none committed]; built on the natural plane, the neural plane under C9, `.pia` declarations judged at load, and the knowledge graph |
+| **Takamba** | the harness, formerly Bangalo: many sessions on one body of work with a directory and git; laws cited to incidents (built) [R] | how Haro is built; its refinement discipline is law 1 made structural, which "IS the audit chain" [R, 03-PRODUCTS] |
+| **Luau** | stz's script host today, "Luau-first, Ring-still" [R, stz/README.md] | hosts stzr and the four reference machines' worlds; the meta-court that judges `.stzu` files runs in Luau today (`face/stz/Stzu.luau`) [R, machine.stzu header]; the spike (section 10) re-judges with `rnx`; convergence is the author's ruling at the critical point [R, 01-KERNEL] |
+| **Softanza, the library** | the foundation, built: 531K lines, the Zig engine, 501 narrated guards [M, site] | the computing altitude's compatibility specification, and the engine behind every altitude (graphs, text, the decoder, the natural plane) |
 
 ---
 
-## 4. The grammar contract: how the GBNF is produced and how C9 holds it
+## 8. The grammar contract, extended to the declaring altitude
 
-**One source.** `haro/grammar/haro.ebnf` (name illustrative), written in the Grammar
-Commons' lexical form [R, C6: `--` comments, double-quoted strings, UTF-8, LF or CRLF
-accepted and never diagnosed]. It is the only place the grammar is written. Three
-artefacts are **generated** from it and never edited by hand:
+v0.1's contract stands for the computing altitude (one grammar source; parser, GBNF and
+editor grammar generated from it; the gate proving them equal on fixtures; three grains). The
+ruling adds:
 
-1. the parser `rnxc` uses for `.haro` files (a hand-written recursive-descent parser is
-   acceptable for the spike *if* the gate below proves it against the GBNF; the
-   generated parser is the target);
-2. `haro.gbnf`, the whole-file grammar, in the dialect `gbnf_machine.zig` accepts;
-3. `tree-sitter-haro`, for editors and for `rnxc check`'s span machinery.
-
-**The gate**, in `bench/gate.py`'s style, made to fail before it is trusted:
-
-- every accept fixture parses under (1) and is accepted by (2) through
-  `StzGrammarAccepts(gbnf, text)` [R, stzNeuralModel.ring 204, works with no model
-  loaded];
-- every reject fixture is refused by (1) *and* by (2), and the refusal carries the
-  fragment the fixture names (the exemplar's gap G8 [R, ringua/docs/exemplar-zql.md]);
-- N derivations sampled from (2) all parse under (1) -- the direction that catches a
-  grammar wider than its parser;
-- the three artefacts carry the same grammar version, and a fixture change lands with
-  the prose in the same commit (the W discipline, "fixtures first, prose second" [R]).
-
-**The three grains** (2.3) are produced by the compiler, not stored: grain 1 is the
-file; grain 2 is the nonterminal the agent's edit targets; grain 3 is grain 2 with the
-`ident` production rewritten as the alternation of the names reachable at the hole,
-each function name followed by its parameter shape. The compiler already carries every
-table this needs -- `global_names`, the per-function locals table, `fn_owner`,
-`class_parent`, the dispatch table [R, ringpp/CLAUDE.md, image VERSION 2 and prefix
-VERSION 2].
-
-**How C9 holds it** [R, the engine, read 2026-09-26]: `StzGenerateXT(prompt, [:Grammar
-= gbnf])` installs the grammar through `StzEngineNeuralSetGrammar`, then
-`neural_gen_set_grammar`, then `stz_grammar_set`; at every step `sampleIdConstrained`
-keeps only tokens whose whole byte piece the pushdown machine accepts, and
-end-of-generation is allowed only when `stz_grammar_can_end` is satisfied; the run
-reports masked, judged, steps, stalled, complete through `StzLastGrammarRun()`, and
-`StzEngineGbnfDecodingSupported` says honestly whether decoding was constrained at all.
-Any GBNF text is accepted today; there is no JSON-Schema path and Haro needs none.
-Streaming refuses `:Grammar`; a Haro agent that wants tokens as they come pays that
-until the engine changes.
-
-**What travels with every claim** (C9 clause 8): *structure kills malformedness, not
-falsehood.* A grammatical Haro program can still be the wrong program. That is what the
-court, the fixtures, the narration and the governance gate are for, and this charter
-promises none of them from the grammar.
+- **Every declared language emits its GBNF by construction**, because the forge emits it
+  from the declaration; a language without a grammar for the sampler is not a Haro
+  language. This is the kernel's promise ("every declared grammar also emits its GBNF" [R,
+  01-KERNEL]) made structural, and it closes HF-8: today no surface but C9's schemas emits
+  one.
+- **The declaring altitude has its own GBNF** (stzu v0.1's grammar is EBNF already [R,
+  GRAMMAR.md]), so Aicha can draft a *language*, not only a sentence -- a draft the
+  meta-court judges and the human ratifies, under N's ink lines.
+- **The refinement grammar** per point is grain 3 (section 6.6).
+- **C9's mechanics and limits** are v0.1's: `StzGenerateXT(prompt, [:Grammar = g])`,
+  `sampleIdConstrained`, `stz_grammar_can_end`, the honest `StzEngineGbnfDecodingSupported`;
+  non-ASCII in a character class is unsupported by the machine, so identifiers are ASCII and
+  strings go through byte ranges [R, gbnf_machine.zig 40-47]; and the amendment travels with
+  every claim: *structure kills malformedness, not falsehood* (C9 clause 8).
 
 ---
 
-## 5. The shape of a Haro error
+## 9. The error, at every altitude
 
-**The record [D]** -- C2 v1.2.0's six fields, unchanged in meaning, plus three extension
-fields C2 permits (none boolean, per its v1.2.0 clause):
+v0.1's record stands: a C2 v1.2.0 envelope (`code`, `severity`, `message`, `span`, `cites`,
+`language`) with `why`, `todo` and `frames` as the extensions C2 permits [R, diagnostic-
+contract.schema.json, no bare booleans]. The ruling adds two things:
 
-```
-{
-  "code":     "CONST_ASSIGN",                     -- Haro's own, stable, never reused
-  "severity": "error",
-  "message":  "true is a literal and cannot be assigned.",
-  "span":     { "file": "walk.haro", "line": 12, "col": 5 },
-  "cites":    [ "rule:no-silent-global", "pattern:ring-2.1" ],
-  "language": "haro",
-  "why":      "On Ring, TRUE was a variable holding 1; assigning it inverted every
-               comparison in the process and nothing errored (Ring, Judged by the
-               Record, 2.1). In Haro true is a literal.",
-  "todo":     { "say":  "If a flag was wanted, declare a local: bDone = true.",
-                "edit": { "span": {...}, "replace": "bDone = true" } },
-  "frames":   [ "Walk() walk.haro:12", "Main() walk.haro:3" ]
-}
-```
+- **The refusal's phrasing is declared beside the grammar, in the domain's jargon and human
+  language** (`DEFINE REFUSAL ... MESSAGE`), so the `message` an agent or a maker reads is the
+  maker's own sentence, and "a host stack trace reaching the domain expert is a defect"
+  [R, ringua/README.md 31]. The `language` field names the declared language, not "haro".
+- **A gate's refusal names its stage** -- structural, constraint, derivation, governance,
+  trust -- as `stzRefinableCode.ring` does today ("constraint: 0.30 above max 0.25";
+  "trust: posture :llm below the required floor for 'vat'" [R, lines 257, 278]), and carries
+  the book's four parts: what happened, why, what to do next, where to learn more [R,
+  rop-book.md 364]. `todo` is the third part; `cites` the fourth.
 
-- `why` is one sentence and the citations; it names the paid-for lesson, so the agent
-  learns the rule and not only the fix.
-- `todo` is the instruction. When the fix is mechanical, `edit` is an applicable patch at
-  a span; when it is a judgement, `say` alone. An agent applies `edit`; a human reads
-  `say`.
-- `frames` is Ring++'s own call chain (C-8), oldest last.
-- The human line, one per error, is the same record folded: `haro walk.haro:12:5
-  CONST_ASSIGN: true is a literal and cannot be assigned. Why: ... Todo: ...`.
-- `severity` has C2's two rungs. Haro has **no warning that is a wrong program**: a
-  house-rule finding is a warning only under the migration profile.
-
-**Three examples, each a Ring trap the estate paid for:**
-
-**(1) The constant clobber** -- `stzWordStream.MostFrequentWords` wrote `nL = len(_aRes_)`
-and left `NL` a number for the rest of the process [R, stzlib/CLAUDE.md]. In Haro the
-trap does not exist to be diagnosed: `nL` is a local and newline is `"\n"`. What Haro
-refuses is the nearest thing an agent can still write:
-
-```
-haro stream.haro:41:5 CONST_ASSIGN: true is a literal and cannot be assigned.
-  why:  On Ring TRUE was a variable; writing it inverted every comparison silently.
-  todo: declare a local instead: bDone = true
-```
-
-**(2) The case collision** -- `NthStz` and `NthSTZ` in one class, a C22 at load that
-made every method call fail with R14 across every test [R, stzlib "Editing discipline"
-1-2; 887 such errors in the classic suites]:
-
-```
-haro stzString.haro:2210:9 CASE_COLLISION: NthSTZ differs only by case from NthStz,
-  defined at stzString.haro:1187.
-  why:  Haro identifiers are case-sensitive and a case-only difference is never a
-        different name on purpose (Ring, Judged by the Record, 2.5; F-18).
-  todo: rename one of the two, or delete the later one if it is the same method.
-        edit: replace line 2210 `def NthSTZ(` with `def NthStz(`  -- if a duplicate
-```
-
-**(3) The colon that builds a list** -- `stzSurfacePlot.ring:697-700`, `if _bUp_ :
-_nConnections_++` four times: the `:` is Ring's range, the expression is a list, a list
-is truthy, so the increment happens whatever `_bUp_` is [R, F-65, ringpp/CLAUDE.md
-"THE SIX DIAGNOSTIC REFUSALS"]:
-
-```
-haro surface.haro:697:12 COND_NOT_BOOLEAN: the condition is a list; a condition must
-  be a boolean.
-  why:  On Ring `_bUp_ : n++` was a two-element list and a list is always true, so the
-        branch ran on every call (F-65). Haro has no one-line if with a colon.
-  todo: write the statement on its own line inside the if:
-        edit: replace `if _bUp_ : _nConnections_++` with
-              `if _bUp_` / `    _nConnections_++` / `end`
-```
-
-The fourth shape worth naming without an example: **arity that changes meaning** --
-`substr(s, needle)` finds and `substr(s, old, new)` replaces [R, stzlib]. Haro has no
-such function, and a call with the wrong shape refuses with the definition's signature
-*and its intent line* in `message`, because the intent line exists (2.5).
+v0.1's three examples (the constant clobber, the case collision, the colon that builds a
+list) stand for the computing altitude. One example for the declared altitude, from the
+machine language as it refuses today: a service written as a shell line is refused by the
+grammar, "a service is an argv, never a shell line" [R, machine.stzu, FORM word]; the court
+says so in that sentence, with the line.
 
 ---
 
-## 6. Relations
+## 10. The spike -- the forge's first act on `rnx`
 
-### 6.1 To the eleven declared surfaces
+v0.1's spike (`twice.haro`, a definition with an intent clause) proved one altitude. The
+ruling asks for three to meet, and the estate has already named the smallest program that
+makes them: the alphabet's own proof obligation, "Z re-expressed through stzf from `z.stzu`
+must pass zing's 16 fixtures unadapted" [R, 06-ALPHABET, execution route 3], and the machine
+language that already conforms to stzu v0.1 and runs a real stack.
 
-Measured on the tree on 2026-09-26 [M, haro/FINDINGS.md HF-5..HF-8]: only `.pia` has all
-three properties of a declared language -- a closed vocabulary, a version gate, and a
-load-time court whose findings accumulate in the family shape (22 refusal codes, 53
-sites). `.zopt` is versioned and refuses at load with plain-string findings. `.zrlz` and
-`.stzrulz` refuse only unknown names. `.zknw`, `.zrfn` and the six `-ex` pattern classes
-accept malformed input without refusing it. `W` is compiled by the engine at the call
-and refuses there. `Naturally` refuses only in strict mode. None emits a grammar.
-
-**Haro's relation [D]: the floor, and a typed door for each.**
-
-| surface | today | under Haro |
-|---|---|---|
-| `.pia` | closed, versioned, judged at load; the pattern | unchanged; the model Haro's own profiles follow. A Haro unit declares its capabilities the way a `.pia` declares its posture |
-| `W` (`'{ @item > 5 }'`) | a string handed to `expr.zig` at the call | a **W literal**, parsed at compile time by the W grammar (stz/declarative/w), so a malformed W is a compile refusal, and the sampler's grammar includes W's |
-| the `-ex` strings (listex, numbrex, matrex, graphex, tablex, timex) | parsed at construction; unknown tokens silently answer `[]` or an `"ERROR"` token never raised | each becomes a **declared grammar with fixtures** and embeds as a typed literal; the silent acceptance is a finding for its owner, routed |
-| `.zknw`, `.zopt`, `.zrfn`, `.zrlz`, `.stzrulz`, `.narration` | data formats with loaders of uneven strictness | data, read through their loaders; Haro adds nothing and demands one thing: a loader refuses in the C2 envelope. `.narration` is stzn's output and is never parsed back |
-| notations, rules-as-data | profiles built by API calls; a misspelt primitive never fires | data; the profile's own court is its owner's |
-| `Naturally()` | parses, executes, ends in `eval` | parses, refuses, emits a Haro program the compiler judges; no `eval` (2.8) |
-
-**And the family.** Haro is the general-purpose **floor**; a declared language is a world
-above it (06-ALPHABET's "one governed door per level" [R]). stzu v0.1 declares languages
-whose expressions come from closed menus with no `call`, no `eval`, no statement
-position [R, stz/declarative/stzu/GRAMMAR.md, "Refused, by design"]; it cannot declare
-Haro and must not, because Haro is where computation lives and stzu is where it is
-refused. What Haro offers the family: the runtime in which stzf's forged courts and
-runtimes are written, and the typed literal by which a Haro program carries a declared
-sentence with the declared grammar's own GBNF spliced into Haro's at that position.
-
-### 6.2 To Luau
-
-Luau is the script host of `stz` today, "Luau-first, Ring-still", and stays Luau-judged
-until the author routes a migration; a Ring++ host enters through the same script-host
-C-ABI [R, stz/README.md, stz/CLAUDE.md]. Haro does not target Luau's VM. What it takes
-from Luau, read and not copied:
-
-- **the sandbox by absence**: no `loadstring` exists to cheat with, so the platform
-  enforces closure [R, 02-STACK L1]; Haro has no `eval`, and a unit's reach (file,
-  network, process) is a declared capability the host grants, the way `.pia` postures
-  are granted -- the standard library is *limited*, not guarded;
-- **gradual, checked types**: `--!strict` is what Ring's discarded annotation channel
-  was reaching for [R, ringpp/README.md]; in Haro the hints are real, and the checker is
-  the compiler (commitment 4);
-- **the honest row**: the shipped `rnxc` is in Luau's class and behind it by 1.04-1.88x on
-  x64 [M, 2026-09-13]. Haro inherits that VM and that number, and claims nothing faster
-  until measured.
-
-### 6.3 To Ring++'s checker
-
-`rnxc check` carries 34 rule ids: 17 in `check.zig`, 17 in `types.zig`; the "37" in
-CLAUDE.md counts expected findings, not rules [R, HF-13]. Each becomes one of three
-things in Haro:
-
-| becomes | rules |
-|---|---|
-| **impossible by grammar** (nothing to check) | string-escape, exit-outside-loop, exit-bad-depth, type-not-a-hint, anchor-unknown, default-not-trailing, default-missing-value, default-unknown-param |
-| **a compile refusal** (the checker is the compiler) | undefined-function, uninitialized-variable, unknown-class, unknown-package (the four absence rules, with no holes to silence them), type-duplicate-func, type-arity, type-arg-mismatch, type-return-mismatch, type-declared-conflict, method-shadows-builtin, keyed-read-inserts (moot under P2), char-truncates, empty-catch (an empty handler is refused), varptr-unknown-name |
-| **advice under a profile** (performance facts, not errors) | advise-forin, advise-patch-rebuild, len-in-loop-header, substr-in-loop, genarray-in-loop, varptr-in-loop, memcpy-string-dest, memcpy-nul-source, cache-reads-object, cache-impure, type-hints-missing, unparsed |
-
-The 14 house rules of `stzCodeRules.ring` (15 run; `for_in_loop` is unregistered [R,
-HF-2]) split the same way -- decision D3.
-
----
-
-## 7. The spike plan -- the smallest Haro program that runs on `rnx`
-
-**Not before ratification.** This section is the plan the spike will be measured against.
-
-**The program**, `haro/spike/twice.haro`, and its Ring twin `twice.ring` for the oracle:
-
-```
-# twice.haro -- one definition with its intent, one typed parameter, one call
-
-def Twice(n: integer) -> integer  is "doubles a number"
-    return n * 2
-end
-
-? Twice(21)
-```
-
-**And its refused twin**, `twice_refused.haro`, which is the same file with `true = 0`
-inserted before the call, and must produce the CONST_ASSIGN record of section 5, exit 1,
-validated against the C2 schema.
+**The program.** `harobanda/declarative/machine/machine.stzu` (79 lines) read by a Haro
+front end in `rnxc` as a declaring-altitude file; the forge generates the machine language's
+court as a computing-altitude program on `rnx`; that court judges `machines/makeen_box.machine`
+and the 54 fixtures in `fixtures.json`.
 
 **What the spike builds, and nothing more:**
 
-1. a front end for this subset in `rnxc` (`rnxc haro <file>`): `def`/`end`, typed
-   parameters, the intent clause, `return`, `?`, integer and string literals, a call, a
-   local, `true`/`false`; compiled to the bytecode the Ring front end already emits, so
-   the VM is untouched;
-2. the intent clause carried in the image's function table, and one query that reads it
-   back (`rnxc ask Twice` printing the intent) -- principle 5 in its smallest form;
-3. one refusal in the C2 envelope with `why` and `todo`;
-4. `haro/grammar/haro-subset.ebnf` and the generated `haro-subset.gbnf`, accepted by
-   `gbnf_machine.zig`;
-5. the guard.
+1. a reader for stzu v0.1's grammar in `rnxc` (`rnxc haro <file.stzu>`), judged by the
+   meta-court's own fixtures (`stz/declarative/stzu/fixtures.json`) -- the verdicts must match
+   the Luau meta-court's on every fixture;
+2. the forge's smallest act: from the declaration, a generated court (tokenizer, parser,
+   checks, refusal channel) for the declared language, compiled to `rnx` bytecode;
+3. that court judging the machine language's 54 fixtures with the same verdicts, and the
+   same refusal fragments, as `harb check` gives today;
+4. the GBNF of the machine language, emitted by the forge and accepted by `gbnf_machine.zig`;
+   `makeen_box.machine` accepted by `StzGrammarAccepts`;
+5. one refinement through the gate: a `SERVICE` clause's `RESTART` value changed by a
+   refinement sentence, admitted at the structural and constraint stages, refused at the
+   trust stage when posed as `:llm` against a floor of `:trusted`, and reverted;
+6. the guard.
 
-**The guard**, `bench/haro_px.py`, born standalone and folded into `gate.py` only when
+**The guard**, `bench/haro_forge.py`, born standalone and folded into `gate.py` only when
 green, made to fail before it is trusted:
 
-- **edit-to-verdict**: minima of 15 of `rnxc haro twice.haro` against `rnxc twice.ring`
-  and the oracle on `twice.ring`; then the same with the Softanza prefix resident and a
-  `load` of the library in the twin -- the number that matters. Target: **under 100 ms**
-  with the library resident. Today's baseline for the toy is above (16-27 ms, both
-  sides); the library-resident baseline is 0.25 s for a never-run child on the prefix
-  [M].
-- **the refusal**: the record validates against `diagnostic-contract.schema.json`, exit 1,
-  and the human line matches a pinned fixture.
-- **the grammar**: 200 derivations from the GBNF all parse; the reject fixtures are
-  refused by parser and machine alike; `twice.haro` is accepted by `StzGrammarAccepts`.
-- **the oracle**: `? Twice(21)` prints the same bytes on `rnxc haro`, `rnxc` and
-  `ring.exe`.
+- the two meta-courts (Luau's, `rnx`'s) agree on every stzu fixture; the two machine courts
+  (`harb check`, the forged one) agree on all 54, verdict and fragment;
+- edit-to-verdict: minima of 15 of judging `makeen_box.machine` through the forged court on
+  `rnx`, against `harb check`; target **under 100 ms** -- a target until measured, and the
+  record says v0.1's toy measurement was inside one scheduler tick on both runtimes [M,
+  HF-10];
+- 200 derivations from the machine language's GBNF all parse under the forged court; the
+  reject fixtures are refused by court and machine alike;
+- the refinement fixture pins the C2 record of the trust refusal and the revert.
 
-**Not in the spike**: classes, forms, W literals, named parameters, grain-3 grammars, the
-migration profile, Softanza compiled from Haro source. Each is a later rung with its own
-guard.
+**Not in the spike**: `WORLD`, `ASK`, `NARRATE` seats; the alphabet beyond what the machine
+language uses; Aicha; a Haro world booting on Harobanda; the computing altitude's profiles.
+Each is a later rung with its own guard.
 
 ---
 
-## 8. The decisions only the author can make
+## 11. The principles, re-answered at three altitudes
 
-Five, and the charter stops there. Each has this session's recommendation, which the
-author may reverse by name.
+v0.1's eight, each kept, and three the ruling adds. The full text of each is in
+`haro/PRINCIPLES.md`.
 
-**D1 -- One language or a family?** *Recommendation: one language, one grammar, one
-canonical text (H-1); the family stays in stzu above Haro; the "second surface" is stzn's
-projection and the natural door, never a second parser.* Reversing it means two grammars
-and a round-trip court between them; the estate has paid for drift between two readers
-of one format more than once this month.
-
-**D2 -- The natural surface's scope.** *Recommendation: `Naturally` and `HowTo` stay
-library doors over a closed, per-language vocabulary; they emit a Haro program the
-compiler judges; no natural syntax enters the grammar; strict mode is the only mode for
-an agent.* The alternative -- natural phrases as Haro statements -- is NaturalLib's
-design, and the record says why it failed (analysis 6).
-
-**D3 -- Which of the house rules become compile rules?** *Recommendation: six become the
-language -- `q-returns-object`, `q-has-plain-twin`, `no-case-collision`, `no-len-method`,
-`writes-a-mutable-constant`, `value-called-as-function` -- because each is a grammatical
-or type fact; eight become a declared profile (`profile softanza`) the compiler enforces
-when a unit declares it -- `engine-first`, `no-aggressive-verbs`, `library-prints`,
-`dead-knob`, `setter-resets-on-reject`, `setter-only-moves-one-way`, `misspelled-name`,
-`empty-method-body` -- because each is library policy, right for Softanza and wrong for a
-script.* The line between the two is the author's to draw.
-
-**D4 -- Named arguments and the `:Name = value` spelling.** F-59 stands for Ring++:
-`:Name = value` is a two-element list, and Softanza spells about a thousand arguments
-that way [R]. *Recommendation: in Haro the same spelling is a real named argument bound
-at compile time (analysis 5.2's answer), and a Softanza method that today tests
-`isList(p) and Q(p).IsXNamedParam()` declares its named parameters instead; the
-migration is a census, and the two readings cannot both hold for one call.* This
-touches the calling convention of the whole library and is not this session's to take.
-
-**D5 -- The first spike's target and its number.** *Recommendation: the program and the
-guard of section 7, with the 100 ms library-resident target and the grain-1 GBNF only.*
-And the standing item the record already names: **the name** -- the Haro naming check
-was pending on 2026-09-13 [R, softanza/memos/2026-09-13.md] and nothing here should seal
-it.
-
-Two further decisions the charter took and flags because they are large: the case rule
-(H-2) and the value model. On the value model the charter follows `rnx`'s measured
-answer -- assignment copies, a parameter is by reference (C-7) -- and adds Rust's lesson
-in the smallest form the forms already carry: the active form may mutate, the passive
-may not, and a *function* that mutates a list parameter says so in its definition. The
-author may want that frame more explicit than this, or less.
+| # | principle | declaring | declared | computing |
+|---|---|---|---|---|
+| 1 | no silent global | a language's names are its declarations; one namespace, duplicates refused (stzu check 3) | a dangling reference is a check failure in jargon (G6) | v0.1: literals, `$`/`@`/bare, no upward resolution, shadowing refused |
+| 2 | one obvious spelling | the Commons' lexical form (C6), one | the Commons' form, one spelling per verb, the vocabulary registry | v0.1: Rule C, case decided, keywords reserved |
+| 3 | grammar the decoder holds | stzu's EBNF emitted as GBNF | emitted by the forge for every language, by construction | v0.1: one source, three grains |
+| 4 | refuse, then explain | the meta-court's channel, C2 | refusal phrasing declared beside the grammar, in jargon | v0.1: C2 + why/todo/frames |
+| 5 | self-describing | `RATIONALE` mandatory (C6 3.8) | `explain` on every declaration (Ringua's CLI contract) | v0.1: the intent clause |
+| 6 | cheap to be wrong | the meta-court in ms | a total language terminates; the court judges in ms | v0.1: compile-time verdicts, the library resident |
+| 7 | forms as execution modes | `FORMS` declared as data | closed verb sets, one word per letter | v0.1: the forms as grammar, families from a rule |
+| 8 | humans read; agents write | **amended again**: the default venue is declarative and natural; N drafts, the court judges, the human ratifies | the agent's sentence is the human's sentence | the expert venue, one governed door |
+| 9 | **declaring a language is as easy as declaring a variable** | the founding act is first-class: a language is a value with a version, a court, a grammar; composition over the alphabet is the normal way | | |
+| 10 | **every change is a refinement** | a grammar version is a point with its fixtures as cascade | every named thing is a point; the refinement is the agent's write surface | profiles are refinements of the library |
+| 11 | **total by default** | | not Turing-complete: W total, F expression-free, A bounded; non-termination unexpressible | computation reached through one declared door |
 
 ---
 
-## 9. What this costs, named
+## 12. Carry, leave, decide -- updated
 
-- **Softanza's migration surface** [M, all from the census and the record]: 160 Rule A
-  sites (90 of them attributes without `@`); 136 `eval` sites in 44 files, which C-9 kept
-  for the bridge and this charter drops for Haro; about 1,000 `:name = value` arguments
-  whose reading D4 decides; 27,807 colon sites that keep working under D1; the 59% of
-  public methods whose intent line is inferred, not written; every `for x in` loop
-  (fixed silently); every `substr` (already banned by the house rules).
-- **What Haro gives up on purpose**: typo tolerance in names; free spelling of
-  constructs; free-order parameters; runtime reflection deepening (redirected to
-  compile-time families, charter 4e.6); `eval`; the one-line `if cond : stmt`.
-- **What it does not claim**: a speed. The shipped VM is in Luau's class and behind it;
-  the toy edit-to-verdict is inside a scheduler tick on both runtimes; the
-  library-resident number is a target until the spike measures it.
-- **What it asks of the engine**: nothing new for the spike. Grain-3 grammars and
-  streaming under a grammar are asks for later rungs, each with a cost to measure.
+**Carried**, beyond v0.1's list: stzu v0.1's grammar, menus, meta-court and fixtures,
+verbatim; the Grammar Commons C6 as the one lexical form of every declared language; the
+alphabet Z W Q F A N as ratified; the two-surface doctrine and the totality doctrine;
+Ringua's five contracts and four rules (NL asks, never declares; the NL engine compiles to
+the closed query grammar; the knowledge graph is part of the language definition; the two
+surfaces); Refine's refinement, cascade, gate, audit chain, trust floor, reversibility; the
+machine language as the first declared language with a real stack beneath it.
+
+**Left**, beyond v0.1's table: a general-purpose venue as the maker's default; a comment-
+annotation as the only refinement surface; a declared language that grows "conditionals,
+loops and user functions" (it "has left the jurisdiction" [R, ringua/docs/design.md 4]);
+a mutable runtime knowledge store; natural-language declaration.
+
+**Decided by this version, reversible by name:**
+
+- **H-1 (reversed by the author)** Haro is the language of languages: one language, three
+  altitudes, one law. The family is inside Haro, not above it.
+- **H-9 (reversed with it)** stzu's grammar is Haro's declaring altitude, kept verbatim and
+  grown by the `WORLD`, `ASK`, `NARRATE`, `REFINE`, `FORMS` seats.
+- **H-10** every named thing is a refinement point by the language; a refinement is a
+  sentence of Haro; the compiler takes refinements as a second source language.
+- **H-11** the refinement point's grammar is v0.1's grain 3; the agent never edits text.
+- **H-12** the declared altitude is total; computation passes through one declared door.
+- **H-13** the machine language is the spike's program; the forge's first act runs on `rnx`.
+- v0.1's H-2 to H-8 stand for the computing altitude.
+
+---
+
+## 13. The decisions only the author can make
+
+Five, re-cut on the ruling. Each with this session's recommendation.
+
+**D1 -- ruled 2026-10-01: Haro is the language of languages.** What remains is the *name*:
+whether stzu and Ringua survive as names of Haro's declaring altitude (the `.stzu` extension,
+the stzf/stzu organs) or retire into Haro (`.haro` files at every altitude; `haro forge`,
+`haro check`, `haro refine`, `haro run`, `haro project`, `haro narrate` as the verbs; the
+organs' letters kept as the family sentence's rhyme). *Recommendation: retire the names into
+Haro and keep the grammar and the fixtures verbatim -- the site already says "the language of
+languages" and never says stzu; the fixtures' history keeps its names.* And the standing
+item: the Haro naming check was pending on 2026-09-13 [R] and nothing here seals it.
+
+**D2 -- the natural surface's scope.** Ratified by the alphabet: N asks, never declares; may
+draft, through the closed compile target; the court judges, the human ratifies [R,
+06-ALPHABET, ratified 2026-09-27]. *The charter conforms; nothing is asked.* What is asked:
+whether Aicha's first speech is a declared language's sentence (recommended) or the
+computing altitude's code.
+
+**D3 -- which house rules become compile rules.** Unchanged from v0.1 (six language, eight
+profile), with one addition the ruling makes natural: a profile is a sealed rule set, a
+declared thing (`.zrlz`), and switching it is a refinement.
+
+**D4 -- named arguments and `:Name = value`.** Unchanged from v0.1: a real named argument at
+the computing altitude; the migration a census; the two readings cannot both hold.
+
+**D5 -- the spike.** *Recommendation: section 10 -- the machine language forged on `rnx`,
+54 fixtures, one refinement through the gate, the 100 ms target -- in place of v0.1's
+`twice.haro`.* It proves the three altitudes and the stack at once, on a program the estate
+already pins.
+
+**And two the ruling raises, named here and put to him:**
+
+- **D6 -- the refinement point's syntax and file.** The record carries two taxonomies of
+  kinds (eight in Refine's spec, six in the manifesto) and two file extensions (`.rfn` in
+  Refine, `.zrfn` in stzlib) [R, HF-19, HF-20]. One name per kind and one extension are his.
+- **D7 -- Zin.** Whether ZinScript embraces Haro, and whether Zin's pillar DSLs are forged
+  from Haro's declaring altitude, is Zin's call "recorded, never forced from here" [R,
+  06-ALPHABET]; the charter asks nothing and records the lossless elevation.
+
+---
+
+## 14. What this costs, named
+
+- **To the estate's names**: if D1 retires stzu and Ringua into Haro, three repositories and
+  the vision chapters change a word; the fixtures and grammars do not change a byte.
+- **To the computing altitude**: v0.1's costs stand (the Rule A surface, 136 `eval` sites,
+  the `:name = value` reading, the 59% of methods without an own intent line).
+- **To the declared altitude**: the seats stzu v0.1 lacks (`WORLD`, `ASK`, `NARRATE`,
+  `REFINE`, `FORMS`) are grammar growth with fixtures first, prose second -- the W
+  discipline; Ringua's Phase 1.5 study (the tontine given a graph and a natural door in two
+  human languages) remains the named gate before `WORLD` and `ASK` are drawn [R, mission.md
+  6], and this charter does not pretend past it.
+- **To the agent**: nothing it had is lost; what it gains is bounded.
+- **What it does not claim**: a speed (the shipped `rnxc` is in Luau's class and behind it
+  [M, 2026-09-13]); a running Aicha; a Haro world booting on Harobanda; a forge that exists.
+  Haro is "in construction" and the site says so; this charter is the construction's
+  drawing.

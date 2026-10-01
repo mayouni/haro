@@ -1,9 +1,15 @@
 # Haro -- the principles, in full
 
-**Status: v0.1 DRAFT, 2026-09-26, with `haro/CHARTER.md`.** The charter gives each
+**Status: v0.2 DRAFT, 2026-10-01, with `haro/CHARTER.md`.** The charter gives each
 principle its verdict; this file gives each its full text: the lesson, its source, the
 rule, what the rule costs, and how a guard would check it. Grades as in the charter:
 [M] measured, [R] recorded, [D] designed.
+
+**v0.2 note.** Principles 1-7 below are written for the computing altitude (v0.1's Haro) and
+stand there unchanged; the charter's section 11 says what each means at the declaring and
+declared altitudes. Principle 8 is amended a second time, and principles 9, 10 and 11 are
+added, at the end of this file, on the author's ruling of 2026-10-01 that Haro is the
+language of languages and embraces refinement.
 
 The principles are numbered as the launch prompt numbered them (1-8), preceded by the ten
 Haro inherits from the Ring++ design charter (P1-P10, `softanza/memos/2026-08-30-ringpp-
@@ -350,3 +356,142 @@ emission; nothing else. The human loses nothing: the text was already the senten
 **The guard.** A `Naturally` fixture whose result is a Haro program text that the
 compiler accepts; a strict-mode fixture where `CREATE_OBJECT` outside the allow-list is
 refused (the gap named in HF-4).
+
+---
+
+## 8, amended in v0.2. Humans read; agents write -- the default venue is declarative
+
+**Verdict: AMENDED AGAIN (H-1 reversed by the author, 2026-10-01).**
+
+**The lesson, with its bill.** v0.1's amendment stands at the computing altitude (one
+grammar, one text, the narration a projection, the natural door a library feature). The
+ruling adds what the alphabet already ratified: "the default venue -- 100% declarative and
+natural. A solution designer declares the world in Z, gets an executable immediately,
+constrains and computes in W, asks in Q, moves work in F, steps in A, and converses in N.
+End users get Q and N too"; "the expert venue -- any combination with the lower level ...
+One governed door per level, never a hidden escape" [R, 06-ALPHABET, ratified 2026-09-27].
+And N's ink lines: "natural language asks; it never declares"; "N may DRAFT declarations ...
+produced through the closed compile target ... a draft enters the world only as a proposal
+judged by the court ... N proposes; the court decides; the human ratifies" [R, same].
+
+**The rule [D].**
+1. The maker's and the agent's default venue is the declared altitude; the human reads the
+   same sentence the agent emitted, in the domain's jargon.
+2. The natural door (N, Aicha) asks and drafts; it never declares; its drafts are sentences
+   of the declared language produced through the closed compile target, judged by the court
+   and ratified by a human. It never produces computing-altitude code for evaluation.
+3. The computing altitude is reached through one declared door, never by default.
+4. Within each altitude, one grammar and one text; the narration is a projection.
+
+**What it costs.** Nothing new: it is the ratified alphabet applied to the language.
+
+**The guard.** A fixture where N drafts a Z sentence, the court judges it, and the draft is
+refused when it names a thing the world does not declare.
+
+---
+
+## 9. Declaring a language is as easy as declaring a variable
+
+**Verdict: ADDED (the ruling of 2026-10-01).**
+
+**The lesson, with its bill.**
+- The founding act: "DECLARE A LANGUAGE ... let the machinery return it as a true language --
+  executable, judged, governed, intelligent" [R, 01-KERNEL]. "Softanza is the machinery that
+  makes declaring such a language as easy as declaring a variable" [R, same].
+- Ringua's five contracts and three strata [R, ringua/README.md 27-33; mission.md 1]; its
+  honest boundary: "no code exists in this repository yet" [R].
+- What exists: stzu v0.1 declares W, ZQL and the machine language, with a meta-court and
+  fixtures [R, stz/declarative/stzu]; `machine.stzu` is 79 lines for a language that boots
+  a computer [R, harobanda].
+- The alphabet: six letters, "learnable in an evening each", composing to "the most complex
+  enterprise reality" [R, 06-ALPHABET].
+
+**The rule [D].**
+1. The declaring altitude is first-class in Haro: a language is a value with a `VERSION`, a
+   `GRAMMAR`, a `COURT` and an `EXTENSION` (stzu v0.1's `DEFINE LANGUAGE`, kept).
+2. A maker composes a domain language from the alphabet: a vocabulary over Z W Q F A N; one
+   word belongs to one letter.
+3. The forge produces, from the declaration alone: parser, court, printer, GBNF, knowledge
+   graph, query grammar, natural door, narration, runtime, one static binary.
+4. A language is judged by the meta-court before it exists, and by its own court after.
+
+**What it costs.** The forge, which does not exist (ST-8 is "the standing rung" [R,
+softanza/memos/2026-09-13.md]); the seats stzu v0.1 lacks; Ringua's Phase 1.5 study before
+the knowledge and pragmatics seats are drawn [R, mission.md 6].
+
+**The guard.** The spike of the charter's section 10: `machine.stzu` forged on `rnx`, 54
+fixtures agreeing with `harb check`.
+
+---
+
+## 10. Every change is a refinement
+
+**Verdict: ADDED (the ruling of 2026-10-01).**
+
+**The lesson, with its bill.**
+- "AI removed the bottleneck on producing code and created a new one: trusting code -- yours
+  or an agent's -- that arrives faster than anyone can review" [R, refine/README.md 3-5].
+- "A refinement is a typed, bounded change to a declared point in a system, validated
+  against declared rules before it lands, attributed to its author, aware of everything it
+  affects, and reversible by construction" [R, rop-book.md 205].
+- "Every named thing is a candidate refinement point. The boundaries are not author-chosen;
+  they are language-required" [R, DECLARATIVE_FOUNDATIONS_FOR_REFINEMENT 64].
+- "A refinement compiler takes a stream of refinements as its source language" [R,
+  THE_REFINEMENT_COMPILER 18]; "the diff is a derived view, the cascade is the primary one"
+  [R, START_HERE 18-21].
+- "A typed proposal against a declared point is the safest write surface you can hand an
+  autonomous system" [R, rop-book.md 557]; a trust floor refuses model-composed proposals
+  "not by convention, by construction" [R, 565].
+- Today: `stzRefinableCode.ring` runs five stages (structural, constraint, governance,
+  trust posture, derivation) on `<R:KIND ...>` tags in comments; its header says four; the
+  constraint stage checks `param`, `algo` and `lib` only; `Save()` writes the raw source
+  and no history [R, HF-19, HF-22]. "A change to a machine is a refinement" [R, 07-SYSTEM].
+
+**The rule [D].**
+1. Every named thing is a refinement point by the language; a declaration is its own point,
+   carrying kind, bounds and trust floor; the comment tag is the lift for foreign code only.
+2. A refinement is a sentence of Haro: `target`, `from`, `to`, `author`, `reason`, and the
+   optional `policy`, `cascade`, `gates`, `reverts`; it does not compute.
+3. The compiler takes refinements as a second source language (`haro refine`).
+4. One gate over all altitudes: structural (the language's own court), constraint,
+   derivation, governance, trust posture; a refusal names its stage and carries the four
+   parts (what, why, what next, where to learn).
+5. The inverse is computed before the refinement lands; a revert is its own event; nothing
+   is erased; the audit chain is a by-product.
+6. The refinement point's grammar is the agent's write surface (v0.1's grain 3).
+7. A language's grammar version is a point whose cascade is its fixtures and its consumers'
+   pins.
+
+**What it costs.** Kind, bounds and trust floor on every declaration (the Commons' typed
+seats and mandatory `RATIONALE` carry most of it; profiles default the rest); the gate on
+every change; the authorship of trust floors and risk tiers.
+
+**The guard.** The spike's refinement fixture: a `RESTART` value refined through the gate,
+admitted, refused at the trust stage as `:llm`, and reverted, with its C2 record pinned.
+
+---
+
+## 11. Total by default
+
+**Verdict: ADDED (the alphabet's totality doctrine, made the language's).**
+
+**The lesson, with its bill.** "The alphabet is deliberately not Turing-complete, and that
+is its power, not its poverty": W's evaluator is total and terminating; F has no expression
+production at all; A iterates over declared collections only; "nothing in the alphabet can
+run away ... non-termination is unexpressible. This is the claim no general-purpose language
+can make" [R, 06-ALPHABET, "The totality doctrine"]. Ringua: "a Ringua language that grows
+conditionals, loops, and user functions has left the jurisdiction" [R, design.md 4].
+
+**The rule [D].**
+1. The declared altitude is total: no unbounded loop, no recursion, no user function, no
+   host call is expressible in any declared language.
+2. Computation beyond totality passes through one declared door to the computing altitude:
+   an `A` step naming a computing-altitude verb with its capability, judged like any seat.
+3. The computing altitude is the expert venue and keeps v0.1's rules; its programs are
+   general-purpose and say so.
+
+**What it costs.** A maker who needs an unbounded computation writes it at the computing
+altitude and declares the door; the court names the door in the narration.
+
+**The guard.** A fixture where an `A` declaration attempts an unbounded iteration and is
+unparseable, and one where the declared door is named and the narration shows it.
