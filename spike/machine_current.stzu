@@ -1,0 +1,101 @@
+-- machine_current.stzu -- the machine language as harb's court READS it on
+-- 2026-10-01, declared in stzu v0.1. A PROPOSAL for harobanda, not its
+-- file: the pinned machine.stzu (79 lines) declares six kinds and 23
+-- clauses, and harobanda/src/machine.zig has grown to eight kinds and 36
+-- clauses since -- SLOTS, IDENTITY, JOURNAL, HEALTH, MEMORY, CPU, TASKS,
+-- SEES, EGRESS, DOMAIN and the PEER kind (haro/FINDINGS.md HF-31). This
+-- file is what the forge consumes to measure the court the declaration
+-- CAN carry; what it cannot carry is counted by the guard.
+--
+-- Two seats are a UNION in the court and a single type here, because stzu
+-- v0.1 has no alternative type: ADDRESS is the word dhcp OR an
+-- address/prefix string (declared text), and EGRESS is the word none OR a
+-- list of destination strings (declared a list). The fixtures that use the
+-- word form read as "beyond the declaration" on purpose (HF-32).
+
+DEFINE LANGUAGE machine AS (
+  VERSION "0.1",
+  GRAMMAR "0.1",
+  COURT "declarative/machine/fixtures.json",
+  EXTENSION ".machine"
+) RATIONALE "A machine declared whole -- profile, capabilities, mounts, pins, services, networks, peers -- with no shell on its boot path"
+
+DEFINE FORM word AS (
+  SEATS [value: text]
+) RATIONALE "One word of a service's argv; a service is an argv, never a shell line"
+
+DEFINE FORM need AS (
+  SEATS [capability: name]
+) RATIONALE "One capability a service needs; the name is drawn from stzlib's nine-name lattice"
+
+DEFINE FORM dependency AS (
+  SEATS [service: name]
+) RATIONALE "One service that must have started first"
+
+DEFINE FORM option AS (
+  SEATS [flag: name]
+) RATIONALE "One mount option from the closed menu"
+
+DEFINE FORM sight AS (
+  SEATS [mount: name]
+) RATIONALE "One mount a service keeps in view; SEES narrows a filesystem grant"
+
+DEFINE FORM server AS (
+  SEATS [address: text]
+) RATIONALE "One dns server of a static network, an address as text"
+
+DEFINE FORM destination AS (
+  SEATS [prefix: text]
+) RATIONALE "One address/prefix a network may reach; EGRESS lists them, or says none"
+
+DEFINE DECLARATION box AS (
+  VERB "MACHINE",
+  SEATS [profile: name, arch: name, kernel: name, libc: name?, board: name?, console: text?, slots: text?, identity: text?, journal: text?]
+) RATIONALE "The one identity declaration, first in the file: profile, architecture, kernel; libc and console default by profile, the board by architecture; slots, identity and journal are the hosted box's"
+
+DEFINE DECLARATION service AS (
+  VERB "SERVICE",
+  SEATS [run: [word], restart: name?, after: [dependency], needs: [need], ready: text?, health: number?, memory: number?, cpu: number?, tasks: number?, user: name?, sees: [sight]]
+) RATIONALE "A process the machine keeps: its argv, its restart policy, what it follows, what it needs, its readiness and health, its ceilings, its user, the mounts it sees"
+
+DEFINE DECLARATION capability AS (
+  VERB "CAPABILITY",
+  SEATS [grant: flag]
+) RATIONALE "The name IS the capability; the declaration only grants or refuses it -- silence refuses"
+
+DEFINE DECLARATION mount AS (
+  VERB "MOUNT",
+  SEATS [at: text, fs: name, device: text?, options: [option]]
+) RATIONALE "A filesystem of the profile at an absolute path"
+
+DEFINE DECLARATION network AS (
+  VERB "NETWORK",
+  SEATS [interface: text, address: text, gateway: text?, dns: [server], egress: [destination], domain: text?]
+) RATIONALE "One interface, one way to an address (dhcp or a static address/prefix); a static one may name its gateway, dns servers, egress and the domain it serves"
+
+DEFINE DECLARATION user AS (
+  VERB "USER",
+  SEATS [uid: number, gid: number?]
+) RATIONALE "A declared identity: a service that names one is dropped to it before it is executed; uid 0 is refused, because root is the machine itself"
+
+DEFINE DECLARATION pin AS (
+  VERB "PIN",
+  SEATS [gpio: number, mode: name]
+) RATIONALE "A GPIO line, granted through the gpio capability"
+
+DEFINE DECLARATION peer AS (
+  VERB "PEER",
+  SEATS [network: name, hardware: text, address: text]
+) RATIONALE "A device this machine recognises on a link it serves: by its hardware address, given one address and a name"
+
+DEFINE REFUSAL unknown_verb AS (
+  MESSAGE "The machine verb set is closed (DEFINE)."
+) RATIONALE "The closure speaks when an alien verb arrives"
+
+DEFINE REFUSAL dangling_reference AS (
+  MESSAGE "This name resolves to nothing in the declared machine."
+) RATIONALE "AFTER and NEEDS resolve at check time, never at boot"
+
+DEFINE REFUSAL duplicate_name AS (
+  MESSAGE "This name is already declared; one namespace, no duplicates."
+) RATIONALE "Two services with one name would be one service with two argvs"

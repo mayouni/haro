@@ -1,0 +1,26 @@
+-- rfn.stzu -- the refinement language of the spike, declared in stzu v0.1.
+-- A refinement is a sentence (charter section 6): a typed, bounded change
+-- to a declared point, carrying what it changes, from what, to what, who
+-- proposes it, under which posture, and why. It does not compute. Its
+-- kinds and extension follow the ratified D6: RFN's six kinds, .rfn.
+-- The gate that judges it is the forged court's `refine` verb.
+
+DEFINE LANGUAGE rfn AS (
+  VERSION "0.1",
+  GRAMMAR "0.1",
+  COURT "haro/spike/rfn_fixtures.json",
+  EXTENSION ".rfn"
+) RATIONALE "A refinement is a sentence: typed, bounded, attributed, reversible, judged before it lands"
+
+DEFINE DECLARATION refinement AS (
+  VERB "REFINE",
+  SEATS [target: text, kind: name, from: text, to: text, author: text, posture: name, reason: text]
+) RATIONALE "One change to one declared point: the point by name (declaration.CLAUSE), its kind (knob, field, symbol, policy, composite or pipeline), the value it leaves and the value it takes, who proposes it, under which trust posture, and why"
+
+DEFINE REFUSAL unknown_verb AS (
+  MESSAGE "A refinement file speaks REFINE and nothing else."
+) RATIONALE "The closure speaks when an alien verb arrives"
+
+DEFINE REFUSAL duplicate_name AS (
+  MESSAGE "This refinement is already declared; one name, one change."
+) RATIONALE "Two refinements of one name would be two changes with one audit entry"

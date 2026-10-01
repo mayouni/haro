@@ -47,7 +47,11 @@ def parse_verdict(out):
     fields = {}
     for l in lines[1:]:
         k, _, v = l.partition(' ')
-        fields[k] = v
+        if k == 'count':                      # 'count SERVICE 3' -> fields['count SERVICE'] = '3'
+            verb, _, n = v.partition(' ')
+            fields['count ' + verb] = n
+        else:
+            fields[k] = v
     return True, fields
 
 
@@ -124,8 +128,477 @@ def stage1():
     return f1 + f2 + len(diff)
 
 
+
+# ---- stage 2: the forge; stage 3: the forged court against harb ------------
+
+MACHINE_STZU = r'D:\GitHub\harobanda\declarative\machine\machine.stzu'
+MACHINE_FIXTURES = r'D:\GitHub\harobanda\declarative\machine\fixtures.json'
+MAKEEN = r'D:\GitHub\harobanda\machines\makeen_box.machine'
+HARB = r'D:\GitHub\harobanda\zig-out\bin\harb.exe'
+FORGE_RING = os.path.join(HERE, 'forge.ring')
+
+SYNTAX_FRAGMENTS = ('Expected', 'Unknown', 'not part of', 'neither', 'Unterminated',
+                    'A list', 'given twice', 'RATIONALE is mandatory', 'declares nothing')
+
+
+def run_args(exe, args, cwd):
+    env = dict(os.environ)
+    env['RNXC_NOCACHE'] = '1'
+    r = subprocess.run([exe] + args, capture_output=True, env=env, timeout=120, cwd=cwd)
+    return r.stdout.decode('utf-8', 'replace').replace('\r\n', '\n')
+
+
+def stage2(stzu_path=MACHINE_STZU, label='machine'):
+    """The forge on rnxc writes <lang>_court.ring and <lang>.gbnf beside
+    court_lib.ring; the forge on the oracle writes the same into a scratch
+    folder, and the two must be byte-identical (the forge is A/B'd too)."""
+    print(f'stage 2 -- the forge: {os.path.basename(stzu_path)} -> a court and a grammar, on rnxc and on the oracle')
+    out_rnx = run_args(RNXC, ['forge.ring', stzu_path, '.'], HERE).strip()
+    print('  rnxc  :', out_rnx.splitlines()[0] if out_rnx else 'NO OUTPUT')
+    failures = 0
+    if not out_rnx.startswith('forged '):
+        print('  FAIL the forge did not forge')
+        return 1, None
+    lang = out_rnx.split()[1].rstrip(':')
+    # the oracle forges into a scratch folder BESIDE the forge, by a relative
+    # name: Ring's write() refused the temp folder's path on this machine
+    td = os.path.join(ROOT, 'runtime', 'haro-forge-oracle')   # runtime/ is gitignored
+    os.makedirs(td, exist_ok=True)
+    for art in (f'{lang}_court.ring', f'{lang}.gbnf'):
+        if os.path.exists(os.path.join(td, art)):
+            os.remove(os.path.join(td, art))
+    out_or = run_args(ORACLE, ['forge.ring', stzu_path, '../../runtime/haro-forge-oracle'], HERE).strip()
+    print('  oracle:', out_or.splitlines()[0] if out_or else 'NO OUTPUT')
+    for art in (f'{lang}_court.ring', f'{lang}.gbnf'):
+        a = open(os.path.join(HERE, art), 'rb').read()
+        b = open(os.path.join(td, art), 'rb').read() if os.path.exists(os.path.join(td, art)) else b''
+        if a != b:
+            failures += 1
+            print(f'  FAIL {art} differs between the two runtimes ({len(a)} vs {len(b)} bytes)')
+        else:
+            print(f'  ok   {art}: {len(a)} bytes, byte-identical on both runtimes')
+    return failures, lang
+
+
+def harb_verdict(path):
+    out = run_args(HARB, ['check', path], os.path.dirname(HARB)).strip()
+    first = out.split('\n')[0] if out else ''
+    if first.startswith('machine (line'):
+        return False, first
+    return True, first
+
+
+def court_verdict(exe, court, path):
+    out = run_args(exe, [court, 'check', path], HERE)
+    return parse_verdict(out)
+
+
+def stage3(lang, court=None):
+    """Every machine fixture through harb and through the forged court.
+    The verdicts are classified, and the class 'beyond the declaration'
+    (harb refuses on a rule the .stzu does not carry) is the measurement.
+    A fixture harb accepts and the forged court refuses is a DEFECT."""
+    court = court or f'{lang}_court.ring'
+    print(f'stage 3 -- the forged court ({court}) against harb on the {lang} fixtures')
+    doc = json.load(open(MACHINE_FIXTURES, encoding='utf-8'))
+    cases = doc['accepts'] + doc['rejects']
+    agree = []          # same verdict, and fragment / structural fields agree
+    beyond = []         # harb refuses, the declaration cannot: a rule beyond it
+    phrasing = []       # both refuse, the fixture's fragment is not in ours
+    drift = []          # the DECLARATION lags the court: a clause, a kind or a
+                        # type harb knows and the .stzu does not declare
+    defects = []        # harb accepts, we refuse, and it is not drift
+    unjudged = {}       # accept expectation keys the court does not claim
+    ab_diff = []
+
+    def is_drift(msg):
+        return msg.split('): ', 1)[-1].startswith(('Unknown clause', 'Unknown kind', 'Clause '))
+    with tempfile.TemporaryDirectory() as td:
+        for case in cases:
+            p = os.path.join(td, case['id'] + '.machine')
+            with open(p, 'w', encoding='utf-8', newline='') as f:
+                f.write(case['source'])
+            h_ok, h_line = harb_verdict(p)
+            c_ok, c_got = court_verdict(RNXC, court, p)
+            o_ok, o_got = court_verdict(ORACLE, court, p)
+            if (c_ok, c_got) != (o_ok, o_got):
+                ab_diff.append(case['id'])
+            is_accept = 'expect' in case
+            if h_ok and c_ok:
+                # structural fields the court claims: name, rationale, the
+                # first declaration's scalar clauses, the counts per verb
+                e = case.get('expect', {})
+                why = ''
+                for k, want in e.items():
+                    if k == 'counts':
+                        for ck, cv in want.items():
+                            verb = {'services': 'SERVICE', 'capabilities': 'CAPABILITY', 'mounts': 'MOUNT',
+                                    'pins': 'PIN', 'networks': 'NETWORK', 'users': 'USER'}.get(ck)
+                            got = c_got.get(f'count {verb}') if verb else None
+                            if got is None:
+                                unjudged[ck] = unjudged.get(ck, 0) + 1
+                            elif int(got) != cv:
+                                why = f'{ck}: expected {cv} got {got}'
+                    elif k in ('name', 'rationale', 'profile', 'arch', 'kernel'):
+                        if c_got.get(k) is None:
+                            unjudged[k] = unjudged.get(k, 0) + 1
+                        elif c_got.get(k) != want:
+                            why = f"{k}: expected '{want}' got '{c_got.get(k)}'"
+                    else:
+                        unjudged[k] = unjudged.get(k, 0) + 1
+                if why:
+                    defects.append((case['id'], why))
+                else:
+                    agree.append(case['id'])
+            elif (not h_ok) and (not c_ok):
+                frag = case.get('refusal', '')
+                if frag and frag in c_got:
+                    agree.append(case['id'])
+                elif is_drift(c_got):
+                    drift.append((case['id'], c_got))
+                else:
+                    phrasing.append((case['id'], frag, c_got))
+            elif (not h_ok) and c_ok:
+                beyond.append((case['id'], h_line))
+            elif is_drift(c_got):
+                drift.append((case['id'], c_got))
+            else:
+                defects.append((case['id'], f'harb accepts, the court refuses: {c_got}'))
+    if PLANT:
+        defects.append(('A1', 'PLANTED: a verdict the guard must refuse'))
+    n = len(cases)
+    print(f'  {n} fixtures: {len(agree)} agree with harb; {len(beyond)} refused by harb on a rule BEYOND the declaration;')
+    print(f'  {len(drift)} where the DECLARATION LAGS the court (a clause, kind or type it does not declare);')
+    print(f'  {len(phrasing)} refused by both with a different fragment; {len(defects)} DEFECT(s) of the forged court')
+    if unjudged:
+        print('  accept expectations the declaration cannot claim (not judged):',
+              ', '.join(f'{k} x{v}' for k, v in sorted(unjudged.items())))
+    if '--verbose' in sys.argv:
+        for cid, line in beyond:
+            print(f'    beyond  {cid}: {line[:110]}')
+        for cid, got in drift:
+            print(f'    drift   {cid}: {got[:110]}')
+    for cid, frag, got in phrasing:
+        print(f'    phrase  {cid}: expected fragment {frag!r}; the court said: {got[:100]}')
+    for cid, why in defects:
+        print(f'    DEFECT  {cid}: {why[:140]}')
+    if ab_diff:
+        print(f'  FAIL rnxc and the oracle differ on {len(ab_diff)} fixture(s): {ab_diff}')
+    else:
+        print(f'  ok   rnxc and the oracle agree on all {n} fixtures through the forged court')
+    return len(defects) + len(ab_diff)
+
+
+# ---- stage 4: the grammar, sampled and held by the engine's decoder ----------
+
+import random, re
+
+PACKAGE_RNXC = os.path.join(ROOT, 'runtime', 'package', 'ringpp-win64', 'bin', 'rnxc.exe')
+GBNF_PROBE = os.path.join(HERE, 'gbnf_probe.ring')
+
+
+class Gbnf:
+    """A sampler over the forge's own GBNF dialect: rules `name ::= alts`,
+    sequences of "literals", rule refs, [classes], groups with * + ?.
+    Enough to derive random sentences of the emitted grammar."""
+    TOK = re.compile(r'\s*(::=|\|\||\||\(|\)|\*|\+|\?|"(?:[^"\\]|\\.)*"|\[(?:[^\]\\]|\\.)*\]|[A-Za-z_][A-Za-z0-9_]*)')
+
+    def __init__(self, text):
+        self.rules = {}
+        for line in text.splitlines():
+            line = line.split('#', 1)[0].strip()
+            if not line or '::=' not in line:
+                continue
+            name, rhs = line.split('::=', 1)
+            self.rules[name.strip()] = self.parse_alts(self.tokens(rhs))
+
+    def tokens(self, s):
+        out, pos = [], 0
+        while pos < len(s):
+            m = self.TOK.match(s, pos)
+            if not m:
+                break
+            out.append(m.group(1))
+            pos = m.end()
+        return out
+
+    def parse_alts(self, toks):
+        alts, seq = [], []
+        i = 0
+        while i < len(toks):
+            t = toks[i]
+            if t == '|':
+                alts.append(seq); seq = []
+            elif t == '(':
+                depth, j = 1, i + 1
+                while depth:
+                    if toks[j] == '(': depth += 1
+                    elif toks[j] == ')': depth -= 1
+                    j += 1
+                seq.append(('group', self.parse_alts(toks[i + 1:j - 1])))
+                i = j - 1
+            elif t in ('*', '+', '?'):
+                seq[-1] = ('rep', seq[-1], t)
+            elif t.startswith('"'):
+                seq.append(('lit', bytes(t[1:-1], 'utf-8').decode('unicode_escape')))
+            elif t.startswith('['):
+                seq.append(('cls', t))
+            else:
+                seq.append(('ref', t))
+            i += 1
+        alts.append(seq)
+        return alts
+
+    def sample(self, rnd, name='root', depth=0):
+        return self.seq(rnd, rnd.choice(self.rules[name]), depth)
+
+    def seq(self, rnd, seq, depth):
+        return ''.join(self.item(rnd, it, depth) for it in seq)
+
+    def item(self, rnd, it, depth):
+        kind = it[0]
+        if kind == 'lit':
+            return it[1]
+        if kind == 'ref':
+            return self.sample(rnd, it[1], depth + 1)
+        if kind == 'group':
+            return self.seq(rnd, rnd.choice(it[1]), depth + 1)
+        if kind == 'cls':
+            return self.cls(rnd, it[1])
+        if kind == 'rep':
+            lo = 1 if it[2] == '+' else 0
+            hi = 1 if it[2] == '?' else (3 if depth < 6 else lo)
+            n = rnd.randint(lo, hi)
+            return ''.join(self.item(rnd, it[1], depth + 1) for _ in range(n))
+        raise ValueError(kind)
+
+    def cls(self, rnd, spec):
+        body = spec[1:-1]
+        neg = body.startswith('^')
+        if neg:
+            body = body[1:]
+        body = bytes(body, 'utf-8').decode('unicode_escape')
+        chars = []
+        i = 0
+        while i < len(body):
+            if i + 2 < len(body) and body[i + 1] == '-':
+                chars.extend(chr(c) for c in range(ord(body[i]), ord(body[i + 2]) + 1))
+                i += 3
+            else:
+                chars.append(body[i]); i += 1
+        if neg:
+            pool = [chr(c) for c in range(32, 127) if chr(c) not in chars and chr(c) != '"']
+            return rnd.choice(pool)
+        return rnd.choice(chars)
+
+
+def stage4(lang, court=None, n=200):
+    """(a) n derivations of the forged grammar all pass the forged court's
+    SYNTAX (a refusal, if any, is the court's semantic stage: a clause
+    given twice or a required seat absent -- the grammar is context-free);
+    (b) the engine's decoder accepts the grammar text and accepts the
+    reference machine under it, through Softanza on rnxc in the package."""
+    court = court or f'{lang}_court.ring'
+    gbnf_path = os.path.join(HERE, f'{lang}.gbnf')
+    print(f'stage 4 -- the grammar: {lang}.gbnf sampled {n} times, and held by the engine')
+    failures = 0
+    g = Gbnf(open(gbnf_path, encoding='utf-8').read())
+    rnd = random.Random(20261001)
+    syntax_refusals = 0
+    semantic_refusals = {}
+    with tempfile.TemporaryDirectory() as td:
+        for k in range(n):
+            text = g.sample(rnd)
+            p = os.path.join(td, f's{k}.machine')
+            with open(p, 'w', encoding='utf-8', newline='') as f:
+                f.write(text)
+            ok, got = court_verdict(RNXC, court, p)
+            if not ok:
+                msg = got.split('): ', 1)[-1]
+                if msg.startswith(('Clause ', 'A list is')) or 'given twice' in msg or 'is required on' in msg or 'already declared' in msg:
+                    bucket = ('a required seat absent' if 'is required on' in msg else
+                              'a clause given twice' if 'given twice' in msg else
+                              'a name declared twice' if 'already declared' in msg else 'a value shape')
+                    semantic_refusals[bucket] = semantic_refusals.get(bucket, 0) + 1
+                else:
+                    syntax_refusals += 1
+                    if syntax_refusals <= 3:
+                        print(f'    SYNTAX refusal of a derivation: {got[:120]}')
+                        print('      ' + text[:160].replace('\n', ' | '))
+    if syntax_refusals:
+        failures += 1
+        print(f'  FAIL {syntax_refusals} of {n} derivations refused for a SYNTAX reason: the grammar is wider than the court')
+    else:
+        sem = sum(semantic_refusals.values())
+        print(f'  ok   {n} derivations: every one is a sentence to the court\'s parser; {sem} refused at the court\'s own stages'
+              f' ({", ".join(f"{k.strip()} x{v}" for k, v in semantic_refusals.items())})')
+    # (b) the engine: the grammar is held, and a sentence the forged court
+    # ACCEPTS is accepted under it (qemu_hello.machine under the pinned
+    # declaration; makeen_box.machine needs the clauses it lacks, HF-31)
+    if not os.path.exists(PACKAGE_RNXC):
+        print('  SKIP the engine probe: no package at runtime/package/ringpp-win64 (bench/package.py builds it)')
+        return failures
+    sentence = r'D:\GitHub\harobanda\machines\qemu_hello.machine'
+    ok_c, _ = court_verdict(RNXC, court, sentence)
+    if not ok_c:
+        sentence = MAKEEN
+    out = run_args(PACKAGE_RNXC, [GBNF_PROBE, gbnf_path, sentence], os.path.dirname(PACKAGE_RNXC))
+    lines = {l.split(':')[0]: l.split(': ', 1)[-1] for l in out.splitlines() if ': ' in l}
+    if lines.get('refusal') == '[]' and lines.get('accepts') == '1' and lines.get('supported') == '1':
+        print(f'  ok   the engine\'s decoder (gbnf_machine.zig) holds the grammar and accepts {os.path.basename(sentence)} under it')
+    else:
+        failures += 1
+        print(f'  FAIL the engine said: {out.strip()[:300]}')
+    return failures
+
+
+# ---- stage 5: one refinement through the gate ----------------------------------
+
+C2_CODE = re.compile(r'^[A-Z][A-Z0-9]*([_-][A-Z0-9]+)*$')
+C2_CITE = re.compile(r'^(rule|article|right|pattern):[A-Za-z0-9_.-]+$')
+
+
+def c2_valid(rec):
+    for k in ('code', 'severity', 'message', 'span', 'cites', 'language'):
+        if k not in rec:
+            return f'missing {k}'
+    if not C2_CODE.match(rec['code']):
+        return 'bad code'
+    if rec['severity'] not in ('error', 'warning'):
+        return 'bad severity'
+    if not isinstance(rec['span'], dict) or 'file' not in rec['span'] or not isinstance(rec['span'].get('line'), int):
+        return 'bad span'
+    if any(not C2_CITE.match(c) for c in rec['cites']):
+        return 'bad cite'
+    if not re.match(r'^[a-z][a-z0-9_]*$', rec['language']):
+        return 'bad language'
+    for k, v in rec.items():
+        if k not in ('code', 'severity', 'message', 'span', 'cites', 'language') and (v is None or isinstance(v, bool)):
+            return f'extension {k} is a bare boolean or null'
+    return None
+
+
+def stage5(lang, court=None):
+    court = court or f'{lang}_court.ring'
+    print('stage 5 -- one refinement through the gate: hello.RESTART never -> always')
+    failures = 0
+    src = open(r'D:\GitHub\harobanda\machines\qemu_hello.machine', 'rb').read()
+    with tempfile.TemporaryDirectory() as td:
+        p = os.path.join(td, 'hello.machine')
+        open(p, 'wb').write(src)
+        # (a) the model-composed proposal is refused at the trust stage, with a C2 record
+        out = run_args(RNXC, [court, 'refine', p, os.path.join(HERE, 'fixtures', 'hello_llm.rfn')], HERE)
+        if PLANT:
+            out = out.replace('trust: posture :llm', 'PLANTED: posture :llm')
+        lines = [l for l in out.splitlines() if l]
+        if len(lines) >= 2 and 'trust: posture :llm below the required floor :trusted' in lines[0]:
+            try:
+                rec = json.loads(lines[1])
+                why = c2_valid(rec)
+                if why or rec['code'] != 'TRUST_FLOOR' or 'todo' not in rec:
+                    failures += 1
+                    print(f'  FAIL the refusal record is not a C2 envelope: {why or rec}')
+                else:
+                    print(f'  ok   refused at trust, as :llm against a floor of :trusted; the record is C2 with why and todo')
+            except json.JSONDecodeError as e:
+                failures += 1
+                print(f'  FAIL the record is not JSON: {e}: {lines[1][:120]}')
+        else:
+            failures += 1
+            print(f'  FAIL expected a trust refusal, got: {out.strip()[:200]}')
+        if os.path.exists(p + '.refined'):
+            failures += 1
+            print('  FAIL a refused refinement wrote a refined file')
+        # (b) the trusted proposal is admitted; the refined file differs on the one value
+        out = run_args(RNXC, [court, 'refine', p, os.path.join(HERE, 'fixtures', 'hello_trusted.rfn')], HERE)
+        if out.startswith('admitted: hello.RESTART never -> always [trusted]'):
+            refined = open(p + '.refined', 'rb').read()
+            ok2, _ = court_verdict(RNXC, court, p + '.refined')
+            if refined.count(b'RESTART always') == 1 and refined.replace(b'RESTART always', b'RESTART never', 1) == src and ok2:
+                print('  ok   admitted as :trusted; the refined file differs on the one value and is a sentence of the language')
+            else:
+                failures += 1
+                print('  FAIL the refined file is not the original with one value changed')
+            # (c) the inverse, computed before the refinement landed, restores the bytes
+            out2 = run_args(RNXC, [court, 'refine', p + '.refined', p + '.revert.rfn'], HERE)
+            reverted = open(p + '.refined.refined', 'rb').read() if os.path.exists(p + '.refined.refined') else b''
+            if out2.startswith('admitted:') and reverted == src:
+                print('  ok   the revert restores the original byte for byte')
+            else:
+                failures += 1
+                print(f'  FAIL the revert did not restore the original: {out2.strip()[:120]}')
+        else:
+            failures += 1
+            print(f'  FAIL expected admission, got: {out.strip()[:200]}')
+        # the same gate on the oracle: byte-identical verdicts
+        o = run_args(ORACLE, [court, 'refine', p, os.path.join(HERE, 'fixtures', 'hello_llm.rfn')], HERE)
+        r = run_args(RNXC, [court, 'refine', p, os.path.join(HERE, 'fixtures', 'hello_llm.rfn')], HERE)
+        if o == r:
+            print('  ok   rnxc and the oracle print the same refusal, byte for byte')
+        else:
+            failures += 1
+            print('  FAIL the two runtimes differ on the refusal')
+            print('    rnxc  :', r.strip()[:160]); print('    oracle:', o.strip()[:160])
+    return failures
+
+
+# ---- stage 6: edit to verdict, measured ------------------------------------------
+
+def stage6(lang, court=None, n=15):
+    court = court or f'{lang}_court.ring'
+    print(f'stage 6 -- edit to verdict on makeen_box.machine, minima of {n}')
+    def best(cmd, cwd, cache):
+        env = dict(os.environ)
+        if cache:
+            env.pop('RNXC_NOCACHE', None)
+        else:
+            env['RNXC_NOCACHE'] = '1'
+        ts = []
+        for _ in range(n):
+            t0 = time.perf_counter()
+            subprocess.run(cmd, capture_output=True, env=env, cwd=cwd, timeout=120)
+            ts.append(time.perf_counter() - t0)
+        return min(ts) * 1000, sorted(ts)[n // 2] * 1000
+    h = best([HARB, 'check', MAKEEN], os.path.dirname(HARB), False)
+    r = best([RNXC, court, 'check', MAKEEN], HERE, False)
+    rc = best([RNXC, court, 'check', MAKEEN], HERE, True)
+    o = best([ORACLE, court, 'check', MAKEEN], HERE, False)
+    print(f'  harb check (Zig, the native court)       min {h[0]:7.1f} ms   median {h[1]:7.1f} ms')
+    print(f'  forged court on rnxc, compiled each run  min {r[0]:7.1f} ms   median {r[1]:7.1f} ms')
+    print(f'  forged court on rnxc, its image reused   min {rc[0]:7.1f} ms   median {rc[1]:7.1f} ms')
+    print(f'  forged court on the oracle               min {o[0]:7.1f} ms   median {o[1]:7.1f} ms')
+    target = 100.0
+    if r[0] <= target:
+        print(f'  ok   under the {target:.0f} ms target on rnxc, image or no image')
+        return 0
+    print(f'  FAIL {r[0]:.1f} ms is over the {target:.0f} ms target on rnxc')
+    return 1
+
+
 if __name__ == '__main__':
     t0 = time.perf_counter()
-    failures = stage1()
+    stage = None
+    for a in sys.argv[1:]:
+        if a.startswith('--stage='):
+            stage = int(a.split('=')[1])
+    stzu = MACHINE_STZU
+    for a in sys.argv[1:]:
+        if a.startswith('--stzu='):
+            stzu = os.path.abspath(a.split('=', 1)[1])
+    failures = 0
+    if stage in (None, 1):
+        failures += stage1()
+    lang = None
+    if stage in (None, 2, 3, 4, 5, 6):
+        f2, lang = stage2(stzu)
+        failures += f2
+        if lang and stage in (None, 3):
+            failures += stage3(lang)
+    if lang and stage in (None, 4):
+        failures += stage4(lang)
+    if lang and stage in (None, 5):
+        failures += stage5(lang)
+    if lang and stage in (None, 6):
+        failures += stage6(lang)
     print(f'haro_forge: {"FAIL" if failures else "PASS"} ({failures} failure(s), {time.perf_counter()-t0:.1f} s)')
     sys.exit(1 if failures else 0)

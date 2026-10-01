@@ -1,0 +1,7 @@
+-- hello_llm.rfn -- a model-composed proposal against a point whose floor is trusted
+DEFINE REFINE keep_hello_alive AS (
+  TARGET "hello.RESTART", KIND knob,
+  FROM "never", TO "always",
+  AUTHOR "aicha", POSTURE llm,
+  REASON "the hello world should come back when it exits, so the box always answers"
+) RATIONALE "A restart policy is a knob; a model may propose it and a trusted actor may commit it"

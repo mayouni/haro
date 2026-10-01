@@ -1,0 +1,7 @@
+-- hello_trusted.rfn -- the same proposal, posed by a trusted actor
+DEFINE REFINE keep_hello_alive AS (
+  TARGET "hello.RESTART", KIND knob,
+  FROM "never", TO "always",
+  AUTHOR "mansour", POSTURE trusted,
+  REASON "the hello world should come back when it exits, so the box always answers"
+) RATIONALE "A restart policy is a knob; a trusted actor commits what the model proposed"

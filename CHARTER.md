@@ -391,6 +391,20 @@ says so in that sentence, with the line.
 
 ## 10. The spike -- the forge's first act on `rnx`
 
+**BUILT 2026-10-01, the day of ratification, and measured: `haro/SPIKE.md` is the record,
+`python haro/spike/haro_forge.py` the guard (six stages, PASS, 52 s; `--plant` makes it
+fail).** The numbers that matter: the meta-court passes its 28 fixtures on `rnxc` and on the
+oracle, byte-identical; the forge is byte-identical on both; the forged court agrees with
+`harb` on 30 of 120 machine fixtures from the pinned declaration and 41 from one brought up
+to date, with 0 defects, and the 70 rules a court carries that its declaration cannot are
+counted and named (the `WORLD` and `REFINE` seats' size on a real language); 200
+derivations of the forged grammar all parse and the engine's decoder holds it; a
+refinement is refused at the trust floor as `:llm` with a C2 record, admitted as
+`:trusted`, and reverted byte for byte; edit to verdict is 14.9 ms on `rnxc` with the
+court's image (33.5 ms without; `harb` 12.0; the oracle 27.4). One correction to the plan
+below: the machine language has **120** fixtures, not 54 (HF-34). The plan stands as
+written, as the record of what was asked.
+
 v0.1's spike (`twice.haro`, a definition with an intent clause) proved one altitude. The
 ruling asks for three to meet, and the estate has already named the smallest program that
 makes them: the alphabet's own proof obligation, "Z re-expressed through stzf from `z.stzu`
