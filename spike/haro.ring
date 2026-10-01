@@ -1,4 +1,4 @@
-# stzu.ring -- `rnxc stzu.ring <file.stzu>`: judge a language declaration
+# haro.ring -- `rnxc haro.ring <file.haro>`: judge a language declaration
 # with the stzu v0.1 meta-court, in pure core Ring, on rnx or on the oracle.
 #
 # Prints "ok" and the structural fields on acceptance, or the one refusal
@@ -10,7 +10,7 @@
 # level, because on Ring a `$name` first assigned inside a function is
 # that function's local (C-2's own note), and on Ring++ `$` is the global.
 
-load "stzu_lib.ring"
+load "haro_lib.ring"
 
 $aStzuToks = []
 $nStzuPos = 1
@@ -29,7 +29,7 @@ $aCourtSentences = []
 $cStzuDir = ""
 
 if len(sysargv) < 3
-	? "usage: stzu.ring <file.stzu>"
+	? "usage: haro.ring <file.haro>"
 else
 	cPath = sysargv[3]
 	cSrc = read(cPath)

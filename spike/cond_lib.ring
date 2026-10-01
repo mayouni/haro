@@ -2,7 +2,7 @@
 # grown in v0.3 and v0.4), in pure core Ring.
 #
 # Closed and total: a condition is read, never run. The grammar is in
-# haro/spike/stzu4/GRAMMAR.md (v0.3's in stzu3/, v0.2's in stzu2/). One
+# haro/spike/v04/GRAMMAR.md (v0.3's in v03/, v0.2's in v02/). One
 # parser, two readers: the meta-court VALIDATES a condition against the
 # declarations' seats (every name it uses must exist, by type) and the forged
 # court EVALUATES it on a sentence's declarations.

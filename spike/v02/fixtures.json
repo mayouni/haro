@@ -1,7 +1,7 @@
 {
-  "grammar": "stzu",
+  "grammar": "haro",
   "version": "0.2",
-  "comment": "The stzu v0.2 conformance floor, written BEFORE the court that passes it (the W discipline: fixtures first, prose second). v0.2 grows v0.1 by the WORLD and REFINE seats the Haro charter names (section 3) and the type kinds the spike measured as missing on a real language (haro/SPIKE.md: 70 of 120 machine fixtures were rules beyond the declaration): MENU, RANGE and FORMAT as seat types with their refusal phrasing; a seat typed by a DECLARATION is a reference resolved at check time; CONSTRAINT carries a condition in a closed language over a declaration's seats; WORLD declares cardinality and position; REFINE declares the refinable points, their kinds (RFN's six, per D6) and their trust floors. Every v0.1 fixture still passes: v0.2 refuses nothing v0.1 accepted. Rejects carry the fragment the refusal must contain.",
+  "comment": "The Haro v0.2 conformance floor, written BEFORE the court that passes it (the W discipline: fixtures first, prose second). v0.2 grows v0.1 by the WORLD and REFINE seats the Haro charter names (section 3) and the type kinds the spike measured as missing on a real language (haro/SPIKE.md: 70 of 120 machine fixtures were rules beyond the declaration): MENU, RANGE and FORMAT as seat types with their refusal phrasing; a seat typed by a DECLARATION is a reference resolved at check time; CONSTRAINT carries a condition in a closed language over a declaration's seats; WORLD declares cardinality and position; REFINE declares the refinable points, their kinds (RFN's six, per D6) and their trust floors. Every v0.1 fixture still passes: v0.2 refuses nothing v0.1 accepted. Rejects carry the fragment the refusal must contain.",
   "accepts": [
     {
       "id": "A1",

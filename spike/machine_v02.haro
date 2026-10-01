@@ -1,9 +1,9 @@
--- machine_v02.stzu -- the machine language declared in stzu v0.2: the clauses
--- harb's court reads today (machine_current.stzu) AND the rules it carries,
+-- machine_v02.haro -- the machine language declared in Haro v0.2: the clauses
+-- harb's court reads today (machine_current.haro) AND the rules it carries,
 -- as data -- menus, ranges, formats, references, one-and-first, and the
 -- conditions between seats -- each with the refusal phrase harb speaks, so
 -- the forged court can be held to harb's own fixtures. A PROPOSAL for
--- harobanda. What v0.2 still cannot say is in stzu2/GRAMMAR.md: a cycle, an
+-- harobanda. What v0.2 still cannot say is in v02/GRAMMAR.md: a cycle, an
 -- address inside a subnet, a path inside a declared mount, a perimeter that
 -- covers every address, a union type (ADDRESS dhcp-or-string, EGRESS
 -- none-or-list), and the fleet file's kinds.

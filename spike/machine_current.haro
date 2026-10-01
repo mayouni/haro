@@ -1,4 +1,4 @@
--- machine_current.stzu -- the machine language as harb's court READS it on
+-- machine_current.haro -- the machine language as harb's court READS it on
 -- 2026-10-01, declared in stzu v0.1. A PROPOSAL for harobanda, not its
 -- file: the pinned machine.stzu (79 lines) declares six kinds and 23
 -- clauses, and harobanda/src/machine.zig has grown to eight kinds and 36

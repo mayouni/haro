@@ -1,6 +1,6 @@
--- fleet_v04.stzu -- the fleet language declared in stzu v0.4: a vocabulary OVER the
+-- fleet_v04.haro -- the fleet language declared in Haro v0.4: a vocabulary OVER the
 -- machine language. Every MEMBER names a machine FILE, read beside the fleet file and
--- judged by the machine court (machine_v03.stzu, beside this declaration), and the
+-- judged by the machine court (machine_v03.haro, beside this declaration), and the
 -- rules no single machine can fail are conditions that read through those files: a
 -- link's one server, one address per machine, a promise held against the device that
 -- claims it, a key held or retired, never both. A PROPOSAL for harobanda
@@ -17,7 +17,7 @@ DEFINE LANGUAGE fleet AS (
 -- ---- the sentence: a member is a machine file, judged by the machine court -------
 
 DEFINE SENTENCE machine_file AS (
-  OF "machine_v03.stzu",
+  OF "machine_v03.haro",
   MESSAGE "MEMBER {name} names {value}, which cannot be read from beside this fleet file",
   REFUSED "MEMBER {name} is refused: {why} (line {line} of {value})"
 ) RATIONALE "A member is a machine, declared whole in its own file and judged by its own court; a fleet is no better than the machines in it, and a member's own refusal is reported WITH the member"

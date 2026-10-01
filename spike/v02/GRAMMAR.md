@@ -1,4 +1,4 @@
-# stzu v0.2 -- the WORLD and REFINE seats, and the types a court needs
+# Haro v0.2 -- the WORLD and REFINE seats, and the types a court needs
 
 **Written after `fixtures.json` beside it, which is the judge** (the W discipline: fixtures
 first, prose second). v0.2 is the declaring altitude of Haro grown by what the spike

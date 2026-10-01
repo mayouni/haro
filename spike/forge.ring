@@ -1,6 +1,6 @@
-# forge.ring -- `rnxc forge.ring <file.stzu> <out dir>`: the forge's smallest act.
+# forge.ring -- `rnxc forge.ring <file.haro> <out dir>`: the forge's smallest act.
 #
-# Reads a language declaration with the stzu meta-court (stzu_lib.ring) and
+# Reads a language declaration with the stzu meta-court (haro_lib.ring) and
 # EMITS, into <out dir>:
 #   <lang>_court.ring   a court for the declared language: this generated
 #                       program loads court_lib.ring and carries the
@@ -11,7 +11,7 @@
 #                       gbnf_machine.zig reads
 # Pure core Ring; runs on rnx and on the oracle alike.
 
-load "stzu_lib.ring"
+load "haro_lib.ring"
 
 $aStzuToks = []
 $nStzuPos = 1
@@ -35,7 +35,7 @@ $cStzuDir = ""
 # version of this file lost its output directory to a helper's `cOut`
 # while rnxc, under Rule A, ran it correctly (HF-33).
 if len(sysargv) < 4
-	? "usage: forge.ring <file.stzu> <out dir>"
+	? "usage: forge.ring <file.haro> <out dir>"
 else
 	cInPath = sysargv[3]
 	cOutDir = sysargv[4]
@@ -66,7 +66,7 @@ func RingStr(cS)
 	return '"' + cS + '"'
 
 # what a seat's type name resolves to in the language: prim form expr menu range
-# format decl union sentence -- the meta-court's own answer (stzu_lib.ring)
+# format decl union sentence -- the meta-court's own answer (haro_lib.ring)
 func TypeKindOf(aLang, cOf)
 	return StzuTypeKindOf(aLang, cOf)
 

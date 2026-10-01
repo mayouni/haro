@@ -178,27 +178,27 @@ no expression position, no escape):
 | **`REFINE`** | absent | which declared points of a sentence may be refined, by whom, within what bounds, at what trust floor (section 7) |
 | **`FORMS` inside a vocabulary** | absent | the function-name grammar of principle 7 declared as data for the computing altitude's families |
 
-**Built 2026-10-01, the first slice of two of these rows -- stzu v0.2, the spike's second
-rung (`haro/spike/stzu2/GRAMMAR.md`, 30 fixtures, `haro/SPIKE.md`).** `WORLD` as cardinality
+**Built 2026-10-01, the first slice of two of these rows -- Haro v0.2, the spike's second
+rung (`haro/spike/v02/GRAMMAR.md`, 30 fixtures, `haro/SPIKE.md`).** `WORLD` as cardinality
 (`ONE`, `FIRST`), the typed seats a knowledge stratum needs before it needs an ontology
 (`MENU`, `RANGE`, `FORMAT`, a seat typed by another declaration, `NAMES`), and `CONSTRAINT`
 with a closed, total condition language over one declaration and the `ONE` kinds; `REFINE`
 as `POINTS` (which seats, of which kind) and `FLOOR` (at what trust posture). The ontology
 as versioned data, `ASK`, `NARRATE` and `FORMS` are not built. Measured on the machine
 language: 95 of `harb`'s 120 fixtures agree with a court forged from the v0.2 declaration,
-against 41 from v0.1. **stzu v0.3, the same night (`haro/spike/stzu3/GRAMMAR.md`, 27
+against 41 from v0.1. **Haro v0.3, the same night (`haro/spike/v03/GRAMMAR.md`, 27
 fixtures):** a `UNION` seat whose value has one of two shapes, a declaration's `MESSAGES`
 for its reference seats, and a condition language that reads through a reference,
 quantifies over a kind or a list of references, and tests five closed relations (an
 address within a prefix, its host, a path under a directory, a perimeter covering every
 address, a cycle through references) -- each total, each a fixed line of the court, none
 a computation the declaration writes, so the totality doctrine holds. 117 of 120; the
-three left are the fleet file's kinds, another language's. **stzu v0.4, 2026-10-02
-(`haro/spike/stzu4/GRAMMAR.md`, 23 fixtures): a language over a language.** A `SENTENCE`
+three left are the fleet file's kinds, another language's. **Haro v0.4, 2026-10-02
+(`haro/spike/v04/GRAMMAR.md`, 23 fixtures): a language over a language.** A `SENTENCE`
 seat names a file of another declared language, judged by that language's own court; a
 `VIEW` is a derived place by a closed rule; a condition's places are paths through
 sentences and views. The fleet language declared over the machine language
-(`fleet_v04.stzu`) forges one court carrying both records, and it agrees with `harb` on
+(`fleet_v04.haro`) forges one court carrying both records, and it agrees with `harb` on
 32 of 32 -- this section's "composition is the normal way to declare a language", measured.
 
 **What the forge produces from one declaration** (Ringua's kit, 02-STACK's L1, now Haro's
@@ -429,8 +429,8 @@ below: the machine language has **120** fixtures, not 54 (HF-34). The plan stand
 written, as the record of what was asked.
 
 **The second rung, the same day, at the author's word ("Go for the WORLD and REFINE
-seats, fixtures first"): stzu v0.2** (`haro/spike/stzu2/`, 30 fixtures, then the prose;
-section 3's note). The machine language re-declared in it (`machine_v02.stzu`) forges a
+seats, fixtures first"): Haro v0.2** (`haro/spike/v02/`, 30 fixtures, then the prose;
+section 3's note). The machine language re-declared in it (`machine_v02.haro`) forges a
 court that agrees with `harb` on **95 of 120** (14 computations beyond a declaration, 9
 the union and fleet kinds, 2 fragments, 0 defects), byte-identical on `rnxc` and the
 oracle; the refinement gate reads the declared `POINTS` and `FLOOR` (eight rows); 200
@@ -448,7 +448,7 @@ own measuring class absorbed a court that had lost its constraints (HF-39). Reco
 `haro/SPIKE.md`, "The third rung".
 
 **The fourth rung, 2026-10-02, decided on the author's behalf ("decide on what is next on
-my behalf"): stzu v0.4, the fleet language declared OVER the machine language** (section
+my behalf"): Haro v0.4, the fleet language declared OVER the machine language** (section
 3's note). One court, two languages' records, judged against `harb`'s 32 fleet fixtures as
 the guard's stage 7: **32 of 32**, 0 defects, byte-identical on `rnxc` and the oracle,
 pinned at 32; 102.8 s a pass. The composition claim of section 3 has its number (HF-41).
@@ -467,7 +467,7 @@ and the 54 fixtures in `fixtures.json`.
 
 **What the spike builds, and nothing more:**
 
-1. a reader for stzu v0.1's grammar in `rnxc` (`rnxc haro <file.stzu>`), judged by the
+1. a reader for stzu v0.1's grammar in `rnxc` (`rnxc haro <file.haro>`), judged by the
    meta-court's own fixtures (`stz/declarative/stzu/fixtures.json`) -- the verdicts must match
    the Luau meta-court's on every fixture;
 2. the forge's smallest act: from the declaration, a generated court (tokenizer, parser,
@@ -566,6 +566,8 @@ organs' letters kept as the family sentence's rhyme). *Recommendation: retire th
 Haro and keep the grammar and the fixtures verbatim -- the site already says "the language of
 languages" and never says stzu; the fixtures' history keeps its names.* And the standing
 item: the Haro naming check was pending on 2026-09-13 [R] and nothing here seals it.
+*Carried into `haro/` on 2026-10-02, at the author's reminder: `.haro` files, `haro.ring`,
+"Haro v0.N"; the pinned v0.1 judge and the sibling repositories' files keep `stzu` (HF-44).*
 
 **D2 -- the natural surface's scope.** Ratified by the alphabet: N asks, never declares; may
 draft, through the closed compile target; the court judges, the human ratifies [R,

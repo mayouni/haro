@@ -1,4 +1,4 @@
-# stzu v0.3 -- a seat of two shapes, a reference's own words, and a condition that reads across
+# Haro v0.3 -- a seat of two shapes, a reference's own words, and a condition that reads across
 
 **Written after `fixtures.json` beside it, which is the judge** (the W discipline: fixtures
 first, prose second). v0.3 is the declaring altitude of Haro grown by what the machine

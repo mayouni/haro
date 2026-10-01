@@ -3,7 +3,7 @@
 Born standalone; folded into bench/gate.py only when green. Every claim it
 prints is a comparison against a pinned judge or an oracle:
 
-  stage 1  the stzu meta-court, ported to pure Ring (haro/spike/stzu.ring),
+  stage 1  the Haro meta-court (stzu v0.1's grammar, grown), ported to pure Ring (haro/spike/haro.ring),
            judged by stz/declarative/stzu/fixtures.json exactly as the Luau
            runner judges it, on rnxc AND on the oracle ring.exe -- and the two
            runtimes must print the same bytes for every fixture.
@@ -21,7 +21,7 @@ ROOT = os.path.abspath(os.path.join(HERE, '..', '..'))
 RNXC = os.path.join(ROOT, 'zig-out', 'bin', 'rnxc.exe')
 ORACLE = os.path.join(ROOT, 'runtime', 'win64', 'ring.exe')
 STZU_FIXTURES = r'D:\GitHub\stz\declarative\stzu\fixtures.json'
-STZU_RING = os.path.join(HERE, 'stzu.ring')
+STZU_RING = os.path.join(HERE, 'haro.ring')
 
 PLANT = '--plant' in sys.argv
 
@@ -55,9 +55,9 @@ def parse_verdict(out):
     return True, fields
 
 
-STZU2_FIXTURES = os.path.join(HERE, 'stzu2', 'fixtures.json')
-STZU3_FIXTURES = os.path.join(HERE, 'stzu3', 'fixtures.json')
-STZU4_FIXTURES = os.path.join(HERE, 'stzu4', 'fixtures.json')
+STZU2_FIXTURES = os.path.join(HERE, 'v02', 'fixtures.json')
+STZU3_FIXTURES = os.path.join(HERE, 'v03', 'fixtures.json')
+STZU4_FIXTURES = os.path.join(HERE, 'v04', 'fixtures.json')
 
 
 def judge_stzu(exe, label, fixtures=STZU_FIXTURES):
@@ -66,7 +66,8 @@ def judge_stzu(exe, label, fixtures=STZU_FIXTURES):
     v0.2's fixtures add the keys menus/ranges/formats/constraints (under
     counts), world and points."""
     doc = json.load(open(fixtures, encoding='utf-8'))
-    assert doc['grammar'] == 'stzu' and doc['version'] in ('0.1', '0.2', '0.3', '0.4')
+    # the pinned v0.1 judge is stzu's; everything since is Haro's (D1)
+    assert doc['grammar'] in ('stzu', 'haro') and doc['version'] in ('0.1', '0.2', '0.3', '0.4')
     passed = failed = 0
     outputs = {}
     with tempfile.TemporaryDirectory() as td:
@@ -78,7 +79,8 @@ def judge_stzu(exe, label, fixtures=STZU_FIXTURES):
             for fname, text in case.get('files', {}).items():
                 with open(os.path.join(cd, fname), 'w', encoding='utf-8', newline='') as f:
                     f.write(text)
-            p = os.path.join(cd, case['id'] + '.stzu')
+            # a Haro declaration is a .haro file (D1); the pinned v0.1 judge keeps .stzu
+            p = os.path.join(cd, case['id'] + ('.haro' if doc['grammar'] == 'haro' else '.stzu'))
             with open(p, 'w', encoding='utf-8', newline='') as f:
                 f.write(case['source'])
             out = run(exe, STZU_RING, p)
@@ -123,7 +125,7 @@ def judge_stzu(exe, label, fixtures=STZU_FIXTURES):
             else:
                 failed += 1
                 print(f'  FAIL {case["id"]} ({kind}): {case["name"]}{why}')
-    print(f'STZU-CONFORMANCE ({label}): {passed} passed, {failed} failed')
+    print(f'{doc["grammar"].upper()}-CONFORMANCE ({label}): {passed} passed, {failed} failed')
     return failed, outputs
 
 
@@ -132,7 +134,7 @@ def stage1():
     for label, fixtures in (('v0.1, the pinned judge', STZU_FIXTURES), ('v0.2, the WORLD and REFINE seats', STZU2_FIXTURES),
                             ('v0.3, the UNION, MESSAGES and the relations', STZU3_FIXTURES),
                             ('v0.4, the SENTENCE, the VIEW and the paths', STZU4_FIXTURES)):
-        print(f'stage 1 -- the stzu meta-court in pure Ring, judged by its fixtures ({label})')
+        print(f'stage 1 -- the Haro meta-court in pure Ring, judged by its fixtures ({label})')
         f1, o1 = judge_stzu(RNXC, 'rnxc', fixtures)
         f2, o2 = judge_stzu(ORACLE, 'oracle ring.exe', fixtures)
         diff = [k for k in o1 if o1[k] != o2.get(k)]
@@ -220,7 +222,7 @@ def harb_verdict(path, verb='check', prefix='machine'):
 # files their members name, written beside each case; `harb fleet <file>` is
 # the native court, and its refusal reads `fleet (line N): ...`
 FLEET_FIXTURES = r'D:\GitHub\harobanda\declarative\fleet\fixtures.json'
-FLEET_STZU = os.path.join(HERE, 'fleet_v04.stzu')
+FLEET_STZU = os.path.join(HERE, 'fleet_v04.haro')
 FLEET_FLOOR = 32
 FLEET_COUNTS = {'members': 'MEMBER', 'retirements': 'RETIREMENT'}
 MACHINE_COUNTS = {'services': 'SERVICE', 'capabilities': 'CAPABILITY', 'mounts': 'MOUNT',
@@ -678,11 +680,11 @@ if __name__ == '__main__':
         if a.startswith('--stage='):
             stage = int(a.split('=')[1])
     # the default is the v0.3 declaration, the rung of record since 2026-10-01 (v0.2
-    # is machine_v02.stzu); the pinned v0.1 run is
-    # `--stzu=D:\GitHub\harobanda\declarative\machine\machine.stzu`
-    stzu = os.path.join(HERE, 'machine_v03.stzu')
+    # is machine_v02.haro); the pinned v0.1 run is
+    # `--haro=D:\GitHub\harobanda\declarative\machine\machine.stzu`
+    stzu = os.path.join(HERE, 'machine_v03.haro')
     for a in sys.argv[1:]:
-        if a.startswith('--stzu='):
+        if a.startswith('--haro='):
             stzu = os.path.abspath(a.split('=', 1)[1])
     failures = 0
     if stage in (None, 1):
@@ -692,11 +694,11 @@ if __name__ == '__main__':
         f2, lang = stage2(stzu)
         failures += f2
         if lang and stage in (None, 3):
-            failures += stage3(lang, floor=AGREE_FLOOR if os.path.basename(stzu) == 'machine_v03.stzu' else 0)
+            failures += stage3(lang, floor=AGREE_FLOOR if os.path.basename(stzu) == 'machine_v03.haro' else 0)
     # the fourth rung: the fleet language, a vocabulary over the machine language,
-    # forged from fleet_v04.stzu (which names machine_v03.stzu beside it) and judged
+    # forged from fleet_v04.haro (which names machine_v03.haro beside it) and judged
     # against harb's fleet fixtures; `--stage=7` runs it alone
-    if stage in (None, 7) and os.path.basename(stzu) == 'machine_v03.stzu' and os.path.exists(FLEET_STZU):
+    if stage in (None, 7) and os.path.basename(stzu) == 'machine_v03.haro' and os.path.exists(FLEET_STZU):
         f7, lang7 = stage2(FLEET_STZU, 'fleet')
         failures += f7
         if lang7:
@@ -704,7 +706,7 @@ if __name__ == '__main__':
     if lang and stage in (None, 4):
         failures += stage4(lang)
     if lang and stage in (None, 5):
-        failures += stage5(lang, v02=os.path.basename(stzu) in ('machine_v02.stzu', 'machine_v03.stzu'))
+        failures += stage5(lang, v02=os.path.basename(stzu) in ('machine_v02.haro', 'machine_v03.haro'))
     if lang and stage in (None, 6):
         failures += stage6(lang)
     print(f'haro_forge: {"FAIL" if failures else "PASS"} ({failures} failure(s), {time.perf_counter()-t0:.1f} s)')

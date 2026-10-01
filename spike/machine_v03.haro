@@ -1,6 +1,6 @@
--- machine_v03.stzu -- the machine language declared in stzu v0.3: v0.2 (the
+-- machine_v03.haro -- the machine language declared in Haro v0.3: v0.2 (the
 -- clauses harb reads and its rules as data) plus what v0.2 could not say
--- (stzu3/GRAMMAR.md): ADDRESS and EGRESS as UNIONs of two shapes; a service's
+-- (v03/GRAMMAR.md): ADDRESS and EGRESS as UNIONs of two shapes; a service's
 -- own MESSAGES for its references; conditions that read through a reference
 -- (the peer's network), quantify over a kind or a list of references (the
 -- capabilities a service needs, the mounts that keep a key) and test the five

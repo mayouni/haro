@@ -1,4 +1,4 @@
--- rfn.stzu -- the refinement language of the spike, declared in stzu v0.1.
+-- rfn.haro -- the refinement language of the spike, declared in stzu v0.1.
 -- A refinement is a sentence (charter section 6): a typed, bounded change
 -- to a declared point, carrying what it changes, from what, to what, who
 -- proposes it, under which posture, and why. It does not compute. Its

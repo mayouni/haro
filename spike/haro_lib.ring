@@ -1,9 +1,9 @@
-# stzu_lib.ring -- the stzu meta-court, v0.2, in pure core Ring (no Softanza).
+# haro_lib.ring -- the stzu meta-court, v0.2, in pure core Ring (no Softanza).
 #
 # v0.1 was a port of stz/face/stz/Stzu.luau (437 lines); it still is, and the
 # 28 v0.1 fixtures still pass unchanged. v0.2 is the declaring altitude of Haro
 # grown by the WORLD and REFINE seats and the type kinds a real language's
-# court needs (haro/spike/stzu2/GRAMMAR.md; the judge is stzu2/fixtures.json,
+# court needs (haro/spike/v02/GRAMMAR.md; the judge is v02/fixtures.json,
 # written first): MENU, RANGE, FORMAT as seat types; a seat typed by a
 # DECLARATION as a reference; NAMES on a declaration; CONSTRAINT with a
 # condition in the closed language of cond_lib.ring; WORLD (ONE, FIRST);
@@ -257,7 +257,7 @@ func IsUpperSnake(cW)
 	return 1
 
 func StzuFail(nLine, cMsg)
-	raise("stzu (line " + nLine + "): " + cMsg)
+	raise("haro (line " + nLine + "): " + cMsg)
 
 # ---- tokenizer --------------------------------------------------------------
 # a token is [type, value, line]; types: string number ident keyword
@@ -626,7 +626,7 @@ func StzuDeclare(cSrc)
 	$nStzuPos = 1
 
 	if StzuPeek()[1] = "eof"
-		StzuFail(1, "an empty file declares nothing -- a .stzu file opens with DEFINE LANGUAGE")
+		StzuFail(1, "an empty file declares nothing -- a .haro file opens with DEFINE LANGUAGE")
 	ok
 
 	bHaveLang = 0
@@ -657,7 +657,7 @@ func StzuDeclare(cSrc)
 		ok
 		if cKind = "LANGUAGE"
 			if bHaveLang
-				StzuFail(nLine, "a .stzu file declares exactly one LANGUAGE")
+				StzuFail(nLine, "a .haro file declares exactly one LANGUAGE")
 			ok
 			bHaveLang = 1
 			cLName = cName
@@ -668,7 +668,7 @@ func StzuDeclare(cSrc)
 			cLRationale = cRationale
 		but cKind = "WORLD"
 			if not isNull(aWorld)
-				StzuFail(nLine, "a .stzu file declares at most one WORLD")
+				StzuFail(nLine, "a .haro file declares at most one WORLD")
 			ok
 			aOne = []
 			if HasClause(aClauses, "ONE") aOne = ClauseValue(aClauses, "ONE") ok
@@ -677,7 +677,7 @@ func StzuDeclare(cSrc)
 			aWorld = [aOne, cFirst, nLine]
 		but cKind = "REFINE"
 			if not isNull(aRefine)
-				StzuFail(nLine, "a .stzu file declares at most one REFINE")
+				StzuFail(nLine, "a .haro file declares at most one REFINE")
 			ok
 			aFloors = []
 			if HasClause(aClauses, "FLOOR") aFloors = ClauseValue(aClauses, "FLOOR") ok

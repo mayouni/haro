@@ -1,6 +1,6 @@
 # court_lib.ring -- the generic court of a declared language, in pure core Ring.
 #
-# A court FORGED from a .stzu declaration is a generated program that loads
+# A court FORGED from a .haro declaration is a generated program that loads
 # this file and fills five tables (see forge.ring): the language's name and
 # extension, its declaration kinds with their typed seats, its forms, and
 # its declared refusal phrasings. Everything the DECLARATION says is judged
@@ -15,7 +15,7 @@
 # the Grammar Commons gives every court, so the fixtures' fragments can be
 # compared; where the declaration carries a REFUSAL message, it is spoken.
 #
-# v0.2 (haro/spike/stzu2/GRAMMAR.md): a seat's type may be a MENU (a word of
+# v0.2 (haro/spike/v02/GRAMMAR.md): a seat's type may be a MENU (a word of
 # its WORDS), a RANGE (a number within it), a FORMAT (a text of its shape)
 # or a DECLARATION (a reference that must resolve); a declaration's NAMES
 # are drawn from a MENU or a FORMAT; the WORLD's ONE and FIRST hold; every
@@ -23,7 +23,7 @@
 # and its MESSAGE is spoken with {name}, {seat}, {other} and {decl.seat}
 # filled in. The refinement gate reads the REFINE's POINTS and FLOOR.
 #
-# v0.3 (haro/spike/stzu3/GRAMMAR.md): a UNION seat takes a value of one of
+# v0.3 (haro/spike/v03/GRAMMAR.md): a UNION seat takes a value of one of
 # several shapes and is checked as the alternative the shape names; a
 # declaration's MESSAGES speak for its reference seats; a condition reads
 # through a reference, quantifies, and tests the closed relations; and the
@@ -1079,7 +1079,7 @@ func CtPostureRank(cP)
 	if cP = "llm" return 0 ok
 	return -1
 
-# the refinement sentence's own tables (rfn.stzu), read by the same parser
+# the refinement sentence's own tables (rfn.haro), read by the same parser
 func CtRfnKinds()
 	return [ ["REFINE", "refinement", [ ["target", "text", 0, 0], ["kind", "name", 0, 0], ["from", "text", 0, 0],
 	          ["to", "text", 0, 0], ["author", "text", 0, 0], ["posture", "name", 0, 0], ["reason", "text", 0, 0] ]] ]

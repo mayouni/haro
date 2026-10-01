@@ -1,7 +1,7 @@
 {
-  "grammar": "stzu",
+  "grammar": "haro",
   "version": "0.3",
-  "comment": "The stzu v0.3 conformance floor, written BEFORE the court that passes it (the W discipline: fixtures first, prose second). v0.3 grows v0.2 by what the machine language's 25 remaining fixtures could not say (haro/SPIKE.md, the second rung): a UNION seat type (a value of one of several shapes: dhcp or an address/prefix; none or a list), a reference seat's own MESSAGES on its declaration, and a condition language that reads THROUGH a reference (network.domain on a peer), quantifies over a kind or a list of references (some, all, named, where, this.), tests a FORMAT (matches) and five closed relations (within, host_of, under, covers, cyclic) -- each total, each a fixed line of the court, none a computation the declaration writes. Every v0.2 fixture still passes: v0.3 refuses nothing v0.2 accepted. Rejects carry the fragment the refusal must contain.",
+  "comment": "The Haro v0.3 conformance floor, written BEFORE the court that passes it (the W discipline: fixtures first, prose second). v0.3 grows v0.2 by what the machine language's 25 remaining fixtures could not say (haro/SPIKE.md, the second rung): a UNION seat type (a value of one of several shapes: dhcp or an address/prefix; none or a list), a reference seat's own MESSAGES on its declaration, and a condition language that reads THROUGH a reference (network.domain on a peer), quantifies over a kind or a list of references (some, all, named, where, this.), tests a FORMAT (matches) and five closed relations (within, host_of, under, covers, cyclic) -- each total, each a fixed line of the court, none a computation the declaration writes. Every v0.2 fixture still passes: v0.3 refuses nothing v0.2 accepted. Rejects carry the fragment the refusal must contain.",
   "accepts": [
     {
       "id": "A1",
