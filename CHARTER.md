@@ -26,8 +26,10 @@ everything else is re-centred below.
 **How to read it.** Every claim is **[M] measured** (a number, with file and date), **[R]
 recorded** (a ruling, finding or correction in the estate's record, cited) or **[D] designed**
 (this charter's proposal, reversible by name). A number without a source is a defect in this
-document. The spelling of the intelligence layer's name follows the site (Aicha); the author's
-note spells it Aiha, and the author rules the spelling.
+document. The spelling of the intelligence layer's name follows the site (Aicha, with a
+diaeresis), which is also the author's own correction of 2026-09-30 ("the product is Aicha,
+not Aichat" [R, softanza/memos/2026-09-30-escep-launch.md 9-10]); his note of 2026-10-01
+spells it with a circumflex, and he rules the spelling.
 
 **The one sentence.** Haro is one language with three altitudes: in it a maker declares the
 language of a world, an agent speaks that language under a grammar it cannot break, a human
@@ -121,9 +123,11 @@ that declaring a language is as easy as declaring a variable; that the declarati
 text the maker keeps; that the court judges it in the maker's own words; that the artefact
 ships as one binary and expires never.
 
-**The agent** -- Aicha, the estate's own intelligence layer and conversational agent, named
-and not yet shipped [R, vision.md "Aicha: named"], or any agent under C9 -- speaks the
-declared language. Owed, as in v0.1: a grammar the decoder holds (now emitted by the forge
+**The agent** -- Aicha, "the name the author gives to the Softanza language model and
+conversational agent", the coming face of the neural tier (a local model through ggml,
+structured output under C9, the semantic index) and of the agentic layer, a name and nothing
+else yet [R, the site's estate page, "named"; softanza/memos/2026-09-30-escep-launch.md
+128-134] -- or any agent under C9 -- speaks the declared language. Owed, as in v0.1: a grammar the decoder holds (now emitted by the forge
 for every declared language, by construction); refusals that are instructions, in the
 domain's jargon; verdicts in milliseconds; one spelling; the language's own tables. And one
 thing more: **a write surface that is a refinement** -- "a typed proposal against a declared
@@ -322,13 +326,13 @@ is authorship: trust floors and risk tiers declared per point, which a profile c
 
 | member | what it is (stage, as the site reads it 2026-10-01) | its relation to Haro |
 |---|---|---|
-| **Harobanda** | the declared machine: one text file boots exactly that and judges every boot; Linux pinned beneath, PID 1 the one binary, no shell, no login (built, MIT) [R] | its language, `.machine`, is declared in stzu v0.1 -- 79 lines, 7 declarations, 5 forms, 0 expressions, 54 fixtures [R, machine.stzu; 07-SYSTEM] -- so it is Haro's first customer at the declaring altitude; a machine update through two slots is a refinement; the worlds it runs are Luau under `stzr` today (four reference machines) and become Haro worlds on `rnx` as "the image's second binary" [R, 08-NORTH-STAR, the Ring++ row] |
-| **HaroBase** | the governed data store: SQLite in the process, governed, a Zig library with a C ABI, no Ring inside (specification; HB1 and HB2 built) [R, harobase/README.md] | the data refinement domain's store; a world's records persist through it; "shared by every face of the estate (Haro, Zin, and Softanza's engine while Ring lasts)" [R] |
+| **Harobanda** | the declared machine: one text file boots exactly that and judges every boot; Linux pinned beneath, PID 1 the one binary, no shell, no login (built, MIT) [R] | its language, `.machine`, is declared in stzu v0.1 -- 79 lines, 7 declarations, 5 forms, 0 expressions, 54 fixtures [R, machine.stzu; 07-SYSTEM] -- so it is Haro's first customer at the declaring altitude; a machine update through two slots is a refinement; the image's boot path holds exactly two binaries, `harb` and `stzr`, and the worlds are Luau under `stzr` today (four reference machines); Harobanda's own record names the successor: "the runtime: stzr today, Ring++ and Haro tomorrow ... ship as the image's second binary. Status: real for stzr. For Haro, by design: one path in `experiment/os2_image.sh` and one SERVICE word" [R, harobanda/doc/DIVIDEND.md 179-232, seam 12]; the Haro tool names (HaroServ, HaroScript, MicroHaro) stand today for RingServ, RingScript and MicroRing at those tools' own stated levels [R, PROVENANCE.md, STZ-OS-RULING-10]; `rnx` appears nowhere in the repository yet |
+| **HaroBase** | the governed data store: SQLite in the process, governed, a Zig library with a C ABI, no Ring inside (specification; HB1 and HB2 built) [R, harobase/README.md] | the data refinement domain's store; a world's records persist through it; "shared by every face of the estate (Haro, Zin, and Softanza's engine while Ring lasts)" [R]; its charter already names the seam: "Haro writes its binding against the C ABI when its charter is ratified and its runtime exists. Until then, HaroBase owes Haro one thing: that the C ABI does not change shape after HB1 without a version bump" [R, harobase/CHARTER.md 9.3] |
 | **the worlds** | stzApp ("an application is a living world of meaning"), stzSuperApp ("a living constellation of worlds") [R, 02-STACK L3] | declared in the alphabet; governed by Z's norms and Zui's constitution; refined through the gate |
 | **the projections** | stzp: app, server/service, edge/browser via wasm, device, constellation [R, 03-PRODUCTS] | one Haro world, five targets; one static binary per language (contract 5 = commitment 5) |
 | **Zin** | the constitutional federation: 56 pillars under a compile-time constitution; ZML the meta-language behind its pillar DSLs; ZinScript its scripting language (built, commercial) [R] | ZML and Haro's declaring altitude elevate losslessly by construction (the stzu-to-ZML table [R, stzu GRAMMAR.md]); "ZinScript may stay close to Zin or embrace Haro" is Zin's call [R, stz/CLAUDE.md, author 2026-09-13]; the convergence point is refine's gate enforcing zin's constitution [R, 03-PRODUCTS] |
 | **Refine** | refinement-oriented programming: a corpus of over a hundred specifications, a prototype, the first module of a Zig engine, a book in manuscript (specification) [R] | section 6 is Refine's paradigm made the language's own; Refine the product is the governed-change environment over it |
-| **Aicha** | the coming intelligence layer and conversational agent: knowledge, models and agents on your own device, "bound by the rule that a model proposes and never commits" (named) [R, vision.md] | the speaker of declared languages: it drafts sentences of Z/W/Q/F/A through the closed compile target (N's governed middle [R, 06-ALPHABET]), proposes refinements against declared points, and holds no `effectful` capability [R, agentic.md, 610 deletions proposed and none committed]; built on the natural plane, the neural plane under C9, `.pia` declarations judged at load, and the knowledge graph |
+| **Aicha** | the coming intelligence layer, language model and conversational agent: knowledge, models and agents on your own device, "bound by the rule that a model proposes and never commits" (named, and nothing else yet) [R, the site's estate page; escep-launch memo 2026-09-30]; not the Aicha of Refine's Sonibank pilot, who is a persona, a compliance officer in Niamey [R, refine/SONIBANK_PILOT_v0_1.md 34] | the speaker of declared languages: it drafts sentences of Z/W/Q/F/A through the closed compile target (N's governed middle [R, 06-ALPHABET]), proposes refinements against declared points, and holds no `effectful` capability [R, agentic.md, 610 deletions proposed and none committed]; built on the natural plane, the neural plane under C9, `.pia` declarations judged at load, and the knowledge graph |
 | **Takamba** | the harness, formerly Bangalo: many sessions on one body of work with a directory and git; laws cited to incidents (built) [R] | how Haro is built; its refinement discipline is law 1 made structural, which "IS the audit chain" [R, 03-PRODUCTS] |
 | **Luau** | stz's script host today, "Luau-first, Ring-still" [R, stz/README.md] | hosts stzr and the four reference machines' worlds; the meta-court that judges `.stzu` files runs in Luau today (`face/stz/Stzu.luau`) [R, machine.stzu header]; the spike (section 10) re-judges with `rnx`; convergence is the author's ruling at the critical point [R, 01-KERNEL] |
 | **Softanza, the library** | the foundation, built: 531K lines, the Zig engine, 501 narrated guards [M, site] | the computing altitude's compatibility specification, and the engine behind every altitude (graphs, text, the decoder, the natural plane) |
