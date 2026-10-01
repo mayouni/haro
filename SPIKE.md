@@ -6,8 +6,9 @@ asked, under `haro/spike/`. Every number below comes from `python haro/spike/har
 run is kept beside the oracle artefacts in `runtime/haro-forge-oracle/full_run.txt` (not
 committed). The guard was made to fail before it was trusted: `--plant` flips a verdict in
 stages 1, 3 and 5 and the guard says `FAIL`. **The second rung, stzu v0.2, was built the
-same evening** (its own section below); the guard's default declaration is v0.2's since
-then, 40.9 s a pass, `full_run_v02.txt` its transcript.
+same evening** (its own section below), 40.9 s a pass, `full_run_v02.txt` its transcript;
+**the third, stzu v0.3, the same night** -- the guard's default declaration is v0.3's since
+then, 62.6 s a pass, `full_run_v03.txt` its transcript, and stage 3 is pinned at a floor.
 
 ## What was built
 
@@ -25,6 +26,8 @@ then, 40.9 s a pass, `full_run_v02.txt` its transcript.
 | `spike/cond_lib.ring` | v0.2's closed, total condition language: a tokenizer, a parser to a small AST, a validator the meta-court runs at declaration time, an evaluator the forged court runs on every declaration |
 | `spike/machine_v02.stzu` | the machine language declared in v0.2: 11 menus, 1 range, 9 formats, 3 forms, 8 declarations with references, a `WORLD`, ~45 constraints in `harb`'s own phrasings, a `REFINE` of 11 points and 8 floors, 3 refusals |
 | `spike/fixtures/refine_point.rfn`, `refine_kind.rfn`, `hello_menu.rfn`, `hello_external.rfn` | four more refinement sentences: a seat that is not a point, a point of another kind, a value outside the knob's menu, an external actor at an external floor |
+| `spike/stzu3/fixtures.json`, `spike/stzu3/GRAMMAR.md` | **stzu v0.3** (the third rung, below): a UNION seat of two shapes, a reference seat's own MESSAGES, and a condition language that reads through a reference, quantifies, and tests five closed relations -- 27 fixtures first, the prose after |
+| `spike/machine_v03.stzu` | the machine language declared in v0.3: v0.2 plus two unions, three formats, a service's MESSAGES and 17 more constraints in harb's words; the guard's default since 2026-10-01 |
 
 Nothing in `rnxc` or the VM changed. Nothing in a sibling repository changed.
 
@@ -204,11 +207,74 @@ artefacts, 40.9 s; `--plant` fails it with 6):
               floor moved between the passes: compare within a pass, never across.
               The pattern that pays is the first run after a rebuild of rnxc, 45 ms.
 
+## The third rung -- stzu v0.3, a seat of two shapes and a condition that reads across
+
+**At the author's word: "Go for v0.3, fixtures first."** The 25 fixtures left after v0.2
+were read again and sorted by what a declaration must say: a seat whose value has one of
+two shapes (ADDRESS, EGRESS: 6), a reference seat's own refusal (2), and a condition that
+reads THROUGH a reference, quantifies over a kind or a list of references, and tests a
+relation between two values (14); the three fleet kinds are another language's. v0.3
+declares the first three (`spike/stzu3/GRAMMAR.md`, written after its 27 fixtures): a
+`UNION` kind; `MESSAGES` on a declaration; and in the condition language `x.seat` through a
+reference, `some`/`all` with `named`, `where` and `this.`, `matches` a FORMAT, and five
+closed relations -- `within`, `host_of`, `under`, `covers`, `cyclic` -- each total, each a
+fixed line of the court, named by the declaration and never written by it. The court's
+order moved once: local types, then the constraints, then the references, because a
+reference is a fact about the whole sentence as a constraint is, and the maker's words
+speak first. Nothing in `rnxc`, the VM or a sibling repository changed.
+
+    stage 1   v0.1 28 of 28, v0.2 30 of 30, v0.3 27 of 27, on rnxc and on the
+              oracle, byte-identical
+    stage 2   machine_v03.stzu (62 constraints, 2 unions) forges a court of
+              17,953 bytes and a grammar of 2,861, byte-identical on both
+    stage 3   117 of 120 agree with harb (95 under v0.2, 41 under v0.1);
+              0 beyond, 0 fragments, 0 defects; the 3 left are FLEET, MEMBER
+              and RETIREMENT, the fleet file's kinds, refused by name on both
+              sides for different reasons -- a court for the fleet language is
+              that language's own declaration, not this one's
+              rnxc and the oracle agree on all 120
+    stage 4   200 derivations all parse (a required seat absent 141, given twice
+              50, the WORLD 8, a name twice 1); the decoder holds the grammar,
+              whose ADDRESS is now `(ident | string)`
+    stage 5   eight rows, unchanged, through the v0.3 court
+    stage 6   edit to verdict on makeen_box.machine, minima of 15, one pass:
+                harb check (Zig)                         11.5 ms   (the v0.2 pass: 9.3)
+                the forged court on rnxc, compiled       68.1 ms   (45.3)
+                the forged court on rnxc, image reused   24.6 ms   (13.9)
+                the forged court on the oracle           77.1 ms   (44.9)
+              harb is the same binary and moved 9.3 -> 11.5, so part of the rise
+              is the machine; the rest is the court's: 62 constraints against
+              45, and the quantifiers walk the mounts and capabilities for
+              every service and box. Under the 100 ms target, and the pattern
+              that pays is a sentence with many declarations of a quantified
+              kind. Not optimised; named.
+    --plant   FAIL (8); the new floor fires at 117 against a pinned 200
+
+**THE GUARD HAD A BLIND SPOT, AND THE RUNG WALKED INTO IT.** The first v0.3 court read
+"67 agree, 47 beyond", and every one of the 47 carried harb's correct refusal -- a
+constraint-driven one. The court's constraints had stopped firing: the rewrite of the
+constraint loop (to skip a condition that reads through a dangling reference) inverted the
+rule for a `WHEN` with no `THEN`, so a forbidden state was never refused. The guard
+classifies "harb refuses, the court accepts" as *beyond the declaration* -- the class that
+MEASURES -- and has no row for "the court got weaker", so a court that lost half its
+rules read as a declaration that could not say them (HF-39). `AGREE_FLOOR` pins stage 3
+on the default declaration at 117 now, made to fail against 200 before it was trusted.
+
+**Two fragments closed by what a declaration says, not by a phrase.** R17 by the
+service's own `MESSAGES` for `needs`; R82 by the court's order, since the constraint
+"SEES a mount and this machine declares no MOUNT" now speaks before the reference `data`
+is found to resolve to nothing (HF-37 closed). R35 and R51 came and went on the way:
+with the constraint loop fixed they agree because `hosted_boards` is declared before
+`rpi4_is_aarch64`, and the declared order is the court's order.
+
 ## What the spike does not claim
 
 - The forged court judges what the declaration says and nothing more; 70 of 120 fixtures
-  need rules it cannot carry under v0.1, and 25 under v0.2 (14 computations, 9 lags, 2
-  fragments). That is the measurement, not a shortfall of the forge.
+  need rules it cannot carry under v0.1, 25 under v0.2 (14 computations, 9 lags, 2
+  fragments), and 3 under v0.3 (the fleet file's kinds, another language's). That is the
+  measurement, not a shortfall of the forge.
+- The five relations are a closed menu grown by five lines of the court, not the governed
+  door to the computing altitude; a computation outside them is unsayable, by design.
 - The refinement gate's trust floor was one rule (`trusted` for every point) under v0.1; v0.2
   declares a floor per point (`REFINE ... FLOOR`), and the guard's stage 5 measures it under
   `--stzu=machine_v02.stzu`.
@@ -227,7 +293,9 @@ artefacts, 40.9 s; `--plant` fails it with 6):
    harobanda's to take or refuse.
 3. Decide HF-30 and HF-36 as corrections: string ordering is Ring's R41 or Ring++'s bytes;
    a list literal naming its own target copies the new value or the old.
-4. v0.3, fixtures first: a union seat type (HF-32, 6 fixtures), a reference seat's own
-   MESSAGE (HF-37, 2), and the computations the 14 "beyond" need -- a cycle, a subnet, a
-   path prefix, a coverage -- which are the first candidates for the computing altitude's
-   governed door rather than for the condition language.
+4. ~~v0.3, fixtures first~~ -- built 2026-10-01 as stzu v0.3, the third rung above:
+   95 -> 117 of 120; what is left is the fleet language, which is its own declaration
+   (harobanda's to write in stzu, fixtures first, the way `machine_v03.stzu` is written).
+5. The forge as an `rnxc` verb, or the Softanza-resident timing the charter's 2.6 asks
+   for; and the court's run time on a sentence with many quantified declarations, named
+   at stage 6 and not optimised.

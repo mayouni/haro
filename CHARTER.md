@@ -186,7 +186,14 @@ with a closed, total condition language over one declaration and the `ONE` kinds
 as `POINTS` (which seats, of which kind) and `FLOOR` (at what trust posture). The ontology
 as versioned data, `ASK`, `NARRATE` and `FORMS` are not built. Measured on the machine
 language: 95 of `harb`'s 120 fixtures agree with a court forged from the v0.2 declaration,
-against 41 from v0.1.
+against 41 from v0.1. **stzu v0.3, the same night (`haro/spike/stzu3/GRAMMAR.md`, 27
+fixtures):** a `UNION` seat whose value has one of two shapes, a declaration's `MESSAGES`
+for its reference seats, and a condition language that reads through a reference,
+quantifies over a kind or a list of references, and tests five closed relations (an
+address within a prefix, its host, a path under a directory, a perimeter covering every
+address, a cycle through references) -- each total, each a fixed line of the court, none
+a computation the declaration writes, so the totality doctrine holds. 117 of 120; the
+three left are the fleet file's kinds, another language's.
 
 **What the forge produces from one declaration** (Ringua's kit, 02-STACK's L1, now Haro's
 compiler verbs rather than separate organs): the parser; the court with the fixtures as its
@@ -424,6 +431,15 @@ oracle; the refinement gate reads the declared `POINTS` and `FLOOR` (eight rows)
 derivations all parse and the decoder holds the grammar; edit to verdict 13.9 ms with the
 image (45.3 without; `harb` 9.3; the oracle 44.9). The oracle found the rung's one defect
 and it was Ring's (HF-36). Record: `haro/SPIKE.md`, "The second rung".
+
+**The third rung, 2026-10-01, at the author's word ("Go for v0.3, fixtures first"): stzu
+v0.3** (section 3's note). The machine language re-declared in it forges a court that
+agrees with `harb` on **117 of 120** (0 beyond, 0 fragments, 0 defects; the three left are
+the fleet file's kinds), byte-identical on `rnxc` and the oracle; edit to verdict 24.6 ms
+with the image (68.1 without; `harb` 11.5; the oracle 77.1), under the target and named
+as the cost of 62 constraints with quantifiers. The guard gained a pinned floor after its
+own measuring class absorbed a court that had lost its constraints (HF-39). Record:
+`haro/SPIKE.md`, "The third rung".
 
 v0.1's spike (`twice.haro`, a definition with an intent clause) proved one altitude. The
 ruling asks for three to meet, and the estate has already named the smallest program that

@@ -56,6 +56,7 @@ def parse_verdict(out):
 
 
 STZU2_FIXTURES = os.path.join(HERE, 'stzu2', 'fixtures.json')
+STZU3_FIXTURES = os.path.join(HERE, 'stzu3', 'fixtures.json')
 
 
 def judge_stzu(exe, label, fixtures=STZU_FIXTURES):
@@ -64,7 +65,7 @@ def judge_stzu(exe, label, fixtures=STZU_FIXTURES):
     v0.2's fixtures add the keys menus/ranges/formats/constraints (under
     counts), world and points."""
     doc = json.load(open(fixtures, encoding='utf-8'))
-    assert doc['grammar'] == 'stzu' and doc['version'] in ('0.1', '0.2')
+    assert doc['grammar'] == 'stzu' and doc['version'] in ('0.1', '0.2', '0.3')
     passed = failed = 0
     outputs = {}
     with tempfile.TemporaryDirectory() as td:
@@ -120,7 +121,8 @@ def judge_stzu(exe, label, fixtures=STZU_FIXTURES):
 
 def stage1():
     failures = 0
-    for label, fixtures in (('v0.1, the pinned judge', STZU_FIXTURES), ('v0.2, the WORLD and REFINE seats', STZU2_FIXTURES)):
+    for label, fixtures in (('v0.1, the pinned judge', STZU_FIXTURES), ('v0.2, the WORLD and REFINE seats', STZU2_FIXTURES),
+                            ('v0.3, the UNION, MESSAGES and the relations', STZU3_FIXTURES)):
         print(f'stage 1 -- the stzu meta-court in pure Ring, judged by its fixtures ({label})')
         f1, o1 = judge_stzu(RNXC, 'rnxc', fixtures)
         f2, o2 = judge_stzu(ORACLE, 'oracle ring.exe', fixtures)
@@ -140,6 +142,11 @@ def stage1():
 # ---- stage 2: the forge; stage 3: the forged court against harb ------------
 
 MACHINE_STZU = r'D:\GitHub\harobanda\declarative\machine\machine.stzu'
+# the pinned floor of stage 3 on the default declaration: a fixture harb refuses
+# and the court now ACCEPTS reads as "beyond the declaration", never as a defect,
+# so a court that silently got weaker would pass -- it did once, 95 -> 67 read
+# as 47 rules "beyond" (2026-10-01). The floor is the guard for that.
+AGREE_FLOOR = 117
 MACHINE_FIXTURES = r'D:\GitHub\harobanda\declarative\machine\fixtures.json'
 MAKEEN = r'D:\GitHub\harobanda\machines\makeen_box.machine'
 HARB = r'D:\GitHub\harobanda\zig-out\bin\harb.exe'
@@ -205,11 +212,12 @@ def court_verdict(exe, court, path):
     return parse_verdict(out)
 
 
-def stage3(lang, court=None):
+def stage3(lang, court=None, floor=0):
     """Every machine fixture through harb and through the forged court.
     The verdicts are classified, and the class 'beyond the declaration'
     (harb refuses on a rule the .stzu does not carry) is the measurement.
-    A fixture harb accepts and the forged court refuses is a DEFECT."""
+    A fixture harb accepts and the forged court refuses is a DEFECT; an
+    agree count under the pinned floor is one too."""
     court = court or f'{lang}_court.ring'
     print(f'stage 3 -- the forged court ({court}) against harb on the {lang} fixtures')
     doc = json.load(open(MACHINE_FIXTURES, encoding='utf-8'))
@@ -298,7 +306,14 @@ def stage3(lang, court=None):
         print(f'  FAIL rnxc and the oracle differ on {len(ab_diff)} fixture(s): {ab_diff}')
     else:
         print(f'  ok   rnxc and the oracle agree on all {n} fixtures through the forged court')
-    return len(defects) + len(ab_diff)
+    under = 0
+    if floor and len(agree) < floor:
+        under = 1
+        print(f'  FAIL {len(agree)} agree with harb, under the pinned floor of {floor}: the court got weaker '
+              f'(a fixture harb refuses and the court accepts reads as "beyond", never as a defect; the floor is the guard)')
+    elif floor:
+        print(f'  ok   {len(agree)} agree, at or above the pinned floor of {floor}')
+    return len(defects) + len(ab_diff) + under
 
 
 # ---- stage 4: the grammar, sampled and held by the engine's decoder ----------
@@ -627,9 +642,10 @@ if __name__ == '__main__':
     for a in sys.argv[1:]:
         if a.startswith('--stage='):
             stage = int(a.split('=')[1])
-    # the default is the v0.2 declaration, the rung of record since 2026-10-01; the
-    # pinned v0.1 run is `--stzu=D:\GitHub\harobanda\declarative\machine\machine.stzu`
-    stzu = os.path.join(HERE, 'machine_v02.stzu')
+    # the default is the v0.3 declaration, the rung of record since 2026-10-01 (v0.2
+    # is machine_v02.stzu); the pinned v0.1 run is
+    # `--stzu=D:\GitHub\harobanda\declarative\machine\machine.stzu`
+    stzu = os.path.join(HERE, 'machine_v03.stzu')
     for a in sys.argv[1:]:
         if a.startswith('--stzu='):
             stzu = os.path.abspath(a.split('=', 1)[1])
@@ -641,11 +657,11 @@ if __name__ == '__main__':
         f2, lang = stage2(stzu)
         failures += f2
         if lang and stage in (None, 3):
-            failures += stage3(lang)
+            failures += stage3(lang, floor=AGREE_FLOOR if os.path.basename(stzu) == 'machine_v03.stzu' else 0)
     if lang and stage in (None, 4):
         failures += stage4(lang)
     if lang and stage in (None, 5):
-        failures += stage5(lang, v02=os.path.basename(stzu) == 'machine_v02.stzu')
+        failures += stage5(lang, v02=os.path.basename(stzu) in ('machine_v02.stzu', 'machine_v03.stzu'))
     if lang and stage in (None, 6):
         failures += stage6(lang)
     print(f'haro_forge: {"FAIL" if failures else "PASS"} ({failures} failure(s), {time.perf_counter()-t0:.1f} s)')

@@ -23,11 +23,18 @@
 # and its MESSAGE is spoken with {name}, {seat}, {other} and {decl.seat}
 # filled in. The refinement gate reads the REFINE's POINTS and FLOOR.
 #
+# v0.3 (haro/spike/stzu3/GRAMMAR.md): a UNION seat takes a value of one of
+# several shapes and is checked as the alternative the shape names; a
+# declaration's MESSAGES speak for its reference seats; a condition reads
+# through a reference, quantifies, and tests the closed relations; and the
+# order of the court is: shapes, the WORLD, the local types, the
+# CONSTRAINTs, then the references.
+#
 # Functions only. Globals ($cCourtLang, $cCourtExt, $aCourtKinds,
 # $aCourtForms, $aCourtRefusals, $aCourtMenus, $aCourtRanges,
-# $aCourtFormats, $aCourtConstraints, $aCourtWorld, $aCourtPoints,
-# $aCourtFloors, $aCourtToks, $nCourtPos, and cond_lib's) are born in the
-# generated court, at its top level, for both runtimes' sake.
+# $aCourtFormats, $aCourtUnions, $aCourtConstraints, $aCourtWorld,
+# $aCourtPoints, $aCourtFloors, $aCourtToks, $nCourtPos, and cond_lib's)
+# are born in the generated court, at its top level, for both runtimes' sake.
 
 load "cond_lib.ring"
 
@@ -222,6 +229,7 @@ func CtClauseShape(aSeat)
 		ok
 		return "namelist"
 	ok
+	if cK = "union" return "union" ok
 	if cOf = "text" or cK = "format" return "string" ok
 	if cOf = "number" or cK = "range" return "number" ok
 	return "word"
@@ -249,6 +257,54 @@ func CtKindByDeclName(cName)
 		if $aCourtKinds[i][2] = cName return $aCourtKinds[i] ok
 	next
 	return NULL
+
+# ---- v0.3: a UNION seat takes a value of one of several shapes -------------------
+# a union is [name, [[of, isList, typeKind], ...], message]
+
+func CtUnionByName(cName)
+	for i = 1 to len($aCourtUnions)
+		if $aCourtUnions[i][1] = cName return $aCourtUnions[i] ok
+	next
+	return NULL
+
+# an alternative's value shape, as CtClauseShape gives a seat's
+func CtAltShape(aAlt)
+	return CtClauseShape([aAlt[1], aAlt[1], aAlt[2], 0, aAlt[3]])
+
+# the alternative whose shape the written value has, or NULL; an empty list
+# fits either list shape
+func CtUnionAlt(aSeat, aClause)
+	aU = CtUnionByName(aSeat[2])
+	if isNull(aU) return NULL ok
+	cGot = aClause[3][1]
+	bEmpty = 0
+	if cGot = "namelist" or cGot = "stringlist"
+		if len(aClause[3][2]) = 0 bEmpty = 1 ok
+	ok
+	aAlts = aU[2]
+	for i = 1 to len(aAlts)
+		cShape = CtAltShape(aAlts[i])
+		if cShape = cGot return aAlts[i] ok
+		if bEmpty and (cShape = "namelist" or cShape = "stringlist") return aAlts[i] ok
+	next
+	return NULL
+
+# the union's own MESSAGE speaks when the value fits no alternative
+func CtWantUnion(aDecl, aClause, aSeat)
+	if not isNull(CtUnionAlt(aSeat, aClause)) return ok
+	aU = CtUnionByName(aSeat[2])
+	if isNull(aU) CtFail(aClause[2], "Clause " + aClause[1] + " names a UNION the court does not carry") ok
+	cMsg = aU[3]
+	if cMsg = ""
+		aNames = []
+		for i = 1 to len(aU[2])
+			aNames + aU[2][i][1]
+		next
+		cMsg = "Clause " + aClause[1] + " takes one of " + CtJoin(aNames, ", ")
+	ok
+	cV = ""
+	if aClause[3][1] = "word" or aClause[3][1] = "string" or aClause[3][1] = "number" cV = aClause[3][2] ok
+	CtFail(aClause[2], CtFill(cMsg, aDecl, cV))
 
 # {name}, {VERB}, {value}, {other}, {seat} and {decl.seat} in a declared message
 func CtFill(cMsg, aDecl, cValue)
@@ -278,10 +334,11 @@ func CtFill(cMsg, aDecl, cValue)
 			but cKey = "other"
 				cRep = $cCondOther
 			but substr(cKey, ".") > 0
+				# {x.seat}: through a reference seat of the declaration (v0.3),
+				# or the one declaration of a ONE kind
 				nDot = substr(cKey, ".")
-				aOne = CondOneDecl(left(cKey, nDot - 1))
-				if not isNull(aOne)
-					v = CondScalar(aOne, substr(cKey, nDot + 1))
+				if not isNull(aDecl)
+					v = CondPlaceScalar(["via", left(cKey, nDot - 1), substr(cKey, nDot + 1)], aDecl, NULL)
 					if not isNull(v) cRep = v ok
 				ok
 			else
@@ -349,38 +406,10 @@ func CtIsLabel(cS)
 	if cS[1] = "-" or cS[len(cS)] = "-" return 0 ok
 	return 1
 
+# one definition of the shapes, in cond_lib.ring, since v0.3's `matches`
+# tests them inside a condition too
 func CtHasShape(cS, cShape)
-	if cShape = "absolute_path"
-		return len(cS) > 0 and cS[1] = "/"
-	but cShape = "ipv4"
-		return CtIsIpv4(cS)
-	but cShape = "cidr"
-		aP = CtSplit(cS, "/")
-		if len(aP) != 2 return 0 ok
-		if not CtIsIpv4(aP[1]) return 0 ok
-		if len(aP[2]) = 0 or len(aP[2]) > 2 return 0 ok
-		for j = 1 to len(aP[2])
-			if not CtIsDigit(aP[2][j]) return 0 ok
-		next
-		return 0 + aP[2] <= 32
-	but cShape = "mac"
-		aP = CtSplit(cS, ":")
-		if len(aP) != 6 return 0 ok
-		for i = 1 to 6
-			if len(aP[i]) != 2 return 0 ok
-			if not (CtIsHexChar(aP[i][1]) and CtIsHexChar(aP[i][2])) return 0 ok
-		next
-		return 1
-	but cShape = "label"
-		return CtIsLabel(cS)
-	but cShape = "domain"
-		aP = CtSplit(cS, ".")
-		for i = 1 to len(aP)
-			if not CtIsLabel(aP[i]) return 0 ok
-		next
-		return 1
-	ok
-	return 1
+	return CondHasShape(cS, cShape)
 
 func CtAllowedClauses(aKind)
 	aS = aKind[3]
@@ -569,7 +598,11 @@ func CtDeclare(cSrc)
 		aC = aD[4]
 		for j = 1 to len(aC)
 			aSeat = CtSeatByClause(aKind, aC[j][1])
-			CtWantShape(aD, aC[j], CtClauseShape(aSeat))
+			if CtTypeKind(aSeat) = "union"
+				CtWantUnion(aD, aC[j], aSeat)
+			else
+				CtWantShape(aD, aC[j], CtClauseShape(aSeat))
+			ok
 		next
 		aSeats = aKind[3]
 		for j = 1 to len(aSeats)
@@ -590,6 +623,20 @@ func CtDeclare(cSrc)
 	$aCondVerbOf = []
 	for i = 1 to len($aCourtKinds)
 		$aCondVerbOf + [$aCourtKinds[i][2], $aCourtKinds[i][1]]
+	next
+	# v0.3: the reference seats of each kind, and the formats, for the conditions
+	$aCondRefSeats = []
+	for i = 1 to len($aCourtKinds)
+		aRS = []
+		aKS = $aCourtKinds[i][3]
+		for j = 1 to len(aKS)
+			if CtTypeKind(aKS[j]) = "decl" aRS + [aKS[j][1], aKS[j][2], aKS[j][3]] ok
+		next
+		$aCondRefSeats + [$aCourtKinds[i][2], aRS]
+	next
+	$aCondFormats = []
+	for i = 1 to len($aCourtFormats)
+		$aCondFormats + [$aCourtFormats[i][1], $aCourtFormats[i][2]]
 	next
 
 	# the WORLD: exactly one of each ONE kind, and the FIRST kind first
@@ -612,23 +659,15 @@ func CtDeclare(cSrc)
 		ok
 	ok
 
-	# the NAMES of a declaration kind, and every seat's typed value
-	for i = 1 to len(aDecls)
-		aD = aDecls[i]
-		aKind = CtKindByVerb(aD[1])
-		if len(aKind) >= 4 and aKind[4] != ""
-			cWhy = CtCheckNamed(aKind[4], aD[2])
-			if cWhy != "" CtFail(aD[3], "'" + aD[2] + "' " + cWhy) ok
-		ok
-		aC = aD[4]
-		for j = 1 to len(aC)
-			aSeat = CtSeatByClause(aKind, aC[j][1])
-			cWhy = CtCheckSeatValue(aD, aSeat, aC[j])
-			if cWhy != "" CtFail(aC[j][2], cWhy) ok
-		next
-	next
+	# the NAMES of a declaration kind, and every seat's typed value -- the
+	# local facts first (a menu, a range, a format, a union); a reference is a
+	# fact about the whole sentence and is checked after the constraints, which
+	# are the maker's own words about the whole sentence (v0.3)
+	CtCheckValues(aDecls, 0)
 
-	# the CONSTRAINTs, each on every declaration of its ON kind
+	# the CONSTRAINTs, each on every declaration of its ON kind; a condition
+	# that reads through a reference that resolves to nothing says nothing,
+	# and the reference's own refusal speaks below
 	for i = 1 to len($aCourtConstraints)
 		aCn = $aCourtConstraints[i]
 		aK = CtKindByDeclName(aCn[2])
@@ -640,14 +679,49 @@ func CtDeclare(cSrc)
 			aD = aDecls[j]
 			if aD[1] != aK[1] loop ok
 			$cCondOther = ""
-			if CondEval(aWhen, aD)
-				if isNull(aThen) or not CondEval(aThen, aD)
+			$bCondUnread = 0
+			bWhen = CondEval(aWhen, aD)
+			if $bCondUnread loop ok
+			if bWhen
+				# WHEN alone names a forbidden state; with THEN, the consequence must hold
+				bFail = 1
+				if not isNull(aThen)
+					bFail = not CondEval(aThen, aD)
+					if $bCondUnread loop ok
+				ok
+				if bFail
 					CtFail(aD[3], CtFill(aCn[5], aD, ""))
 				ok
 			ok
 		next
 	next
+
+	# the references, last
+	CtCheckValues(aDecls, 1)
 	return aDecls
+
+# the NAMES and the typed seat values of every declaration: bRefs 0 checks
+# the local types and skips the references, 1 the references alone
+func CtCheckValues(aDecls, bRefs)
+	for i = 1 to len(aDecls)
+		aD = aDecls[i]
+		aKind = CtKindByVerb(aD[1])
+		if not bRefs
+			if len(aKind) >= 4 and aKind[4] != ""
+				cWhy = CtCheckNamed(aKind[4], aD[2])
+				if cWhy != "" CtFail(aD[3], "'" + aD[2] + "' " + cWhy) ok
+			ok
+		ok
+		aC = aD[4]
+		for j = 1 to len(aC)
+			aSeat = CtSeatByClause(aKind, aC[j][1])
+			bRef = 0
+			if CtTypeKind(aSeat) = "decl" bRef = 1 ok
+			if bRef != bRefs loop ok
+			cWhy = CtCheckSeatValue(aD, aSeat, aC[j])
+			if cWhy != "" CtFail(aC[j][2], cWhy) ok
+		next
+	next
 
 # a declaration's name against its kind's NAMES (a MENU or a FORMAT); "" or why
 func CtCheckNamed(cNames, cName)
@@ -698,6 +772,13 @@ func CtCheckScalar(aDecl, aSeat, cValue)
 		for i = 1 to len($aCondDecls)
 			if $aCondDecls[i][1] = aK[1] and $aCondDecls[i][2] = cValue return "" ok
 		next
+		# the declaration's own MESSAGES for this seat speaks first (v0.3)
+		aKd = CtKindByVerb(aDecl[1])
+		if len(aKd) >= 5
+			for i = 1 to len(aKd[5])
+				if aKd[5][i][1] = aSeat[1] return CtFill(aKd[5][i][2], aDecl, cValue) ok
+			next
+		ok
 		cMsg = CtRefusalMessage("dangling_reference")
 		cOut = aDecl[2] + " " + cClause + " '" + cValue + "', which resolves to nothing: no such " + aK[1]
 		if cMsg != "" cOut += " -- " + cMsg ok
@@ -705,8 +786,14 @@ func CtCheckScalar(aDecl, aSeat, cValue)
 	ok
 	return ""
 
-# a clause's value against its seat: scalars directly, lists item by item
+# a clause's value against its seat: scalars directly, lists item by item; a
+# UNION seat is checked as the alternative whose shape the value has (v0.3)
 func CtCheckSeatValue(aDecl, aSeat, aClause)
+	if CtTypeKind(aSeat) = "union"
+		aAlt = CtUnionAlt(aSeat, aClause)
+		if isNull(aAlt) return "" ok
+		return CtCheckSeatValue(aDecl, [aSeat[1], aAlt[1], aAlt[2], aSeat[4], aAlt[3]], aClause)
+	ok
 	cShape = aClause[3][1]
 	if cShape = "word" or cShape = "string" or cShape = "number"
 		return CtCheckScalar(aDecl, aSeat, aClause[3][2])
@@ -878,6 +965,14 @@ func CtRefine(cFile, cRfnFile)
 		return
 	ok
 	cShape = CtClauseShape(aSeat)
+	if cShape = "union"
+		# a UNION seat's shape is the shape of the value written (v0.3)
+		cShape = "word"
+		aCw = aDecl[4]
+		for i = 1 to len(aCw)
+			if aCw[i][1] = cClause cShape = aCw[i][3][1] ok
+		next
+	ok
 	if cShape != "word" and cShape != "string" and cShape != "number"
 		CtRefuse("constraint", "NOT_A_KNOB", cClause + " is a list seat; this gate refines scalar points only", cRfnFile, nRLine,
 		         ["rule:constraint"], "the spike's gate refines knobs, fields and symbols, not composites", "refine a scalar clause")

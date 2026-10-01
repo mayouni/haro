@@ -21,6 +21,9 @@ $aCondDeclSeats = []
 $aCondDecls = []
 $aCondVerbOf = []
 $cCondOther = ""
+$aCondRefSeats = []
+$aCondFormats = []
+$bCondUnread = 0
 
 # The top level's names are its own (cInPath, cOutDir, ...): on Ring a
 # function's bare assignment to a name that exists as a global WRITES THE
@@ -69,7 +72,34 @@ func TypeKindOf(aLang, cOf)
 	for i = 1 to len(aL) if aL[i][1] = cOf return "format" ok next
 	aL = LangGet(aLang, "declarations")
 	for i = 1 to len(aL) if aL[i][1] = cOf return "decl" ok next
+	aL = LangGet(aLang, "unions")
+	for i = 1 to len(aL) if aL[i][1] = cOf return "union" ok next
 	return "expr"
+
+func UnionOf(aLang, cName)
+	aU = LangGet(aLang, "unions")
+	for i = 1 to len(aU)
+		if aU[i][1] = cName return aU[i] ok
+	next
+	return NULL
+
+# a declaration's MESSAGES as [[seat, text], ...]
+func MessagesSource(aMsgs)
+	cBuf = "["
+	for i = 1 to len(aMsgs)
+		if i > 1 cBuf += ", " ok
+		cBuf += "[" + RingStr(aMsgs[i][1]) + ", " + RingStr(aMsgs[i][2]) + "]"
+	next
+	return cBuf + "]"
+
+# a union's alternatives as [[of, isList, typeKind], ...]
+func AltsSource(aLang, aAlts)
+	cBuf = "["
+	for i = 1 to len(aAlts)
+		if i > 1 cBuf += ", " ok
+		cBuf += "[" + RingStr(aAlts[i][1]) + ", " + aAlts[i][2] + ", " + RingStr(TypeKindOf(aLang, aAlts[i][1])) + "]"
+	next
+	return cBuf + "]"
 
 # a seat in the court's table is [name, of, isList, optional, typeKind]
 func SeatsSource(aLang, aSeats)
@@ -111,10 +141,11 @@ func ForgeCourt(aLang)
 	c += "$nCourtPos = 1" + nl
 	c += "$aCondToks = []" + nl + "$nCondPos = 1" + nl + "$aCondDeclSeats = []" + nl
 	c += "$aCondDecls = []" + nl + "$aCondVerbOf = []" + nl + "$cCondOther = " + '""' + nl
+	c += "$aCondRefSeats = []" + nl + "$aCondFormats = []" + nl + "$bCondUnread = 0" + nl
 	c += "$aCourtKinds = [" + nl
 	aD = LangGet(aLang, "declarations")
 	for i = 1 to len(aD)
-		c += "    [" + RingStr(aD[i][2]) + ", " + RingStr(aD[i][1]) + ", " + SeatsSource(aLang, aD[i][3]) + ", " + RingStr(aD[i][6]) + "]"
+		c += "    [" + RingStr(aD[i][2]) + ", " + RingStr(aD[i][1]) + ", " + SeatsSource(aLang, aD[i][3]) + ", " + RingStr(aD[i][6]) + ", " + MessagesSource(aD[i][7]) + "]"
 		if i < len(aD) c += "," ok
 		c += nl
 	next
@@ -159,6 +190,14 @@ func ForgeCourt(aLang)
 		c += nl
 	next
 	c += "]" + nl
+	c += "$aCourtUnions = [" + nl
+	aU = LangGet(aLang, "unions")
+	for i = 1 to len(aU)
+		c += "    [" + RingStr(aU[i][1]) + ", " + AltsSource(aLang, aU[i][2]) + ", " + RingStr(aU[i][3]) + "]"
+		if i < len(aU) c += "," ok
+		c += nl
+	next
+	c += "]" + nl
 	c += "$aCourtConstraints = [" + nl
 	aC = LangGet(aLang, "constraints")
 	for i = 1 to len(aC)
@@ -192,6 +231,16 @@ func ForgeCourt(aLang)
 func GbnfShape(aSeat, aLang)
 	cOf = aSeat[2]
 	cK = TypeKindOf(aLang, cOf)
+	if cK = "union"
+		# one alternative per shape, in the union's order (v0.3)
+		aU = UnionOf(aLang, cOf)
+		cOut = "("
+		for i = 1 to len(aU[2])
+			if i > 1 cOut += " | " ok
+			cOut += GbnfShape([aU[2][i][1], aU[2][i][1], aU[2][i][2], 0], aLang)
+		next
+		return cOut + ")"
+	ok
 	if aSeat[3]
 		if cK = "form"
 			aF = FormOf(aLang, cOf)

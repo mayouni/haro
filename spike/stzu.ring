@@ -20,6 +20,9 @@ $aCondDeclSeats = []
 $aCondDecls = []
 $aCondVerbOf = []
 $cCondOther = ""
+$aCondRefSeats = []
+$aCondFormats = []
+$bCondUnread = 0
 
 if len(sysargv) < 3
 	? "usage: stzu.ring <file.stzu>"
