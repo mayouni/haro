@@ -1,10 +1,13 @@
 # Haro -- the charter
 
-**Status: v0.2 DRAFT, 2026-10-01, awaiting the author's ratification.** v0.1 was written
-2026-09-26 (commit 7c772ee) by the `haro-charter` session; this version answers the author's
-note of 2026-10-01 and the vision he published on the Softanza site the same day. Nothing is
-built. No parser, no compiler, no VM change exists for Haro beyond the `rnx` VM and `rnxc`
-compiler that run the platform's code today.
+**Status: v0.2 RATIFIED by the author, 2026-10-01** -- "Ratified, go with your
+recommendations on D1 to D7" -- so every recommendation in section 13 is a ruling, marked
+there. v0.1 was written 2026-09-26 (commit 7c772ee) by the `haro-charter` session; v0.2
+answered the author's note of 2026-10-01 and the vision he published on the Softanza site
+the same day. With ratification the brief's next step opens: the spike of section 10, built
+under `haro/spike/` and measured; its record is `haro/SPIKE.md`. Nothing else is built. No
+parser, no compiler, no VM change exists for Haro beyond the `rnx` VM and `rnxc` compiler
+that run the platform's code today.
 
 **What changed since v0.1, in the author's words (2026-10-01):** "Haro is actually a
 language of languages as designed in the Ringua project. The idea is that the agentic makers
@@ -485,9 +488,12 @@ a mutable runtime knowledge store; natural-language declaration.
 
 ---
 
-## 13. The decisions only the author can make
+## 13. The decisions only the author can make -- RULED 2026-10-01
 
-Five, re-cut on the ruling. Each with this session's recommendation.
+Seven, re-cut on the ruling of 2026-10-01 and **ratified the same day, each on this
+session's recommendation** ("go with your recommendations on D1 to D7"). The
+recommendations below are therefore the rulings; the alternatives stay named so a reversal
+has its text.
 
 **D1 -- ruled 2026-10-01: Haro is the language of languages.** What remains is the *name*:
 whether stzu and Ringua survive as names of Haro's declaring altitude (the `.stzu` extension,
@@ -520,7 +526,11 @@ already pins.
 
 - **D6 -- the refinement point's syntax and file.** The record carries two taxonomies of
   kinds (eight in Refine's spec, six in the manifesto) and two file extensions (`.rfn` in
-  Refine, `.zrfn` in stzlib) [R, HF-19, HF-20]. One name per kind and one extension are his.
+  Refine, `.zrfn` in stzlib) [R, HF-19, HF-20]. *Recommendation, now the ruling: RFN's
+  kinds -- knob, field, symbol, policy, composite, pipeline -- because RFN is the refinement
+  language and a Haro refinement is a sentence of it; Refine's eight remain the computing
+  altitude's point kinds, each mapped onto one of the six; and `.rfn`, Refine's own
+  extension, with `.zrfn` retired to stzlib's comment-tag lift.*
 - **D7 -- Zin.** Whether ZinScript embraces Haro, and whether Zin's pillar DSLs are forged
   from Haro's declaring altitude, is Zin's call "recorded, never forced from here" [R,
   06-ALPHABET]; the charter asks nothing and records the lossless elevation.
