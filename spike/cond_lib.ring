@@ -1,39 +1,59 @@
-# cond_lib.ring -- the condition language of stzu's CONSTRAINT (v0.2, grown
-# in v0.3), in pure core Ring.
+# cond_lib.ring -- the condition language of stzu's CONSTRAINT and VIEW (v0.2,
+# grown in v0.3 and v0.4), in pure core Ring.
 #
 # Closed and total: a condition is read, never run. The grammar is in
-# haro/spike/stzu3/GRAMMAR.md (v0.2's in stzu2/). One parser, two readers:
-# the meta-court VALIDATES a condition against a declaration's seats (every
-# name it uses must exist) and the forged court EVALUATES it on a sentence's
-# declarations.
+# haro/spike/stzu4/GRAMMAR.md (v0.3's in stzu3/, v0.2's in stzu2/). One
+# parser, two readers: the meta-court VALIDATES a condition against the
+# declarations' seats (every name it uses must exist, by type) and the forged
+# court EVALUATES it on a sentence's declarations.
 #
 #   cond   = term { ("and" | "or") term }       -- and binds tighter than or
 #   term   = [ "not" ] atom
 #   atom   = "(" cond ")"
 #          | "exists" decl
-#          | ("some" | "all") target [ "named" value ] [ "where" cond ]   (v0.3)
-#          | place "=" value | place "!=" value | place ">" number | place "<" number
-#          | place "present" | place "absent" | place "contains" value
-#          | place "empty" | place "nonempty" | place "unique" | place "distinct"
-#          | place ("within" | "host_of" | "under" | "covers") (place | value)  (v0.3)
-#          | place "cyclic" | place "matches" format                            (v0.3)
-#   place  = "self" | "this" "." seat | seat | x "." seat
-#            x is a scalar reference seat of the current declaration (v0.3), or a
-#            ONE kind; inside a quantifier a bare seat is the quantified
-#            declaration's and this.seat is the ON declaration's
-#   target = a declaration kind, or a list seat of references (v0.3)
-#   value  = IDENT | NUMBER | "'" text "'" | "self"  -- self: the declaration's own name
-#   a quantifier's "where" runs to the closing parenthesis or the end
+#          | ("some" | "all" | "earlier") path [ "named" (value | path) ] [ "where" cond ]
+#          | path "=" (value | path) | path "!=" (value | path)
+#          | path ">" number | path "<" number
+#          | path "present" | path "absent" | path "contains" value
+#          | path "empty" | path "nonempty" | path "unique" | path "distinct"
+#          | path ("within" | "host_of" | "under" | "covers") (path | value)
+#          | path "cyclic" | path "matches" format
+#          | "self" "is" view                                              (v0.4)
+#   path   = seg { "." seg } ;  seg = IDENT | "self" | "this"            (v0.4)
+#            the head is self, this (the ON declaration, inside a quantifier or a
+#            VIEW's WHERE), a VIEW, a seat, a ONE kind or a kind; each step is a
+#            seat of a declaration, or a kind inside a SENTENCE seat
+#   a quantifier's "where" runs to the closing parenthesis or the end;
+#   on the right of = and != a bare word is a value, a dotted name or this/self a place;
+#   on the right of a relation a bare word is a seat (v0.3's rule)
 #
-# The AST is nested lists: ["or", a, b]  ["and", a, b]  ["not", a]  ["exists", decl]
-#   ["cmp", op, place, value]        op in = != > <
-#   ["has", test, place]             test in present absent empty nonempty unique distinct
-#   ["contains", place, value]
-#   ["rel", name, place, right]      name in within host_of under covers; right a place or ["val", text]
-#   ["cyclic", place]  ["matches", place, format]
-#   ["quant", some|all, target, named, cond]   target a name (resolved by both readers the
-#                                               same way: a list seat first, then a kind)
-#   a place: ["seat", name]  ["this", name]  ["via", x, name]  ["self"]
+# The AST: ["or", a, b]  ["and", a, b]  ["not", a]  ["exists", decl]
+#   ["path", [segs]]                 a place;  ["val", text] a value
+#   ["cmp", op, path, right]         op in = != > <; right a path or a val
+#   ["has", test, path]              test in present absent empty nonempty unique distinct
+#   ["contains", path, value]
+#   ["rel", name, path, right]       name in within host_of under covers
+#   ["cyclic", path]  ["matches", path, format]  ["is", view]
+#   ["quant", some|all|earlier, path, named, cond]   named NULL, a val or a path; cond or NULL
+#
+# TYPES (the meta-court) and CURSORS (the court) walk a path the same way:
+#   ["decl", lang, d]      one declaration     (cursor: ["decl", lang, aDecl, pool])
+#   ["set", lang, d]       declarations of a kind (cursor: ["set", lang, [decls], pool])
+#   ["sentence", lang]     a SENTENCE seat's file (cursor: ["sentence", lang, decls])
+#   ["value", seat]        a scalar or list value (cursor: ["value", text | list | NULL])
+#   ["list", seat]         (types only; a cursor carries the list as a value)
+#   ["none"]               (cursors only: a VIEW or a ONE kind that resolves to nothing)
+#
+# Tables. $aCondLangs: one entry per language, [lang, declseats, onedecls, views,
+# verbof], where declseats is [[declname, [[seat, of, isList, kind, targetlang],
+# ...]], ...] (kind in prim form expr menu range format decl union sentence),
+# onedecls the names in WORLD's ONE, views [[name, on, resulttype, onepath, named,
+# where], ...] and verbof [[declname, VERB], ...]. $aCondFormats: [[name, shape],
+# ...] of the language being validated. The court also sets $cCondLang (the
+# top language), $aCondDecls (its declarations), $aCourtSentences ([ownerlang,
+# VERB, name, seat, path, decls, lang] per judged SENTENCE seat), $cCondOther,
+# $bCondUnread (a reference that resolves to nothing was read: the condition
+# says nothing and the reference's own refusal speaks).
 # Functions only.
 
 func CondIsWordChar(c)
@@ -120,6 +140,24 @@ func CondParse(cS)
 	ok
 	return aAst
 
+# a path on its own (a VIEW's ONE), from its text
+func CondParsePathText(cS)
+	$aCondToks = CondTokenize(cS)
+	$nCondPos = 1
+	t = CondNext()
+	if t[1] != "word" raise("path: expected a name, found '" + t[2] + "'") ok
+	aP = CondParsePath(t)
+	if CondPeek()[1] != "eof" raise("path: unexpected '" + CondPeek()[2] + "' in '" + cS + "'") ok
+	return aP
+
+# a value or a path on its own (a VIEW's NAMED), from its text
+func CondParseRightText(cS)
+	$aCondToks = CondTokenize(cS)
+	$nCondPos = 1
+	aR = CondCmpRight()
+	if CondPeek()[1] != "eof" raise("named: unexpected '" + CondPeek()[2] + "' in '" + cS + "'") ok
+	return aR
+
 # A node is built in a fresh variable and assigned after: `aL = ["or", aL,
 # aR]` puts the variable being assigned inside the list assigned to it, and
 # on Ring the copy taken of aL dangles once aL is replaced -- an R2 at the
@@ -157,30 +195,33 @@ func CondValue()
 	if t[1] = "word" or t[1] = "number" or t[1] = "string" return t[2] ok
 	raise("condition: expected a value, found '" + t[2] + "'")
 
-# a place, its first word already consumed as t
-func CondPlace(t)
-	if t[2] = "self" return ["self"] ok
-	if t[2] = "this"
-		if CondPeek()[1] != "dot" raise("condition: this is read as this.SEAT") ok
+# a path, its first word already consumed as t
+func CondParsePath(t)
+	aSegs = [t[2]]
+	while CondPeek()[1] = "dot"
 		CondNext()
 		s = CondNext()
-		if s[1] != "word" raise("condition: expected a seat after 'this.'") ok
-		return ["this", s[2]]
-	ok
-	if CondPeek()[1] = "dot"
-		CondNext()
-		s = CondNext()
-		if s[1] != "word" raise("condition: expected a seat after '.'") ok
-		return ["via", t[2], s[2]]
-	ok
-	return ["seat", t[2]]
+		if s[1] != "word" raise("condition: expected a name after '.'") ok
+		aSegs + s[2]
+	end
+	return ["path", aSegs]
 
-# the right side of a relation: a quoted or numeric value, or a place
-func CondRight()
+# the right of = and !=, and a quantifier's named: a quoted or numeric value,
+# a dotted name or this/self as a place, a bare word as a value
+func CondCmpRight()
+	t = CondNext()
+	if t[1] = "string" or t[1] = "number" return ["val", t[2]] ok
+	if t[1] != "word" raise("condition: expected a value or a place, found '" + t[2] + "'") ok
+	if CondPeek()[1] = "dot" or t[2] = "this" or t[2] = "self" return CondParsePath(t) ok
+	return ["val", t[2]]
+
+# the right of a relation: a quoted or numeric value, or a place (a bare word
+# is a seat)
+func CondRelRight()
 	t = CondNext()
 	if t[1] = "string" or t[1] = "number" return ["val", t[2]] ok
 	if t[1] != "word" raise("condition: expected a seat or a value, found '" + t[2] + "'") ok
-	return CondPlace(t)
+	return CondParsePath(t)
 
 func CondAtom()
 	t = CondNext()
@@ -197,47 +238,60 @@ func CondAtom()
 		if d[1] != "word" raise("condition: exists names a declaration") ok
 		return ["exists", d[2]]
 	ok
-	if t[2] = "some" or t[2] = "all"
+	if t[2] = "some" or t[2] = "all" or t[2] = "earlier"
 		d = CondNext()
 		if d[1] != "word" raise("condition: " + t[2] + " names a declaration kind or a list of references") ok
-		cNamed = ""
+		aTarget = CondParsePath(d)
+		aNamed = NULL
 		if CondPeek()[1] = "word" and CondPeek()[2] = "named"
 			CondNext()
-			cNamed = CondValue()
+			aNamed = CondCmpRight()
 		ok
 		aCond = NULL
 		if CondPeek()[1] = "word" and CondPeek()[2] = "where"
 			CondNext()
 			aCond = CondOr()
 		ok
-		return ["quant", t[2], d[2], cNamed, aCond]
+		return ["quant", t[2], aTarget, aNamed, aCond]
 	ok
-	aPlace = CondPlace(t)
+	aPath = CondParsePath(t)
+	if CondPeek()[1] = "word" and CondPeek()[2] = "is"
+		CondNext()
+		v = CondNext()
+		if v[1] != "word" raise("condition: is names a VIEW") ok
+		if len(aPath[2]) != 1 or aPath[2][1] != "self"
+			raise("condition: is asks whether self is a VIEW's declaration; write self is " + v[2])
+		ok
+		return ["is", v[2]]
+	ok
 	op = CondNext()
-	if op[1] = "eq" or op[1] = "ne" or op[1] = "gt" or op[1] = "lt"
+	if op[1] = "eq" or op[1] = "ne"
+		return ["cmp", op[2], aPath, CondCmpRight()]
+	ok
+	if op[1] = "gt" or op[1] = "lt"
 		v = CondValue()
-		if (op[1] = "gt" or op[1] = "lt") and not CondIsNumberText(v)
+		if not CondIsNumberText(v)
 			raise("condition: " + op[2] + " compares numbers, and '" + v + "' is not one")
 		ok
-		return ["cmp", op[2], aPlace, v]
+		return ["cmp", op[2], aPath, ["val", v]]
 	ok
 	if op[1] = "word"
 		if op[2] = "present" or op[2] = "absent" or op[2] = "empty" or op[2] = "nonempty" or op[2] = "unique" or op[2] = "distinct"
-			return ["has", op[2], aPlace]
+			return ["has", op[2], aPath]
 		ok
 		if op[2] = "contains"
-			return ["contains", aPlace, CondValue()]
+			return ["contains", aPath, CondValue()]
 		ok
 		if op[2] = "within" or op[2] = "host_of" or op[2] = "under" or op[2] = "covers"
-			return ["rel", op[2], aPlace, CondRight()]
+			return ["rel", op[2], aPath, CondRelRight()]
 		ok
 		if op[2] = "cyclic"
-			return ["cyclic", aPlace]
+			return ["cyclic", aPath]
 		ok
 		if op[2] = "matches"
 			f = CondNext()
 			if f[1] != "word" raise("condition: matches names a FORMAT") ok
-			return ["matches", aPlace, f[2]]
+			return ["matches", aPath, f[2]]
 		ok
 	ok
 	raise("condition: '" + op[2] + "' is not an operator of the condition language")
@@ -249,29 +303,13 @@ func CondIsNumberText(v)
 	next
 	return 1
 
-# ---- validation (the meta-court) ------------------------------------------------
-# $aCondDeclSeats: [[declname, [[seat, of, isList, kind], ...]], ...] for every
-# DECLARATION of the language; kind is prim, form, expr, menu, range, format,
-# decl or union. $aCondFormats: [[name, shape], ...]. aOneDecls: the names in
-# WORLD's ONE. cInner: "" outside a quantifier, else the quantified kind.
-# Returns "" or the refusal text.
-
-func CondSeatsOf(cDecl)
-	for i = 1 to len($aCondDeclSeats)
-		if $aCondDeclSeats[i][1] = cDecl return $aCondDeclSeats[i][2] ok
+func CondPathText(aP)
+	cOut = ""
+	for i = 1 to len(aP[2])
+		if i > 1 cOut += "." ok
+		cOut += aP[2][i]
 	next
-	return NULL
-
-func CondSeatInfo(cDecl, cSeat)
-	aS = CondSeatsOf(cDecl)
-	if isNull(aS) return NULL ok
-	for i = 1 to len(aS)
-		if aS[i][1] = cSeat return aS[i] ok
-	next
-	return NULL
-
-func CondHasSeat(cDecl, cSeat)
-	return not isNull(CondSeatInfo(cDecl, cSeat))
+	return cOut
 
 func CondInList(cS, aL)
 	for i = 1 to len(aL)
@@ -279,175 +317,343 @@ func CondInList(cS, aL)
 	next
 	return 0
 
+# ---- the language tables, read by both readers --------------------------------------
+
+func CondLang(cLang)
+	for i = 1 to len($aCondLangs)
+		if $aCondLangs[i][1] = cLang return $aCondLangs[i] ok
+	next
+	return NULL
+
+# the seats of a declaration kind of a language, or NULL when no such kind
+func CondSeatsIn(cLang, cDecl)
+	aL = CondLang(cLang)
+	if isNull(aL) return NULL ok
+	aD = aL[2]
+	for i = 1 to len(aD)
+		if aD[i][1] = cDecl return aD[i][2] ok
+	next
+	return NULL
+
+func CondSeatInfoIn(cLang, cDecl, cSeat)
+	aS = CondSeatsIn(cLang, cDecl)
+	if isNull(aS) return NULL ok
+	for i = 1 to len(aS)
+		if aS[i][1] = cSeat return aS[i] ok
+	next
+	return NULL
+
+func CondIsOneIn(cLang, cDecl)
+	aL = CondLang(cLang)
+	if isNull(aL) return 0 ok
+	return CondInList(cDecl, aL[3])
+
+func CondViewIn(cLang, cName)
+	aL = CondLang(cLang)
+	if isNull(aL) return NULL ok
+	aV = aL[4]
+	for i = 1 to len(aV)
+		if aV[i][1] = cName return aV[i] ok
+	next
+	return NULL
+
+func CondVerbIn(cLang, cDecl)
+	aL = CondLang(cLang)
+	if isNull(aL) return "" ok
+	aV = aL[5]
+	for i = 1 to len(aV)
+		if aV[i][1] = cDecl return aV[i][2] ok
+	next
+	return ""
+
+func CondDeclNameIn(cLang, cVerb)
+	aL = CondLang(cLang)
+	if isNull(aL) return "" ok
+	aV = aL[5]
+	for i = 1 to len(aV)
+		if aV[i][2] = cVerb return aV[i][1] ok
+	next
+	return ""
+
 func CondFormatShape(cName)
 	for i = 1 to len($aCondFormats)
 		if $aCondFormats[i][1] = cName return $aCondFormats[i][2] ok
 	next
 	return ""
 
-func CondCurName(cOn, cInner)
-	if cInner != "" return cInner ok
-	return cOn
+# ---- validation (the meta-court) ------------------------------------------------------
+# The context is [onLang, on, inLang, in]: the ON declaration (on "" for a
+# VIEW of the whole sentence) and the quantified declaration (in "" outside
+# a quantifier). The current declaration is `in` when set, else `on`. A
+# function returns "" or the refusal text; the type walkers return a type
+# (a list) or the refusal text (a string).
 
-func CondPlaceText(aP)
-	if aP[1] = "self" return "self" ok
-	if aP[1] = "this" return "this." + aP[2] ok
-	if aP[1] = "via" return aP[2] + "." + aP[3] ok
-	return aP[2]
+func CondCtxCur(aCtx)
+	if aCtx[4] != "" return [aCtx[3], aCtx[4]] ok
+	return [aCtx[1], aCtx[2]]
 
-func CondValidatePlace(aP, cOn, cInner, aOneDecls)
-	cCur = CondCurName(cOn, cInner)
-	if aP[1] = "self" return "" ok
-	if aP[1] = "seat"
-		if not CondHasSeat(cCur, aP[2]) return "no seat '" + aP[2] + "' on " + cCur ok
-		return ""
+# the type a seat gives, read from a declaration of a language
+func CondSeatType(aInfo, cLang)
+	if aInfo[4] = "decl"
+		if aInfo[3] return ["set", cLang, aInfo[2]] ok
+		return ["decl", cLang, aInfo[2]]
 	ok
-	if aP[1] = "this"
-		if cInner = "" return "this." + aP[2] + " is read inside some or all, where a bare seat is the quantified declaration's" ok
-		if not CondHasSeat(cOn, aP[2]) return "no seat '" + aP[2] + "' on " + cOn ok
-		return ""
+	if aInfo[4] = "sentence" return ["sentence", aInfo[5]] ok
+	if aInfo[3] return ["list", aInfo[1]] ok
+	return ["value", aInfo[1]]
+
+func CondTypeHead(cSeg, aCtx)
+	aCur = CondCtxCur(aCtx)
+	cLang = aCur[1]
+	cDecl = aCur[2]
+	if cSeg = "self"
+		if cDecl = "" return "self is read on a declaration, and this VIEW has no ON" ok
+		return ["decl", cLang, cDecl]
 	ok
-	x = aP[2]
-	s = aP[3]
-	aInfo = CondSeatInfo(cCur, x)
-	if not isNull(aInfo)
-		if aInfo[4] = "decl" and not aInfo[3]
-			if not CondHasSeat(aInfo[2], s) return "no seat '" + s + "' on " + aInfo[2] ok
-			return ""
+	if cSeg = "this"
+		if aCtx[4] = "" return "this." + " is read inside some or all, where a bare seat is the quantified declaration's" ok
+		if aCtx[2] = "" return "this has no declaration here: this VIEW has no ON" ok
+		return ["decl", aCtx[1], aCtx[2]]
+	ok
+	if cDecl != ""
+		aV = CondViewIn(cLang, cSeg)
+		if not isNull(aV)
+			if aV[2] = "" or aV[2] = cDecl return aV[3] ok
+		ok
+		aInfo = CondSeatInfoIn(cLang, cDecl, cSeg)
+		if not isNull(aInfo) return CondSeatType(aInfo, cLang) ok
+	else
+		aV = CondViewIn(cLang, cSeg)
+		if not isNull(aV)
+			if aV[2] = "" return aV[3] ok
 		ok
 	ok
-	if isNull(CondSeatsOf(x))
-		return "'" + x + "' is not a ONE kind, and neither a reference seat of " + cCur + ": X.seat reads through a reference seat, or the one declaration of a ONE kind"
+	if not isNull(CondSeatsIn(cLang, cSeg))
+		if CondIsOneIn(cLang, cSeg) return ["decl", cLang, cSeg] ok
+		return ["set", cLang, cSeg]
 	ok
-	if not CondInList(x, aOneDecls)
-		return "'" + x + "' is not a ONE kind, and neither a reference seat of " + cCur + ": only the one declaration of a ONE kind can be read from a condition"
+	# inside a quantifier over another language's declarations, a KIND or a
+	# whole-sentence VIEW of the ON declaration's language is still in reach
+	# (fleet.link from a peer); a seat of the ON declaration is this.SEAT
+	if aCtx[4] != "" and aCtx[1] != cLang
+		aV = CondViewIn(aCtx[1], cSeg)
+		if not isNull(aV)
+			if aV[2] = "" return aV[3] ok
+		ok
+		if not isNull(CondSeatsIn(aCtx[1], cSeg))
+			if CondIsOneIn(aCtx[1], cSeg) return ["decl", aCtx[1], cSeg] ok
+			return ["set", aCtx[1], cSeg]
+		ok
 	ok
-	if not CondHasSeat(x, s) return "no seat '" + s + "' on " + x ok
-	return ""
+	if cDecl != "" return "no seat '" + cSeg + "' on " + cDecl ok
+	return "'" + cSeg + "' is neither a kind nor a VIEW of " + cLang
+
+func CondTypeStep(aT, cPrev, cSeg, aCtx)
+	cK = aT[1]
+	if cK = "decl"
+		aInfo = CondSeatInfoIn(aT[2], aT[3], cSeg)
+		if not isNull(aInfo) return CondSeatType(aInfo, aT[2]) ok
+		# a VIEW on that declaration's kind reads as one of its seats
+		aV = CondViewIn(aT[2], cSeg)
+		if not isNull(aV)
+			if aV[2] = aT[3] return aV[3] ok
+		ok
+		return "no seat '" + cSeg + "' on " + aT[3]
+	ok
+	if cK = "sentence"
+		if isNull(CondSeatsIn(aT[2], cSeg))
+			return "'" + cSeg + "' is neither a seat nor a kind of " + aT[2]
+		ok
+		if CondIsOneIn(aT[2], cSeg) return ["decl", aT[2], cSeg] ok
+		return ["set", aT[2], cSeg]
+	ok
+	aCur = CondCtxCur(aCtx)
+	if cK = "set"
+		return "'" + cPrev + "' is not a ONE kind, and neither a reference seat of " + aCur[2] + ": only the one declaration of a ONE kind can be read from a condition, and a set of declarations is quantified over"
+	ok
+	return "'" + cPrev + "' is a value, not a declaration: neither a reference seat of " + aCur[2] + " nor a ONE kind, and a path does not continue through a value"
+
+# a path's type, or the refusal text
+func CondTypePath(aP, aCtx)
+	aSegs = aP[2]
+	aT = CondTypeHead(aSegs[1], aCtx)
+	if isString(aT) return aT ok
+	for i = 2 to len(aSegs)
+		aT = CondTypeStep(aT, aSegs[i-1], aSegs[i], aCtx)
+		if isString(aT) return aT ok
+	next
+	return aT
+
+# the type of the right side of a comparison or a relation
+func CondTypeRight(aR, aCtx)
+	if aR[1] = "val" return ["value", ""] ok
+	return CondTypePath(aR, aCtx)
 
 func CondValidate(aAst, cOn, aOneDecls, cInner)
-	cCur = CondCurName(cOn, cInner)
+	# v0.2/v0.3 callers: the ON and the quantified kind are of the language
+	# being validated ($cCondLang); aOneDecls is carried in the tables now
+	return CondValidateIn(aAst, [$cCondLang, cOn, $cCondLang, cInner])
+
+func CondValidateIn(aAst, aCtx)
 	cK = aAst[1]
+	aCur = CondCtxCur(aCtx)
 	if cK = "and" or cK = "or"
-		e = CondValidate(aAst[2], cOn, aOneDecls, cInner)
+		e = CondValidateIn(aAst[2], aCtx)
 		if e != "" return e ok
-		return CondValidate(aAst[3], cOn, aOneDecls, cInner)
+		return CondValidateIn(aAst[3], aCtx)
 	but cK = "not"
-		return CondValidate(aAst[2], cOn, aOneDecls, cInner)
+		return CondValidateIn(aAst[2], aCtx)
 	but cK = "exists"
-		if isNull(CondSeatsOf(aAst[2]))
+		if isNull(CondSeatsIn(aCur[1], aAst[2]))
 			return "'" + aAst[2] + "' resolves to nothing: exists names a declaration of this language"
 		ok
 		return ""
 	but cK = "cmp"
-		return CondValidatePlace(aAst[3], cOn, cInner, aOneDecls)
+		aT = CondTypePath(aAst[3], aCtx)
+		if isString(aT) return aT ok
+		if aT[1] = "set" return "'" + CondPathText(aAst[3]) + "' is a set of declarations, and = compares one value" ok
+		if aT[1] = "sentence" return "'" + CondPathText(aAst[3]) + "' is a file, and = compares one value" ok
+		aR = CondTypeRight(aAst[4], aCtx)
+		if isString(aR) return aR ok
+		if aR[1] = "set" or aR[1] = "sentence" return "'" + CondPathText(aAst[4]) + "' is not one value" ok
+		return ""
 	but cK = "has"
-		return CondValidatePlace(aAst[3], cOn, cInner, aOneDecls)
+		aT = CondTypePath(aAst[3], aCtx)
+		if isString(aT) return aT ok
+		cTest = aAst[2]
+		if cTest = "empty" or cTest = "nonempty" or cTest = "distinct"
+			# a list of values, a list of references (a set), or a UNION seat one
+			# of whose shapes is a list
+			if not CondTypeIsListish(aT, aCtx) return cTest + " reads a list seat, and '" + CondPathText(aAst[3]) + "' is not one" ok
+		ok
+		if cTest = "unique"
+			if aT[1] != "value" and aT[1] != "sentence" return "unique reads a scalar seat, and '" + CondPathText(aAst[3]) + "' is not one" ok
+			if len(aAst[3][2]) != 1 return "unique reads a seat of this declaration, and '" + CondPathText(aAst[3]) + "' is a path" ok
+		ok
+		return ""
 	but cK = "contains"
-		return CondValidatePlace(aAst[2], cOn, cInner, aOneDecls)
+		aT = CondTypePath(aAst[2], aCtx)
+		if isString(aT) return aT ok
+		if not CondTypeIsListish(aT, aCtx) return "contains reads a list seat, and '" + CondPathText(aAst[2]) + "' is not one" ok
+		return ""
 	but cK = "rel"
-		e = CondValidatePlace(aAst[3], cOn, cInner, aOneDecls)
-		if e != "" return e ok
+		aT = CondTypePath(aAst[3], aCtx)
+		if isString(aT) return aT ok
 		if aAst[2] = "covers"
 			# a list seat, or a UNION seat (one of whose alternatives may be a
 			# list; a word written there covers nothing)
-			aP = aAst[3]
-			bList = 0
-			aInfo = NULL
-			if aP[1] = "seat"
-				aInfo = CondSeatInfo(cCur, aP[2])
-			but aP[1] = "this"
-				aInfo = CondSeatInfo(cOn, aP[2])
-			ok
-			if not isNull(aInfo)
-				if aInfo[3] or aInfo[4] = "union" bList = 1 ok
-			ok
-			if not bList return "covers takes a list seat on its left, and '" + CondPlaceText(aP) + "' is not one" ok
+			if not CondTypeIsListish(aT, aCtx) return "covers takes a list seat on its left, and '" + CondPathText(aAst[3]) + "' is not one" ok
+		else
+			if aT[1] != "value" return aAst[2] + " reads a scalar seat, and '" + CondPathText(aAst[3]) + "' is not one" ok
 		ok
-		if aAst[4][1] != "val"
-			return CondValidatePlace(aAst[4], cOn, cInner, aOneDecls)
-		ok
+		aR = CondTypeRight(aAst[4], aCtx)
+		if isString(aR) return aR ok
 		return ""
 	but cK = "cyclic"
-		aP = aAst[2]
+		aSegs = aAst[2][2]
 		bOk = 0
-		if aP[1] = "seat"
-			aInfo = CondSeatInfo(cCur, aP[2])
+		if len(aSegs) = 1
+			aInfo = CondSeatInfoIn(aCur[1], aCur[2], aSegs[1])
 			if not isNull(aInfo)
-				if aInfo[3] and aInfo[4] = "decl" and aInfo[2] = cCur bOk = 1 ok
+				if aInfo[3] and aInfo[4] = "decl" and aInfo[2] = aCur[2] bOk = 1 ok
 			ok
 		ok
-		if not bOk return "cyclic follows a list of references to the declaration's own kind, and '" + CondPlaceText(aP) + "' is not one" ok
+		if not bOk return "cyclic follows a list of references to the declaration's own kind, and '" + CondPathText(aAst[2]) + "' is not one" ok
 		return ""
 	but cK = "matches"
-		e = CondValidatePlace(aAst[2], cOn, cInner, aOneDecls)
-		if e != "" return e ok
+		aT = CondTypePath(aAst[2], aCtx)
+		if isString(aT) return aT ok
+		if aT[1] != "value" and aT[1] != "decl" return "matches reads a value, and '" + CondPathText(aAst[2]) + "' is not one" ok
 		if CondFormatShape(aAst[3]) = "" return "'" + aAst[3] + "' must name a FORMAT of this language: matches tests a shape" ok
 		return ""
+	but cK = "is"
+		if isNull(CondViewIn(aCur[1], aAst[2])) return "'" + aAst[2] + "' must name a VIEW: is asks whether self is the VIEW's declaration" ok
+		return ""
 	but cK = "quant"
-		cTarget = aAst[3]
-		cInnerKind = ""
-		aInfo = CondSeatInfo(cCur, cTarget)
-		if not isNull(aInfo)
-			if aInfo[3] and aInfo[4] = "decl"
-				if aAst[4] != "" return "named goes with a kind, and '" + cTarget + "' is a list of references, already named" ok
-				cInnerKind = aInfo[2]
+		cQ = aAst[2]
+		aSegs = aAst[3][2]
+		if cQ = "earlier"
+			if len(aSegs) != 1 or isNull(CondSeatsIn(aCur[1], aSegs[1]))
+				return "earlier quantifies over a kind of this language, the declarations before this one, and '" + CondPathText(aAst[3]) + "' is not one"
+			ok
+			aT = ["set", aCur[1], aSegs[1]]
+		else
+			# a quantifier wants a set, so one name that is both a seat and a kind
+			# (a RETIREMENT's member, the kind member) is the kind here
+			if len(aSegs) = 1 and not isNull(CondSeatsIn(aCur[1], aSegs[1]))
+				aT = ["set", aCur[1], aSegs[1]]
+			else
+				aT = CondTypePath(aAst[3], aCtx)
+				if isString(aT)
+					if len(aSegs) = 1 return "'" + aSegs[1] + "' names neither a declaration kind nor a list of references: some and all quantify over a declaration kind or a list of references" ok
+					return aT
+				ok
+				if aT[1] != "set" return "'" + CondPathText(aAst[3]) + "' is not a set of declarations: some and all quantify over a declaration kind, a list of references, or a kind inside a SENTENCE" ok
 			ok
 		ok
-		if cInnerKind = ""
-			if isNull(CondSeatsOf(cTarget))
-				return "'" + cTarget + "' names neither a declaration kind nor a list of references: some and all quantify over a declaration kind or a list of references"
+		if not isNull(aAst[4])
+			if len(aSegs) = 1
+				aInfo = CondSeatInfoIn(aCur[1], aCur[2], aSegs[1])
+				if not isNull(aInfo)
+					if aInfo[4] = "decl" and aInfo[3] return "named goes with a kind, and '" + aSegs[1] + "' is a list of references, already named" ok
+				ok
 			ok
-			cInnerKind = cTarget
+			aR = CondTypeRight(aAst[4], aCtx)
+			if isString(aR) return aR ok
 		ok
 		if not isNull(aAst[5])
-			return CondValidate(aAst[5], cOn, aOneDecls, cInnerKind)
+			return CondValidateIn(aAst[5], [aCtx[1], aCtx[2], aT[2], aT[3]])
 		ok
 		return ""
 	ok
 	return "'" + cK + "' is not a condition"
 
-# ---- evaluation (the forged court) -------------------------------------------------
-# A declaration here is the court's [VERB, name, line, clauses, rationale] with a
-# clause [NAME, line, [shape, payload, start, end]]. The seat's clause name is
-# upper(seat). $aCondDecls holds every declaration of the sentence; $aCondVerbOf
-# maps a declaration (kind) name to its VERB as [declname, VERB] pairs;
-# $aCondRefSeats maps a kind name to its reference seats as
-# [declname, [[seat, targetkind, isList], ...]]. $cCondOther receives the name of
-# the conflicting declaration when unique, distinct or all fails. $bCondUnread
-# is raised when a place reads through a reference that resolves to nothing:
-# such a condition says nothing, and the reference's own refusal speaks.
-
-func CondVerbOf(cDecl)
-	for i = 1 to len($aCondVerbOf)
-		if $aCondVerbOf[i][1] = cDecl return $aCondVerbOf[i][2] ok
-	next
+# a VIEW: [name, on, onepath (text), named (text or ""), where (text or "")];
+# returns "" or the refusal, and the view's result type through aOut[1]
+func CondValidateView(aView, cLang, aOut)
+	cOn = aView[2]
+	aCtx = [cLang, cOn, cLang, ""]
+	aP = CondParsePathText(aView[3])
+	aT = CondTypePath(aP, aCtx)
+	if isString(aT) return aT ok
+	if aT[1] != "set" return "ONE names a set of declarations, and '" + aView[3] + "' is " + CondTypeWord(aT) ok
+	if aView[4] != ""
+		aR = CondParseRightText(aView[4])
+		aRT = CondTypeRight(aR, aCtx)
+		if isString(aRT) return aRT ok
+	ok
+	if aView[5] != ""
+		aC = CondParse(aView[5])
+		e = CondValidateIn(aC, [cLang, cOn, aT[2], aT[3]])
+		if e != "" return e ok
+	ok
+	aOut[1] = ["decl", aT[2], aT[3]]
 	return ""
 
-func CondDeclNameOf(cVerb)
-	for i = 1 to len($aCondVerbOf)
-		if $aCondVerbOf[i][2] = cVerb return $aCondVerbOf[i][1] ok
-	next
-	return ""
+func CondTypeWord(aT)
+	if aT[1] = "decl" return "one declaration" ok
+	if aT[1] = "sentence" return "a file" ok
+	return "a value"
 
-func CondRefOf(cDeclName, cSeat)
-	for i = 1 to len($aCondRefSeats)
-		if $aCondRefSeats[i][1] = cDeclName
-			aR = $aCondRefSeats[i][2]
-			for j = 1 to len(aR)
-				if aR[j][1] = cSeat return aR[j] ok
-			next
-			return NULL
+# a list of values, a set of declarations, or a UNION seat (one of whose shapes
+# may be a list; a word written there is an empty list to these tests)
+func CondTypeIsListish(aT, aCtx)
+	if aT[1] = "list" or aT[1] = "set" return 1 ok
+	if aT[1] = "value"
+		aCur = CondCtxCur(aCtx)
+		aInfo = CondSeatInfoIn(aCur[1], aCur[2], aT[2])
+		if not isNull(aInfo)
+			if aInfo[4] = "union" return 1 ok
 		ok
-	next
-	return NULL
+	ok
+	return 0
 
-func CondFindDecl(cDeclName, cName)
-	cVerb = CondVerbOf(cDeclName)
-	for i = 1 to len($aCondDecls)
-		if $aCondDecls[i][1] = cVerb and $aCondDecls[i][2] = cName return $aCondDecls[i] ok
-	next
-	return NULL
+# ---- evaluation (the forged court) ----------------------------------------------------
+# A declaration is the court's [VERB, name, line, clauses, rationale] with a
+# clause [NAME, line, [shape, payload, start, end]]; the seat's clause name
+# is upper(seat). A cursor carries the language and the pool (the declarations
+# of the sentence the declaration stands in), so a kind, `earlier` and
+# `unique` are read against the right pool.
 
 func CondClauseOf(aDecl, cSeat)
 	aC = aDecl[4]
@@ -472,68 +678,268 @@ func CondListOf(aDecl, cSeat)
 	if cShape = "namelist" or cShape = "stringlist" return aC[3][2] ok
 	return NULL
 
-func CondOneDecl(cDecl)
-	cVerb = CondVerbOf(cDecl)
-	for i = 1 to len($aCondDecls)
-		if $aCondDecls[i][1] = cVerb return $aCondDecls[i] ok
-	next
-	return NULL
-
 func CondSameText(a, b)
 	return a = b
+
+func CondSameDecl(a, b)
+	return a[1] = b[1] and a[2] = b[2] and a[3] = b[3]
 
 func CondCur(aOuter, aInner)
 	if isNull(aInner) return aOuter ok
 	return aInner
 
-# a place resolved on the current declarations: [decl, seat] with seat "" for
-# self; NULL (and $bCondUnread raised) when a reference resolves to nothing
-func CondResolve(aP, aOuter, aInner)
+func CondPoolOf(aC)
+	if isNull(aC) return $aCondDecls ok
+	return aC[4]
+
+func CondLangOf(aC)
+	if isNull(aC) return $cCondLang ok
+	return aC[2]
+
+# the declarations of a kind in a pool
+func CondOfKind(cLang, cDecl, aPool)
+	cVerb = CondVerbIn(cLang, cDecl)
+	aOut = []
+	for i = 1 to len(aPool)
+		if aPool[i][1] = cVerb aOut + aPool[i] ok
+	next
+	return aOut
+
+func CondFindIn(cLang, cDecl, cName, aPool)
+	cVerb = CondVerbIn(cLang, cDecl)
+	for i = 1 to len(aPool)
+		if aPool[i][1] = cVerb and aPool[i][2] = cName return aPool[i] ok
+	next
+	return NULL
+
+# the judged file of a SENTENCE seat: [ownerlang, VERB, name, seat, path, decls, lang]
+func CondSentenceOf(cLang, aDecl, cSeat)
+	for i = 1 to len($aCourtSentences)
+		aS = $aCourtSentences[i]
+		if aS[1] = cLang and aS[2] = aDecl[1] and aS[3] = aDecl[2] and aS[4] = cSeat return aS ok
+	next
+	return NULL
+
+# a seat of a declaration cursor, as a cursor; NULL raises $bCondUnread
+func CondSeatCursor(aC, cSeat)
+	cLang = aC[2]
+	aDecl = aC[3]
+	cDeclName = CondDeclNameIn(cLang, aDecl[1])
+	aInfo = CondSeatInfoIn(cLang, cDeclName, cSeat)
+	if isNull(aInfo) return ["none"] ok
+	if aInfo[4] = "decl"
+		if aInfo[3]
+			aL = CondListOf(aDecl, cSeat)
+			if isNull(aL) aL = [] ok
+			aOut = []
+			for i = 1 to len(aL)
+				aT = CondFindIn(cLang, aInfo[2], aL[i], aC[4])
+				if not isNull(aT) aOut + aT ok
+			next
+			return ["set", cLang, aOut, aC[4]]
+		ok
+		v = CondScalar(aDecl, cSeat)
+		if isNull(v)
+			$bCondUnread = 1
+			return NULL
+		ok
+		aT = CondFindIn(cLang, aInfo[2], v, aC[4])
+		if isNull(aT)
+			$bCondUnread = 1
+			return NULL
+		ok
+		return ["decl", cLang, aT, aC[4]]
+	ok
+	if aInfo[4] = "sentence"
+		aS = CondSentenceOf(cLang, aDecl, cSeat)
+		if isNull(aS) return ["none"] ok
+		return ["sentence", aS[7], aS[6]]
+	ok
+	if aInfo[3]
+		return ["value", CondListOf(aDecl, cSeat)]
+	ok
+	return ["value", CondScalar(aDecl, cSeat)]
+
+func CondHeadCursor(cSeg, aOuter, aInner)
 	aCur = CondCur(aOuter, aInner)
-	if aP[1] = "self" return [aCur, ""] ok
-	if aP[1] = "seat" return [aCur, aP[2]] ok
-	if aP[1] = "this" return [aOuter, aP[2]] ok
-	aRef = CondRefOf(CondDeclNameOf(aCur[1]), aP[2])
-	if not isNull(aRef)
-		if not aRef[3]
-			v = CondScalar(aCur, aP[2])
-			if isNull(v)
-				$bCondUnread = 1
-				return NULL
-			ok
-			aT = CondFindDecl(aRef[2], v)
-			if isNull(aT)
-				$bCondUnread = 1
-				return NULL
-			ok
-			return [aT, aP[3]]
+	if cSeg = "self"
+		if isNull(aCur)
+			$bCondUnread = 1
+			return NULL
+		ok
+		return aCur
+	ok
+	if cSeg = "this"
+		if isNull(aOuter)
+			$bCondUnread = 1
+			return NULL
+		ok
+		return aOuter
+	ok
+	cLang = CondLangOf(aCur)
+	aV = CondViewIn(cLang, cSeg)
+	if not isNull(aV)
+		return CondViewCursor(aV, aCur)
+	ok
+	if not isNull(aCur)
+		cDeclName = CondDeclNameIn(cLang, aCur[3][1])
+		if not isNull(CondSeatInfoIn(cLang, cDeclName, cSeg))
+			return CondSeatCursor(aCur, cSeg)
 		ok
 	ok
-	aOne = CondOneDecl(aP[2])
-	if isNull(aOne)
-		$bCondUnread = 1
+	aPool = CondPoolOf(aCur)
+	if not isNull(CondSeatsIn(cLang, cSeg))
+		aK = CondOfKind(cLang, cSeg, aPool)
+		if CondIsOneIn(cLang, cSeg)
+			if len(aK) = 0 return ["none"] ok
+			return ["decl", cLang, aK[1], aPool]
+		ok
+		return ["set", cLang, aK, aPool]
+	ok
+	# inside a quantifier over another language's declarations, a KIND or a
+	# whole-sentence VIEW of the ON declaration's language is still in reach
+	if not isNull(aInner) and not isNull(aOuter)
+		if aOuter[2] != cLang
+			cOL = aOuter[2]
+			aV = CondViewIn(cOL, cSeg)
+			if not isNull(aV)
+				if aV[2] = "" return CondViewCursor(aV, aOuter) ok
+			ok
+			if not isNull(CondSeatsIn(cOL, cSeg))
+				aPoolO = aOuter[4]
+				aK = CondOfKind(cOL, cSeg, aPoolO)
+				if CondIsOneIn(cOL, cSeg)
+					if len(aK) = 0 return ["none"] ok
+					return ["decl", cOL, aK[1], aPoolO]
+				ok
+				return ["set", cOL, aK, aPoolO]
+			ok
+		ok
+	ok
+	return ["none"]
+
+func CondStepCursor(aC, cSeg)
+	if isNull(aC) return NULL ok
+	cK = aC[1]
+	if cK = "decl"
+		cDeclName = CondDeclNameIn(aC[2], aC[3][1])
+		if not isNull(CondSeatInfoIn(aC[2], cDeclName, cSeg)) return CondSeatCursor(aC, cSeg) ok
+		aV = CondViewIn(aC[2], cSeg)
+		if not isNull(aV)
+			if aV[2] = cDeclName return CondViewCursor(aV, aC) ok
+		ok
+		return ["none"]
+	ok
+	if cK = "sentence"
+		cLang = aC[2]
+		aK = CondOfKind(cLang, cSeg, aC[3])
+		if CondIsOneIn(cLang, cSeg)
+			if len(aK) = 0 return ["none"] ok
+			return ["decl", cLang, aK[1], aC[3]]
+		ok
+		return ["set", cLang, aK, aC[3]]
+	ok
+	return ["none"]
+
+# a path's cursor: NULL (unread), ["none"], or a cursor
+func CondWalk(aP, aOuter, aInner)
+	aSegs = aP[2]
+	aC = CondHeadCursor(aSegs[1], aOuter, aInner)
+	for i = 2 to len(aSegs)
+		if isNull(aC) return NULL ok
+		if aC[1] = "none" return aC ok
+		aC = CondStepCursor(aC, aSegs[i])
+	next
+	return aC
+
+# a path's text value: a declaration's name, a scalar's text; NULL otherwise
+func CondPathScalar(aP, aOuter, aInner)
+	aC = CondWalk(aP, aOuter, aInner)
+	if isNull(aC) return NULL ok
+	if aC[1] = "decl" return aC[3][2] ok
+	if aC[1] = "value"
+		if isNull(aC[2]) return NULL ok
+		if isList(aC[2]) return NULL ok
+		return aC[2]
+	ok
+	return NULL
+
+# a path's list: a list seat's items as written (so a list of references reads
+# its names, resolved or not), or the names of a set reached along a path
+func CondPathList(aP, aOuter, aInner)
+	aSegs = aP[2]
+	aCur = CondCur(aOuter, aInner)
+	if len(aSegs) = 1 and not isNull(aCur)
+		if aSegs[1] != "self" and aSegs[1] != "this"
+			cDeclName = CondDeclNameIn(aCur[2], aCur[3][1])
+			if not isNull(CondSeatInfoIn(aCur[2], cDeclName, aSegs[1]))
+				return CondListOf(aCur[3], aSegs[1])
+			ok
+		ok
+	ok
+	aC = CondWalk(aP, aOuter, aInner)
+	if isNull(aC) return NULL ok
+	if aC[1] = "value"
+		if isNull(aC[2]) return NULL ok
+		if isList(aC[2]) return aC[2] ok
 		return NULL
 	ok
-	return [aOne, aP[3]]
-
-func CondPlaceScalar(aP, aOuter, aInner)
-	r = CondResolve(aP, aOuter, aInner)
-	if isNull(r) return NULL ok
-	if r[2] = "" return r[1][2] ok
-	return CondScalar(r[1], r[2])
-
-func CondPlaceList(aP, aOuter, aInner)
-	r = CondResolve(aP, aOuter, aInner)
-	if isNull(r) return NULL ok
-	if r[2] = "" return NULL ok
-	return CondListOf(r[1], r[2])
+	if aC[1] = "set"
+		aOut = []
+		for i = 1 to len(aC[3])
+			aOut + aC[3][i][2]
+		next
+		return aOut
+	ok
+	return NULL
 
 func CondRightText(aR, aOuter, aInner)
-	if aR[1] = "val" return aR[2] ok
-	return CondPlaceScalar(aR, aOuter, aInner)
+	if aR[1] = "val"
+		if aR[2] = "self"
+			aCur = CondCur(aOuter, aInner)
+			if isNull(aCur) return NULL ok
+			return aCur[3][2]
+		ok
+		return aR[2]
+	ok
+	return CondPathScalar(aR, aOuter, aInner)
+
+# a VIEW's declaration for a cursor: ["decl", ...] or ["none"]
+func CondViewCursor(aV, aCur)
+	cOn = aV[2]
+	aOuter = aCur
+	if cOn = ""
+		aOuter = NULL
+	else
+		if isNull(aCur) return ["none"] ok
+		if CondDeclNameIn(aCur[2], aCur[3][1]) != cOn return ["none"] ok
+	ok
+	aP = CondParsePathText(aV[4])
+	aSet = CondWalk(aP, aOuter, NULL)
+	if isNull(aSet) return ["none"] ok
+	if aSet[1] != "set" return ["none"] ok
+	cNamed = NULL
+	if aV[5] != ""
+		cNamed = CondRightText(CondParseRightText(aV[5]), aOuter, NULL)
+		if isNull(cNamed) return ["none"] ok
+	ok
+	aWhere = NULL
+	if aV[6] != "" aWhere = CondParse(aV[6]) ok
+	for i = 1 to len(aSet[3])
+		aD = aSet[3][i]
+		if not isNull(cNamed)
+			if aD[2] != cNamed loop ok
+		ok
+		aIn = ["decl", aSet[2], aD, aSet[4]]
+		if not isNull(aWhere)
+			if not CondEvalIn(aWhere, aOuter, aIn) loop ok
+		ok
+		return aIn
+	next
+	return ["none"]
 
 func CondEval(aAst, aDecl)
-	return CondEvalIn(aAst, aDecl, NULL)
+	return CondEvalIn(aAst, ["decl", $cCondLang, aDecl, $aCondDecls], NULL)
 
 func CondEvalIn(aAst, aOuter, aInner)
 	aCur = CondCur(aOuter, aInner)
@@ -547,27 +953,26 @@ func CondEvalIn(aAst, aOuter, aInner)
 	but cK = "not"
 		return not CondEvalIn(aAst[2], aOuter, aInner)
 	but cK = "exists"
-		cVerb = CondVerbOf(aAst[2])
-		for i = 1 to len($aCondDecls)
-			if $aCondDecls[i][1] = cVerb return 1 ok
-		next
-		return 0
+		return len(CondOfKind(CondLangOf(aCur), aAst[2], CondPoolOf(aCur))) > 0
 	but cK = "cmp"
 		op = aAst[2]
-		v = CondPlaceScalar(aAst[3], aOuter, aInner)
+		v = CondPathScalar(aAst[3], aOuter, aInner)
 		if isNull(v) return 0 ok
-		w = aAst[4]
-		if w = "self" w = aCur[2] ok
+		w = CondRightText(aAst[4], aOuter, aInner)
+		if isNull(w) return 0 ok
 		if op = "="  return CondSameText(v, w) ok
 		if op = "!=" return not CondSameText(v, w) ok
 		if not CondIsNumberText(v) return 0 ok
 		if op = ">" return 0 + v > 0 + w ok
 		return 0 + v < 0 + w
 	but cK = "contains"
-		aL = CondPlaceList(aAst[2], aOuter, aInner)
+		aL = CondPathList(aAst[2], aOuter, aInner)
 		if isNull(aL) return 0 ok
 		w = aAst[3]
-		if w = "self" w = aCur[2] ok
+		if w = "self"
+			if isNull(aCur) return 0 ok
+			w = aCur[3][2]
+		ok
 		for i = 1 to len(aL)
 			if aL[i] = w return 1 ok
 		next
@@ -575,13 +980,13 @@ func CondEvalIn(aAst, aOuter, aInner)
 	but cK = "rel"
 		cRel = aAst[2]
 		if cRel = "covers"
-			aL = CondPlaceList(aAst[3], aOuter, aInner)
+			aL = CondPathList(aAst[3], aOuter, aInner)
 			if isNull(aL) return 0 ok
 			cR = CondRightText(aAst[4], aOuter, aInner)
 			if isNull(cR) return 0 ok
 			return CondCovers(aL, cR)
 		ok
-		v = CondPlaceScalar(aAst[3], aOuter, aInner)
+		v = CondPathScalar(aAst[3], aOuter, aInner)
 		if isNull(v) return 0 ok
 		cR = CondRightText(aAst[4], aOuter, aInner)
 		if isNull(cR) return 0 ok
@@ -589,42 +994,58 @@ func CondEvalIn(aAst, aOuter, aInner)
 		if cRel = "host_of" return CondHostOf(v, cR) ok
 		return CondUnder(v, cR)
 	but cK = "cyclic"
-		r = CondResolve(aAst[2], aOuter, aInner)
-		if isNull(r) return 0 ok
-		if r[2] = "" return 0 ok
-		return CondCyclic(r[1], r[2])
+		if isNull(aCur) return 0 ok
+		return CondCyclic(aCur, aAst[2][2][1])
 	but cK = "matches"
-		v = CondPlaceScalar(aAst[2], aOuter, aInner)
+		v = CondPathScalar(aAst[2], aOuter, aInner)
 		if isNull(v) return 0 ok
 		return CondHasShape(v, CondFormatShape(aAst[3]))
+	but cK = "is"
+		if isNull(aCur) return 0 ok
+		aV = CondViewIn(CondLangOf(aCur), aAst[2])
+		if isNull(aV) return 0 ok
+		aD = CondViewCursor(aV, aCur)
+		if aD[1] != "decl" return 0 ok
+		return CondSameDecl(aD[3], aCur[3])
 	but cK = "quant"
 		return CondQuant(aAst, aOuter, aInner)
 	else
 		# has
 		cTest = aAst[2]
-		r = CondResolve(aAst[3], aOuter, aInner)
-		if isNull(r) return 0 ok
-		if r[2] = ""
-			if cTest = "present" return 1 ok
-			return 0
+		if cTest = "unique"
+			# against the declarations BEFORE this one, so the later of two
+			# is the one refused and {other} names the earlier ("already a's");
+			# the clause's own text, so a SENTENCE seat's path counts too
+			if isNull(aCur) return 1 ok
+			cSeat = aAst[3][2][1]
+			aD = aCur[3]
+			v = CondScalar(aD, cSeat)
+			if isNull(v) return 1 ok
+			aPool = aCur[4]
+			for i = 1 to len(aPool)
+				aO = aPool[i]
+				if CondSameDecl(aO, aD) exit ok
+				if aO[1] = aD[1]
+					w = CondScalar(aO, cSeat)
+					if not isNull(w) and w = v
+						$cCondOther = aO[2]
+						return 0
+					ok
+				ok
+			next
+			return 1
 		ok
-		aD = r[1]
-		cSeat = r[2]
-		aC = CondClauseOf(aD, cSeat)
-		if cTest = "present" return not isNull(aC) ok
-		if cTest = "absent" return isNull(aC) ok
-		if cTest = "empty"
-			aL = CondListOf(aD, cSeat)
-			if isNull(aL) return 0 ok
-			return len(aL) = 0
-		ok
-		if cTest = "nonempty"
-			aL = CondListOf(aD, cSeat)
-			if isNull(aL) return 0 ok
-			return len(aL) > 0
-		ok
-		if cTest = "distinct"
-			aL = CondListOf(aD, cSeat)
+		if cTest = "empty" or cTest = "nonempty" or cTest = "distinct"
+			# the list as written: a list of references reads its names, resolved or not
+			aL = CondPathList(aAst[3], aOuter, aInner)
+			if cTest = "empty"
+				if isNull(aL) return 0 ok
+				return len(aL) = 0
+			ok
+			if cTest = "nonempty"
+				if isNull(aL) return 0 ok
+				return len(aL) > 0
+			ok
 			if isNull(aL) return 1 ok
 			for i = 1 to len(aL)
 				for j = 1 to i - 1
@@ -636,74 +1057,105 @@ func CondEvalIn(aAst, aOuter, aInner)
 			next
 			return 1
 		ok
-		if cTest = "unique"
-			# against the declarations BEFORE this one, so the later of two
-			# is the one refused and {other} names the earlier ("already a's")
-			v = CondScalar(aD, cSeat)
-			if isNull(v) return 1 ok
-			for i = 1 to len($aCondDecls)
-				aO = $aCondDecls[i]
-				if aO[1] = aD[1] and aO[2] = aD[2] and aO[3] = aD[3] exit ok
-				if aO[1] = aD[1] and aO[2] != aD[2]
-					w = CondScalar(aO, cSeat)
-					if not isNull(w) and w = v
-						$cCondOther = aO[2]
-						return 0
-					ok
+		# present and absent on a seat of this declaration ask whether the
+		# clause is WRITTEN (a list of references is present when written, even
+		# empty or unresolved); on a view or a kind, whether it resolves
+		aSegs = aAst[3][2]
+		if len(aSegs) = 1 and not isNull(aCur)
+			if aSegs[1] != "self" and aSegs[1] != "this"
+				cDeclName = CondDeclNameIn(aCur[2], aCur[3][1])
+				if not isNull(CondSeatInfoIn(aCur[2], cDeclName, aSegs[1]))
+					bWritten = not isNull(CondClauseOf(aCur[3], aSegs[1]))
+					if cTest = "present" return bWritten ok
+					return not bWritten
 				ok
-			next
-			return 1
+			ok
 		ok
+		aC = CondWalk(aAst[3], aOuter, aInner)
+		if isNull(aC) return 0 ok
+		if aC[1] = "none"
+			return cTest = "absent"
+		ok
+		if aC[1] = "decl" or aC[1] = "sentence"
+			if cTest = "present" return 1 ok
+			return 0
+		ok
+		if aC[1] = "set"
+			if cTest = "present" return len(aC[3]) > 0 ok
+			if cTest = "absent" return len(aC[3]) = 0 ok
+			return 0
+		ok
+		v = aC[2]
+		if cTest = "present" return not isNull(v) ok
+		if cTest = "absent" return isNull(v) ok
 		return 0
 	ok
 
-# some/all over the declarations of a kind (narrowed by named), or over the
-# declarations a list seat of references names; all records the first failure
+# some, all and earlier over the declarations a path names (a kind, a list
+# of references, a kind inside a SENTENCE), narrowed by named; some and
+# earlier record the one found, all the first failure, in {other}
 func CondQuant(aAst, aOuter, aInner)
 	aCur = CondCur(aOuter, aInner)
-	cKind = aAst[2]
-	cTarget = aAst[3]
-	cNamed = aAst[4]
-	if cNamed = "self" cNamed = aCur[2] ok
-	aCond = aAst[5]
+	cQ = aAst[2]
 	aItems = []
-	aRef = CondRefOf(CondDeclNameOf(aCur[1]), cTarget)
-	bList = 0
-	if not isNull(aRef)
-		if aRef[3] bList = 1 ok
-	ok
-	if bList
-		aL = CondListOf(aCur, cTarget)
-		if isNull(aL) aL = [] ok
-		for i = 1 to len(aL)
-			aT = CondFindDecl(aRef[2], aL[i])
-			if not isNull(aT) aItems + aT ok
+	if cQ = "earlier"
+		if isNull(aCur) return 0 ok
+		aPool = aCur[4]
+		cVerb = CondVerbIn(aCur[2], aAst[3][2][1])
+		for i = 1 to len(aPool)
+			if CondSameDecl(aPool[i], aCur[3]) exit ok
+			if aPool[i][1] = cVerb aItems + ["decl", aCur[2], aPool[i], aPool] ok
 		next
 	else
-		cVerb = CondVerbOf(cTarget)
-		for i = 1 to len($aCondDecls)
-			aD = $aCondDecls[i]
-			if aD[1] = cVerb
-				if cNamed = "" or aD[2] = cNamed aItems + aD ok
-			ok
-		next
-	ok
-	if cKind = "some"
-		for i = 1 to len(aItems)
-			if isNull(aCond) return 1 ok
-			if CondEvalIn(aCond, aOuter, aItems[i]) return 1 ok
-		next
-		return 0
-	ok
-	for i = 1 to len(aItems)
-		if not isNull(aCond)
-			if not CondEvalIn(aCond, aOuter, aItems[i])
-				$cCondOther = aItems[i][2]
-				return 0
+		aSegs = aAst[3][2]
+		aSet = NULL
+		if len(aSegs) = 1 and not isNull(aCur)
+			# a name that is both a seat and a kind is the kind to a quantifier
+			if not isNull(CondSeatsIn(aCur[2], aSegs[1]))
+				aSet = ["set", aCur[2], CondOfKind(aCur[2], aSegs[1], aCur[4]), aCur[4]]
 			ok
 		ok
+		if isNull(aSet) aSet = CondWalk(aAst[3], aOuter, aInner) ok
+		if isNull(aSet) return 0 ok
+		if aSet[1] != "set" return 0 ok
+		for i = 1 to len(aSet[3])
+			aItems + ["decl", aSet[2], aSet[3][i], aSet[4]]
+		next
+	ok
+	cNamed = NULL
+	if not isNull(aAst[4])
+		cNamed = CondRightText(aAst[4], aOuter, aInner)
+		if isNull(cNamed) return 0 ok
+	ok
+	aCond = aAst[5]
+	if cQ = "all"
+		for i = 1 to len(aItems)
+			if not isNull(cNamed)
+				if aItems[i][3][2] != cNamed loop ok
+			ok
+			if not isNull(aCond)
+				if not CondEvalIn(aCond, aOuter, aItems[i])
+					$cCondOther = aItems[i][3][2]
+					return 0
+				ok
+			ok
+		next
+		return 1
+	ok
+	for i = 1 to len(aItems)
+		if not isNull(cNamed)
+			if aItems[i][3][2] != cNamed loop ok
+		ok
+		if isNull(aCond)
+			$cCondOther = aItems[i][3][2]
+			return 1
+		ok
+		if CondEvalIn(aCond, aOuter, aItems[i])
+			$cCondOther = aItems[i][3][2]
+			return 1
+		ok
 	next
-	return 1
+	return 0
 
 # ---- the relations, each total ---------------------------------------------------
 
@@ -724,6 +1176,10 @@ func CondSplit(cS, cSep)
 func CondIsHexChar(c)
 	n = ascii(c)
 	return (n >= 48 and n <= 57) or (n >= 97 and n <= 102) or (n >= 65 and n <= 70)
+
+func CondIsLowerHexChar(c)
+	n = ascii(c)
+	return (n >= 48 and n <= 57) or (n >= 97 and n <= 102)
 
 func CondIsLabelChar(c)
 	n = ascii(c)
@@ -751,7 +1207,8 @@ func CondIsLabel(cS)
 	if cS[len(cS)] = "-" return 0 ok
 	return 1
 
-# the shapes of a FORMAT: absolute_path, ipv4, cidr, mac, label, domain
+# the shapes of a FORMAT: absolute_path, ipv4, cidr, mac, label, domain,
+# hex64, hex64_lower (v0.4)
 func CondHasShape(cS, cShape)
 	if cShape = "absolute_path"
 		if len(cS) = 0 return 0 ok
@@ -781,6 +1238,18 @@ func CondHasShape(cS, cShape)
 		aP = CondSplit(cS, ".")
 		for i = 1 to len(aP)
 			if not CondIsLabel(aP[i]) return 0 ok
+		next
+		return 1
+	but cShape = "hex64"
+		if len(cS) != 64 return 0 ok
+		for i = 1 to 64
+			if not CondIsHexChar(cS[i]) return 0 ok
+		next
+		return 1
+	but cShape = "hex64_lower"
+		if len(cS) != 64 return 0 ok
+		for i = 1 to 64
+			if not CondIsLowerHexChar(cS[i]) return 0 ok
 		next
 		return 1
 	ok
@@ -844,7 +1313,6 @@ func CondCovers(aList, cCidr)
 	for i = 1 to len(aList)
 		r = CondCidrRange(aList[i])
 		if not isNull(r)
-			# insertion, by first address
 			nAt = len(aR) + 1
 			for j = 1 to len(aR)
 				if aR[j][1] > r[1]
@@ -865,22 +1333,25 @@ func CondCovers(aList, cCidr)
 	return nCur > aT[2]
 
 # the references of a list seat, followed through declarations of the same
-# kind, return to the declaration they started from
-func CondCyclic(aDecl, cSeat)
-	aRef = CondRefOf(CondDeclNameOf(aDecl[1]), cSeat)
-	if isNull(aRef) return 0 ok
+# kind in the cursor's pool, return to the declaration they started from
+func CondCyclic(aC, cSeat)
+	cLang = aC[2]
+	aDecl = aC[3]
+	cDeclName = CondDeclNameIn(cLang, aDecl[1])
+	aInfo = CondSeatInfoIn(cLang, cDeclName, cSeat)
+	if isNull(aInfo) return 0 ok
 	aSeen = []
-	return CondReaches(aDecl, cSeat, aDecl[2], aRef[2], aSeen)
+	return CondReaches(aDecl, cSeat, aDecl[2], cLang, aInfo[2], aC[4], aSeen)
 
-func CondReaches(aFrom, cSeat, cStart, cTargetKind, aSeen)
+func CondReaches(aFrom, cSeat, cStart, cLang, cTargetKind, aPool, aSeen)
 	aL = CondListOf(aFrom, cSeat)
 	if isNull(aL) return 0 ok
 	for i = 1 to len(aL)
 		if aL[i] = cStart return 1 ok
 		if CondInList(aL[i], aSeen) loop ok
 		aSeen + aL[i]
-		aT = CondFindDecl(cTargetKind, aL[i])
+		aT = CondFindIn(cLang, cTargetKind, aL[i], aPool)
 		if isNull(aT) loop ok
-		if CondReaches(aT, cSeat, cStart, cTargetKind, aSeen) return 1 ok
+		if CondReaches(aT, cSeat, cStart, cLang, cTargetKind, aPool, aSeen) return 1 ok
 	next
 	return 0

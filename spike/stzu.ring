@@ -23,12 +23,17 @@ $cCondOther = ""
 $aCondRefSeats = []
 $aCondFormats = []
 $bCondUnread = 0
+$aCondLangs = []
+$cCondLang = ""
+$aCourtSentences = []
+$cStzuDir = ""
 
 if len(sysargv) < 3
 	? "usage: stzu.ring <file.stzu>"
 else
 	cPath = sysargv[3]
 	cSrc = read(cPath)
+	$cStzuDir = StzuDirOf(cPath)
 	try
 		aLang = StzuDeclare(cSrc)
 		StzuPrintLanguage(aLang)

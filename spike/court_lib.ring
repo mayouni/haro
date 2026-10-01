@@ -79,6 +79,195 @@ func CtRefusalMessage(cCategory)
 	next
 	return ""
 
+# ---- v0.4: one court, several languages ------------------------------------------
+# The generated court carries $aCourtLangs, one record per language -- its own
+# first, then every language a SENTENCE names, recursively: [name, ext, kinds,
+# forms, refusals, menus, ranges, formats, unions, constraints, world, points,
+# floors, views, sentences]. CtUseLanguage loads one record into the tables
+# the court reads; a SENTENCE seat is judged by switching to its language and
+# back, the judged declarations kept in $aCourtSentences for the conditions
+# that read through them.
+
+func CtDirOf(cPath)
+	n = 0
+	for i = 1 to len(cPath)
+		if cPath[i] = "/" or cPath[i] = char(92) n = i ok
+	next
+	if n = 0 return "" ok
+	return left(cPath, n - 1)
+
+func CtReplace(cS, cOld, cNew)
+	cOut = ""
+	i = 1
+	n = len(cS)
+	m = len(cOld)
+	while i <= n
+		if i + m - 1 <= n and substr(cS, i, m) = cOld
+			cOut += cNew
+			i += m
+		else
+			cOut += cS[i]
+			i++
+		ok
+	end
+	return cOut
+
+func CtLangEntry(cName)
+	for i = 1 to len($aCourtLangs)
+		if $aCourtLangs[i][1] = cName return $aCourtLangs[i] ok
+	next
+	return NULL
+
+func CtUseLanguage(cName)
+	aE = CtLangEntry(cName)
+	if isNull(aE) raise("the court carries no language called '" + cName + "'") ok
+	$cCourtLang = aE[1]
+	$cCourtExt = aE[2]
+	$aCourtKinds = aE[3]
+	$aCourtForms = aE[4]
+	$aCourtRefusals = aE[5]
+	$aCourtMenus = aE[6]
+	$aCourtRanges = aE[7]
+	$aCourtFormats = aE[8]
+	$aCourtUnions = aE[9]
+	$aCourtConstraints = aE[10]
+	$aCourtWorld = aE[11]
+	$aCourtPoints = aE[12]
+	$aCourtFloors = aE[13]
+	$aCourtViews = aE[14]
+	$aCourtSentenceKinds = aE[15]
+
+# the condition tables of every language the court carries, built once
+func CtBuildCondLangs()
+	$aCondLangs = []
+	for i = 1 to len($aCourtLangs)
+		aE = $aCourtLangs[i]
+		aKinds = aE[3]
+		aSents = aE[15]
+		aDeclSeats = []
+		aVerbOf = []
+		for j = 1 to len(aKinds)
+			aS = aKinds[j][3]
+			aInfo = []
+			for k = 1 to len(aS)
+				cTK = "prim"
+				if len(aS[k]) >= 5 cTK = aS[k][5] ok
+				cTarget = ""
+				if cTK = "decl" cTarget = aE[1] ok
+				if cTK = "sentence"
+					for m = 1 to len(aSents)
+						if aSents[m][1] = aS[k][2] cTarget = aSents[m][2] ok
+					next
+				ok
+				aInfo + [aS[k][1], aS[k][2], aS[k][3], cTK, cTarget]
+			next
+			aDeclSeats + [aKinds[j][2], aInfo]
+			aVerbOf + [aKinds[j][2], aKinds[j][1]]
+		next
+		aViews = []
+		for j = 1 to len(aE[14])
+			aV = aE[14][j]
+			aViews + [aV[1], aV[2], NULL, aV[3], aV[4], aV[5]]
+		next
+		$aCondLangs + [aE[1], aDeclSeats, aE[11][1], aViews, aVerbOf]
+	next
+
+# the court's state, so a SENTENCE can be judged in its own language and the
+# judge returned to its own; $aCourtSentences and $aCondLangs are shared
+func CtSnapshot()
+	return [$cCourtLang, $cCourtExt, $cCourtDir, $aCourtKinds, $aCourtForms, $aCourtRefusals,
+	        $aCourtMenus, $aCourtRanges, $aCourtFormats, $aCourtUnions, $aCourtConstraints,
+	        $aCourtWorld, $aCourtPoints, $aCourtFloors, $aCourtViews, $aCourtSentenceKinds,
+	        $aCourtToks, $nCourtPos, $aCondDecls, $cCondLang, $cCondOther, $bCondUnread,
+	        $aCondFormats, $aCondToks, $nCondPos]
+
+func CtRestore(aS)
+	$cCourtLang = aS[1]
+	$cCourtExt = aS[2]
+	$cCourtDir = aS[3]
+	$aCourtKinds = aS[4]
+	$aCourtForms = aS[5]
+	$aCourtRefusals = aS[6]
+	$aCourtMenus = aS[7]
+	$aCourtRanges = aS[8]
+	$aCourtFormats = aS[9]
+	$aCourtUnions = aS[10]
+	$aCourtConstraints = aS[11]
+	$aCourtWorld = aS[12]
+	$aCourtPoints = aS[13]
+	$aCourtFloors = aS[14]
+	$aCourtViews = aS[15]
+	$aCourtSentenceKinds = aS[16]
+	$aCourtToks = aS[17]
+	$nCourtPos = aS[18]
+	$aCondDecls = aS[19]
+	$cCondLang = aS[20]
+	$cCondOther = aS[21]
+	$bCondUnread = aS[22]
+	$aCondFormats = aS[23]
+	$aCondToks = aS[24]
+	$nCondPos = aS[25]
+
+# a SENTENCE seat type's record: [name, lang, message, refused]
+func CtSentenceKind(cName)
+	for i = 1 to len($aCourtSentenceKinds)
+		if $aCourtSentenceKinds[i][1] = cName return $aCourtSentenceKinds[i] ok
+	next
+	return NULL
+
+# a kind's MESSAGES entry for a seat, or ""
+func CtMessageFor(aKind, cSeat)
+	if len(aKind) < 5 return "" ok
+	for i = 1 to len(aKind[5])
+		if aKind[5][i][1] = cSeat return aKind[5][i][2] ok
+	next
+	return ""
+
+# judge the file a SENTENCE seat names, beside the file being judged, with
+# the language's own tables; keep its declarations, or refuse in the
+# sentence's own words
+func CtJudgeSentence(aDecl, aSeat, aClause)
+	cRel = aClause[3][2]
+	aSK = CtSentenceKind(aSeat[2])
+	if isNull(aSK) CtFail(aClause[2], "Clause " + aClause[1] + " names a SENTENCE the court does not carry") ok
+	cPath = cRel
+	if $cCourtDir != "" cPath = $cCourtDir + "/" + cRel ok
+	if cRel = "" or not fexists(cPath)
+		cMsg = aSK[3]
+		if cMsg = "" cMsg = "{VERB} {name} names {value}, which cannot be read from beside this file" ok
+		CtFail(aClause[2], CtFill(cMsg, aDecl, cRel))
+	ok
+	cText = read(cPath)
+	aSnap = CtSnapshot()
+	CtUseLanguage(aSK[2])
+	$cCourtDir = CtDirOf(cPath)
+	cErr = ""
+	aInner = NULL
+	try
+		aInner = CtDeclare(cText)
+	catch
+		cErr = cCatchError
+	done
+	CtRestore(aSnap)
+	if cErr != ""
+		# "<lang> (line N): why" -> why and N
+		cWhy = cErr
+		cLine = "?"
+		nAt = substr(cErr, "(line ")
+		if nAt > 0
+			nEnd = substr(cErr, "): ")
+			if nEnd > nAt
+				cLine = substr(cErr, nAt + 6, nEnd - nAt - 6)
+				cWhy = substr(cErr, nEnd + 3)
+			ok
+		ok
+		cMsg = aSK[4]
+		if cMsg = "" cMsg = "{VERB} {name} is refused: {why} (line {line} of {value})" ok
+		cMsg = CtReplace(CtReplace(cMsg, "{why}", cWhy), "{line}", cLine)
+		CtFail(aDecl[3], CtFill(cMsg, aDecl, cRel))
+	ok
+	$aCourtSentences + [$cCourtLang, aDecl[1], aDecl[2], aSeat[1], cRel, aInner, aSK[2]]
+
 # ---- tokenizer: the Commons' lexical form, as harb's court reads it ---------
 # a token is [type, text, line]; types: string number ident keyword
 # lparen rparen lbracket rbracket comma eof
@@ -230,6 +419,7 @@ func CtClauseShape(aSeat)
 		return "namelist"
 	ok
 	if cK = "union" return "union" ok
+	if cK = "sentence" return "string" ok
 	if cOf = "text" or cK = "format" return "string" ok
 	if cOf = "number" or cK = "range" return "number" ok
 	return "word"
@@ -333,14 +523,6 @@ func CtFill(cMsg, aDecl, cValue)
 				cRep = cValue
 			but cKey = "other"
 				cRep = $cCondOther
-			but substr(cKey, ".") > 0
-				# {x.seat}: through a reference seat of the declaration (v0.3),
-				# or the one declaration of a ONE kind
-				nDot = substr(cKey, ".")
-				if not isNull(aDecl)
-					v = CondPlaceScalar(["via", left(cKey, nDot - 1), substr(cKey, nDot + 1)], aDecl, NULL)
-					if not isNull(v) cRep = v ok
-				ok
 			else
 				if not isNull(aDecl)
 					v = CondScalar(aDecl, cKey)
@@ -348,7 +530,16 @@ func CtFill(cMsg, aDecl, cValue)
 						cRep = v
 					else
 						aL = CondListOf(aDecl, cKey)
-						if not isNull(aL) cRep = CtJoin(aL, ", ") ok
+						if not isNull(aL)
+							cRep = CtJoin(aL, ", ")
+						else
+							# a path: {x.seat} through a reference seat, a ONE kind or a
+							# VIEW, {view} a VIEW's declaration (v0.3, v0.4)
+							bSave = $bCondUnread
+							v = CondPathScalar(["path", CondSplit(cKey, ".")], ["decl", $cCondLang, aDecl, $aCondDecls], NULL)
+							$bCondUnread = bSave
+							if not isNull(v) cRep = v ok
+						ok
 					ok
 				ok
 			ok
@@ -534,6 +725,18 @@ func CtParseDecl()
 			ok
 		next
 		aVal = CtParseValue()
+		# a FORMAT that FOLDs case reads its value folded (v0.4): hex is case-blind
+		aSeatF = CtSeatByClause(aKind, tC[2])
+		if not isNull(aSeatF)
+			if CtTypeKind(aSeatF) = "format" and aVal[1] = "string"
+				aF = CtFormatByName(aSeatF[2])
+				if not isNull(aF)
+					if len(aF) >= 4
+						if aF[4] = "case" aVal[2] = lower(aVal[2]) ok
+					ok
+				ok
+			ok
+		ok
 		# a clause is [NAME, line, value, start, end] -- the value's span
 		aClauses + [tC[2], tC[3], aVal, aVal[3], aVal[4]]
 		sep = CtPeek()
@@ -613,6 +816,9 @@ func CtDeclare(cSrc)
 				if aC[k][1] = upper(aSeat[1]) bFound = 1 ok
 			next
 			if not bFound
+				# the declaration's own MESSAGES for a required seat speaks first (v0.4)
+				cMsgR = CtMessageFor(aKind, aSeat[1])
+				if cMsgR != "" CtFail(aD[3], CtFill(cMsgR, aD, "")) ok
 				CtFail(aD[3], upper(aSeat[1]) + " is required on " + aD[1] + " " + aD[2])
 			ok
 		next
@@ -620,20 +826,7 @@ func CtDeclare(cSrc)
 
 	# ---- v0.2: what the WORLD, the types, the names and the constraints say ----
 	$aCondDecls = aDecls
-	$aCondVerbOf = []
-	for i = 1 to len($aCourtKinds)
-		$aCondVerbOf + [$aCourtKinds[i][2], $aCourtKinds[i][1]]
-	next
-	# v0.3: the reference seats of each kind, and the formats, for the conditions
-	$aCondRefSeats = []
-	for i = 1 to len($aCourtKinds)
-		aRS = []
-		aKS = $aCourtKinds[i][3]
-		for j = 1 to len(aKS)
-			if CtTypeKind(aKS[j]) = "decl" aRS + [aKS[j][1], aKS[j][2], aKS[j][3]] ok
-		next
-		$aCondRefSeats + [$aCourtKinds[i][2], aRS]
-	next
+	$cCondLang = $cCourtLang
 	$aCondFormats = []
 	for i = 1 to len($aCourtFormats)
 		$aCondFormats + [$aCourtFormats[i][1], $aCourtFormats[i][2]]
@@ -718,6 +911,11 @@ func CtCheckValues(aDecls, bRefs)
 			bRef = 0
 			if CtTypeKind(aSeat) = "decl" bRef = 1 ok
 			if bRef != bRefs loop ok
+			if CtTypeKind(aSeat) = "sentence"
+				# v0.4: the file a SENTENCE seat names is judged in its own language
+				CtJudgeSentence(aD, aSeat, aC[j])
+				loop
+			ok
 			cWhy = CtCheckSeatValue(aD, aSeat, aC[j])
 			if cWhy != "" CtFail(aC[j][2], cWhy) ok
 		next
@@ -1106,6 +1304,8 @@ func CtMain()
 		return
 	ok
 	cVerb = sysargv[3]
+	# the judged file's folder: a SENTENCE seat's file is read beside it (v0.4)
+	$cCourtDir = CtDirOf(sysargv[4])
 	if cVerb = "check"
 		cSrc = read(sysargv[4])
 		try

@@ -1,0 +1,171 @@
+-- fleet_v04.stzu -- the fleet language declared in stzu v0.4: a vocabulary OVER the
+-- machine language. Every MEMBER names a machine FILE, read beside the fleet file and
+-- judged by the machine court (machine_v03.stzu, beside this declaration), and the
+-- rules no single machine can fail are conditions that read through those files: a
+-- link's one server, one address per machine, a promise held against the device that
+-- claims it, a key held or retired, never both. A PROPOSAL for harobanda
+-- (declarative/fleet/). What this declaration cannot say: the roll, the verify act and
+-- the fingerprint, which are acts of the fleet, not its grammar.
+
+DEFINE LANGUAGE fleet AS (
+  VERSION "0.4",
+  GRAMMAR "0.4",
+  COURT "declarative/fleet/fixtures.json",
+  EXTENSION ".fleet"
+) RATIONALE "Which machines are one estate, and the facts about the SET that no one machine can state"
+
+-- ---- the sentence: a member is a machine file, judged by the machine court -------
+
+DEFINE SENTENCE machine_file AS (
+  OF "machine_v03.stzu",
+  MESSAGE "MEMBER {name} names {value}, which cannot be read from beside this fleet file",
+  REFUSED "MEMBER {name} is refused: {why} (line {line} of {value})"
+) RATIONALE "A member is a machine, declared whole in its own file and judged by its own court; a fleet is no better than the machines in it, and a member's own refusal is reported WITH the member"
+
+-- ---- the formats --------------------------------------------------------------------
+
+DEFINE FORMAT ed25519_key AS (
+  SHAPE hex64, FOLD case,
+  MESSAGE "KEY is an ed25519 public key -- 64 hex characters, the half a device may publish -- and '{value}' is not one"
+) RATIONALE "The public half, as a device publishes it; hex is case-blind, so one key is one key however it is spelled"
+
+DEFINE FORMAT journal_head AS (
+  SHAPE hex64_lower,
+  MESSAGE "THROUGH is the hash of the last entry the fleet trusts this key for -- 64 lowercase hex, exactly as `harb fleet ... verify` prints it once that record has verified -- and '{value}' is not one"
+) RATIONALE "A head is compared byte for byte against the hash the journal wrote, which is lowercase"
+
+DEFINE FORMAT hardware_address AS (
+  SHAPE mac,
+  MESSAGE "HARDWARE is six pairs of hex separated by colons (52:54:00:12:34:61), and '{value}' is not: it is what a server recognises this device by, so it is the device's and not a word for it"
+) RATIONALE "A device is recognised by its hardware address"
+
+-- ---- the kinds ----------------------------------------------------------------------
+
+DEFINE DECLARATION fleet AS (
+  VERB "FLEET",
+  SEATS [link: name?]
+) RATIONALE "The set, and the wire its members share: within one fleet, every member's NETWORK of this name is the same link; without one, a fleet is an estate and not a network"
+
+DEFINE DECLARATION member AS (
+  VERB "MEMBER",
+  SEATS [declaration: machine_file, key: ed25519_key?, hardware: hardware_address?]
+) RATIONALE "One machine of the set: its declaration, its enrolled key (absent until the device exists), which physical unit it is"
+
+DEFINE DECLARATION retirement AS (
+  VERB "RETIREMENT",
+  SEATS [member: member, key: ed25519_key, through: journal_head],
+  MESSAGES [member: "RETIREMENT {name} retires a key of {value}, and no MEMBER {value} is declared: a key is retired FROM a device", through: "RETIREMENT {name} names no THROUGH: a retired key with no entry it is trusted through vouches for whatever its holder signs next, and a card that was stolen rather than broken goes on signing"]
+) RATIONALE "A key a member USED to have, trusted through one entry and not one further"
+
+DEFINE WORLD fleet AS (
+  ONE [fleet],
+  FIRST fleet
+) RATIONALE "A fleet file declares exactly one FLEET, and it comes first"
+
+-- ---- the views: the derived places the cross-machine rules read -------------------
+
+DEFINE VIEW link_network AS (
+  ON member, ONE "declaration.network", NAMED "fleet.link"
+) RATIONALE "The member's NETWORK on the fleet's link, when it declares one"
+
+DEFINE VIEW server AS (
+  ONE "member", WHERE "link_network present and link_network.domain present"
+) RATIONALE "The link's server of names: the first member whose network on the link declares a DOMAIN"
+
+DEFINE VIEW promise AS (
+  ON member, ONE "server.declaration.peer", WHERE "network = fleet.link and hardware = this.hardware"
+) RATIONALE "The PEER the server promises this member an address as, when the member says which device it is and the server has it in its register"
+
+DEFINE VIEW taken AS (
+  ON member, ONE "server.declaration.peer", WHERE "network = fleet.link and address host_of this.link_network.address"
+) RATIONALE "The PEER the server has promised the address this member takes for itself"
+
+-- ---- the constraints: harb's rules, as data, in harb's words -------------------------
+
+DEFINE CONSTRAINT one_declaration_one_member AS (
+  ON member, WHEN "not declaration unique",
+  MESSAGE "{declaration} is already {other}'s declaration: one declaration, one member, or the fleet counts one device twice"
+) RATIONALE "One file, one member"
+
+DEFINE CONSTRAINT one_machine_one_member AS (
+  ON member, WHEN "earlier member where declaration.box = this.declaration.box",
+  MESSAGE "{name} and {other} both declare the machine {declaration.box}: a signed record names its machine, and two of them would be one name"
+) RATIONALE "A signed record names its machine"
+
+DEFINE CONSTRAINT one_key_one_device AS (
+  ON member, WHEN "key present and not key unique",
+  MESSAGE "this key is already {other}'s key: two members cannot be the same device, and a key that appears twice attributes one device's records to two"
+) RATIONALE "A key that appears twice attributes one device's records to two"
+
+DEFINE CONSTRAINT one_device_one_member AS (
+  ON member, WHEN "hardware present and not hardware unique",
+  MESSAGE "{hardware} is already {other}'s hardware: one device, one member"
+) RATIONALE "One device, one member"
+
+DEFINE CONSTRAINT one_link_one_server AS (
+  ON member, WHEN "link_network present and link_network.domain present and not self is server",
+  MESSAGE "{server} already serves {fleet.link}: one link, one server of names, or two machines hand out the same addresses and neither is wrong alone"
+) RATIONALE "One link, one server of names"
+
+DEFINE CONSTRAINT one_address_one_machine AS (
+  ON member, WHEN "link_network present and link_network.address != dhcp and earlier member where link_network present and link_network.address = this.link_network.address",
+  MESSAGE "{link_network.address} is already {other}'s address on {fleet.link}: one address, one machine"
+) RATIONALE "Two machines that each take one address are each correct alone"
+
+DEFINE CONSTRAINT the_server_is_not_its_own_peer AS (
+  ON member, WHEN "self is server and promise present",
+  MESSAGE "{name} serves {fleet.link} and cannot be its own peer: {hardware} is declared as {promise}, and a server does not ask itself for an address"
+) RATIONALE "A server does not ask itself for an address"
+
+DEFINE CONSTRAINT a_device_that_asks_is_promised AS (
+  ON member, WHEN "hardware present and server present and not self is server and link_network present and link_network.address = dhcp and promise absent",
+  MESSAGE "{server} promises no address to {hardware}: a device that asks on {fleet.link} and is in nobody's register will never get one, and no pool exists to fall back on"
+) RATIONALE "A device in nobody's register never gets an address"
+
+DEFINE CONSTRAINT one_device_one_address AS (
+  ON member, WHEN "promise present and not self is server and link_network present and link_network.address != dhcp",
+  MESSAGE "{hardware} is promised {promise.address} by {server} and takes {link_network.address} itself: one device, one address, written in one place"
+) RATIONALE "One device, one address, written in one place"
+
+DEFINE CONSTRAINT a_promised_address_is_not_free AS (
+  ON member, WHEN "not self is server and link_network present and link_network.address != dhcp and taken present",
+  MESSAGE "{link_network.address} is promised to {taken} by {server}: an address the server hands out is not free for a member to take, and the promise is the one place it is written"
+) RATIONALE "The promise is the one place an address is written"
+
+DEFINE CONSTRAINT somebody_serves AS (
+  ON member, WHEN "link_network present and link_network.address = dhcp and server absent",
+  MESSAGE "{name} asks for its address on {fleet.link} and no member serves {fleet.link}: a fleet that declares a link declares who answers on it"
+) RATIONALE "A fleet that declares a link declares who answers on it"
+
+DEFINE CONSTRAINT held_or_retired AS (
+  ON retirement, WHEN "member.key = self.key",
+  MESSAGE "{member} still holds this key: a key is the device's or it is retired, never both"
+) RATIONALE "A key is the device's or it is retired, never both"
+
+DEFINE CONSTRAINT not_a_way_around AS (
+  ON retirement, WHEN "some member where key = this.key",
+  MESSAGE "this key is already {other}'s key: a key that appears twice attributes one device's records to two"
+) RATIONALE "A retirement is not a way around one key, one place"
+
+DEFINE CONSTRAINT retired_once AS (
+  ON retirement, WHEN "earlier retirement where key = this.key",
+  MESSAGE "this key is already retired as {other}: a key is retired once, from one device"
+) RATIONALE "A key is retired once, from one device"
+
+-- ---- the refusals ------------------------------------------------------------------
+
+DEFINE REFUSAL unknown_verb AS (
+  MESSAGE "The fleet verb set is closed (DEFINE)."
+) RATIONALE "The closure speaks when an alien verb arrives"
+
+DEFINE REFUSAL unknown_declaration AS (
+  MESSAGE "belongs to a machine file, not a fleet file: a fleet says which machines are one estate, never what any one of them is"
+) RATIONALE "A file is judged by which kinds it may carry"
+
+DEFINE REFUSAL dangling_reference AS (
+  MESSAGE "This name resolves to nothing in the declared fleet."
+) RATIONALE "A RETIREMENT's MEMBER resolves at check time"
+
+DEFINE REFUSAL duplicate_name AS (
+  MESSAGE "one namespace, no duplicates"
+) RATIONALE "Two members with one name would be one member with two declarations"

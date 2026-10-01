@@ -193,7 +193,13 @@ quantifies over a kind or a list of references, and tests five closed relations 
 address within a prefix, its host, a path under a directory, a perimeter covering every
 address, a cycle through references) -- each total, each a fixed line of the court, none
 a computation the declaration writes, so the totality doctrine holds. 117 of 120; the
-three left are the fleet file's kinds, another language's.
+three left are the fleet file's kinds, another language's. **stzu v0.4, 2026-10-02
+(`haro/spike/stzu4/GRAMMAR.md`, 23 fixtures): a language over a language.** A `SENTENCE`
+seat names a file of another declared language, judged by that language's own court; a
+`VIEW` is a derived place by a closed rule; a condition's places are paths through
+sentences and views. The fleet language declared over the machine language
+(`fleet_v04.stzu`) forges one court carrying both records, and it agrees with `harb` on
+32 of 32 -- this section's "composition is the normal way to declare a language", measured.
 
 **What the forge produces from one declaration** (Ringua's kit, 02-STACK's L1, now Haro's
 compiler verbs rather than separate organs): the parser; the court with the fixtures as its
@@ -440,6 +446,13 @@ with the image (68.1 without; `harb` 11.5; the oracle 77.1), under the target an
 as the cost of 62 constraints with quantifiers. The guard gained a pinned floor after its
 own measuring class absorbed a court that had lost its constraints (HF-39). Record:
 `haro/SPIKE.md`, "The third rung".
+
+**The fourth rung, 2026-10-02, decided on the author's behalf ("decide on what is next on
+my behalf"): stzu v0.4, the fleet language declared OVER the machine language** (section
+3's note). One court, two languages' records, judged against `harb`'s 32 fleet fixtures as
+the guard's stage 7: **32 of 32**, 0 defects, byte-identical on `rnxc` and the oracle,
+pinned at 32; 102.8 s a pass. The composition claim of section 3 has its number (HF-41).
+Record: `haro/SPIKE.md`, "The fourth rung".
 
 v0.1's spike (`twice.haro`, a definition with an intent clause) proved one altitude. The
 ruling asks for three to meet, and the estate has already named the smallest program that

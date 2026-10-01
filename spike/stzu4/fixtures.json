@@ -1,0 +1,157 @@
+{
+  "grammar": "stzu",
+  "version": "0.4",
+  "comment": "The stzu v0.4 conformance floor, written BEFORE the court that passes it (the W discipline: fixtures first, prose second). v0.4 grows v0.3 by what a language declared OVER another language needs (haro/SPIKE.md, the fourth rung: harobanda's fleet file, whose every member names a machine FILE the fleet court reads, judges with the machine court, and reads through for the rules no single machine can fail): a SENTENCE seat type -- a seat whose value names a file of another declared language, read beside the judged file and judged by that language's own court; a VIEW -- a derived place by a closed rule (the one declaration of a set, named by a value or chosen by a condition); a condition whose places are PATHS (declaration.thing.kind, server.declaration.part), whose quantifiers run over a path or over the EARLIER declarations of a kind, whose comparisons take a place on either side, and `self is VIEW`; a FORMAT that FOLDs case; MESSAGES for a required seat absent; the shapes hex64 and hex64_lower. A fixture may carry `files` written beside it. Every v0.3 fixture still passes: v0.4 refuses nothing v0.3 accepted. Rejects carry the fragment the refusal must contain.",
+  "accepts": [
+    {
+      "id": "A1",
+      "name": "a SENTENCE is a seat type: the value names a file of another declared language (OF, read beside this declaration), with the words for a file that cannot be read and for one its court refuses",
+      "source": "DEFINE LANGUAGE set AS (VERSION \"0.4\", GRAMMAR \"0.4\", COURT \"x\", EXTENSION \".set\") RATIONALE \"x\"\nDEFINE SENTENCE inner_file AS (OF \"inner.stzu\", MESSAGE \"MEMBER {name} names {value}, which cannot be read from beside this set file\", REFUSED \"MEMBER {name} is refused: {why} (line {line} of {value})\") RATIONALE \"a member is a file of the inner language\"\nDEFINE DECLARATION group AS (VERB \"GROUP\", SEATS [link: name?]) RATIONALE \"x\"\nDEFINE DECLARATION member AS (VERB \"MEMBER\", SEATS [declaration: inner_file, key: text?]) RATIONALE \"x\"\nDEFINE WORLD set AS (ONE [group], FIRST group) RATIONALE \"x\"\n",
+      "files": {"inner.stzu": "DEFINE LANGUAGE inner AS (VERSION \"0.4\", GRAMMAR \"0.4\", COURT \"x\", EXTENSION \".inner\") RATIONALE \"x\"\nDEFINE MENU yes_no AS (WORDS [yes, no]) RATIONALE \"x\"\nDEFINE DECLARATION thing AS (VERB \"THING\", SEATS [kind: name, mark: text?]) RATIONALE \"x\"\nDEFINE DECLARATION part AS (VERB \"PART\", SEATS [of: text, served: yes_no?]) RATIONALE \"x\"\nDEFINE WORLD inner AS (ONE [thing], FIRST thing) RATIONALE \"x\"\n"},
+      "expect": {"language": "set", "counts": {"declarations": 2, "sentences": 1}, "verbs": ["GROUP", "MEMBER"]}
+    },
+    {
+      "id": "A2",
+      "name": "a condition reads along a PATH through a sentence seat: declaration.thing is the one THING of the member's file, declaration.thing.kind its seat, declaration.part the set of its PARTs",
+      "source": "DEFINE LANGUAGE set AS (VERSION \"0.4\", GRAMMAR \"0.4\", COURT \"x\", EXTENSION \".set\") RATIONALE \"x\"\nDEFINE SENTENCE inner_file AS (OF \"inner.stzu\") RATIONALE \"x\"\nDEFINE DECLARATION group AS (VERB \"GROUP\", SEATS [link: name?]) RATIONALE \"x\"\nDEFINE DECLARATION member AS (VERB \"MEMBER\", SEATS [declaration: inner_file, key: text?]) RATIONALE \"x\"\nDEFINE WORLD set AS (ONE [group], FIRST group) RATIONALE \"x\"\nDEFINE CONSTRAINT no_broken_things AS (ON member, WHEN \"declaration.thing.kind = broken\", MESSAGE \"{name} brings a broken thing\") RATIONALE \"x\"\nDEFINE CONSTRAINT one_served_part AS (ON member, WHEN \"not some declaration.part where served = yes\", MESSAGE \"{name} serves no part\") RATIONALE \"x\"\nDEFINE CONSTRAINT one_thing_per_set AS (ON member, WHEN \"earlier member where declaration.thing = this.declaration.thing\", MESSAGE \"{name} and {other} both declare the thing {declaration.thing}\") RATIONALE \"x\"\n",
+      "files": {"inner.stzu": "DEFINE LANGUAGE inner AS (VERSION \"0.4\", GRAMMAR \"0.4\", COURT \"x\", EXTENSION \".inner\") RATIONALE \"x\"\nDEFINE MENU yes_no AS (WORDS [yes, no]) RATIONALE \"x\"\nDEFINE DECLARATION thing AS (VERB \"THING\", SEATS [kind: name, mark: text?]) RATIONALE \"x\"\nDEFINE DECLARATION part AS (VERB \"PART\", SEATS [of: text, served: yes_no?]) RATIONALE \"x\"\nDEFINE WORLD inner AS (ONE [thing], FIRST thing) RATIONALE \"x\"\n"},
+      "expect": {"language": "set", "counts": {"declarations": 2, "sentences": 1, "constraints": 3}}
+    },
+    {
+      "id": "A3",
+      "name": "a VIEW ON a declaration is a derived place: the ONE declaration of a set along a path, NAMED by a value or a place; it is read like a reference seat",
+      "source": "DEFINE LANGUAGE set AS (VERSION \"0.4\", GRAMMAR \"0.4\", COURT \"x\", EXTENSION \".set\") RATIONALE \"x\"\nDEFINE SENTENCE inner_file AS (OF \"inner.stzu\") RATIONALE \"x\"\nDEFINE DECLARATION group AS (VERB \"GROUP\", SEATS [link: name?]) RATIONALE \"x\"\nDEFINE DECLARATION member AS (VERB \"MEMBER\", SEATS [declaration: inner_file]) RATIONALE \"x\"\nDEFINE WORLD set AS (ONE [group], FIRST group) RATIONALE \"x\"\nDEFINE VIEW link_part AS (ON member, ONE \"declaration.part\", NAMED \"group.link\") RATIONALE \"the member's part on the group's link\"\nDEFINE CONSTRAINT link_parts_are_served AS (ON member, WHEN \"link_part present and link_part.served != yes\", MESSAGE \"{name} is on {group.link} and its part {link_part} is not served\") RATIONALE \"x\"\n",
+      "files": {"inner.stzu": "DEFINE LANGUAGE inner AS (VERSION \"0.4\", GRAMMAR \"0.4\", COURT \"x\", EXTENSION \".inner\") RATIONALE \"x\"\nDEFINE MENU yes_no AS (WORDS [yes, no]) RATIONALE \"x\"\nDEFINE DECLARATION thing AS (VERB \"THING\", SEATS [kind: name, mark: text?]) RATIONALE \"x\"\nDEFINE DECLARATION part AS (VERB \"PART\", SEATS [of: text, served: yes_no?]) RATIONALE \"x\"\nDEFINE WORLD inner AS (ONE [thing], FIRST thing) RATIONALE \"x\"\n"},
+      "expect": {"language": "set", "counts": {"declarations": 2, "views": 1, "constraints": 1}}
+    },
+    {
+      "id": "A4",
+      "name": "a VIEW with no ON is a place of the whole sentence: the ONE declaration of a kind chosen by WHERE; `self is VIEW` asks whether this declaration is it",
+      "source": "DEFINE LANGUAGE set AS (VERSION \"0.4\", GRAMMAR \"0.4\", COURT \"x\", EXTENSION \".set\") RATIONALE \"x\"\nDEFINE SENTENCE inner_file AS (OF \"inner.stzu\") RATIONALE \"x\"\nDEFINE DECLARATION group AS (VERB \"GROUP\", SEATS [link: name?]) RATIONALE \"x\"\nDEFINE DECLARATION member AS (VERB \"MEMBER\", SEATS [declaration: inner_file]) RATIONALE \"x\"\nDEFINE WORLD set AS (ONE [group], FIRST group) RATIONALE \"x\"\nDEFINE VIEW link_part AS (ON member, ONE \"declaration.part\", NAMED \"group.link\") RATIONALE \"x\"\nDEFINE VIEW server AS (ONE \"member\", WHERE \"link_part present and link_part.served = yes\") RATIONALE \"the one member that serves the link\"\nDEFINE CONSTRAINT one_server AS (ON member, WHEN \"link_part present and link_part.served = yes and not self is server\", MESSAGE \"{server} already serves {group.link}\") RATIONALE \"x\"\nDEFINE CONSTRAINT somebody_serves AS (ON member, WHEN \"link_part present and server absent\", MESSAGE \"{name} is on {group.link} and no member serves it\") RATIONALE \"x\"\n",
+      "files": {"inner.stzu": "DEFINE LANGUAGE inner AS (VERSION \"0.4\", GRAMMAR \"0.4\", COURT \"x\", EXTENSION \".inner\") RATIONALE \"x\"\nDEFINE MENU yes_no AS (WORDS [yes, no]) RATIONALE \"x\"\nDEFINE DECLARATION thing AS (VERB \"THING\", SEATS [kind: name, mark: text?]) RATIONALE \"x\"\nDEFINE DECLARATION part AS (VERB \"PART\", SEATS [of: text, served: yes_no?]) RATIONALE \"x\"\nDEFINE WORLD inner AS (ONE [thing], FIRST thing) RATIONALE \"x\"\n"},
+      "expect": {"language": "set", "counts": {"declarations": 2, "views": 2, "constraints": 2}}
+    },
+    {
+      "id": "A5",
+      "name": "a quantifier runs over a path through a view (some server.declaration.part) and a comparison takes a place on its right (hardware = this.key)",
+      "source": "DEFINE LANGUAGE set AS (VERSION \"0.4\", GRAMMAR \"0.4\", COURT \"x\", EXTENSION \".set\") RATIONALE \"x\"\nDEFINE SENTENCE inner_file AS (OF \"inner.stzu\") RATIONALE \"x\"\nDEFINE DECLARATION group AS (VERB \"GROUP\", SEATS [link: name?]) RATIONALE \"x\"\nDEFINE DECLARATION member AS (VERB \"MEMBER\", SEATS [declaration: inner_file, key: text?]) RATIONALE \"x\"\nDEFINE WORLD set AS (ONE [group], FIRST group) RATIONALE \"x\"\nDEFINE VIEW link_part AS (ON member, ONE \"declaration.part\", NAMED \"group.link\") RATIONALE \"x\"\nDEFINE VIEW server AS (ONE \"member\", WHERE \"link_part present and link_part.served = yes\") RATIONALE \"x\"\nDEFINE CONSTRAINT promised AS (ON member, WHEN \"key present and server present and not self is server and not some server.declaration.part where of = this.key\", MESSAGE \"{server} promises no part to {key}\") RATIONALE \"x\"\n",
+      "files": {"inner.stzu": "DEFINE LANGUAGE inner AS (VERSION \"0.4\", GRAMMAR \"0.4\", COURT \"x\", EXTENSION \".inner\") RATIONALE \"x\"\nDEFINE MENU yes_no AS (WORDS [yes, no]) RATIONALE \"x\"\nDEFINE DECLARATION thing AS (VERB \"THING\", SEATS [kind: name, mark: text?]) RATIONALE \"x\"\nDEFINE DECLARATION part AS (VERB \"PART\", SEATS [of: text, served: yes_no?]) RATIONALE \"x\"\nDEFINE WORLD inner AS (ONE [thing], FIRST thing) RATIONALE \"x\"\n"},
+      "expect": {"language": "set", "counts": {"declarations": 2, "views": 2, "constraints": 1}}
+    },
+    {
+      "id": "A6",
+      "name": "a FORMAT that FOLDs case compares case-blind (hex is); the shapes hex64 and hex64_lower; MESSAGES speaks for a required seat that is absent too",
+      "source": "DEFINE LANGUAGE set AS (VERSION \"0.4\", GRAMMAR \"0.4\", COURT \"x\", EXTENSION \".set\") RATIONALE \"x\"\nDEFINE FORMAT key64 AS (SHAPE hex64, FOLD case, MESSAGE \"KEY is 64 hex characters, and '{value}' is not one\") RATIONALE \"x\"\nDEFINE FORMAT head AS (SHAPE hex64_lower, MESSAGE \"THROUGH is 64 lowercase hex, and '{value}' is not\") RATIONALE \"x\"\nDEFINE DECLARATION group AS (VERB \"GROUP\", SEATS [link: name?]) RATIONALE \"x\"\nDEFINE DECLARATION member AS (VERB \"MEMBER\", SEATS [key: key64?]) RATIONALE \"x\"\nDEFINE DECLARATION retirement AS (VERB \"RETIREMENT\", SEATS [member: member, key: key64, through: head], MESSAGES [member: \"RETIREMENT {name} retires a key of {value}, and no MEMBER {value} is declared\", through: \"RETIREMENT {name} names no THROUGH\"]) RATIONALE \"x\"\nDEFINE WORLD set AS (ONE [group], FIRST group) RATIONALE \"x\"\nDEFINE CONSTRAINT one_key_one_member AS (ON member, WHEN \"key present and not key unique\", MESSAGE \"this key is already {other}'s key\") RATIONALE \"x\"\nDEFINE CONSTRAINT retired_once AS (ON retirement, WHEN \"earlier retirement where key = this.key\", MESSAGE \"this key is already retired as {other}\") RATIONALE \"x\"\n",
+      "expect": {"language": "set", "counts": {"declarations": 3, "formats": 2, "constraints": 2}}
+    },
+    {
+      "id": "A7",
+      "name": "a v0.3 declaration is a v0.4 declaration: v0.3's A5, unchanged",
+      "source": "DEFINE LANGUAGE m AS (VERSION \"0.3\", GRAMMAR \"0.3\", COURT \"x\", EXTENSION \".m\") RATIONALE \"x\"\nDEFINE MENU dhcp_only AS (WORDS [dhcp]) RATIONALE \"x\"\nDEFINE MENU none_only AS (WORDS [none]) RATIONALE \"x\"\nDEFINE FORMAT address_prefix AS (SHAPE cidr) RATIONALE \"x\"\nDEFINE FORMAT wire_name AS (SHAPE label) RATIONALE \"x\"\nDEFINE FORM word AS (SEATS [value: text]) RATIONALE \"x\"\nDEFINE FORM destination AS (SEATS [prefix: address_prefix]) RATIONALE \"x\"\nDEFINE UNION address AS (OF [dhcp_only, address_prefix]) RATIONALE \"x\"\nDEFINE UNION egress AS (OF [none_only, [destination]]) RATIONALE \"x\"\nDEFINE DECLARATION network AS (VERB \"NETWORK\", SEATS [interface: text, address: address, egress: egress?]) RATIONALE \"x\"\nDEFINE DECLARATION peer AS (VERB \"PEER\", SEATS [network: network, address: text]) RATIONALE \"x\"\nDEFINE DECLARATION service AS (VERB \"SERVICE\", SEATS [run: [word], after: [service]]) RATIONALE \"x\"\nDEFINE DECLARATION mount AS (VERB \"MOUNT\", SEATS [at: text]) RATIONALE \"x\"\nDEFINE DECLARATION box AS (VERB \"MACHINE\", SEATS [identity: text?]) RATIONALE \"x\"\nDEFINE CONSTRAINT on_the_link AS (ON peer, WHEN \"not address within network.address\", MESSAGE \"{address} is not on {network} ({network.address})\") RATIONALE \"x\"\nDEFINE CONSTRAINT not_the_box AS (ON peer, WHEN \"address host_of network.address\", MESSAGE \"{address} is the machine's own address on {network}\") RATIONALE \"x\"\nDEFINE CONSTRAINT a_wire_name AS (ON peer, WHEN \"not self matches wire_name\", MESSAGE \"'{name}' cannot be a name on the wire\") RATIONALE \"x\"\nDEFINE CONSTRAINT no_cycle AS (ON service, WHEN \"after cyclic\", MESSAGE \"AFTER forms a cycle through {name}: no order starts it\") RATIONALE \"x\"\nDEFINE CONSTRAINT a_perimeter AS (ON network, WHEN \"egress covers '0.0.0.0/0'\", MESSAGE \"EGRESS names a perimeter, and these destinations together cover every address there is\") RATIONALE \"x\"\nDEFINE CONSTRAINT a_key_under_a_mount AS (ON box, WHEN \"identity present and not identity under '/data'\", MESSAGE \"IDENTITY {identity} is not under /data\") RATIONALE \"x\"\n",
+      "expect": {"language": "m", "counts": {"declarations": 5, "constraints": 6, "unions": 2, "formats": 2, "sentences": 0, "views": 0}}
+    }
+  ],
+  "rejects": [
+    {
+      "id": "R1",
+      "name": "a SENTENCE requires its OF",
+      "source": "DEFINE LANGUAGE set AS (VERSION \"0.4\", GRAMMAR \"0.4\", COURT \"x\", EXTENSION \".set\") RATIONALE \"x\"\nDEFINE SENTENCE inner_file AS (MESSAGE \"x\") RATIONALE \"x\"\n",
+      "refusal": "requires the OF clause"
+    },
+    {
+      "id": "R2",
+      "name": "OF names a declaration that can be read beside this one",
+      "source": "DEFINE LANGUAGE set AS (VERSION \"0.4\", GRAMMAR \"0.4\", COURT \"x\", EXTENSION \".set\") RATIONALE \"x\"\nDEFINE SENTENCE inner_file AS (OF \"nowhere.stzu\") RATIONALE \"x\"\n",
+      "refusal": "cannot be read"
+    },
+    {
+      "id": "R3",
+      "name": "the language a SENTENCE names is itself judged, and its refusal is this declaration's",
+      "source": "DEFINE LANGUAGE set AS (VERSION \"0.4\", GRAMMAR \"0.4\", COURT \"x\", EXTENSION \".set\") RATIONALE \"x\"\nDEFINE SENTENCE bad_file AS (OF \"bad.stzu\") RATIONALE \"x\"\n",
+      "files": {"bad.stzu": "DEFINE LANGUAGE bad AS (VERSION \"0.4\", GRAMMAR \"0.4\", COURT \"x\", EXTENSION \".bad\") RATIONALE \"x\"\nDEFINE MENU m AS (WORDS []) RATIONALE \"x\"\n"},
+      "refusal": "is refused"
+    },
+    {
+      "id": "R4",
+      "name": "a SENTENCE is not a list seat's element",
+      "source": "DEFINE LANGUAGE set AS (VERSION \"0.4\", GRAMMAR \"0.4\", COURT \"x\", EXTENSION \".set\") RATIONALE \"x\"\nDEFINE SENTENCE inner_file AS (OF \"inner.stzu\") RATIONALE \"x\"\nDEFINE DECLARATION group AS (VERB \"GROUP\", SEATS [members: [inner_file]]) RATIONALE \"x\"\n",
+      "files": {"inner.stzu": "DEFINE LANGUAGE inner AS (VERSION \"0.4\", GRAMMAR \"0.4\", COURT \"x\", EXTENSION \".inner\") RATIONALE \"x\"\nDEFINE DECLARATION thing AS (VERB \"THING\", SEATS [kind: name]) RATIONALE \"x\"\n"},
+      "refusal": "a list seat's element"
+    },
+    {
+      "id": "R5",
+      "name": "a path through a sentence names a seat or a kind of that language",
+      "source": "DEFINE LANGUAGE set AS (VERSION \"0.4\", GRAMMAR \"0.4\", COURT \"x\", EXTENSION \".set\") RATIONALE \"x\"\nDEFINE SENTENCE inner_file AS (OF \"inner.stzu\") RATIONALE \"x\"\nDEFINE DECLARATION member AS (VERB \"MEMBER\", SEATS [declaration: inner_file]) RATIONALE \"x\"\nDEFINE CONSTRAINT c AS (ON member, WHEN \"declaration.colour.kind = x\", MESSAGE \"x\") RATIONALE \"x\"\n",
+      "files": {"inner.stzu": "DEFINE LANGUAGE inner AS (VERSION \"0.4\", GRAMMAR \"0.4\", COURT \"x\", EXTENSION \".inner\") RATIONALE \"x\"\nDEFINE DECLARATION thing AS (VERB \"THING\", SEATS [kind: name]) RATIONALE \"x\"\nDEFINE WORLD inner AS (ONE [thing]) RATIONALE \"x\"\n"},
+      "refusal": "neither a seat nor a kind of inner"
+    },
+    {
+      "id": "R6",
+      "name": "a VIEW's ON names a declaration of this language",
+      "source": "DEFINE LANGUAGE set AS (VERSION \"0.4\", GRAMMAR \"0.4\", COURT \"x\", EXTENSION \".set\") RATIONALE \"x\"\nDEFINE DECLARATION member AS (VERB \"MEMBER\", SEATS [key: text?]) RATIONALE \"x\"\nDEFINE VIEW v AS (ON crew, ONE \"member\") RATIONALE \"x\"\n",
+      "refusal": "resolves to nothing"
+    },
+    {
+      "id": "R7",
+      "name": "a VIEW's ONE is a path to a set of declarations, not to a value",
+      "source": "DEFINE LANGUAGE set AS (VERSION \"0.4\", GRAMMAR \"0.4\", COURT \"x\", EXTENSION \".set\") RATIONALE \"x\"\nDEFINE DECLARATION member AS (VERB \"MEMBER\", SEATS [key: text?]) RATIONALE \"x\"\nDEFINE VIEW v AS (ON member, ONE \"key\") RATIONALE \"x\"\n",
+      "refusal": "ONE names a set of declarations"
+    },
+    {
+      "id": "R8",
+      "name": "a VIEW's name is not a seat of its ON declaration: one name, one meaning",
+      "source": "DEFINE LANGUAGE set AS (VERSION \"0.4\", GRAMMAR \"0.4\", COURT \"x\", EXTENSION \".set\") RATIONALE \"x\"\nDEFINE DECLARATION member AS (VERB \"MEMBER\", SEATS [key: text?, mate: member?]) RATIONALE \"x\"\nDEFINE VIEW key AS (ON member, ONE \"member\") RATIONALE \"x\"\n",
+      "refusal": "is already a seat of member"
+    },
+    {
+      "id": "R9",
+      "name": "earlier quantifies over the declarations of a kind of this language that precede this one",
+      "source": "DEFINE LANGUAGE set AS (VERSION \"0.4\", GRAMMAR \"0.4\", COURT \"x\", EXTENSION \".set\") RATIONALE \"x\"\nDEFINE DECLARATION member AS (VERB \"MEMBER\", SEATS [key: text?]) RATIONALE \"x\"\nDEFINE CONSTRAINT c AS (ON member, WHEN \"earlier key where key = this.key\", MESSAGE \"x\") RATIONALE \"x\"\n",
+      "refusal": "earlier quantifies over a kind"
+    },
+    {
+      "id": "R10",
+      "name": "is names a VIEW",
+      "source": "DEFINE LANGUAGE set AS (VERSION \"0.4\", GRAMMAR \"0.4\", COURT \"x\", EXTENSION \".set\") RATIONALE \"x\"\nDEFINE DECLARATION member AS (VERB \"MEMBER\", SEATS [key: text?]) RATIONALE \"x\"\nDEFINE CONSTRAINT c AS (ON member, WHEN \"self is leader\", MESSAGE \"x\") RATIONALE \"x\"\n",
+      "refusal": "must name a VIEW"
+    },
+    {
+      "id": "R11",
+      "name": "FOLD takes case, the one folding a court knows",
+      "source": "DEFINE LANGUAGE set AS (VERSION \"0.4\", GRAMMAR \"0.4\", COURT \"x\", EXTENSION \".set\") RATIONALE \"x\"\nDEFINE FORMAT key64 AS (SHAPE hex64, FOLD upper) RATIONALE \"x\"\n",
+      "refusal": "FOLD takes case"
+    },
+    {
+      "id": "R12",
+      "name": "MESSAGES speaks for a reference seat, or for a required seat when it is absent; an optional text seat has nothing to say",
+      "source": "DEFINE LANGUAGE set AS (VERSION \"0.4\", GRAMMAR \"0.4\", COURT \"x\", EXTENSION \".set\") RATIONALE \"x\"\nDEFINE DECLARATION member AS (VERB \"MEMBER\", SEATS [key: text?], MESSAGES [key: \"x\"]) RATIONALE \"x\"\n",
+      "refusal": "MESSAGES speaks for"
+    },
+    {
+      "id": "R13",
+      "name": "a path does not continue through a value",
+      "source": "DEFINE LANGUAGE set AS (VERSION \"0.4\", GRAMMAR \"0.4\", COURT \"x\", EXTENSION \".set\") RATIONALE \"x\"\nDEFINE DECLARATION member AS (VERB \"MEMBER\", SEATS [key: text?]) RATIONALE \"x\"\nDEFINE CONSTRAINT c AS (ON member, WHEN \"key.thing present\", MESSAGE \"x\") RATIONALE \"x\"\n",
+      "refusal": "'key' is a value"
+    },
+    {
+      "id": "R14",
+      "name": "a place on the right of a comparison is checked like one on the left",
+      "source": "DEFINE LANGUAGE set AS (VERSION \"0.4\", GRAMMAR \"0.4\", COURT \"x\", EXTENSION \".set\") RATIONALE \"x\"\nDEFINE DECLARATION member AS (VERB \"MEMBER\", SEATS [key: text?]) RATIONALE \"x\"\nDEFINE CONSTRAINT c AS (ON member, WHEN \"earlier member where key = this.colour\", MESSAGE \"x\") RATIONALE \"x\"\n",
+      "refusal": "no seat 'colour' on member"
+    },
+    {
+      "id": "R15",
+      "name": "named takes a value or a place that exists",
+      "source": "DEFINE LANGUAGE set AS (VERSION \"0.4\", GRAMMAR \"0.4\", COURT \"x\", EXTENSION \".set\") RATIONALE \"x\"\nDEFINE SENTENCE inner_file AS (OF \"inner.stzu\") RATIONALE \"x\"\nDEFINE DECLARATION group AS (VERB \"GROUP\", SEATS [link: name?]) RATIONALE \"x\"\nDEFINE DECLARATION member AS (VERB \"MEMBER\", SEATS [declaration: inner_file]) RATIONALE \"x\"\nDEFINE WORLD set AS (ONE [group]) RATIONALE \"x\"\nDEFINE VIEW link_part AS (ON member, ONE \"declaration.part\", NAMED \"group.colour\") RATIONALE \"x\"\n",
+      "files": {"inner.stzu": "DEFINE LANGUAGE inner AS (VERSION \"0.4\", GRAMMAR \"0.4\", COURT \"x\", EXTENSION \".inner\") RATIONALE \"x\"\nDEFINE DECLARATION thing AS (VERB \"THING\", SEATS [kind: name]) RATIONALE \"x\"\nDEFINE DECLARATION part AS (VERB \"PART\", SEATS [of: text]) RATIONALE \"x\"\nDEFINE WORLD inner AS (ONE [thing]) RATIONALE \"x\"\n"},
+      "refusal": "no seat 'colour' on group"
+    },
+    {
+      "id": "R16",
+      "name": "a quantifier's path ends at a set of declarations",
+      "source": "DEFINE LANGUAGE set AS (VERSION \"0.4\", GRAMMAR \"0.4\", COURT \"x\", EXTENSION \".set\") RATIONALE \"x\"\nDEFINE SENTENCE inner_file AS (OF \"inner.stzu\") RATIONALE \"x\"\nDEFINE DECLARATION member AS (VERB \"MEMBER\", SEATS [declaration: inner_file]) RATIONALE \"x\"\nDEFINE CONSTRAINT c AS (ON member, WHEN \"some declaration.thing where kind = x\", MESSAGE \"x\") RATIONALE \"x\"\n",
+      "files": {"inner.stzu": "DEFINE LANGUAGE inner AS (VERSION \"0.4\", GRAMMAR \"0.4\", COURT \"x\", EXTENSION \".inner\") RATIONALE \"x\"\nDEFINE DECLARATION thing AS (VERB \"THING\", SEATS [kind: name]) RATIONALE \"x\"\nDEFINE WORLD inner AS (ONE [thing]) RATIONALE \"x\"\n"},
+      "refusal": "a set of declarations"
+    }
+  ]
+}

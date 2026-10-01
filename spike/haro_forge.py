@@ -57,6 +57,7 @@ def parse_verdict(out):
 
 STZU2_FIXTURES = os.path.join(HERE, 'stzu2', 'fixtures.json')
 STZU3_FIXTURES = os.path.join(HERE, 'stzu3', 'fixtures.json')
+STZU4_FIXTURES = os.path.join(HERE, 'stzu4', 'fixtures.json')
 
 
 def judge_stzu(exe, label, fixtures=STZU_FIXTURES):
@@ -65,12 +66,19 @@ def judge_stzu(exe, label, fixtures=STZU_FIXTURES):
     v0.2's fixtures add the keys menus/ranges/formats/constraints (under
     counts), world and points."""
     doc = json.load(open(fixtures, encoding='utf-8'))
-    assert doc['grammar'] == 'stzu' and doc['version'] in ('0.1', '0.2', '0.3')
+    assert doc['grammar'] == 'stzu' and doc['version'] in ('0.1', '0.2', '0.3', '0.4')
     passed = failed = 0
     outputs = {}
     with tempfile.TemporaryDirectory() as td:
         for case in doc['accepts'] + doc['rejects']:
-            p = os.path.join(td, case['id'] + '.stzu')
+            # v0.4: a fixture may carry files written beside it (the languages
+            # its SENTENCEs name); each case gets its own folder so nothing leaks
+            cd = os.path.join(td, case['id'])
+            os.makedirs(cd, exist_ok=True)
+            for fname, text in case.get('files', {}).items():
+                with open(os.path.join(cd, fname), 'w', encoding='utf-8', newline='') as f:
+                    f.write(text)
+            p = os.path.join(cd, case['id'] + '.stzu')
             with open(p, 'w', encoding='utf-8', newline='') as f:
                 f.write(case['source'])
             out = run(exe, STZU_RING, p)
@@ -122,7 +130,8 @@ def judge_stzu(exe, label, fixtures=STZU_FIXTURES):
 def stage1():
     failures = 0
     for label, fixtures in (('v0.1, the pinned judge', STZU_FIXTURES), ('v0.2, the WORLD and REFINE seats', STZU2_FIXTURES),
-                            ('v0.3, the UNION, MESSAGES and the relations', STZU3_FIXTURES)):
+                            ('v0.3, the UNION, MESSAGES and the relations', STZU3_FIXTURES),
+                            ('v0.4, the SENTENCE, the VIEW and the paths', STZU4_FIXTURES)):
         print(f'stage 1 -- the stzu meta-court in pure Ring, judged by its fixtures ({label})')
         f1, o1 = judge_stzu(RNXC, 'rnxc', fixtures)
         f2, o2 = judge_stzu(ORACLE, 'oracle ring.exe', fixtures)
@@ -199,12 +208,23 @@ def stage2(stzu_path=MACHINE_STZU, label='machine'):
     return failures, lang
 
 
-def harb_verdict(path):
-    out = run_args(HARB, ['check', path], os.path.dirname(HARB)).strip()
+def harb_verdict(path, verb='check', prefix='machine'):
+    out = run_args(HARB, [verb, path], os.path.dirname(HARB)).strip()
     first = out.split('\n')[0] if out else ''
-    if first.startswith('machine (line'):
+    if first.startswith(prefix + ' (line'):
         return False, first
     return True, first
+
+
+# the fleet language (the fourth rung): harb's fleet fixtures carry the machine
+# files their members name, written beside each case; `harb fleet <file>` is
+# the native court, and its refusal reads `fleet (line N): ...`
+FLEET_FIXTURES = r'D:\GitHub\harobanda\declarative\fleet\fixtures.json'
+FLEET_STZU = os.path.join(HERE, 'fleet_v04.stzu')
+FLEET_FLOOR = 32
+FLEET_COUNTS = {'members': 'MEMBER', 'retirements': 'RETIREMENT'}
+MACHINE_COUNTS = {'services': 'SERVICE', 'capabilities': 'CAPABILITY', 'mounts': 'MOUNT',
+                  'pins': 'PIN', 'networks': 'NETWORK', 'users': 'USER'}
 
 
 def court_verdict(exe, court, path):
@@ -212,15 +232,16 @@ def court_verdict(exe, court, path):
     return parse_verdict(out)
 
 
-def stage3(lang, court=None, floor=0):
-    """Every machine fixture through harb and through the forged court.
+def stage3(lang, court=None, floor=0, fixtures=MACHINE_FIXTURES, verb='check', counts=MACHINE_COUNTS,
+           scalars=('name', 'rationale', 'profile', 'arch', 'kernel', 'link')):
+    """Every fixture of the language through harb and through the forged court.
     The verdicts are classified, and the class 'beyond the declaration'
     (harb refuses on a rule the .stzu does not carry) is the measurement.
     A fixture harb accepts and the forged court refuses is a DEFECT; an
     agree count under the pinned floor is one too."""
     court = court or f'{lang}_court.ring'
     print(f'stage 3 -- the forged court ({court}) against harb on the {lang} fixtures')
-    doc = json.load(open(MACHINE_FIXTURES, encoding='utf-8'))
+    doc = json.load(open(fixtures, encoding='utf-8'))
     cases = doc['accepts'] + doc['rejects']
     agree = []          # same verdict, and fragment / structural fields agree
     beyond = []         # harb refuses, the declaration cannot: a rule beyond it
@@ -235,10 +256,16 @@ def stage3(lang, court=None, floor=0):
         return msg.split('): ', 1)[-1].startswith(('Unknown clause', 'Unknown kind', 'Clause '))
     with tempfile.TemporaryDirectory() as td:
         for case in cases:
-            p = os.path.join(td, case['id'] + '.machine')
+            # each case in its own folder, with the files it carries beside it
+            cd = os.path.join(td, case['id'])
+            os.makedirs(cd, exist_ok=True)
+            for fname, text in case.get('files', {}).items():
+                with open(os.path.join(cd, fname), 'w', encoding='utf-8', newline='') as f:
+                    f.write(text)
+            p = os.path.join(cd, case['id'] + '.' + lang)
             with open(p, 'w', encoding='utf-8', newline='') as f:
                 f.write(case['source'])
-            h_ok, h_line = harb_verdict(p)
+            h_ok, h_line = harb_verdict(p, verb, lang)
             c_ok, c_got = court_verdict(RNXC, court, p)
             o_ok, o_got = court_verdict(ORACLE, court, p)
             if (c_ok, c_got) != (o_ok, o_got):
@@ -248,22 +275,30 @@ def stage3(lang, court=None, floor=0):
                 # structural fields the court claims: name, rationale, the
                 # first declaration's scalar clauses, the counts per verb
                 e = case.get('expect', {})
-                why = ''
+                # the fleet fixtures put the counts beside the scalars
+                flat = {}
                 for k, want in e.items():
                     if k == 'counts':
-                        for ck, cv in want.items():
-                            verb = {'services': 'SERVICE', 'capabilities': 'CAPABILITY', 'mounts': 'MOUNT',
-                                    'pins': 'PIN', 'networks': 'NETWORK', 'users': 'USER'}.get(ck)
-                            got = c_got.get(f'count {verb}') if verb else None
-                            if got is None:
-                                unjudged[ck] = unjudged.get(ck, 0) + 1
-                            elif int(got) != cv:
-                                why = f'{ck}: expected {cv} got {got}'
-                    elif k in ('name', 'rationale', 'profile', 'arch', 'kernel'):
-                        if c_got.get(k) is None:
+                        flat.update(want)
+                    else:
+                        flat[k] = want
+                why = ''
+                for k, want in flat.items():
+                    if k in counts:
+                        got = c_got.get(f'count {counts[k]}')
+                        if got is None:
                             unjudged[k] = unjudged.get(k, 0) + 1
-                        elif c_got.get(k) != want:
-                            why = f"{k}: expected '{want}' got '{c_got.get(k)}'"
+                        elif int(got) != want:
+                            why = f'{k}: expected {want} got {got}'
+                    elif k in scalars:
+                        got = c_got.get(k)
+                        if want is None:
+                            if got is not None:
+                                why = f"{k}: expected none, got '{got}'"
+                        elif got is None:
+                            unjudged[k] = unjudged.get(k, 0) + 1
+                        elif got != want:
+                            why = f"{k}: expected '{want}' got '{got}'"
                     else:
                         unjudged[k] = unjudged.get(k, 0) + 1
                 if why:
@@ -658,6 +693,14 @@ if __name__ == '__main__':
         failures += f2
         if lang and stage in (None, 3):
             failures += stage3(lang, floor=AGREE_FLOOR if os.path.basename(stzu) == 'machine_v03.stzu' else 0)
+    # the fourth rung: the fleet language, a vocabulary over the machine language,
+    # forged from fleet_v04.stzu (which names machine_v03.stzu beside it) and judged
+    # against harb's fleet fixtures; `--stage=7` runs it alone
+    if stage in (None, 7) and os.path.basename(stzu) == 'machine_v03.stzu' and os.path.exists(FLEET_STZU):
+        f7, lang7 = stage2(FLEET_STZU, 'fleet')
+        failures += f7
+        if lang7:
+            failures += stage3(lang7, floor=FLEET_FLOOR, fixtures=FLEET_FIXTURES, verb='fleet', counts=FLEET_COUNTS)
     if lang and stage in (None, 4):
         failures += stage4(lang)
     if lang and stage in (None, 5):
