@@ -1,0 +1,8 @@
+-- refine_point.rfn -- a proposal against a seat the language does not declare refinable:
+-- box.arch is not in REFINE's POINTS (box.profile is, as a policy -- see refine_kind.rfn)
+DEFINE REFINE touch_the_arch AS (
+  TARGET "qemu_hello.ARCH", KIND knob,
+  FROM "x86_64", TO "aarch64",
+  AUTHOR "mansour", POSTURE trusted,
+  REASON "try the box on another architecture"
+) RATIONALE "A refinement is admitted only against a declared point"

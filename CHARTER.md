@@ -178,6 +178,16 @@ no expression position, no escape):
 | **`REFINE`** | absent | which declared points of a sentence may be refined, by whom, within what bounds, at what trust floor (section 7) |
 | **`FORMS` inside a vocabulary** | absent | the function-name grammar of principle 7 declared as data for the computing altitude's families |
 
+**Built 2026-10-01, the first slice of two of these rows -- stzu v0.2, the spike's second
+rung (`haro/spike/stzu2/GRAMMAR.md`, 30 fixtures, `haro/SPIKE.md`).** `WORLD` as cardinality
+(`ONE`, `FIRST`), the typed seats a knowledge stratum needs before it needs an ontology
+(`MENU`, `RANGE`, `FORMAT`, a seat typed by another declaration, `NAMES`), and `CONSTRAINT`
+with a closed, total condition language over one declaration and the `ONE` kinds; `REFINE`
+as `POINTS` (which seats, of which kind) and `FLOOR` (at what trust posture). The ontology
+as versioned data, `ASK`, `NARRATE` and `FORMS` are not built. Measured on the machine
+language: 95 of `harb`'s 120 fixtures agree with a court forged from the v0.2 declaration,
+against 41 from v0.1.
+
 **What the forge produces from one declaration** (Ringua's kit, 02-STACK's L1, now Haro's
 compiler verbs rather than separate organs): the parser; the court with the fixtures as its
 constitution and the runner as its drift alarm; the canonical printer (the round-trip
@@ -404,6 +414,16 @@ refinement is refused at the trust floor as `:llm` with a C2 record, admitted as
 court's image (33.5 ms without; `harb` 12.0; the oracle 27.4). One correction to the plan
 below: the machine language has **120** fixtures, not 54 (HF-34). The plan stands as
 written, as the record of what was asked.
+
+**The second rung, the same day, at the author's word ("Go for the WORLD and REFINE
+seats, fixtures first"): stzu v0.2** (`haro/spike/stzu2/`, 30 fixtures, then the prose;
+section 3's note). The machine language re-declared in it (`machine_v02.stzu`) forges a
+court that agrees with `harb` on **95 of 120** (14 computations beyond a declaration, 9
+the union and fleet kinds, 2 fragments, 0 defects), byte-identical on `rnxc` and the
+oracle; the refinement gate reads the declared `POINTS` and `FLOOR` (eight rows); 200
+derivations all parse and the decoder holds the grammar; edit to verdict 13.9 ms with the
+image (45.3 without; `harb` 9.3; the oracle 44.9). The oracle found the rung's one defect
+and it was Ring's (HF-36). Record: `haro/SPIKE.md`, "The second rung".
 
 v0.1's spike (`twice.haro`, a definition with an intent clause) proved one altitude. The
 ruling asks for three to meet, and the estate has already named the smallest program that

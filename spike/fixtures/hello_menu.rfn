@@ -1,0 +1,7 @@
+-- hello_menu.rfn -- a proposal whose value is outside the point's MENU: refused at constraint
+DEFINE REFINE restart_sometimes AS (
+  TARGET "hello.RESTART", KIND knob,
+  FROM "never", TO "sometimes",
+  AUTHOR "mansour", POSTURE trusted,
+  REASON "restart it now and then"
+) RATIONALE "The bounds of a knob are the seat's declared type"

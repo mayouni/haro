@@ -1,0 +1,416 @@
+-- machine_v02.stzu -- the machine language declared in stzu v0.2: the clauses
+-- harb's court reads today (machine_current.stzu) AND the rules it carries,
+-- as data -- menus, ranges, formats, references, one-and-first, and the
+-- conditions between seats -- each with the refusal phrase harb speaks, so
+-- the forged court can be held to harb's own fixtures. A PROPOSAL for
+-- harobanda. What v0.2 still cannot say is in stzu2/GRAMMAR.md: a cycle, an
+-- address inside a subnet, a path inside a declared mount, a perimeter that
+-- covers every address, a union type (ADDRESS dhcp-or-string, EGRESS
+-- none-or-list), and the fleet file's kinds.
+
+DEFINE LANGUAGE machine AS (
+  VERSION "0.2",
+  GRAMMAR "0.2",
+  COURT "declarative/machine/fixtures.json",
+  EXTENSION ".machine"
+) RATIONALE "A machine declared whole -- profile, capabilities, mounts, pins, services, networks, peers -- with no shell on its boot path, and its court's rules declared beside its grammar"
+
+-- ---- the menus (harb's enums, verbatim) ------------------------------------
+
+DEFINE MENU profiles AS (
+  WORDS [hosted, edge, touch], MESSAGE "PROFILE is hosted, edge or touch"
+) RATIONALE "The three substrates a machine can have"
+
+DEFINE MENU archs AS (
+  WORDS [x86_64, aarch64, riscv32, riscv64, thumbv7em, thumbv8m], MESSAGE "ARCH is x86_64, aarch64, riscv32, riscv64 or thumbv7em"
+) RATIONALE "The architectures the image builds for"
+
+DEFINE MENU kernels AS (
+  WORDS [linux, none, android], MESSAGE "KERNEL is linux, none or android"
+) RATIONALE "A kernel per profile"
+
+DEFINE MENU libcs AS (
+  WORDS [musl, none, bionic], MESSAGE "LIBC is musl, none or bionic"
+) RATIONALE "A libc per profile"
+
+DEFINE MENU boards AS (
+  WORDS [qemu_pc, qemu_virt, rpi4, sim, pico2, pico2w, esp32c6], MESSAGE "BOARD is qemu_pc, qemu_virt, rpi4 (hosted) or sim, pico2, pico2w, esp32c6 (edge)"
+) RATIONALE "The emulator court's machines and the real boards, hosted and edge"
+
+DEFINE MENU restart_policies AS (
+  WORDS [never, always, on_failure], MESSAGE "RESTART is never, always or on_failure"
+) RATIONALE "The restart menu is closed"
+
+DEFINE MENU yes_no AS (
+  WORDS [yes, no], MESSAGE "GRANT is yes or no"
+) RATIONALE "A capability is granted or refused; silence refuses"
+
+DEFINE MENU pin_modes AS (
+  WORDS [in, out], MESSAGE "MODE is in or out"
+) RATIONALE "A pin reads or drives"
+
+DEFINE MENU filesystems AS (
+  WORDS [proc, sysfs, devtmpfs, tmpfs, ext4, vfat, littlefs, cgroup2], MESSAGE "FS is proc, sysfs, devtmpfs, tmpfs, ext4, vfat, littlefs or cgroup2"
+) RATIONALE "The filesystems the image can mount"
+
+DEFINE MENU mount_options AS (
+  WORDS [rw, ro, noatime, nosuid, nodev, noexec], MESSAGE "'{value}' is not a mount option: the menu is rw, ro, noatime, nosuid, nodev, noexec"
+) RATIONALE "The mount options from the closed menu"
+
+DEFINE MENU capabilities AS (
+  WORDS [filesystem, process, network, environment, dynamic_load, gpio, threads, clock, inference], MESSAGE "is not a capability: the menu is filesystem, process, network, environment, dynamic_load, gpio, threads, clock, inference"
+) RATIONALE "stzlib's nine-name lattice, unchanged"
+
+-- ---- the ranges and formats -------------------------------------------------
+
+DEFINE RANGE uids AS (
+  MIN 0, MAX 65534, MESSAGE "uid {value} is out of range (1..65534)"
+) RATIONALE "above 65534 is nobody; zero is admitted by the range so that the constraint no_root can say why it is refused"
+
+DEFINE FORMAT at_path AS (
+  SHAPE absolute_path, MESSAGE "AT is an absolute path, not '{value}'"
+) RATIONALE "A mount point is an absolute path"
+
+DEFINE FORMAT ready_path AS (
+  SHAPE absolute_path, MESSAGE "READY is the absolute path the service creates when it is serving, not '{value}'"
+) RATIONALE "A readiness signal is a path"
+
+DEFINE FORMAT slots_device AS (
+  SHAPE absolute_path, MESSAGE "SLOTS is the boot partition's device, an absolute path, not '{value}'"
+) RATIONALE "Two slots on one partition, named by its device"
+
+DEFINE FORMAT identity_path AS (
+  SHAPE absolute_path, MESSAGE "IDENTITY is the absolute path of this device's key, not '{value}'"
+) RATIONALE "The device's key lives at an absolute path"
+
+DEFINE FORMAT journal_path AS (
+  SHAPE absolute_path, MESSAGE "JOURNAL is the absolute path of this machine's record, not '{value}'"
+) RATIONALE "The machine's record lives at an absolute path"
+
+DEFINE FORMAT peer_address AS (
+  SHAPE ipv4, MESSAGE "'{value}' is not an address (a.b.c.d): a peer is given one address, not a range"
+) RATIONALE "A peer is given one address"
+
+DEFINE FORMAT destination AS (
+  SHAPE cidr, MESSAGE "EGRESS takes destinations as address/prefix (10.9.0.0/16), and '{value}' is not one"
+) RATIONALE "A destination is an address/prefix"
+
+DEFINE FORMAT hardware_address AS (
+  SHAPE mac, MESSAGE "HARDWARE is six pairs of hex separated by colons (b8:27:eb:11:22:33), and '{value}' is not: it is what this machine recognises a returning device by"
+) RATIONALE "A device is recognised by its hardware address"
+
+DEFINE FORMAT domain_name AS (
+  SHAPE domain, MESSAGE "'{value}' cannot be a domain: a name on the wire is lowercase letters, digits and the hyphen, in labels separated by dots"
+) RATIONALE "A domain is labels joined by dots"
+
+-- ---- the forms ----------------------------------------------------------------
+
+DEFINE FORM word AS (
+  SEATS [value: text]
+) RATIONALE "One word of a service's argv; a service is an argv, never a shell line"
+
+DEFINE FORM server AS (
+  SEATS [address: text]
+) RATIONALE "One dns server of a static network, an address as text"
+
+DEFINE FORM egress_destination AS (
+  SEATS [prefix: destination]
+) RATIONALE "One address/prefix a network may reach"
+
+-- ---- the declarations ---------------------------------------------------------
+
+DEFINE DECLARATION box AS (
+  VERB "MACHINE",
+  SEATS [profile: profiles, arch: archs, kernel: kernels, libc: libcs?, board: boards?, console: text?, slots: slots_device?, identity: identity_path?, journal: journal_path?]
+) RATIONALE "The one identity declaration, first in the file: profile, architecture, kernel; libc and console default by profile, the board by architecture; slots, identity and journal are the hosted box's"
+
+DEFINE DECLARATION capability AS (
+  VERB "CAPABILITY",
+  NAMES capabilities,
+  SEATS [grant: yes_no]
+) RATIONALE "The name IS the capability; the declaration only grants or refuses it -- silence refuses"
+
+DEFINE DECLARATION user AS (
+  VERB "USER",
+  SEATS [uid: uids, gid: number?]
+) RATIONALE "A declared identity: a service that names one is dropped to it before it is executed"
+
+DEFINE DECLARATION mount AS (
+  VERB "MOUNT",
+  SEATS [at: at_path, fs: filesystems, device: text?, options: [mount_options]]
+) RATIONALE "A filesystem of the profile at an absolute path"
+
+DEFINE DECLARATION service AS (
+  VERB "SERVICE",
+  SEATS [run: [word], restart: restart_policies?, after: [service], needs: [capability], ready: ready_path?, health: number?, memory: number?, cpu: number?, tasks: number?, user: user?, sees: [mount]]
+) RATIONALE "A process the machine keeps: its argv, its restart policy, what it follows, what it needs, its readiness and health, its ceilings, its user, the mounts it sees -- AFTER, NEEDS, USER and SEES are references, resolved at check time"
+
+DEFINE DECLARATION network AS (
+  VERB "NETWORK",
+  SEATS [interface: text, address: text, gateway: text?, dns: [server], egress: [egress_destination], domain: domain_name?]
+) RATIONALE "One interface, one way to an address (dhcp or a static address/prefix); a static one may name its gateway, dns servers, egress and the domain it serves"
+
+DEFINE DECLARATION pin AS (
+  VERB "PIN",
+  SEATS [gpio: number, mode: pin_modes]
+) RATIONALE "A GPIO line, granted through the gpio capability"
+
+DEFINE DECLARATION peer AS (
+  VERB "PEER",
+  SEATS [network: network, hardware: hardware_address, address: peer_address]
+) RATIONALE "A device this machine recognises on a link it serves: by its hardware address, given one address and a name"
+
+-- ---- the world: one machine, first ----------------------------------------------
+
+DEFINE WORLD machine AS (
+  ONE [box],
+  FIRST box
+) RATIONALE "A machine file declares what ONE machine is, and the identity comes first"
+
+-- ---- the constraints: harb's rules, as data, in harb's words --------------------
+
+DEFINE CONSTRAINT hosted_runs_linux AS (
+  ON box, WHEN "profile = hosted", THEN "kernel = linux",
+  MESSAGE "PROFILE {profile} contradicts KERNEL {kernel}: a machine of PROFILE hosted runs on KERNEL linux"
+) RATIONALE "The profile fixes the substrate"
+
+DEFINE CONSTRAINT edge_runs_none AS (
+  ON box, WHEN "profile = edge", THEN "kernel = none",
+  MESSAGE "PROFILE {profile} contradicts KERNEL {kernel}: a machine of PROFILE edge runs on KERNEL none"
+) RATIONALE "An edge machine has no kernel"
+
+DEFINE CONSTRAINT touch_runs_android AS (
+  ON box, WHEN "profile = touch", THEN "kernel = android",
+  MESSAGE "PROFILE {profile} contradicts KERNEL {kernel}: a machine of PROFILE touch runs on KERNEL android"
+) RATIONALE "A touch machine is a commodity Android"
+
+DEFINE CONSTRAINT hosted_links_musl AS (
+  ON box, WHEN "profile = hosted and libc present", THEN "libc = musl",
+  MESSAGE "PROFILE {profile} contradicts LIBC {libc}: a machine of PROFILE hosted links LIBC musl"
+) RATIONALE "The libc follows the profile"
+
+DEFINE CONSTRAINT edge_links_none AS (
+  ON box, WHEN "profile = edge and libc present", THEN "libc = none",
+  MESSAGE "PROFILE {profile} contradicts LIBC {libc}: a machine of PROFILE edge links LIBC none"
+) RATIONALE "The libc follows the profile"
+
+DEFINE CONSTRAINT touch_links_bionic AS (
+  ON box, WHEN "profile = touch and libc present", THEN "libc = bionic",
+  MESSAGE "PROFILE {profile} contradicts LIBC {libc}: a machine of PROFILE touch links LIBC bionic"
+) RATIONALE "The libc follows the profile"
+
+DEFINE CONSTRAINT hosted_boards AS (
+  ON box, WHEN "profile = hosted and (board = sim or board = pico2 or board = pico2w or board = esp32c6)",
+  MESSAGE "PROFILE {profile} contradicts BOARD {board}: that is a board of the edge profile"
+) RATIONALE "Each profile has its own board menu"
+
+DEFINE CONSTRAINT edge_boards AS (
+  ON box, WHEN "profile = edge and (board = qemu_pc or board = qemu_virt or board = rpi4)",
+  MESSAGE "PROFILE {profile} contradicts BOARD {board}: that is a board of the hosted profile"
+) RATIONALE "Each profile has its own board menu"
+
+DEFINE CONSTRAINT rpi4_is_aarch64 AS (
+  ON box, WHEN "board = rpi4", THEN "arch = aarch64",
+  MESSAGE "ARCH {arch} contradicts BOARD {board}: that board is aarch64"
+) RATIONALE "A board has one architecture"
+
+DEFINE CONSTRAINT qemu_pc_is_x86_64 AS (
+  ON box, WHEN "board = qemu_pc", THEN "arch = x86_64",
+  MESSAGE "ARCH {arch} contradicts BOARD {board}: that board is x86_64"
+) RATIONALE "A board has one architecture"
+
+DEFINE CONSTRAINT qemu_virt_is_aarch64 AS (
+  ON box, WHEN "board = qemu_virt", THEN "arch = aarch64",
+  MESSAGE "ARCH {arch} contradicts BOARD {board}: that board is aarch64"
+) RATIONALE "A board has one architecture"
+
+DEFINE CONSTRAINT pico2_is_thumbv8m AS (
+  ON box, WHEN "board = pico2 or board = pico2w", THEN "arch = thumbv8m",
+  MESSAGE "ARCH {arch} contradicts BOARD {board}: that board is thumbv8m"
+) RATIONALE "A board has one architecture"
+
+DEFINE CONSTRAINT esp32c6_is_riscv32 AS (
+  ON box, WHEN "board = esp32c6", THEN "arch = riscv32",
+  MESSAGE "ARCH {arch} contradicts BOARD {board}: that board is riscv32"
+) RATIONALE "A board has one architecture"
+
+DEFINE CONSTRAINT slots_need_rpi4 AS (
+  ON box, WHEN "slots present and board != rpi4",
+  MESSAGE "SLOTS needs a board that boots from a card under a firmware that can try a slot (rpi4); {board} loads the kernel directly"
+) RATIONALE "Only a firmware that can try a slot can hold two"
+
+DEFINE CONSTRAINT identity_is_hosted AS (
+  ON box, WHEN "identity present and profile != hosted",
+  MESSAGE "IDENTITY is a hosted machine's declaration; a machine of PROFILE {profile} keeps its key in its own substrate, whose custody is the hardware's"
+) RATIONALE "An edge device's key is MicroRing's"
+
+DEFINE CONSTRAINT journal_needs_identity AS (
+  ON box, WHEN "journal present and identity absent",
+  MESSAGE "a journal is signed by the device, and this machine declares no IDENTITY: an unsigned record is anybody's"
+) RATIONALE "A record is signed or it is nobody's"
+
+DEFINE CONSTRAINT qemu_pc_consoles AS (
+  ON box, WHEN "console present and (board = qemu_pc or (board absent and arch = x86_64 and profile = hosted)) and not (console = '/dev/ttyS0' or console = '/dev/ttyS1' or console = '/dev/ttyS2' or console = '/dev/ttyS3')",
+  MESSAGE "CONSOLE {console} is not a console of BOARD qemu_pc: its consoles are /dev/ttyS0, /dev/ttyS1, /dev/ttyS2, /dev/ttyS3"
+) RATIONALE "A console is a port the board has"
+
+DEFINE CONSTRAINT qemu_virt_consoles AS (
+  ON box, WHEN "console present and (board = qemu_virt or (board absent and arch = aarch64 and profile = hosted)) and console != '/dev/ttyAMA0'",
+  MESSAGE "CONSOLE {console} is not a console of BOARD qemu_virt: its console is /dev/ttyAMA0, the emulated PL011"
+) RATIONALE "A console is a port the board has"
+
+DEFINE CONSTRAINT rpi4_consoles AS (
+  ON box, WHEN "console present and board = rpi4 and console != '/dev/ttyS1'",
+  MESSAGE "CONSOLE {console} is not a console of BOARD rpi4: its console is /dev/ttyS1, the mini-UART on the header pins"
+) RATIONALE "A console is a port the board has"
+
+DEFINE CONSTRAINT no_root AS (
+  ON user, WHEN "uid = 0",
+  MESSAGE "uid 0 is the machine itself; a service that must be root declares no USER rather than a root one"
+) RATIONALE "Root is the machine"
+
+DEFINE CONSTRAINT one_uid_one_identity AS (
+  ON user, WHEN "not uid unique",
+  MESSAGE "uid {uid} is already {other}'s; one number, one identity"
+) RATIONALE "Two names for one number would be one identity with two names"
+
+DEFINE CONSTRAINT users_are_hosted AS (
+  ON user, WHEN "box.profile != hosted",
+  MESSAGE "USER is a hosted machine's declaration; a machine of PROFILE {box.profile} runs one program and has no one to be"
+) RATIONALE "An edge machine runs one program"
+
+DEFINE CONSTRAINT run_names_a_program AS (
+  ON service, WHEN "run empty",
+  MESSAGE "RUN must name a program: the argv is empty"
+) RATIONALE "An argv starts with a program"
+
+DEFINE CONSTRAINT no_shell_line AS (
+  ON service, WHEN "run contains '/bin/sh'",
+  MESSAGE "A service is an argv, never a shell line: the boot path has no shell ('/bin/sh')"
+) RATIONALE "The boot path has no shell"
+
+DEFINE CONSTRAINT not_after_itself AS (
+  ON service, WHEN "after contains self",
+  MESSAGE "{name} comes after itself"
+) RATIONALE "An order starts somewhere"
+
+DEFINE CONSTRAINT ready_is_a_daemons_signal AS (
+  ON service, WHEN "ready present and restart = never",
+  MESSAGE "READY is a daemon's signal; {name} is a one-shot (RESTART never) and its readiness is its exit 0"
+) RATIONALE "A one-shot's readiness is its exit"
+
+DEFINE CONSTRAINT one_ready_path AS (
+  ON service, WHEN "ready present and not ready unique",
+  MESSAGE "{other} already signals on {ready}; one path signals for one service"
+) RATIONALE "Two services on one path would be one signal with two senders"
+
+DEFINE CONSTRAINT health_needs_ready AS (
+  ON service, WHEN "health present and ready absent",
+  MESSAGE "HEALTH is measured on the READY path, and {name} declares none: a world with nothing to refresh cannot be found wedged"
+) RATIONALE "Health is measured on the readiness path"
+
+DEFINE CONSTRAINT health_window AS (
+  ON service, WHEN "health = 0",
+  MESSAGE "HEALTH 0 is not a window: a world that never has to refresh is a world that can stop serving unnoticed"
+) RATIONALE "A window has a size"
+
+DEFINE CONSTRAINT health_under_an_hour AS (
+  ON service, WHEN "health > 3600",
+  MESSAGE "HEALTH {health} is longer than an hour: a window nobody would wait out is a promise the watchdog cannot keep"
+) RATIONALE "A window nobody waits out is no promise"
+
+DEFINE CONSTRAINT memory_ceiling AS (
+  ON service, WHEN "memory = 0",
+  MESSAGE "MEMORY 0 is not a ceiling: a world that may hold nothing cannot run at all"
+) RATIONALE "A ceiling is above the floor"
+
+DEFINE CONSTRAINT cpu_runs AS (
+  ON service, WHEN "cpu = 0",
+  MESSAGE "CPU 0 is a service that cannot run: the number is a percentage of ONE core, and 100 is that core"
+) RATIONALE "A service needs a core's share"
+
+DEFINE CONSTRAINT cpu_ceiling AS (
+  ON service, WHEN "cpu > 1600",
+  MESSAGE "CPU {cpu} is more than sixteen cores' worth; 1600 is the ceiling this grammar admits"
+) RATIONALE "Sixteen cores is the grammar's ceiling"
+
+DEFINE CONSTRAINT tasks_run AS (
+  ON service, WHEN "tasks = 0",
+  MESSAGE "TASKS 0 is a world that may hold no task at all, and a world with no task cannot run"
+) RATIONALE "A world has at least one task"
+
+DEFINE CONSTRAINT tasks_ceiling AS (
+  ON service, WHEN "tasks > 4096",
+  MESSAGE "TASKS {tasks}: the number counts tasks -- processes and threads together -- and four thousand is more than this grammar admits for one world"
+) RATIONALE "Four thousand tasks is the grammar's ceiling"
+
+DEFINE CONSTRAINT sees_needs_filesystem AS (
+  ON service, WHEN "sees present and not needs contains filesystem",
+  MESSAGE "{name} SEES a mount and needs filesystem for it: a world cannot choose sight of storage it never asked to touch, and SEES narrows that grant rather than making one"
+) RATIONALE "Sight narrows a grant"
+
+DEFINE CONSTRAINT sees_needs_a_mount AS (
+  ON service, WHEN "sees present and not exists mount",
+  MESSAGE "{name} SEES a mount and this machine declares no MOUNT: there is no sight to apportion"
+) RATIONALE "Nothing to see, nothing to narrow"
+
+DEFINE CONSTRAINT sees_something AS (
+  ON service, WHEN "sees present and sees empty",
+  MESSAGE "an empty SEES is not a declaration: a world that wants no storage declares no filesystem, and a world that wants all of it says nothing"
+) RATIONALE "An empty narrowing narrows nothing"
+
+DEFINE CONSTRAINT sees_once AS (
+  ON service, WHEN "not sees distinct",
+  MESSAGE "{other} is already named in {name}'s SEES: saying it twice says nothing the once did not"
+) RATIONALE "Once is enough"
+
+DEFINE CONSTRAINT mounts_are_not_touch AS (
+  ON mount, WHEN "box.profile = touch",
+  MESSAGE "The touch profile owns no mounts: Android's init does ({name})"
+) RATIONALE "A touch machine owns no mounts"
+
+DEFINE CONSTRAINT edge_filesystems AS (
+  ON mount, WHEN "box.profile = edge and not (fs = littlefs or fs = vfat or fs = tmpfs)",
+  MESSAGE "{fs} is not a filesystem of the edge profile (littlefs, vfat, tmpfs)"
+) RATIONALE "An edge machine's filesystems are a flash's"
+
+DEFINE CONSTRAINT block_filesystems_need_a_device AS (
+  ON mount, WHEN "(fs = ext4 or fs = vfat) and device absent",
+  MESSAGE "MOUNT {name} on {fs} needs a DEVICE"
+) RATIONALE "A block filesystem lives on a device"
+
+DEFINE CONSTRAINT egress_names_a_perimeter AS (
+  ON network, WHEN "egress present and egress empty",
+  MESSAGE "an empty EGRESS is not a declaration: a list names where the machine may go, and the word none says it goes nowhere"
+) RATIONALE "A perimeter is named or absent"
+
+DEFINE CONSTRAINT one_network_per_interface AS (
+  ON network, WHEN "not interface unique",
+  MESSAGE "{interface} already has a network ({other}); one network per interface"
+) RATIONALE "One interface, one network"
+
+DEFINE CONSTRAINT one_address_one_peer AS (
+  ON peer, WHEN "not address unique",
+  MESSAGE "{address} is already {other}'s: one address, one peer, or the name does not mean anything"
+) RATIONALE "One address names one device"
+
+-- ---- the refinable points, their kinds and their floors --------------------------
+
+DEFINE REFINE machine AS (
+  POINTS [service.restart: knob, service.ready: field, service.health: knob, service.memory: knob, service.cpu: knob, service.tasks: knob, box.console: field, box.profile: policy, box.board: policy, mount.device: field, capability.grant: policy],
+  FLOOR [service.restart: external, service.health: external, service.memory: external, service.cpu: external, service.tasks: external, box.profile: trusted, box.board: trusted, capability.grant: trusted]
+) RATIONALE "A restart policy and the ceilings are knobs an external actor may turn; the profile, the board and a grant are policy, and only a trusted actor touches them; a field with no floor takes the court's floor, trusted"
+
+-- ---- the refusals ------------------------------------------------------------------
+
+DEFINE REFUSAL unknown_verb AS (
+  MESSAGE "The machine verb set is closed (DEFINE)."
+) RATIONALE "The closure speaks when an alien verb arrives"
+
+DEFINE REFUSAL dangling_reference AS (
+  MESSAGE "This name resolves to nothing in the declared machine."
+) RATIONALE "AFTER, NEEDS, USER and SEES resolve at check time, never at boot"
+
+DEFINE REFUSAL duplicate_name AS (
+  MESSAGE "This name is already declared; one namespace, no duplicates."
+) RATIONALE "Two services with one name would be one service with two argvs"

@@ -1,16 +1,19 @@
-# stzu_lib.ring -- the stzu v0.1 meta-court, in pure core Ring (no Softanza).
+# stzu_lib.ring -- the stzu meta-court, v0.2, in pure core Ring (no Softanza).
 #
-# A port of stz/face/stz/Stzu.luau (437 lines, the first conforming
-# implementation) so that the declaring altitude of Haro is judged on rnx,
-# and A/B'd against the oracle: the same file runs on rnxc and on ring.exe
-# and must print the same bytes. The normative text is
-# stz/declarative/stzu/GRAMMAR.md; the judge is its fixtures.json.
+# v0.1 was a port of stz/face/stz/Stzu.luau (437 lines); it still is, and the
+# 28 v0.1 fixtures still pass unchanged. v0.2 is the declaring altitude of Haro
+# grown by the WORLD and REFINE seats and the type kinds a real language's
+# court needs (haro/spike/stzu2/GRAMMAR.md; the judge is stzu2/fixtures.json,
+# written first): MENU, RANGE, FORMAT as seat types; a seat typed by a
+# DECLARATION as a reference; NAMES on a declaration; CONSTRAINT with a
+# condition in the closed language of cond_lib.ring; WORLD (ONE, FIRST);
+# REFINE (POINTS, FLOOR).
 #
-# Refusals are one channel, "stzu (line N): message", raised with raise()
-# and caught by the caller. Nothing here executes anything.
-#
-# Functions only: this file is loaded, never run. Globals carry the $ of
-# Rule A so the same text means the same thing on both runtimes.
+# The same file runs on rnxc and on the oracle and must print the same bytes.
+# Refusals are one channel, "stzu (line N): message". Functions only; the
+# globals ($aStzuToks, $nStzuPos, and cond_lib's) are born in the root file.
+
+load "cond_lib.ring"
 
 # ---- the closed menus -------------------------------------------------------
 
@@ -30,18 +33,40 @@ func StzuRefusalCategories()
 	return ["unknown_verb", "unknown_declaration", "unknown_seat", "unknown_variable",
 	        "unterminated_string", "unexpected_character", "dangling_reference", "duplicate_name"]
 
-# kind -> list of [clause, shape]; shape is "string", "namelist" or "seatlist"
+func StzuShapes()
+	return ["absolute_path", "ipv4", "cidr", "mac", "label", "domain"]
+
+func StzuRefinementKinds()
+	return ["knob", "field", "symbol", "policy", "composite", "pipeline"]
+
+func StzuPostures()
+	return ["trusted", "external", "sandboxed", "llm"]
+
+# kind -> list of [clause, shape]; shapes: string namelist seatlist number ident pointlist
+# (sorted by clause name, as Luau's table.sort gives, for the allowed-list text)
 func StzuClauses(cKind)
 	if cKind = "LANGUAGE"
 		return [["COURT", "string"], ["EXTENSION", "string"], ["GRAMMAR", "string"], ["VERSION", "string"]]
 	but cKind = "DECLARATION"
-		return [["SEATS", "seatlist"], ["VERB", "string"]]
+		return [["NAMES", "ident"], ["SEATS", "seatlist"], ["VERB", "string"]]
 	but cKind = "FORM"
 		return [["SEATS", "seatlist"]]
 	but cKind = "EXPRESSION"
 		return [["AGGREGATES", "namelist"], ["OPERANDS", "namelist"], ["OPERATORS", "namelist"], ["VARIABLES", "namelist"]]
 	but cKind = "REFUSAL"
 		return [["MESSAGE", "string"]]
+	but cKind = "MENU"
+		return [["MESSAGE", "string"], ["WORDS", "namelist"]]
+	but cKind = "RANGE"
+		return [["MAX", "number"], ["MESSAGE", "string"], ["MIN", "number"]]
+	but cKind = "FORMAT"
+		return [["MESSAGE", "string"], ["SHAPE", "ident"]]
+	but cKind = "CONSTRAINT"
+		return [["MESSAGE", "string"], ["ON", "ident"], ["THEN", "string"], ["WHEN", "string"]]
+	but cKind = "WORLD"
+		return [["FIRST", "ident"], ["ONE", "namelist"]]
+	but cKind = "REFINE"
+		return [["FLOOR", "pointlist"], ["POINTS", "pointlist"]]
 	ok
 	return []
 
@@ -56,14 +81,25 @@ func StzuRequired(cKind)
 		return ["OPERATORS", "OPERANDS"]
 	but cKind = "REFUSAL"
 		return ["MESSAGE"]
+	but cKind = "MENU"
+		return ["WORDS"]
+	but cKind = "RANGE"
+		return ["MIN", "MAX"]
+	but cKind = "FORMAT"
+		return ["SHAPE"]
+	but cKind = "CONSTRAINT"
+		return ["ON", "WHEN", "MESSAGE"]
+	but cKind = "WORLD"
+		return []
+	but cKind = "REFINE"
+		return ["POINTS"]
 	ok
 	return []
 
 func StzuIsKind(cWord)
-	return InStrList(cWord, ["LANGUAGE", "DECLARATION", "FORM", "EXPRESSION", "REFUSAL"])
+	return InStrList(cWord, ["LANGUAGE", "DECLARATION", "FORM", "EXPRESSION", "REFUSAL",
+	                         "MENU", "RANGE", "FORMAT", "CONSTRAINT", "WORLD", "REFINE"])
 
-# the allowed clause names of a kind, sorted and comma-joined (the tables
-# above are already in sorted order, as Luau's table.sort gives)
 func StzuAllowedList(cKind)
 	aC = StzuClauses(cKind)
 	cOut = ""
@@ -88,11 +124,7 @@ func InStrList(cS, aL)
 	next
 	return 0
 
-# Character classes by byte code, never by string ordering: on Ring an
-# ordering of two strings where one is numeric ("D" >= "0") converts and
-# raises R41 (Ring, Judged by the Record, 2.8); the oracle found it on
-# this file's first run, where rnxc had compared silently (HF-30).
-
+# character classes by byte code, never by string ordering (HF-30)
 func IsLowerStart(c)
 	n = ascii(c)
 	return (n >= 97 and n <= 122) or n = 95
@@ -141,7 +173,7 @@ func StzuFail(nLine, cMsg)
 
 # ---- tokenizer --------------------------------------------------------------
 # a token is [type, value, line]; types: string number ident keyword
-# lparen rparen lbracket rbracket comma colon question eof
+# lparen rparen lbracket rbracket comma colon question dot eof
 
 func StzuTokenize(cSrc)
 	aToks = []
@@ -156,13 +188,10 @@ func StzuTokenize(cSrc)
 		but c = " " or c = char(9) or c = char(13)
 			i++
 		but c = "-" and i < n and cSrc[i+1] = "-"
-			# a comment runs to the end of the line
 			while i <= n and cSrc[i] != char(10)
 				i++
 			end
 		but c = '"'
-			# a string may span lines; continuation whitespace folds to one
-			# space (the commons, 3.2): [ \t]*\r?\n[ \t]* -> " ". No escapes.
 			nStart = nLine
 			j = i + 1
 			cRaw = ""
@@ -177,7 +206,6 @@ func StzuTokenize(cSrc)
 			aToks + ["string", FoldString(cRaw), nStart]
 			i = j + 1
 		but IsDigitChar(c) or (c = "-" and i < n and IsDigitChar(cSrc[i+1]))
-			# ^-?\d+\.?\d*
 			j = i
 			if cSrc[j] = "-" j++ ok
 			while j <= n and IsDigitChar(cSrc[j])
@@ -214,6 +242,7 @@ func StzuTokenize(cSrc)
 			but c = "," cT = "comma"
 			but c = ":" cT = "colon"
 			but c = "?" cT = "question"
+			but c = "." cT = "dot"
 			ok
 			if cT = ""
 				StzuFail(nLine, "character '" + c + "' is not part of the stzu grammar")
@@ -225,8 +254,7 @@ func StzuTokenize(cSrc)
 	aToks + ["eof", "", nLine]
 	return aToks
 
-# Luau: string.gsub(raw, "[ \t]*\r?\n[ \t]*", " ") -- spaces and tabs on
-# BOTH sides of the newline fold into the one space.
+# Luau: string.gsub(raw, "[ \t]*\r?\n[ \t]*", " ")
 func FoldString(cRaw)
 	cOut = ""
 	n = len(cRaw)
@@ -234,7 +262,6 @@ func FoldString(cRaw)
 	while i <= n
 		c = cRaw[i]
 		if c = char(10) or (c = char(13) and i < n and cRaw[i+1] = char(10))
-			# strip the spaces and tabs already emitted before the newline
 			while len(cOut) > 0 and (cOut[len(cOut)] = " " or cOut[len(cOut)] = char(9))
 				cOut = left(cOut, len(cOut) - 1)
 			end
@@ -251,8 +278,7 @@ func FoldString(cRaw)
 	end
 	return cOut
 
-# ---- parser + the meta-court -----------------------------------------------
-# The parse state lives in two globals so the small helpers can share it.
+# ---- parser -----------------------------------------------------------------
 
 func StzuPeek()
 	return $aStzuToks[$nStzuPos]
@@ -276,7 +302,6 @@ func StzuExpectKeyword(cV)
 	ok
 	StzuAdvance()
 
-# [ ident, ident, ] -- trailing comma legal
 func StzuParseNameList()
 	StzuExpect("lbracket", "'['")
 	aNames = []
@@ -293,7 +318,7 @@ func StzuParseNameList()
 	StzuAdvance()
 	return aNames
 
-# [ name: type?, other: [form], ] -- a seat is [name, of, isList, optional, line]
+# a seat is [name, of, isList, optional, line]
 func StzuParseSeatList()
 	StzuExpect("lbracket", "'['")
 	aSeats = []
@@ -328,6 +353,27 @@ func StzuParseSeatList()
 	StzuAdvance()
 	return aSeats
 
+# a point is [decl, seat, word, line]: [ decl.seat: word, ... ]
+func StzuParsePointList()
+	StzuExpect("lbracket", "'['")
+	aPoints = []
+	while StzuPeek()[1] != "rbracket"
+		tD = StzuExpect("ident", "a declaration name")
+		StzuExpect("dot", "'.'")
+		tS = StzuExpect("ident", "a seat name")
+		StzuExpect("colon", "':'")
+		tW = StzuExpect("ident", "a word")
+		aPoints + [tD[2], tS[2], tW[2], tD[3]]
+		if StzuPeek()[1] = "comma"
+			StzuAdvance()
+		but StzuPeek()[1] != "rbracket"
+			t = StzuPeek()
+			StzuFail(t[3], "Expected ',' or ']' but found '" + t[2] + "'")
+		ok
+	end
+	StzuAdvance()
+	return aPoints
+
 func ClauseValue(aClauses, cName)
 	for i = 1 to len(aClauses)
 		if aClauses[i][1] = cName return aClauses[i][2] ok
@@ -341,7 +387,7 @@ func HasClause(aClauses, cName)
 	return 0
 
 # one DEFINE <KIND> <name> AS ( clauses ) RATIONALE "..."
-# returns [kind, name, clauses, rationale, line]; clauses is a list of [NAME, value]
+# returns [kind, name, clauses, rationale, line]
 func StzuParseDeclaration()
 	t = StzuPeek()
 	if t[1] != "keyword" or t[2] != "DEFINE"
@@ -377,8 +423,16 @@ func StzuParseDeclaration()
 			aClauses + [ct[2], tv[2]]
 		but cShape = "namelist"
 			aClauses + [ct[2], StzuParseNameList()]
-		else
+		but cShape = "seatlist"
 			aClauses + [ct[2], StzuParseSeatList()]
+		but cShape = "number"
+			tv = StzuExpect("number", "a number")
+			aClauses + [ct[2], tv[2]]
+		but cShape = "ident"
+			tv = StzuExpect("ident", "a lower_snake name")
+			aClauses + [ct[2], tv[2]]
+		else
+			aClauses + [ct[2], StzuParsePointList()]
 		ok
 		if StzuPeek()[1] = "comma"
 			StzuAdvance()
@@ -402,13 +456,19 @@ func StzuParseDeclaration()
 	next
 	return [cKind, cName, aClauses, tr[2], nDeclLine]
 
-# The language record: a list of pairs read with LangGet(). Its members:
+# ---- the language record ------------------------------------------------------
 #   name version grammar court extension rationale
-#   declarations: list of [name, verb, seats, rationale, line]
-#   forms:        list of [name, seats, rationale, line]
-#   expressions:  list of [name, operators, operands, aggregates, variables, rationale, line]
-#                 (aggregates / variables are NULL when absent)
-#   refusals:     list of [name, message, rationale, line]
+#   declarations: [name, verb, seats, rationale, line, names]   (names "" or a MENU/FORMAT)
+#   forms:        [name, seats, rationale, line]
+#   expressions:  [name, operators, operands, aggregates, variables, rationale, line]
+#   refusals:     [name, message, rationale, line]
+#   menus:        [name, words, message, line]
+#   ranges:       [name, min, max, message, line]
+#   formats:      [name, shape, message, line]
+#   constraints:  [name, on, when, then, message, line]        (then "" when absent)
+#   world:        [one, first] or NULL                          (one a list, first "" or a name)
+#   refine:       [points, floors] or NULL                       (lists of [decl, seat, word, line])
+
 func LangGet(aLang, cKey)
 	for i = 1 to len(aLang)
 		if aLang[i][1] = cKey return aLang[i][2] ok
@@ -435,7 +495,13 @@ func StzuDeclare(cSrc)
 	aForms = []
 	aExpressions = []
 	aRefusals = []
-	aDeclared = []     # [name, kind] -- one namespace
+	aMenus = []
+	aRanges = []
+	aFormats = []
+	aConstraints = []
+	aWorld = NULL
+	aRefine = NULL
+	aDeclared = []
 	aVerbs = []
 	nCount = 0
 
@@ -457,6 +523,22 @@ func StzuDeclare(cSrc)
 			cLCourt = ClauseValue(aClauses, "COURT")
 			cLExtension = ClauseValue(aClauses, "EXTENSION")
 			cLRationale = cRationale
+		but cKind = "WORLD"
+			if not isNull(aWorld)
+				StzuFail(nLine, "a .stzu file declares at most one WORLD")
+			ok
+			aOne = []
+			if HasClause(aClauses, "ONE") aOne = ClauseValue(aClauses, "ONE") ok
+			cFirst = ""
+			if HasClause(aClauses, "FIRST") cFirst = ClauseValue(aClauses, "FIRST") ok
+			aWorld = [aOne, cFirst, nLine]
+		but cKind = "REFINE"
+			if not isNull(aRefine)
+				StzuFail(nLine, "a .stzu file declares at most one REFINE")
+			ok
+			aFloors = []
+			if HasClause(aClauses, "FLOOR") aFloors = ClauseValue(aClauses, "FLOOR") ok
+			aRefine = [ClauseValue(aClauses, "POINTS"), aFloors, nLine]
 		else
 			if DeclaredKind(aDeclared, cName) != ""
 				StzuFail(nLine, "'" + cName + "' is already declared -- one namespace, one name, one meaning")
@@ -471,7 +553,9 @@ func StzuDeclare(cSrc)
 					StzuFail(nLine, "verb '" + cVerb + "' is already declared")
 				ok
 				aVerbs + cVerb
-				aDeclarations + [cName, cVerb, ClauseValue(aClauses, "SEATS"), cRationale, nLine]
+				cNames = ""
+				if HasClause(aClauses, "NAMES") cNames = ClauseValue(aClauses, "NAMES") ok
+				aDeclarations + [cName, cVerb, ClauseValue(aClauses, "SEATS"), cRationale, nLine, cNames]
 			but cKind = "FORM"
 				aForms + [cName, ClauseValue(aClauses, "SEATS"), cRationale, nLine]
 			but cKind = "EXPRESSION"
@@ -501,19 +585,58 @@ func StzuDeclare(cSrc)
 					aVars = ClauseValue(aClauses, "VARIABLES")
 				ok
 				aExpressions + [cName, aOps, aOpd, aAgg, aVars, cRationale, nLine]
-			else
+			but cKind = "REFUSAL"
 				if not InStrList(cName, StzuRefusalCategories())
 					StzuFail(nLine, "'" + cName + "' is not a refusal category")
 				ok
 				aRefusals + [cName, ClauseValue(aClauses, "MESSAGE"), cRationale, nLine]
+			but cKind = "MENU"
+				aWords = ClauseValue(aClauses, "WORDS")
+				if len(aWords) = 0
+					StzuFail(nLine, "a MENU names at least one word")
+				ok
+				cMsg = ""
+				if HasClause(aClauses, "MESSAGE") cMsg = ClauseValue(aClauses, "MESSAGE") ok
+				aMenus + [cName, aWords, cMsg, nLine]
+			but cKind = "RANGE"
+				nMin = 0 + ClauseValue(aClauses, "MIN")
+				nMax = 0 + ClauseValue(aClauses, "MAX")
+				if nMin > nMax
+					StzuFail(nLine, "RANGE " + cName + " has MIN above MAX (" + ClauseValue(aClauses, "MIN") + " > " + ClauseValue(aClauses, "MAX") + ")")
+				ok
+				cMsg = ""
+				if HasClause(aClauses, "MESSAGE") cMsg = ClauseValue(aClauses, "MESSAGE") ok
+				aRanges + [cName, ClauseValue(aClauses, "MIN"), ClauseValue(aClauses, "MAX"), cMsg, nLine]
+			but cKind = "FORMAT"
+				cShape = ClauseValue(aClauses, "SHAPE")
+				if not InStrList(cShape, StzuShapes())
+					StzuFail(nLine, "'" + cShape + "' is not a shape: the menu is absolute_path, ipv4, cidr, mac, label, domain")
+				ok
+				cMsg = ""
+				if HasClause(aClauses, "MESSAGE") cMsg = ClauseValue(aClauses, "MESSAGE") ok
+				aFormats + [cName, cShape, cMsg, nLine]
+			else
+				# CONSTRAINT: resolved after the whole file is read
+				cThen = ""
+				if HasClause(aClauses, "THEN") cThen = ClauseValue(aClauses, "THEN") ok
+				aConstraints + [cName, ClauseValue(aClauses, "ON"), ClauseValue(aClauses, "WHEN"), cThen, ClauseValue(aClauses, "MESSAGE"), nLine]
 			ok
 		ok
 	end
 
-	# the resolution pass (order-free: forward references are legal; a name
-	# resolving to nothing is refused now, never a later surprise)
+	# the resolution pass (order-free; a name resolving to nothing is refused now)
 	for i = 1 to len(aDeclarations)
 		StzuResolveSeats(aDeclarations[i][3], aDeclared)
+		cNames = aDeclarations[i][6]
+		if cNames != ""
+			cK = DeclaredKind(aDeclared, cNames)
+			if cK = ""
+				StzuFail(aDeclarations[i][5], "NAMES '" + cNames + "' resolves to nothing in this declaration")
+			ok
+			if cK != "MENU" and cK != "FORMAT"
+				StzuFail(aDeclarations[i][5], "NAMES must name a MENU or a FORMAT; '" + cNames + "' is a " + cK)
+			ok
+		ok
 	next
 	for i = 1 to len(aForms)
 		StzuResolveSeats(aForms[i][2], aDeclared)
@@ -534,11 +657,109 @@ func StzuDeclare(cSrc)
 		if not isNull(aE[4]) and not bAgg StzuFail(aE[7], "an AGGREGATES clause requires operand 'agg'") ok
 	next
 
+	# the WORLD: ONE and FIRST name declarations
+	aOneDecls = []
+	if not isNull(aWorld)
+		aOne = aWorld[1]
+		for i = 1 to len(aOne)
+			cK = DeclaredKind(aDeclared, aOne[i])
+			if cK = "" StzuFail(aWorld[3], "ONE: '" + aOne[i] + "' resolves to nothing in this declaration") ok
+			if cK != "DECLARATION" StzuFail(aWorld[3], "ONE must name a DECLARATION; '" + aOne[i] + "' is a " + cK) ok
+		next
+		aOneDecls = aOne
+		if aWorld[2] != ""
+			cK = DeclaredKind(aDeclared, aWorld[2])
+			if cK = "" StzuFail(aWorld[3], "FIRST: '" + aWorld[2] + "' resolves to nothing in this declaration") ok
+			if cK != "DECLARATION" StzuFail(aWorld[3], "FIRST must name a DECLARATION; '" + aWorld[2] + "' is a " + cK) ok
+		ok
+	ok
+
+	# the CONSTRAINTs: ON names a declaration; every name a condition uses exists
+	$aCondDeclSeats = []
+	for i = 1 to len(aDeclarations)
+		aS = aDeclarations[i][3]
+		aNames = []
+		for j = 1 to len(aS)
+			aNames + aS[j][1]
+		next
+		$aCondDeclSeats + [aDeclarations[i][1], aNames]
+	next
+	for i = 1 to len(aConstraints)
+		aC = aConstraints[i]
+		cK = DeclaredKind(aDeclared, aC[2])
+		if cK = "" StzuFail(aC[6], "ON: '" + aC[2] + "' resolves to nothing in this declaration") ok
+		if cK != "DECLARATION" StzuFail(aC[6], "ON must name a DECLARATION; '" + aC[2] + "' is a " + cK) ok
+		StzuCheckCondition(aC[3], aC[2], aOneDecls, aC[6])
+		if aC[4] != ""
+			StzuCheckCondition(aC[4], aC[2], aOneDecls, aC[6])
+		ok
+	next
+
+	# the REFINE: every point is a seat of a declaration; kinds and floors are closed
+	if not isNull(aRefine)
+		aPoints = aRefine[1]
+		for i = 1 to len(aPoints)
+			aP = aPoints[i]
+			if not StzuHasSeat(aDeclarations, aP[1], aP[2])
+				StzuFail(aP[4], "no such point '" + aP[1] + "." + aP[2] + "': a point is a seat of a declaration of this language")
+			ok
+			if not InStrList(aP[3], StzuRefinementKinds())
+				StzuFail(aP[4], "'" + aP[3] + "' is not a refinement kind: knob, field, symbol, policy, composite or pipeline")
+			ok
+		next
+		aFloors = aRefine[2]
+		for i = 1 to len(aFloors)
+			aF = aFloors[i]
+			if not InStrList(aF[3], StzuPostures())
+				StzuFail(aF[4], "'" + aF[3] + "' is not a posture: trusted, external, sandboxed or llm")
+			ok
+			bPoint = 0
+			for j = 1 to len(aPoints)
+				if aPoints[j][1] = aF[1] and aPoints[j][2] = aF[2] bPoint = 1 ok
+			next
+			if not bPoint
+				StzuFail(aF[4], "'" + aF[1] + "." + aF[2] + "' is not a declared point: a FLOOR stands on a POINT")
+			ok
+		next
+	ok
+
 	return [ ["name", cLName], ["version", cLVersion], ["grammar", cLGrammar],
 	         ["court", cLCourt], ["extension", cLExtension], ["rationale", cLRationale],
 	         ["declarations", aDeclarations], ["forms", aForms],
-	         ["expressions", aExpressions], ["refusals", aRefusals] ]
+	         ["expressions", aExpressions], ["refusals", aRefusals],
+	         ["menus", aMenus], ["ranges", aRanges], ["formats", aFormats],
+	         ["constraints", aConstraints], ["world", aWorld], ["refine", aRefine] ]
 
+func StzuHasSeat(aDeclarations, cDecl, cSeat)
+	for i = 1 to len(aDeclarations)
+		if aDeclarations[i][1] = cDecl
+			aS = aDeclarations[i][3]
+			for j = 1 to len(aS)
+				if aS[j][1] = cSeat return 1 ok
+			next
+		ok
+	next
+	return 0
+
+func StzuCheckCondition(cCond, cOn, aOneDecls, nLine)
+	aAst = NULL
+	cErr = ""
+	try
+		aAst = CondParse(cCond)
+	catch
+		cErr = cCatchError
+	done
+	if cErr != ""
+		StzuFail(nLine, cErr + " -- in '" + cCond + "'")
+	ok
+	cWhy = CondValidate(aAst, cOn, aOneDecls)
+	if cWhy != ""
+		StzuFail(nLine, cWhy + " -- in '" + cCond + "'")
+	ok
+
+# a seat type resolves to a primitive, a FORM, an EXPRESSION, a MENU, a RANGE,
+# a FORMAT or a DECLARATION (a reference); a list seat's element is a FORM, a
+# DECLARATION or a MENU
 func StzuResolveSeats(aSeats, aDeclared)
 	for i = 1 to len(aSeats)
 		aS = aSeats[i]
@@ -548,23 +769,21 @@ func StzuResolveSeats(aSeats, aDeclared)
 			if cK = ""
 				StzuFail(aS[5], "seat type '" + cOf + "' resolves to nothing in this declaration")
 			ok
-			if cK != "FORM"
-				StzuFail(aS[5], "a list seat's element must be a declared FORM; '" + cOf + "' is not")
+			if cK != "FORM" and cK != "DECLARATION" and cK != "MENU"
+				StzuFail(aS[5], "a list seat's element must be a declared FORM, DECLARATION or MENU; '" + cOf + "' is not")
 			ok
 		but not InStrList(cOf, StzuPrimitives())
 			cK = DeclaredKind(aDeclared, cOf)
 			if cK = ""
 				StzuFail(aS[5], "seat type '" + cOf + "' resolves to nothing in this declaration")
 			ok
-			if cK != "FORM" and cK != "EXPRESSION"
-				StzuFail(aS[5], "seat type '" + cOf + "' must name a FORM or an EXPRESSION, not a " + cK)
+			if cK != "FORM" and cK != "EXPRESSION" and cK != "MENU" and cK != "RANGE" and cK != "FORMAT" and cK != "DECLARATION"
+				StzuFail(aS[5], "seat type '" + cOf + "' must name a FORM, an EXPRESSION, a MENU, a RANGE, a FORMAT or a DECLARATION, not a " + cK)
 			ok
 		ok
 	next
 
 # ---- the printed verdict ----------------------------------------------------
-# The structural fields the fixtures' accepts ask for, one per line, so a
-# harness reads them without a JSON reader; "ok" first.
 
 func StzuPrintLanguage(aLang)
 	? "ok"
@@ -578,6 +797,17 @@ func StzuPrintLanguage(aLang)
 	? "forms " + len(LangGet(aLang, "forms"))
 	? "expressions " + len(LangGet(aLang, "expressions"))
 	? "refusals " + len(LangGet(aLang, "refusals"))
+	? "menus " + len(LangGet(aLang, "menus"))
+	? "ranges " + len(LangGet(aLang, "ranges"))
+	? "formats " + len(LangGet(aLang, "formats"))
+	? "constraints " + len(LangGet(aLang, "constraints"))
+	nWorld = 0
+	if not isNull(LangGet(aLang, "world")) nWorld = 1 ok
+	? "world " + nWorld
+	nPoints = 0
+	aR = LangGet(aLang, "refine")
+	if not isNull(aR) nPoints = len(aR[1]) ok
+	? "points " + nPoints
 	aD = LangGet(aLang, "declarations")
 	aV = []
 	for i = 1 to len(aD)

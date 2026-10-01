@@ -1,0 +1,8 @@
+-- refine_kind.rfn -- a proposal of the wrong KIND against a declared point:
+-- box.profile is declared a policy, and the proposal calls it a knob
+DEFINE REFINE touch_the_profile AS (
+  TARGET "qemu_hello.PROFILE", KIND knob,
+  FROM "hosted", TO "edge",
+  AUTHOR "mansour", POSTURE trusted,
+  REASON "try the box as an edge machine"
+) RATIONALE "The kind of a point is the language's to declare, not the proposal's"

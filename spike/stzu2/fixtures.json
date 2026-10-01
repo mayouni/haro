@@ -1,0 +1,189 @@
+{
+  "grammar": "stzu",
+  "version": "0.2",
+  "comment": "The stzu v0.2 conformance floor, written BEFORE the court that passes it (the W discipline: fixtures first, prose second). v0.2 grows v0.1 by the WORLD and REFINE seats the Haro charter names (section 3) and the type kinds the spike measured as missing on a real language (haro/SPIKE.md: 70 of 120 machine fixtures were rules beyond the declaration): MENU, RANGE and FORMAT as seat types with their refusal phrasing; a seat typed by a DECLARATION is a reference resolved at check time; CONSTRAINT carries a condition in a closed language over a declaration's seats; WORLD declares cardinality and position; REFINE declares the refinable points, their kinds (RFN's six, per D6) and their trust floors. Every v0.1 fixture still passes: v0.2 refuses nothing v0.1 accepted. Rejects carry the fragment the refusal must contain.",
+  "accepts": [
+    {
+      "id": "A1",
+      "name": "a MENU is a seat type: the word must be one of its WORDS, and the menu speaks its own refusal",
+      "source": "DEFINE LANGUAGE m AS (VERSION \"0.2\", GRAMMAR \"0.2\", COURT \"x\", EXTENSION \".m\") RATIONALE \"x\"\nDEFINE MENU restart_policy AS (WORDS [never, always, on_failure], MESSAGE \"RESTART is never, always or on_failure\") RATIONALE \"the restart menu is closed\"\nDEFINE DECLARATION service AS (VERB \"SERVICE\", SEATS [restart: restart_policy?]) RATIONALE \"x\"\n",
+      "expect": {"language": "m", "counts": {"declarations": 1, "forms": 0, "expressions": 0, "refusals": 0, "menus": 1, "ranges": 0, "formats": 0, "constraints": 0}, "verbs": ["SERVICE"]}
+    },
+    {
+      "id": "A2",
+      "name": "a RANGE is a seat type for numbers, MIN to MAX inclusive",
+      "source": "DEFINE LANGUAGE m AS (VERSION \"0.2\", GRAMMAR \"0.2\", COURT \"x\", EXTENSION \".m\") RATIONALE \"x\"\nDEFINE RANGE health_window AS (MIN 1, MAX 3600, MESSAGE \"HEALTH is a window of one second to an hour\") RATIONALE \"x\"\nDEFINE DECLARATION service AS (VERB \"SERVICE\", SEATS [health: health_window?]) RATIONALE \"x\"\n",
+      "expect": {"language": "m", "counts": {"declarations": 1, "menus": 0, "ranges": 1, "formats": 0, "constraints": 0}}
+    },
+    {
+      "id": "A3",
+      "name": "a FORMAT is a seat type for text, its SHAPE from the closed shape menu",
+      "source": "DEFINE LANGUAGE m AS (VERSION \"0.2\", GRAMMAR \"0.2\", COURT \"x\", EXTENSION \".m\") RATIONALE \"x\"\nDEFINE FORMAT abs_path AS (SHAPE absolute_path, MESSAGE \"an absolute path\") RATIONALE \"x\"\nDEFINE FORMAT subnet AS (SHAPE cidr) RATIONALE \"x\"\nDEFINE DECLARATION mount AS (VERB \"MOUNT\", SEATS [at: abs_path]) RATIONALE \"x\"\n",
+      "expect": {"language": "m", "counts": {"declarations": 1, "formats": 2}}
+    },
+    {
+      "id": "A4",
+      "name": "a seat typed by a DECLARATION is a reference, resolved at check time; a list of them is a list of references",
+      "source": "DEFINE LANGUAGE m AS (VERSION \"0.2\", GRAMMAR \"0.2\", COURT \"x\", EXTENSION \".m\") RATIONALE \"x\"\nDEFINE DECLARATION service AS (VERB \"SERVICE\", SEATS [after: [service], user: user?]) RATIONALE \"a service follows services and runs as a user\"\nDEFINE DECLARATION user AS (VERB \"USER\", SEATS [uid: number]) RATIONALE \"x\"\n",
+      "expect": {"language": "m", "counts": {"declarations": 2}, "verbs": ["SERVICE", "USER"]}
+    },
+    {
+      "id": "A5",
+      "name": "a WORLD declares cardinality and position: ONE of each listed kind per sentence, and which kind comes FIRST",
+      "source": "DEFINE LANGUAGE m AS (VERSION \"0.2\", GRAMMAR \"0.2\", COURT \"x\", EXTENSION \".m\") RATIONALE \"x\"\nDEFINE DECLARATION box AS (VERB \"MACHINE\", SEATS [profile: name]) RATIONALE \"x\"\nDEFINE DECLARATION service AS (VERB \"SERVICE\", SEATS [run: [word]]) RATIONALE \"x\"\nDEFINE FORM word AS (SEATS [value: text]) RATIONALE \"x\"\nDEFINE WORLD machine AS (ONE [box], FIRST box) RATIONALE \"a machine file declares one machine, and it comes first\"\n",
+      "expect": {"language": "m", "counts": {"declarations": 2, "forms": 1}, "world": 1}
+    },
+    {
+      "id": "A6",
+      "name": "a CONSTRAINT with WHEN and THEN: when the condition holds on a declaration, the consequence must hold too",
+      "source": "DEFINE LANGUAGE m AS (VERSION \"0.2\", GRAMMAR \"0.2\", COURT \"x\", EXTENSION \".m\") RATIONALE \"x\"\nDEFINE DECLARATION box AS (VERB \"MACHINE\", SEATS [profile: name, kernel: name]) RATIONALE \"x\"\nDEFINE CONSTRAINT hosted_runs_linux AS (ON box, WHEN \"profile = hosted\", THEN \"kernel = linux\", MESSAGE \"a machine of PROFILE hosted runs on KERNEL linux\") RATIONALE \"the profile fixes the substrate\"\n",
+      "expect": {"language": "m", "counts": {"declarations": 1, "constraints": 1}}
+    },
+    {
+      "id": "A7",
+      "name": "a CONSTRAINT with WHEN alone names a forbidden state; the atoms: present, absent, contains, nonempty, unique, distinct, exists, and the ONE kind's seats",
+      "source": "DEFINE LANGUAGE m AS (VERSION \"0.2\", GRAMMAR \"0.2\", COURT \"x\", EXTENSION \".m\") RATIONALE \"x\"\nDEFINE DECLARATION box AS (VERB \"MACHINE\", SEATS [profile: name]) RATIONALE \"x\"\nDEFINE MENU caps AS (WORDS [filesystem, network]) RATIONALE \"x\"\nDEFINE DECLARATION service AS (VERB \"SERVICE\", SEATS [run: [word], ready: text?, needs: [caps], uid: number?]) RATIONALE \"x\"\nDEFINE DECLARATION mount AS (VERB \"MOUNT\", SEATS [at: text]) RATIONALE \"x\"\nDEFINE FORM word AS (SEATS [value: text]) RATIONALE \"x\"\nDEFINE WORLD machine AS (ONE [box], FIRST box) RATIONALE \"x\"\nDEFINE CONSTRAINT no_root AS (ON service, WHEN \"uid = 0\", MESSAGE \"uid 0 is the machine itself\") RATIONALE \"x\"\nDEFINE CONSTRAINT run_names_a_program AS (ON service, WHEN \"run empty\", MESSAGE \"RUN must name a program: the argv is empty\") RATIONALE \"x\"\nDEFINE CONSTRAINT one_ready_path AS (ON service, WHEN \"ready present and not ready unique\", MESSAGE \"one path signals for one service\") RATIONALE \"x\"\nDEFINE CONSTRAINT needs_once AS (ON service, WHEN \"not needs distinct\", MESSAGE \"saying it twice says nothing the once did not\") RATIONALE \"x\"\nDEFINE CONSTRAINT touch_owns_no_mounts AS (ON mount, WHEN \"box.profile = touch\", MESSAGE \"The touch profile owns no mounts\") RATIONALE \"x\"\nDEFINE CONSTRAINT sees_needs_a_mount AS (ON service, WHEN \"needs contains filesystem and not exists mount\", MESSAGE \"there is no sight to apportion\") RATIONALE \"x\"\n",
+      "expect": {"language": "m", "counts": {"declarations": 3, "constraints": 6, "menus": 1}}
+    },
+    {
+      "id": "A8",
+      "name": "a REFINE declares the refinable POINTS with their kinds (RFN's six) and the trust FLOOR of the ones that have one",
+      "source": "DEFINE LANGUAGE m AS (VERSION \"0.2\", GRAMMAR \"0.2\", COURT \"x\", EXTENSION \".m\") RATIONALE \"x\"\nDEFINE DECLARATION service AS (VERB \"SERVICE\", SEATS [restart: name?, ready: text?]) RATIONALE \"x\"\nDEFINE DECLARATION box AS (VERB \"MACHINE\", SEATS [profile: name]) RATIONALE \"x\"\nDEFINE REFINE machine AS (POINTS [service.restart: knob, service.ready: field, box.profile: policy], FLOOR [service.restart: external, box.profile: trusted]) RATIONALE \"a restart policy is a knob any external actor may turn; the profile is policy, and only a trusted actor touches it\"\n",
+      "expect": {"language": "m", "counts": {"declarations": 2}, "points": 3}
+    },
+    {
+      "id": "A9",
+      "name": "NAMES on a declaration: its names are drawn from a MENU",
+      "source": "DEFINE LANGUAGE m AS (VERSION \"0.2\", GRAMMAR \"0.2\", COURT \"x\", EXTENSION \".m\") RATIONALE \"x\"\nDEFINE MENU capabilities AS (WORDS [filesystem, process, network], MESSAGE \"is not a capability: the menu is filesystem, process, network\") RATIONALE \"x\"\nDEFINE DECLARATION capability AS (VERB \"CAPABILITY\", NAMES capabilities, SEATS [grant: name]) RATIONALE \"the name IS the capability\"\n",
+      "expect": {"language": "m", "counts": {"declarations": 1, "menus": 1}}
+    },
+    {
+      "id": "A10",
+      "name": "a v0.1 declaration is a v0.2 declaration: the machine language's pinned file, unchanged",
+      "source": "DEFINE LANGUAGE machine AS (\n  VERSION \"0.1\",\n  GRAMMAR \"0.1\",\n  COURT \"declarative/machine/fixtures.json\",\n  EXTENSION \".machine\"\n) RATIONALE \"A machine declared whole\"\n\nDEFINE FORM word AS (\n  SEATS [value: text]\n) RATIONALE \"One word of a service's argv\"\n\nDEFINE DECLARATION box AS (\n  VERB \"MACHINE\",\n  SEATS [profile: name, arch: name, kernel: name, libc: name?, board: name?, console: text?]\n) RATIONALE \"The one identity declaration\"\n\nDEFINE DECLARATION service AS (\n  VERB \"SERVICE\",\n  SEATS [run: [word], restart: name?, ready: text?]\n) RATIONALE \"A process the machine keeps\"\n\nDEFINE REFUSAL unknown_verb AS (\n  MESSAGE \"The machine verb set is closed (DEFINE).\"\n) RATIONALE \"The closure speaks\"\n",
+      "expect": {"language": "machine", "version": "0.1", "counts": {"declarations": 2, "forms": 1, "refusals": 1, "menus": 0, "constraints": 0}, "verbs": ["MACHINE", "SERVICE"], "world": 0, "points": 0}
+    }
+  ],
+  "rejects": [
+    {
+      "id": "R1",
+      "name": "a MENU requires its WORDS",
+      "source": "DEFINE LANGUAGE m AS (VERSION \"0.2\", GRAMMAR \"0.2\", COURT \"x\", EXTENSION \".m\") RATIONALE \"x\"\nDEFINE MENU restart_policy AS (MESSAGE \"x\") RATIONALE \"x\"\n",
+      "refusal": "requires the WORDS clause"
+    },
+    {
+      "id": "R2",
+      "name": "a MENU names at least one word",
+      "source": "DEFINE LANGUAGE m AS (VERSION \"0.2\", GRAMMAR \"0.2\", COURT \"x\", EXTENSION \".m\") RATIONALE \"x\"\nDEFINE MENU restart_policy AS (WORDS []) RATIONALE \"x\"\n",
+      "refusal": "at least one word"
+    },
+    {
+      "id": "R3",
+      "name": "a RANGE's MIN is not above its MAX",
+      "source": "DEFINE LANGUAGE m AS (VERSION \"0.2\", GRAMMAR \"0.2\", COURT \"x\", EXTENSION \".m\") RATIONALE \"x\"\nDEFINE RANGE r AS (MIN 10, MAX 1) RATIONALE \"x\"\n",
+      "refusal": "MIN above MAX"
+    },
+    {
+      "id": "R4",
+      "name": "a FORMAT's SHAPE is drawn from the closed shape menu",
+      "source": "DEFINE LANGUAGE m AS (VERSION \"0.2\", GRAMMAR \"0.2\", COURT \"x\", EXTENSION \".m\") RATIONALE \"x\"\nDEFINE FORMAT f AS (SHAPE regex) RATIONALE \"x\"\n",
+      "refusal": "not a shape"
+    },
+    {
+      "id": "R5",
+      "name": "a seat type still resolves to something: a MENU, a RANGE, a FORMAT, a FORM, an EXPRESSION or a DECLARATION",
+      "source": "DEFINE LANGUAGE m AS (VERSION \"0.2\", GRAMMAR \"0.2\", COURT \"x\", EXTENSION \".m\") RATIONALE \"x\"\nDEFINE DECLARATION service AS (VERB \"SERVICE\", SEATS [restart: policy]) RATIONALE \"x\"\n",
+      "refusal": "resolves to nothing"
+    },
+    {
+      "id": "R6",
+      "name": "at most one WORLD",
+      "source": "DEFINE LANGUAGE m AS (VERSION \"0.2\", GRAMMAR \"0.2\", COURT \"x\", EXTENSION \".m\") RATIONALE \"x\"\nDEFINE DECLARATION box AS (VERB \"MACHINE\", SEATS [profile: name]) RATIONALE \"x\"\nDEFINE WORLD w1 AS (ONE [box]) RATIONALE \"x\"\nDEFINE WORLD w2 AS (FIRST box) RATIONALE \"x\"\n",
+      "refusal": "at most one WORLD"
+    },
+    {
+      "id": "R7",
+      "name": "ONE names declarations of this language",
+      "source": "DEFINE LANGUAGE m AS (VERSION \"0.2\", GRAMMAR \"0.2\", COURT \"x\", EXTENSION \".m\") RATIONALE \"x\"\nDEFINE DECLARATION box AS (VERB \"MACHINE\", SEATS [profile: name]) RATIONALE \"x\"\nDEFINE WORLD w AS (ONE [fleet]) RATIONALE \"x\"\n",
+      "refusal": "resolves to nothing"
+    },
+    {
+      "id": "R8",
+      "name": "FIRST names a DECLARATION, not a FORM",
+      "source": "DEFINE LANGUAGE m AS (VERSION \"0.2\", GRAMMAR \"0.2\", COURT \"x\", EXTENSION \".m\") RATIONALE \"x\"\nDEFINE FORM word AS (SEATS [value: text]) RATIONALE \"x\"\nDEFINE DECLARATION box AS (VERB \"MACHINE\", SEATS [run: [word]]) RATIONALE \"x\"\nDEFINE WORLD w AS (FIRST word) RATIONALE \"x\"\n",
+      "refusal": "must name a DECLARATION"
+    },
+    {
+      "id": "R9",
+      "name": "a CONSTRAINT is ON a declaration of this language",
+      "source": "DEFINE LANGUAGE m AS (VERSION \"0.2\", GRAMMAR \"0.2\", COURT \"x\", EXTENSION \".m\") RATIONALE \"x\"\nDEFINE DECLARATION box AS (VERB \"MACHINE\", SEATS [profile: name]) RATIONALE \"x\"\nDEFINE CONSTRAINT c AS (ON fleet, WHEN \"profile = hosted\", MESSAGE \"x\") RATIONALE \"x\"\n",
+      "refusal": "resolves to nothing"
+    },
+    {
+      "id": "R10",
+      "name": "a condition names the declaration's own seats",
+      "source": "DEFINE LANGUAGE m AS (VERSION \"0.2\", GRAMMAR \"0.2\", COURT \"x\", EXTENSION \".m\") RATIONALE \"x\"\nDEFINE DECLARATION box AS (VERB \"MACHINE\", SEATS [profile: name]) RATIONALE \"x\"\nDEFINE CONSTRAINT c AS (ON box, WHEN \"colour = blue\", MESSAGE \"x\") RATIONALE \"x\"\n",
+      "refusal": "no seat 'colour'"
+    },
+    {
+      "id": "R11",
+      "name": "a condition is a sentence of the closed condition language, not an expression of anything else",
+      "source": "DEFINE LANGUAGE m AS (VERSION \"0.2\", GRAMMAR \"0.2\", COURT \"x\", EXTENSION \".m\") RATIONALE \"x\"\nDEFINE DECLARATION box AS (VERB \"MACHINE\", SEATS [profile: name]) RATIONALE \"x\"\nDEFINE CONSTRAINT c AS (ON box, WHEN \"profile = hosted and\", MESSAGE \"x\") RATIONALE \"x\"\n",
+      "refusal": "condition"
+    },
+    {
+      "id": "R12",
+      "name": "a REFINE point is a seat of a declaration of this language",
+      "source": "DEFINE LANGUAGE m AS (VERSION \"0.2\", GRAMMAR \"0.2\", COURT \"x\", EXTENSION \".m\") RATIONALE \"x\"\nDEFINE DECLARATION service AS (VERB \"SERVICE\", SEATS [restart: name?]) RATIONALE \"x\"\nDEFINE REFINE r AS (POINTS [service.colour: knob]) RATIONALE \"x\"\n",
+      "refusal": "no such point"
+    },
+    {
+      "id": "R13",
+      "name": "a point's kind is one of RFN's six: knob, field, symbol, policy, composite, pipeline",
+      "source": "DEFINE LANGUAGE m AS (VERSION \"0.2\", GRAMMAR \"0.2\", COURT \"x\", EXTENSION \".m\") RATIONALE \"x\"\nDEFINE DECLARATION service AS (VERB \"SERVICE\", SEATS [restart: name?]) RATIONALE \"x\"\nDEFINE REFINE r AS (POINTS [service.restart: dial]) RATIONALE \"x\"\n",
+      "refusal": "not a refinement kind"
+    },
+    {
+      "id": "R14",
+      "name": "a FLOOR is a posture: trusted, external, sandboxed or llm",
+      "source": "DEFINE LANGUAGE m AS (VERSION \"0.2\", GRAMMAR \"0.2\", COURT \"x\", EXTENSION \".m\") RATIONALE \"x\"\nDEFINE DECLARATION service AS (VERB \"SERVICE\", SEATS [restart: name?]) RATIONALE \"x\"\nDEFINE REFINE r AS (POINTS [service.restart: knob], FLOOR [service.restart: anyone]) RATIONALE \"x\"\n",
+      "refusal": "not a posture"
+    },
+    {
+      "id": "R15",
+      "name": "a FLOOR stands on a declared point",
+      "source": "DEFINE LANGUAGE m AS (VERSION \"0.2\", GRAMMAR \"0.2\", COURT \"x\", EXTENSION \".m\") RATIONALE \"x\"\nDEFINE DECLARATION service AS (VERB \"SERVICE\", SEATS [restart: name?, ready: text?]) RATIONALE \"x\"\nDEFINE REFINE r AS (POINTS [service.restart: knob], FLOOR [service.ready: trusted]) RATIONALE \"x\"\n",
+      "refusal": "not a declared point"
+    },
+    {
+      "id": "R16",
+      "name": "NAMES names a MENU",
+      "source": "DEFINE LANGUAGE m AS (VERSION \"0.2\", GRAMMAR \"0.2\", COURT \"x\", EXTENSION \".m\") RATIONALE \"x\"\nDEFINE FORM word AS (SEATS [value: text]) RATIONALE \"x\"\nDEFINE DECLARATION capability AS (VERB \"CAPABILITY\", NAMES word, SEATS [grant: name]) RATIONALE \"x\"\n",
+      "refusal": "must name a MENU"
+    },
+    {
+      "id": "R17",
+      "name": "at most one REFINE",
+      "source": "DEFINE LANGUAGE m AS (VERSION \"0.2\", GRAMMAR \"0.2\", COURT \"x\", EXTENSION \".m\") RATIONALE \"x\"\nDEFINE DECLARATION service AS (VERB \"SERVICE\", SEATS [restart: name?]) RATIONALE \"x\"\nDEFINE REFINE r1 AS (POINTS [service.restart: knob]) RATIONALE \"x\"\nDEFINE REFINE r2 AS (POINTS [service.restart: knob]) RATIONALE \"x\"\n",
+      "refusal": "at most one REFINE"
+    },
+    {
+      "id": "R18",
+      "name": "a condition's KIND.seat atom names a ONE kind, because only then is there one declaration to read",
+      "source": "DEFINE LANGUAGE m AS (VERSION \"0.2\", GRAMMAR \"0.2\", COURT \"x\", EXTENSION \".m\") RATIONALE \"x\"\nDEFINE DECLARATION box AS (VERB \"MACHINE\", SEATS [profile: name]) RATIONALE \"x\"\nDEFINE DECLARATION mount AS (VERB \"MOUNT\", SEATS [at: text]) RATIONALE \"x\"\nDEFINE CONSTRAINT c AS (ON mount, WHEN \"box.profile = touch\", MESSAGE \"x\") RATIONALE \"x\"\n",
+      "refusal": "not a ONE kind"
+    },
+    {
+      "id": "R19",
+      "name": "exists names a declaration of this language",
+      "source": "DEFINE LANGUAGE m AS (VERSION \"0.2\", GRAMMAR \"0.2\", COURT \"x\", EXTENSION \".m\") RATIONALE \"x\"\nDEFINE DECLARATION box AS (VERB \"MACHINE\", SEATS [profile: name]) RATIONALE \"x\"\nDEFINE CONSTRAINT c AS (ON box, WHEN \"exists fleet\", MESSAGE \"x\") RATIONALE \"x\"\n",
+      "refusal": "resolves to nothing"
+    },
+    {
+      "id": "R20",
+      "name": "a list seat's element is a FORM, a DECLARATION or a MENU, never an EXPRESSION",
+      "source": "DEFINE LANGUAGE m AS (VERSION \"0.2\", GRAMMAR \"0.2\", COURT \"x\", EXTENSION \".m\") RATIONALE \"x\"\nDEFINE EXPRESSION cond AS (OPERATORS [cmp], OPERANDS [number]) RATIONALE \"x\"\nDEFINE DECLARATION service AS (VERB \"SERVICE\", SEATS [after: [service], guards: [cond]]) RATIONALE \"x\"\n",
+      "refusal": "a list seat's element"
+    }
+  ]
+}

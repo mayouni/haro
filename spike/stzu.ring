@@ -14,6 +14,12 @@ load "stzu_lib.ring"
 
 $aStzuToks = []
 $nStzuPos = 1
+$aCondToks = []
+$nCondPos = 1
+$aCondDeclSeats = []
+$aCondDecls = []
+$aCondVerbOf = []
+$cCondOther = ""
 
 if len(sysargv) < 3
 	? "usage: stzu.ring <file.stzu>"

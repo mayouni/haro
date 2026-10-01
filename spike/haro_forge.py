@@ -55,11 +55,16 @@ def parse_verdict(out):
     return True, fields
 
 
-def judge_stzu(exe, label):
+STZU2_FIXTURES = os.path.join(HERE, 'stzu2', 'fixtures.json')
+
+
+def judge_stzu(exe, label, fixtures=STZU_FIXTURES):
     """Mirror experiment/run_stzu.luau: accepts carry structural
-    expectations, rejects carry the fragment the refusal must contain."""
-    doc = json.load(open(STZU_FIXTURES, encoding='utf-8'))
-    assert doc['grammar'] == 'stzu' and doc['version'] == '0.1'
+    expectations, rejects carry the fragment the refusal must contain.
+    v0.2's fixtures add the keys menus/ranges/formats/constraints (under
+    counts), world and points."""
+    doc = json.load(open(fixtures, encoding='utf-8'))
+    assert doc['grammar'] == 'stzu' and doc['version'] in ('0.1', '0.2')
     passed = failed = 0
     outputs = {}
     with tempfile.TemporaryDirectory() as td:
@@ -88,7 +93,7 @@ def judge_stzu(exe, label):
                             if g != sorted(want):
                                 verdict = False
                                 why = f' -- verbs: expected {sorted(want)} got {g}'
-                        elif got.get(k) != want:
+                        elif got.get(k) != str(want):
                             verdict = False
                             why = f" -- {k}: expected '{want}' got '{got.get(k)}'"
                 if PLANT and case['id'] == 'A1':
@@ -114,18 +119,21 @@ def judge_stzu(exe, label):
 
 
 def stage1():
-    print('stage 1 -- the stzu meta-court in pure Ring, judged by its pinned fixtures')
-    f1, o1 = judge_stzu(RNXC, 'rnxc')
-    f2, o2 = judge_stzu(ORACLE, 'oracle ring.exe')
-    diff = [k for k in o1 if o1[k] != o2.get(k)]
-    if diff:
-        print(f'  FAIL the two runtimes differ on {len(diff)} fixture(s): {diff}')
-        for k in diff[:3]:
-            print('    rnxc  :', o1[k].strip()[:200])
-            print('    oracle:', o2[k].strip()[:200])
-    else:
-        print(f'  ok   rnxc and the oracle print the same bytes on all {len(o1)} fixtures')
-    return f1 + f2 + len(diff)
+    failures = 0
+    for label, fixtures in (('v0.1, the pinned judge', STZU_FIXTURES), ('v0.2, the WORLD and REFINE seats', STZU2_FIXTURES)):
+        print(f'stage 1 -- the stzu meta-court in pure Ring, judged by its fixtures ({label})')
+        f1, o1 = judge_stzu(RNXC, 'rnxc', fixtures)
+        f2, o2 = judge_stzu(ORACLE, 'oracle ring.exe', fixtures)
+        diff = [k for k in o1 if o1[k] != o2.get(k)]
+        if diff:
+            print(f'  FAIL the two runtimes differ on {len(diff)} fixture(s): {diff}')
+            for k in diff[:3]:
+                print('    rnxc  :', o1[k].strip()[:200])
+                print('    oracle:', o2[k].strip()[:200])
+        else:
+            print(f'  ok   rnxc and the oracle print the same bytes on all {len(o1)} fixtures')
+        failures += f1 + f2 + len(diff)
+    return failures
 
 
 
@@ -139,6 +147,10 @@ FORGE_RING = os.path.join(HERE, 'forge.ring')
 
 SYNTAX_FRAGMENTS = ('Expected', 'Unknown', 'not part of', 'neither', 'Unterminated',
                     'A list', 'given twice', 'RATIONALE is mandatory', 'declares nothing')
+# the fragments of court_lib's tokenizer and parser alone -- what a grammar derivation
+# must never trip (stage 4); the shapes and duplicates above are the court's own stages
+PARSE_FRAGMENTS = ('Expected', 'Unknown', 'not part of', 'neither', 'Unterminated',
+                   'RATIONALE is mandatory', 'declares nothing')
 
 
 def run_args(exe, args, cwd):
@@ -415,16 +427,22 @@ def stage4(lang, court=None, n=200):
             ok, got = court_verdict(RNXC, court, p)
             if not ok:
                 msg = got.split('): ', 1)[-1]
-                if msg.startswith(('Clause ', 'A list is')) or 'given twice' in msg or 'is required on' in msg or 'already declared' in msg:
-                    bucket = ('a required seat absent' if 'is required on' in msg else
-                              'a clause given twice' if 'given twice' in msg else
-                              'a name declared twice' if 'already declared' in msg else 'a value shape')
-                    semantic_refusals[bucket] = semantic_refusals.get(bucket, 0) + 1
-                else:
+                # a SYNTAX refusal comes from the court's tokenizer or parser and
+                # carries one of their fragments; every other refusal is a stage
+                # the grammar cannot carry, bucketed by what the declaration said
+                if any(f in msg for f in PARSE_FRAGMENTS):
                     syntax_refusals += 1
                     if syntax_refusals <= 3:
                         print(f'    SYNTAX refusal of a derivation: {got[:120]}')
                         print('      ' + text[:160].replace('\n', ' | '))
+                else:
+                    bucket = ('a required seat absent' if 'is required on' in msg else
+                              'a clause given twice' if 'given twice' in msg else
+                              'a name declared twice' if 'already declared' in msg else
+                              'a value shape' if msg.startswith(('Clause ', 'A list is')) else
+                              'the WORLD (one, first)' if 'declares exactly one' in msg or 'comes first' in msg else
+                              'a declared rule (menu, range, format, reference, constraint)')
+                    semantic_refusals[bucket] = semantic_refusals.get(bucket, 0) + 1
     if syntax_refusals:
         failures += 1
         print(f'  FAIL {syntax_refusals} of {n} derivations refused for a SYNTAX reason: the grammar is wider than the court')
@@ -478,20 +496,48 @@ def c2_valid(rec):
     return None
 
 
-def stage5(lang, court=None):
+def stage5(lang, court=None, v02=False):
     court = court or f'{lang}_court.ring'
-    print('stage 5 -- one refinement through the gate: hello.RESTART never -> always')
+    print('stage 5 -- one refinement through the gate: hello.RESTART never -> always'
+          + (' (v0.2: the points and floors the language declares)' if v02 else ''))
     failures = 0
+    floor = 'external' if v02 else 'trusted'
     src = open(r'D:\GitHub\harobanda\machines\qemu_hello.machine', 'rb').read()
     with tempfile.TemporaryDirectory() as td:
         p = os.path.join(td, 'hello.machine')
         open(p, 'wb').write(src)
+        if v02:
+            # (v) a point the language does not declare refinable; a value outside the
+            # knob's MENU; the external actor admitted at the point's declared floor
+            o = run_args(RNXC, [court, 'refine', p, os.path.join(HERE, 'fixtures', 'refine_point.rfn')], HERE)
+            if "is not a declared refinement point" in o and 'NOT_A_POINT' in o:
+                print('  ok   a seat outside REFINE\'s POINTS is refused: qemu_hello.ARCH is not a declared point')
+            else:
+                failures += 1; print(f'  FAIL expected NOT_A_POINT, got: {o.strip()[:160]}')
+            o = run_args(RNXC, [court, 'refine', p, os.path.join(HERE, 'fixtures', 'refine_kind.rfn')], HERE)
+            if "'qemu_hello.PROFILE' is a policy, not a knob" in o and 'KIND_MISMATCH' in o:
+                print('  ok   a declared point of another KIND is refused: qemu_hello.PROFILE is a policy, not a knob')
+            else:
+                failures += 1; print(f'  FAIL expected KIND_MISMATCH, got: {o.strip()[:160]}')
+            o = run_args(RNXC, [court, 'refine', p, os.path.join(HERE, 'fixtures', 'hello_menu.rfn')], HERE)
+            if "RESTART is never, always or on_failure, not 'sometimes'" in o and 'OUT_OF_BOUNDS' in o:
+                print('  ok   a value outside the knob\'s MENU is refused at constraint, in the menu\'s own words')
+            else:
+                failures += 1; print(f'  FAIL expected the menu\'s refusal, got: {o.strip()[:160]}')
+            o = run_args(RNXC, [court, 'refine', p, os.path.join(HERE, 'fixtures', 'hello_external.rfn')], HERE)
+            if o.startswith('admitted: hello.RESTART never -> always [external]'):
+                print('  ok   an external actor is admitted at the point\'s declared floor, external')
+                for ext in ('.refined', '.revert.rfn'):
+                    if os.path.exists(p + ext):
+                        os.remove(p + ext)
+            else:
+                failures += 1; print(f'  FAIL expected admission as :external, got: {o.strip()[:160]}')
         # (a) the model-composed proposal is refused at the trust stage, with a C2 record
         out = run_args(RNXC, [court, 'refine', p, os.path.join(HERE, 'fixtures', 'hello_llm.rfn')], HERE)
         if PLANT:
             out = out.replace('trust: posture :llm', 'PLANTED: posture :llm')
         lines = [l for l in out.splitlines() if l]
-        if len(lines) >= 2 and 'trust: posture :llm below the required floor :trusted' in lines[0]:
+        if len(lines) >= 2 and f'trust: posture :llm below the required floor :{floor}' in lines[0]:
             try:
                 rec = json.loads(lines[1])
                 why = c2_valid(rec)
@@ -499,7 +545,7 @@ def stage5(lang, court=None):
                     failures += 1
                     print(f'  FAIL the refusal record is not a C2 envelope: {why or rec}')
                 else:
-                    print(f'  ok   refused at trust, as :llm against a floor of :trusted; the record is C2 with why and todo')
+                    print(f'  ok   refused at trust, as :llm against a floor of :{floor}; the record is C2 with why and todo')
             except json.JSONDecodeError as e:
                 failures += 1
                 print(f'  FAIL the record is not JSON: {e}: {lines[1][:120]}')
@@ -581,7 +627,9 @@ if __name__ == '__main__':
     for a in sys.argv[1:]:
         if a.startswith('--stage='):
             stage = int(a.split('=')[1])
-    stzu = MACHINE_STZU
+    # the default is the v0.2 declaration, the rung of record since 2026-10-01; the
+    # pinned v0.1 run is `--stzu=D:\GitHub\harobanda\declarative\machine\machine.stzu`
+    stzu = os.path.join(HERE, 'machine_v02.stzu')
     for a in sys.argv[1:]:
         if a.startswith('--stzu='):
             stzu = os.path.abspath(a.split('=', 1)[1])
@@ -597,7 +645,7 @@ if __name__ == '__main__':
     if lang and stage in (None, 4):
         failures += stage4(lang)
     if lang and stage in (None, 5):
-        failures += stage5(lang)
+        failures += stage5(lang, v02=os.path.basename(stzu) == 'machine_v02.stzu')
     if lang and stage in (None, 6):
         failures += stage6(lang)
     print(f'haro_forge: {"FAIL" if failures else "PASS"} ({failures} failure(s), {time.perf_counter()-t0:.1f} s)')

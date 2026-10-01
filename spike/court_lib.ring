@@ -15,9 +15,21 @@
 # the Grammar Commons gives every court, so the fixtures' fragments can be
 # compared; where the declaration carries a REFUSAL message, it is spoken.
 #
+# v0.2 (haro/spike/stzu2/GRAMMAR.md): a seat's type may be a MENU (a word of
+# its WORDS), a RANGE (a number within it), a FORMAT (a text of its shape)
+# or a DECLARATION (a reference that must resolve); a declaration's NAMES
+# are drawn from a MENU or a FORMAT; the WORLD's ONE and FIRST hold; every
+# CONSTRAINT's condition is evaluated on every declaration of its ON kind,
+# and its MESSAGE is spoken with {name}, {seat}, {other} and {decl.seat}
+# filled in. The refinement gate reads the REFINE's POINTS and FLOOR.
+#
 # Functions only. Globals ($cCourtLang, $cCourtExt, $aCourtKinds,
-# $aCourtForms, $aCourtRefusals, $aCourtToks, $nCourtPos) are born in the
+# $aCourtForms, $aCourtRefusals, $aCourtMenus, $aCourtRanges,
+# $aCourtFormats, $aCourtConstraints, $aCourtWorld, $aCourtPoints,
+# $aCourtFloors, $aCourtToks, $nCourtPos, and cond_lib's) are born in the
 # generated court, at its top level, for both runtimes' sake.
+
+load "cond_lib.ring"
 
 # ---- character classes by byte code (HF-30) ---------------------------------
 
@@ -188,23 +200,187 @@ func CtFormByName(cName)
 	next
 	return NULL
 
-# a seat is [name, of, isList, optional]; its clause name is the seat's name
-# in UPPER_SNAKE, and its value shape follows its type:
-#   text -> string, name/flag/ref -> word, number -> number,
-#   [form] -> a list whose items follow the form's first seat (text ->
-#   stringlist, else namelist)
+# a seat is [name, of, isList, optional, typeKind]; its clause name is the
+# seat's name in UPPER_SNAKE, and its value shape follows its type:
+#   text / a FORMAT -> string, name/flag/ref / a MENU / a DECLARATION -> word,
+#   number / a RANGE -> number, [form] -> a list whose items follow the form's
+#   first seat (text or a FORMAT -> stringlist, else namelist), [decl] and
+#   [menu] -> namelist
+func CtTypeKind(aSeat)
+	if len(aSeat) >= 5 return aSeat[5] ok
+	return "prim"
+
 func CtClauseShape(aSeat)
 	cOf = aSeat[2]
+	cK = CtTypeKind(aSeat)
 	if aSeat[3]
-		aF = CtFormByName(cOf)
-		if isNull(aF) return "namelist" ok
-		aFS = aF[2]
-		if len(aFS) > 0 and aFS[1][2] = "text" return "stringlist" ok
+		if cK = "form"
+			aF = CtFormByName(cOf)
+			if isNull(aF) return "namelist" ok
+			aFS = aF[2]
+			if len(aFS) > 0 and (aFS[1][2] = "text" or CtTypeKind(aFS[1]) = "format") return "stringlist" ok
+		ok
 		return "namelist"
 	ok
-	if cOf = "text" return "string" ok
-	if cOf = "number" return "number" ok
+	if cOf = "text" or cK = "format" return "string" ok
+	if cOf = "number" or cK = "range" return "number" ok
 	return "word"
+
+func CtMenuByName(cName)
+	for i = 1 to len($aCourtMenus)
+		if $aCourtMenus[i][1] = cName return $aCourtMenus[i] ok
+	next
+	return NULL
+
+func CtRangeByName(cName)
+	for i = 1 to len($aCourtRanges)
+		if $aCourtRanges[i][1] = cName return $aCourtRanges[i] ok
+	next
+	return NULL
+
+func CtFormatByName(cName)
+	for i = 1 to len($aCourtFormats)
+		if $aCourtFormats[i][1] = cName return $aCourtFormats[i] ok
+	next
+	return NULL
+
+func CtKindByDeclName(cName)
+	for i = 1 to len($aCourtKinds)
+		if $aCourtKinds[i][2] = cName return $aCourtKinds[i] ok
+	next
+	return NULL
+
+# {name}, {VERB}, {value}, {other}, {seat} and {decl.seat} in a declared message
+func CtFill(cMsg, aDecl, cValue)
+	cOut = ""
+	n = len(cMsg)
+	i = 1
+	while i <= n
+		c = cMsg[i]
+		if c = "{"
+			j = i + 1
+			while j <= n and cMsg[j] != "}"
+				j++
+			end
+			if j > n
+				cOut += c
+				i++
+				loop
+			ok
+			cKey = substr(cMsg, i + 1, j - i - 1)
+			cRep = ""
+			if cKey = "name"
+				if not isNull(aDecl) cRep = aDecl[2] ok
+			but cKey = "VERB"
+				if not isNull(aDecl) cRep = aDecl[1] ok
+			but cKey = "value"
+				cRep = cValue
+			but cKey = "other"
+				cRep = $cCondOther
+			but substr(cKey, ".") > 0
+				nDot = substr(cKey, ".")
+				aOne = CondOneDecl(left(cKey, nDot - 1))
+				if not isNull(aOne)
+					v = CondScalar(aOne, substr(cKey, nDot + 1))
+					if not isNull(v) cRep = v ok
+				ok
+			else
+				if not isNull(aDecl)
+					v = CondScalar(aDecl, cKey)
+					if not isNull(v)
+						cRep = v
+					else
+						aL = CondListOf(aDecl, cKey)
+						if not isNull(aL) cRep = CtJoin(aL, ", ") ok
+					ok
+				ok
+			ok
+			cOut += cRep
+			i = j + 1
+		else
+			cOut += c
+			i++
+		ok
+	end
+	return cOut
+
+# ---- the shapes of a FORMAT -----------------------------------------------------
+
+func CtIsHexChar(c)
+	n = ascii(c)
+	return (n >= 48 and n <= 57) or (n >= 97 and n <= 102) or (n >= 65 and n <= 70)
+
+func CtIsLabelChar(c)
+	n = ascii(c)
+	return (n >= 97 and n <= 122) or (n >= 48 and n <= 57) or n = 45
+
+func CtIsIpv4(cS)
+	aParts = CtSplit(cS, ".")
+	if len(aParts) != 4 return 0 ok
+	for i = 1 to 4
+		p = aParts[i]
+		if len(p) = 0 or len(p) > 3 return 0 ok
+		for j = 1 to len(p)
+			if not CtIsDigit(p[j]) return 0 ok
+		next
+		if 0 + p > 255 return 0 ok
+	next
+	return 1
+
+func CtSplit(cS, cSep)
+	aOut = []
+	cCur = ""
+	for i = 1 to len(cS)
+		if cS[i] = cSep
+			aOut + cCur
+			cCur = ""
+		else
+			cCur += cS[i]
+		ok
+	next
+	aOut + cCur
+	return aOut
+
+func CtIsLabel(cS)
+	if len(cS) = 0 return 0 ok
+	for i = 1 to len(cS)
+		if not CtIsLabelChar(cS[i]) return 0 ok
+	next
+	if cS[1] = "-" or cS[len(cS)] = "-" return 0 ok
+	return 1
+
+func CtHasShape(cS, cShape)
+	if cShape = "absolute_path"
+		return len(cS) > 0 and cS[1] = "/"
+	but cShape = "ipv4"
+		return CtIsIpv4(cS)
+	but cShape = "cidr"
+		aP = CtSplit(cS, "/")
+		if len(aP) != 2 return 0 ok
+		if not CtIsIpv4(aP[1]) return 0 ok
+		if len(aP[2]) = 0 or len(aP[2]) > 2 return 0 ok
+		for j = 1 to len(aP[2])
+			if not CtIsDigit(aP[2][j]) return 0 ok
+		next
+		return 0 + aP[2] <= 32
+	but cShape = "mac"
+		aP = CtSplit(cS, ":")
+		if len(aP) != 6 return 0 ok
+		for i = 1 to 6
+			if len(aP[i]) != 2 return 0 ok
+			if not (CtIsHexChar(aP[i][1]) and CtIsHexChar(aP[i][2])) return 0 ok
+		next
+		return 1
+	but cShape = "label"
+		return CtIsLabel(cS)
+	but cShape = "domain"
+		aP = CtSplit(cS, ".")
+		for i = 1 to len(aP)
+			if not CtIsLabel(aP[i]) return 0 ok
+		next
+		return 1
+	ok
+	return 1
 
 func CtAllowedClauses(aKind)
 	aS = aKind[3]
@@ -408,7 +584,151 @@ func CtDeclare(cSrc)
 			ok
 		next
 	next
+
+	# ---- v0.2: what the WORLD, the types, the names and the constraints say ----
+	$aCondDecls = aDecls
+	$aCondVerbOf = []
+	for i = 1 to len($aCourtKinds)
+		$aCondVerbOf + [$aCourtKinds[i][2], $aCourtKinds[i][1]]
+	next
+
+	# the WORLD: exactly one of each ONE kind, and the FIRST kind first
+	aOne = $aCourtWorld[1]
+	for i = 1 to len(aOne)
+		aK = CtKindByDeclName(aOne[i])
+		if isNull(aK) loop ok
+		n = 0
+		for j = 1 to len(aDecls)
+			if aDecls[j][1] = aK[1] n++ ok
+		next
+		if n != 1
+			CtFail(aDecls[1][3], "A " + $cCourtLang + " file declares exactly one " + aK[1] + " (found " + n + ")")
+		ok
+	next
+	if $aCourtWorld[2] != ""
+		aK = CtKindByDeclName($aCourtWorld[2])
+		if not isNull(aK) and aDecls[1][1] != aK[1]
+			CtFail(aDecls[1][3], "The " + aK[1] + " declaration comes first")
+		ok
+	ok
+
+	# the NAMES of a declaration kind, and every seat's typed value
+	for i = 1 to len(aDecls)
+		aD = aDecls[i]
+		aKind = CtKindByVerb(aD[1])
+		if len(aKind) >= 4 and aKind[4] != ""
+			cWhy = CtCheckNamed(aKind[4], aD[2])
+			if cWhy != "" CtFail(aD[3], "'" + aD[2] + "' " + cWhy) ok
+		ok
+		aC = aD[4]
+		for j = 1 to len(aC)
+			aSeat = CtSeatByClause(aKind, aC[j][1])
+			cWhy = CtCheckSeatValue(aD, aSeat, aC[j])
+			if cWhy != "" CtFail(aC[j][2], cWhy) ok
+		next
+	next
+
+	# the CONSTRAINTs, each on every declaration of its ON kind
+	for i = 1 to len($aCourtConstraints)
+		aCn = $aCourtConstraints[i]
+		aK = CtKindByDeclName(aCn[2])
+		if isNull(aK) loop ok
+		aWhen = CondParse(aCn[3])
+		aThen = NULL
+		if aCn[4] != "" aThen = CondParse(aCn[4]) ok
+		for j = 1 to len(aDecls)
+			aD = aDecls[j]
+			if aD[1] != aK[1] loop ok
+			$cCondOther = ""
+			if CondEval(aWhen, aD)
+				if isNull(aThen) or not CondEval(aThen, aD)
+					CtFail(aD[3], CtFill(aCn[5], aD, ""))
+				ok
+			ok
+		next
+	next
 	return aDecls
+
+# a declaration's name against its kind's NAMES (a MENU or a FORMAT); "" or why
+func CtCheckNamed(cNames, cName)
+	aM = CtMenuByName(cNames)
+	if not isNull(aM)
+		if CtInList(cName, aM[2]) return "" ok
+		cMsg = aM[3]
+		if cMsg = "" cMsg = "is not a " + cNames + ": the menu is " + CtJoin(aM[2], ", ") ok
+		return CtFill(cMsg, NULL, cName)
+	ok
+	aF = CtFormatByName(cNames)
+	if not isNull(aF)
+		if CtHasShape(cName, aF[2]) return "" ok
+		cMsg = aF[3]
+		if cMsg = "" cMsg = "is not a " + aF[2] ok
+		return CtFill(cMsg, NULL, cName)
+	ok
+	return ""
+
+# one scalar value against a seat's type (menu, range, format, reference); "" or why
+func CtCheckScalar(aDecl, aSeat, cValue)
+	cK = CtTypeKind(aSeat)
+	cClause = upper(aSeat[1])
+	if cK = "menu"
+		aM = CtMenuByName(aSeat[2])
+		if isNull(aM) or CtInList(cValue, aM[2]) return "" ok
+		cMsg = aM[3]
+		if cMsg = "" cMsg = cClause + " is " + CtJoin(aM[2], ", ") ok
+		if substr(cMsg, "{value}") = 0 cMsg += ", not '{value}'" ok
+		return CtFill(cMsg, aDecl, cValue)
+	but cK = "range"
+		aR = CtRangeByName(aSeat[2])
+		if isNull(aR) return "" ok
+		n = 0 + cValue
+		if n >= 0 + aR[2] and n <= 0 + aR[3] return "" ok
+		cMsg = aR[4]
+		if cMsg = "" cMsg = cClause + " {value} is out of range (" + aR[2] + ".." + aR[3] + ")" ok
+		return CtFill(cMsg, aDecl, cValue)
+	but cK = "format"
+		aF = CtFormatByName(aSeat[2])
+		if isNull(aF) or CtHasShape(cValue, aF[2]) return "" ok
+		cMsg = aF[3]
+		if cMsg = "" cMsg = cClause + " is not a " + aF[2] + ": '{value}'" ok
+		return CtFill(cMsg, aDecl, cValue)
+	but cK = "decl"
+		aK = CtKindByDeclName(aSeat[2])
+		if isNull(aK) return "" ok
+		for i = 1 to len($aCondDecls)
+			if $aCondDecls[i][1] = aK[1] and $aCondDecls[i][2] = cValue return "" ok
+		next
+		cMsg = CtRefusalMessage("dangling_reference")
+		cOut = aDecl[2] + " " + cClause + " '" + cValue + "', which resolves to nothing: no such " + aK[1]
+		if cMsg != "" cOut += " -- " + cMsg ok
+		return cOut
+	ok
+	return ""
+
+# a clause's value against its seat: scalars directly, lists item by item
+func CtCheckSeatValue(aDecl, aSeat, aClause)
+	cShape = aClause[3][1]
+	if cShape = "word" or cShape = "string" or cShape = "number"
+		return CtCheckScalar(aDecl, aSeat, aClause[3][2])
+	ok
+	cK = CtTypeKind(aSeat)
+	aItems = aClause[3][2]
+	if cK = "menu" or cK = "decl"
+		for i = 1 to len(aItems)
+			cWhy = CtCheckScalar(aDecl, aSeat, aItems[i])
+			if cWhy != "" return cWhy ok
+		next
+	but cK = "form"
+		# a form's one seat may be a FORMAT: each item takes its shape
+		aF = CtFormByName(aSeat[2])
+		if not isNull(aF) and len(aF[2]) > 0 and CtTypeKind(aF[2][1]) = "format"
+			for i = 1 to len(aItems)
+				cWhy = CtCheckScalar(aDecl, aF[2][1], aItems[i])
+				if cWhy != "" return cWhy ok
+			next
+		ok
+	ok
+	return ""
 
 # ---- the printed verdict -----------------------------------------------------
 
@@ -563,6 +883,31 @@ func CtRefine(cFile, cRfnFile)
 		         ["rule:constraint"], "the spike's gate refines knobs, fields and symbols, not composites", "refine a scalar clause")
 		return
 	ok
+	# v0.2: the point is declared in REFINE's POINTS, with its kind. A language
+	# that declares no REFINE at all keeps the spike's first rule: every
+	# scalar seat is a point (a word or number a knob, a text a field) at the
+	# court's floor, trusted.
+	cPointName = aKind[2] + "." + lower(cClause)
+	cDeclaredKind = ""
+	for i = 1 to len($aCourtPoints)
+		if $aCourtPoints[i][1] = cPointName cDeclaredKind = $aCourtPoints[i][2] ok
+	next
+	if len($aCourtPoints) = 0
+		cDeclaredKind = "field"
+		if cShape = "word" or cShape = "number" cDeclaredKind = "knob" ok
+	ok
+	if cDeclaredKind = ""
+		CtRefuse("constraint", "NOT_A_POINT", "'" + cTarget + "' is not a declared refinement point of " + $cCourtLang + " (" + cPointName + " is not in REFINE's POINTS)",
+		         cRfnFile, nRLine, ["rule:refine-points"], "every refinable point is declared by the language, with its kind; the boundaries are language-required, not author-chosen",
+		         "propose a change to a declared point, or declare this one in the language's REFINE")
+		return
+	ok
+	cKindGiven = CtClauseText(aR, "KIND")
+	if cKindGiven != cDeclaredKind
+		CtRefuse("constraint", "KIND_MISMATCH", "'" + cTarget + "' is a " + cDeclaredKind + ", not a " + cKindGiven, cRfnFile, nRLine,
+		         ["rule:refine-points"], "the point's kind is declared by the language", "say KIND " + cDeclaredKind)
+		return
+	ok
 	# the clause as written, with its token span
 	aClause = NULL
 	aC = aDecl[4]
@@ -597,6 +942,14 @@ func CtRefine(cFile, cRfnFile)
 			ok
 		next
 	ok
+	# v0.2: the bounds of the point are the seat's declared type (a MENU, a RANGE, a FORMAT)
+	cWhy = CtCheckScalar(aDecl, aSeat, cTo)
+	if cWhy != ""
+		CtRefuse("constraint", "OUT_OF_BOUNDS", cWhy, cRfnFile, nRLine, ["rule:constraint"],
+		         "a knob's bounds are the declared type of its seat; the court speaks the type's own message",
+		         "propose a value the seat's type admits")
+		return
+	ok
 
 	# the refined text: the value's span replaced, nothing else touched
 	nStart = aClause[4]
@@ -628,11 +981,15 @@ func CtRefine(cFile, cRfnFile)
 		         ["rule:trust"], "the trust ladder is closed", "name one of the four postures")
 		return
 	ok
+	# v0.2: the floor is the point's own (REFINE's FLOOR), trusted when it declares none
 	cFloor = "trusted"
+	for i = 1 to len($aCourtFloors)
+		if $aCourtFloors[i][1] = cPointName cFloor = $aCourtFloors[i][2] ok
+	next
 	if nRank < CtPostureRank(cFloor)
 		CtRefuse("trust", "TRUST_FLOOR", "posture :" + cPosture + " below the required floor :" + cFloor + " for '" + cTarget + "'", cRfnFile, nRLine,
-		         ["rule:trust-floor"], "a point may declare a trust floor, and this court's floor for every point is trusted: a model-composed proposal is refused by construction, not by convention",
-		         "a trusted actor may propose the same change; or lower the point's floor in a profile")
+		         ["rule:trust-floor"], "the point's floor is declared by the language (REFINE's FLOOR; trusted when none is declared): a proposal below it is refused by construction, not by convention",
+		         "an actor of posture :" + cFloor + " or above may propose the same change; or lower the point's floor in the language's REFINE")
 		return
 	ok
 

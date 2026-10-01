@@ -1,0 +1,7 @@
+-- hello_external.rfn -- the restart knob's floor is external: an external actor may turn it
+DEFINE REFINE keep_hello_alive AS (
+  TARGET "hello.RESTART", KIND knob,
+  FROM "never", TO "always",
+  AUTHOR "the ops runbook", POSTURE external,
+  REASON "the hello world should come back when it exits"
+) RATIONALE "A restart policy is a knob whose declared floor is external"
