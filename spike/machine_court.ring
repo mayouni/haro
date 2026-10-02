@@ -33,7 +33,7 @@ $aCourtRanges = []
 $aCourtFormats = []
 $aCourtUnions = []
 $aCourtConstraints = []
-$aCourtWorld = [[], "", []]
+$aCourtWorld = [[], "", [], []]
 $aCourtPoints = []
 $aCourtFloors = []
 $aCourtViews = []
@@ -42,6 +42,8 @@ $aCourtExprs = []
 $aCourtWalks = []
 $aCourtAsk = NULL
 $aCourtRun = NULL
+$aCourtSymbols = []
+$aCourtWorldFile = NULL
 $cExprLang = ""
 $aExprOperators = []
 $aExprOperands = []
@@ -178,7 +180,7 @@ $aCourtLangs = [
       ["not_the_boxs_address", "peer", "address host_of network.address", "", "{address} is the machine's own address on {network}: the one address on this link it cannot give away"],
       ["one_address_one_peer", "peer", "not address unique", "", "{address} is already {other}'s: one address, one peer, or the name does not mean anything"]
     ],
-    [["box"], "box", []],
+    [["box"], "box", [], []],
     [["service.restart", "knob"], ["service.ready", "field"], ["service.health", "knob"], ["service.memory", "knob"], ["service.cpu", "knob"], ["service.tasks", "knob"], ["box.console", "field"], ["box.profile", "policy"], ["box.board", "policy"], ["mount.device", "field"], ["capability.grant", "policy"]],
     [["service.restart", "external"], ["service.health", "external"], ["service.memory", "external"], ["service.cpu", "external"], ["service.tasks", "external"], ["box.profile", "trusted"], ["box.board", "trusted"], ["capability.grant", "trusted"]],
     [
@@ -190,7 +192,8 @@ $aCourtLangs = [
     [
     ],
     NULL,
-    NULL
+    NULL,
+    []
   ]
 ]
 CtUseLanguage("machine")

@@ -64,6 +64,7 @@ STZU6_FIXTURES = os.path.join(HERE, 'v06', 'fixtures.json')
 STZU7_FIXTURES = os.path.join(HERE, 'v07', 'fixtures.json')
 STZU8_FIXTURES = os.path.join(HERE, 'v08', 'fixtures.json')
 STZU9_FIXTURES = os.path.join(HERE, 'v09', 'fixtures.json')
+STZU10_FIXTURES = os.path.join(HERE, 'v10', 'fixtures.json')
 
 
 def judge_stzu(exe, label, fixtures=STZU_FIXTURES):
@@ -73,7 +74,7 @@ def judge_stzu(exe, label, fixtures=STZU_FIXTURES):
     counts), world and points."""
     doc = json.load(open(fixtures, encoding='utf-8'))
     # the pinned v0.1 judge is stzu's; everything since is Haro's (D1)
-    assert doc['grammar'] in ('stzu', 'haro') and doc['version'] in ('0.1', '0.2', '0.3', '0.4', '0.5', '0.6', '0.7', '0.8', '0.9')
+    assert doc['grammar'] in ('stzu', 'haro') and doc['version'] in ('0.1', '0.2', '0.3', '0.4', '0.5', '0.6', '0.7', '0.8', '0.9', '0.10')
     passed = failed = 0
     outputs = {}
     with tempfile.TemporaryDirectory() as td:
@@ -144,7 +145,8 @@ def stage1():
                             ('v0.6, pair lists, the expression semantics and WALK', STZU6_FIXTURES),
                             ('v0.7, ASK -- the Q letter -- and ABSENT missing', STZU7_FIXTURES),
                             ('v0.8, what F needs: NAMED refusals, keyed pairs, a UNION of declarations, deadlines, ENTRY, three relations', STZU8_FIXTURES),
-                            ('v0.9, what A needs: RUN, the structured steps, and a list of a UNION of declarations', STZU9_FIXTURES)):
+                            ('v0.9, what A needs: RUN, the structured steps, and a list of a UNION of declarations', STZU9_FIXTURES),
+                            ('v0.10, the WORLD as versioned data: SYMBOL and PUBLISH', STZU10_FIXTURES)):
         print(f'stage 1 -- the Haro meta-court in pure Ring, judged by its fixtures ({label})')
         f1, o1 = judge_stzu(RNXC, 'rnxc', fixtures)
         f2, o2 = judge_stzu(ORACLE, 'oracle ring.exe', fixtures)
@@ -760,7 +762,7 @@ def stage8():
 
 # ---- stage 9: Z, a WORLD forged whole -- court AND runtime -- judged by zing's 16 cases
 
-Z_STZU = os.path.join(HERE, 'z_v07.haro')   # z_v06.haro plus the ASK (the seventh rung); the 16 cases are unchanged
+Z_STZU = os.path.join(HERE, 'z_v10.haro')   # z_v07.haro plus PUBLISH (the tenth rung); the 16 cases and 25 questions are unchanged
 Z_SENTENCE = 'tontine.z'
 Z_FIXTURES = r'D:\GitHub\zing\conformance\fixtures.json'
 Z_FLOOR = 16
@@ -1031,7 +1033,7 @@ def stage10():
 
 # ---- stage 11: F, the flow of work -- RingFlex's .wflow re-declared, judged by its own fixtures
 
-F_STZU = os.path.join(HERE, 'f_v08.haro')
+F_STZU = os.path.join(HERE, 'f_v10.haro')   # f_v08.haro plus the flow SYMBOL and PUBLISH (the tenth rung); the 26 fixtures are unchanged
 F_DIR = os.path.join(HERE, 'f')
 F_FLOOR = 26
 RINGFLEX = r'D:\GitHub\ringflex'
@@ -1263,6 +1265,125 @@ def stage12():
     return failures
 
 
+# ---- stage 13: the WORLD as versioned data -- C1 rows emitted, C3 3.2 resolved, judged by RingFlex's placement fixtures
+
+RINGFLEX_WORLDS = os.path.join(RINGFLEX, 'fixtures', 'world')
+
+
+def stage13():
+    """The tenth rung. F's INVOKES and COMPENSATED_BY are SYMBOL seats resolved
+    against a C1 world handed to `check`; Z PUBLISHes its flows, entities, norms
+    and zones, and `world <file>` emits a sentence's C1 rows. The judge is
+    RingFlex's placement gate (tests/boundary-run.ring, sections C and D) on its
+    own world fixtures, read-only: the lawful workflow resolves against
+    world.json; a world missing one flow refuses exactly the step that names it;
+    a world missing the compensating flow refuses the compensating step by the
+    flow's name; no world at all is a warning, not a refusal; and the rows a
+    workflow contributes are one process symbol and three calls refs, no flow
+    symbol. Then the seam between two forged letters: the world Z's court emits
+    from tontine.z resolves an F workflow that invokes two of its flows, and the
+    merged rows satisfy C1 3.2 (every ref's ends are symbols)."""
+    print('stage 13 -- the WORLD as versioned data: z_v10.haro publishes, f_v10.haro resolves; judged by RingFlex\'s placement fixtures and the Z->F seam')
+    failures = 0
+    for stzu in (Z_STZU, F_STZU):
+        out = run_args(RNXC, ['forge.ring', stzu, '.'], HERE).strip()
+        if not out.startswith('forged '):
+            print(f'  FAIL the forge did not forge {os.path.basename(stzu)}: {out[:120]}')
+            return 1
+    ab_diff = []
+    def both(court, args, label):
+        r = run_args(RNXC, [court] + args, HERE).strip()
+        o = run_args(ORACLE, [court] + args, HERE).strip()
+        if r != o:
+            ab_diff.append(label)
+        return r
+    checks = 0
+    wf = os.path.join('f', 'boundary-invokes-flow.f')
+    worlds = {k: os.path.join(RINGFLEX_WORLDS, k + '.json') for k in ('world', 'world-missing-flow', 'world-missing-compensating')}
+    if not all(os.path.exists(p) for p in worlds.values()):
+        print('  SKIP RingFlex\'s world fixtures are not here')
+        return 0
+    r = both('f_court.ring', ['check', wf, worlds['world']], 'resolved')
+    ok = r.startswith('ok') and 'warning' not in r
+    checks += 1; failures += 0 if ok else 1
+    print(('  ok   ' if ok else '  FAIL ') + f'the lawful workflow resolves every INVOKES against world.json: {r.splitlines()[0][:60]}')
+    r = both('f_court.ring', ['check', wf, worlds['world-missing-flow']], 'missing-flow')
+    ok = (not r.startswith('ok')) and 'UNRESOLVED' in r and 'notifier' in r and 'notifier_client' in r
+    checks += 1; failures += 0 if ok else 1
+    print(('  ok   ' if ok else '  FAIL ') + f'a world missing one flow refuses the step that names it, by both names: {r[:110]}')
+    r = both('f_court.ring', ['check', wf, worlds['world-missing-compensating']], 'missing-compensating')
+    ok = (not r.startswith('ok')) and 'UNRESOLVED' in r and 'encaisser' in r and 'rembourser_paiement' in r
+    checks += 1; failures += 0 if ok else 1
+    print(('  ok   ' if ok else '  FAIL ') + f'a world missing the compensating flow refuses the compensating step by the flow\'s name: {r[:110]}')
+    r = both('f_court.ring', ['check', wf], 'no-world')
+    ok = r.startswith('ok') and 'warning NO_WORLD' in r
+    checks += 1; failures += 0 if ok else 1
+    print(('  ok   ' if ok else '  FAIL ') + f'no world at all is a warning, not a refusal: {r.splitlines()[-1][:90]}')
+    r = both('f_court.ring', ['world', wf], 'rows')
+    try:
+        w = json.loads(r)
+        syms = w['symbols']; refs = w['refs']
+        ok = (len(syms) == 1 and syms[0]['kind'] == 'process' and syms[0]['name'] == 'paiement'
+              and len(refs) == 3 and all(x['kind'] == 'calls' and x['to'].startswith('flow:') for x in refs)
+              and w.get('contract') == '1.0')
+    except (json.JSONDecodeError, KeyError, TypeError):
+        ok = False
+    checks += 1; failures += 0 if ok else 1
+    print(('  ok   ' if ok else '  FAIL ') + f'the rows a workflow contributes: one process symbol, three calls refs, no flow symbol: {r[:100]}')
+    # the seam between two forged letters
+    z = both('z_court.ring', ['world', 'tontine.z'], 'z-world')
+    with tempfile.TemporaryDirectory() as td:
+        try:
+            zw = json.loads(z)
+            kinds = sorted(set(s['kind'] for s in zw['symbols']))
+            names = sorted(s['name'] for s in zw['symbols'] if s['kind'] == 'flow')
+            ok = names == ['collect', 'indice'] and 'entity' in kinds and 'norm' in kinds
+        except (json.JSONDecodeError, KeyError, TypeError):
+            ok = False; zw = None
+        checks += 1; failures += 0 if ok else 1
+        print(('  ok   ' if ok else '  FAIL ') + f'Z publishes its world: flows {names if ok else "?"}, kinds {kinds if ok else "?"}')
+        if zw is not None:
+            p = os.path.join(td, 'tontine_world.json')
+            with open(p, 'w', encoding='utf-8', newline='') as f:
+                json.dump(zw, f)
+            cyc = os.path.join('f', 'tontine_cycle.f')
+            r = both('f_court.ring', ['check', cyc, p], 'seam-resolved')
+            ok = r.startswith('ok') and 'warning' not in r
+            checks += 1; failures += 0 if ok else 1
+            print(('  ok   ' if ok else '  FAIL ') + f'an F workflow invoking two Z flows resolves against the world Z emitted: {r.splitlines()[0][:60]}')
+            r = both('f_court.ring', ['check', cyc, worlds['world']], 'seam-unresolved')
+            ok = (not r.startswith('ok')) and 'UNRESOLVED' in r and 'collect' in r
+            checks += 1; failures += 0 if ok else 1
+            print(('  ok   ' if ok else '  FAIL ') + f'and against RingFlex\'s world, which declares no collect, the deposit step is refused: {r[:100]}')
+            fw = json.loads(both('f_court.ring', ['world', cyc], 'f-rows'))
+            merged = zw['symbols'] + fw['symbols']
+            ids = set(s['kind'].lower() + ':' + s['name'].lower() for s in merged)
+            dangling = [x for x in zw['refs'] + fw['refs'] if x['from'].lower() not in ids or x['to'].lower() not in ids]
+            ok = not dangling
+            checks += 1; failures += 0 if ok else 1
+            print(('  ok   ' if ok else '  FAIL ') + f'the merged rows satisfy C1 3.2: every ref\'s ends are symbols ({len(merged)} symbols, {len(zw["refs"] + fw["refs"])} refs, {len(dangling)} dangling)')
+    if PLANT:
+        failures += 1
+        print('  FAIL the seam -- PLANTED')
+    if ab_diff:
+        failures += 1
+        print(f'  FAIL rnxc and the oracle differ on {len(ab_diff)} check(s): {ab_diff}')
+    else:
+        print(f'  ok   rnxc and the oracle print the same bytes on all {checks} checks')
+    if os.path.exists(RING_OFFICIAL) and os.path.isdir(RINGFLEX):
+        p = subprocess.run([RING_OFFICIAL, 'tests/boundary-run.ring'], cwd=RINGFLEX, capture_output=True, timeout=120)
+        out = p.stdout.decode('utf-8', 'replace')
+        m = re.search(r'(\d+) passed, (\d+) failed', out)
+        if m and m.group(2) == '0':
+            print(f'  ok   RingFlex\'s own placement gate (official Ring 1.27, read-only): {m.group(1)} passed, 0 failed on its original fixtures')
+        else:
+            failures += 1
+            print(f'  FAIL RingFlex\'s placement gate did not hold: {out[-200:]}')
+    else:
+        print('  SKIP RingFlex\'s placement gate: official Ring 1.27 is not installed here')
+    return failures
+
+
 def stage6(lang, court=None, n=15):
     court = court or f'{lang}_court.ring'
     print(f'stage 6 -- edit to verdict on makeen_box.machine, minima of {n}')
@@ -1346,5 +1467,7 @@ if __name__ == '__main__':
         failures += stage11()
     if stage in (None, 12) and os.path.exists(A_STZU) and os.path.exists(A_CASES):
         failures += stage12()
+    if stage in (None, 13) and os.path.exists(Z_STZU) and os.path.exists(F_STZU):
+        failures += stage13()
     print(f'haro_forge: {"FAIL" if failures else "PASS"} ({failures} failure(s), {time.perf_counter()-t0:.1f} s)')
     sys.exit(1 if failures else 0)

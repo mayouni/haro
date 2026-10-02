@@ -35,7 +35,7 @@ $aCourtRanges = []
 $aCourtFormats = []
 $aCourtUnions = []
 $aCourtConstraints = []
-$aCourtWorld = [[], "", []]
+$aCourtWorld = [[], "", [], []]
 $aCourtPoints = []
 $aCourtFloors = []
 $aCourtViews = []
@@ -44,6 +44,8 @@ $aCourtExprs = []
 $aCourtWalks = []
 $aCourtAsk = NULL
 $aCourtRun = NULL
+$aCourtSymbols = []
+$aCourtWorldFile = NULL
 $cExprLang = ""
 $aExprOperators = []
 $aExprOperands = []
@@ -93,7 +95,7 @@ $aCourtLangs = [
       ["a_computed_field_has_a_formula", "step", "compute present and formula absent", "", "STEP {name} names COMPUTE {compute} and has no FORMULA"],
       ["one_rank_per_flow", "step", "earlier step where flow = this.flow and order = this.order", "", "STEP {name} and STEP {other} both stand at ORDER {order} of {flow}: one rank, one step"]
     ],
-    [[], "", []],
+    [[], "", [], [["flow", "flow"], ["entity", "entity"], ["norm", "norm"], ["landing_zone", "zone"]]],
     [],
     [],
     [
@@ -107,7 +109,8 @@ $aCourtLangs = [
       ["flows", "flow", "step", "flow", "order", ["validate", "enforcing.rule"], "compute", "formula", "on_fail"]
     ],
     ["questions", ["flow"], "zexpr", ["where", "order", "limit"]],
-    NULL
+    NULL,
+    []
   ]
 ]
 CtUseLanguage("z")

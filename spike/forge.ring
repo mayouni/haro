@@ -187,7 +187,7 @@ func WalkSource(aW)
 
 # one language's record, as the court reads it (v0.4, grown in v0.6 and v0.7):
 # [name, ext, kinds, forms, refusals, menus, ranges, formats, unions,
-# constraints, world, points, floors, views, sentences, expressions, walks, ask, run]
+# constraints, world, points, floors, views, sentences, expressions, walks, ask, run, symbols]
 func LangSource(aLang)
 	nl = char(10)
 	aRows = []
@@ -243,12 +243,28 @@ func LangSource(aLang)
 	next
 	cConstraints = RowsSource(aRows, nl)
 	aW = LangGet(aLang, "world")
-	cWorld = "[[], " + '""' + ", []]"
+	cWorld = "[[], " + '""' + ", [], []]"
 	if not isNull(aW)
 		aEntry = []
 		if len(aW) >= 4 aEntry = aW[4] ok
-		cWorld = "[" + NamesSource(aW[1]) + ", " + RingStr(aW[2]) + ", " + NamesSource(aEntry) + "]"
+		aPublish = []
+		if len(aW) >= 5 aPublish = aW[5] ok
+		cPub = "["
+		for i = 1 to len(aPublish)
+			if i > 1 cPub += ", " ok
+			cPub += "[" + RingStr(aPublish[i][1]) + ", " + RingStr(aPublish[i][2]) + "]"
+		next
+		cPub += "]"
+		cWorld = "[" + NamesSource(aW[1]) + ", " + RingStr(aW[2]) + ", " + NamesSource(aEntry) + ", " + cPub + "]"
 	ok
+	aSy = LangGet(aLang, "symbols")
+	if isNull(aSy) aSy = [] ok
+	cSymbols = "["
+	for i = 1 to len(aSy)
+		if i > 1 cSymbols += ", " ok
+		cSymbols += "[" + RingStr(aSy[i][1]) + ", " + RingStr(aSy[i][2]) + ", " + RingStr(aSy[i][3]) + ", " + RingStr(aSy[i][4]) + "]"
+	next
+	cSymbols += "]"
 	aRf = LangGet(aLang, "refine")
 	cPoints = "[]"
 	cFloors = "[]"
@@ -315,7 +331,8 @@ func LangSource(aLang)
 	c += "    " + cExprs + "," + nl
 	c += "    " + cWalks + "," + nl
 	c += "    " + cAsk + "," + nl
-	c += "    " + cRun + nl
+	c += "    " + cRun + "," + nl
+	c += "    " + cSymbols + nl
 	c += "  ]"
 	return c
 
@@ -352,7 +369,18 @@ func ForgeCourt(aLang)
 	# (v0.7: or an ASK, whose rows are JSON); the question library only with an ASK
 	bAsk = not isNull(LangGet(aLang, "ask"))
 	bRun = not isNull(LangGet(aLang, "run"))
-	if len(LangGet(aLang, "expressions")) > 0 or bAsk or bRun
+	aSyL = LangGet(aLang, "symbols")
+	bSym = 0
+	if not isNull(aSyL)
+		if len(aSyL) > 0 bSym = 1 ok
+	ok
+	if not isNull(LangGet(aLang, "world"))
+		if len(LangGet(aLang, "world")) >= 5
+			if len(LangGet(aLang, "world")[5]) > 0 bSym = 1 ok
+		ok
+	ok
+	# v0.10: a world is JSON, read and written with expr_lib's reader
+	if len(LangGet(aLang, "expressions")) > 0 or bAsk or bRun or bSym
 		c += 'load "expr_lib.ring"' + nl
 	ok
 	if bAsk
@@ -370,9 +398,10 @@ func ForgeCourt(aLang)
 	c += "$aCondLangs = []" + nl + "$cCondLang = " + '""' + nl + "$aCourtSentences = []" + nl
 	c += "$aCourtKinds = []" + nl + "$aCourtForms = []" + nl + "$aCourtRefusals = []" + nl + "$aCourtMenus = []" + nl
 	c += "$aCourtRanges = []" + nl + "$aCourtFormats = []" + nl + "$aCourtUnions = []" + nl + "$aCourtConstraints = []" + nl
-	c += "$aCourtWorld = [[], " + '""' + ", []]" + nl + "$aCourtPoints = []" + nl + "$aCourtFloors = []" + nl
+	c += "$aCourtWorld = [[], " + '""' + ", [], []]" + nl + "$aCourtPoints = []" + nl + "$aCourtFloors = []" + nl
 	c += "$aCourtViews = []" + nl + "$aCourtSentenceKinds = []" + nl
 	c += "$aCourtExprs = []" + nl + "$aCourtWalks = []" + nl + "$aCourtAsk = NULL" + nl + "$aCourtRun = NULL" + nl
+	c += "$aCourtSymbols = []" + nl + "$aCourtWorldFile = NULL" + nl
 	c += ExprGlobals()
 	c += "$aCourtLangs = [" + nl
 	aRecs = ForgeLangRecords(aLang, [])
@@ -624,7 +653,7 @@ func GbnfShape(aSeat, aLang)
 	ok
 	if cOf = "text" or cK = "format" or cK = "sentence" or cK = "expr" return "string" ok
 	if cOf = "number" or cK = "range" return "number" ok
-	return "ident"
+	return "ident"   # a name, a flag, a MENU word, a reference, a SYMBOL
 
 func FormOf(aLang, cName)
 	aF = LangGet(aLang, "forms")

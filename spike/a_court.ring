@@ -35,7 +35,7 @@ $aCourtRanges = []
 $aCourtFormats = []
 $aCourtUnions = []
 $aCourtConstraints = []
-$aCourtWorld = [[], "", []]
+$aCourtWorld = [[], "", [], []]
 $aCourtPoints = []
 $aCourtFloors = []
 $aCourtViews = []
@@ -44,6 +44,8 @@ $aCourtExprs = []
 $aCourtWalks = []
 $aCourtAsk = NULL
 $aCourtRun = NULL
+$aCourtSymbols = []
+$aCourtWorldFile = NULL
 $cExprLang = ""
 $aExprOperators = []
 $aExprOperands = []
@@ -86,7 +88,7 @@ $aCourtLangs = [
     ],
     [
     ],
-    [[], "", []],
+    [[], "", [], []],
     [],
     [],
     [
@@ -99,7 +101,8 @@ $aCourtLangs = [
     [
     ],
     NULL,
-    [["OF", ["algorithm", "steps", "result"]], ["COMPUTE", ["compute", "into", "value"]], ["COLLECT", ["collect", "into", "value"]], ["GROUP", ["group", "into", "by", "value"]], ["BRANCH", ["branch", "when", "then", "else"]], ["ITERATE", ["iterate", "over", "as", "do"]]]
+    [["OF", ["algorithm", "steps", "result"]], ["COMPUTE", ["compute", "into", "value"]], ["COLLECT", ["collect", "into", "value"]], ["GROUP", ["group", "into", "by", "value"]], ["BRANCH", ["branch", "when", "then", "else"]], ["ITERATE", ["iterate", "over", "as", "do"]]],
+    []
   ]
 ]
 CtUseLanguage("a")

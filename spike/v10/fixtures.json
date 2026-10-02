@@ -1,0 +1,51 @@
+{
+  "grammar": "haro",
+  "version": "0.10",
+  "comment": "The Haro v0.10 conformance floor, written BEFORE the court that passes it (the W discipline: fixtures first, prose second). v0.10 grows v0.9 by what the WORLD row of the charter's section 3 needs -- 'the ontology declared beside the grammar, as versioned data (C1, world.json)' -- and nothing else: a SYMBOL kind, a seat type whose value is a name resolved against a C1 world when the court is handed one (KIND: the symbol kind it resolves to; REF: the kind of ref the sentence contributes for it; MESSAGE: the refusal when the world declares no such symbol), and PUBLISH on the WORLD -- which DECLARATION kinds a sentence contributes as symbols, and as which symbol kind. The court's `check <file> [world.json]` resolves every SYMBOL seat when a world is given and says NO_WORLD, a warning, when none is; `world <file>` emits the sentence's own C1 rows. Every v0.9 fixture still passes: v0.10 refuses nothing v0.9 accepted. Rejects carry the fragment the refusal must contain.",
+  "accepts": [
+    {
+      "id": "A1",
+      "name": "a SYMBOL: a seat type resolved against the world -- its KIND, the REF it contributes, its MESSAGE",
+      "source": "DEFINE LANGUAGE f AS (VERSION \"0.10\", GRAMMAR \"0.10\", COURT \"x\", EXTENSION \".f\") RATIONALE \"x\"\nDEFINE SYMBOL flow AS (KIND \"flow\", REF \"calls\", MESSAGE \"step {name} invokes '{value}', and the world declares no flow:{value}\") RATIONALE \"a ZQL flow, declared in the world and never here\"\nDEFINE DECLARATION invocation AS (VERB \"INVOCATION\", SEATS [invokes: flow, compensated_by: flow?]) RATIONALE \"x\"\n",
+      "expect": {"language": "f", "counts": {"declarations": 1}, "symbols": 1}
+    },
+    {
+      "id": "A2",
+      "name": "PUBLISH on the WORLD: which kinds a sentence contributes as symbols, and as which symbol kind",
+      "source": "DEFINE LANGUAGE z AS (VERSION \"0.10\", GRAMMAR \"0.10\", COURT \"x\", EXTENSION \".z\") RATIONALE \"x\"\nDEFINE DECLARATION flow AS (VERB \"FLOW\", SEATS []) RATIONALE \"x\"\nDEFINE DECLARATION entity AS (VERB \"ENTITY\", SEATS []) RATIONALE \"x\"\nDEFINE WORLD z AS (PUBLISH [flow: flow, entity: entity]) RATIONALE \"a world declares its flows and entities for every court that cites them\"\n",
+      "expect": {"language": "z", "counts": {"declarations": 2}, "world": 1}
+    },
+    {
+      "id": "A3",
+      "name": "a v0.9 declaration is a v0.10 declaration: v0.9's A2, unchanged",
+      "source": "DEFINE LANGUAGE a AS (VERSION \"0.9\", GRAMMAR \"0.9\", COURT \"x\", EXTENSION \".a\") RATIONALE \"x\"\nDEFINE EXPRESSION aexpr AS (OPERATORS [add], OPERANDS [number, ref]) RATIONALE \"x\"\nDEFINE FORM word AS (SEATS [name: name]) RATIONALE \"x\"\nDEFINE DECLARATION compute AS (VERB \"COMPUTE\", SEATS [into: name, value: aexpr]) RATIONALE \"x\"\nDEFINE DECLARATION algorithm AS (VERB \"ALGORITHM\", SEATS [steps: [compute], result: [word]]) RATIONALE \"x\"\nDEFINE RUN a AS (OF [algorithm, steps, result], COMPUTE [compute, into, value]) RATIONALE \"x\"\n",
+      "expect": {"language": "a", "counts": {"declarations": 2}, "runs": 1, "symbols": 0}
+    }
+  ],
+  "rejects": [
+    {
+      "id": "R1",
+      "name": "a SYMBOL has a KIND",
+      "source": "DEFINE LANGUAGE f AS (VERSION \"0.10\", GRAMMAR \"0.10\", COURT \"x\", EXTENSION \".f\") RATIONALE \"x\"\nDEFINE SYMBOL flow AS (REF \"calls\") RATIONALE \"x\"\n",
+      "refusal": "SYMBOL requires the KIND clause"
+    },
+    {
+      "id": "R2",
+      "name": "PUBLISH names DECLARATIONs of this language",
+      "source": "DEFINE LANGUAGE z AS (VERSION \"0.10\", GRAMMAR \"0.10\", COURT \"x\", EXTENSION \".z\") RATIONALE \"x\"\nDEFINE DECLARATION flow AS (VERB \"FLOW\", SEATS []) RATIONALE \"x\"\nDEFINE WORLD z AS (PUBLISH [river: flow]) RATIONALE \"x\"\n",
+      "refusal": "PUBLISH: 'river' resolves to nothing"
+    },
+    {
+      "id": "R3",
+      "name": "a SYMBOL types a scalar seat, never a list's element",
+      "source": "DEFINE LANGUAGE f AS (VERSION \"0.10\", GRAMMAR \"0.10\", COURT \"x\", EXTENSION \".f\") RATIONALE \"x\"\nDEFINE SYMBOL flow AS (KIND \"flow\") RATIONALE \"x\"\nDEFINE DECLARATION batch AS (VERB \"BATCH\", SEATS [invokes: [flow]]) RATIONALE \"x\"\n",
+      "refusal": "a list seat's element must be a declared FORM, DECLARATION, MENU or a UNION of declarations"
+    },
+    {
+      "id": "R4",
+      "name": "two SYMBOLs do not resolve to the same KIND: one name, one meaning",
+      "source": "DEFINE LANGUAGE f AS (VERSION \"0.10\", GRAMMAR \"0.10\", COURT \"x\", EXTENSION \".f\") RATIONALE \"x\"\nDEFINE SYMBOL flow AS (KIND \"flow\") RATIONALE \"x\"\nDEFINE SYMBOL transaction AS (KIND \"flow\") RATIONALE \"x\"\n",
+      "refusal": "already resolves to flow"
+    }
+  ]
+}

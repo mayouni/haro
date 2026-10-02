@@ -172,7 +172,7 @@ no expression position, no escape):
 |---|---|---|
 | `LANGUAGE`, `DECLARATION`, `FORM`, `EXPRESSION`, `REFUSAL` | the five meta-kinds | kept, with their menus, their meta-court and their refusal channel |
 | `RATIONALE` on every declaration | mandatory (C6 3.8) | kept; it is principle 5 at this altitude |
-| **`WORLD`** (the knowledge stratum) | absent | the ontology declared beside the grammar: entities, relations, constraints, as versioned data (C1, `world.json`); never a mutable runtime store [R, mission.md rule 3] |
+| **`WORLD`** (the knowledge stratum) | absent | the ontology declared beside the grammar: entities, relations, constraints, as versioned data (C1, `world.json`); never a mutable runtime store [R, mission.md rule 3]. *Built in three slices: cardinality (v0.2), entry (v0.8), the C1 rows a sentence publishes and resolves against (v0.10, the tenth rung).* |
 | **`ASK`** (the pragmatics stratum) | absent | the language's own closed query grammar (the Q letter) and the human languages its natural door speaks; NL asks, never declares; the engine compiles to this grammar and never to host code [R, mission.md rules 1-2]. *The query grammar is built, v0.7 (the seventh rung); the natural door is not.* |
 | **`NARRATE`** | absent | how a run of the language is narrated back (stzn); the court's voice |
 | **`REFINE`** | absent | which declared points of a sentence may be refined, by whom, within what bounds, at what trust floor (section 7) |
@@ -240,6 +240,14 @@ a step tree that re-enters itself refused at check -- the totality doctrine of s
 structural. Judged by stz's 29 W cases and zing's formula cases re-expressed as algorithms
 (35 of 35 on `rnxc` and the oracle), because A has no suite of its own. Five letters of
 six are forged: Z, W, Q, F, A; N waits on the ringua Phase 1.5 study, the author's gate.
+**Haro v0.10, the same day (`haro/spike/v10/GRAMMAR.md`, 7 fixtures): the WORLD as versioned
+data.** The `WORLD` row above, past cardinality and entry: `SYMBOL`, a seat resolved against a
+C1 `world.json` when the court is handed one, and `PUBLISH`, the kinds a sentence contributes
+as symbols. Z publishes its flows, entities, norms and zones; F resolves INVOKES and
+COMPENSATED_BY through a `flow` symbol and publishes one `process` -- the placement contract's
+C3 3.2, in the declaring altitude, judged by RingFlex's own placement gate and by the seam
+between the two forged letters, nine of nine on `rnxc` and the oracle. The world is emitted
+and resolved, never stored, as the row says.
 
 **What the forge produces from one declaration** (Ringua's kit, 02-STACK's L1, now Haro's
 compiler verbs rather than separate organs): the parser; the court with the fixtures as its
@@ -538,6 +546,13 @@ duplicated two blocks across two commits (HF-57), the judge made from other repo
 numbers (HF-58), a list of a union judged by scalar shapes (HF-59). Five letters of six
 are forged. Record: `haro/SPIKE.md`, "The ninth rung".
 
+**The tenth rung, 2026-10-02, on the author's delegation: Haro v0.10, the WORLD as versioned
+data** (section 3's note). SYMBOL and PUBLISH; the court's `check <file> [world.json]` and
+`world <file>`; the placement contract's C3 3.2 judged by RingFlex's own placement gate on its
+world fixtures and by the seam between Z and F -- **nine of nine** on `rnxc` and the oracle,
+first run; RingFlex's gate 44 of 44 beside it (HF-60). D9 ruled on the delegation: A lives in
+stz beside W. Record: `haro/SPIKE.md`, "The tenth rung".
+
 v0.1's spike (`twice.haro`, a definition with an intent clause) proved one altitude. The
 ruling asks for three to meet, and the estate has already named the smallest program that
 makes them: the alphabet's own proof obligation, "Z re-expressed through stzf from `z.stzu`
@@ -697,6 +712,13 @@ already pins.
   kind (a `NOTATION` clause, which the forge would have to emit a reader for). *Recommendation:
   the Commons' shape, because every other letter and vocabulary already has it, the forge
   already emits its court, and a second notation is a second grammar to keep in step.*
+
+- **D9 -- where A lives -- RULED 2026-10-02 on the author's delegation: stz, beside W**
+  (`declarative/a/`). A's judge is W's own fixtures; the alphabet's sentence pairs them
+  ("constrain it in W, step it in A"); stz holds the pinned declarative homes (`stzu`, `w`,
+  `zql`); and Zex "owns no authoring DSL -- it runs what other pillars declare". `a_v09.haro`,
+  `a/w_in_a.a` and `v09/a_cases.json` are the proposal, routed through Central (HARO-A-01);
+  nothing in stz is written from here.
 
 ---
 

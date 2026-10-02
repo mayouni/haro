@@ -30,6 +30,11 @@
 # order of the court is: shapes, the WORLD, the local types, the
 # CONSTRAINTs, then the references.
 #
+# v0.10 (haro/spike/v10/GRAMMAR.md): the WORLD as versioned data -- a SYMBOL
+# seat resolves against a C1 world.json handed to `check <file> [world]`
+# (UNRESOLVED in the symbol's words; NO_WORLD a warning without one), and
+# `world <file>` emits the sentence's own C1 rows.
+#
 # v0.9 (haro/spike/v09/GRAMMAR.md): the RUN -- the A letter -- and the `run`
 # verb: `run <file> <algorithm> <record json>` walks an algorithm's step tree
 # on a record and answers its result (run_lib.ring, loaded by the generated
@@ -191,6 +196,9 @@ func CtUseLanguage(cName)
 	# v0.9: the RUN [[role, [kind, seat, ...]], ...], or NULL
 	$aCourtRun = NULL
 	if len(aE) >= 19 $aCourtRun = aE[19] ok
+	# v0.10: the SYMBOLs [name, kind, ref, message]
+	$aCourtSymbols = []
+	if len(aE) >= 20 $aCourtSymbols = aE[20] ok
 
 # the condition tables of every language the court carries, built once
 func CtBuildCondLangs()
@@ -246,7 +254,8 @@ func CtSnapshot()
 	        $aCourtMenus, $aCourtRanges, $aCourtFormats, $aCourtUnions, $aCourtConstraints,
 	        $aCourtWorld, $aCourtPoints, $aCourtFloors, $aCourtViews, $aCourtSentenceKinds,
 	        $aCourtToks, $nCourtPos, $aCondDecls, $cCondLang, $cCondOther, $bCondUnread,
-	        $aCondFormats, $aCondToks, $nCondPos, $aCourtExprs, $aCourtWalks, $aCourtAsk, $aCourtRun]
+	        $aCondFormats, $aCondToks, $nCondPos, $aCourtExprs, $aCourtWalks, $aCourtAsk, $aCourtRun,
+	        $aCourtSymbols, $aCourtWorldFile]
 
 func CtRestore(aS)
 	$cCourtLang = aS[1]
@@ -278,6 +287,114 @@ func CtRestore(aS)
 	$aCourtWalks = aS[27]
 	$aCourtAsk = aS[28]
 	$aCourtRun = aS[29]
+	$aCourtSymbols = aS[30]
+	$aCourtWorldFile = aS[31]
+
+# ---- v0.10: the world ------------------------------------------------------------------
+# A C1 world is JSON: {"world", "contract", "symbols": [{kind, name, span, rationale}],
+# "refs": [{from, to, kind, span}]}; read with expr_lib's reader, matched case-blind
+# (C1 3.1). $aCourtWorldFile is NULL (no world handed in) or the loaded world's
+# symbols; a SYMBOL seat resolves against it in the court's last pass.
+
+func CtSymbolByName(cName)
+	for i = 1 to len($aCourtSymbols)
+		if $aCourtSymbols[i][1] = cName return $aCourtSymbols[i] ok
+	next
+	return NULL
+
+func CtWorldLoad(cPath)
+	if not fexists(cPath) CtFail(1, "no world artifact at '" + cPath + "'") ok
+	aW = ExJsonParse(read(cPath))
+	if not ExIsObj(aW) CtFail(1, "'" + cPath + "' is not a C1 world: not a JSON object") ok
+	aGot = ExObjGet(aW, "symbols")
+	if not aGot[1] CtFail(1, "'" + cPath + "' has no symbols table; it is not a C1 world") ok
+	return aGot[2]
+
+func CtWorldHas(aSymbols, cKind, cName)
+	for i = 1 to len(aSymbols)
+		aK = ExObjGet(aSymbols[i], "kind")
+		aN = ExObjGet(aSymbols[i], "name")
+		if aK[1] and aN[1]
+			if lower("" + aK[2]) = lower(cKind) and lower("" + aN[2]) = lower(cName) return 1 ok
+		ok
+	next
+	return 0
+
+# every SYMBOL seat of the sentence, as [decl, seat, value, line]
+func CtSymbolSites(aDecls)
+	aOut = []
+	for i = 1 to len(aDecls)
+		aD = aDecls[i]
+		aKind = CtKindByVerb(aD[1])
+		aC = aD[4]
+		for j = 1 to len(aC)
+			aSeat = CtSeatByClause(aKind, aC[j][1])
+			if isNull(aSeat) loop ok
+			if CtTypeKind(aSeat) != "symbol" loop ok
+			if aC[j][3][1] != "word" loop ok
+			aOut + [aD, aSeat, aC[j][3][2], aC[j][2]]
+		next
+	next
+	return aOut
+
+# C3 3.2: every SYMBOL seat resolves to its KIND in the world; the first that
+# does not is refused in the SYMBOL's own words
+func CtResolveWorld(aDecls)
+	aSites = CtSymbolSites(aDecls)
+	for i = 1 to len(aSites)
+		aSy = CtSymbolByName(aSites[i][2][2])
+		if isNull(aSy) loop ok
+		if CtWorldHas($aCourtWorldFile, aSy[2], aSites[i][3]) loop ok
+		cMsg = aSy[4]
+		if cMsg = "" cMsg = "{VERB} {name} names '{value}', and the world declares no " + aSy[2] + ":{value}" ok
+		CtFail(aSites[i][4], "UNRESOLVED " + CtFill(cMsg, aSites[i][1], aSites[i][3]))
+	next
+
+func CtWorldStem(cPath)
+	cName = cPath
+	for i = len(cPath) to 1 step -1
+		if cPath[i] = "/" or cPath[i] = char(92)
+			cName = substr(cPath, i + 1)
+			exit
+		ok
+	next
+	n = 0
+	for i = 1 to len(cName)
+		if cName[i] = "." n = i ok
+	next
+	if n > 1 cName = left(cName, n - 1) ok
+	return cName
+
+# the sentence's own C1 rows: a symbol per declaration of a PUBLISH kind, a ref
+# per SYMBOL seat from the FIRST published declaration (the process) to the
+# symbol it names -- and nothing else: a court emits only what it can prove
+func CtWorldRows(aDecls, cFile)
+	aPublish = []
+	if len($aCourtWorld) >= 4 aPublish = $aCourtWorld[4] ok
+	aSymbols = []
+	cFrom = ""
+	for i = 1 to len(aDecls)
+		aD = aDecls[i]
+		for j = 1 to len(aPublish)
+			aK = CtKindByDeclName(aPublish[j][1])
+			if isNull(aK) or aK[1] != aD[1] loop ok
+			aRow = [ExObjMark(), ["kind", aPublish[j][2]], ["name", aD[2]], ["span", [ExObjMark(), ["file", cFile], ["line", aD[3]]]], ["rationale", aD[5]]]
+			aSymbols + aRow
+			if cFrom = "" cFrom = aPublish[j][2] + ":" + aD[2] ok
+		next
+	next
+	if cFrom = "" cFrom = $cCourtLang + ":" + CtWorldStem(cFile) ok
+	aRefs = []
+	aSites = CtSymbolSites(aDecls)
+	for i = 1 to len(aSites)
+		aSy = CtSymbolByName(aSites[i][2][2])
+		if isNull(aSy) loop ok
+		cRef = aSy[3]
+		if cRef = "" cRef = "cites" ok
+		aRow = [ExObjMark(), ["from", cFrom], ["to", aSy[2] + ":" + aSites[i][3]], ["kind", cRef], ["span", [ExObjMark(), ["file", cFile], ["line", aSites[i][4]]]]]
+		aRefs + aRow
+	next
+	return [ExObjMark(), ["world", CtWorldStem(cFile)], ["contract", "1.0"], ["symbols", aSymbols], ["refs", aRefs]]
 
 # ---- v0.6: the EXPRESSION tables, handed to expr_lib.ring ----------------------
 
@@ -556,6 +673,7 @@ func CtClauseShape(aSeat)
 	if cK = "union" return "union" ok
 	if cK = "sentence" return "string" ok
 	if cK = "expr" return "string" ok
+	if cK = "symbol" return "word" ok
 	if cOf = "text" or cK = "format" return "string" ok
 	if cOf = "number" or cK = "range" return "number" ok
 	return "word"
@@ -1051,6 +1169,8 @@ func CtDeclare(cSrc)
 	CtCheckValues(aDecls, 1)
 	# v0.9: an algorithm's step tree is a tree
 	if not isNull($aCourtRun) RunCheckAcyclic(aDecls) ok
+	# v0.10: the symbols resolve against the world, when one is handed in
+	if not isNull($aCourtWorldFile) CtResolveWorld(aDecls) ok
 	return aDecls
 
 # the NAMES and the typed seat values of every declaration: bRefs 0 checks
@@ -1709,10 +1829,30 @@ func CtMain()
 	# the judged file's folder: a SENTENCE seat's file is read beside it (v0.4)
 	$cCourtDir = CtDirOf(sysargv[4])
 	if cVerb = "check"
+		# v0.10: `check <file> [<world.json>]` -- with a world, every SYMBOL seat
+		# resolves against it; without one, a sentence that holds SYMBOL seats is
+		# judged alone and the last line says so, a warning (C2's "undecidable
+		# without more input"), never a refusal
+		cSrc = read(sysargv[4])
+		try
+			if len(sysargv) >= 5 $aCourtWorldFile = CtWorldLoad(sysargv[5]) ok
+			aDecls = CtDeclare(cSrc)
+			CtPrintVerdict(aDecls)
+			if isNull($aCourtWorldFile) and len($aCourtSymbols) > 0
+				nSites = len(CtSymbolSites(aDecls))
+				if nSites > 0
+					? "warning NO_WORLD: no world to resolve against; " + nSites + " symbol reference(s) unresolved, which is what C3 section 3.2 asks a project to close"
+				ok
+			ok
+		catch
+			? cCatchError
+		done
+	but cVerb = "world"
+		# v0.10: the sentence's own C1 rows, as JSON
 		cSrc = read(sysargv[4])
 		try
 			aDecls = CtDeclare(cSrc)
-			CtPrintVerdict(aDecls)
+			? ExJson(CtWorldRows(aDecls, CtWorldStem(sysargv[4]) + $cCourtExt))
 		catch
 			? cCatchError
 		done
@@ -1783,5 +1923,5 @@ func CtMain()
 			? cCatchError
 		done
 	else
-		? "unknown verb '" + cVerb + "'; this court answers: check, refine, eval, walk, ask, run"
+		? "unknown verb '" + cVerb + "'; this court answers: check, refine, eval, walk, ask, run, world"
 	ok

@@ -7,6 +7,7 @@
 # views, sentences, expressions, walks and the ask.
 
 load "court_lib.ring"
+load "expr_lib.ring"
 
 $cCourtLang = ""
 $cCourtExt = ""
@@ -33,7 +34,7 @@ $aCourtRanges = []
 $aCourtFormats = []
 $aCourtUnions = []
 $aCourtConstraints = []
-$aCourtWorld = [[], "", []]
+$aCourtWorld = [[], "", [], []]
 $aCourtPoints = []
 $aCourtFloors = []
 $aCourtViews = []
@@ -42,6 +43,8 @@ $aCourtExprs = []
 $aCourtWalks = []
 $aCourtAsk = NULL
 $aCourtRun = NULL
+$aCourtSymbols = []
+$aCourtWorldFile = NULL
 $cExprLang = ""
 $aExprOperators = []
 $aExprOperands = []
@@ -64,7 +67,7 @@ $aCourtLangs = [
       ["GUARD", "guard", [["norm", "name", 0, 0, "prim"]], "", []],
       ["ESCALATION", "escalation", [["on_breach", "breach_action", 1, 0, "form"]], "", []],
       ["RETRY", "retry", [["attempts", "number", 0, 0, "prim"], ["initial", "duration", 0, 0, "format"], ["backoff", "number", 0, 0, "prim"], ["max", "duration", 0, 0, "format"], ["not_on", "verdicts", 1, 0, "menu"]], "", []],
-      ["INVOCATION", "invocation", [["invokes", "name", 0, 0, "prim"], ["retry", "retry", 0, 1, "decl"], ["compensated_by", "name", 0, 1, "prim"], ["irreversible", "flag", 0, 1, "prim"], ["on_committed", "node", 0, 0, "union"], ["on_rejected", "node", 0, 0, "union"], ["on_held", "node", 0, 0, "union"]], "", [["retry", "C11: step {name} cites the retry policy '{value}', which is not declared"], ["on_committed", "C4: step {name} does not route ON COMMITTED. An invocation declares all three of a ZQL flow's endings"], ["on_rejected", "C4: step {name} does not route ON REJECTED. An invocation declares all three of a ZQL flow's endings"], ["on_held", "C4: step {name} does not route ON HELD. An invocation declares all three of a ZQL flow's endings"]]],
+      ["INVOCATION", "invocation", [["invokes", "flow", 0, 0, "symbol"], ["retry", "retry", 0, 1, "decl"], ["compensated_by", "flow", 0, 1, "symbol"], ["irreversible", "flag", 0, 1, "prim"], ["on_committed", "node", 0, 0, "union"], ["on_rejected", "node", 0, 0, "union"], ["on_held", "node", 0, 0, "union"]], "", [["retry", "C11: step {name} cites the retry policy '{value}', which is not declared"], ["on_committed", "C4: step {name} does not route ON COMMITTED. An invocation declares all three of a ZQL flow's endings"], ["on_rejected", "C4: step {name} does not route ON REJECTED. An invocation declares all three of a ZQL flow's endings"], ["on_held", "C4: step {name} does not route ON HELD. An invocation declares all three of a ZQL flow's endings"]]],
       ["TASK", "task", [["asks", "actor", 0, 0, "decl"], ["surface", "name", 0, 0, "prim"], ["decisions", "decision", 1, 0, "form"], ["sla", "deadline", 0, 0, "format"], ["escalation", "escalation", 0, 1, "decl"], ["timeout", "deadline", 0, 0, "format"], ["on_timeout", "node", 0, 0, "union"], ["routes", "route", 1, 0, "form"]], "", [["asks", "C11: human task {name} ASKS '{value}', which is not a declared actor"], ["escalation", "C11: human task {name} cites the escalation '{value}', which is not declared"], ["timeout", "C1: human task {name} has no TIMEOUT. Every wait carries one -- a dossier only a human can close is a SUSPENDED state, not an untimed wait"], ["on_timeout", "C1: human task {name} has no ON_TIMEOUT: a TIMEOUT says where the wait goes when it expires"]]],
       ["EVENT_WAIT", "event_wait", [["awaits", "name", 0, 0, "prim"], ["correlated_by", "name", 0, 0, "prim"], ["timeout", "deadline", 0, 0, "format"], ["on_timeout", "node", 0, 0, "union"], ["on_received", "node", 0, 0, "union"]], "", [["timeout", "C2: event wait {name} has no TIMEOUT. A workflow may not wait on the world for ever"], ["on_timeout", "C2: event wait {name} has no ON_TIMEOUT: a TIMEOUT says where the wait goes when it expires"]]],
       ["TIMER_WAIT", "timer_wait", [["awaits", "landmark", 0, 0, "format"], ["on_due", "node", 0, 0, "union"]], "", []],
@@ -119,7 +122,7 @@ $aCourtLangs = [
       ["c15_escalation", "escalation", "not self referenced", "", "C15: escalation {name} is declared and never used"],
       ["c15_retry", "retry", "not self referenced", "", "C15: retry policy {name} is declared and never used"]
     ],
-    [["workflow"], "workflow", ["invocation", "task", "event_wait", "timer_wait", "routing", "compensation"]],
+    [["workflow"], "workflow", ["invocation", "task", "event_wait", "timer_wait", "routing", "compensation"], [["workflow", "process"]]],
     [],
     [],
     [
@@ -131,7 +134,8 @@ $aCourtLangs = [
     [
     ],
     NULL,
-    NULL
+    NULL,
+    [["flow", "flow", "calls", "step {name} names the flow '{value}', and the world declares no flow:{value}. A cross-artifact reference no court resolves is the defect C3 section 3.2 closes"]]
   ]
 ]
 CtUseLanguage("f")

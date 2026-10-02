@@ -18,6 +18,10 @@
 # closed question grammar: FROM which kinds, WHERE in which expression,
 # which optional CLAUSES (where, order, limit); and ABSENT missing.
 #
+# v0.10 (haro/spike/v10/GRAMMAR.md): the WORLD as versioned data -- SYMBOL, a
+# seat type resolved against a C1 world.json when the court is handed one, and
+# PUBLISH on the WORLD, the kinds a sentence contributes as symbols.
+#
 # v0.9 (haro/spike/v09/GRAMMAR.md): what A needs -- RUN, the kinetic declaration
 # of structured steps (OF, COMPUTE, COLLECT, GROUP, BRANCH, ITERATE: a kind and
 # its seats by role), and a list seat whose element is a UNION of declarations.
@@ -87,7 +91,7 @@ func StzuClauses(cKind)
 	but cKind = "CONSTRAINT"
 		return [["MESSAGE", "string"], ["ON", "ident"], ["THEN", "string"], ["WHEN", "string"]]
 	but cKind = "WORLD"
-		return [["ENTRY", "namelist"], ["FIRST", "ident"], ["ONE", "namelist"]]
+		return [["ENTRY", "namelist"], ["FIRST", "ident"], ["ONE", "namelist"], ["PUBLISH", "pairlist"]]
 	but cKind = "REFINE"
 		return [["FLOOR", "pointlist"], ["POINTS", "pointlist"]]
 	but cKind = "UNION"
@@ -98,6 +102,8 @@ func StzuClauses(cKind)
 		return [["CLAUSES", "namelist"], ["FROM", "namelist"], ["WHERE", "ident"]]
 	but cKind = "RUN"
 		return [["BRANCH", "namelist"], ["COLLECT", "namelist"], ["COMPUTE", "namelist"], ["GROUP", "namelist"], ["ITERATE", "namelist"], ["OF", "namelist"]]
+	but cKind = "SYMBOL"
+		return [["KIND", "string"], ["MESSAGE", "string"], ["REF", "string"]]
 	ok
 	return []
 
@@ -136,13 +142,15 @@ func StzuRequired(cKind)
 		return ["FROM"]
 	but cKind = "RUN"
 		return ["OF"]
+	but cKind = "SYMBOL"
+		return ["KIND"]
 	ok
 	return []
 
 func StzuIsKind(cWord)
 	return InStrList(cWord, ["LANGUAGE", "DECLARATION", "FORM", "EXPRESSION", "REFUSAL",
 	                         "MENU", "RANGE", "FORMAT", "CONSTRAINT", "WORLD", "REFINE", "UNION",
-	                         "SENTENCE", "VIEW", "WALK", "ASK", "RUN"])
+	                         "SENTENCE", "VIEW", "WALK", "ASK", "RUN", "SYMBOL"])
 
 # the directory part of a path, "" when none (core Ring has no dirname)
 func StzuDirOf(cPath)
@@ -171,6 +179,10 @@ func StzuTypeKindOf(aLang, cOf)
 	for i = 1 to len(aL) if aL[i][1] = cOf return "union" ok next
 	aL = LangGet(aLang, "sentences")
 	for i = 1 to len(aL) if aL[i][1] = cOf return "sentence" ok next
+	aL = LangGet(aLang, "symbols")
+	if not isNull(aL)
+		for i = 1 to len(aL) if aL[i][1] = cOf return "symbol" ok next
+	ok
 	return "expr"
 
 # the condition tables of a language record and of the languages its
@@ -583,6 +595,25 @@ func StzuParsePathList()
 	StzuAdvance()
 	return aPaths
 
+# a pair is [key, word, line]: [ key: word, ... ]   (v0.10)
+func StzuParsePairList()
+	StzuExpect("lbracket", "'['")
+	aPairs = []
+	while StzuPeek()[1] != "rbracket"
+		tK = StzuExpect("ident", "a name")
+		StzuExpect("colon", "':'")
+		tV = StzuExpect("ident", "a name")
+		aPairs + [tK[2], tV[2], tK[3]]
+		if StzuPeek()[1] = "comma"
+			StzuAdvance()
+		but StzuPeek()[1] != "rbracket"
+			t = StzuPeek()
+			StzuFail(t[3], "Expected ',' or ']' but found '" + t[2] + "'")
+		ok
+	end
+	StzuAdvance()
+	return aPairs
+
 # a message is [seat, text, line]: [ seat: "text", ... ]   (v0.3)
 func StzuParseMessageList()
 	StzuExpect("lbracket", "'['")
@@ -667,6 +698,8 @@ func StzuParseDeclaration()
 			aClauses + [ct[2], StzuParseContextList()]
 		but cShape = "pathlist"
 			aClauses + [ct[2], StzuParsePathList()]
+		but cShape = "pairlist"
+			aClauses + [ct[2], StzuParsePairList()]
 		else
 			aClauses + [ct[2], StzuParsePointList()]
 		ok
@@ -707,6 +740,8 @@ func StzuParseDeclaration()
 #                 (guards a list of [path, line]; compute, formula, fail "" when absent, v0.6)
 #   ask:          [name, from kinds, where, clauses, rationale, line] or NULL   (v0.7)
 #   run:          [name, [[role, [kind, seat, ...]], ...], rationale, line] or NULL   (v0.9)
+#   symbols:      [name, kind, ref, message, line]                (a seat type resolved against the world, v0.10)
+#                 and world gains publish: [[kind, symbolkind, line], ...] as its fifth element
 #   refusals:     [name, message, rationale, line, named]          (named [word, text, line] per trespasser, v0.8)
 #   menus:        [name, words, message, line]
 #   ranges:       [name, min, max, message, line]
@@ -753,6 +788,7 @@ func StzuDeclare(cSrc)
 	aWalks = []
 	aAsk = NULL
 	aRun = NULL
+	aSymbols = []
 	aWorld = NULL
 	aRefine = NULL
 	aDeclared = []
@@ -789,7 +825,11 @@ func StzuDeclare(cSrc)
 			# where `reachable` starts walking
 			aEntry = []
 			if HasClause(aClauses, "ENTRY") aEntry = ClauseValue(aClauses, "ENTRY") ok
-			aWorld = [aOne, cFirst, nLine, aEntry]
+			# v0.10: PUBLISH -- which kinds a sentence contributes to the world,
+			# and as which symbol kind
+			aPublish = []
+			if HasClause(aClauses, "PUBLISH") aPublish = ClauseValue(aClauses, "PUBLISH") ok
+			aWorld = [aOne, cFirst, nLine, aEntry, aPublish]
 		but cKind = "REFINE"
 			if not isNull(aRefine)
 				StzuFail(nLine, "a .haro file declares at most one REFINE")
@@ -944,6 +984,18 @@ func StzuDeclare(cSrc)
 				cWhere = ""
 				if HasClause(aClauses, "WHERE") cWhere = ClauseValue(aClauses, "WHERE") ok
 				aViews + [cName, cOn, ClauseValue(aClauses, "ONE"), cNamed, cWhere, nLine]
+			but cKind = "SYMBOL"
+				cSKind = ClauseValue(aClauses, "KIND")
+				for i = 1 to len(aSymbols)
+					if aSymbols[i][2] = cSKind
+						StzuFail(nLine, "SYMBOL " + cName + " already resolves to " + cSKind + " through " + aSymbols[i][1] + ": one name, one meaning")
+					ok
+				next
+				cRef = ""
+				if HasClause(aClauses, "REF") cRef = ClauseValue(aClauses, "REF") ok
+				cMsg = ""
+				if HasClause(aClauses, "MESSAGE") cMsg = ClauseValue(aClauses, "MESSAGE") ok
+				aSymbols + [cName, cSKind, cRef, cMsg, nLine]
 			but cKind = "RUN"
 				if not isNull(aRun)
 					StzuFail(nLine, "a .haro file declares at most one RUN: a language runs one way (" + aRun[1] + " is it)")
@@ -1135,6 +1187,12 @@ func StzuDeclare(cSrc)
 			if cK = "" StzuFail(aWorld[3], "ENTRY: '" + aEntry[i] + "' resolves to nothing in this declaration") ok
 			if cK != "DECLARATION" StzuFail(aWorld[3], "ENTRY must name a DECLARATION; '" + aEntry[i] + "' is a " + cK) ok
 		next
+		aPublish = aWorld[5]
+		for i = 1 to len(aPublish)
+			cK = DeclaredKind(aDeclared, aPublish[i][1])
+			if cK = "" StzuFail(aPublish[i][3], "PUBLISH: '" + aPublish[i][1] + "' resolves to nothing in this declaration") ok
+			if cK != "DECLARATION" StzuFail(aPublish[i][3], "PUBLISH must name a DECLARATION; '" + aPublish[i][1] + "' is a " + cK) ok
+		next
 	ok
 
 	# the condition tables: this language and the languages its SENTENCEs name
@@ -1145,7 +1203,7 @@ func StzuDeclare(cSrc)
 	         ["menus", aMenus], ["ranges", aRanges], ["formats", aFormats],
 	         ["constraints", aConstraints], ["world", aWorld], ["refine", aRefine],
 	         ["unions", aUnions], ["sentences", aSentences], ["views", aViews],
-	         ["walks", aWalks], ["ask", aAsk], ["run", aRun] ]
+	         ["walks", aWalks], ["ask", aAsk], ["run", aRun], ["symbols", aSymbols] ]
 	$cCondLang = cLName
 	$aCondLangs = StzuCondLangs(aRec, [])
 	$aCondFormats = []
@@ -1522,8 +1580,8 @@ func StzuResolveSeats(aSeats, aDeclared)
 			if cK = ""
 				StzuFail(aS[5], "seat type '" + cOf + "' resolves to nothing in this declaration")
 			ok
-			if cK != "FORM" and cK != "EXPRESSION" and cK != "MENU" and cK != "RANGE" and cK != "FORMAT" and cK != "DECLARATION" and cK != "UNION" and cK != "SENTENCE"
-				StzuFail(aS[5], "seat type '" + cOf + "' must name a FORM, an EXPRESSION, a MENU, a RANGE, a FORMAT, a DECLARATION, a UNION or a SENTENCE, not a " + cK)
+			if cK != "FORM" and cK != "EXPRESSION" and cK != "MENU" and cK != "RANGE" and cK != "FORMAT" and cK != "DECLARATION" and cK != "UNION" and cK != "SENTENCE" and cK != "SYMBOL"
+				StzuFail(aS[5], "seat type '" + cOf + "' must name a FORM, an EXPRESSION, a MENU, a RANGE, a FORMAT, a DECLARATION, a UNION, a SENTENCE or a SYMBOL, not a " + cK)
 			ok
 		ok
 	next
@@ -1562,6 +1620,10 @@ func StzuPrintLanguage(aLang)
 	nRuns = 0
 	if not isNull(LangGet(aLang, "run")) nRuns = 1 ok
 	? "runs " + nRuns
+	aSy = LangGet(aLang, "symbols")
+	nSy = 0
+	if not isNull(aSy) nSy = len(aSy) ok
+	? "symbols " + nSy
 	nWorld = 0
 	if not isNull(LangGet(aLang, "world")) nWorld = 1 ok
 	? "world " + nWorld
