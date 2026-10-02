@@ -793,12 +793,17 @@ already pins.
   `src/rnxc.zig`, outside `haro/` and that session's own work. The guard folding into
   `bench/gate.py` is routed with it. This session writes neither.
 
-- **D15 -- `origin/next` (HF-18): remove it -- decided, not executed.** The visibility rule
-  says `next` never goes to origin, and it is there at `026ac97` with `haro/*.md` inside.
-  Deleting a public branch is an act on the public remote, and `ringpp/CLAUDE.md` names
-  pushes to origin his; so the command waits for his word: `git push origin --delete next`
-  from `ringpp`. The commit is an ancestor of local `next`, so the ref can be recreated
-  exactly if the deletion is ever wrong.
+- **D15 -- `origin/next` (HF-18): remove it -- DONE 2026-10-03, at the author's word.** The
+  visibility rule says `next` never goes to origin, and it was there at `026ac97` with
+  `haro/*.md` inside. Decided on the delegation and left unexecuted, because deleting a
+  public branch is an act on the public remote and `ringpp/CLAUDE.md` names pushes to
+  origin his; he then said "if the removal is what we should do while keeping everything
+  consistent, then remove it". Consistency checked first: no pull request from or into
+  `next`, the branch unprotected, `main` the default, nothing in the repository pointing
+  at it, the commit an ancestor of local `next`. Then `git push origin --delete next`, and
+  local `next` now tracks `private/next`. *Not undone by it:* the fork `ringpackages/ringpp`
+  holds `next` at `026ac97`, and any earlier clone does too; the commits since were never
+  public.
 
 - **D9 -- where A lives -- RULED 2026-10-02 on the author's delegation: stz, beside W**
   (`declarative/a/`). A's judge is W's own fixtures; the alphabet's sentence pairs them
