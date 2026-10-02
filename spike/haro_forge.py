@@ -9,7 +9,8 @@ prints is a comparison against a pinned judge or an oracle:
            runtimes must print the same bytes for every fixture.
 
 Later stages (the forge, the machine court against harb, the GBNF, the
-refinement, the timing) are added below as they are built.
+refinement, the timing, the fleet court, W forged whole, Z forged whole)
+are added below as they are built.
 
 Usage: python haro/spike/haro_forge.py [--stage N] [--plant]
   --plant   plants a known-wrong verdict to prove the guard can fail.
@@ -59,6 +60,7 @@ STZU2_FIXTURES = os.path.join(HERE, 'v02', 'fixtures.json')
 STZU3_FIXTURES = os.path.join(HERE, 'v03', 'fixtures.json')
 STZU4_FIXTURES = os.path.join(HERE, 'v04', 'fixtures.json')
 STZU5_FIXTURES = os.path.join(HERE, 'v05', 'fixtures.json')
+STZU6_FIXTURES = os.path.join(HERE, 'v06', 'fixtures.json')
 
 
 def judge_stzu(exe, label, fixtures=STZU_FIXTURES):
@@ -68,7 +70,7 @@ def judge_stzu(exe, label, fixtures=STZU_FIXTURES):
     counts), world and points."""
     doc = json.load(open(fixtures, encoding='utf-8'))
     # the pinned v0.1 judge is stzu's; everything since is Haro's (D1)
-    assert doc['grammar'] in ('stzu', 'haro') and doc['version'] in ('0.1', '0.2', '0.3', '0.4', '0.5')
+    assert doc['grammar'] in ('stzu', 'haro') and doc['version'] in ('0.1', '0.2', '0.3', '0.4', '0.5', '0.6')
     passed = failed = 0
     outputs = {}
     with tempfile.TemporaryDirectory() as td:
@@ -135,7 +137,8 @@ def stage1():
     for label, fixtures in (('v0.1, the pinned judge', STZU_FIXTURES), ('v0.2, the WORLD and REFINE seats', STZU2_FIXTURES),
                             ('v0.3, the UNION, MESSAGES and the relations', STZU3_FIXTURES),
                             ('v0.4, the SENTENCE, the VIEW and the paths', STZU4_FIXTURES),
-                            ('v0.5, CONTEXTS on an EXPRESSION', STZU5_FIXTURES)):
+                            ('v0.5, CONTEXTS on an EXPRESSION', STZU5_FIXTURES),
+                            ('v0.6, pair lists, the expression semantics and WALK', STZU6_FIXTURES)):
         print(f'stage 1 -- the Haro meta-court in pure Ring, judged by its fixtures ({label})')
         f1, o1 = judge_stzu(RNXC, 'rnxc', fixtures)
         f2, o2 = judge_stzu(ORACLE, 'oracle ring.exe', fixtures)
@@ -749,6 +752,142 @@ def stage8():
     return failures
 
 
+# ---- stage 9: Z, a WORLD forged whole -- court AND runtime -- judged by zing's 16 cases
+
+Z_STZU = os.path.join(HERE, 'z_v06.haro')
+Z_SENTENCE = 'tontine.z'
+Z_FIXTURES = r'D:\GitHub\zing\conformance\fixtures.json'
+Z_FLOOR = 16
+Z_COUNTS = {'entities': 'ENTITY', 'norms': 'NORM', 'flows': 'FLOW', 'zones': 'LANDING_ZONE'}
+
+
+def z_run(exe, args):
+    return run_args(exe, ['z_court.ring'] + args, HERE).strip()
+
+
+def stage9():
+    """The sixth rung. z_v06.haro declares ZQL in the Grammar Commons' shape
+    (an EXPRESSION with ABSENT/DIVISION/EQUALITY, entities with pair-list
+    FIELDS, norms and steps with expression seats, a WALK of flows); the
+    forge emits its sentence court, its expression court and both grammars;
+    tontine.z is zing's fixture source re-expressed in that shape (the ONE
+    adaptation, haro/SPIKE.md); and the 16 cases -- 4 norms on records, 8
+    flows on records with their computed fields, 4 destructive rejects --
+    are judged on the forged court unadapted, their data and expectations
+    read from zing's file. A step is named lower_snake in the Commons where
+    ZQL names it UPPER, so `at` is compared case-blind; nothing else is."""
+    print('stage 9 -- Z, a WORLD forged whole: z_v06.haro -> z_court.ring, z.gbnf, z_expr.ring, z_expr.gbnf; tontine.z judged by zing\'s 16 cases unadapted')
+    failures = 0
+    out_rnx = run_args(RNXC, ['forge.ring', Z_STZU, '.'], HERE).strip()
+    print('  rnxc  :', out_rnx.splitlines()[0] if out_rnx else 'NO OUTPUT')
+    if not out_rnx.startswith('forged z'):
+        print('  FAIL the forge did not forge Z')
+        return 1
+    td = os.path.join(ROOT, 'runtime', 'haro-forge-oracle')
+    os.makedirs(td, exist_ok=True)
+    arts = ('z_court.ring', 'z.gbnf', 'z_expr.ring', 'z_expr.gbnf')
+    for art in arts:
+        if os.path.exists(os.path.join(td, art)):
+            os.remove(os.path.join(td, art))
+    out_or = run_args(ORACLE, ['forge.ring', Z_STZU, '../../runtime/haro-forge-oracle'], HERE).strip()
+    print('  oracle:', out_or.splitlines()[0] if out_or else 'NO OUTPUT')
+    for art in arts:
+        a = open(os.path.join(HERE, art), 'rb').read()
+        b = open(os.path.join(td, art), 'rb').read() if os.path.exists(os.path.join(td, art)) else b''
+        if a != b:
+            failures += 1
+            print(f'  FAIL {art} differs between the two runtimes ({len(a)} vs {len(b)} bytes)')
+        else:
+            print(f'  ok   {art}: {len(a)} bytes, byte-identical on both runtimes')
+    doc = json.load(open(Z_FIXTURES, encoding='utf-8'))
+    assert doc['name'] == 'tontine conformance fixtures v1', 'unexpected Z fixture file'
+    ab_diff = []
+    # the sentence itself: accepted, with the fixture's counts
+    r = z_run(RNXC, ['check', Z_SENTENCE])
+    o = z_run(ORACLE, ['check', Z_SENTENCE])
+    if r != o:
+        ab_diff.append('check tontine.z')
+    ok, fields = parse_verdict(r)
+    if not ok:
+        failures += 1
+        print(f'  FAIL tontine.z is refused: {fields}')
+    else:
+        for k, verb in Z_COUNTS.items():
+            want = doc['counts'][k]
+            got = int(fields.get('count ' + verb, '-1'))
+            if got != want:
+                failures += 1
+                print(f'  FAIL tontine.z counts {got} {verb}, the fixture {want} {k}')
+        print(f'  ok   tontine.z is a sentence of z: ' + ', '.join(f'{doc["counts"][k]} {k}' for k in Z_COUNTS))
+    passed = failed = 0
+    for case in doc['normCases']:
+        args = ['eval', Z_SENTENCE, case['norm'], 'rule', json.dumps(case['data'])]
+        r = z_run(RNXC, args)
+        o = z_run(ORACLE, args)
+        if r != o:
+            ab_diff.append(case['name'])
+        ok = r == json.dumps(case['expect'])
+        if ok:
+            passed += 1
+        else:
+            failed += 1
+            print(f'  FAIL norm {case["norm"]} / {case["name"]}: expected {json.dumps(case["expect"])} got {r[:120]}')
+    for case in doc['flowCases']:
+        args = ['walk', Z_SENTENCE, case['flow'], json.dumps(case['data'])]
+        r = z_run(RNXC, args)
+        o = z_run(ORACLE, args)
+        if r != o:
+            ab_diff.append(case['name'])
+        why = ''
+        try:
+            got = json.loads(r)
+            ok = got.get('status') == case['expect']
+            if ok and 'at' in case:
+                ok = got.get('at', '').lower() == case['at'].lower()
+            if ok and 'computed' in case:
+                ok = got.get('computed') == case['computed']
+            if not ok:
+                why = f' -- expected {case["expect"]}' + (f' at {case["at"]}' if 'at' in case else '') + \
+                      (f' computed {json.dumps(case["computed"])}' if 'computed' in case else '') + f', got {r[:160]}'
+        except json.JSONDecodeError:
+            ok = False
+            why = f' -- not a verdict: {r[:160]}'
+        if PLANT and case['name'].startswith('FORMULA: [4,5,3,4,5]'):
+            ok, why = False, ' -- PLANTED'
+        if ok:
+            passed += 1
+        else:
+            failed += 1
+            print(f'  FAIL flow {case["flow"]} / {case["name"]}{why}')
+    with tempfile.TemporaryDirectory() as tdr:
+        for k, text in enumerate(doc['rejects']):
+            p = os.path.join(tdr, f'reject{k}.z')
+            with open(p, 'w', encoding='utf-8', newline='') as f:
+                f.write(text + '\n')
+            r = z_run(RNXC, ['check', p])
+            o = z_run(ORACLE, ['check', p])
+            if r != o:
+                ab_diff.append(text)
+            ok = not r.startswith('ok') and 'closed' in r
+            if ok:
+                passed += 1
+            else:
+                failed += 1
+                print(f'  FAIL reject {text!r}: {r[:160]}')
+    n = len(doc['normCases']) + len(doc['flowCases']) + len(doc['rejects'])
+    print(f'Z-CONFORMANCE (the forged court and runtime on rnxc): {passed} passed, {failed} failed of {n}')
+    failures += failed
+    if ab_diff:
+        failures += 1
+        print(f'  FAIL rnxc and the oracle differ on {len(ab_diff)} case(s): {ab_diff}')
+    else:
+        print(f'  ok   rnxc and the oracle print the same bytes on all {n} cases and the sentence')
+    if Z_FLOOR and passed < Z_FLOOR:
+        failures += 1
+        print(f'  FAIL {passed} passed, under the pinned floor of {Z_FLOOR}')
+    return failures
+
+
 def stage6(lang, court=None, n=15):
     court = court or f'{lang}_court.ring'
     print(f'stage 6 -- edit to verdict on makeen_box.machine, minima of {n}')
@@ -818,5 +957,7 @@ if __name__ == '__main__':
         failures += stage6(lang)
     if stage in (None, 8) and os.path.exists(W_STZU):
         failures += stage8()
+    if stage in (None, 9) and os.path.exists(Z_STZU):
+        failures += stage9()
     print(f'haro_forge: {"FAIL" if failures else "PASS"} ({failures} failure(s), {time.perf_counter()-t0:.1f} s)')
     sys.exit(1 if failures else 0)

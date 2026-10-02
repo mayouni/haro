@@ -4,7 +4,7 @@
 # by court_lib.ring over the records below, one per language -- this one first, then
 # every language a SENTENCE seat names: kinds [VERB, name, seats, names, messages],
 # forms, refusals, menus, ranges, formats, unions, constraints, world, points, floors,
-# views and sentences.
+# views, sentences, expressions and walks.
 
 load "court_lib.ring"
 
@@ -38,6 +38,22 @@ $aCourtPoints = []
 $aCourtFloors = []
 $aCourtViews = []
 $aCourtSentenceKinds = []
+$aCourtExprs = []
+$aCourtWalks = []
+$cExprLang = ""
+$aExprOperators = []
+$aExprOperands = []
+$aExprAggregates = []
+$aExprVariables = []
+$aExprContexts = []
+$cExprAbsent = ""
+$cExprDivision = ""
+$cExprEquality = ""
+$aExprToks = []
+$nExprPos = 1
+$aExprAllowed = []
+$aExprRecord = []
+$aExprOverlay = []
 $aCourtLangs = [
   ["fleet", ".fleet",
     [
@@ -91,6 +107,10 @@ $aCourtLangs = [
     ],
     [
       ["machine_file", "machine", "MEMBER {name} names {value}, which cannot be read from beside this fleet file", "MEMBER {name} is refused: {why} (line {line} of {value})"]
+    ],
+    [
+    ],
+    [
     ]
   ],
   ["machine", ".machine",
@@ -217,6 +237,10 @@ $aCourtLangs = [
     [["box"], "box"],
     [["service.restart", "knob"], ["service.ready", "field"], ["service.health", "knob"], ["service.memory", "knob"], ["service.cpu", "knob"], ["service.tasks", "knob"], ["box.console", "field"], ["box.profile", "policy"], ["box.board", "policy"], ["mount.device", "field"], ["capability.grant", "policy"]],
     [["service.restart", "external"], ["service.health", "external"], ["service.memory", "external"], ["service.cpu", "external"], ["service.tasks", "external"], ["box.profile", "trusted"], ["box.board", "trusted"], ["capability.grant", "trusted"]],
+    [
+    ],
+    [
+    ],
     [
     ],
     [

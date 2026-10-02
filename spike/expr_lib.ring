@@ -1,15 +1,23 @@
 # expr_lib.ring -- the generic court AND evaluator of a declared EXPRESSION
-# language (Haro v0.5), in pure core Ring.
+# language (Haro v0.5, grown in v0.6), in pure core Ring.
 #
 # A court FORGED from a .haro declaration that holds an EXPRESSION loads this
-# file and fills five tables (see forge.ring): the language's name, its
-# OPERATORS and OPERANDS (words of the closed menus), its VARIABLES, and its
-# CONTEXTS -- the seats a host offers the expression, each with the variables
-# it admits. The grammar is W's (stz/declarative/w/GRAMMAR.md), the one
-# expression shape the estate declares: or < and < not < comparison < additive
-# < multiplicative < unary < primary. What the declaration does NOT admit --
-# an operator outside its menu, an operand kind outside its menu, a variable
-# outside the seat -- is refused at compile time, by name, never answered nil.
+# file and fills its tables (see forge.ring): the language's name, its
+# OPERATORS and OPERANDS (words of the closed menus), its AGGREGATES, its
+# VARIABLES, its CONTEXTS -- the seats a host offers the expression, each
+# with the variables it admits -- and, since v0.6, the three semantics an
+# evaluator needs and the declaration says: ABSENT (what a reference to
+# nothing reads as: zero, or refuse), DIVISION (what a division by zero
+# yields: calm, 0, or refuse), EQUALITY (kind: a number and a text are never
+# equal, W's rule; value: a numeric text and its number are one value,
+# ZQL's). The grammar is W's (stz/declarative/w/GRAMMAR.md), the one
+# expression shape the estate declares: or < and < not < comparison <
+# additive < multiplicative < unary < primary -- with v0.6's operands and
+# operators where the menu admits them: a bare name is a reference into the
+# record (ref, dotted for a path), SUM(path) and its kin an aggregate (agg),
+# ROUND(x) an operator, CONTAINS a comparison, true and false flags. What
+# the declaration does NOT admit is refused at compile time, by name, never
+# answered nil.
 #
 #   <court>.ring check <seat> "<expr>"                  ok | refused: why
 #   <court>.ring eval  <seat> "<expr>" [input] [init]    the value, as JSON
@@ -19,11 +27,17 @@
 # (stz's list face, experiment/run_w.luau), implemented here once so the
 # forged evaluator can be judged by W's own fixtures unadapted. Numbers are
 # the host's numbers (Ring's doubles); a comparison answers 1 or 0; a string
-# is always true, as on the Luau host.
+# is always true, as on the Luau host. A record (a JSON object) is the list
+# [ExObjMark(), [key, value], ...]; a sentence court sets it with
+# ExSetRecord() before evaluating a seat's expression on it (court_lib.ring,
+# the eval and walk verbs), and FORMULA results overlay it by name, as
+# zing's runner does (cli/src/zql.zig, EvalCtx.overlay).
 #
 # Functions only. Globals ($cExprLang, $aExprOperators, $aExprOperands,
-# $aExprVariables, $aExprContexts, $aExprToks, $nExprPos, $aExprAllowed) are
-# born in the generated court, at its top level, for both runtimes' sake.
+# $aExprAggregates, $aExprVariables, $aExprContexts, $cExprAbsent,
+# $cExprDivision, $cExprEquality, $aExprToks, $nExprPos, $aExprAllowed,
+# $aExprRecord, $aExprOverlay) are born in the generated court, at its top
+# level, for both runtimes' sake.
 
 func ExInList(cS, aL)
 	for i = 1 to len(aL)
@@ -47,7 +61,7 @@ func ExIsAlpha(c)
 func ExIsNameChar(c)
 	return ExIsAlpha(c) or ExIsDigit(c) or c = "_"
 
-# ---- tokenizer: [type, text]; types: num str var and or not cmp op lparen rparen
+# ---- tokenizer: [type, text]; types: num str var ref flag fn and or not cmp op lparen rparen
 func ExTokenize(cS)
 	aT = []
 	n = len(cS)
@@ -92,8 +106,31 @@ func ExTokenize(cS)
 			end
 			cW = substr(cS, i, j - i)
 			cL = lower(cW)
+			# the word's meaning is fixed by what follows and by the menus,
+			# never by its case: AND and and are one word
+			k = j
+			while k <= n and (cS[k] = " " or cS[k] = char(9))
+				k++
+			end
+			bCall = 0
+			if k <= n and cS[k] = "(" bCall = 1 ok
 			if cL = "and" or cL = "or" or cL = "not"
 				aT + [cL, cL]
+			but cL = "contains"
+				aT + ["cmp", "contains"]
+			but cL = "true" or cL = "false"
+				aT + ["flag", cL]
+			but bCall and (cL = "round" or cL = "sum" or cL = "count" or cL = "avg" or cL = "min" or cL = "max")
+				aT + ["fn", cL]
+			but ExInList("ref", $aExprOperands)
+				# a bare name is a reference into the record; a dotted one a path
+				while j < n and cS[j] = "." and ExIsAlpha(cS[j + 1])
+					j++
+					while j <= n and ExIsNameChar(cS[j])
+						j++
+					end
+				end
+				aT + ["ref", substr(cS, i, j - i)]
 			else
 				ExFail("'" + cW + "' is not part of the " + $cExprLang + " grammar -- no calls, no host names")
 			ok
@@ -153,7 +190,8 @@ func ExJoin(aL, cSep)
 	return cOut
 
 # ---- parser: one function per grammar rule; nodes are lists --------------------
-#   ["num", n] ["str", s] ["var", name] ["neg", l] ["arith", op, l, r]
+#   ["num", n] ["str", s] ["var", name] ["ref", path] ["flag", 1|0]
+#   ["agg", kind, path] ["round", l] ["neg", l] ["arith", op, l, r]
 #   ["cmp", op, l, r] ["not", l] ["and", l, r] ["or", l, r]
 # A node is built in a fresh variable and assigned after (HF-36).
 
@@ -188,6 +226,41 @@ func ExPrimary()
 			ExFail("unknown variable @" + t[2] + " in this seat")
 		ok
 		return ["var", t[2]]
+	ok
+	if t[1] = "ref"
+		ExTake()
+		ExWantOperand("ref", t[2])
+		return ["ref", t[2]]
+	ok
+	if t[1] = "flag"
+		ExTake()
+		ExWantOperand("flag", t[2])
+		if t[2] = "true" return ["flag", 1] ok
+		return ["flag", 0]
+	ok
+	if t[1] = "fn"
+		ExTake()
+		if ExPeek()[1] != "lparen" ExFail(upper(t[2]) + " is followed by '('") ok
+		ExTake()
+		if t[2] = "round"
+			ExWantOperator("round", "ROUND")
+			aInner = ExOr()
+			if ExPeek()[1] != "rparen" ExFail("unclosed '(' after ROUND") ok
+			ExTake()
+			aNode = ["round", aInner]
+			return aNode
+		ok
+		ExWantOperand("agg", upper(t[2]) + "(...)")
+		if not ExInList(t[2], $aExprAggregates)
+			ExFail("'" + upper(t[2]) + "' is not an aggregate of " + $cExprLang + " (its menu: " + ExJoin($aExprAggregates, ", ") + ")")
+		ok
+		tP = ExPeek()
+		if tP[1] != "ref" ExFail(upper(t[2]) + " takes a field name, found '" + tP[2] + "'") ok
+		ExTake()
+		if ExPeek()[1] != "rparen" ExFail("unclosed '(' after " + upper(t[2])) ok
+		ExTake()
+		aNode = ["agg", t[2], tP[2]]
+		return aNode
 	ok
 	if t[1] = "lparen"
 		ExTake()
@@ -247,7 +320,11 @@ func ExComparison()
 	t = ExPeek()
 	if t[1] = "cmp"
 		ExTake()
-		ExWantOperator("cmp", t[2])
+		if t[2] = "contains"
+			ExWantOperator("contains", "CONTAINS")
+		else
+			ExWantOperator("cmp", t[2])
+		ok
 		aR = ExAdd()
 		aNode = ["cmp", t[2], aL, aR]
 		return aNode
@@ -287,6 +364,135 @@ func ExOr()
 	end
 	return aL
 
+# ---- the record (v0.6): a JSON object, read by path ----------------------------
+# an object is [ExObjMark(), [key, value], ...]; JSON null is ExNullMark()
+
+func ExObjMark()
+	return char(1) + "obj"
+
+func ExNullMark()
+	return char(1) + "null"
+
+func ExIsObj(v)
+	if not isList(v) return 0 ok
+	if len(v) = 0 return 0 ok
+	if not isString(v[1]) return 0 ok
+	return v[1] = ExObjMark()
+
+func ExIsNull(v)
+	if not isString(v) return 0 ok
+	return v = ExNullMark()
+
+func ExObjGet(aObj, cKey)
+	for i = 2 to len(aObj)
+		if aObj[i][1] = cKey return [1, aObj[i][2]] ok
+	next
+	return [0, 0]
+
+func ExSetRecord(aRecord)
+	$aExprRecord = aRecord
+	$aExprOverlay = []
+
+func ExSplitPath(cPath)
+	aOut = []
+	cCur = ""
+	for i = 1 to len(cPath)
+		if cPath[i] = "."
+			aOut + cCur
+			cCur = ""
+		else
+			cCur += cPath[i]
+		ok
+	next
+	aOut + cCur
+	return aOut
+
+# a reference, read first from the overlay (a FORMULA's results, by the name
+# as written) and then by path through the record: [found, value]
+func ExRefGet(cPath)
+	for i = 1 to len($aExprOverlay)
+		if $aExprOverlay[i][1] = cPath return [1, $aExprOverlay[i][2]] ok
+	next
+	aSegs = ExSplitPath(cPath)
+	v = $aExprRecord
+	for i = 1 to len(aSegs)
+		if not ExIsObj(v) return [0, 0] ok
+		aGot = ExObjGet(v, aSegs[i])
+		if not aGot[1] return [0, 0] ok
+		v = aGot[2]
+	next
+	if ExIsNull(v) return [0, 0] ok
+	return [1, v]
+
+# ---- numbers and texts under EQUALITY value (zql.zig's asNum and asStr) ------------
+
+# a value as a number: [ok, n] -- a number, a numeric text (digits, a point,
+# an exponent; no spaces, as parseFloat reads it), a flag; never a list
+func ExNumOf(v)
+	if isNumber(v) return [1, v] ok
+	if not isString(v) return [0, 0] ok
+	n = len(v)
+	if n = 0 return [0, 0] ok
+	i = 1
+	if v[i] = "-" or v[i] = "+" i++ ok
+	nDigits = 0
+	while i <= n and ExIsDigit(v[i])
+		i++
+		nDigits++
+	end
+	if i <= n and v[i] = "."
+		i++
+		while i <= n and ExIsDigit(v[i])
+			i++
+			nDigits++
+		end
+	ok
+	if nDigits = 0 return [0, 0] ok
+	if i <= n and (v[i] = "e" or v[i] = "E")
+		i++
+		if i <= n and (v[i] = "-" or v[i] = "+") i++ ok
+		nExp = 0
+		while i <= n and ExIsDigit(v[i])
+			i++
+			nExp++
+		end
+		if nExp = 0 return [0, 0] ok
+	ok
+	if i <= n return [0, 0] ok
+	return [1, 0 + v]
+
+# a value as a number for arithmetic: what cannot be one is 0
+func ExNum(v)
+	a = ExNumOf(v)
+	if a[1] return a[2] ok
+	return 0
+
+func ExStr(v)
+	if isNumber(v) return ExNumText(v) ok
+	if isString(v)
+		if ExIsNull(v) return "" ok
+		return v
+	ok
+	return ""
+
+# byte order of two texts, -1 0 1, by hand: Ring's own < on two strings is R41 (HF-30)
+func ExStrOrder(a, b)
+	n = len(a)
+	if len(b) < n n = len(b) ok
+	for i = 1 to n
+		x = ascii(a[i])
+		y = ascii(b[i])
+		if x < y return -1 ok
+		if x > y return 1 ok
+	next
+	if len(a) < len(b) return -1 ok
+	if len(a) > len(b) return 1 ok
+	return 0
+
+func ExContains(cHay, cNeedle)
+	if len(cNeedle) = 0 return 1 ok
+	return substr(lower(cHay), lower(cNeedle)) > 0
+
 # ---- evaluator: env is [[name, value], ...]; a comparison answers 1 or 0 --------
 
 func ExTruthy(v)
@@ -303,23 +509,45 @@ func ExEnvGet(aEnv, cName)
 
 func ExEval(aNode, aEnv)
 	cK = aNode[1]
-	if cK = "num" or cK = "str" return aNode[2] ok
+	if cK = "num" or cK = "str" or cK = "flag" return aNode[2] ok
 	if cK = "var" return ExEnvGet(aEnv, aNode[2]) ok
+	if cK = "ref"
+		aGot = ExRefGet(aNode[2])
+		if aGot[1] return aGot[2] ok
+		if $cExprAbsent = "zero" return 0 ok
+		ExFail("'" + aNode[2] + "' is absent from the record")
+	ok
+	if cK = "agg" return ExAggregate(aNode[2], aNode[3]) ok
+	if cK = "round" return ExRound(ExNum(ExEval(aNode[2], aEnv))) ok
 	if cK = "neg" return -ExEval(aNode[2], aEnv) ok
 	if cK = "arith"
 		a = ExEval(aNode[3], aEnv)
 		b = ExEval(aNode[4], aEnv)
+		if $cExprEquality = "value"
+			# calm arithmetic: a value that is not a number counts as 0
+			a = ExNum(a)
+			b = ExNum(b)
+		ok
 		op = aNode[2]
 		if op = "+" return a + b ok
 		if op = "-" return a - b ok
 		if op = "*" return a * b ok
-		if op = "/" return a / b ok
+		if op = "/"
+			if $cExprDivision = "calm" and b = 0 return 0 ok
+			if $cExprDivision = "refuse" and b = 0 ExFail("division by zero") ok
+			return a / b
+		ok
 		return a % b
 	ok
 	if cK = "cmp"
 		a = ExEval(aNode[3], aEnv)
 		b = ExEval(aNode[4], aEnv)
 		op = aNode[2]
+		if op = "contains"
+			if ExContains(ExStr(a), ExStr(b)) return 1 ok
+			return 0
+		ok
+		if $cExprEquality = "value" return ExCompareValue(op, a, b) ok
 		if op = "="
 			if ExSame(a, b) return 1 ok
 			return 0
@@ -366,6 +594,66 @@ func ExSame(a, b)
 	if isString(a) and isString(b) return a = b ok
 	return 0
 
+# EQUALITY value: numeric when both sides can be numbers, by text otherwise
+# (zql.zig's compareOperands, zql.js's _compare)
+func ExCompareValue(op, a, b)
+	na = ExNumOf(a)
+	nb = ExNumOf(b)
+	if na[1] and nb[1]
+		x = na[2]
+		y = nb[2]
+		if op = "=" return x = y ok
+		if op = "!=" return x != y ok
+		if op = ">" return x > y ok
+		if op = "<" return x < y ok
+		if op = ">=" return x >= y ok
+		return x <= y
+	ok
+	n = ExStrOrder(ExStr(a), ExStr(b))
+	if op = "=" return n = 0 ok
+	if op = "!=" return n != 0 ok
+	if op = ">" return n > 0 ok
+	if op = "<" return n < 0 ok
+	if op = ">=" return n >= 0 ok
+	return n <= 0
+
+# ROUND: half away from zero, as C's round() and zql.zig's @round
+func ExRound(x)
+	if x >= 0 return floor(x + 0.5) ok
+	return -floor(-x + 0.5)
+
+# an aggregate over the list a path names: the numeric items count, a path
+# that names no list answers 0 (zql.zig's resolveCtx .agg)
+func ExAggregate(cKind, cPath)
+	aGot = ExRefGet(cPath)
+	if not aGot[1] return 0 ok
+	aL = aGot[2]
+	if not isList(aL) or ExIsObj(aL) return 0 ok
+	nSum = 0
+	nCount = 0
+	nMin = 0
+	nMax = 0
+	for i = 1 to len(aL)
+		a = ExNumOf(aL[i])
+		if not a[1] loop ok
+		v = a[2]
+		if nCount = 0
+			nMin = v
+			nMax = v
+		else
+			if v < nMin nMin = v ok
+			if v > nMax nMax = v ok
+		ok
+		nSum += v
+		nCount++
+	next
+	if cKind = "sum" return nSum ok
+	if cKind = "count" return nCount ok
+	if cKind = "min" return nMin ok
+	if cKind = "max" return nMax ok
+	if nCount = 0 return 0 ok
+	return nSum / nCount
+
 # ---- the seats -------------------------------------------------------------------
 
 # the variables a seat admits: its CONTEXTS entry, or every VARIABLE when the
@@ -398,8 +686,19 @@ func ExNumText(n)
 
 func ExJson(v)
 	if isNumber(v) return ExNumText(v) ok
-	if isString(v) return '"' + v + '"' ok
+	if isString(v)
+		if ExIsNull(v) return "null" ok
+		return '"' + v + '"'
+	ok
 	if isList(v)
+		if ExIsObj(v)
+			cOut = "{"
+			for i = 2 to len(v)
+				if i > 2 cOut += ", " ok
+				cOut += '"' + v[i][1] + '": ' + ExJson(v[i][2])
+			next
+			return cOut + "}"
+		ok
 		cOut = "["
 		for i = 1 to len(v)
 			if i > 1 cOut += ", " ok
@@ -409,7 +708,8 @@ func ExJson(v)
 	ok
 	return "null"
 
-# a small reader: numbers, strings, lists; $aExprToks/$nExprPos reused as the cursor
+# a small reader: numbers, strings, lists, objects, true/false/null;
+# $aExprToks/$nExprPos reused as the cursor
 func ExJsonParse(cS)
 	$aExprToks = cS
 	$nExprPos = 1
@@ -422,6 +722,17 @@ func ExJsonWs()
 	while $nExprPos <= len($aExprToks) and ($aExprToks[$nExprPos] = " " or $aExprToks[$nExprPos] = char(9) or $aExprToks[$nExprPos] = char(10) or $aExprToks[$nExprPos] = char(13))
 		$nExprPos++
 	end
+
+func ExJsonString()
+	cS = $aExprToks
+	j = $nExprPos + 1
+	while j <= len(cS) and cS[j] != '"'
+		j++
+	end
+	if j > len(cS) ExFail("input: unterminated string") ok
+	v = substr(cS, $nExprPos + 1, j - $nExprPos - 1)
+	$nExprPos = j + 1
+	return v
 
 func ExJsonValue()
 	ExJsonWs()
@@ -450,21 +761,61 @@ func ExJsonValue()
 			ok
 		end
 	ok
-	if c = '"'
-		j = $nExprPos + 1
-		while j <= len(cS) and cS[j] != '"'
+	if c = "{"
+		$nExprPos++
+		aObj = [ExObjMark()]
+		ExJsonWs()
+		if $nExprPos <= len(cS) and cS[$nExprPos] = "}"
+			$nExprPos++
+			return aObj
+		ok
+		while 1
+			ExJsonWs()
+			if $nExprPos > len(cS) or cS[$nExprPos] != '"' ExFail("input: a key was expected in an object") ok
+			cKey = ExJsonString()
+			ExJsonWs()
+			if $nExprPos > len(cS) or cS[$nExprPos] != ":" ExFail("input: ':' was expected after a key") ok
+			$nExprPos++
+			vVal = ExJsonValue()
+			aPair = [cKey, vVal]
+			aObj + aPair
+			ExJsonWs()
+			if $nExprPos > len(cS) ExFail("input: unclosed '{'") ok
+			if cS[$nExprPos] = ","
+				$nExprPos++
+			but cS[$nExprPos] = "}"
+				$nExprPos++
+				return aObj
+			else
+				ExFail("input: expected ',' or '}'")
+			ok
+		end
+	ok
+	if c = '"' return ExJsonString() ok
+	if ExIsAlpha(c)
+		j = $nExprPos
+		while j <= len(cS) and ExIsAlpha(cS[j])
 			j++
 		end
-		if j > len(cS) ExFail("input: unterminated string") ok
-		v = substr(cS, $nExprPos + 1, j - $nExprPos - 1)
-		$nExprPos = j + 1
-		return v
+		cW = substr(cS, $nExprPos, j - $nExprPos)
+		$nExprPos = j
+		if cW = "true" return 1 ok
+		if cW = "false" return 0 ok
+		if cW = "null" return ExNullMark() ok
+		ExFail("input: unexpected '" + cW + "'")
 	ok
 	j = $nExprPos
 	if cS[j] = "-" j++ ok
 	while j <= len(cS) and (ExIsDigit(cS[j]) or cS[j] = ".")
 		j++
 	end
+	if j <= len(cS) and (cS[j] = "e" or cS[j] = "E")
+		j++
+		if j <= len(cS) and (cS[j] = "-" or cS[j] = "+") j++ ok
+		while j <= len(cS) and ExIsDigit(cS[j])
+			j++
+		end
+	ok
 	if j = $nExprPos ExFail("input: unexpected '" + c + "'") ok
 	v = 0 + substr(cS, $nExprPos, j - $nExprPos)
 	$nExprPos = j
@@ -475,6 +826,8 @@ func ExJsonValue()
 func ExRun(cSeat, cExpr, aInput, vInit, bHasInit)
 	aAllowed = ExAllowedIn(cSeat)
 	aAst = ExParse(cExpr, aAllowed)
+	# an object as the input is the RECORD the references read (v0.6)
+	if ExIsObj(aInput) ExSetRecord(aInput) ok
 	if cSeat = "eval" return ExEval(aAst, []) ok
 	if cSeat = "map"
 		aOut = []

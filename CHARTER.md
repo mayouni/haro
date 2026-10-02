@@ -205,7 +205,17 @@ language forged whole.** `CONTEXTS` on an `EXPRESSION` says which seat admits wh
 variables; W, the alphabet's W letter, declared by its own grammar text (`w_v05.haro`),
 is forged into its court AND its evaluator and its grammar for the decoder, and passes
 stz's 29 fixtures unadapted on `rnxc` and the oracle. The forge is measured on two
-shapes of language: sentences of `DEFINE`s, and an expression.
+shapes of language: sentences of `DEFINE`s, and an expression. **Haro v0.6, the same day
+(`haro/spike/v06/GRAMMAR.md`, 14 fixtures): a WORLD forged whole, court and runtime.** A
+list of a FORM that is a name and a scalar written as pairs; an EXPRESSION's `ABSENT`,
+`DIVISION` and `EQUALITY` declared, so two correct evaluators of one grammar stop
+disagreeing in silence; and `WALK`, the one kinetic declaration -- which kind is walked,
+by which steps, in what order, under which guards, computing what, failing how. Z, the
+alphabet's Z letter, declared in the Commons' shape (`z_v06.haro`) and zing's 16 tontine
+cases judged on the forged court and walker unadapted: 16 of 16 on `rnxc` and the oracle.
+This is section 7's "the forge produces the runtime" with its first number, and the
+`WORLD` row above has its second slice: the declared world's norms and flows RUN. The
+notation gap between ZQL v0 and the Commons is HF-47 and the author's (D8).
 
 **What the forge produces from one declaration** (Ringua's kit, 02-STACK's L1, now Haro's
 compiler verbs rather than separate organs): the parser; the court with the fixtures as its
@@ -469,6 +479,15 @@ not taken: 06-ALPHABET's route 3 needs a runtime for a declared world, the
 computing-altitude bridge, and is the author's to open (HF-45). Record: `haro/SPIKE.md`,
 "The fifth rung".
 
+**The sixth rung, 2026-10-02, on the author's delegation: Haro v0.6, Z forged whole**
+(section 3's note). The computing-altitude bridge opened as route 3 words it: Z
+re-expressed in the Commons' shape, its court AND its runtime (`eval`, `walk`) emitted by
+the forge from `z_v06.haro`, and zing's 16 tontine cases judged unadapted on
+`tontine.z`: **16 of 16**, byte-identical on `rnxc` and the oracle, the guard's stage 9,
+pinned at 16, first run. Three findings: the notation gap (HF-47, D8), the pinned judge
+narrowing a new rule (HF-48), the guard catching a 20 ms regression the rung would have
+shipped (HF-49). Record: `haro/SPIKE.md`, "The sixth rung".
+
 v0.1's spike (`twice.haro`, a definition with an intent clause) proved one altitude. The
 ruling asks for three to meet, and the estate has already named the smallest program that
 makes them: the alphabet's own proof obligation, "Z re-expressed through stzf from `z.stzu`
@@ -614,6 +633,17 @@ already pins.
 - **D7 -- Zin.** Whether ZinScript embraces Haro, and whether Zin's pillar DSLs are forged
   from Haro's declaring altitude, is Zin's call "recorded, never forced from here" [R,
   06-ALPHABET]; the charter asks nothing and records the lossless elevation.
+
+- **D8 -- ZQL's notation, opened by the sixth rung (2026-10-02, HF-47).** ZQL v0 writes
+  `ENTITY deposit (id: uuid, ...)`, `NORM x AS (RULE: expr, MESSAGE: "...")`, `STEP 1: RECORD
+  -> { ... }` and `AS JSON INTO`; the Grammar Commons writes `DEFINE KIND name AS (CLAUSE
+  value, ...) RATIONALE`, and section 3 says every letter does. Haro v0.6 declares Z in the
+  Commons' shape (`z_v06.haro`) and re-expresses zing's fixture source in it (`tontine.z`);
+  the 16 cases pass unadapted. The ruling is yours: StzZql's `GRAMMAR.md` moves to the
+  Commons' shape and zing's three runtimes follow, or Haro admits a second notation for a
+  kind (a `NOTATION` clause, which the forge would have to emit a reader for). *Recommendation:
+  the Commons' shape, because every other letter and vocabulary already has it, the forge
+  already emits its court, and a second notation is a second grammar to keep in step.*
 
 ---
 

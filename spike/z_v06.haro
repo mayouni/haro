@@ -1,0 +1,117 @@
+-- z_v06.haro -- Z, the alphabet's Z letter: ZQL (canonical in StzZql, pinned by zing,
+-- stz's fourth runtime), declared in Haro v0.6 as a sentence language whose seats hold
+-- expressions and whose FLOWs are WALKED. ZQL v0's own notation -- colon clauses, typed
+-- field lists in parentheses, STEP n: NAME -> { ... } blocks, AS JSON INTO -- is not the
+-- Grammar Commons' shape, so a sentence of Z is written in the Commons' shape here (a
+-- step is a declaration that names its flow and its rank) and zing's 16 cases are
+-- judged unadapted on it: the norms' and flows' data and expectations as they are, the
+-- 4 destructive rejects as they are. A PROPOSAL for StzZql and zing; the notation gap is
+-- HF-47 and the author's.
+
+DEFINE LANGUAGE z AS (
+  VERSION "0.6",
+  GRAMMAR "0.6",
+  COURT "zing/conformance/fixtures.json",
+  EXTENSION ".z"
+) RATIONALE "The declared WORLD -- entities, norms, flows, zones -- whose every destructive act is unparseable, and whose rules mean one thing everywhere"
+
+-- ---- the expression language of RULE, VALIDATE and FORMULA ---------------------------
+
+DEFINE EXPRESSION zexpr AS (
+  OPERATORS [or, and, not, cmp, contains, add, sub, mul, div, round, neg],
+  OPERANDS [number, text, flag, ref, agg],
+  AGGREGATES [sum, count],
+  ABSENT zero, DIVISION calm, EQUALITY value
+) RATIONALE "zql.js's _compare: equality is loose (a numeric string and its number are one value), CONTAINS is case-insensitive; FORMULA arithmetic is calm -- a missing value counts as 0 and division by zero yields 0; ROUND rounds half away from zero"
+
+-- ---- the menus and the forms ------------------------------------------------------------
+
+DEFINE MENU actors AS (
+  WORDS [collector, treasurer, system, member, auditor], MESSAGE "ACTOR is collector, treasurer, system, member or auditor"
+) RATIONALE "Who acts at a step"
+
+DEFINE MENU outcomes AS (
+  WORDS [commit_to_bedrock, hold], MESSAGE "ON_SUCCESS is commit_to_bedrock or hold"
+) RATIONALE "What a step does with a record that passed"
+
+DEFINE MENU formats AS (
+  WORDS [json, csv], MESSAGE "FORMAT is json or csv"
+) RATIONALE "The forms a landing zone reads"
+
+DEFINE FORM word AS (
+  SEATS [value: name]
+) RATIONALE "One word of an enum, a lower_snake name as the Commons writes a word"
+
+DEFINE FORM field AS (
+  SEATS [name: name, type: name]
+) RATIONALE "A field is a name and a type: id: uuid, amount: currency, status: deposit_status"
+
+-- ---- the kinds ----------------------------------------------------------------------------
+
+DEFINE DECLARATION enum AS (
+  VERB "ENUM",
+  SEATS [words: [word]]
+) RATIONALE "The closed values a field may take; ZQL v0 writes them inline as enum('A', 'B'), Z names them"
+
+DEFINE DECLARATION entity AS (
+  VERB "ENTITY",
+  SEATS [fields: [field]]
+) RATIONALE "A record's shape: its fields, each with a type"
+
+DEFINE DECLARATION norm AS (
+  VERB "NORM",
+  SEATS [rule: zexpr, message: text]
+) RATIONALE "A rule a record must satisfy, and the words spoken when it does not; a norm is a visible-violation transformer, never a silent filter"
+
+DEFINE DECLARATION flow AS (
+  VERB "FLOW",
+  SEATS []
+) RATIONALE "A named walk a record takes; its steps declare themselves THROUGH it"
+
+DEFINE DECLARATION step AS (
+  VERB "STEP",
+  SEATS [flow: flow, order: number, actor: actors, validate: zexpr?, enforcing: norm?, compute: name?, formula: zexpr?, on_fail: text?, on_success: outcomes?],
+  MESSAGES [flow: "STEP {name} walks '{value}', and no FLOW of that name is declared", enforcing: "STEP {name} enforces '{value}', and no NORM of that name is declared: referencing an undeclared norm is a registration error"]
+) RATIONALE "One step of a flow: who acts, what must hold (VALIDATE, or a NORM ENFORCING), what is computed, what happens on failure and on success"
+
+DEFINE DECLARATION landing_zone AS (
+  VERB "LANDING_ZONE",
+  SEATS [format: formats, into: flow]
+) RATIONALE "Where exported records land, and the flow every one of them walks"
+
+DEFINE WALK flows AS (
+  OF flow, STEPS step, THROUGH flow, ORDER order,
+  GUARDS [validate, enforcing.rule],
+  COMPUTE compute, FORMULA formula, FAIL on_fail
+) RATIONALE "A record walks a flow's steps in order of ORDER: a step's VALIDATE must hold, its ENFORCING norm's RULE must hold, its FORMULA computes its COMPUTE field into the record for every later step; a guard that fails stops the walk there, with the step's ON_FAIL code"
+
+-- ---- the constraints ------------------------------------------------------------------------
+
+DEFINE CONSTRAINT a_formula_names_its_field AS (
+  ON step, WHEN "formula present and compute absent",
+  MESSAGE "STEP {name} has a FORMULA and no COMPUTE: a computed value is named"
+) RATIONALE "FORMULA: ref = aexpr, the name and the expression"
+
+DEFINE CONSTRAINT a_computed_field_has_a_formula AS (
+  ON step, WHEN "compute present and formula absent",
+  MESSAGE "STEP {name} names COMPUTE {compute} and has no FORMULA"
+) RATIONALE "A name without an expression computes nothing"
+
+DEFINE CONSTRAINT one_rank_per_flow AS (
+  ON step, WHEN "earlier step where flow = this.flow and order = this.order",
+  MESSAGE "STEP {name} and STEP {other} both stand at ORDER {order} of {flow}: one rank, one step"
+) RATIONALE "Steps are walked in order, and an order is one step"
+
+-- ---- the refusals -----------------------------------------------------------------------------
+
+DEFINE REFUSAL unknown_verb AS (
+  MESSAGE "The ZQL verb set is closed -- destructive or unrecognized operations are not part of the grammar."
+) RATIONALE "DROP, TRUNCATE, DELETE are not forbidden; they are unparseable"
+
+DEFINE REFUSAL unknown_declaration AS (
+  MESSAGE "The ZQL verb set is closed -- destructive or unrecognized operations are not part of the grammar."
+) RATIONALE "DEFINE VIRUS is as unparseable as DROP"
+
+DEFINE REFUSAL dangling_reference AS (
+  MESSAGE "This name resolves to nothing in the declared world."
+) RATIONALE "A step's FLOW, its ENFORCING and a zone's INTO resolve at check time"

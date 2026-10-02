@@ -30,6 +30,15 @@
 # order of the court is: shapes, the WORLD, the local types, the
 # CONSTRAINTs, then the references.
 #
+# v0.6 (haro/spike/v06/GRAMMAR.md): a list of a FORM that is a name and a
+# scalar is written as name: value pairs; a seat typed by an EXPRESSION holds
+# an expression text the court parses with the expression's own menus
+# (expr_lib.ring); and the sentence court RUNS what the declaration says a
+# record does -- `eval <file> <decl> <seat> <json>` evaluates one expression
+# seat on a record, `walk <file> <name> <json>` walks the record through the
+# steps the WALK of that kind names, in ORDER, under its GUARDS, computing
+# its COMPUTE seats by their FORMULAs, stopping at the first guard that fails.
+#
 # Functions only. Globals ($cCourtLang, $cCourtExt, $aCourtKinds,
 # $aCourtForms, $aCourtRefusals, $aCourtMenus, $aCourtRanges,
 # $aCourtFormats, $aCourtUnions, $aCourtConstraints, $aCourtWorld,
@@ -37,6 +46,9 @@
 # are born in the generated court, at its top level, for both runtimes' sake.
 
 load "cond_lib.ring"
+# expr_lib.ring is loaded by the GENERATED court, and only when its language
+# declares an EXPRESSION (forge.ring): a court carries what its language says,
+# and the machine court's edit-to-verdict stays under its 100 ms target
 
 # ---- character classes by byte code (HF-30) ---------------------------------
 
@@ -136,6 +148,15 @@ func CtUseLanguage(cName)
 	$aCourtFloors = aE[13]
 	$aCourtViews = aE[14]
 	$aCourtSentenceKinds = aE[15]
+	# v0.6: the EXPRESSIONs [name, ops, opds, aggs, vars, contexts, absent,
+	# division, equality] and the WALKs [name, of, steps, through, order,
+	# guards, compute, formula, fail]
+	$aCourtExprs = []
+	$aCourtWalks = []
+	if len(aE) >= 17
+		$aCourtExprs = aE[16]
+		$aCourtWalks = aE[17]
+	ok
 
 # the condition tables of every language the court carries, built once
 func CtBuildCondLangs()
@@ -179,7 +200,7 @@ func CtSnapshot()
 	        $aCourtMenus, $aCourtRanges, $aCourtFormats, $aCourtUnions, $aCourtConstraints,
 	        $aCourtWorld, $aCourtPoints, $aCourtFloors, $aCourtViews, $aCourtSentenceKinds,
 	        $aCourtToks, $nCourtPos, $aCondDecls, $cCondLang, $cCondOther, $bCondUnread,
-	        $aCondFormats, $aCondToks, $nCondPos]
+	        $aCondFormats, $aCondToks, $nCondPos, $aCourtExprs, $aCourtWalks]
 
 func CtRestore(aS)
 	$cCourtLang = aS[1]
@@ -207,6 +228,27 @@ func CtRestore(aS)
 	$aCondFormats = aS[23]
 	$aCondToks = aS[24]
 	$nCondPos = aS[25]
+	$aCourtExprs = aS[26]
+	$aCourtWalks = aS[27]
+
+# ---- v0.6: the EXPRESSION tables, handed to expr_lib.ring ----------------------
+
+func CtExprByName(cName)
+	for i = 1 to len($aCourtExprs)
+		if $aCourtExprs[i][1] = cName return $aCourtExprs[i] ok
+	next
+	return NULL
+
+func CtExprUse(aE)
+	$cExprLang = aE[1]
+	$aExprOperators = aE[2]
+	$aExprOperands = aE[3]
+	$aExprAggregates = aE[4]
+	$aExprVariables = aE[5]
+	$aExprContexts = aE[6]
+	$cExprAbsent = aE[7]
+	$cExprDivision = aE[8]
+	$cExprEquality = aE[9]
 
 # a SENTENCE seat type's record: [name, lang, message, refused]
 func CtSentenceKind(cName)
@@ -364,6 +406,7 @@ func CtTokenize(cSrc)
 			but c = "[" cT = "lbracket"
 			but c = "]" cT = "rbracket"
 			but c = "," cT = "comma"
+			but c = ":" cT = "colon"
 			ok
 			if cT = ""
 				CtFail(nLine, "The character '" + c + "' is not part of the " + $cCourtLang + " grammar")
@@ -406,6 +449,12 @@ func CtTypeKind(aSeat)
 	if len(aSeat) >= 5 return aSeat[5] ok
 	return "prim"
 
+func CtIsPairForm(aFS)
+	if len(aFS) != 2 return 0 ok
+	if aFS[1][2] != "name" or aFS[1][3] return 0 ok
+	if aFS[2][3] return 0 ok
+	return 1
+
 func CtClauseShape(aSeat)
 	cOf = aSeat[2]
 	cK = CtTypeKind(aSeat)
@@ -414,12 +463,15 @@ func CtClauseShape(aSeat)
 			aF = CtFormByName(cOf)
 			if isNull(aF) return "namelist" ok
 			aFS = aF[2]
+			# v0.6: a FORM that is a name and a scalar is written as pairs
+			if CtIsPairForm(aFS) return "pairlist" ok
 			if len(aFS) > 0 and (aFS[1][2] = "text" or CtTypeKind(aFS[1]) = "format") return "stringlist" ok
 		ok
 		return "namelist"
 	ok
 	if cK = "union" return "union" ok
 	if cK = "sentence" return "string" ok
+	if cK = "expr" return "string" ok
 	if cOf = "text" or cK = "format" return "string" ok
 	if cOf = "number" or cK = "range" return "number" ok
 	return "word"
@@ -649,6 +701,7 @@ func CtParseValue()
 	if t[1] = "lbracket"
 		aNames = []
 		aStrings = []
+		aPairs = []
 		while 1
 			e = CtPeek()
 			if e[1] = "rbracket"
@@ -656,7 +709,21 @@ func CtParseValue()
 				exit
 			ok
 			item = CtNext()
-			if item[1] = "ident"
+			if item[1] = "ident" and CtPeek()[1] = "colon"
+				# v0.6: a name: value pair; the value a word, a string or a number
+				CtNext()
+				tv = CtNext()
+				if tv[1] != "ident" and tv[1] != "string" and tv[1] != "number"
+					CtFail(tv[3], "A pair's value is a word, a string or a number, found '" + CtShown(tv) + "'")
+				ok
+				for k = 1 to len(aPairs)
+					if aPairs[k][1] = item[2]
+						CtFail(item[3], "'" + item[2] + "' is named twice in one list")
+					ok
+				next
+				aPair = [item[2], tv[2], tv[1]]
+				aPairs + aPair
+			but item[1] = "ident"
 				aNames + item[2]
 			but item[1] = "string"
 				aStrings + item[2]
@@ -673,7 +740,11 @@ func CtParseValue()
 		if len(aNames) > 0 and len(aStrings) > 0
 			CtFail(t[3], "A list is all words or all strings, never mixed")
 		ok
+		if len(aPairs) > 0 and (len(aNames) > 0 or len(aStrings) > 0)
+			CtFail(t[3], "A list is all name: value pairs or none")
+		ok
 		nListEnd = $aCourtToks[$nCourtPos - 1][5]
+		if len(aPairs) > 0 return ["pairlist", aPairs, t[4], nListEnd] ok
 		if len(aStrings) > 0 return ["stringlist", aStrings, t[4], nListEnd] ok
 		return ["namelist", aNames, t[4], nListEnd]
 	ok
@@ -770,6 +841,9 @@ func CtWantShape(aDecl, aClause, cShape)
 	but cShape = "stringlist"
 		if cGot = "namelist" and len(aClause[3][2]) = 0 return ok
 		if cGot != "stringlist" CtFail(aClause[2], "Clause " + cName + " takes a string list, one word per string") ok
+	but cShape = "pairlist"
+		if cGot = "namelist" and len(aClause[3][2]) = 0 return ok
+		if cGot != "pairlist" CtFail(aClause[2], "Clause " + cName + " takes name: value pairs") ok
 	ok
 
 # parse a whole source and judge what the declaration can judge; returns the
@@ -964,6 +1038,19 @@ func CtCheckScalar(aDecl, aSeat, cValue)
 		cMsg = aF[3]
 		if cMsg = "" cMsg = cClause + " is not a " + aF[2] + ": '{value}'" ok
 		return CtFill(cMsg, aDecl, cValue)
+	but cK = "expr"
+		# v0.6: the text is an expression of the seat's language, or the refusal says why
+		aE = CtExprByName(aSeat[2])
+		if isNull(aE) return "" ok
+		CtExprUse(aE)
+		cErr = ""
+		try
+			ExParse(cValue, [])
+		catch
+			cErr = cCatchError
+		done
+		if cErr != "" return cClause + " of " + aDecl[1] + " " + aDecl[2] + " is not a " + aSeat[2] + " expression -- " + cErr ok
+		return ""
 	but cK = "decl"
 		aK = CtKindByDeclName(aSeat[2])
 		if isNull(aK) return "" ok
@@ -998,6 +1085,16 @@ func CtCheckSeatValue(aDecl, aSeat, aClause)
 	ok
 	cK = CtTypeKind(aSeat)
 	aItems = aClause[3][2]
+	if cShape = "pairlist"
+		# v0.6: each pair's value takes the form's second seat's type
+		aF = CtFormByName(aSeat[2])
+		if isNull(aF) or len(aF[2]) < 2 return "" ok
+		for i = 1 to len(aItems)
+			cWhy = CtCheckScalar(aDecl, aF[2][2], aItems[i][2])
+			if cWhy != "" return cWhy ok
+		next
+		return ""
+	ok
 	if cK = "menu" or cK = "decl"
 		for i = 1 to len(aItems)
 			cWhy = CtCheckScalar(aDecl, aSeat, aItems[i])
@@ -1297,10 +1394,141 @@ func CtRefine(cFile, cRfnFile)
 	write(cFile + ".revert.rfn", cRevert)
 	? "admitted: " + cTarget + " " + cFrom + " -> " + cTo + " [" + cPosture + "] (structural + constraint + derivation + governance + trust passed); inverse in " + cFile + ".revert.rfn"
 
-# the command: check <file> | refine <file> <file.rfn>
+# ---- v0.6: a sentence's expressions evaluated, and a WALK run ---------------------
+# `<court>.ring eval <file> <decl> <seat> <json>`: the expression in SEAT of the
+# declaration DECL, evaluated on the record, answers true or false.
+# `<court>.ring walk <file> <name> <json>`: the record walks the steps of the
+# declaration NAME under the WALK of its kind -- every step whose THROUGH seat
+# names it, in ORDER; at each step the FORMULA, when written, computes the
+# COMPUTE seat's value into the record first (for this step's guards and every
+# later one, as zing's runner does), then each GUARD in the WALK's order must
+# hold; the first that does not stops the walk. The verdict is JSON:
+#   {"status": "complete", "computed": {name: value, ...}}
+#   {"status": "failed", "at": step, "code": <the FAIL seat>, "reason": why}
+# A guard read through a reference (enforcing.rule) takes its reason from the
+# referenced declaration's `message` seat when it has one.
+
+func CtDeclNamed(aDecls, cName)
+	for i = 1 to len(aDecls)
+		if aDecls[i][2] = cName return aDecls[i] ok
+	next
+	return NULL
+
+func CtWalkOf(cKindName)
+	for i = 1 to len($aCourtWalks)
+		if $aCourtWalks[i][2] = cKindName return $aCourtWalks[i] ok
+	next
+	return NULL
+
+# the node of an expression seat, parsed under its language; NULL when the
+# clause is not written
+func CtExprNode(aDecl, cSeat)
+	aKind = CtKindByVerb(aDecl[1])
+	aSeat = CtSeatByClause(aKind, upper(cSeat))
+	if isNull(aSeat) raise("no seat '" + cSeat + "' on " + aDecl[1]) ok
+	if CtTypeKind(aSeat) != "expr" raise(upper(cSeat) + " of " + aDecl[1] + " " + aDecl[2] + " is not an expression seat") ok
+	cText = CondScalar(aDecl, cSeat)
+	if isNull(cText) return NULL ok
+	aE = CtExprByName(aSeat[2])
+	if isNull(aE) raise("the court carries no EXPRESSION called '" + aSeat[2] + "'") ok
+	CtExprUse(aE)
+	return ExParse(cText, [])
+
+func CtEval(aDecls, cDecl, cSeat, aRecord)
+	aD = CtDeclNamed(aDecls, cDecl)
+	if isNull(aD) raise("no declaration named '" + cDecl + "' in this file") ok
+	aNode = CtExprNode(aD, cSeat)
+	if isNull(aNode) raise(upper(cSeat) + " is not written on " + aD[1] + " " + aD[2]) ok
+	ExSetRecord(aRecord)
+	return ExTruthy(ExEval(aNode, []))
+
+# a guard of a step: [node, reason], or [NULL, ""] when the seat is not written
+func CtGuard(aDecls, aStep, cPath)
+	nDot = substr(cPath, ".")
+	if nDot = 0
+		aNode = CtExprNode(aStep, cPath)
+		return [aNode, upper(cPath) + " failed"]
+	ok
+	cHead = left(cPath, nDot - 1)
+	cTail = substr(cPath, nDot + 1)
+	cRef = CondScalar(aStep, cHead)
+	if isNull(cRef) return [NULL, ""] ok
+	aTarget = CtDeclNamed(aDecls, cRef)
+	if isNull(aTarget) return [NULL, ""] ok
+	aNode = CtExprNode(aTarget, cTail)
+	cReason = CondScalar(aTarget, "message")
+	if isNull(cReason) cReason = upper(cTail) + " of " + aTarget[1] + " " + aTarget[2] + " failed" ok
+	return [aNode, cReason]
+
+func CtWalk(aDecls, cName, aRecord)
+	aD = CtDeclNamed(aDecls, cName)
+	if isNull(aD) raise("no declaration named '" + cName + "' in this file") ok
+	aKind = CtKindByVerb(aD[1])
+	aW = CtWalkOf(aKind[2])
+	if isNull(aW) raise("no WALK of " + aKind[2] + " is declared, so " + aD[1] + " " + cName + " cannot be walked") ok
+	aStepKind = CtKindByDeclName(aW[3])
+	# the steps THROUGH this declaration, in ORDER (an insertion sort on the
+	# number: Ring's sort() orders a column of text)
+	aSteps = []
+	for i = 1 to len(aDecls)
+		if aDecls[i][1] != aStepKind[1] loop ok
+		cThrough = CondScalar(aDecls[i], aW[4])
+		if isNull(cThrough) or cThrough != cName loop ok
+		nOrder = 0 + CondScalar(aDecls[i], aW[5])
+		nAt = len(aSteps) + 1
+		for j = 1 to len(aSteps)
+			if nOrder < aSteps[j][1]
+				nAt = j
+				exit
+			ok
+		next
+		aEntry = [nOrder, aDecls[i]]
+		if nAt > len(aSteps)
+			aSteps + aEntry
+		else
+			insert(aSteps, nAt, aEntry)
+		ok
+	next
+	ExSetRecord(aRecord)
+	aComputed = [ExObjMark()]
+	for i = 1 to len(aSteps)
+		aStep = aSteps[i][2]
+		if aW[7] != "" and aW[8] != ""
+			cTarget = CondScalar(aStep, aW[7])
+			aF = CtExprNode(aStep, aW[8])
+			if not isNull(cTarget) and not isNull(aF)
+				v = ExNum(ExEval(aF, []))
+				$aExprOverlay + [cTarget, v]
+				aPair = [cTarget, v]
+				aComputed + aPair
+			ok
+		ok
+		aG = aW[6]
+		for j = 1 to len(aG)
+			aGuard = CtGuard(aDecls, aStep, aG[j])
+			if isNull(aGuard[1]) loop ok
+			if not ExTruthy(ExEval(aGuard[1], []))
+				aOut = [ExObjMark(), ["status", "failed"], ["at", aStep[2]]]
+				if aW[9] != ""
+					cCode = CondScalar(aStep, aW[9])
+					if not isNull(cCode)
+						aPair = ["code", cCode]
+						aOut + aPair
+					ok
+				ok
+				aPair = ["reason", aGuard[2]]
+				aOut + aPair
+				return aOut
+			ok
+		next
+	next
+	aOut = [ExObjMark(), ["status", "complete"], ["computed", aComputed]]
+	return aOut
+
+# the command: check <file> | refine <file> <file.rfn> | eval ... | walk ...
 func CtMain()
 	if len(sysargv) < 4
-		? "usage: <court>.ring check <file" + $cCourtExt + "> | refine <file" + $cCourtExt + "> <file.rfn>"
+		? "usage: <court>.ring check <file" + $cCourtExt + "> | refine <file" + $cCourtExt + "> <file.rfn> | eval <file> <decl> <seat> <json> | walk <file> <name> <json>"
 		return
 	ok
 	cVerb = sysargv[3]
@@ -1320,6 +1548,36 @@ func CtMain()
 			return
 		ok
 		CtRefine(sysargv[4], sysargv[5])
+	but cVerb = "eval"
+		if len(sysargv) < 7
+			? "usage: <court>.ring eval <file" + $cCourtExt + "> <decl> <seat> <json>"
+			return
+		ok
+		cSrc = read(sysargv[4])
+		try
+			aDecls = CtDeclare(cSrc)
+			aRecord = ExJsonParse(sysargv[7])
+			if CtEval(aDecls, sysargv[5], sysargv[6], aRecord)
+				? "true"
+			else
+				? "false"
+			ok
+		catch
+			? cCatchError
+		done
+	but cVerb = "walk"
+		if len(sysargv) < 6
+			? "usage: <court>.ring walk <file" + $cCourtExt + "> <name> <json>"
+			return
+		ok
+		cSrc = read(sysargv[4])
+		try
+			aDecls = CtDeclare(cSrc)
+			aRecord = ExJsonParse(sysargv[6])
+			? ExJson(CtWalk(aDecls, sysargv[5], aRecord))
+		catch
+			? cCatchError
+		done
 	else
-		? "unknown verb '" + cVerb + "'; this court answers: check, refine"
+		? "unknown verb '" + cVerb + "'; this court answers: check, refine, eval, walk"
 	ok

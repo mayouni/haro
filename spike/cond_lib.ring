@@ -676,6 +676,14 @@ func CondListOf(aDecl, cSeat)
 	if isNull(aC) return NULL ok
 	cShape = aC[3][1]
 	if cShape = "namelist" or cShape = "stringlist" return aC[3][2] ok
+	if cShape = "pairlist"
+		# v0.6: a list of name: value pairs reads as its names
+		aNames = []
+		for i = 1 to len(aC[3][2])
+			aNames + aC[3][2][i][1]
+		next
+		return aNames
+	ok
 	return NULL
 
 func CondSameText(a, b)

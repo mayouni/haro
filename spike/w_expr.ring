@@ -9,10 +9,16 @@ load "expr_lib.ring"
 $cExprLang = "w"
 $aExprOperators = ["or", "and", "not", "cmp", "add", "sub", "mul", "div", "mod", "neg"]
 $aExprOperands = ["number", "text", "var"]
+$aExprAggregates = []
 $aExprVariables = ["item", "accumulator"]
 $aExprContexts = [["eval", []], ["map", ["item"]], ["filter", ["item"]], ["count", ["item"]], ["partition", ["item"]], ["groupby", ["item"]], ["reduce", ["accumulator", "item"]], ["reduce_noinit", ["accumulator", "item"]]]
+$cExprAbsent = ""
+$cExprDivision = ""
+$cExprEquality = ""
 $aExprToks = []
 $nExprPos = 1
 $aExprAllowed = []
+$aExprRecord = []
+$aExprOverlay = []
 
 ExMain()

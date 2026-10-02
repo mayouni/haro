@@ -1,0 +1,126 @@
+{
+  "grammar": "haro",
+  "version": "0.6",
+  "comment": "The Haro v0.6 conformance floor, written BEFORE the court that passes it (the W discipline: fixtures first, prose second). v0.6 grows v0.5 by what a declared WORLD needs to be forged whole -- its court AND its runtime -- from its declaration (haro/SPIKE.md, the sixth rung: Z, the alphabet's Z letter, zing's 16 tontine cases): a list of a FORM that is a name and a scalar, written as name: value pairs (an entity's fields); every other FORM keeps v0.1's reading, because the pinned judge lists a six-seat FORM; an EXPRESSION's semantics declared -- what an absent reference reads as (ABSENT), what a division by zero yields (DIVISION), whether a number and a text can be equal (EQUALITY); and WALK, the one kinetic declaration: which kind is walked, which kind its steps are, how a step names its walk and its rank, which of its seats are guards, which compute a value, which names the failure. Every v0.5 fixture still passes: v0.6 refuses nothing v0.5 accepted. Rejects carry the fragment the refusal must contain.",
+  "accepts": [
+    {
+      "id": "A1",
+      "name": "a list of a FORM with two scalar seats: its items are written as name: value pairs (an entity's fields)",
+      "source": "DEFINE LANGUAGE z AS (VERSION \"0.6\", GRAMMAR \"0.6\", COURT \"x\", EXTENSION \".z\") RATIONALE \"x\"\nDEFINE FORM field AS (SEATS [name: name, type: name]) RATIONALE \"a field is a name and a type\"\nDEFINE DECLARATION entity AS (VERB \"ENTITY\", SEATS [fields: [field]]) RATIONALE \"x\"\n",
+      "expect": {
+        "language": "z",
+        "counts": {
+          "declarations": 1,
+          "forms": 1
+        }
+      }
+    },
+    {
+      "id": "A2",
+      "name": "an EXPRESSION declares its semantics: ABSENT zero or refuse, DIVISION calm or refuse, EQUALITY kind or value",
+      "source": "DEFINE LANGUAGE z AS (VERSION \"0.6\", GRAMMAR \"0.6\", COURT \"x\", EXTENSION \".z\") RATIONALE \"x\"\nDEFINE EXPRESSION zexpr AS (OPERATORS [or, and, cmp, add, sub, mul, div, round], OPERANDS [number, text, flag, ref, agg], AGGREGATES [sum, count], ABSENT zero, DIVISION calm, EQUALITY value) RATIONALE \"calm arithmetic: a missing value counts as 0 and division by zero yields 0\"\n",
+      "expect": {
+        "language": "z",
+        "counts": {
+          "expressions": 1
+        }
+      }
+    },
+    {
+      "id": "A3",
+      "name": "a seat typed by an EXPRESSION holds an expression text the court parses with the expression's own menus",
+      "source": "DEFINE LANGUAGE z AS (VERSION \"0.6\", GRAMMAR \"0.6\", COURT \"x\", EXTENSION \".z\") RATIONALE \"x\"\nDEFINE EXPRESSION zexpr AS (OPERATORS [or, and, cmp], OPERANDS [number, text, ref]) RATIONALE \"x\"\nDEFINE DECLARATION norm AS (VERB \"NORM\", SEATS [rule: zexpr, message: text]) RATIONALE \"x\"\n",
+      "expect": {
+        "language": "z",
+        "counts": {
+          "declarations": 1,
+          "expressions": 1
+        }
+      }
+    },
+    {
+      "id": "A4",
+      "name": "a WALK: OF the walked kind, STEPS its steps' kind, THROUGH the step's reference to its walk, ORDER its rank, GUARDS the expression seats that must hold (a path reads through a reference), COMPUTE and FORMULA the computed field and its expression, FAIL the seat naming the failure",
+      "source": "DEFINE LANGUAGE z AS (VERSION \"0.6\", GRAMMAR \"0.6\", COURT \"x\", EXTENSION \".z\") RATIONALE \"x\"\nDEFINE EXPRESSION zexpr AS (OPERATORS [or, and, cmp, add, sub, mul, div, round], OPERANDS [number, text, ref, agg], AGGREGATES [sum, count], ABSENT zero, DIVISION calm, EQUALITY value) RATIONALE \"x\"\nDEFINE MENU actors AS (WORDS [collector, treasurer, system]) RATIONALE \"x\"\nDEFINE DECLARATION norm AS (VERB \"NORM\", SEATS [rule: zexpr, message: text]) RATIONALE \"x\"\nDEFINE DECLARATION flow AS (VERB \"FLOW\", SEATS []) RATIONALE \"x\"\nDEFINE DECLARATION step AS (VERB \"STEP\", SEATS [flow: flow, order: number, actor: actors, validate: zexpr?, enforcing: norm?, compute: name?, formula: zexpr?, on_fail: text?]) RATIONALE \"x\"\nDEFINE WALK flows AS (OF flow, STEPS step, THROUGH flow, ORDER order, GUARDS [validate, enforcing.rule], COMPUTE compute, FORMULA formula, FAIL on_fail) RATIONALE \"a record walks a flow's steps in order; a guard that fails stops it there\"\n",
+      "expect": {
+        "language": "z",
+        "counts": {
+          "declarations": 3,
+          "expressions": 1,
+          "menus": 1
+        },
+        "walks": 1
+      }
+    },
+    {
+      "id": "A5",
+      "name": "a v0.5 declaration is a v0.6 declaration: v0.5's A1, unchanged",
+      "source": "DEFINE LANGUAGE w AS (VERSION \"0.1\", GRAMMAR \"0.1\", COURT \"x\", EXTENSION \".w\") RATIONALE \"x\"\nDEFINE EXPRESSION w AS (OPERATORS [or, and, not, cmp, add, sub, mul, div, mod, neg], OPERANDS [number, text, var], VARIABLES [item, accumulator], CONTEXTS [eval: [], map: [item], reduce: [accumulator, item]]) RATIONALE \"the seats fix the variables\"\n",
+      "expect": {
+        "language": "w",
+        "counts": {
+          "declarations": 0,
+          "expressions": 1
+        },
+        "contexts": 3,
+        "walks": 0
+      }
+    }
+  ],
+  "rejects": [
+    {
+      "id": "R1",
+      "name": "ABSENT takes zero or refuse",
+      "source": "DEFINE LANGUAGE z AS (VERSION \"0.6\", GRAMMAR \"0.6\", COURT \"x\", EXTENSION \".z\") RATIONALE \"x\"\nDEFINE EXPRESSION zexpr AS (OPERATORS [cmp], OPERANDS [number, ref], ABSENT nil) RATIONALE \"x\"\n",
+      "refusal": "ABSENT takes zero or refuse"
+    },
+    {
+      "id": "R2",
+      "name": "DIVISION takes calm or refuse",
+      "source": "DEFINE LANGUAGE z AS (VERSION \"0.6\", GRAMMAR \"0.6\", COURT \"x\", EXTENSION \".z\") RATIONALE \"x\"\nDEFINE EXPRESSION zexpr AS (OPERATORS [div], OPERANDS [number], DIVISION infinity) RATIONALE \"x\"\n",
+      "refusal": "DIVISION takes calm or refuse"
+    },
+    {
+      "id": "R3",
+      "name": "EQUALITY takes kind or value",
+      "source": "DEFINE LANGUAGE z AS (VERSION \"0.6\", GRAMMAR \"0.6\", COURT \"x\", EXTENSION \".z\") RATIONALE \"x\"\nDEFINE EXPRESSION zexpr AS (OPERATORS [cmp], OPERANDS [number, text], EQUALITY loose) RATIONALE \"x\"\n",
+      "refusal": "EQUALITY takes kind or value"
+    },
+    {
+      "id": "R4",
+      "name": "a WALK's OF names a DECLARATION of this language",
+      "source": "DEFINE LANGUAGE z AS (VERSION \"0.6\", GRAMMAR \"0.6\", COURT \"x\", EXTENSION \".z\") RATIONALE \"x\"\nDEFINE DECLARATION step AS (VERB \"STEP\", SEATS [order: number]) RATIONALE \"x\"\nDEFINE WALK flows AS (OF river, STEPS step, THROUGH flow, ORDER order) RATIONALE \"x\"\n",
+      "refusal": "resolves to nothing"
+    },
+    {
+      "id": "R5",
+      "name": "THROUGH is a seat of the steps' kind that refers to the walked kind",
+      "source": "DEFINE LANGUAGE z AS (VERSION \"0.6\", GRAMMAR \"0.6\", COURT \"x\", EXTENSION \".z\") RATIONALE \"x\"\nDEFINE DECLARATION flow AS (VERB \"FLOW\", SEATS []) RATIONALE \"x\"\nDEFINE DECLARATION step AS (VERB \"STEP\", SEATS [order: number, name: text]) RATIONALE \"x\"\nDEFINE WALK flows AS (OF flow, STEPS step, THROUGH name, ORDER order) RATIONALE \"x\"\n",
+      "refusal": "THROUGH names a seat of step that refers to flow"
+    },
+    {
+      "id": "R6",
+      "name": "GUARDS name expression seats of the steps' kind, or a path through a reference to one",
+      "source": "DEFINE LANGUAGE z AS (VERSION \"0.6\", GRAMMAR \"0.6\", COURT \"x\", EXTENSION \".z\") RATIONALE \"x\"\nDEFINE EXPRESSION zexpr AS (OPERATORS [cmp], OPERANDS [number, ref]) RATIONALE \"x\"\nDEFINE MENU actors AS (WORDS [collector]) RATIONALE \"x\"\nDEFINE DECLARATION flow AS (VERB \"FLOW\", SEATS []) RATIONALE \"x\"\nDEFINE DECLARATION step AS (VERB \"STEP\", SEATS [flow: flow, order: number, actor: actors, validate: zexpr?]) RATIONALE \"x\"\nDEFINE WALK flows AS (OF flow, STEPS step, THROUGH flow, ORDER order, GUARDS [actor]) RATIONALE \"x\"\n",
+      "refusal": "GUARDS: 'actor' is not an expression seat"
+    },
+    {
+      "id": "R7",
+      "name": "at most one WALK of a kind",
+      "source": "DEFINE LANGUAGE z AS (VERSION \"0.6\", GRAMMAR \"0.6\", COURT \"x\", EXTENSION \".z\") RATIONALE \"x\"\nDEFINE DECLARATION flow AS (VERB \"FLOW\", SEATS []) RATIONALE \"x\"\nDEFINE DECLARATION step AS (VERB \"STEP\", SEATS [flow: flow, order: number]) RATIONALE \"x\"\nDEFINE WALK a AS (OF flow, STEPS step, THROUGH flow, ORDER order) RATIONALE \"x\"\nDEFINE WALK b AS (OF flow, STEPS step, THROUGH flow, ORDER order) RATIONALE \"x\"\n",
+      "refusal": "already walked by a"
+    },
+    {
+      "id": "R8",
+      "name": "a list of a FORM is written as name: value pairs when the FORM is a name and a scalar; a pair cannot hold a reference",
+      "source": "DEFINE LANGUAGE z AS (VERSION \"0.6\", GRAMMAR \"0.6\", COURT \"x\", EXTENSION \".z\") RATIONALE \"x\"\nDEFINE DECLARATION flow AS (VERB \"FLOW\", SEATS []) RATIONALE \"x\"\nDEFINE FORM hop AS (SEATS [name: name, to: flow]) RATIONALE \"x\"\nDEFINE DECLARATION route AS (VERB \"ROUTE\", SEATS [hops: [hop]]) RATIONALE \"x\"\n",
+      "refusal": "which a pair cannot hold"
+    },
+    {
+      "id": "R9",
+      "name": "COMPUTE and FORMULA go together",
+      "source": "DEFINE LANGUAGE z AS (VERSION \"0.6\", GRAMMAR \"0.6\", COURT \"x\", EXTENSION \".z\") RATIONALE \"x\"\nDEFINE EXPRESSION zexpr AS (OPERATORS [add], OPERANDS [number, ref]) RATIONALE \"x\"\nDEFINE DECLARATION flow AS (VERB \"FLOW\", SEATS []) RATIONALE \"x\"\nDEFINE DECLARATION step AS (VERB \"STEP\", SEATS [flow: flow, order: number, compute: name?, formula: zexpr?]) RATIONALE \"x\"\nDEFINE WALK flows AS (OF flow, STEPS step, THROUGH flow, ORDER order, COMPUTE compute) RATIONALE \"x\"\n",
+      "refusal": "COMPUTE and FORMULA go together"
+    }
+  ]
+}
