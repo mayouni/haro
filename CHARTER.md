@@ -222,6 +222,15 @@ be asked, WHERE in which expression, and which clauses it admits; the forge emit
 question grammar and the court's `ask` verb, and the judge is zing itself: its own
 answers to 25 questions on its bedrock-query example, re-taken live by the guard, 25 of
 25 on `rnxc` and the oracle. The natural door of the same row -- N -- is not built.
+**Haro v0.8, the same day (`haro/spike/v08/GRAMMAR.md`, 13 fixtures): the F letter.** RingFlex's
+`.wflow` v0 -- the FLOW OF WORK, a shipped normative grammar with its own court and fixture
+suite -- declared in the Commons' shape (`f_v08.haro`): a step is one of six kinds, an arrow a
+reference into a UNION of declarations, a deadline a FORMAT, an escalation's actions a
+MENU-keyed sequence, a routing's branches GUARD-keyed pairs, and its fifteen court rules
+seats, messages and three closed relations (`reachable`, `referenced`, `keyed_by`); no
+expression, by design. 26 of 26 of RingFlex's fixtures and reference workflows, re-expressed,
+on `rnxc` and the oracle, with RingFlex's own court holding the same expectations beside it.
+Four letters of the alphabet are forged from declarations now: Z, W, Q, F.
 
 **What the forge produces from one declaration** (Ringua's kit, 02-STACK's L1, now Haro's
 compiler verbs rather than separate organs): the parser; the court with the fixtures as its
@@ -501,6 +510,15 @@ captured into the fixture and re-taken live by the guard's stage 10 -- **25 of 2
 `rnxc` and the oracle, byte-identical, pinned. Three findings: `ABSENT missing` (HF-50),
 zing's unresolved FROM (HF-51), and Ring's after-the-index `insert()` that had left the
 walk's ordering untested (HF-52). Record: `haro/SPIKE.md`, "The seventh rung".
+
+**The eighth rung, 2026-10-02, on the author's "next": Haro v0.8, F re-declared** (section
+3's note). RingFlex's workflow grammar in the Commons' shape, forged into its court, and
+judged by RingFlex's own fixture suite re-expressed -- 24 one-defect workflows and two
+reference workflows, each with its expected verdict: **26 of 26** on `rnxc` and the oracle,
+byte-identical, first run, pinned; RingFlex's court 26 of 26 on the originals under official
+Ring. v0.8 grew by what F needs (NAMED refusals, keyed pairs, a UNION of declarations,
+deadlines, ENTRY, three relations) and reversed two earlier fixtures out loud (HF-55).
+Record: `haro/SPIKE.md`, "The eighth rung".
 
 v0.1's spike (`twice.haro`, a definition with an intent clause) proved one altitude. The
 ruling asks for three to meet, and the estate has already named the smallest program that

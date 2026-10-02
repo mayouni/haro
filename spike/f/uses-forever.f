@@ -1,0 +1,3 @@
+-- EXPECT: parse-error FOREVER
+DEFINE WORKFLOW bad AS (DEFINITION_VERSION "0.1.0", ZQL "x/app.zql", SURFACES "x.face", CALENDAR c, CALENDAR_VERSION "1", LOCALE fr) RATIONALE "FOREVER was deleted from the language."
+DEFINE FOREVER x AS () RATIONALE "Deleted."

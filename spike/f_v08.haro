@@ -1,0 +1,261 @@
+-- f_v08.haro -- F, the alphabet's F letter: the FLOW OF WORK. RingFlex's .wflow v0
+-- (D:\GitHub\ringflex\docs\grammar-v0.md, normative; src/wflow.ring its court; the
+-- fixtures and the two reference workflows its judge) re-declared in Haro v0.8, in
+-- the Grammar Commons' shape (D8): a step is a declaration of one of six kinds, an
+-- arrow is a reference seat, a deadline is a FORMAT, an escalation's actions are a
+-- MENU-keyed sequence, a routing's branches are GUARD-keyed pairs. There are no
+-- expressions, by design -- the one EXPRESSION kind is absent and the grammar has no
+-- production that can parse an operator. The fifteen rules of its structural court
+-- (C1 to C15) are required seats, MESSAGES, UNION messages and CONSTRAINTs here, each
+-- carrying its code. A PROPOSAL for RingFlex (HARO-F-01).
+
+DEFINE LANGUAGE f AS (
+  VERSION "0.8",
+  GRAMMAR "0.8",
+  COURT "ringflex/fixtures",
+  EXTENSION ".f"
+) RATIONALE "A durable business process declared in a closed language: it waits on a person, a timer or an event, escalates when an SLA breaches, compensates what it cannot complete, and every wait carries a TIMEOUT; nothing in it can run away"
+
+-- ---- the menus ----------------------------------------------------------------------------
+
+DEFINE MENU outcomes AS (
+  WORDS [success, refused, abandoned],
+  MESSAGE "OUTCOME is success, refused or abandoned, not '{value}': there is no HELD outcome. An instance waiting for a person is not finished -- declare a SUSPENDED state instead, with RESUMED_BY and RESUMES_AT"
+) RATIONALE "The three endings of a workflow; a held dossier is alive, not ended"
+
+DEFINE MENU verdicts AS (
+  WORDS [committed, rejected, held]
+) RATIONALE "ZQL's three endings of a flow, which an invocation routes and a retry policy may exclude"
+
+DEFINE MENU breach_actions AS (
+  WORDS [notify, reassign, transition]
+) RATIONALE "The closed action set of an escalation: notify, reassign, transition; an escalation that needed a condition would be a guard on a transition instead"
+
+-- ---- the formats ----------------------------------------------------------------------------
+
+DEFINE FORMAT duration AS (
+  SHAPE duration,
+  MESSAGE "{VERB} {name}: '{value}' is not a duration -- a number and a unit: seconds, minutes, hours, days, working day, working days"
+) RATIONALE "A declared length of time, counted from the entry into a step"
+
+DEFINE FORMAT landmark AS (
+  SHAPE landmark,
+  MESSAGE "{VERB} {name}: '{value}' is not a landmark -- the one form v0 knows is 'the Nth working day of next month'"
+) RATIONALE "A business calendar moment, resolved once against the calendar pinned at the instance's birth"
+
+DEFINE FORMAT deadline AS (
+  SHAPE deadline,
+  MESSAGE "{VERB} {name}: '{value}' is not a deadline -- a duration (a number and seconds, minutes, hours, days or working days) or the landmark 'the Nth working day of next month'. No deadline reads instance data: a duration after a payload field must arrive as a declared event"
+) RATIONALE "A duration or a landmark; never a value the instance carries"
+
+-- ---- the forms ------------------------------------------------------------------------------
+
+DEFINE FORM decision AS (
+  SEATS [word: name]
+) RATIONALE "One decision a human task offers"
+
+DEFINE FORM breach_action AS (
+  SEATS [verb: breach_actions, target: name]
+) RATIONALE "One action of an escalation, in order: NOTIFY an actor, REASSIGN TO an actor, TRANSITION TO a target"
+
+DEFINE FORM route AS (
+  SEATS [decision: name, target: node]
+) RATIONALE "ON decision -> target: where a human task's decision leads"
+
+DEFINE FORM branch AS (
+  SEATS [guard: guard, target: node]
+) RATIONALE "WHEN guard -> target: a routing's branch, on a guard that cites a ZQL norm"
+
+-- ---- the kinds ------------------------------------------------------------------------------
+
+DEFINE DECLARATION workflow AS (
+  VERB "WORKFLOW",
+  SEATS [definition_version: text, zql: text, surfaces: text, calendar: name, calendar_version: text, locale: name]
+) RATIONALE "The header: the file's entire outward surface -- the ZQL file whose flows it invokes, the composition file its tasks cite, the business calendar and its version, the locale, and the version an instance pins at birth"
+
+DEFINE DECLARATION actor AS (
+  VERB "ACTOR",
+  SEATS [role: name, segregated_from: actor?],
+  MESSAGES [segregated_from: "C9: actor {name} is SEGREGATED_FROM '{value}', which is not a declared actor"]
+) RATIONALE "Who may act; SEGREGATED_FROM is a design-time court check, never a runtime condition"
+
+DEFINE DECLARATION guard AS (
+  VERB "GUARD",
+  SEATS [norm: name]
+) RATIONALE "A guard cites a ZQL norm, and nothing else: it names a rule, it never computes one"
+
+DEFINE DECLARATION escalation AS (
+  VERB "ESCALATION",
+  SEATS [on_breach: [breach_action]]
+) RATIONALE "What happens when an SLA breaches: a sequence of notify, reassign, transition"
+
+DEFINE DECLARATION retry AS (
+  VERB "RETRY",
+  SEATS [attempts: number, initial: duration, backoff: number, max: duration, not_on: [verdicts]]
+) RATIONALE "Four numbers the author declares; the engine does the multiplication"
+
+DEFINE DECLARATION invocation AS (
+  VERB "INVOCATION",
+  SEATS [invokes: name, retry: retry?, compensated_by: name?, irreversible: flag?, on_committed: node, on_rejected: node, on_held: node],
+  MESSAGES [retry: "C11: step {name} cites the retry policy '{value}', which is not declared", on_committed: "C4: step {name} does not route ON COMMITTED. An invocation declares all three of a ZQL flow's endings", on_rejected: "C4: step {name} does not route ON REJECTED. An invocation declares all three of a ZQL flow's endings", on_held: "C4: step {name} does not route ON HELD. An invocation declares all three of a ZQL flow's endings"]
+) RATIONALE "The transactional act: a step INVOKES a ZQL flow by name and routes its three verdicts; this production is the whole of the seam"
+
+DEFINE DECLARATION task AS (
+  VERB "TASK",
+  SEATS [asks: actor, surface: name, decisions: [decision], sla: deadline, escalation: escalation?, timeout: deadline, on_timeout: node, routes: [route]],
+  MESSAGES [asks: "C11: human task {name} ASKS '{value}', which is not a declared actor", escalation: "C11: human task {name} cites the escalation '{value}', which is not declared", timeout: "C1: human task {name} has no TIMEOUT. Every wait carries one -- a dossier only a human can close is a SUSPENDED state, not an untimed wait", on_timeout: "C1: human task {name} has no ON_TIMEOUT: a TIMEOUT says where the wait goes when it expires"]
+) RATIONALE "The wait on a person: who is asked, on which surface (a citation, never a description), which decisions, under which SLA and TIMEOUT, and where each decision leads"
+
+DEFINE DECLARATION event_wait AS (
+  VERB "EVENT_WAIT",
+  SEATS [awaits: name, correlated_by: name, timeout: deadline, on_timeout: node, on_received: node],
+  MESSAGES [timeout: "C2: event wait {name} has no TIMEOUT. A workflow may not wait on the world for ever", on_timeout: "C2: event wait {name} has no ON_TIMEOUT: a TIMEOUT says where the wait goes when it expires"]
+) RATIONALE "The wait on the world: an event, correlated by a key, with a timeout"
+
+DEFINE DECLARATION timer_wait AS (
+  VERB "TIMER_WAIT",
+  SEATS [awaits: landmark, on_due: node]
+) RATIONALE "The wait on a landmark; it carries no TIMEOUT because a landmark always arrives"
+
+DEFINE DECLARATION routing AS (
+  VERB "ROUTING",
+  SEATS [when: [branch], otherwise: node],
+  MESSAGES [when: "C12: step {name} branches WHEN '{value}', which is not a declared guard", otherwise: "step {name} has no OTHERWISE: a routing node can never fall through to nowhere"]
+) RATIONALE "A pure declared routing node: no actor, no invocation; branches on named guards, with a mandatory OTHERWISE"
+
+DEFINE DECLARATION compensation AS (
+  VERB "COMPENSATION",
+  SEATS [on_compensated: node, on_failed: node]
+) RATIONALE "The unwinding: the engine replays completed compensable invocations in reverse order of completion; no per-step ordering is declarable"
+
+DEFINE DECLARATION terminal AS (
+  VERB "TERMINAL",
+  SEATS [outcome: outcomes]
+) RATIONALE "An ending: success, refused or abandoned"
+
+DEFINE DECLARATION suspended AS (
+  VERB "SUSPENDED",
+  SEATS [resumed_by: actor, resumes_at: step],
+  MESSAGES [resumed_by: "C10: suspension {name} is RESUMED_BY '{value}', which is not a declared actor"]
+) RATIONALE "A dossier only a person can close: alive, with no timer, no event and no assigned task; an operator's act resumes it at a declared step"
+
+-- ---- the unions: an arrow's target ----------------------------------------------------------
+
+DEFINE UNION node AS (
+  OF [invocation, task, event_wait, timer_wait, routing, compensation, terminal, suspended],
+  MESSAGE "C5: step {name} points at '{value}', which is not a declared step, terminal or suspension"
+) RATIONALE "Where an arrow may land: a step, a terminal or a suspension, told apart by name in one namespace"
+
+DEFINE UNION step AS (
+  OF [invocation, task, event_wait, timer_wait, routing, compensation],
+  MESSAGE "C10: suspension {name} RESUMES_AT '{value}', which is not a declared step"
+) RATIONALE "Where a suspension re-enters: a step, never an ending"
+
+-- ---- the world ------------------------------------------------------------------------------
+
+DEFINE WORLD f AS (
+  ONE [workflow], FIRST workflow,
+  ENTRY [invocation, task, event_wait, timer_wait, routing, compensation]
+) RATIONALE "One header, first; the entry step is the first step declared, by position, with no ENTRY keyword"
+
+-- ---- the structural court: C3, C6, C7, C8, C9, C15 (the rest are seats and references) ------
+
+DEFINE CONSTRAINT c3_neither AS (
+  ON invocation, WHEN "compensated_by absent and irreversible absent",
+  MESSAGE "C3: step {name} invokes '{invokes}' without declaring COMPENSATED_BY or IRREVERSIBLE. An act that changes the world must say whether it can be taken back"
+) RATIONALE "Exactly one of COMPENSATED_BY and IRREVERSIBLE"
+
+DEFINE CONSTRAINT c3_both AS (
+  ON invocation, WHEN "compensated_by present and irreversible present",
+  MESSAGE "C3: step {name} declares both COMPENSATED_BY and IRREVERSIBLE; an act is one or the other"
+) RATIONALE "Exactly one of COMPENSATED_BY and IRREVERSIBLE"
+
+DEFINE CONSTRAINT c6_invocation AS (
+  ON invocation, WHEN "not self reachable",
+  MESSAGE "C6: step {name} is unreachable from the entry step. A step nothing can reach is a dead step"
+) RATIONALE "Every step is reachable from the entry step"
+
+DEFINE CONSTRAINT c6_task AS (
+  ON task, WHEN "not self reachable",
+  MESSAGE "C6: step {name} is unreachable from the entry step. A step nothing can reach is a dead step"
+) RATIONALE "Every step is reachable from the entry step"
+
+DEFINE CONSTRAINT c6_event_wait AS (
+  ON event_wait, WHEN "not self reachable",
+  MESSAGE "C6: step {name} is unreachable from the entry step. A step nothing can reach is a dead step"
+) RATIONALE "Every step is reachable from the entry step"
+
+DEFINE CONSTRAINT c6_timer_wait AS (
+  ON timer_wait, WHEN "not self reachable",
+  MESSAGE "C6: step {name} is unreachable from the entry step. A step nothing can reach is a dead step"
+) RATIONALE "Every step is reachable from the entry step"
+
+DEFINE CONSTRAINT c6_routing AS (
+  ON routing, WHEN "not self reachable",
+  MESSAGE "C6: step {name} is unreachable from the entry step. A step nothing can reach is a dead step"
+) RATIONALE "Every step is reachable from the entry step"
+
+DEFINE CONSTRAINT c6_compensation AS (
+  ON compensation, WHEN "not self reachable",
+  MESSAGE "C6: step {name} is unreachable from the entry step. A step nothing can reach is a dead step"
+) RATIONALE "Every step is reachable from the entry step"
+
+DEFINE CONSTRAINT c7_an_ending AS (
+  ON workflow, WHEN "not exists terminal",
+  MESSAGE "C7: workflow {name} declares no terminal. Every workflow must be able to end"
+) RATIONALE "At least one terminal exists"
+
+DEFINE CONSTRAINT c7_terminal AS (
+  ON terminal, WHEN "not self reachable",
+  MESSAGE "C7: terminal {name} is unreachable. An ending nothing can reach is an ending that never happens"
+) RATIONALE "Every terminal is reachable"
+
+DEFINE CONSTRAINT c7_suspended AS (
+  ON suspended, WHEN "not self reachable",
+  MESSAGE "C7: suspension {name} is unreachable"
+) RATIONALE "Every suspension is reachable, as RingFlex's court reads C7"
+
+DEFINE CONSTRAINT c8_decisions_routed AS (
+  ON task, WHEN "not routes keyed_by decisions",
+  MESSAGE "C8: step {name} declares the decision '{other}' and never routes it, or routes it without declaring it. Every declared decision is routed, and no arrow routes an undeclared one"
+) RATIONALE "A declared decision that goes nowhere is a hole in the workflow"
+
+DEFINE CONSTRAINT c9_self_segregation AS (
+  ON actor, WHEN "segregated_from = self",
+  MESSAGE "C9: actor {name} is SEGREGATED_FROM itself. Segregation separates two people, not one from a reflection"
+) RATIONALE "No actor is segregated from itself"
+
+DEFINE CONSTRAINT c15_guard AS (
+  ON guard, WHEN "not self referenced",
+  MESSAGE "C15: guard {name} is declared and never used. Either it is a leftover, or an arrow somebody forgot to wire"
+) RATIONALE "Every declared guard is referenced at least once"
+
+DEFINE CONSTRAINT c15_escalation AS (
+  ON escalation, WHEN "not self referenced",
+  MESSAGE "C15: escalation {name} is declared and never used"
+) RATIONALE "Every declared escalation is referenced at least once"
+
+DEFINE CONSTRAINT c15_retry AS (
+  ON retry, WHEN "not self referenced",
+  MESSAGE "C15: retry policy {name} is declared and never used"
+) RATIONALE "Every declared retry policy is referenced at least once"
+
+-- ---- the refusals, by name where an author is reaching for something real ---------------------
+
+DEFINE REFUSAL unknown_declaration AS (
+  MESSAGE "The RingFlex declaration set is closed -- a workflow says what it declares, and nothing else is expressible.",
+  NAMED [flow: "'FLOW' belongs to ZQL, not to RingFlex. A workflow step INVOKES a ZQL flow by name; it never declares one.", invoked_by: "'INVOKED_BY' claims the seam runs upward. It does not: a workflow step INVOKES a ZQL flow, and a ZQL flow may never contain a workflow -- the seam is closed downward (placement contract C3, section 3). What starts a workflow is an event or a person, and a workflow says so nowhere.", forever: "'FOREVER' was deleted from the language (author decision, 2026-08-06). A wait without a TIMEOUT is refused, and the dossier that genuinely cannot be timed out is a SUSPENDED state."]
+) RATIONALE "An author who writes FLOW, INVOKED_BY or FOREVER is reaching for something real and deserves to be told which law they met"
+
+DEFINE REFUSAL unknown_seat AS (
+  MESSAGE "a step is exactly one of six kinds, and each says exactly what it says",
+  NAMED [called_by: "'CALLED_BY' claims the seam runs upward. It does not: a workflow step INVOKES a ZQL flow, and a ZQL flow may never contain a workflow -- the seam is closed downward (placement contract C3, section 3).", verdict: "'VERDICT OF' was deleted from the language on 2026-08-07. A step already routes its verdicts and decisions inline -- ON COMMITTED, ON approuver -- so a guard restating one is a second spelling of the same fact. A guard cites a ZQL norm, and nothing else.", decision: "'DECISION OF' was deleted from the language on 2026-08-07. A step already routes its verdicts and decisions inline, so a guard restating one is a second spelling of the same fact. A guard cites a ZQL norm, and nothing else."]
+) RATIONALE "The deleted guard forms and the upward seam are refused by name, not left to fall through to a generic error"
+
+DEFINE REFUSAL unexpected_character AS (
+  MESSAGE "There is no production in this grammar that can parse an operator -- no operators, no conditionals, no loops, no comparisons, no arithmetic. Branching is declared as named guards on declared arrows; computation belongs to the ZQL flows a step invokes."
+) RATIONALE "The load-bearing wall, and it is structural"
+
+DEFINE REFUSAL dangling_reference AS (
+  MESSAGE "Every arrow lands somewhere declared."
+) RATIONALE "C5, C10, C11, C12: every reference resolves"

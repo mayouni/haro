@@ -35,7 +35,7 @@ $aCourtRanges = []
 $aCourtFormats = []
 $aCourtUnions = []
 $aCourtConstraints = []
-$aCourtWorld = [[], ""]
+$aCourtWorld = [[], "", []]
 $aCourtPoints = []
 $aCourtFloors = []
 $aCourtViews = []
@@ -72,9 +72,9 @@ $aCourtLangs = [
       ["field", [["name", "name", 0, 0, "prim"], ["type", "name", 0, 0, "prim"]]]
     ],
     [
-      ["unknown_verb", "The ZQL verb set is closed -- destructive or unrecognized operations are not part of the grammar."],
-      ["unknown_declaration", "The ZQL verb set is closed -- destructive or unrecognized operations are not part of the grammar."],
-      ["dangling_reference", "This name resolves to nothing in the declared world."]
+      ["unknown_verb", "The ZQL verb set is closed -- destructive or unrecognized operations are not part of the grammar.", []],
+      ["unknown_declaration", "The ZQL verb set is closed -- destructive or unrecognized operations are not part of the grammar.", []],
+      ["dangling_reference", "This name resolves to nothing in the declared world.", []]
     ],
     [
       ["actors", ["collector", "treasurer", "system", "member", "auditor"], "ACTOR is collector, treasurer, system, member or auditor"],
@@ -92,7 +92,7 @@ $aCourtLangs = [
       ["a_computed_field_has_a_formula", "step", "compute present and formula absent", "", "STEP {name} names COMPUTE {compute} and has no FORMULA"],
       ["one_rank_per_flow", "step", "earlier step where flow = this.flow and order = this.order", "", "STEP {name} and STEP {other} both stand at ORDER {order} of {flow}: one rank, one step"]
     ],
-    [[], ""],
+    [[], "", []],
     [],
     [],
     [

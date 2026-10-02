@@ -18,9 +18,11 @@
 # closed question grammar: FROM which kinds, WHERE in which expression,
 # which optional CLAUSES (where, order, limit); and ABSENT missing.
 #
-# v0.7 (haro/spike/v07/GRAMMAR.md): ASK, the Q letter -- the language's own
-# closed question grammar: FROM which kinds, WHERE in which expression,
-# which optional CLAUSES (where, order, limit); and ABSENT missing.
+# v0.8 (haro/spike/v08/GRAMMAR.md): what F needs -- a REFUSAL's NAMED words;
+# pair lists keyed by a MENU or a DECLARATION with reference values; a UNION
+# of DECLARATIONs; the shapes duration, landmark, deadline; the WORLD's
+# ENTRY kinds; the relations reachable, referenced and keyed_by.
+
 #
 # The same file runs on rnxc and on the oracle and must print the same bytes.
 # Refusals are one channel, "stzu (line N): message". Functions only; the
@@ -47,7 +49,7 @@ func StzuRefusalCategories()
 	        "unterminated_string", "unexpected_character", "dangling_reference", "duplicate_name"]
 
 func StzuShapes()
-	return ["absolute_path", "ipv4", "cidr", "mac", "label", "domain", "hex64", "hex64_lower"]
+	return ["absolute_path", "ipv4", "cidr", "mac", "label", "domain", "hex64", "hex64_lower", "duration", "landmark", "deadline"]
 
 func StzuRefinementKinds()
 	return ["knob", "field", "symbol", "policy", "composite", "pipeline"]
@@ -67,7 +69,7 @@ func StzuClauses(cKind)
 	but cKind = "EXPRESSION"
 		return [["ABSENT", "ident"], ["AGGREGATES", "namelist"], ["CONTEXTS", "contextlist"], ["DIVISION", "ident"], ["EQUALITY", "ident"], ["OPERANDS", "namelist"], ["OPERATORS", "namelist"], ["VARIABLES", "namelist"]]
 	but cKind = "REFUSAL"
-		return [["MESSAGE", "string"]]
+		return [["MESSAGE", "string"], ["NAMED", "messagelist"]]
 	but cKind = "MENU"
 		return [["MESSAGE", "string"], ["WORDS", "namelist"]]
 	but cKind = "RANGE"
@@ -81,7 +83,7 @@ func StzuClauses(cKind)
 	but cKind = "CONSTRAINT"
 		return [["MESSAGE", "string"], ["ON", "ident"], ["THEN", "string"], ["WHEN", "string"]]
 	but cKind = "WORLD"
-		return [["FIRST", "ident"], ["ONE", "namelist"]]
+		return [["ENTRY", "namelist"], ["FIRST", "ident"], ["ONE", "namelist"]]
 	but cKind = "REFINE"
 		return [["FLOOR", "pointlist"], ["POINTS", "pointlist"]]
 	but cKind = "UNION"
@@ -205,9 +207,24 @@ func StzuCondLang(aLang, aViewEntries)
 		aVerbOf + [aDecls[i][1], aDecls[i][2]]
 	next
 	aOne = []
+	aEntry = []
 	aW = LangGet(aLang, "world")
-	if not isNull(aW) aOne = aW[1] ok
-	return [LangGet(aLang, "name"), aDeclSeats, aOne, aViewEntries, aVerbOf]
+	if not isNull(aW)
+		aOne = aW[1]
+		if len(aW) >= 4 aEntry = aW[4] ok
+	ok
+	# v0.8: the forms, so a condition can read a pair list's keys and values
+	aFormTable = []
+	aFm = LangGet(aLang, "forms")
+	for i = 1 to len(aFm)
+		aFS = aFm[i][2]
+		aInfo = []
+		for j = 1 to len(aFS)
+			aInfo + [aFS[j][1], aFS[j][2], StzuTypeKindOf(aLang, aFS[j][2])]
+		next
+		aFormTable + [aFm[i][1], aInfo]
+	next
+	return [LangGet(aLang, "name"), aDeclSeats, aOne, aViewEntries, aVerbOf, aEntry, aFormTable]
 
 func StzuAllowedList(cKind)
 	aC = StzuClauses(cKind)
@@ -682,14 +699,14 @@ func StzuParseDeclaration()
 #                 (guards a list of [path, line]; compute, formula, fail "" when absent, v0.6)
 #   ask:          [name, from kinds, where, clauses, rationale, line] or NULL   (v0.7)
 #   ask:          [name, from kinds, where, clauses, rationale, line] or NULL   (v0.7)
-#   refusals:     [name, message, rationale, line]
+#   refusals:     [name, message, rationale, line, named]          (named [word, text, line] per trespasser, v0.8)
 #   menus:        [name, words, message, line]
 #   ranges:       [name, min, max, message, line]
 #   formats:      [name, shape, message, line, fold]            (fold "" or "case", v0.4)
 #   sentences:    [name, of, language record, message, refused, line]   (v0.4)
 #   views:        [name, on, one, named, where, line]            (on "" for the whole sentence, v0.4)
 #   constraints:  [name, on, when, then, message, line]        (then "" when absent)
-#   world:        [one, first] or NULL                          (one a list, first "" or a name)
+#   world:        [one, first, line, entry] or NULL             (one and entry lists, first "" or a name; entry v0.8)
 #   refine:       [points, floors] or NULL                       (lists of [decl, seat, word, line])
 
 func LangGet(aLang, cKey)
@@ -759,7 +776,11 @@ func StzuDeclare(cSrc)
 			if HasClause(aClauses, "ONE") aOne = ClauseValue(aClauses, "ONE") ok
 			cFirst = ""
 			if HasClause(aClauses, "FIRST") cFirst = ClauseValue(aClauses, "FIRST") ok
-			aWorld = [aOne, cFirst, nLine]
+			# v0.8: the ENTRY kinds -- the first declaration of one of them is
+			# where `reachable` starts walking
+			aEntry = []
+			if HasClause(aClauses, "ENTRY") aEntry = ClauseValue(aClauses, "ENTRY") ok
+			aWorld = [aOne, cFirst, nLine, aEntry]
 		but cKind = "REFINE"
 			if not isNull(aRefine)
 				StzuFail(nLine, "a .haro file declares at most one REFINE")
@@ -860,7 +881,16 @@ func StzuDeclare(cSrc)
 				if not InStrList(cName, StzuRefusalCategories())
 					StzuFail(nLine, "'" + cName + "' is not a refusal category")
 				ok
-				aRefusals + [cName, ClauseValue(aClauses, "MESSAGE"), cRationale, nLine]
+				# v0.8: NAMED gives a known trespasser its own message -- an author
+				# who writes FLOW or INVOKED_BY is told which law they met
+				aNamedMsgs = []
+				if HasClause(aClauses, "NAMED")
+					aNamedMsgs = ClauseValue(aClauses, "NAMED")
+					if cName != "unknown_declaration" and cName != "unknown_seat"
+						StzuFail(nLine, "NAMED belongs to unknown_declaration and unknown_seat, the refusals a trespasser meets; '" + cName + "' is neither")
+					ok
+				ok
+				aRefusals + [cName, ClauseValue(aClauses, "MESSAGE"), cRationale, nLine, aNamedMsgs]
 			but cKind = "MENU"
 				aWords = ClauseValue(aClauses, "WORDS")
 				if len(aWords) = 0
@@ -881,7 +911,7 @@ func StzuDeclare(cSrc)
 			but cKind = "FORMAT"
 				cShape = ClauseValue(aClauses, "SHAPE")
 				if not InStrList(cShape, StzuShapes())
-					StzuFail(nLine, "'" + cShape + "' is not a shape: the menu is absolute_path, ipv4, cidr, mac, label, domain, hex64, hex64_lower")
+					StzuFail(nLine, "'" + cShape + "' is not a shape: the menu is absolute_path, ipv4, cidr, mac, label, domain, hex64, hex64_lower, duration, landmark, deadline")
 				ok
 				cMsg = ""
 				if HasClause(aClauses, "MESSAGE") cMsg = ClauseValue(aClauses, "MESSAGE") ok
@@ -986,6 +1016,9 @@ func StzuDeclare(cSrc)
 			cShape = StzuAltShape(aAlts[j], aDeclared, aForms, aU[4])
 			for k = 1 to len(aShapes)
 				if aShapes[k] = cShape
+					# v0.8: two DECLARATIONs share the shape "word" and are told
+					# apart by the name's resolution, in one namespace
+					if DeclaredKind(aDeclared, aAlts[k][1]) = "DECLARATION" and DeclaredKind(aDeclared, aAlts[j][1]) = "DECLARATION" loop ok
 					StzuFail(aU[4], "'" + aAlts[k][1] + "' and '" + aAlts[j][1] + "' have the same shape (" + cShape + "): a UNION's alternatives are told apart by shape")
 				ok
 			next
@@ -1006,6 +1039,14 @@ func StzuDeclare(cSrc)
 			ok
 			bRef = 0
 			if DeclaredKind(aDeclared, aFound[2]) = "DECLARATION" bRef = 1 ok
+			# v0.8: a list of pairs whose keys or values are references
+			if aFound[3] and DeclaredKind(aDeclared, aFound[2]) = "FORM"
+				for k = 1 to len(aForms)
+					if aForms[k][1] = aFound[2] and StzuIsPairForm(aForms[k][2], aDeclared)
+						if StzuPairRefs(aForms[k][2], aDeclared) bRef = 1 ok
+					ok
+				next
+			ok
 			bReq = 1
 			if aFound[3] or aFound[4] bReq = 0 ok
 			if not bRef and not bReq
@@ -1075,6 +1116,12 @@ func StzuDeclare(cSrc)
 			if cK = "" StzuFail(aWorld[3], "FIRST: '" + aWorld[2] + "' resolves to nothing in this declaration") ok
 			if cK != "DECLARATION" StzuFail(aWorld[3], "FIRST must name a DECLARATION; '" + aWorld[2] + "' is a " + cK) ok
 		ok
+		aEntry = aWorld[4]
+		for i = 1 to len(aEntry)
+			cK = DeclaredKind(aDeclared, aEntry[i])
+			if cK = "" StzuFail(aWorld[3], "ENTRY: '" + aEntry[i] + "' resolves to nothing in this declaration") ok
+			if cK != "DECLARATION" StzuFail(aWorld[3], "ENTRY must name a DECLARATION; '" + aEntry[i] + "' is a " + cK) ok
+		next
 	ok
 
 	# the condition tables: this language and the languages its SENTENCEs name
@@ -1332,7 +1379,8 @@ func StzuAltShape(aAlt, aDeclared, aForms, nLine)
 	if cK = "MENU" return "word" ok
 	if cK = "RANGE" return "number" ok
 	if cK = "FORMAT" return "string" ok
-	StzuFail(nLine, "'" + cOf + "' cannot be an alternative of a UNION: an alternative is a MENU, a RANGE, a FORMAT, a primitive or a list of a FORM, not a " + cK)
+	if cK = "DECLARATION" return "word" ok
+	StzuFail(nLine, "'" + cOf + "' cannot be an alternative of a UNION: an alternative is a MENU, a RANGE, a FORMAT, a primitive, a DECLARATION or a list of a FORM, not a " + cK)
 
 func StzuSeatsOf(aDeclarations, cDecl)
 	for i = 1 to len(aDeclarations)
@@ -1350,11 +1398,18 @@ func StzuSeatNamed(aSeats, cSeat)
 # name and the second a scalar, is written as name: value pairs; every other
 # FORM keeps v0.1's reading (its items follow the form's first seat), because
 # the pinned judge lists a six-seat FORM and v0.6 refuses nothing v0.5 accepted
-func StzuIsPairForm(aFS)
+func StzuIsPairForm(aFS, aDeclared)
 	if len(aFS) != 2 return 0 ok
-	if aFS[1][2] != "name" or aFS[1][3] return 0 ok
-	if aFS[2][3] return 0 ok
+	if aFS[1][3] or aFS[2][3] return 0 ok
+	cK1 = DeclaredKind(aDeclared, aFS[1][2])
+	if aFS[1][2] != "name" and cK1 != "MENU" and cK1 != "DECLARATION" return 0 ok
 	return 1
+
+# a pair form whose key or value is a reference (v0.8)
+func StzuPairRefs(aFS, aDeclared)
+	cK1 = DeclaredKind(aDeclared, aFS[1][2])
+	cK2 = DeclaredKind(aDeclared, aFS[2][2])
+	return cK1 = "DECLARATION" or cK2 = "DECLARATION" or cK2 = "UNION"
 
 func StzuCheckListForms(aSeats, aDeclared, aForms)
 	for i = 1 to len(aSeats)
@@ -1364,12 +1419,13 @@ func StzuCheckListForms(aSeats, aDeclared, aForms)
 		for j = 1 to len(aForms)
 			if aForms[j][1] != aS[2] loop ok
 			aFS = aForms[j][2]
-			if StzuIsPairForm(aFS)
+			if StzuIsPairForm(aFS, aDeclared)
 				# the pair's value is a scalar of the second seat's type: a
-				# primitive, a MENU, a RANGE or a FORMAT
+				# primitive, a MENU, a RANGE, a FORMAT, or (v0.8) a reference --
+				# a DECLARATION or a UNION of declarations
 				cK2 = DeclaredKind(aDeclared, aFS[2][2])
-				if not (InStrList(aFS[2][2], StzuPrimitives()) or cK2 = "MENU" or cK2 = "RANGE" or cK2 = "FORMAT")
-					StzuFail(aS[5], "a list of a FORM writes name: value pairs when the FORM is a name and a scalar; the second seat of '" + aS[2] + "' is a " + cK2 + ", which a pair cannot hold")
+				if not (InStrList(aFS[2][2], StzuPrimitives()) or cK2 = "MENU" or cK2 = "RANGE" or cK2 = "FORMAT" or cK2 = "DECLARATION" or cK2 = "UNION")
+					StzuFail(aS[5], "a list of a FORM writes key: value pairs when the FORM is a key and a scalar; the second seat of '" + aS[2] + "' is a " + cK2 + ", which a pair cannot hold")
 				ok
 			ok
 		next

@@ -30,6 +30,11 @@
 # order of the court is: shapes, the WORLD, the local types, the
 # CONSTRAINTs, then the references.
 #
+# v0.8 (haro/spike/v08/GRAMMAR.md): a refusal by NAME for a known trespasser;
+# pair lists keyed by a MENU (a sequence) or a DECLARATION (resolved) with
+# reference values; a UNION of declarations resolved by name; the references
+# pass judges every reference, scalar, listed, keyed or valued.
+#
 # v0.7 (haro/spike/v07/GRAMMAR.md): the ASK -- the Q letter -- and the `ask`
 # verb: `ask <file> "<question>" <rows json>` answers a question of the
 # declared world on the records handed in (ask_lib.ring, loaded by the
@@ -90,6 +95,18 @@ func CtJoin(aL, cSep)
 	return cOut
 
 # the declared refusal message of a category, or ""
+# v0.8: a refusal's NAMED word -- its own message, or ""
+func CtRefusalNamed(cCategory, cWord)
+	for i = 1 to len($aCourtRefusals)
+		if $aCourtRefusals[i][1] = cCategory and len($aCourtRefusals[i]) >= 3
+			aN = $aCourtRefusals[i][3]
+			for j = 1 to len(aN)
+				if aN[j][1] = cWord return aN[j][2] ok
+			next
+		ok
+	next
+	return ""
+
 func CtRefusalMessage(cCategory)
 	for i = 1 to len($aCourtRefusals)
 		if $aCourtRefusals[i][1] = cCategory return $aCourtRefusals[i][2] ok
@@ -198,7 +215,19 @@ func CtBuildCondLangs()
 			aV = aE[14][j]
 			aViews + [aV[1], aV[2], NULL, aV[3], aV[4], aV[5]]
 		next
-		$aCondLangs + [aE[1], aDeclSeats, aE[11][1], aViews, aVerbOf]
+		# v0.8: the WORLD's ENTRY kinds and the forms' seat kinds
+		aEntry = []
+		if len(aE[11]) >= 3 aEntry = aE[11][3] ok
+		aFormTable = []
+		for j = 1 to len(aE[4])
+			aFS = aE[4][j][2]
+			aInfo = []
+			for k = 1 to len(aFS)
+				aInfo + [aFS[k][1], aFS[k][2], CtTypeKind(aFS[k])]
+			next
+			aFormTable + [aE[4][j][1], aInfo]
+		next
+		$aCondLangs + [aE[1], aDeclSeats, aE[11][1], aViews, aVerbOf, aEntry, aFormTable]
 	next
 
 # the court's state, so a SENTENCE can be judged in its own language and the
@@ -418,7 +447,9 @@ func CtTokenize(cSrc)
 			but c = ":" cT = "colon"
 			ok
 			if cT = ""
-				CtFail(nLine, "The character '" + c + "' is not part of the " + $cCourtLang + " grammar")
+				cMsgC = CtRefusalMessage("unexpected_character")
+				if cMsgC != "" cMsgC = " -- " + cMsgC ok
+				CtFail(nLine, "The character '" + c + "' is not part of the " + $cCourtLang + " grammar" + cMsgC)
 			ok
 			aToks + [cT, c, nLine, i, i + 1]
 			i++
@@ -460,9 +491,41 @@ func CtTypeKind(aSeat)
 
 func CtIsPairForm(aFS)
 	if len(aFS) != 2 return 0 ok
-	if aFS[1][2] != "name" or aFS[1][3] return 0 ok
-	if aFS[2][3] return 0 ok
+	if aFS[1][3] or aFS[2][3] return 0 ok
+	cK1 = CtTypeKind(aFS[1])
+	if aFS[1][2] != "name" and cK1 != "menu" and cK1 != "decl" return 0 ok
 	return 1
+
+# v0.8: does a seat take part in the references pass -- a reference, a UNION
+# of declarations, or a pair list whose keys or values are references -- and
+# in the local pass -- everything else, and a pair list's menu keys and
+# scalar values
+func CtUnionHasDecls(cName)
+	aU = CtUnionByName(cName)
+	if isNull(aU) return 0 ok
+	for i = 1 to len(aU[2])
+		if aU[2][i][3] = "decl" return 1 ok
+	next
+	return 0
+
+func CtSeatPasses(aSeat)
+	cK = CtTypeKind(aSeat)
+	if cK = "decl" return [0, 1] ok
+	if cK = "union"
+		if CtUnionHasDecls(aSeat[2]) return [1, 1] ok
+		return [1, 0]
+	ok
+	if aSeat[3] and cK = "form"
+		aF = CtFormByName(aSeat[2])
+		if not isNull(aF) and CtIsPairForm(aF[2])
+			bRef = 0
+			if CtTypeKind(aF[2][1]) = "decl" bRef = 1 ok
+			if CtTypeKind(aF[2][2]) = "decl" bRef = 1 ok
+			if CtTypeKind(aF[2][2]) = "union" and CtUnionHasDecls(aF[2][2][2]) bRef = 1 ok
+			return [1, bRef]
+		ok
+	ok
+	return [1, 0]
 
 func CtClauseShape(aSeat)
 	cOf = aSeat[2]
@@ -725,11 +788,6 @@ func CtParseValue()
 				if tv[1] != "ident" and tv[1] != "string" and tv[1] != "number"
 					CtFail(tv[3], "A pair's value is a word, a string or a number, found '" + CtShown(tv) + "'")
 				ok
-				for k = 1 to len(aPairs)
-					if aPairs[k][1] = item[2]
-						CtFail(item[3], "'" + item[2] + "' is named twice in one list")
-					ok
-				next
 				aPair = [item[2], tv[2], tv[1]]
 				aPairs + aPair
 			but item[1] = "ident"
@@ -772,6 +830,8 @@ func CtParseDecl()
 	aKind = NULL
 	if tK[1] = "keyword" aKind = CtKindByVerb(tK[2]) ok
 	if isNull(aKind)
+		cNamed = CtRefusalNamed("unknown_declaration", lower(CtShown(tK)))
+		if cNamed != "" CtFail(tK[3], cNamed) ok
 		cMsg = CtRefusalMessage("unknown_declaration")
 		if cMsg = "" cMsg = "the kinds are closed (" + CtJoin(CtVerbs(), ", ") + ")" ok
 		CtFail(tK[3], "Unknown kind '" + CtShown(tK) + "': " + cMsg)
@@ -795,6 +855,8 @@ func CtParseDecl()
 			CtFail(tC[3], "Expected a clause name, found '" + CtShown(tC) + "'")
 		ok
 		if not CtInList(tC[2], aAllowed)
+			cNamed = CtRefusalNamed("unknown_seat", lower(tC[2]))
+			if cNamed != "" CtFail(tC[3], cNamed) ok
 			cMsg = CtRefusalMessage("unknown_seat")
 			if cMsg = "" cMsg = "allowed are " + CtJoin(aAllowed, ", ") ok
 			CtFail(tC[3], "Unknown clause '" + tC[2] + "' for " + aKind[1] + ": " + cMsg)
@@ -991,15 +1053,14 @@ func CtCheckValues(aDecls, bRefs)
 		aC = aD[4]
 		for j = 1 to len(aC)
 			aSeat = CtSeatByClause(aKind, aC[j][1])
-			bRef = 0
-			if CtTypeKind(aSeat) = "decl" bRef = 1 ok
-			if bRef != bRefs loop ok
+			aP = CtSeatPasses(aSeat)
+			if not aP[bRefs + 1] loop ok
 			if CtTypeKind(aSeat) = "sentence"
 				# v0.4: the file a SENTENCE seat names is judged in its own language
 				CtJudgeSentence(aD, aSeat, aC[j])
 				loop
 			ok
-			cWhy = CtCheckSeatValue(aD, aSeat, aC[j])
+			cWhy = CtCheckSeatValue(aD, aSeat, aC[j], bRefs)
 			if cWhy != "" CtFail(aC[j][2], cWhy) ok
 		next
 	next
@@ -1082,11 +1143,36 @@ func CtCheckScalar(aDecl, aSeat, cValue)
 
 # a clause's value against its seat: scalars directly, lists item by item; a
 # UNION seat is checked as the alternative whose shape the value has (v0.3)
-func CtCheckSeatValue(aDecl, aSeat, aClause)
+# v0.8: a word against a UNION of declarations -- it resolves to a declaration
+# of one of the union's kinds, or the union's own MESSAGE speaks
+func CtCheckUnionWord(aDecl, aSeat, cValue)
+	aU = CtUnionByName(aSeat[2])
+	if isNull(aU) return "" ok
+	aVerbs = []
+	for i = 1 to len(aU[2])
+		if aU[2][i][3] != "decl" loop ok
+		aK = CtKindByDeclName(aU[2][i][1])
+		if isNull(aK) loop ok
+		aVerbs + aK[1]
+		for j = 1 to len($aCondDecls)
+			if $aCondDecls[j][1] = aK[1] and $aCondDecls[j][2] = cValue return "" ok
+		next
+	next
+	cMsg = aU[3]
+	if cMsg = "" cMsg = "{VERB} {name} " + upper(aSeat[1]) + " '{value}', which resolves to nothing: no such " + CtJoin(aVerbs, " or ") ok
+	return CtFill(cMsg, aDecl, cValue)
+
+func CtCheckSeatValue(aDecl, aSeat, aClause, bRefs)
 	if CtTypeKind(aSeat) = "union"
 		aAlt = CtUnionAlt(aSeat, aClause)
 		if isNull(aAlt) return "" ok
-		return CtCheckSeatValue(aDecl, [aSeat[1], aAlt[1], aAlt[2], aSeat[4], aAlt[3]], aClause)
+		if aAlt[3] = "decl"
+			if not bRefs return "" ok
+			if aClause[3][1] != "word" return "" ok
+			return CtCheckUnionWord(aDecl, aSeat, aClause[3][2])
+		ok
+		if bRefs return "" ok
+		return CtCheckSeatValue(aDecl, [aSeat[1], aAlt[1], aAlt[2], aSeat[4], aAlt[3]], aClause, bRefs)
 	ok
 	cShape = aClause[3][1]
 	if cShape = "word" or cShape = "string" or cShape = "number"
@@ -1095,13 +1181,63 @@ func CtCheckSeatValue(aDecl, aSeat, aClause)
 	cK = CtTypeKind(aSeat)
 	aItems = aClause[3][2]
 	if cShape = "pairlist"
-		# v0.6: each pair's value takes the form's second seat's type
+		# v0.6: each pair's value takes the form's second seat's type; v0.8: a
+		# key is a name (once), a MENU word (a sequence, keys may repeat) or a
+		# declaration (resolved), and a value may be a reference
 		aF = CtFormByName(aSeat[2])
 		if isNull(aF) or len(aF[2]) < 2 return "" ok
-		for i = 1 to len(aItems)
-			cWhy = CtCheckScalar(aDecl, aF[2][2], aItems[i][2])
-			if cWhy != "" return cWhy ok
-		next
+		aKeySeat = aF[2][1]
+		aValSeat = aF[2][2]
+		cKeyK = CtTypeKind(aKeySeat)
+		cValK = CtTypeKind(aValSeat)
+		aKind = CtKindByVerb(aDecl[1])
+		cMsgL = CtMessageFor(aKind, aSeat[1])
+		if not bRefs
+			if cKeyK != "menu"
+				for i = 1 to len(aItems)
+					for j = 1 to i - 1
+						if aItems[j][1] = aItems[i][1]
+							return "'" + aItems[i][1] + "' is named twice in " + upper(aSeat[1]) + " of " + aDecl[1] + " " + aDecl[2]
+						ok
+					next
+				next
+			else
+				for i = 1 to len(aItems)
+					cWhy = CtCheckScalar(aDecl, aKeySeat, aItems[i][1])
+					if cWhy != "" return cWhy ok
+				next
+			ok
+			if cValK != "decl" and cValK != "union"
+				for i = 1 to len(aItems)
+					cWhy = CtCheckScalar(aDecl, aValSeat, aItems[i][2])
+					if cWhy != "" return cWhy ok
+				next
+			ok
+			return ""
+		ok
+		if cKeyK = "decl"
+			for i = 1 to len(aItems)
+				cWhy = CtCheckScalar(aDecl, aKeySeat, aItems[i][1])
+				if cWhy != ""
+					if cMsgL != "" return CtFill(cMsgL, aDecl, aItems[i][1]) ok
+					return cWhy
+				ok
+			next
+		ok
+		if cValK = "decl"
+			for i = 1 to len(aItems)
+				cWhy = CtCheckScalar(aDecl, aValSeat, aItems[i][2])
+				if cWhy != ""
+					if cMsgL != "" return CtFill(cMsgL, aDecl, aItems[i][2]) ok
+					return cWhy
+				ok
+			next
+		but cValK = "union"
+			for i = 1 to len(aItems)
+				cWhy = CtCheckUnionWord(aDecl, aValSeat, aItems[i][2])
+				if cWhy != "" return cWhy ok
+			next
+		ok
 		return ""
 	ok
 	if cK = "menu" or cK = "decl"

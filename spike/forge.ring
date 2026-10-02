@@ -204,7 +204,9 @@ func LangSource(aLang)
 	aRows = []
 	aR = LangGet(aLang, "refusals")
 	for i = 1 to len(aR)
-		aRows + ("[" + RingStr(aR[i][1]) + ", " + RingStr(aR[i][2]) + "]")
+		aNamed = []
+		if len(aR[i]) >= 5 aNamed = aR[i][5] ok
+		aRows + ("[" + RingStr(aR[i][1]) + ", " + RingStr(aR[i][2]) + ", " + MessagesSource(aNamed) + "]")
 	next
 	cRefusals = RowsSource(aRows, nl)
 	aRows = []
@@ -240,8 +242,12 @@ func LangSource(aLang)
 	next
 	cConstraints = RowsSource(aRows, nl)
 	aW = LangGet(aLang, "world")
-	cWorld = "[[], " + '""' + "]"
-	if not isNull(aW) cWorld = "[" + NamesSource(aW[1]) + ", " + RingStr(aW[2]) + "]" ok
+	cWorld = "[[], " + '""' + ", []]"
+	if not isNull(aW)
+		aEntry = []
+		if len(aW) >= 4 aEntry = aW[4] ok
+		cWorld = "[" + NamesSource(aW[1]) + ", " + RingStr(aW[2]) + ", " + NamesSource(aEntry) + "]"
+	ok
 	aRf = LangGet(aLang, "refine")
 	cPoints = "[]"
 	cFloors = "[]"
@@ -348,7 +354,7 @@ func ForgeCourt(aLang)
 	c += "$aCondLangs = []" + nl + "$cCondLang = " + '""' + nl + "$aCourtSentences = []" + nl
 	c += "$aCourtKinds = []" + nl + "$aCourtForms = []" + nl + "$aCourtRefusals = []" + nl + "$aCourtMenus = []" + nl
 	c += "$aCourtRanges = []" + nl + "$aCourtFormats = []" + nl + "$aCourtUnions = []" + nl + "$aCourtConstraints = []" + nl
-	c += "$aCourtWorld = [[], " + '""' + "]" + nl + "$aCourtPoints = []" + nl + "$aCourtFloors = []" + nl
+	c += "$aCourtWorld = [[], " + '""' + ", []]" + nl + "$aCourtPoints = []" + nl + "$aCourtFloors = []" + nl
 	c += "$aCourtViews = []" + nl + "$aCourtSentenceKinds = []" + nl
 	c += "$aCourtExprs = []" + nl + "$aCourtWalks = []" + nl + "$aCourtAsk = NULL" + nl
 	c += ExprGlobals()
@@ -590,7 +596,12 @@ func GbnfShape(aSeat, aLang)
 		if cK = "form"
 			aF = FormOf(aLang, cOf)
 			aFS = aF[2]
-			if StzuIsPairForm(aFS) return "pairlist" ok
+			aDeclaredK = []
+			aDL = LangGet(aLang, "declarations")
+			for i = 1 to len(aDL) aDeclaredK + [aDL[i][1], "DECLARATION"] next
+			aML = LangGet(aLang, "menus")
+			for i = 1 to len(aML) aDeclaredK + [aML[i][1], "MENU"] next
+			if StzuIsPairForm(aFS, aDeclaredK) return "pairlist" ok
 			if len(aFS) > 0 and (aFS[1][2] = "text" or TypeKindOf(aLang, aFS[1][2]) = "format") return "stringlist" ok
 		ok
 		return "namelist"

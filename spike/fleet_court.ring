@@ -33,7 +33,7 @@ $aCourtRanges = []
 $aCourtFormats = []
 $aCourtUnions = []
 $aCourtConstraints = []
-$aCourtWorld = [[], ""]
+$aCourtWorld = [[], "", []]
 $aCourtPoints = []
 $aCourtFloors = []
 $aCourtViews = []
@@ -65,10 +65,10 @@ $aCourtLangs = [
     [
     ],
     [
-      ["unknown_verb", "The fleet verb set is closed (DEFINE)."],
-      ["unknown_declaration", "belongs to a machine file, not a fleet file: a fleet says which machines are one estate, never what any one of them is"],
-      ["dangling_reference", "This name resolves to nothing in the declared fleet."],
-      ["duplicate_name", "one namespace, no duplicates"]
+      ["unknown_verb", "The fleet verb set is closed (DEFINE).", []],
+      ["unknown_declaration", "belongs to a machine file, not a fleet file: a fleet says which machines are one estate, never what any one of them is", []],
+      ["dangling_reference", "This name resolves to nothing in the declared fleet.", []],
+      ["duplicate_name", "one namespace, no duplicates", []]
     ],
     [
     ],
@@ -97,7 +97,7 @@ $aCourtLangs = [
       ["not_a_way_around", "retirement", "some member where key = this.key", "", "this key is already {other}'s key: a key that appears twice attributes one device's records to two"],
       ["retired_once", "retirement", "earlier retirement where key = this.key", "", "this key is already retired as {other}: a key is retired once, from one device"]
     ],
-    [["fleet"], "fleet"],
+    [["fleet"], "fleet", []],
     [],
     [],
     [
@@ -132,9 +132,9 @@ $aCourtLangs = [
       ["egress_destination", [["prefix", "destination", 0, 0, "format"]]]
     ],
     [
-      ["unknown_verb", "The machine verb set is closed (DEFINE)."],
-      ["dangling_reference", "This name resolves to nothing in the declared machine."],
-      ["duplicate_name", "This name is already declared; one namespace, no duplicates."]
+      ["unknown_verb", "The machine verb set is closed (DEFINE).", []],
+      ["dangling_reference", "This name resolves to nothing in the declared machine.", []],
+      ["duplicate_name", "This name is already declared; one namespace, no duplicates.", []]
     ],
     [
       ["profiles", ["hosted", "edge", "touch"], "PROFILE is hosted, edge or touch"],
@@ -236,7 +236,7 @@ $aCourtLangs = [
       ["not_the_boxs_address", "peer", "address host_of network.address", "", "{address} is the machine's own address on {network}: the one address on this link it cannot give away"],
       ["one_address_one_peer", "peer", "not address unique", "", "{address} is already {other}'s: one address, one peer, or the name does not mean anything"]
     ],
-    [["box"], "box"],
+    [["box"], "box", []],
     [["service.restart", "knob"], ["service.ready", "field"], ["service.health", "knob"], ["service.memory", "knob"], ["service.cpu", "knob"], ["service.tasks", "knob"], ["box.console", "field"], ["box.profile", "policy"], ["box.board", "policy"], ["mount.device", "field"], ["capability.grant", "policy"]],
     [["service.restart", "external"], ["service.health", "external"], ["service.memory", "external"], ["service.cpu", "external"], ["service.tasks", "external"], ["box.profile", "trusted"], ["box.board", "trusted"], ["capability.grant", "trusted"]],
     [

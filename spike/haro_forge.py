@@ -62,6 +62,7 @@ STZU4_FIXTURES = os.path.join(HERE, 'v04', 'fixtures.json')
 STZU5_FIXTURES = os.path.join(HERE, 'v05', 'fixtures.json')
 STZU6_FIXTURES = os.path.join(HERE, 'v06', 'fixtures.json')
 STZU7_FIXTURES = os.path.join(HERE, 'v07', 'fixtures.json')
+STZU8_FIXTURES = os.path.join(HERE, 'v08', 'fixtures.json')
 
 
 def judge_stzu(exe, label, fixtures=STZU_FIXTURES):
@@ -71,7 +72,7 @@ def judge_stzu(exe, label, fixtures=STZU_FIXTURES):
     counts), world and points."""
     doc = json.load(open(fixtures, encoding='utf-8'))
     # the pinned v0.1 judge is stzu's; everything since is Haro's (D1)
-    assert doc['grammar'] in ('stzu', 'haro') and doc['version'] in ('0.1', '0.2', '0.3', '0.4', '0.5', '0.6', '0.7')
+    assert doc['grammar'] in ('stzu', 'haro') and doc['version'] in ('0.1', '0.2', '0.3', '0.4', '0.5', '0.6', '0.7', '0.8')
     passed = failed = 0
     outputs = {}
     with tempfile.TemporaryDirectory() as td:
@@ -140,7 +141,8 @@ def stage1():
                             ('v0.4, the SENTENCE, the VIEW and the paths', STZU4_FIXTURES),
                             ('v0.5, CONTEXTS on an EXPRESSION', STZU5_FIXTURES),
                             ('v0.6, pair lists, the expression semantics and WALK', STZU6_FIXTURES),
-                            ('v0.7, ASK -- the Q letter -- and ABSENT missing', STZU7_FIXTURES)):
+                            ('v0.7, ASK -- the Q letter -- and ABSENT missing', STZU7_FIXTURES),
+                            ('v0.8, what F needs: NAMED refusals, keyed pairs, a UNION of declarations, deadlines, ENTRY, three relations', STZU8_FIXTURES)):
         print(f'stage 1 -- the Haro meta-court in pure Ring, judged by its fixtures ({label})')
         f1, o1 = judge_stzu(RNXC, 'rnxc', fixtures)
         f2, o2 = judge_stzu(ORACLE, 'oracle ring.exe', fixtures)
@@ -1025,6 +1027,119 @@ def stage10():
     return failures
 
 
+# ---- stage 11: F, the flow of work -- RingFlex's .wflow re-declared, judged by its own fixtures
+
+F_STZU = os.path.join(HERE, 'f_v08.haro')
+F_DIR = os.path.join(HERE, 'f')
+F_FLOOR = 26
+RINGFLEX = r'D:\GitHub\ringflex'
+RING_OFFICIAL = r'D:\ring127\bin\ring.exe'
+
+
+def f_run(exe, args):
+    return run_args(exe, ['f_court.ring'] + args, HERE).strip()
+
+
+def f_expect(src):
+    for line in src.splitlines():
+        line = line.strip()
+        if line.startswith('-- EXPECT: '):
+            return line[len('-- EXPECT: '):].strip()
+    return ''
+
+
+def stage11():
+    """The eighth rung. f_v08.haro declares RingFlex's .wflow v0 in the Commons'
+    shape; the forge emits its court; and the judge is RingFlex's own fixture
+    suite -- 24 one-defect workflows and the two reference workflows, each
+    carrying its expected verdict on its first line (clean / refuse Cn /
+    parse-error <fragment>), re-expressed in haro/spike/f/ (notation only,
+    the one defect each kept). The forged court must give the expected verdict
+    on rnxc and on the oracle, byte-identical. RingFlex's own court is run
+    live on the ORIGINAL fixtures when official Ring 1.27 is installed (its
+    runner loads Ring's full stdlib, which the oracle cannot), to show the
+    expectations hold on their own side."""
+    print('stage 11 -- F, the flow of work: f_v08.haro -> f_court.ring and f.gbnf, judged by RingFlex\'s 26 fixtures re-expressed in the Commons\' shape')
+    failures = 0
+    out_rnx = run_args(RNXC, ['forge.ring', F_STZU, '.'], HERE).strip()
+    print('  rnxc  :', out_rnx.splitlines()[0] if out_rnx else 'NO OUTPUT')
+    if not out_rnx.startswith('forged f'):
+        print('  FAIL the forge did not forge F')
+        return 1
+    td = os.path.join(ROOT, 'runtime', 'haro-forge-oracle')
+    os.makedirs(td, exist_ok=True)
+    for art in ('f_court.ring', 'f.gbnf'):
+        if os.path.exists(os.path.join(td, art)):
+            os.remove(os.path.join(td, art))
+    out_or = run_args(ORACLE, ['forge.ring', F_STZU, '../../runtime/haro-forge-oracle'], HERE).strip()
+    print('  oracle:', out_or.splitlines()[0] if out_or else 'NO OUTPUT')
+    for art in ('f_court.ring', 'f.gbnf'):
+        a = open(os.path.join(HERE, art), 'rb').read()
+        b = open(os.path.join(td, art), 'rb').read() if os.path.exists(os.path.join(td, art)) else b''
+        if a != b:
+            failures += 1
+            print(f'  FAIL {art} differs between the two runtimes ({len(a)} vs {len(b)} bytes)')
+        else:
+            print(f'  ok   {art}: {len(a)} bytes, byte-identical on both runtimes')
+    files = sorted(f for f in os.listdir(F_DIR) if f.endswith('.f'))
+    passed = failed = 0
+    ab_diff = []
+    for name in files:
+        src = open(os.path.join(F_DIR, name), encoding='utf-8').read()
+        exp = f_expect(src)
+        if not exp:
+            failed += 1
+            print(f'  FAIL {name}: no -- EXPECT: line')
+            continue
+        r = f_run(RNXC, ['check', os.path.join('f', name)])
+        o = f_run(ORACLE, ['check', os.path.join('f', name)])
+        if r != o:
+            ab_diff.append(name)
+        kind, _, arg = exp.partition(' ')
+        first = r.split('\n')[0] if r else ''
+        if kind == 'clean':
+            ok = first == 'ok'
+            why = '' if ok else f' -- expected clean, got: {first[:160]}'
+        elif kind == 'parse-error':
+            ok = first != 'ok' and arg in r
+            why = '' if ok else f' -- expected a refusal holding {arg!r}, got: {first[:160]}'
+        elif kind == 'refuse':
+            ok = first != 'ok' and re.search(r'\b' + re.escape(arg) + r'\b', r) is not None
+            why = '' if ok else f' -- expected a refusal under {arg}, got: {first[:160]}'
+        else:
+            ok, why = False, f' -- unknown expectation {exp!r}'
+        if PLANT and name == 'dead-step.f':
+            ok, why = False, ' -- PLANTED'
+        if ok:
+            passed += 1
+        else:
+            failed += 1
+            print(f'  FAIL {name} ({exp}){why}')
+    print(f'F-CONFORMANCE (the forged court on rnxc, RingFlex\'s fixtures re-expressed): {passed} passed, {failed} failed of {len(files)}')
+    failures += failed
+    if ab_diff:
+        failures += 1
+        print(f'  FAIL rnxc and the oracle differ on {len(ab_diff)} fixture(s): {ab_diff}')
+    else:
+        print(f'  ok   rnxc and the oracle print the same bytes on all {len(files)} fixtures')
+    if F_FLOOR and passed < F_FLOOR:
+        failures += 1
+        print(f'  FAIL {passed} passed, under the pinned floor of {F_FLOOR}')
+    # RingFlex's own court on the original fixtures: the expectations hold there
+    if os.path.exists(RING_OFFICIAL) and os.path.isdir(RINGFLEX):
+        p = subprocess.run([RING_OFFICIAL, 'tests/run.ring'], cwd=RINGFLEX, capture_output=True, timeout=120)
+        out = p.stdout.decode('utf-8', 'replace')
+        m = re.search(r'(\d+) passed, (\d+) failed', out)
+        if m and m.group(2) == '0' and int(m.group(1)) >= F_FLOOR:
+            print(f'  ok   RingFlex\'s own court (official Ring 1.27, read-only): {m.group(1)} passed, 0 failed on its original fixtures')
+        else:
+            failures += 1
+            print(f'  FAIL RingFlex\'s own court did not hold its fixtures: {out[-200:]}')
+    else:
+        print('  SKIP RingFlex\'s own court: its runner loads Ring\'s full stdlib.ring, which the oracle cannot, and official Ring 1.27 is not installed here')
+    return failures
+
+
 def stage6(lang, court=None, n=15):
     court = court or f'{lang}_court.ring'
     print(f'stage 6 -- edit to verdict on makeen_box.machine, minima of {n}')
@@ -1104,5 +1219,7 @@ if __name__ == '__main__':
         if stage == 10:
             run_args(RNXC, ['forge.ring', Z_STZU, '.'], HERE)
         failures += stage10()
+    if stage in (None, 11) and os.path.exists(F_STZU) and os.path.isdir(F_DIR):
+        failures += stage11()
     print(f'haro_forge: {"FAIL" if failures else "PASS"} ({failures} failure(s), {time.perf_counter()-t0:.1f} s)')
     sys.exit(1 if failures else 0)

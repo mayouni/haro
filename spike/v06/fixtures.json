@@ -112,8 +112,8 @@
     },
     {
       "id": "R8",
-      "name": "a list of a FORM is written as name: value pairs when the FORM is a name and a scalar; a pair cannot hold a reference",
-      "source": "DEFINE LANGUAGE z AS (VERSION \"0.6\", GRAMMAR \"0.6\", COURT \"x\", EXTENSION \".z\") RATIONALE \"x\"\nDEFINE DECLARATION flow AS (VERB \"FLOW\", SEATS []) RATIONALE \"x\"\nDEFINE FORM hop AS (SEATS [name: name, to: flow]) RATIONALE \"x\"\nDEFINE DECLARATION route AS (VERB \"ROUTE\", SEATS [hops: [hop]]) RATIONALE \"x\"\n",
+      "name": "a list of a FORM is written as name: value pairs when the FORM is a name and a scalar; a pair may hold a reference since v0.8, never an EXPRESSION",
+      "source": "DEFINE LANGUAGE z AS (VERSION \"0.6\", GRAMMAR \"0.6\", COURT \"x\", EXTENSION \".z\") RATIONALE \"x\"\nDEFINE EXPRESSION zexpr AS (OPERATORS [cmp], OPERANDS [number, ref]) RATIONALE \"x\"\nDEFINE FORM hop AS (SEATS [name: name, to: zexpr]) RATIONALE \"x\"\nDEFINE DECLARATION route AS (VERB \"ROUTE\", SEATS [hops: [hop]]) RATIONALE \"x\"\n",
       "refusal": "which a pair cannot hold"
     },
     {

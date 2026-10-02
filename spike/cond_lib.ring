@@ -19,6 +19,7 @@
 #          | path ("within" | "host_of" | "under" | "covers") (path | value)
 #          | path "cyclic" | path "matches" format
 #          | "self" "is" view                                              (v0.4)
+#          | "self" "reachable" | "self" "referenced" | path "keyed_by" path (v0.8)
 #   path   = seg { "." seg } ;  seg = IDENT | "self" | "this"            (v0.4)
 #            the head is self, this (the ON declaration, inside a quantifier or a
 #            VIEW's WHERE), a VIEW, a seat, a ONE kind or a kind; each step is a
@@ -288,6 +289,16 @@ func CondAtom()
 		if op[2] = "cyclic"
 			return ["cyclic", aPath]
 		ok
+		# v0.8: three closed relations F needs
+		if op[2] = "reachable"
+			return ["reach", aPath]
+		ok
+		if op[2] = "referenced"
+			return ["refd", aPath]
+		ok
+		if op[2] = "keyed_by"
+			return ["keyed", aPath, CondRelRight()]
+		ok
 		if op[2] = "matches"
 			f = CondNext()
 			if f[1] != "word" raise("condition: matches names a FORMAT") ok
@@ -342,6 +353,30 @@ func CondSeatInfoIn(cLang, cDecl, cSeat)
 		if aS[i][1] = cSeat return aS[i] ok
 	next
 	return NULL
+
+# v0.8: the WORLD's ENTRY kinds and the forms of a language
+func CondEntryIn(cLang)
+	aL = CondLang(cLang)
+	if isNull(aL) return [] ok
+	if len(aL) < 6 return [] ok
+	return aL[6]
+
+func CondFormIn(cLang, cName)
+	aL = CondLang(cLang)
+	if isNull(aL) return NULL ok
+	if len(aL) < 7 return NULL ok
+	for i = 1 to len(aL[7])
+		if aL[7][i][1] = cName return aL[7][i] ok
+	next
+	return NULL
+
+# a form's seat infos [[seat, of, kind], ...] describe a pair when there are two
+# scalar seats and the first is a name, a MENU or a DECLARATION
+func CondIsPairFormInfo(aInfo)
+	if len(aInfo) != 2 return 0 ok
+	cK1 = aInfo[1][3]
+	if not ((aInfo[1][2] = "name" and cK1 = "prim") or cK1 = "menu" or cK1 = "decl") return 0 ok
+	return 1
 
 func CondIsOneIn(cLang, cDecl)
 	aL = CondLang(cLang)
@@ -559,6 +594,40 @@ func CondValidateIn(aAst, aCtx)
 			ok
 		ok
 		if not bOk return "cyclic follows a list of references to the declaration's own kind, and '" + CondPathText(aAst[2]) + "' is not one" ok
+		return ""
+	but cK = "reach" or cK = "refd"
+		cWord = "reachable"
+		if cK = "refd" cWord = "referenced" ok
+		aSegs = aAst[2][2]
+		if len(aSegs) != 1 or aSegs[1] != "self"
+			return cWord + " asks whether self is " + cWord + "; write self " + cWord
+		ok
+		if cK = "reach" and len(CondEntryIn(aCur[1])) = 0
+			return "reachable walks from the WORLD's ENTRY kinds, and none are declared"
+		ok
+		return ""
+	but cK = "keyed"
+		aSegs = aAst[2][2]
+		bPairs = 0
+		if len(aSegs) = 1
+			aInfo = CondSeatInfoIn(aCur[1], aCur[2], aSegs[1])
+			if not isNull(aInfo)
+				if aInfo[3] and aInfo[4] = "form"
+					aF = CondFormIn(aCur[1], aInfo[2])
+					if not isNull(aF) and CondIsPairFormInfo(aF[2]) bPairs = 1 ok
+				ok
+			ok
+		ok
+		if not bPairs return "keyed_by reads a list of pairs on its left, and '" + CondPathText(aAst[2]) + "' is not one" ok
+		aR = aAst[3]
+		bList = 0
+		if aR[1] = "path" and len(aR[2]) = 1
+			aInfo = CondSeatInfoIn(aCur[1], aCur[2], aR[2][1])
+			if not isNull(aInfo)
+				if aInfo[3] bList = 1 ok
+			ok
+		ok
+		if not bList return "keyed_by reads a list of names on its right, and '" + CondPathText(aR) + "' is not one" ok
 		return ""
 	but cK = "matches"
 		aT = CondTypePath(aAst[2], aCtx)
@@ -1001,6 +1070,18 @@ func CondEvalIn(aAst, aOuter, aInner)
 		if cRel = "within" return CondWithin(v, cR) ok
 		if cRel = "host_of" return CondHostOf(v, cR) ok
 		return CondUnder(v, cR)
+	but cK = "reach"
+		aCur = CondCur(aOuter, aInner)
+		if isNull(aCur) return 0 ok
+		return CondReachable(aCur)
+	but cK = "refd"
+		aCur = CondCur(aOuter, aInner)
+		if isNull(aCur) return 0 ok
+		return CondReferenced(aCur)
+	but cK = "keyed"
+		aCur = CondCur(aOuter, aInner)
+		if isNull(aCur) return 0 ok
+		return CondKeyedBy(aCur, aAst[2][2][1], aAst[3][2][1])
 	but cK = "cyclic"
 		if isNull(aCur) return 0 ok
 		return CondCyclic(aCur, aAst[2][2][1])
@@ -1102,6 +1183,106 @@ func CondEvalIn(aAst, aOuter, aInner)
 # some, all and earlier over the declarations a path names (a kind, a list
 # of references, a kind inside a SENTENCE), narrowed by named; some and
 # earlier record the one found, all the first failure, in {other}
+# ---- v0.8: reachable, referenced, keyed_by -----------------------------------------
+
+# the names a declaration refers to through its reference seats: a scalar
+# DECLARATION or UNION seat, a list of references, a pair list's keys when
+# they are declarations and its values when they are declarations or unions
+func CondRefNames(cLang, aDecl)
+	aOut = []
+	cDeclName = CondDeclNameIn(cLang, aDecl[1])
+	aSeats = CondSeatsIn(cLang, cDeclName)
+	if isNull(aSeats) return aOut ok
+	for i = 1 to len(aSeats)
+		aInfo = aSeats[i]
+		aC = CondClauseOf(aDecl, aInfo[1])
+		if isNull(aC) loop ok
+		cShape = aC[3][1]
+		if aInfo[4] = "decl" or aInfo[4] = "union"
+			if cShape = "word" aOut + aC[3][2] ok
+			if cShape = "namelist"
+				for j = 1 to len(aC[3][2]) aOut + aC[3][2][j] next
+			ok
+		but aInfo[4] = "form" and cShape = "pairlist"
+			aF = CondFormIn(cLang, aInfo[2])
+			if isNull(aF) loop ok
+			bKey = aF[2][1][3] = "decl"
+			bVal = aF[2][2][3] = "decl" or aF[2][2][3] = "union"
+			for j = 1 to len(aC[3][2])
+				if bKey aOut + aC[3][2][j][1] ok
+				if bVal aOut + aC[3][2][j][2] ok
+			next
+		ok
+	next
+	return aOut
+
+# self is reachable from the entry -- the first declaration of one of the
+# WORLD's ENTRY kinds -- through the reference seats of the ENTRY kinds'
+# declarations (a step's arrows), never through an ending's
+func CondReachable(aCur)
+	cLang = aCur[2]
+	aPool = aCur[4]
+	aEntry = CondEntryIn(cLang)
+	aVerbs = []
+	for i = 1 to len(aEntry)
+		aVerbs + CondVerbIn(cLang, aEntry[i])
+	next
+	cStart = ""
+	for i = 1 to len(aPool)
+		if CondInList(aPool[i][1], aVerbs)
+			cStart = aPool[i][2]
+			exit
+		ok
+	next
+	if cStart = "" return 0 ok
+	aSeen = [cStart]
+	n = 1
+	while n <= len(aSeen)
+		cCur = aSeen[n]
+		n++
+		for i = 1 to len(aPool)
+			if aPool[i][2] != cCur loop ok
+			if not CondInList(aPool[i][1], aVerbs) loop ok
+			aNames = CondRefNames(cLang, aPool[i])
+			for j = 1 to len(aNames)
+				if not CondInList(aNames[j], aSeen) aSeen + aNames[j] ok
+			next
+		next
+	end
+	return CondInList(aCur[3][2], aSeen)
+
+# self is named by a reference seat of some declaration of the sentence
+func CondReferenced(aCur)
+	cLang = aCur[2]
+	aPool = aCur[4]
+	cMe = aCur[3][2]
+	for i = 1 to len(aPool)
+		aNames = CondRefNames(cLang, aPool[i])
+		if CondInList(cMe, aNames) return 1 ok
+	next
+	return 0
+
+# the keys of a pair list are exactly the names of a list, as sets; the first
+# key with no name, or name with no key, is {other}
+func CondKeyedBy(aCur, cPairs, cNames)
+	aKeys = CondListOf(aCur[3], cPairs)
+	aNames = CondListOf(aCur[3], cNames)
+	if isNull(aKeys) aKeys = [] ok
+	if isNull(aNames) aNames = [] ok
+	for i = 1 to len(aKeys)
+		if not CondInList(aKeys[i], aNames)
+			$cCondOther = aKeys[i]
+			return 0
+		ok
+	next
+	for i = 1 to len(aNames)
+		if not CondInList(aNames[i], aKeys)
+			$cCondOther = aNames[i]
+			return 0
+		ok
+	next
+	return 1
+
 func CondQuant(aAst, aOuter, aInner)
 	aCur = CondCur(aOuter, aInner)
 	cQ = aAst[2]
@@ -1215,9 +1396,58 @@ func CondIsLabel(cS)
 	if cS[len(cS)] = "-" return 0 ok
 	return 1
 
+# a duration is a number and a unit: seconds, minutes, hours, days, working
+# day, working days (RingFlex grammar-v0.md 5.4); a landmark is the one form
+# v0 knows, "the Nth working day of next month"; a deadline is either (v0.8)
+func CondWordsOf(cS)
+	aW = []
+	cCur = ""
+	for i = 1 to len(cS)
+		if cS[i] = " " or cS[i] = char(9)
+			if cCur != "" aW + cCur ok
+			cCur = ""
+		else
+			cCur += cS[i]
+		ok
+	next
+	if cCur != "" aW + cCur ok
+	return aW
+
+func CondIsAllDigits(cS)
+	if len(cS) = 0 return 0 ok
+	for i = 1 to len(cS)
+		if not CondIsDigit(cS[i]) return 0 ok
+	next
+	return 1
+
+func CondIsDuration(cS)
+	aW = CondWordsOf(cS)
+	if len(aW) < 2 return 0 ok
+	if not CondIsAllDigits(aW[1]) return 0 ok
+	if len(aW) = 2
+		return CondInList(aW[2], ["seconds", "minutes", "hours", "days"])
+	ok
+	if len(aW) = 3
+		return aW[2] = "working" and (aW[3] = "day" or aW[3] = "days")
+	ok
+	return 0
+
+func CondIsLandmark(cS)
+	aW = CondWordsOf(cS)
+	if len(aW) != 7 return 0 ok
+	if aW[1] != "the" or aW[3] != "working" or aW[4] != "day" or aW[5] != "of" or aW[6] != "next" or aW[7] != "month" return 0 ok
+	cOrd = aW[2]
+	if len(cOrd) < 3 return 0 ok
+	cSuffix = right(cOrd, 2)
+	if not CondInList(cSuffix, ["st", "nd", "rd", "th"]) return 0 ok
+	return CondIsAllDigits(left(cOrd, len(cOrd) - 2))
+
 # the shapes of a FORMAT: absolute_path, ipv4, cidr, mac, label, domain,
-# hex64, hex64_lower (v0.4)
+# hex64, hex64_lower (v0.4); duration, landmark, deadline (v0.8)
 func CondHasShape(cS, cShape)
+	if cShape = "duration" return CondIsDuration(cS) ok
+	if cShape = "landmark" return CondIsLandmark(cS) ok
+	if cShape = "deadline" return CondIsDuration(cS) or CondIsLandmark(cS) ok
 	if cShape = "absolute_path"
 		if len(cS) = 0 return 0 ok
 		return cS[1] = "/"

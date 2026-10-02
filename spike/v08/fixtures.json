@@ -1,0 +1,121 @@
+{
+  "grammar": "haro",
+  "version": "0.8",
+  "comment": "The Haro v0.8 conformance floor, written BEFORE the court that passes it (the W discipline: fixtures first, prose second). v0.8 grows v0.7 by what F -- the alphabet's F letter, RingFlex's .wflow v0 re-declared (haro/SPIKE.md, the eighth rung) -- needs and nothing else: a REFUSAL that names known trespassers (NAMED: an author who writes FLOW or INVOKED_BY deserves to be told which law they met); a pair list keyed by a MENU (an ordered sequence of actions, keys may repeat) or by a DECLARATION (routing guards, keys resolve), whose values may be references; a UNION of DECLARATIONs (an arrow's target is a step, a terminal or a suspension, told apart by name in one namespace); the shapes duration, landmark and deadline; the WORLD's ENTRY kinds (the first declaration of one of them is where a walk starts); three closed relations -- self reachable (from the entry, through the entry kinds' reference seats), self referenced (named by any reference seat of the sentence), a pair list keyed_by a name list. Every v0.7 fixture still passes: v0.8 refuses nothing v0.7 accepted. Rejects carry the fragment the refusal must contain.",
+  "accepts": [
+    {
+      "id": "A1",
+      "name": "a REFUSAL names known trespassers: NAMED gives a word its own message",
+      "source": "DEFINE LANGUAGE f AS (VERSION \"0.8\", GRAMMAR \"0.8\", COURT \"x\", EXTENSION \".f\") RATIONALE \"x\"\nDEFINE DECLARATION step AS (VERB \"STEP\", SEATS [target: name]) RATIONALE \"x\"\nDEFINE REFUSAL unknown_declaration AS (MESSAGE \"the declaration set is closed\", NAMED [flow: \"'FLOW' belongs to ZQL, not to this language\", forever: \"'FOREVER' was deleted from the language\"]) RATIONALE \"x\"\n",
+      "expect": {
+        "language": "f",
+        "counts": {
+          "declarations": 1,
+          "refusals": 1
+        }
+      }
+    },
+    {
+      "id": "A2",
+      "name": "a pair list keyed by a MENU is an ordered sequence (keys may repeat); keyed by a DECLARATION its keys resolve; a pair's value may be a reference or a UNION of declarations",
+      "source": "DEFINE LANGUAGE f AS (VERSION \"0.8\", GRAMMAR \"0.8\", COURT \"x\", EXTENSION \".f\") RATIONALE \"x\"\nDEFINE MENU verbs AS (WORDS [notify, reassign]) RATIONALE \"x\"\nDEFINE DECLARATION actor AS (VERB \"ACTOR\", SEATS [role: name]) RATIONALE \"x\"\nDEFINE DECLARATION guard AS (VERB \"GUARD\", SEATS [norm: name]) RATIONALE \"x\"\nDEFINE DECLARATION terminal AS (VERB \"TERMINAL\", SEATS [outcome: name]) RATIONALE \"x\"\nDEFINE DECLARATION step AS (VERB \"STEP\", SEATS [target: name]) RATIONALE \"x\"\nDEFINE UNION node AS (OF [step, terminal]) RATIONALE \"a target is a step or a terminal, told apart by name\"\nDEFINE FORM action AS (SEATS [verb: verbs, target: actor]) RATIONALE \"x\"\nDEFINE FORM branch AS (SEATS [guard: guard, target: node]) RATIONALE \"x\"\nDEFINE DECLARATION escalation AS (VERB \"ESCALATION\", SEATS [on_breach: [action]]) RATIONALE \"x\"\nDEFINE DECLARATION routing AS (VERB \"ROUTING\", SEATS [when: [branch], otherwise: node]) RATIONALE \"x\"\n",
+      "expect": {
+        "language": "f",
+        "counts": {
+          "declarations": 6,
+          "forms": 2,
+          "unions": 1,
+          "menus": 1
+        }
+      }
+    },
+    {
+      "id": "A3",
+      "name": "the shapes duration, landmark and deadline; the WORLD's ENTRY kinds; MESSAGES on a pair-list seat whose keys or values are references",
+      "source": "DEFINE LANGUAGE f AS (VERSION \"0.8\", GRAMMAR \"0.8\", COURT \"x\", EXTENSION \".f\") RATIONALE \"x\"\nDEFINE FORMAT duration AS (SHAPE duration) RATIONALE \"x\"\nDEFINE FORMAT landmark AS (SHAPE landmark) RATIONALE \"x\"\nDEFINE FORMAT deadline AS (SHAPE deadline, MESSAGE \"a deadline never reads instance data\") RATIONALE \"x\"\nDEFINE DECLARATION workflow AS (VERB \"WORKFLOW\", SEATS [version: text]) RATIONALE \"x\"\nDEFINE DECLARATION guard AS (VERB \"GUARD\", SEATS [norm: name]) RATIONALE \"x\"\nDEFINE DECLARATION terminal AS (VERB \"TERMINAL\", SEATS [outcome: name]) RATIONALE \"x\"\nDEFINE FORM branch AS (SEATS [guard: guard, target: terminal]) RATIONALE \"x\"\nDEFINE DECLARATION task AS (VERB \"TASK\", SEATS [sla: duration, timeout: deadline, on_timeout: terminal]) RATIONALE \"x\"\nDEFINE DECLARATION routing AS (VERB \"ROUTING\", SEATS [when: [branch], otherwise: terminal], MESSAGES [when: \"ROUTING {name} branches on '{value}', which is not a declared guard\"]) RATIONALE \"x\"\nDEFINE WORLD f AS (ONE [workflow], FIRST workflow, ENTRY [task, routing]) RATIONALE \"the first task or routing declared is the entry\"\n",
+      "expect": {
+        "language": "f",
+        "counts": {
+          "declarations": 5,
+          "formats": 3
+        },
+        "world": 1
+      }
+    },
+    {
+      "id": "A4",
+      "name": "three closed relations: self reachable, self referenced, a pair list keyed_by a name list",
+      "source": "DEFINE LANGUAGE f AS (VERSION \"0.8\", GRAMMAR \"0.8\", COURT \"x\", EXTENSION \".f\") RATIONALE \"x\"\nDEFINE DECLARATION guard AS (VERB \"GUARD\", SEATS [norm: name]) RATIONALE \"x\"\nDEFINE DECLARATION terminal AS (VERB \"TERMINAL\", SEATS [outcome: name]) RATIONALE \"x\"\nDEFINE FORM decision AS (SEATS [word: name]) RATIONALE \"x\"\nDEFINE FORM route AS (SEATS [decision: name, target: terminal]) RATIONALE \"x\"\nDEFINE DECLARATION task AS (VERB \"TASK\", SEATS [decisions: [decision], routes: [route]]) RATIONALE \"x\"\nDEFINE WORLD f AS (ENTRY [task]) RATIONALE \"x\"\nDEFINE CONSTRAINT dead_task AS (ON task, WHEN \"not self reachable\", MESSAGE \"C6: {name} is unreachable from the entry\") RATIONALE \"x\"\nDEFINE CONSTRAINT dead_end AS (ON terminal, WHEN \"not self reachable\", MESSAGE \"C7: {name} is unreachable\") RATIONALE \"x\"\nDEFINE CONSTRAINT unused_guard AS (ON guard, WHEN \"not self referenced\", MESSAGE \"C15: {name} is declared and never used\") RATIONALE \"x\"\nDEFINE CONSTRAINT routed AS (ON task, WHEN \"not routes keyed_by decisions\", MESSAGE \"C8: {name} routes '{other}' or leaves it unrouted\") RATIONALE \"x\"\n",
+      "expect": {
+        "language": "f",
+        "counts": {
+          "declarations": 3,
+          "constraints": 4
+        }
+      }
+    },
+    {
+      "id": "A5",
+      "name": "a v0.7 declaration is a v0.8 declaration: v0.7's A1, unchanged",
+      "source": "DEFINE LANGUAGE z AS (VERSION \"0.7\", GRAMMAR \"0.7\", COURT \"x\", EXTENSION \".z\") RATIONALE \"x\"\nDEFINE EXPRESSION zexpr AS (OPERATORS [or, and, cmp, contains], OPERANDS [number, text, ref], ABSENT missing, EQUALITY value) RATIONALE \"x\"\nDEFINE DECLARATION flow AS (VERB \"FLOW\", SEATS []) RATIONALE \"x\"\nDEFINE ASK questions AS (FROM [flow], WHERE zexpr, CLAUSES [where, order, limit]) RATIONALE \"SELECT * FROM flow [WHERE expr] [ORDER BY field] [LIMIT n]\"\n",
+      "expect": {
+        "language": "z",
+        "counts": {
+          "declarations": 1,
+          "expressions": 1
+        },
+        "asks": 1
+      }
+    }
+  ],
+  "rejects": [
+    {
+      "id": "R1",
+      "name": "NAMED speaks only for unknown_declaration and unknown_seat, the two refusals a trespasser meets",
+      "source": "DEFINE LANGUAGE f AS (VERSION \"0.8\", GRAMMAR \"0.8\", COURT \"x\", EXTENSION \".f\") RATIONALE \"x\"\nDEFINE REFUSAL duplicate_name AS (MESSAGE \"x\", NAMED [flow: \"x\"]) RATIONALE \"x\"\n",
+      "refusal": "NAMED belongs to unknown_declaration and unknown_seat"
+    },
+    {
+      "id": "R2",
+      "name": "a UNION of declarations may not mix a DECLARATION with a MENU: a word would be either",
+      "source": "DEFINE LANGUAGE f AS (VERSION \"0.8\", GRAMMAR \"0.8\", COURT \"x\", EXTENSION \".f\") RATIONALE \"x\"\nDEFINE MENU outcomes AS (WORDS [success]) RATIONALE \"x\"\nDEFINE DECLARATION terminal AS (VERB \"TERMINAL\", SEATS [outcome: name]) RATIONALE \"x\"\nDEFINE UNION target AS (OF [terminal, outcomes]) RATIONALE \"x\"\n",
+      "refusal": "have the same shape (word)"
+    },
+    {
+      "id": "R3",
+      "name": "reachable and referenced ask about self and nothing else",
+      "source": "DEFINE LANGUAGE f AS (VERSION \"0.8\", GRAMMAR \"0.8\", COURT \"x\", EXTENSION \".f\") RATIONALE \"x\"\nDEFINE DECLARATION step AS (VERB \"STEP\", SEATS [target: step?]) RATIONALE \"x\"\nDEFINE WORLD f AS (ENTRY [step]) RATIONALE \"x\"\nDEFINE CONSTRAINT dead AS (ON step, WHEN \"target reachable\", MESSAGE \"x\") RATIONALE \"x\"\n",
+      "refusal": "reachable asks whether self is reachable; write self reachable"
+    },
+    {
+      "id": "R4",
+      "name": "ENTRY names DECLARATIONs of this language",
+      "source": "DEFINE LANGUAGE f AS (VERSION \"0.8\", GRAMMAR \"0.8\", COURT \"x\", EXTENSION \".f\") RATIONALE \"x\"\nDEFINE DECLARATION step AS (VERB \"STEP\", SEATS [target: name]) RATIONALE \"x\"\nDEFINE WORLD f AS (ENTRY [river]) RATIONALE \"x\"\n",
+      "refusal": "ENTRY: 'river' resolves to nothing"
+    },
+    {
+      "id": "R5",
+      "name": "reachable needs an ENTRY: with none declared, no walk can start",
+      "source": "DEFINE LANGUAGE f AS (VERSION \"0.8\", GRAMMAR \"0.8\", COURT \"x\", EXTENSION \".f\") RATIONALE \"x\"\nDEFINE DECLARATION step AS (VERB \"STEP\", SEATS [target: name]) RATIONALE \"x\"\nDEFINE CONSTRAINT dead AS (ON step, WHEN \"not self reachable\", MESSAGE \"x\") RATIONALE \"x\"\n",
+      "refusal": "reachable walks from the WORLD's ENTRY kinds, and none are declared"
+    },
+    {
+      "id": "R6",
+      "name": "keyed_by reads a pair list on its left and a name list on its right",
+      "source": "DEFINE LANGUAGE f AS (VERSION \"0.8\", GRAMMAR \"0.8\", COURT \"x\", EXTENSION \".f\") RATIONALE \"x\"\nDEFINE FORM decision AS (SEATS [word: name]) RATIONALE \"x\"\nDEFINE DECLARATION task AS (VERB \"TASK\", SEATS [decisions: [decision], timeout: text]) RATIONALE \"x\"\nDEFINE CONSTRAINT routed AS (ON task, WHEN \"timeout keyed_by decisions\", MESSAGE \"x\") RATIONALE \"x\"\n",
+      "refusal": "keyed_by reads a list of pairs on its left"
+    },
+    {
+      "id": "R7",
+      "name": "a pair's value may be a reference, never an EXPRESSION (v0.6's R8, kept)",
+      "source": "DEFINE LANGUAGE f AS (VERSION \"0.8\", GRAMMAR \"0.8\", COURT \"x\", EXTENSION \".f\") RATIONALE \"x\"\nDEFINE EXPRESSION e AS (OPERATORS [cmp], OPERANDS [number, ref]) RATIONALE \"x\"\nDEFINE FORM pair AS (SEATS [key: name, value: e]) RATIONALE \"x\"\nDEFINE DECLARATION step AS (VERB \"STEP\", SEATS [pairs: [pair]]) RATIONALE \"x\"\n",
+      "refusal": "which a pair cannot hold"
+    },
+    {
+      "id": "R8",
+      "name": "a shape is one of the menu, and deadline is in it",
+      "source": "DEFINE LANGUAGE f AS (VERSION \"0.8\", GRAMMAR \"0.8\", COURT \"x\", EXTENSION \".f\") RATIONALE \"x\"\nDEFINE FORMAT when AS (SHAPE moment) RATIONALE \"x\"\n",
+      "refusal": "duration, landmark, deadline"
+    }
+  ]
+}
