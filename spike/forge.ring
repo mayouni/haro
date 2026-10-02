@@ -346,6 +346,12 @@ func LangSource(aLang)
 	if not isNull(aFs)
 		cFormset = "[" + RingStr(aFs[1]) + ", " + RingStr(aFs[2]) + ", " + RingStr(aFs[3]) + ", " + RingStr(aFs[4]) + ", " + MessagesSource(aFs[5]) + ", " + NamesSource(aFs[6]) + "]"
 	ok
+	# v0.13: the NARRATE [name, opens, ends, refuses, [[kind, template], ...]], or NULL
+	aNr = LangGet(aLang, "narrate")
+	cNarrate = "NULL"
+	if not isNull(aNr)
+		cNarrate = "[" + RingStr(aNr[1]) + ", " + RingStr(aNr[2]) + ", " + RingStr(aNr[3]) + ", " + RingStr(aNr[4]) + ", " + MessagesSource(aNr[5]) + "]"
+	ok
 	c = "  [" + RingStr(LangGet(aLang, "name")) + ", " + RingStr(LangGet(aLang, "extension")) + "," + nl
 	c += "    " + cKinds + "," + nl
 	c += "    " + cForms + "," + nl
@@ -365,7 +371,8 @@ func LangSource(aLang)
 	c += "    " + cAsk + "," + nl
 	c += "    " + cRun + "," + nl
 	c += "    " + cSymbols + "," + nl
-	c += "    " + cFormset + nl
+	c += "    " + cFormset + "," + nl
+	c += "    " + cNarrate + nl
 	c += "  ]"
 	return c
 
@@ -403,6 +410,7 @@ func ForgeCourt(aLang)
 	bAsk = not isNull(LangGet(aLang, "ask"))
 	bRun = not isNull(LangGet(aLang, "run"))
 	bFormset = not isNull(LangGet(aLang, "formset"))
+	bNarrate = not isNull(LangGet(aLang, "narrate"))
 	aSyL = LangGet(aLang, "symbols")
 	bSym = 0
 	if not isNull(aSyL)
@@ -426,6 +434,9 @@ func ForgeCourt(aLang)
 	if bFormset
 		c += 'load "forms_lib.ring"' + nl
 	ok
+	if bNarrate
+		c += 'load "narrate_lib.ring"' + nl
+	ok
 	c += nl
 	c += "$cCourtLang = " + '""' + nl + "$cCourtExt = " + '""' + nl + "$cCourtDir = " + '""' + nl
 	c += "$aCourtToks = []" + nl + "$nCourtPos = 1" + nl
@@ -440,7 +451,7 @@ func ForgeCourt(aLang)
 	c += "$aCourtExprs = []" + nl + "$aCourtWalks = []" + nl + "$aCourtAsk = NULL" + nl + "$aCourtRun = NULL" + nl
 	c += "$aCourtSymbols = []" + nl + "$aCourtWorldFile = NULL" + nl
 	c += "$cCourtCode = " + RingStr("PARSE") + nl + "$aCourtCites = []" + nl
-	c += "$aCourtFormset = NULL" + nl
+	c += "$aCourtFormset = NULL" + nl + "$aCourtNarrate = NULL" + nl
 	c += ExprGlobals()
 	c += "$aCourtLangs = [" + nl
 	aRecs = ForgeLangRecords(aLang, [])

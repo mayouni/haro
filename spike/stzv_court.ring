@@ -48,6 +48,7 @@ $aCourtWorldFile = NULL
 $cCourtCode = "PARSE"
 $aCourtCites = []
 $aCourtFormset = NULL
+$aCourtNarrate = NULL
 $cExprLang = ""
 $aExprOperators = []
 $aExprOperands = []
@@ -97,7 +98,8 @@ $aCourtLangs = [
     NULL,
     NULL,
     [],
-    ["stz", "Q", "ed", "X", [["cs", "CS"], ["st", "ST"], ["xt", "XT"], ["ib", "IB"], ["d", "D"], ["z", "Z"], ["zz", "ZZ"], ["s", "S"], ["w", "W"], ["f", "F"], ["many", "Many"], ["except", "Except"]], ["family", "base", "forms"]]
+    ["stz", "Q", "ed", "X", [["cs", "CS"], ["st", "ST"], ["xt", "XT"], ["ib", "IB"], ["d", "D"], ["z", "Z"], ["zz", "ZZ"], ["s", "S"], ["w", "W"], ["f", "F"], ["many", "Many"], ["except", "Except"]], ["family", "base", "forms"]],
+    NULL
   ]
 ]
 CtUseLanguage("stzv")

@@ -174,7 +174,7 @@ no expression position, no escape):
 | `RATIONALE` on every declaration | mandatory (C6 3.8) | kept; it is principle 5 at this altitude |
 | **`WORLD`** (the knowledge stratum) | absent | the ontology declared beside the grammar: entities, relations, constraints, as versioned data (C1, `world.json`); never a mutable runtime store [R, mission.md rule 3]. *Built in three slices: cardinality (v0.2), entry (v0.8), the C1 rows a sentence publishes and resolves against (v0.10, the tenth rung).* |
 | **`ASK`** (the pragmatics stratum) | absent | the language's own closed query grammar (the Q letter) and the human languages its natural door speaks; NL asks, never declares; the engine compiles to this grammar and never to host code [R, mission.md rules 1-2]. *The query grammar is built, v0.7 (the seventh rung); the natural door is not.* |
-| **`NARRATE`** | absent | how a run of the language is narrated back (stzn); the court's voice |
+| **`NARRATE`** | absent | how a run of the language is narrated back (stzn); the court's voice. *Built, v0.13 (the thirteenth rung): SAYS, OPENS, ENDS, REFUSES; `narrate <file>`; a projection, never stored, never parsed back.* |
 | **`REFINE`** | absent | which declared points of a sentence may be refined, by whom, within what bounds, at what trust floor (section 7) |
 | **`FORMS` inside a vocabulary** | absent | the function-name grammar of principle 7 declared as data for the computing altitude's families. *Built, v0.12 (the twelfth rung): FLUENT, PASSIVE, STATEMENT, PARAMS and FAMILY; the families generated, the shipped spellings judged live.* |
 
@@ -261,6 +261,15 @@ a base verb and the forms it offers. `stzv_v12.haro` declares Softanza's forms a
 spells them; the court generates every member and judges stzString's 595 shipped spellings
 live -- 584 agree, 11 do not, 41 generated members are not shipped -- the number the migration
 measures, read from the author's tree and never written to it.
+**Haro v0.13, the same day (`haro/spike/v13/GRAMMAR.md`, 10 fixtures): NARRATE.** The last
+section-3 row no rung had built, on the author's blanket delegation (D10 to D15): a voice
+declared beside the grammar -- a template per declaration kind, an opening, an ending, a
+refusal -- and the forged court's `narrate <file>`: the sentence back in the language's own
+words, to stdout, never stored, never parsed back. F speaks four of its kinds; the rest are
+narrated with the author's own reason. Judged by a narration composed by hand first and by
+the StzNarration law and stzn's honesty guard, read by Python: 5 lawful sentences whole,
+92 seat values verbatim, 22 refusals as the envelope's own line (HF-63). Section 3's rows are
+now all built but ASK's natural door, which is N's.
 
 **What the forge produces from one declaration** (Ringua's kit, 02-STACK's L1, now Haro's
 compiler verbs rather than separate organs): the parser; the court with the fixtures as its
@@ -574,10 +583,17 @@ first run, the same bytes on `rnxc` and the oracle (HF-61). Record: `haro/SPIKE.
 eleventh rung".
 
 **The twelfth rung, 2026-10-03, on the author's "continue": Haro v0.12, FORMS as data**
-(section 3's last row, principle 7's guard). FLUENT, PASSIVE, STATEMENT, PARAMS, FAMILY; the
+(section 3's FORMS row, principle 7's guard). FLUENT, PASSIVE, STATEMENT, PARAMS, FAMILY; the
 forged court's `family` and `spellings`; judged by the forms document's own examples (30
 names, 3 families member for member) and by stzString's 595 shipped spellings read live:
 **584 agree**, the 11 and the 41 named (HF-62). Record: `haro/SPIKE.md`, "The twelfth rung".
+
+**The thirteenth rung, 2026-10-03, on the author's blanket delegation: Haro v0.13, NARRATE**
+(section 3's last open row). The decisions first (D10 to D15), then the voice: SAYS, OPENS,
+ENDS, REFUSES; `f_v13.haro`; the forged court's `narrate`; judged by a hand-written narration
+and by the StzNarration law and stzn's honesty guard read in Python -- 5 lawful sentences
+narrated whole, 22 refused ones as the envelope's own line, never parsed back, never stored
+(HF-63). Record: `haro/SPIKE.md`, "The thirteenth rung".
 
 v0.1's spike (`twice.haro`, a definition with an intent clause) proved one altitude. The
 ruling asks for three to meet, and the estate has already named the smallest program that
@@ -738,6 +754,51 @@ already pins.
   kind (a `NOTATION` clause, which the forge would have to emit a reader for). *Recommendation:
   the Commons' shape, because every other letter and vocabulary already has it, the forge
   already emits its court, and a second notation is a second grammar to keep in step.*
+
+- **D10 -- HF-30, ordering two strings -- RULED 2026-10-03 on the author's blanket
+  delegation: keep.** `rnxc` orders strings by bytes where Ring raises R41. A Ring program
+  that reaches the comparison stops there, so no program that worked on Ring holds a
+  successful string ordering whose meaning could change: the answer is a strict extension.
+  *Cost*: code that used a caught R41 as a probe for "is this a number" would stop raising;
+  the spike's own court keeps classifying characters by byte code, because it is judged on
+  both runtimes. Routed to the ringpp session for `docs/CORRECTIONS.md` as "keep" with this
+  reason; the exec probe is still to be pinned there.
+
+- **D11 -- HF-36, a list literal that names the variable it assigns -- RULED 2026-10-03:
+  fix silently.** `rnxc`'s reading (the old value goes inside) is the one every other
+  language gives; Ring's (the new list inside itself) is the cycle the "object held itself"
+  defect already paid for. *Cost, measured by one read-only scan*: of 10 sites in Softanza's
+  core, base and max that match the shape, 7 are live -- each guarded by `isString` or
+  `NOT isList` and wrapping a non-list -- and 3 sit in an archived monolith; none nests a
+  list, so none can change meaning. Routed, as D10.
+
+- **D12 -- NARRATE's shape -- RULED 2026-10-03: a voice declared beside the grammar.**
+  Templates per kind, an opening, an ending and a refusal; a projection of the sentence, to
+  stdout, never stored, never parsed back (the StzNarration law, principle 8). stzn's HTML
+  skins stay stzn's: the declaration holds the words, not the wardrobe. Built as Haro v0.13.
+  *Cost*: stzn v0's page and a forged court's narration are two renderings of one idea until
+  stzn takes its templates from a declaration (HARO-NARRATE-01).
+
+- **D2, its one open half -- RULED 2026-10-03: Aicha's first speech is a declared language's
+  sentence**, not the computing altitude's code -- the recommendation, now the ruling. N
+  drafts a sentence; the court judges it; the human ratifies. Computing code stays the expert
+  venue, behind one governed door.
+
+- **D13 -- N and the Phase 1.5 study: the gate holds.** Not a decision to take: the study
+  (the tontine given a graph and a natural door in two human languages, mission.md 6) is an
+  experiment, and no ruling produces its result. N is built behind it, as the alphabet says.
+
+- **D14 -- the forge as an `rnxc` verb: stays the ringpp session's, routed.** Today the forge
+  is Ring source `rnxc` runs (`rnxc forge.ring <file>`); a verb is a change to
+  `src/rnxc.zig`, outside `haro/` and that session's own work. The guard folding into
+  `bench/gate.py` is routed with it. This session writes neither.
+
+- **D15 -- `origin/next` (HF-18): remove it -- decided, not executed.** The visibility rule
+  says `next` never goes to origin, and it is there at `026ac97` with `haro/*.md` inside.
+  Deleting a public branch is an act on the public remote, and `ringpp/CLAUDE.md` names
+  pushes to origin his; so the command waits for his word: `git push origin --delete next`
+  from `ringpp`. The commit is an ancestor of local `next`, so the ref can be recreated
+  exactly if the deletion is ever wrong.
 
 - **D9 -- where A lives -- RULED 2026-10-02 on the author's delegation: stz, beside W**
   (`declarative/a/`). A's judge is W's own fixtures; the alphabet's sentence pairs them

@@ -67,6 +67,9 @@ expression language forged whole, judged by stz's 29 fixtures as stage 8, pinned
 | `spike/stzv_v12.haro`, `spike/stz/string.stzv` | the Softanza vocabulary's FORMS as the forms document spells them, and five families of stzString declared by base verb and offered forms |
 | `spike/forms_lib.ring` | the FORMS library a forged court loads only where one is declared: `family` generates every member, `spellings` judges a list of names |
 | `spike/v12/doc_names.txt`, `spike/v12/forms_cases.json` | the forms document's own examples as names, with the verdict principle 7 gives each and the families it spells member for member; the pinned half of stage 15's judge |
+| `spike/v13/fixtures.json`, `spike/v13/GRAMMAR.md` | **Haro v0.13** (the thirteenth rung, below): NARRATE -- the court's voice: SAYS, OPENS, ENDS, REFUSES; a placeholder the voice cannot fill is refused; 10 fixtures first, the prose after |
+| `spike/f_v13.haro`, `spike/narrate_lib.ring` | F with a voice (workflow, actor, invocation, terminal spoken; the rest narrated plainly with their rationale), and the library a forged court loads only where a NARRATE is declared: `narrate <file>` |
+| `spike/v13/narration_cases.json` | the narration of the smallest lawful workflow, composed by hand before the court: the hand-written half of stage 16's judge |
 
 Nothing in `rnxc` or the VM changed. Nothing in a sibling repository changed.
 
@@ -885,6 +888,57 @@ point 5 (Many, Except, IsNot verified against the base's signature) need bodies 
 signatures, which are the computing altitude's; prefixes (`viz`, `rnd`) are read as part
 of the base.
 
+## The thirteenth rung -- Haro v0.13, NARRATE: the court's voice -- 2026-10-03
+
+**Decided on the author's blanket delegation ("don't leave any decision I should take, do
+them on my behalf and then continue").** The decisions came first and are recorded in
+CHARTER 13 (D10 to D15); this rung is the one that needed one of them, D12, the shape of
+the voice. NARRATE is the last row of section 3 no rung had built. Its ancestor, stzn v0,
+is a script that renders `narrations/index.html` from every run and stores nothing (the
+StzNarration law); principle 8 rules it "a projection from programs and runs, never parsed
+back". So the declaration holds only what a language can say about itself -- the words --
+and the skin (stzn's RETRO and MODERN wardrobes, its tally) stays stzn's.
+
+**What a voice needs is one clause with four seats.** Fixtures first (`spike/v13/`, 10,
+and a narration composed by hand), then the prose. `NARRATE`, at most one per language:
+`SAYS` (a template per declaration kind, `kind: "text"`, filling `{name}`, `{verb}`,
+`{rationale}`, `{line}` and any seat of the kind), `OPENS` and `ENDS` (the lines around
+the declarations, filling `{language}`, `{file}`, `{count}`) and `REFUSES` (the one line
+when the court stops, filling the line, message, code and cites the envelope of v0.11
+gives). A placeholder the voice cannot fill is refused at declaration, so a narration
+never names a seat its sentence cannot hold. `f_v13.haro` is F with a voice -- workflow,
+actor, invocation and terminal spoken in RingFlex's register -- and the forged court gains
+`narrate <file>` (`narrate_lib.ring`, loaded only where a NARRATE is declared). A kind the
+voice does not speak is narrated as its verb, its name and the author's own reason.
+
+    stage 1    v0.1 28 ... v0.12 10, v0.13 10 -- on rnxc and the oracle, byte-identical
+    stage 16   the hand-written narration of minimal-clean.f, 7 lines, composed before
+               the court; then the laws, read by Python and never by the court: 5
+               lawful sentences narrated whole (every declaration named, every
+               rationale and 92 seat values verbatim, in order, the count right), 22
+               refused sentences narrated as the one line the envelope gives the same
+               verdict, the narration refused by `check` (never parsed back), no file
+               written (never stored), a language with no NARRATE refusing to narrate;
+               the same bytes on rnxc and the oracle on every run
+    stages 9-15  Z 16 of 16, Q 25 of 25, F 27 of 27 on f_v13.haro, A 35 of 35, the
+               world 9 of 9, the envelope 28 of 28, FORMS 584 of 595 -- unchanged
+    stage 6    edit to verdict, measured first in the pass: harb 9.1 ms; rnxc compiled 96.3, image 17.8; the oracle 119.0
+    the pass   sixteen stages, PASS in 167.6 s; --plant FAIL (42 failures, the voice among them)
+
+**The guard found a design weakness first.** The first voice narrated an unvoiced kind as
+its verb and name alone, and the honesty check failed on three of five sentences: the
+author's own reason, mandatory on every declaration, was being dropped for the ten kinds
+the voice did not speak. The plain default carries the rationale now. The checker's first
+reader was wrong too -- one DEFINE per line, where the fixtures wrap -- and was fixed; the
+court was right.
+
+**And one slip of mine, caught by its own symptom**: the edit script wrote `f_v13.haro`
+during its dry run, so a second run appended the voice twice and the forge refused the
+duplicate name. Removed by line number (HF-57's rule); a dry run now writes nothing.
+
+**What it does not do is named in `v13/GRAMMAR.md`**: no skin; the first language's voice
+only; sentences, not runs (`run` and `ask` are not narrated); `NO_WORLD` is not narrated.
+
 ## The names -- `.haro`, not `.stzu` -- corrected 2026-10-02
 
 **At the author's word ("we agreed to use .haro instead of .stzu, no?").** D1 was ratified
@@ -961,7 +1015,11 @@ whole guard re-run on the renamed tree: 28 + 30 + 27 + 23, 117 of 120, 32 of 32,
 13. ~~`FORMS` as data~~ -- built 2026-10-03 as Haro v0.12, the twelfth rung above, on the
    author's "continue": the function-name grammar declared once, families generated,
    stzString's 595 shipped spellings judged live, 584 agreeing; the 11 and the 41 named.
-14. The forge as an `rnxc` verb (the ringpp session's `src/`, routed); the
+14. ~~`NARRATE`~~ -- built 2026-10-03 as Haro v0.13, the thirteenth rung above, on the
+   author's blanket delegation: the voice declared, `narrate` projecting a sentence,
+   judged by the StzNarration law and stzn's honesty guard; section 3's rows are all built
+   but ASK's natural door, which is N's.
+15. The forge as an `rnxc` verb (the ringpp session's `src/`, routed); the
    Softanza-resident timing the charter's 2.6 asks for; the court's run time on the
    oracle under paths and views (6.4x the image this pass, named at stage 6); the
    ontology as versioned data, `ASK`, `NARRATE` and `FORMS`, the rows of section 3 the

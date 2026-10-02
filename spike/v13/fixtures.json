@@ -1,0 +1,69 @@
+{
+  "grammar": "haro",
+  "version": "0.13",
+  "comment": "The Haro v0.13 conformance floor, written BEFORE the court that passes it (the W discipline: fixtures first, prose second). v0.13 grows v0.12 by the charter's last section-3 row, NARRATE -- how a run of the language is narrated back, the court's voice (stzn): NARRATE, at most one per language, with SAYS (a template per declaration kind, kind: \"text\"), OPENS (the line before the declarations), ENDS (the line after) and REFUSES (the line when the court stops). A template may fill {name}, {verb}, {rationale}, {line} and any seat of its kind (R2); OPENS and ENDS fill {language}, {file} and {count}; REFUSES fills {language}, {file}, {line}, {code}, {message} and {cites} (R5); every brace must close (R4); SAYS names declared kinds (R1), each once (R6); at most one NARRATE (R3). The narration is a projection from the sentence and never parsed back, which the court keeps by having no verb that reads one. Every v0.12 fixture still passes: v0.13 refuses nothing v0.12 accepted (A2 is v0.12's A1).",
+  "accepts": [
+    {
+      "id": "A1",
+      "name": "a NARRATE with a template per kind, an opening, an ending and a refusal",
+      "source": "DEFINE LANGUAGE shop AS (VERSION \"0.13\", GRAMMAR \"0.13\", COURT \"x\", EXTENSION \".shop\") RATIONALE \"x\"\nDEFINE DECLARATION item AS (VERB \"ITEM\", SEATS [price: number, label: text]) RATIONALE \"x\"\nDEFINE DECLARATION till AS (VERB \"TILL\", SEATS [holds: name]) RATIONALE \"x\"\nDEFINE NARRATE voice AS (OPENS \"{file}: {count} things in {language}.\", SAYS [item: \"{name} costs {price} and is called {label}. {rationale}\", till: \"{verb} {name} holds {holds}, line {line}.\"], ENDS \"That is all.\", REFUSES \"Stopped at line {line} with {code}: {message} ({cites})\") RATIONALE \"x\"\n",
+      "expect": {"language": "shop", "counts": {"declarations": 2}, "narrates": 1}
+    },
+    {
+      "id": "A2",
+      "name": "a v0.12 declaration is a v0.13 declaration: v0.12's A1, unchanged",
+      "source": "DEFINE LANGUAGE stzv AS (VERSION \"0.12\", GRAMMAR \"0.12\", COURT \"x\", EXTENSION \".stzv\") RATIONALE \"x\"\nDEFINE MENU offered AS (WORDS [cs, st, xt, many, fluent, passive]) RATIONALE \"x\"\nDEFINE DECLARATION family AS (VERB \"FAMILY\", SEATS [base: text, forms: [offered]?]) RATIONALE \"x\"\nDEFINE FORMS stz AS (FLUENT \"Q\", PASSIVE \"ed\", STATEMENT \"X\", PARAMS [cs: \"CS\", st: \"ST\", xt: \"XT\", many: \"Many\"], FAMILY [family, base, forms]) RATIONALE \"x\"\n",
+      "expect": {"language": "stzv", "counts": {"declarations": 1, "menus": 1}, "formsets": 1, "narrates": 0}
+    },
+    {
+      "id": "A3",
+      "name": "a NARRATE of SAYS alone: the opening, ending and refusal take the court's own plain words",
+      "source": "DEFINE LANGUAGE shop AS (VERSION \"0.13\", GRAMMAR \"0.13\", COURT \"x\", EXTENSION \".shop\") RATIONALE \"x\"\nDEFINE DECLARATION till AS (VERB \"TILL\", SEATS [holds: name]) RATIONALE \"x\"\nDEFINE NARRATE voice AS (SAYS [till: \"{name} holds {holds}\"]) RATIONALE \"x\"\n",
+      "expect": {"language": "shop", "narrates": 1}
+    }
+  ],
+  "rejects": [
+    {
+      "id": "R1",
+      "name": "SAYS names a declaration kind the language does not declare",
+      "source": "DEFINE LANGUAGE shop AS (VERSION \"0.13\", GRAMMAR \"0.13\", COURT \"x\", EXTENSION \".shop\") RATIONALE \"x\"\nDEFINE DECLARATION till AS (VERB \"TILL\", SEATS [holds: name]) RATIONALE \"x\"\nDEFINE NARRATE voice AS (SAYS [drawer: \"{name}\"]) RATIONALE \"x\"\n",
+      "refusal": "SAYS: no declaration 'drawer'"
+    },
+    {
+      "id": "R2",
+      "name": "a template fills only the placeholders its kind has: a seat the kind lacks is refused",
+      "source": "DEFINE LANGUAGE shop AS (VERSION \"0.13\", GRAMMAR \"0.13\", COURT \"x\", EXTENSION \".shop\") RATIONALE \"x\"\nDEFINE DECLARATION till AS (VERB \"TILL\", SEATS [holds: name]) RATIONALE \"x\"\nDEFINE NARRATE voice AS (SAYS [till: \"{name} holds {colour}\"]) RATIONALE \"x\"\n",
+      "refusal": "'{colour}' in SAYS till is not a placeholder the voice can fill"
+    },
+    {
+      "id": "R3",
+      "name": "a language has one voice",
+      "source": "DEFINE LANGUAGE shop AS (VERSION \"0.13\", GRAMMAR \"0.13\", COURT \"x\", EXTENSION \".shop\") RATIONALE \"x\"\nDEFINE DECLARATION till AS (VERB \"TILL\", SEATS [holds: name]) RATIONALE \"x\"\nDEFINE NARRATE one AS (SAYS [till: \"{name}\"]) RATIONALE \"x\"\nDEFINE NARRATE two AS (SAYS [till: \"{name}\"]) RATIONALE \"x\"\n",
+      "refusal": "a .haro file declares at most one NARRATE"
+    },
+    {
+      "id": "R4",
+      "name": "every brace closes",
+      "source": "DEFINE LANGUAGE shop AS (VERSION \"0.13\", GRAMMAR \"0.13\", COURT \"x\", EXTENSION \".shop\") RATIONALE \"x\"\nDEFINE DECLARATION till AS (VERB \"TILL\", SEATS [holds: name]) RATIONALE \"x\"\nDEFINE NARRATE voice AS (SAYS [till: \"{name holds\"]) RATIONALE \"x\"\n",
+      "refusal": "a '{' is never closed in SAYS till"
+    },
+    {
+      "id": "R5",
+      "name": "OPENS has no {name}: it speaks before any declaration",
+      "source": "DEFINE LANGUAGE shop AS (VERSION \"0.13\", GRAMMAR \"0.13\", COURT \"x\", EXTENSION \".shop\") RATIONALE \"x\"\nDEFINE DECLARATION till AS (VERB \"TILL\", SEATS [holds: name]) RATIONALE \"x\"\nDEFINE NARRATE voice AS (OPENS \"{name} begins\", SAYS [till: \"{name}\"]) RATIONALE \"x\"\n",
+      "refusal": "'{name}' in OPENS is not a placeholder the voice can fill"
+    },
+    {
+      "id": "R6",
+      "name": "a kind is voiced once",
+      "source": "DEFINE LANGUAGE shop AS (VERSION \"0.13\", GRAMMAR \"0.13\", COURT \"x\", EXTENSION \".shop\") RATIONALE \"x\"\nDEFINE DECLARATION till AS (VERB \"TILL\", SEATS [holds: name]) RATIONALE \"x\"\nDEFINE NARRATE voice AS (SAYS [till: \"{name}\", till: \"{holds}\"]) RATIONALE \"x\"\n",
+      "refusal": "SAYS: 'till' is voiced twice"
+    },
+    {
+      "id": "R7",
+      "name": "a voice that says nothing narrates nothing",
+      "source": "DEFINE LANGUAGE shop AS (VERSION \"0.13\", GRAMMAR \"0.13\", COURT \"x\", EXTENSION \".shop\") RATIONALE \"x\"\nDEFINE DECLARATION till AS (VERB \"TILL\", SEATS [holds: name]) RATIONALE \"x\"\nDEFINE NARRATE voice AS (OPENS \"{file}\") RATIONALE \"x\"\n",
+      "refusal": "NARRATE requires the SAYS clause"
+    }
+  ]
+}

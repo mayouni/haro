@@ -1,0 +1,15 @@
+{
+  "grammar": "haro",
+  "version": "0.13",
+  "comment": "The hand-written half of stage 16's judge, written BEFORE the court: the narration the F voice must give the smallest lawful workflow (f/minimal-clean.f), line for line, composed by hand from the sentence and the templates declared in f_v13.haro. Everything else in the stage is judged by laws read from the estate -- the StzNarration law (a narration is a rendering of a real run, never stored; the plain-text sentence is the document) and stzn v0's honesty guard (a narration never alters a value it shows) -- by a checker that reads the source files in Python and never trusts the court's own reading.",
+  "sentence": "f/minimal-clean.f",
+  "narration": [
+    "minimal-clean.f is a workflow sentence in f, 5 declarations.",
+    "The workflow minimal speaks to the ZQL file x/app.zql, calendar c, in fr: The smallest workflow that says something true.",
+    "a may act as r. One actor.",
+    "go invokes the flow do_it; committed it goes to fini, rejected to refuse, held to refuse. One act, three endings routed.",
+    "fini ends the workflow as success. Done.",
+    "refuse ends the workflow as refused. Refused.",
+    "5 declarations, all read."
+  ]
+}

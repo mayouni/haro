@@ -67,6 +67,7 @@ STZU9_FIXTURES = os.path.join(HERE, 'v09', 'fixtures.json')
 STZU10_FIXTURES = os.path.join(HERE, 'v10', 'fixtures.json')
 STZU11_FIXTURES = os.path.join(HERE, 'v11', 'fixtures.json')
 STZU12_FIXTURES = os.path.join(HERE, 'v12', 'fixtures.json')
+STZU13_FIXTURES = os.path.join(HERE, 'v13', 'fixtures.json')
 
 
 def judge_stzu(exe, label, fixtures=STZU_FIXTURES):
@@ -76,7 +77,7 @@ def judge_stzu(exe, label, fixtures=STZU_FIXTURES):
     counts), world and points."""
     doc = json.load(open(fixtures, encoding='utf-8'))
     # the pinned v0.1 judge is stzu's; everything since is Haro's (D1)
-    assert doc['grammar'] in ('stzu', 'haro') and doc['version'] in ('0.1', '0.2', '0.3', '0.4', '0.5', '0.6', '0.7', '0.8', '0.9', '0.10', '0.11', '0.12')
+    assert doc['grammar'] in ('stzu', 'haro') and doc['version'] in ('0.1', '0.2', '0.3', '0.4', '0.5', '0.6', '0.7', '0.8', '0.9', '0.10', '0.11', '0.12', '0.13')
     passed = failed = 0
     outputs = {}
     with tempfile.TemporaryDirectory() as td:
@@ -150,7 +151,8 @@ def stage1():
                             ('v0.9, what A needs: RUN, the structured steps, and a list of a UNION of declarations', STZU9_FIXTURES),
                             ('v0.10, the WORLD as versioned data: SYMBOL and PUBLISH', STZU10_FIXTURES),
                             ('v0.11, the Diagnostic Contract: CODE, CODES, CITES', STZU11_FIXTURES),
-                            ('v0.12, FORMS: the function-name grammar as data', STZU12_FIXTURES)):
+                            ('v0.12, FORMS: the function-name grammar as data', STZU12_FIXTURES),
+                            ('v0.13, NARRATE: the court\'s voice', STZU13_FIXTURES)):
         print(f'stage 1 -- the Haro meta-court in pure Ring, judged by its fixtures ({label})')
         f1, o1 = judge_stzu(RNXC, 'rnxc', fixtures)
         f2, o2 = judge_stzu(ORACLE, 'oracle ring.exe', fixtures)
@@ -1037,7 +1039,7 @@ def stage10():
 
 # ---- stage 11: F, the flow of work -- RingFlex's .wflow re-declared, judged by its own fixtures
 
-F_STZU = os.path.join(HERE, 'f_v11.haro')   # f_v10.haro plus RingFlex's codes and cites (the eleventh rung); the 27 fixtures are unchanged
+F_STZU = os.path.join(HERE, 'f_v13.haro')   # f_v11.haro plus a NARRATE (the thirteenth rung); the 27 fixtures are unchanged
 F_DIR = os.path.join(HERE, 'f')
 F_FLOOR = 26
 RINGFLEX = r'D:\GitHub\ringflex'
@@ -1818,6 +1820,186 @@ def stage15():
     return failures
 
 
+# ---- stage 16: NARRATE, the court's voice, judged by the StzNarration law and stzn's honesty guard
+
+NARR_CASES = os.path.join(HERE, 'v13', 'narration_cases.json')
+DEF_RE = re.compile(r'^DEFINE\s+(\w+)\s+(\w+)\s+AS\s*\((.*)\)\s*RATIONALE\s+"(.*)"\s*$')
+
+
+def narr_run(exe, args):
+    return run_args(exe, ['f_court.ring'] + args, HERE).strip()
+
+
+def read_definitions(path):
+    """The sentence read the way a person reads it, by Python, never by the court:
+    (kind, name, body, rationale) for every DEFINE statement, which may span
+    lines; a line that begins with -- is a comment and is skipped, one that
+    merely contains -- inside a string is not."""
+    stmts = []
+    cur = None
+    for line in open(path, encoding='utf-8').read().splitlines():
+        t = line.strip()
+        if t.startswith('--'):
+            continue
+        if t.startswith('DEFINE '):
+            if cur is not None:
+                stmts.append(cur)
+            cur = t
+        elif cur is not None and t:
+            cur += ' ' + t
+    if cur is not None:
+        stmts.append(cur)
+    out = []
+    for st in stmts:
+        m = re.match(r'DEFINE\s+(\w+)\s+(\w+)\s+AS\s*\(', st)
+        k = st.rfind('RATIONALE')
+        if not m or k < 0:
+            continue
+        body = st[m.end():st.rfind(')', 0, k)]
+        q = st[k:]
+        rationale = q[q.index('"') + 1:q.rindex('"')]
+        out.append((m.group(1), m.group(2), body, rationale))
+    return out
+
+
+def stage16():
+    """The thirteenth rung. f_v13.haro gives the F court a voice -- a template
+    per declaration kind, an opening, an ending, a refusal -- and `narrate
+    <file>` answers a sentence back in it. The judges are the estate's laws,
+    read in Python by code that never asks the court what it said: the
+    StzNarration law (a narration is a rendering of a real run, never stored,
+    the plain-text sentence the document: so `narrate` writes no file, and what
+    it prints is not a sentence of the language -- never parsed back) and
+    stzn v0's honesty guard (a narration never alters a value it shows: every
+    name, every rationale, every seat value of every declaration appears in it
+    verbatim, in order). Plus one hand-written narration, composed before the
+    court, and a refusal narrated with the code and the line the envelope of
+    v0.11 gives the same verdict."""
+    print('stage 16 -- NARRATE, the court\'s voice: f_v13.haro -> `narrate`, judged by the StzNarration law and stzn\'s honesty guard, read by Python')
+    failures = 0
+    out_rnx = run_args(RNXC, ['forge.ring', F_STZU, '.'], HERE).strip()
+    print('  rnxc  :', out_rnx.splitlines()[0] if out_rnx else 'NO OUTPUT')
+    if not out_rnx.startswith('forged f'):
+        print('  FAIL the forge did not forge F')
+        return 1
+    td = os.path.join(ROOT, 'runtime', 'haro-forge-oracle')
+    os.makedirs(td, exist_ok=True)
+    arts = ('f_court.ring', 'f.gbnf')
+    for art in arts:
+        if os.path.exists(os.path.join(td, art)):
+            os.remove(os.path.join(td, art))
+    out_or = run_args(ORACLE, ['forge.ring', F_STZU, '../../runtime/haro-forge-oracle'], HERE).strip()
+    print('  oracle:', out_or.splitlines()[0] if out_or else 'NO OUTPUT')
+    for art in arts:
+        a = open(os.path.join(HERE, art), 'rb').read()
+        b = open(os.path.join(td, art), 'rb').read() if os.path.exists(os.path.join(td, art)) else b''
+        if a != b:
+            failures += 1
+            print(f'  FAIL {art} differs between the two runtimes ({len(a)} vs {len(b)} bytes)')
+        else:
+            print(f'  ok   {art}: {len(a)} bytes, byte-identical on both runtimes')
+    ab_diff = []
+    def both(args, label):
+        r = narr_run(RNXC, args)
+        o = narr_run(ORACLE, args)
+        if r != o:
+            ab_diff.append(label)
+        return r
+    # 1. the hand-written narration of the smallest lawful workflow
+    doc = json.load(open(NARR_CASES, encoding='utf-8'))
+    r = both(['narrate', doc['sentence']], 'hand')
+    want = '\n'.join(doc['narration'])
+    if r != want:
+        failures += 1
+        print('  FAIL the hand-written narration of ' + doc['sentence'])
+        for a, b in zip(r.splitlines() + [''] * 8, doc['narration'] + [''] * 8):
+            if a != b:
+                print('    court :', a[:150]); print('    hand  :', b[:150]); break
+    else:
+        print(f'  ok   {doc["sentence"]} narrated as composed by hand before the court ({len(doc["narration"])} lines)')
+    # 2. every F sentence: completeness and honesty for the lawful, the envelope's own verdict for the refused
+    complete_bad = []
+    refused_bad = []
+    n_clean = n_refused = n_values = 0
+    for name in sorted(f for f in os.listdir(F_DIR) if f.endswith('.f')):
+        path = os.path.join('f', name)
+        nar = both(['narrate', path], 'narrate:' + name)
+        env = json.loads(both(['diagnose', path], 'diagnose:' + name))['diagnostics']
+        errs = [d for d in env if d['severity'] == 'error']
+        if errs:
+            n_refused += 1
+            d = errs[0]
+            want_line = f'I stopped at line {d["span"]["line"]}: {d["message"]} ({d["code"]})'
+            if nar != want_line:
+                refused_bad.append((name, f'narrated {nar[:120]!r}, the envelope says {want_line[:120]!r}'))
+            continue
+        n_clean += 1
+        defs = read_definitions(os.path.join(HERE, path))
+        lines = nar.splitlines()
+        if len(lines) != len(defs) + 2:
+            complete_bad.append((name, f'{len(lines)} lines for {len(defs)} declarations (want {len(defs) + 2})')); continue
+        if f'{len(defs)} declarations' not in lines[0] or f'{len(defs)} declarations' not in lines[-1]:
+            complete_bad.append((name, 'the count is not the number of DEFINE lines'))
+        for (kind, dname, body, rationale), line in zip(defs, lines[1:-1]):
+            if dname not in line:
+                complete_bad.append((name, f'{dname} is not named in {line[:80]!r}')); break
+            if rationale not in line:
+                complete_bad.append((name, f'the rationale of {dname} is not verbatim: {rationale[:60]!r}')); break
+            # every bare or quoted scalar the line's own seats hold, verbatim, for the seats the voice speaks
+            for key, val in re.findall(r'\b(INVOKES|ON_COMMITTED|ON_REJECTED|ON_HELD|ROLE|OUTCOME|CALENDAR|LOCALE|ZQL)\s+("[^"]*"|[\w.]+)', body):
+                v = val.strip('"')
+                n_values += 1
+                if v not in line:
+                    complete_bad.append((name, f'{dname}: {key} {v!r} is missing or altered in {line[:90]!r}')); break
+    failures += len(complete_bad) + len(refused_bad)
+    for name, why in (complete_bad + refused_bad)[:6]:
+        print(f'  FAIL {name}: {why}')
+    print(('  FAIL ' if complete_bad else '  ok   ') + f'honesty: {n_clean} lawful sentences narrated whole -- every declaration named, every rationale and {n_values} seat values verbatim, in order, the count right ({len(complete_bad)} defect(s))')
+    print(('  FAIL ' if refused_bad else '  ok   ') + f'{n_refused} refused sentences narrated as the one line the envelope of v0.11 gives the same verdict: its line, its message, its code ({len(refused_bad)} differ)')
+    # 3. never parsed back: the narration of a sentence is not a sentence
+    with tempfile.TemporaryDirectory() as tdir:
+        nar = both(['narrate', os.path.join('f', 'minimal-clean.f')], 'back')
+        p = os.path.join(tdir, 'back.f')
+        with open(p, 'w', encoding='utf-8', newline='') as fh:
+            fh.write(nar + '\n')
+        r = narr_run(RNXC, ['check', p])
+        if r.startswith('ok'):
+            failures += 1
+            print('  FAIL a narration was accepted as a sentence: the court reads one back')
+        else:
+            print('  ok   the narration is not a sentence of the language: the court refuses it, and has no verb that reads one back')
+    # 4. never stored: narrating writes nothing anywhere the court can reach
+    before = sorted(os.listdir(HERE)) + sorted(os.listdir(os.path.join(HERE, 'f')))
+    both(['narrate', os.path.join('f', 'commande-fournisseur.f')], 'stored')
+    after = sorted(os.listdir(HERE)) + sorted(os.listdir(os.path.join(HERE, 'f')))
+    if before != after:
+        failures += 1
+        print('  FAIL narrating changed the folder: a narration is stored')
+    else:
+        print('  ok   narrating writes no file: the narration is a rendering of a run, never stored')
+    # 5. a language that declares no voice has none (re-forged first: a court forged before the
+    # forge learned a global is a court the oracle refuses and rnxc runs, HF-61)
+    run_args(RNXC, ['forge.ring', Z_STZU, '.'], HERE)
+    r = both_z = run_args(RNXC, ['z_court.ring', 'narrate', 'tontine.z'], HERE).strip()
+    o = run_args(ORACLE, ['z_court.ring', 'narrate', 'tontine.z'], HERE).strip()
+    if r != o:
+        ab_diff.append('z:narrate')
+    if 'declares no NARRATE' not in r:
+        failures += 1
+        print(f'  FAIL a court with no NARRATE narrated: {r[:120]}')
+    else:
+        print('  ok   a language that declares no NARRATE has no voice: z refuses to narrate')
+    if PLANT:
+        failures += 1
+        print('  FAIL the voice -- PLANTED')
+    if ab_diff:
+        failures += 1
+        print(f'  FAIL rnxc and the oracle differ on {len(ab_diff)} run(s): {ab_diff[:5]}')
+    else:
+        print('  ok   rnxc and the oracle print the same bytes on every narrate and diagnose run')
+    return failures
+
+
 def stage6(lang, court=None, n=15):
     court = court or f'{lang}_court.ring'
     print(f'stage 6 -- edit to verdict on makeen_box.machine, minima of {n}')
@@ -1907,5 +2089,7 @@ if __name__ == '__main__':
         failures += stage14()
     if stage in (None, 15) and os.path.exists(STZV_STZU) and os.path.exists(FORMS_CASES):
         failures += stage15()
+    if stage in (None, 16) and os.path.exists(F_STZU) and os.path.exists(NARR_CASES):
+        failures += stage16()
     print(f'haro_forge: {"FAIL" if failures else "PASS"} ({failures} failure(s), {time.perf_counter()-t0:.1f} s)')
     sys.exit(1 if failures else 0)

@@ -30,6 +30,11 @@
 # order of the court is: shapes, the WORLD, the local types, the
 # CONSTRAINTs, then the references.
 #
+# v0.13 (haro/spike/v13/GRAMMAR.md): NARRATE -- `narrate <file>` answers the
+# sentence back in the language's own voice (narrate_lib.ring, loaded only where
+# a NARRATE is declared): a projection of the sentence on stdout, never stored,
+# never read back.
+#
 # v0.12 (haro/spike/v12/GRAMMAR.md): FORMS -- `family <file>` generates every
 # declared family from its base and the forms it offers; `spellings <file>
 # <names>` judges a list of names against the FORMS and the families
@@ -266,6 +271,9 @@ func CtUseLanguage(cName)
 	# v0.12: the FORMS [name, fluent, passive, statement, params, family], or NULL
 	$aCourtFormset = NULL
 	if len(aE) >= 21 $aCourtFormset = aE[21] ok
+	# v0.13: the NARRATE [name, opens, ends, refuses, says], or NULL
+	$aCourtNarrate = NULL
+	if len(aE) >= 22 $aCourtNarrate = aE[22] ok
 
 # the condition tables of every language the court carries, built once
 func CtBuildCondLangs()
@@ -322,7 +330,7 @@ func CtSnapshot()
 	        $aCourtWorld, $aCourtPoints, $aCourtFloors, $aCourtViews, $aCourtSentenceKinds,
 	        $aCourtToks, $nCourtPos, $aCondDecls, $cCondLang, $cCondOther, $bCondUnread,
 	        $aCondFormats, $aCondToks, $nCondPos, $aCourtExprs, $aCourtWalks, $aCourtAsk, $aCourtRun,
-	        $aCourtSymbols, $aCourtWorldFile, $aCourtFormset]
+	        $aCourtSymbols, $aCourtWorldFile, $aCourtFormset, $aCourtNarrate]
 
 func CtRestore(aS)
 	$cCourtLang = aS[1]
@@ -357,6 +365,7 @@ func CtRestore(aS)
 	$aCourtSymbols = aS[30]
 	$aCourtWorldFile = aS[31]
 	$aCourtFormset = aS[32]
+	$aCourtNarrate = aS[33]
 
 # ---- v0.10: the world ------------------------------------------------------------------
 # A C1 world is JSON: {"world", "contract", "symbols": [{kind, name, span, rationale}],
@@ -2109,6 +2118,18 @@ func CtMain()
 		catch
 			? cCatchError
 		done
+	but cVerb = "narrate"
+		# v0.13: the sentence narrated back in the language's own voice, on stdout, never stored
+		if len(sysargv) < 4
+			? "usage: <court>.ring narrate <file" + $cCourtExt + ">"
+			return
+		ok
+		try
+			if isNull($aCourtNarrate) CtFail(1, "this language declares no NARRATE, so it has no voice") ok
+			NarrateRun(sysargv[4])
+		catch
+			? cCatchError
+		done
 	but cVerb = "family"
 		# v0.12: the members of every declared family, generated from the FORMS
 		cSrc = read(sysargv[4])
@@ -2149,5 +2170,5 @@ func CtMain()
 			? cCatchError
 		done
 	else
-		? "unknown verb '" + cVerb + "'; this court answers: check, refine, eval, walk, ask, run, world, diagnose, family, spellings"
+		? "unknown verb '" + cVerb + "'; this court answers: check, refine, eval, walk, ask, run, world, diagnose, family, spellings, narrate"
 	ok

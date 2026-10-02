@@ -49,6 +49,7 @@ $aCourtWorldFile = NULL
 $cCourtCode = "PARSE"
 $aCourtCites = []
 $aCourtFormset = NULL
+$aCourtNarrate = NULL
 $cExprLang = ""
 $aExprOperators = []
 $aExprOperands = []
@@ -106,6 +107,7 @@ $aCourtLangs = [
     NULL,
     [["OF", ["algorithm", "steps", "result"]], ["COMPUTE", ["compute", "into", "value"]], ["COLLECT", ["collect", "into", "value"]], ["GROUP", ["group", "into", "by", "value"]], ["BRANCH", ["branch", "when", "then", "else"]], ["ITERATE", ["iterate", "over", "as", "do"]]],
     [],
+    NULL,
     NULL
   ]
 ]

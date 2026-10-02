@@ -47,6 +47,7 @@ $aCourtWorldFile = NULL
 $cCourtCode = "PARSE"
 $aCourtCites = []
 $aCourtFormset = NULL
+$aCourtNarrate = NULL
 $cExprLang = ""
 $aExprOperators = []
 $aExprOperands = []
@@ -122,6 +123,7 @@ $aCourtLangs = [
     NULL,
     NULL,
     [],
+    NULL,
     NULL
   ],
   ["machine", ".machine",
@@ -259,6 +261,7 @@ $aCourtLangs = [
     NULL,
     NULL,
     [],
+    NULL,
     NULL
   ]
 ]

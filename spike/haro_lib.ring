@@ -18,6 +18,11 @@
 # closed question grammar: FROM which kinds, WHERE in which expression,
 # which optional CLAUSES (where, order, limit); and ABSENT missing.
 #
+# v0.13 (haro/spike/v13/GRAMMAR.md): NARRATE -- how a run of the language is
+# narrated back, the court's voice: a template per declaration kind, an
+# opening, an ending, a refusal; a projection of the sentence, never stored,
+# never parsed back (the StzNarration law; stzn).
+#
 # v0.12 (haro/spike/v12/GRAMMAR.md): FORMS -- a vocabulary's function-name
 # grammar as data (principle 7): the fluent, passive and statement forms, the
 # parameter suffixes, one meaning per suffix, and which declaration spells a
@@ -114,6 +119,8 @@ func StzuClauses(cKind)
 		return [["CITES", "stringlist"], ["CODE", "string"], ["KIND", "string"], ["MESSAGE", "string"], ["REF", "string"]]
 	but cKind = "FORMS"
 		return [["FAMILY", "namelist"], ["FLUENT", "string"], ["PARAMS", "messagelist"], ["PASSIVE", "string"], ["STATEMENT", "string"]]
+	but cKind = "NARRATE"
+		return [["ENDS", "string"], ["OPENS", "string"], ["REFUSES", "string"], ["SAYS", "messagelist"]]
 	ok
 	return []
 
@@ -156,13 +163,15 @@ func StzuRequired(cKind)
 		return ["KIND"]
 	but cKind = "FORMS"
 		return ["PARAMS"]
+	but cKind = "NARRATE"
+		return ["SAYS"]
 	ok
 	return []
 
 func StzuIsKind(cWord)
 	return InStrList(cWord, ["LANGUAGE", "DECLARATION", "FORM", "EXPRESSION", "REFUSAL",
 	                         "MENU", "RANGE", "FORMAT", "CONSTRAINT", "WORLD", "REFINE", "UNION",
-	                         "SENTENCE", "VIEW", "WALK", "ASK", "RUN", "SYMBOL", "FORMS"])
+	                         "SENTENCE", "VIEW", "WALK", "ASK", "RUN", "SYMBOL", "FORMS", "NARRATE"])
 
 # C2 2.1: a code is ^[A-Z][A-Z0-9]*([_-][A-Z0-9]+)*$ ; C2 2.5: a cite is
 # kind:value, kind in rule|article|right|pattern, value [A-Za-z0-9_.-]+ (v0.11)
@@ -195,6 +204,37 @@ func StzuIsC2Cite(cS)
 		if not (IsUpperChar(c) or IsLowerChar(c) or IsDigitChar(c) or c = "_" or c = "." or c = "-") return 0 ok
 	next
 	return 1
+
+# v0.13: every {word} of a template names a placeholder the voice can fill, and every brace closes
+func StzuCheckTemplate(cT, aAllowed, nLine, cWhere)
+	n = len(cT)
+	i = 1
+	while i <= n
+		if cT[i] = "{"
+			j = i + 1
+			cW = ""
+			while j <= n and cT[j] != "}"
+				cW += cT[j]
+				j++
+			end
+			if j > n
+				StzuFail(nLine, "a '{' is never closed in " + cWhere)
+			ok
+			if not InStrList(cW, aAllowed)
+				StzuFail(nLine, "'{" + cW + "}' in " + cWhere + " is not a placeholder the voice can fill: it fills " + StzuJoinWords(aAllowed))
+			ok
+			i = j
+		ok
+		i++
+	end
+
+func StzuJoinWords(aL)
+	cOut = ""
+	for i = 1 to len(aL)
+		if i > 1 cOut += ", " ok
+		cOut += aL[i]
+	next
+	return cOut
 
 # v0.12: a suffix is letters, and no two roles spell the same one (the FF clash)
 func StzuWantSuffix(cS, nLine, cWhere)
@@ -858,6 +898,7 @@ func StzuParseDeclaration()
 #   ask:          [name, from kinds, where, clauses, rationale, line] or NULL   (v0.7)
 #   run:          [name, [[role, [kind, seat, ...]], ...], rationale, line] or NULL   (v0.9)
 #   symbols:      [name, kind, ref, message, line, code, cites]   (a seat type resolved against the world, v0.10; v0.11 code, cites)
+#   narrate:      [name, opens, ends, refuses, says [[kind, template, line]], rationale, line] or NULL   (v0.13)
 #   formset:      [name, fluent, passive, statement, params, family, rationale, line] or NULL
 #                 (v0.12: params [[key, suffix, line]], family [kind, base seat, forms seat] or [])
 #   (v0.11) declarations gain codes [[seat, code, line]] as their eighth element; refusals gain code,
@@ -910,6 +951,7 @@ func StzuDeclare(cSrc)
 	aAsk = NULL
 	aRun = NULL
 	aFormset = NULL
+	aNarrate = NULL
 	aSymbols = []
 	aWorld = NULL
 	aRefine = NULL
@@ -1173,6 +1215,26 @@ func StzuDeclare(cSrc)
 					ok
 				ok
 				aFormset = [cName, cFluent, cPassive, cStmt, aParams, aFamily, cRationale, nLine]
+			but cKind = "NARRATE"
+				# v0.13: how a run of the language is narrated back -- a voice, never stored, never parsed back
+				if not isNull(aNarrate)
+					StzuFail(nLine, "a .haro file declares at most one NARRATE: a language has one voice (" + aNarrate[1] + " is it)")
+				ok
+				cOpens = ""
+				if HasClause(aClauses, "OPENS") cOpens = ClauseValue(aClauses, "OPENS") ok
+				cEnds = ""
+				if HasClause(aClauses, "ENDS") cEnds = ClauseValue(aClauses, "ENDS") ok
+				cRefuses = ""
+				if HasClause(aClauses, "REFUSES") cRefuses = ClauseValue(aClauses, "REFUSES") ok
+				aSays = ClauseValue(aClauses, "SAYS")
+				for i = 1 to len(aSays)
+					for j = 1 to i - 1
+						if aSays[j][1] = aSays[i][1]
+							StzuFail(aSays[i][3], "SAYS: '" + aSays[i][1] + "' is voiced twice")
+						ok
+					next
+				next
+				aNarrate = [cName, cOpens, cEnds, cRefuses, aSays, cRationale, nLine]
 			but cKind = "RUN"
 				if not isNull(aRun)
 					StzuFail(nLine, "a .haro file declares at most one RUN: a language runs one way (" + aRun[1] + " is it)")
@@ -1265,6 +1327,25 @@ func StzuDeclare(cSrc)
 			aShapes + cShape
 		next
 	next
+	# v0.13: a NARRATE voices declared kinds, and fills only placeholders it can fill
+	if not isNull(aNarrate)
+		aSays = aNarrate[5]
+		for i = 1 to len(aSays)
+			aNK = NULL
+			for j = 1 to len(aDeclarations)
+				if aDeclarations[j][1] = aSays[i][1] aNK = aDeclarations[j] ok
+			next
+			if isNull(aNK) StzuFail(aSays[i][3], "SAYS: no declaration '" + aSays[i][1] + "' in " + cLName) ok
+			aOk = ["name", "verb", "rationale", "line"]
+			for j = 1 to len(aNK[3])
+				aOk + aNK[3][j][1]
+			next
+			StzuCheckTemplate(aSays[i][2], aOk, aSays[i][3], "SAYS " + aSays[i][1])
+		next
+		if aNarrate[2] != "" StzuCheckTemplate(aNarrate[2], ["language", "file", "count"], aNarrate[7], "OPENS") ok
+		if aNarrate[3] != "" StzuCheckTemplate(aNarrate[3], ["language", "file", "count"], aNarrate[7], "ENDS") ok
+		if aNarrate[4] != "" StzuCheckTemplate(aNarrate[4], ["language", "file", "line", "code", "message", "cites"], aNarrate[7], "REFUSES") ok
+	ok
 	# v0.12: a FORMS' FAMILY names a declared kind, a scalar base seat and a list forms seat
 	if not isNull(aFormset)
 		if len(aFormset[6]) = 3
@@ -1407,7 +1488,7 @@ func StzuDeclare(cSrc)
 	         ["constraints", aConstraints], ["world", aWorld], ["refine", aRefine],
 	         ["unions", aUnions], ["sentences", aSentences], ["views", aViews],
 	         ["walks", aWalks], ["ask", aAsk], ["run", aRun], ["symbols", aSymbols],
-	         ["formset", aFormset] ]
+	         ["formset", aFormset], ["narrate", aNarrate] ]
 	$cCondLang = cLName
 	$aCondLangs = StzuCondLangs(aRec, [])
 	$aCondFormats = []
@@ -1831,6 +1912,9 @@ func StzuPrintLanguage(aLang)
 	nFs = 0
 	if not isNull(LangGet(aLang, "formset")) nFs = 1 ok
 	? "formsets " + nFs
+	nNr = 0
+	if not isNull(LangGet(aLang, "narrate")) nNr = 1 ok
+	? "narrates " + nNr
 	nWorld = 0
 	if not isNull(LangGet(aLang, "world")) nWorld = 1 ok
 	? "world " + nWorld
