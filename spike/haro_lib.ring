@@ -18,6 +18,9 @@
 # closed question grammar: FROM which kinds, WHERE in which expression,
 # which optional CLAUSES (where, order, limit); and ABSENT missing.
 #
+# v0.11 (haro/spike/v11/GRAMMAR.md): the Diagnostic Contract (C2 v1.2.0) --
+# CODE, CODES and CITES, so a forged court speaks the family's envelope.
+#
 # v0.10 (haro/spike/v10/GRAMMAR.md): the WORLD as versioned data -- SYMBOL, a
 # seat type resolved against a C1 world.json when the court is handed one, and
 # PUBLISH on the WORLD, the kinds a sentence contributes as symbols.
@@ -71,31 +74,31 @@ func StzuClauses(cKind)
 	if cKind = "LANGUAGE"
 		return [["COURT", "string"], ["EXTENSION", "string"], ["GRAMMAR", "string"], ["VERSION", "string"]]
 	but cKind = "DECLARATION"
-		return [["MESSAGES", "messagelist"], ["NAMES", "ident"], ["SEATS", "seatlist"], ["VERB", "string"]]
+		return [["CODES", "messagelist"], ["MESSAGES", "messagelist"], ["NAMES", "ident"], ["SEATS", "seatlist"], ["VERB", "string"]]
 	but cKind = "FORM"
 		return [["SEATS", "seatlist"]]
 	but cKind = "EXPRESSION"
 		return [["ABSENT", "ident"], ["AGGREGATES", "namelist"], ["CONTEXTS", "contextlist"], ["DIVISION", "ident"], ["EQUALITY", "ident"], ["OPERANDS", "namelist"], ["OPERATORS", "namelist"], ["VARIABLES", "namelist"]]
 	but cKind = "REFUSAL"
-		return [["MESSAGE", "string"], ["NAMED", "messagelist"]]
+		return [["CITES", "stringlist"], ["CODE", "string"], ["CODES", "messagelist"], ["MESSAGE", "string"], ["NAMED", "messagelist"]]
 	but cKind = "MENU"
-		return [["MESSAGE", "string"], ["WORDS", "namelist"]]
+		return [["CODE", "string"], ["MESSAGE", "string"], ["WORDS", "namelist"]]
 	but cKind = "RANGE"
-		return [["MAX", "number"], ["MESSAGE", "string"], ["MIN", "number"]]
+		return [["CODE", "string"], ["MAX", "number"], ["MESSAGE", "string"], ["MIN", "number"]]
 	but cKind = "FORMAT"
-		return [["FOLD", "ident"], ["MESSAGE", "string"], ["SHAPE", "ident"]]
+		return [["CODE", "string"], ["FOLD", "ident"], ["MESSAGE", "string"], ["SHAPE", "ident"]]
 	but cKind = "SENTENCE"
 		return [["MESSAGE", "string"], ["OF", "string"], ["REFUSED", "string"]]
 	but cKind = "VIEW"
 		return [["NAMED", "string"], ["ON", "ident"], ["ONE", "string"], ["WHERE", "string"]]
 	but cKind = "CONSTRAINT"
-		return [["MESSAGE", "string"], ["ON", "ident"], ["THEN", "string"], ["WHEN", "string"]]
+		return [["CODE", "string"], ["MESSAGE", "string"], ["ON", "ident"], ["THEN", "string"], ["WHEN", "string"]]
 	but cKind = "WORLD"
 		return [["ENTRY", "namelist"], ["FIRST", "ident"], ["ONE", "namelist"], ["PUBLISH", "pairlist"]]
 	but cKind = "REFINE"
 		return [["FLOOR", "pointlist"], ["POINTS", "pointlist"]]
 	but cKind = "UNION"
-		return [["MESSAGE", "string"], ["OF", "typelist"]]
+		return [["CODE", "string"], ["MESSAGE", "string"], ["OF", "typelist"]]
 	but cKind = "WALK"
 		return [["COMPUTE", "ident"], ["FAIL", "ident"], ["FORMULA", "ident"], ["GUARDS", "pathlist"], ["OF", "ident"], ["ORDER", "ident"], ["STEPS", "ident"], ["THROUGH", "ident"]]
 	but cKind = "ASK"
@@ -103,7 +106,7 @@ func StzuClauses(cKind)
 	but cKind = "RUN"
 		return [["BRANCH", "namelist"], ["COLLECT", "namelist"], ["COMPUTE", "namelist"], ["GROUP", "namelist"], ["ITERATE", "namelist"], ["OF", "namelist"]]
 	but cKind = "SYMBOL"
-		return [["KIND", "string"], ["MESSAGE", "string"], ["REF", "string"]]
+		return [["CITES", "stringlist"], ["CODE", "string"], ["KIND", "string"], ["MESSAGE", "string"], ["REF", "string"]]
 	ok
 	return []
 
@@ -151,6 +154,76 @@ func StzuIsKind(cWord)
 	return InStrList(cWord, ["LANGUAGE", "DECLARATION", "FORM", "EXPRESSION", "REFUSAL",
 	                         "MENU", "RANGE", "FORMAT", "CONSTRAINT", "WORLD", "REFINE", "UNION",
 	                         "SENTENCE", "VIEW", "WALK", "ASK", "RUN", "SYMBOL"])
+
+# C2 2.1: a code is ^[A-Z][A-Z0-9]*([_-][A-Z0-9]+)*$ ; C2 2.5: a cite is
+# kind:value, kind in rule|article|right|pattern, value [A-Za-z0-9_.-]+ (v0.11)
+func StzuIsC2Code(cS)
+	if len(cS) = 0 return 0 ok
+	if not IsUpperChar(cS[1]) return 0 ok
+	bSep = 0
+	for i = 2 to len(cS)
+		c = cS[i]
+		if c = "_" or c = "-"
+			if bSep return 0 ok
+			bSep = 1
+		but IsUpperChar(c) or IsDigitChar(c)
+			bSep = 0
+		else
+			return 0
+		ok
+	next
+	return not bSep
+
+func StzuIsC2Cite(cS)
+	n = substr(cS, ":")
+	if n < 2 return 0 ok
+	cKind = left(cS, n - 1)
+	if not InStrList(cKind, ["rule", "article", "right", "pattern"]) return 0 ok
+	cV = substr(cS, n + 1)
+	if len(cV) = 0 return 0 ok
+	for i = 1 to len(cV)
+		c = cV[i]
+		if not (IsUpperChar(c) or IsLowerChar(c) or IsDigitChar(c) or c = "_" or c = "." or c = "-") return 0 ok
+	next
+	return 1
+
+func StzuWantCode(cCode, nLine, cWhere)
+	if not StzuIsC2Code(cCode)
+		StzuFail(nLine, "'" + cCode + "' on " + cWhere + " is not a code in the Diagnostic Contract's format: an uppercase identifier, [A-Z][A-Z0-9]* with _ or - between parts")
+	ok
+
+func StzuWantCites(aCites, nLine, cWhere)
+	for i = 1 to len(aCites)
+		if not StzuIsC2Cite(aCites[i])
+			StzuFail(nLine, "'" + aCites[i] + "' on " + cWhere + " is not a cite: kind:value with kind rule, article, right or pattern")
+		ok
+	next
+
+func StzuCodesOf(aClauses, nLine, cWhere)
+	aCodes = []
+	if HasClause(aClauses, "CODES")
+		aCodes = ClauseValue(aClauses, "CODES")
+		for i = 1 to len(aCodes)
+			StzuWantCode(aCodes[i][2], aCodes[i][3], cWhere + "." + aCodes[i][1])
+		next
+	ok
+	return aCodes
+
+func StzuCodeOf(aClauses, nLine, cWhere)
+	cCode = ""
+	if HasClause(aClauses, "CODE")
+		cCode = ClauseValue(aClauses, "CODE")
+		StzuWantCode(cCode, nLine, cWhere)
+	ok
+	return cCode
+
+func StzuCitesOf(aClauses, nLine, cWhere)
+	aCites = []
+	if HasClause(aClauses, "CITES")
+		aCites = ClauseValue(aClauses, "CITES")
+		StzuWantCites(aCites, nLine, cWhere)
+	ok
+	return aCites
 
 # the directory part of a path, "" when none (core Ring has no dirname)
 func StzuDirOf(cPath)
@@ -595,6 +668,23 @@ func StzuParsePathList()
 	StzuAdvance()
 	return aPaths
 
+# a string list: [ "a", "b", ... ]   (v0.11)
+func StzuParseStringList()
+	StzuExpect("lbracket", "'['")
+	aOut = []
+	while StzuPeek()[1] != "rbracket"
+		t = StzuExpect("string", "a string")
+		aOut + t[2]
+		if StzuPeek()[1] = "comma"
+			StzuAdvance()
+		but StzuPeek()[1] != "rbracket"
+			t = StzuPeek()
+			StzuFail(t[3], "Expected ',' or ']' but found '" + t[2] + "'")
+		ok
+	end
+	StzuAdvance()
+	return aOut
+
 # a pair is [key, word, line]: [ key: word, ... ]   (v0.10)
 func StzuParsePairList()
 	StzuExpect("lbracket", "'['")
@@ -700,6 +790,8 @@ func StzuParseDeclaration()
 			aClauses + [ct[2], StzuParsePathList()]
 		but cShape = "pairlist"
 			aClauses + [ct[2], StzuParsePairList()]
+		but cShape = "stringlist"
+			aClauses + [ct[2], StzuParseStringList()]
 		else
 			aClauses + [ct[2], StzuParsePointList()]
 		ok
@@ -740,7 +832,9 @@ func StzuParseDeclaration()
 #                 (guards a list of [path, line]; compute, formula, fail "" when absent, v0.6)
 #   ask:          [name, from kinds, where, clauses, rationale, line] or NULL   (v0.7)
 #   run:          [name, [[role, [kind, seat, ...]], ...], rationale, line] or NULL   (v0.9)
-#   symbols:      [name, kind, ref, message, line]                (a seat type resolved against the world, v0.10)
+#   symbols:      [name, kind, ref, message, line, code, cites]   (a seat type resolved against the world, v0.10; v0.11 code, cites)
+#   (v0.11) declarations gain codes [[seat, code, line]] as their eighth element; refusals gain code,
+#   codes and cites as their sixth to eighth; menus, ranges, formats, unions and constraints a code last
 #                 and world gains publish: [[kind, symbolkind, line], ...] as its fifth element
 #   refusals:     [name, message, rationale, line, named]          (named [word, text, line] per trespasser, v0.8)
 #   menus:        [name, words, message, line]
@@ -855,7 +949,9 @@ func StzuDeclare(cSrc)
 				if HasClause(aClauses, "NAMES") cNames = ClauseValue(aClauses, "NAMES") ok
 				aMsgs = []
 				if HasClause(aClauses, "MESSAGES") aMsgs = ClauseValue(aClauses, "MESSAGES") ok
-				aDeclarations + [cName, cVerb, ClauseValue(aClauses, "SEATS"), cRationale, nLine, cNames, aMsgs]
+				# v0.11: a code per seat, for the envelope
+				aCodes = StzuCodesOf(aClauses, nLine, cName)
+				aDeclarations + [cName, cVerb, ClauseValue(aClauses, "SEATS"), cRationale, nLine, cNames, aMsgs, aCodes]
 			but cKind = "FORM"
 				aForms + [cName, ClauseValue(aClauses, "SEATS"), cRationale, nLine]
 			but cKind = "EXPRESSION"
@@ -939,7 +1035,17 @@ func StzuDeclare(cSrc)
 						StzuFail(nLine, "NAMED belongs to unknown_declaration and unknown_seat, the refusals a trespasser meets; '" + cName + "' is neither")
 					ok
 				ok
-				aRefusals + [cName, ClauseValue(aClauses, "MESSAGE"), cRationale, nLine, aNamedMsgs]
+				cRCode = StzuCodeOf(aClauses, nLine, cName)
+				aRCodes = StzuCodesOf(aClauses, nLine, cName)
+				for i = 1 to len(aRCodes)
+					bNamed = 0
+					for j = 1 to len(aNamedMsgs)
+						if aNamedMsgs[j][1] = aRCodes[i][1] bNamed = 1 ok
+					next
+					if not bNamed StzuFail(aRCodes[i][3], "CODES: '" + aRCodes[i][1] + "' is not a NAMED word of " + cName) ok
+				next
+				aRCites = StzuCitesOf(aClauses, nLine, cName)
+				aRefusals + [cName, ClauseValue(aClauses, "MESSAGE"), cRationale, nLine, aNamedMsgs, cRCode, aRCodes, aRCites]
 			but cKind = "MENU"
 				aWords = ClauseValue(aClauses, "WORDS")
 				if len(aWords) = 0
@@ -947,7 +1053,7 @@ func StzuDeclare(cSrc)
 				ok
 				cMsg = ""
 				if HasClause(aClauses, "MESSAGE") cMsg = ClauseValue(aClauses, "MESSAGE") ok
-				aMenus + [cName, aWords, cMsg, nLine]
+				aMenus + [cName, aWords, cMsg, nLine, StzuCodeOf(aClauses, nLine, cName)]
 			but cKind = "RANGE"
 				nMin = 0 + ClauseValue(aClauses, "MIN")
 				nMax = 0 + ClauseValue(aClauses, "MAX")
@@ -956,7 +1062,7 @@ func StzuDeclare(cSrc)
 				ok
 				cMsg = ""
 				if HasClause(aClauses, "MESSAGE") cMsg = ClauseValue(aClauses, "MESSAGE") ok
-				aRanges + [cName, ClauseValue(aClauses, "MIN"), ClauseValue(aClauses, "MAX"), cMsg, nLine]
+				aRanges + [cName, ClauseValue(aClauses, "MIN"), ClauseValue(aClauses, "MAX"), cMsg, nLine, StzuCodeOf(aClauses, nLine, cName)]
 			but cKind = "FORMAT"
 				cShape = ClauseValue(aClauses, "SHAPE")
 				if not InStrList(cShape, StzuShapes())
@@ -969,7 +1075,7 @@ func StzuDeclare(cSrc)
 				if cFold != "" and cFold != "case"
 					StzuFail(nLine, "FOLD takes case, the one folding a court knows; '" + cFold + "' is not it")
 				ok
-				aFormats + [cName, cShape, cMsg, nLine, cFold]
+				aFormats + [cName, cShape, cMsg, nLine, cFold, StzuCodeOf(aClauses, nLine, cName)]
 			but cKind = "SENTENCE"
 				cMsg = ""
 				if HasClause(aClauses, "MESSAGE") cMsg = ClauseValue(aClauses, "MESSAGE") ok
@@ -995,7 +1101,7 @@ func StzuDeclare(cSrc)
 				if HasClause(aClauses, "REF") cRef = ClauseValue(aClauses, "REF") ok
 				cMsg = ""
 				if HasClause(aClauses, "MESSAGE") cMsg = ClauseValue(aClauses, "MESSAGE") ok
-				aSymbols + [cName, cSKind, cRef, cMsg, nLine]
+				aSymbols + [cName, cSKind, cRef, cMsg, nLine, StzuCodeOf(aClauses, nLine, cName), StzuCitesOf(aClauses, nLine, cName)]
 			but cKind = "RUN"
 				if not isNull(aRun)
 					StzuFail(nLine, "a .haro file declares at most one RUN: a language runs one way (" + aRun[1] + " is it)")
@@ -1033,12 +1139,12 @@ func StzuDeclare(cSrc)
 				ok
 				cMsg = ""
 				if HasClause(aClauses, "MESSAGE") cMsg = ClauseValue(aClauses, "MESSAGE") ok
-				aUnions + [cName, aAlts, cMsg, nLine]
+				aUnions + [cName, aAlts, cMsg, nLine, StzuCodeOf(aClauses, nLine, cName)]
 			else
 				# CONSTRAINT: resolved after the whole file is read
 				cThen = ""
 				if HasClause(aClauses, "THEN") cThen = ClauseValue(aClauses, "THEN") ok
-				aConstraints + [cName, ClauseValue(aClauses, "ON"), ClauseValue(aClauses, "WHEN"), cThen, ClauseValue(aClauses, "MESSAGE"), nLine]
+				aConstraints + [cName, ClauseValue(aClauses, "ON"), ClauseValue(aClauses, "WHEN"), cThen, ClauseValue(aClauses, "MESSAGE"), nLine, StzuCodeOf(aClauses, nLine, cName)]
 			ok
 		ok
 	end
@@ -1086,6 +1192,15 @@ func StzuDeclare(cSrc)
 				ok
 			next
 			aShapes + cShape
+		next
+	next
+	# v0.11: CODES name seats of the declaration
+	for i = 1 to len(aDeclarations)
+		aCd = aDeclarations[i][8]
+		for j = 1 to len(aCd)
+			if isNull(StzuSeatNamed(aDeclarations[i][3], aCd[j][1]))
+				StzuFail(aCd[j][3], "CODES: no seat '" + aCd[j][1] + "' on " + aDeclarations[i][1])
+			ok
 		next
 	next
 	# v0.3: MESSAGES speaks for a reference seat

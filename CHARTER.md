@@ -248,6 +248,12 @@ COMPENSATED_BY through a `flow` symbol and publishes one `process` -- the placem
 C3 3.2, in the declaring altitude, judged by RingFlex's own placement gate and by the seam
 between the two forged letters, nine of nine on `rnxc` and the oracle. The world is emitted
 and resolved, never stored, as the row says.
+**Haro v0.11, the same day (`haro/spike/v11/GRAMMAR.md`, 7 fixtures): the Diagnostic
+Contract.** What section 5 says every court owes: `CODE`, `CODES` and `CITES` declared beside
+the words, and every forged court answering `diagnose <file> [world]` in C2 v1.2.0's one
+object of six-field envelopes -- a refusal one error with its element's code and cites, no
+world one warning at line 0, a clean sentence an empty array. F declares RingFlex's own codes;
+judged against the contract's shape and against RingFlex's court live, 28 of 28, first run.
 
 **What the forge produces from one declaration** (Ringua's kit, 02-STACK's L1, now Haro's
 compiler verbs rather than separate organs): the parser; the court with the fixtures as its
@@ -553,6 +559,13 @@ world fixtures and by the seam between Z and F -- **nine of nine** on `rnxc` and
 first run; RingFlex's gate 44 of 44 beside it (HF-60). D9 ruled on the delegation: A lives in
 stz beside W. Record: `haro/SPIKE.md`, "The tenth rung".
 
+**The eleventh rung, 2026-10-02, on the author's second delegation: Haro v0.11, the Diagnostic
+Contract** (section 3's note, section 5's channel). CODE, CODES and CITES; every forged court's
+`diagnose`; `f_v11.haro` carrying RingFlex's codes -- judged by the contract's shape and by
+RingFlex's court run live on its originals: **28 of 28** codes, cites and severities the same,
+first run, the same bytes on `rnxc` and the oracle (HF-61). Record: `haro/SPIKE.md`, "The
+eleventh rung".
+
 v0.1's spike (`twice.haro`, a definition with an intent clause) proved one altitude. The
 ruling asks for three to meet, and the estate has already named the smallest program that
 makes them: the alphabet's own proof obligation, "Z re-expressed through stzf from `z.stzu`
@@ -609,7 +622,7 @@ v0.1's eight, each kept, and three the ruling adds. The full text of each is in
 | 1 | no silent global | a language's names are its declarations; one namespace, duplicates refused (stzu check 3) | a dangling reference is a check failure in jargon (G6) | v0.1: literals, `$`/`@`/bare, no upward resolution, shadowing refused |
 | 2 | one obvious spelling | the Commons' lexical form (C6), one | the Commons' form, one spelling per verb, the vocabulary registry | v0.1: Rule C, case decided, keywords reserved |
 | 3 | grammar the decoder holds | stzu's EBNF emitted as GBNF | emitted by the forge for every language, by construction | v0.1: one source, three grains |
-| 4 | refuse, then explain | the meta-court's channel, C2 | refusal phrasing declared beside the grammar, in jargon | v0.1: C2 + why/todo/frames |
+| 4 | refuse, then explain | the meta-court's channel, C2 | refusal phrasing declared beside the grammar, in jargon | v0.1: C2 + why/todo/frames; v0.11: every forged court's `diagnose`, its codes and cites declared beside the words (CODE, CODES, CITES) |
 | 5 | self-describing | `RATIONALE` mandatory (C6 3.8) | `explain` on every declaration (Ringua's CLI contract) | v0.1: the intent clause |
 | 6 | cheap to be wrong | the meta-court in ms | a total language terminates; the court judges in ms | v0.1: compile-time verdicts, the library resident |
 | 7 | forms as execution modes | `FORMS` declared as data | closed verb sets, one word per letter | v0.1: the forms as grammar, families from a rule |

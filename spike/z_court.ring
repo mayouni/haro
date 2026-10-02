@@ -46,6 +46,8 @@ $aCourtAsk = NULL
 $aCourtRun = NULL
 $aCourtSymbols = []
 $aCourtWorldFile = NULL
+$cCourtCode = "PARSE"
+$aCourtCites = []
 $cExprLang = ""
 $aExprOperators = []
 $aExprOperands = []
@@ -63,37 +65,37 @@ $aExprOverlay = []
 $aCourtLangs = [
   ["z", ".z",
     [
-      ["ENUM", "enum", [["words", "word", 1, 0, "form"]], "", []],
-      ["ENTITY", "entity", [["fields", "field", 1, 0, "form"]], "", []],
-      ["NORM", "norm", [["rule", "zexpr", 0, 0, "expr"], ["message", "text", 0, 0, "prim"]], "", []],
-      ["FLOW", "flow", [], "", []],
-      ["STEP", "step", [["flow", "flow", 0, 0, "decl"], ["order", "number", 0, 0, "prim"], ["actor", "actors", 0, 0, "menu"], ["validate", "zexpr", 0, 1, "expr"], ["enforcing", "norm", 0, 1, "decl"], ["compute", "name", 0, 1, "prim"], ["formula", "zexpr", 0, 1, "expr"], ["on_fail", "text", 0, 1, "prim"], ["on_success", "outcomes", 0, 1, "menu"]], "", [["flow", "STEP {name} walks '{value}', and no FLOW of that name is declared"], ["enforcing", "STEP {name} enforces '{value}', and no NORM of that name is declared: referencing an undeclared norm is a registration error"]]],
-      ["LANDING_ZONE", "landing_zone", [["format", "formats", 0, 0, "menu"], ["into", "flow", 0, 0, "decl"]], "", []]
+      ["ENUM", "enum", [["words", "word", 1, 0, "form"]], "", [], []],
+      ["ENTITY", "entity", [["fields", "field", 1, 0, "form"]], "", [], []],
+      ["NORM", "norm", [["rule", "zexpr", 0, 0, "expr"], ["message", "text", 0, 0, "prim"]], "", [], []],
+      ["FLOW", "flow", [], "", [], []],
+      ["STEP", "step", [["flow", "flow", 0, 0, "decl"], ["order", "number", 0, 0, "prim"], ["actor", "actors", 0, 0, "menu"], ["validate", "zexpr", 0, 1, "expr"], ["enforcing", "norm", 0, 1, "decl"], ["compute", "name", 0, 1, "prim"], ["formula", "zexpr", 0, 1, "expr"], ["on_fail", "text", 0, 1, "prim"], ["on_success", "outcomes", 0, 1, "menu"]], "", [["flow", "STEP {name} walks '{value}', and no FLOW of that name is declared"], ["enforcing", "STEP {name} enforces '{value}', and no NORM of that name is declared: referencing an undeclared norm is a registration error"]], []],
+      ["LANDING_ZONE", "landing_zone", [["format", "formats", 0, 0, "menu"], ["into", "flow", 0, 0, "decl"]], "", [], []]
     ],
     [
       ["word", [["value", "name", 0, 0, "prim"]]],
       ["field", [["name", "name", 0, 0, "prim"], ["type", "name", 0, 0, "prim"]]]
     ],
     [
-      ["unknown_verb", "The ZQL verb set is closed -- destructive or unrecognized operations are not part of the grammar.", []],
-      ["unknown_declaration", "The ZQL verb set is closed -- destructive or unrecognized operations are not part of the grammar.", []],
-      ["dangling_reference", "This name resolves to nothing in the declared world.", []]
+      ["unknown_verb", "The ZQL verb set is closed -- destructive or unrecognized operations are not part of the grammar.", [], "", [], []],
+      ["unknown_declaration", "The ZQL verb set is closed -- destructive or unrecognized operations are not part of the grammar.", [], "", [], []],
+      ["dangling_reference", "This name resolves to nothing in the declared world.", [], "", [], []]
     ],
     [
-      ["actors", ["collector", "treasurer", "system", "member", "auditor"], "ACTOR is collector, treasurer, system, member or auditor"],
-      ["outcomes", ["commit_to_bedrock", "hold"], "ON_SUCCESS is commit_to_bedrock or hold"],
-      ["formats", ["json", "csv"], "FORMAT is json or csv"]
-    ],
-    [
-    ],
-    [
+      ["actors", ["collector", "treasurer", "system", "member", "auditor"], "ACTOR is collector, treasurer, system, member or auditor", ""],
+      ["outcomes", ["commit_to_bedrock", "hold"], "ON_SUCCESS is commit_to_bedrock or hold", ""],
+      ["formats", ["json", "csv"], "FORMAT is json or csv", ""]
     ],
     [
     ],
     [
-      ["a_formula_names_its_field", "step", "formula present and compute absent", "", "STEP {name} has a FORMULA and no COMPUTE: a computed value is named"],
-      ["a_computed_field_has_a_formula", "step", "compute present and formula absent", "", "STEP {name} names COMPUTE {compute} and has no FORMULA"],
-      ["one_rank_per_flow", "step", "earlier step where flow = this.flow and order = this.order", "", "STEP {name} and STEP {other} both stand at ORDER {order} of {flow}: one rank, one step"]
+    ],
+    [
+    ],
+    [
+      ["a_formula_names_its_field", "step", "formula present and compute absent", "", "STEP {name} has a FORMULA and no COMPUTE: a computed value is named", ""],
+      ["a_computed_field_has_a_formula", "step", "compute present and formula absent", "", "STEP {name} names COMPUTE {compute} and has no FORMULA", ""],
+      ["one_rank_per_flow", "step", "earlier step where flow = this.flow and order = this.order", "", "STEP {name} and STEP {other} both stand at ORDER {order} of {flow}: one rank, one step", ""]
     ],
     [[], "", [], [["flow", "flow"], ["entity", "entity"], ["norm", "norm"], ["landing_zone", "zone"]]],
     [],

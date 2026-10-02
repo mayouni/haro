@@ -1,0 +1,51 @@
+{
+  "grammar": "haro",
+  "version": "0.11",
+  "comment": "The Haro v0.11 conformance floor, written BEFORE the court that passes it (the W discipline: fixtures first, prose second). v0.11 grows v0.10 by what the family's Diagnostic Contract (C2 v1.2.0, stzzui/doc/diagnostic-contract.md: six fields, one object carrying `diagnostics`, codes the court's own, cites by stable identifier, empty where no law applies) asks of a court that wants to speak it -- and nothing else: CODE, the language's own stable identifier for a refusal, on a CONSTRAINT, a SYMBOL, a UNION, a MENU, a RANGE, a FORMAT or a REFUSAL; CODES, a code per seat on a DECLARATION (beside MESSAGES) and a code per NAMED word on a REFUSAL; CITES, the pinned instruments a SYMBOL's or a REFUSAL's refusal cites. A code matches C2's format (R1); CODES name a seat (R2) or a NAMED word (R4); a cite is kind:value in the four binding kinds (R3). Every v0.10 fixture still passes: v0.11 refuses nothing v0.10 accepted. Rejects carry the fragment the refusal must contain.",
+  "accepts": [
+    {
+      "id": "A1",
+      "name": "CODE on a CONSTRAINT, a MENU, a UNION, a SYMBOL and a REFUSAL; CITES on a SYMBOL",
+      "source": "DEFINE LANGUAGE f AS (VERSION \"0.11\", GRAMMAR \"0.11\", COURT \"x\", EXTENSION \".f\") RATIONALE \"x\"\nDEFINE MENU outcomes AS (WORDS [success, refused], CODE \"PARSE\") RATIONALE \"x\"\nDEFINE DECLARATION terminal AS (VERB \"TERMINAL\", SEATS [outcome: outcomes]) RATIONALE \"x\"\nDEFINE DECLARATION step AS (VERB \"STEP\", SEATS [target: name]) RATIONALE \"x\"\nDEFINE UNION node AS (OF [step, terminal], CODE \"C5\") RATIONALE \"x\"\nDEFINE SYMBOL flow AS (KIND \"flow\", REF \"calls\", CODE \"UNRESOLVED_FLOW\", CITES [\"article:placement-3.2\"]) RATIONALE \"x\"\nDEFINE CONSTRAINT one_ending AS (ON terminal, WHEN \"outcome absent\", MESSAGE \"x\", CODE \"C7\") RATIONALE \"x\"\nDEFINE REFUSAL unknown_declaration AS (MESSAGE \"the declaration set is closed\", CODE \"PARSE\") RATIONALE \"x\"\n",
+      "expect": {"language": "f", "counts": {"declarations": 2, "constraints": 1, "unions": 1, "menus": 1, "refusals": 1}, "symbols": 1}
+    },
+    {
+      "id": "A2",
+      "name": "CODES: a code per seat on a DECLARATION, a code per NAMED word on a REFUSAL, with CITES",
+      "source": "DEFINE LANGUAGE f AS (VERSION \"0.11\", GRAMMAR \"0.11\", COURT \"x\", EXTENSION \".f\") RATIONALE \"x\"\nDEFINE DECLARATION actor AS (VERB \"ACTOR\", SEATS [role: name, segregated_from: actor?], MESSAGES [segregated_from: \"actor {name} is SEGREGATED_FROM '{value}', which is not declared\"], CODES [segregated_from: \"C9\"]) RATIONALE \"x\"\nDEFINE REFUSAL unknown_declaration AS (MESSAGE \"the declaration set is closed\", NAMED [flow: \"'FLOW' belongs to ZQL\", forever: \"'FOREVER' was deleted\"], CODES [flow: \"FLOW_IS_ZQL\", forever: \"PARSE\"], CITES [\"article:placement-3\"]) RATIONALE \"x\"\n",
+      "expect": {"language": "f", "counts": {"declarations": 1, "refusals": 1}}
+    },
+    {
+      "id": "A3",
+      "name": "a v0.10 declaration is a v0.11 declaration: v0.10's A1, unchanged",
+      "source": "DEFINE LANGUAGE f AS (VERSION \"0.10\", GRAMMAR \"0.10\", COURT \"x\", EXTENSION \".f\") RATIONALE \"x\"\nDEFINE SYMBOL flow AS (KIND \"flow\", REF \"calls\", MESSAGE \"step {name} invokes '{value}', and the world declares no flow:{value}\") RATIONALE \"a ZQL flow, declared in the world and never here\"\nDEFINE DECLARATION invocation AS (VERB \"INVOCATION\", SEATS [invokes: flow, compensated_by: flow?]) RATIONALE \"x\"\n",
+      "expect": {"language": "f", "counts": {"declarations": 1}, "symbols": 1}
+    }
+  ],
+  "rejects": [
+    {
+      "id": "R1",
+      "name": "a CODE is a stable uppercase identifier in C2's format",
+      "source": "DEFINE LANGUAGE f AS (VERSION \"0.11\", GRAMMAR \"0.11\", COURT \"x\", EXTENSION \".f\") RATIONALE \"x\"\nDEFINE DECLARATION terminal AS (VERB \"TERMINAL\", SEATS [outcome: name]) RATIONALE \"x\"\nDEFINE CONSTRAINT one_ending AS (ON terminal, WHEN \"outcome absent\", MESSAGE \"x\", CODE \"c7 missing\") RATIONALE \"x\"\n",
+      "refusal": "is not a code in the Diagnostic Contract's format"
+    },
+    {
+      "id": "R2",
+      "name": "CODES on a DECLARATION name its seats",
+      "source": "DEFINE LANGUAGE f AS (VERSION \"0.11\", GRAMMAR \"0.11\", COURT \"x\", EXTENSION \".f\") RATIONALE \"x\"\nDEFINE DECLARATION actor AS (VERB \"ACTOR\", SEATS [role: name], CODES [segregated_from: \"C9\"]) RATIONALE \"x\"\n",
+      "refusal": "CODES: no seat 'segregated_from' on actor"
+    },
+    {
+      "id": "R3",
+      "name": "a cite is kind:value in the four binding kinds: rule, article, right, pattern",
+      "source": "DEFINE LANGUAGE f AS (VERSION \"0.11\", GRAMMAR \"0.11\", COURT \"x\", EXTENSION \".f\") RATIONALE \"x\"\nDEFINE SYMBOL flow AS (KIND \"flow\", CITES [\"placement 3.2\"]) RATIONALE \"x\"\n",
+      "refusal": "is not a cite: kind:value with kind rule, article, right or pattern"
+    },
+    {
+      "id": "R4",
+      "name": "CODES on a REFUSAL name its NAMED words",
+      "source": "DEFINE LANGUAGE f AS (VERSION \"0.11\", GRAMMAR \"0.11\", COURT \"x\", EXTENSION \".f\") RATIONALE \"x\"\nDEFINE REFUSAL unknown_declaration AS (MESSAGE \"x\", NAMED [flow: \"x\"], CODES [gateway: \"PARSE\"]) RATIONALE \"x\"\n",
+      "refusal": "CODES: 'gateway' is not a NAMED word of unknown_declaration"
+    }
+  ]
+}

@@ -46,6 +46,8 @@ $aCourtAsk = NULL
 $aCourtRun = NULL
 $aCourtSymbols = []
 $aCourtWorldFile = NULL
+$cCourtCode = "PARSE"
+$aCourtCites = []
 $cExprLang = ""
 $aExprOperators = []
 $aExprOperands = []
@@ -63,19 +65,19 @@ $aExprOverlay = []
 $aCourtLangs = [
   ["a", ".a",
     [
-      ["COMPUTE", "compute", [["into", "name", 0, 0, "prim"], ["value", "aexpr", 0, 0, "expr"]], "", []],
-      ["COLLECT", "collect", [["into", "name", 0, 0, "prim"], ["value", "aexpr", 0, 0, "expr"]], "", []],
-      ["GROUP", "group", [["into", "name", 0, 0, "prim"], ["by", "aexpr", 0, 0, "expr"], ["value", "aexpr", 0, 0, "expr"]], "", []],
-      ["BRANCH", "branch", [["when", "aexpr", 0, 0, "expr"], ["then", "step", 1, 0, "union"], ["else", "step", 1, 0, "union"]], "", [["then", "BRANCH {name} steps to '{value}', which is not a declared step"], ["else", "BRANCH {name} steps to '{value}', which is not a declared step"]]],
-      ["ITERATE", "iterate", [["over", "name", 0, 0, "prim"], ["as", "name", 0, 0, "prim"], ["do", "step", 1, 0, "union"]], "", [["do", "ITERATE {name} steps to '{value}', which is not a declared step"]]],
-      ["ALGORITHM", "algorithm", [["steps", "step", 1, 0, "union"], ["result", "word", 1, 0, "form"]], "", [["steps", "ALGORITHM {name} steps to '{value}', which is not a declared step"]]]
+      ["COMPUTE", "compute", [["into", "name", 0, 0, "prim"], ["value", "aexpr", 0, 0, "expr"]], "", [], []],
+      ["COLLECT", "collect", [["into", "name", 0, 0, "prim"], ["value", "aexpr", 0, 0, "expr"]], "", [], []],
+      ["GROUP", "group", [["into", "name", 0, 0, "prim"], ["by", "aexpr", 0, 0, "expr"], ["value", "aexpr", 0, 0, "expr"]], "", [], []],
+      ["BRANCH", "branch", [["when", "aexpr", 0, 0, "expr"], ["then", "step", 1, 0, "union"], ["else", "step", 1, 0, "union"]], "", [["then", "BRANCH {name} steps to '{value}', which is not a declared step"], ["else", "BRANCH {name} steps to '{value}', which is not a declared step"]], []],
+      ["ITERATE", "iterate", [["over", "name", 0, 0, "prim"], ["as", "name", 0, 0, "prim"], ["do", "step", 1, 0, "union"]], "", [["do", "ITERATE {name} steps to '{value}', which is not a declared step"]], []],
+      ["ALGORITHM", "algorithm", [["steps", "step", 1, 0, "union"], ["result", "word", 1, 0, "form"]], "", [["steps", "ALGORITHM {name} steps to '{value}', which is not a declared step"]], []]
     ],
     [
       ["word", [["name", "name", 0, 0, "prim"]]]
     ],
     [
-      ["unknown_declaration", "An algorithm is a tree of five constructs -- COMPUTE, COLLECT, GROUP, BRANCH, ITERATE -- and nothing else is expressible: no loop but over a collection, no recursion, no call.", []],
-      ["dangling_reference", "Every step named is a step declared.", []]
+      ["unknown_declaration", "An algorithm is a tree of five constructs -- COMPUTE, COLLECT, GROUP, BRANCH, ITERATE -- and nothing else is expressible: no loop but over a collection, no recursion, no call.", [], "", [], []],
+      ["dangling_reference", "Every step named is a step declared.", [], "", [], []]
     ],
     [
     ],
@@ -84,7 +86,7 @@ $aCourtLangs = [
     [
     ],
     [
-      ["step", [["compute", 0, "decl"], ["collect", 0, "decl"], ["group", 0, "decl"], ["branch", 0, "decl"], ["iterate", 0, "decl"]], "{VERB} {name} steps to '{value}', which is not a declared step"]
+      ["step", [["compute", 0, "decl"], ["collect", 0, "decl"], ["group", 0, "decl"], ["branch", 0, "decl"], ["iterate", 0, "decl"]], "{VERB} {name} steps to '{value}', which is not a declared step", ""]
     ],
     [
     ],

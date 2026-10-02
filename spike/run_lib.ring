@@ -80,6 +80,7 @@ func RunCheckAcyclic(aDecls)
 
 func RunWalkCheck(aDecls, cName, aPath)
 	if CtInList(cName, aPath)
+		CtSetCode("CYCLE", ["rule:run"])
 		RunFail("step '" + cName + "' re-enters itself through " + CtJoin(aPath, " > ") + ": an algorithm's steps form a tree, and no step may lead back to one on the way down")
 	ok
 	aD = CtDeclNamed(aDecls, cName)

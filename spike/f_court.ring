@@ -45,6 +45,8 @@ $aCourtAsk = NULL
 $aCourtRun = NULL
 $aCourtSymbols = []
 $aCourtWorldFile = NULL
+$cCourtCode = "PARSE"
+$aCourtCites = []
 $cExprLang = ""
 $aExprOperators = []
 $aExprOperands = []
@@ -62,19 +64,19 @@ $aExprOverlay = []
 $aCourtLangs = [
   ["f", ".f",
     [
-      ["WORKFLOW", "workflow", [["definition_version", "text", 0, 0, "prim"], ["zql", "text", 0, 0, "prim"], ["surfaces", "text", 0, 0, "prim"], ["calendar", "name", 0, 0, "prim"], ["calendar_version", "text", 0, 0, "prim"], ["locale", "name", 0, 0, "prim"]], "", []],
-      ["ACTOR", "actor", [["role", "name", 0, 0, "prim"], ["segregated_from", "actor", 0, 1, "decl"]], "", [["segregated_from", "C9: actor {name} is SEGREGATED_FROM '{value}', which is not a declared actor"]]],
-      ["GUARD", "guard", [["norm", "name", 0, 0, "prim"]], "", []],
-      ["ESCALATION", "escalation", [["on_breach", "breach_action", 1, 0, "form"]], "", []],
-      ["RETRY", "retry", [["attempts", "number", 0, 0, "prim"], ["initial", "duration", 0, 0, "format"], ["backoff", "number", 0, 0, "prim"], ["max", "duration", 0, 0, "format"], ["not_on", "verdicts", 1, 0, "menu"]], "", []],
-      ["INVOCATION", "invocation", [["invokes", "flow", 0, 0, "symbol"], ["retry", "retry", 0, 1, "decl"], ["compensated_by", "flow", 0, 1, "symbol"], ["irreversible", "flag", 0, 1, "prim"], ["on_committed", "node", 0, 0, "union"], ["on_rejected", "node", 0, 0, "union"], ["on_held", "node", 0, 0, "union"]], "", [["retry", "C11: step {name} cites the retry policy '{value}', which is not declared"], ["on_committed", "C4: step {name} does not route ON COMMITTED. An invocation declares all three of a ZQL flow's endings"], ["on_rejected", "C4: step {name} does not route ON REJECTED. An invocation declares all three of a ZQL flow's endings"], ["on_held", "C4: step {name} does not route ON HELD. An invocation declares all three of a ZQL flow's endings"]]],
-      ["TASK", "task", [["asks", "actor", 0, 0, "decl"], ["surface", "name", 0, 0, "prim"], ["decisions", "decision", 1, 0, "form"], ["sla", "deadline", 0, 0, "format"], ["escalation", "escalation", 0, 1, "decl"], ["timeout", "deadline", 0, 0, "format"], ["on_timeout", "node", 0, 0, "union"], ["routes", "route", 1, 0, "form"]], "", [["asks", "C11: human task {name} ASKS '{value}', which is not a declared actor"], ["escalation", "C11: human task {name} cites the escalation '{value}', which is not declared"], ["timeout", "C1: human task {name} has no TIMEOUT. Every wait carries one -- a dossier only a human can close is a SUSPENDED state, not an untimed wait"], ["on_timeout", "C1: human task {name} has no ON_TIMEOUT: a TIMEOUT says where the wait goes when it expires"]]],
-      ["EVENT_WAIT", "event_wait", [["awaits", "name", 0, 0, "prim"], ["correlated_by", "name", 0, 0, "prim"], ["timeout", "deadline", 0, 0, "format"], ["on_timeout", "node", 0, 0, "union"], ["on_received", "node", 0, 0, "union"]], "", [["timeout", "C2: event wait {name} has no TIMEOUT. A workflow may not wait on the world for ever"], ["on_timeout", "C2: event wait {name} has no ON_TIMEOUT: a TIMEOUT says where the wait goes when it expires"]]],
-      ["TIMER_WAIT", "timer_wait", [["awaits", "landmark", 0, 0, "format"], ["on_due", "node", 0, 0, "union"]], "", []],
-      ["ROUTING", "routing", [["when", "branch", 1, 0, "form"], ["otherwise", "node", 0, 0, "union"]], "", [["when", "C12: step {name} branches WHEN '{value}', which is not a declared guard"], ["otherwise", "step {name} has no OTHERWISE: a routing node can never fall through to nowhere"]]],
-      ["COMPENSATION", "compensation", [["on_compensated", "node", 0, 0, "union"], ["on_failed", "node", 0, 0, "union"]], "", []],
-      ["TERMINAL", "terminal", [["outcome", "outcomes", 0, 0, "menu"]], "", []],
-      ["SUSPENDED", "suspended", [["resumed_by", "actor", 0, 0, "decl"], ["resumes_at", "step", 0, 0, "union"]], "", [["resumed_by", "C10: suspension {name} is RESUMED_BY '{value}', which is not a declared actor"]]]
+      ["WORKFLOW", "workflow", [["definition_version", "text", 0, 0, "prim"], ["zql", "text", 0, 0, "prim"], ["surfaces", "text", 0, 0, "prim"], ["calendar", "name", 0, 0, "prim"], ["calendar_version", "text", 0, 0, "prim"], ["locale", "name", 0, 0, "prim"]], "", [], []],
+      ["ACTOR", "actor", [["role", "name", 0, 0, "prim"], ["segregated_from", "actor", 0, 1, "decl"]], "", [["segregated_from", "C9: actor {name} is SEGREGATED_FROM '{value}', which is not a declared actor"]], [["segregated_from", "C9"]]],
+      ["GUARD", "guard", [["norm", "name", 0, 0, "prim"]], "", [], []],
+      ["ESCALATION", "escalation", [["on_breach", "breach_action", 1, 0, "form"]], "", [], []],
+      ["RETRY", "retry", [["attempts", "number", 0, 0, "prim"], ["initial", "duration", 0, 0, "format"], ["backoff", "number", 0, 0, "prim"], ["max", "duration", 0, 0, "format"], ["not_on", "verdicts", 1, 0, "menu"]], "", [], []],
+      ["INVOCATION", "invocation", [["invokes", "flow", 0, 0, "symbol"], ["retry", "retry", 0, 1, "decl"], ["compensated_by", "flow", 0, 1, "symbol"], ["irreversible", "flag", 0, 1, "prim"], ["on_committed", "node", 0, 0, "union"], ["on_rejected", "node", 0, 0, "union"], ["on_held", "node", 0, 0, "union"]], "", [["retry", "C11: step {name} cites the retry policy '{value}', which is not declared"], ["on_committed", "C4: step {name} does not route ON COMMITTED. An invocation declares all three of a ZQL flow's endings"], ["on_rejected", "C4: step {name} does not route ON REJECTED. An invocation declares all three of a ZQL flow's endings"], ["on_held", "C4: step {name} does not route ON HELD. An invocation declares all three of a ZQL flow's endings"]], [["retry", "C11"], ["on_committed", "C4"], ["on_rejected", "C4"], ["on_held", "C4"]]],
+      ["TASK", "task", [["asks", "actor", 0, 0, "decl"], ["surface", "name", 0, 0, "prim"], ["decisions", "decision", 1, 0, "form"], ["sla", "deadline", 0, 0, "format"], ["escalation", "escalation", 0, 1, "decl"], ["timeout", "deadline", 0, 0, "format"], ["on_timeout", "node", 0, 0, "union"], ["routes", "route", 1, 0, "form"]], "", [["asks", "C11: human task {name} ASKS '{value}', which is not a declared actor"], ["escalation", "C11: human task {name} cites the escalation '{value}', which is not declared"], ["timeout", "C1: human task {name} has no TIMEOUT. Every wait carries one -- a dossier only a human can close is a SUSPENDED state, not an untimed wait"], ["on_timeout", "C1: human task {name} has no ON_TIMEOUT: a TIMEOUT says where the wait goes when it expires"]], [["asks", "C11"], ["escalation", "C11"], ["timeout", "C1"], ["on_timeout", "C1"]]],
+      ["EVENT_WAIT", "event_wait", [["awaits", "name", 0, 0, "prim"], ["correlated_by", "name", 0, 0, "prim"], ["timeout", "deadline", 0, 0, "format"], ["on_timeout", "node", 0, 0, "union"], ["on_received", "node", 0, 0, "union"]], "", [["timeout", "C2: event wait {name} has no TIMEOUT. A workflow may not wait on the world for ever"], ["on_timeout", "C2: event wait {name} has no ON_TIMEOUT: a TIMEOUT says where the wait goes when it expires"]], [["timeout", "C2"], ["on_timeout", "C2"]]],
+      ["TIMER_WAIT", "timer_wait", [["awaits", "landmark", 0, 0, "format"], ["on_due", "node", 0, 0, "union"]], "", [], []],
+      ["ROUTING", "routing", [["when", "branch", 1, 0, "form"], ["otherwise", "node", 0, 0, "union"]], "", [["when", "C12: step {name} branches WHEN '{value}', which is not a declared guard"], ["otherwise", "step {name} has no OTHERWISE: a routing node can never fall through to nowhere"]], [["when", "C12"], ["otherwise", "PARSE"]]],
+      ["COMPENSATION", "compensation", [["on_compensated", "node", 0, 0, "union"], ["on_failed", "node", 0, 0, "union"]], "", [], []],
+      ["TERMINAL", "terminal", [["outcome", "outcomes", 0, 0, "menu"]], "", [], []],
+      ["SUSPENDED", "suspended", [["resumed_by", "actor", 0, 0, "decl"], ["resumes_at", "step", 0, 0, "union"]], "", [["resumed_by", "C10: suspension {name} is RESUMED_BY '{value}', which is not a declared actor"]], [["resumed_by", "C10"]]]
     ],
     [
       ["decision", [["word", "name", 0, 0, "prim"]]],
@@ -83,44 +85,44 @@ $aCourtLangs = [
       ["branch", [["guard", "guard", 0, 0, "decl"], ["target", "node", 0, 0, "union"]]]
     ],
     [
-      ["unknown_declaration", "The RingFlex declaration set is closed -- a workflow says what it declares, and nothing else is expressible.", [["flow", "'FLOW' belongs to ZQL, not to RingFlex. A workflow step INVOKES a ZQL flow by name; it never declares one."], ["invoked_by", "'INVOKED_BY' claims the seam runs upward. It does not: a workflow step INVOKES a ZQL flow, and a ZQL flow may never contain a workflow -- the seam is closed downward (placement contract C3, section 3). What starts a workflow is an event or a person, and a workflow says so nowhere."], ["forever", "'FOREVER' was deleted from the language (author decision, 2026-08-06). A wait without a TIMEOUT is refused, and the dossier that genuinely cannot be timed out is a SUSPENDED state."]]],
-      ["unknown_seat", "a step is exactly one of six kinds, and each says exactly what it says", [["called_by", "'CALLED_BY' claims the seam runs upward. It does not: a workflow step INVOKES a ZQL flow, and a ZQL flow may never contain a workflow -- the seam is closed downward (placement contract C3, section 3)."], ["verdict", "'VERDICT OF' was deleted from the language on 2026-08-07. A step already routes its verdicts and decisions inline -- ON COMMITTED, ON approuver -- so a guard restating one is a second spelling of the same fact. A guard cites a ZQL norm, and nothing else."], ["decision", "'DECISION OF' was deleted from the language on 2026-08-07. A step already routes its verdicts and decisions inline, so a guard restating one is a second spelling of the same fact. A guard cites a ZQL norm, and nothing else."]]],
-      ["unexpected_character", "There is no production in this grammar that can parse an operator -- no operators, no conditionals, no loops, no comparisons, no arithmetic. Branching is declared as named guards on declared arrows; computation belongs to the ZQL flows a step invokes.", []],
-      ["dangling_reference", "Every arrow lands somewhere declared.", []]
+      ["unknown_declaration", "The RingFlex declaration set is closed -- a workflow says what it declares, and nothing else is expressible.", [["flow", "'FLOW' belongs to ZQL, not to RingFlex. A workflow step INVOKES a ZQL flow by name; it never declares one."], ["invoked_by", "'INVOKED_BY' claims the seam runs upward. It does not: a workflow step INVOKES a ZQL flow, and a ZQL flow may never contain a workflow -- the seam is closed downward (placement contract C3, section 3). What starts a workflow is an event or a person, and a workflow says so nowhere."], ["forever", "'FOREVER' was deleted from the language (author decision, 2026-08-06). A wait without a TIMEOUT is refused, and the dossier that genuinely cannot be timed out is a SUSPENDED state."]], "PARSE", [["flow", "FLOW_IS_ZQL"], ["invoked_by", "SEAM_UPWARD"], ["forever", "PARSE"]], ["article:placement-3"]],
+      ["unknown_seat", "a step is exactly one of six kinds, and each says exactly what it says", [["called_by", "'CALLED_BY' claims the seam runs upward. It does not: a workflow step INVOKES a ZQL flow, and a ZQL flow may never contain a workflow -- the seam is closed downward (placement contract C3, section 3)."], ["verdict", "'VERDICT OF' was deleted from the language on 2026-08-07. A step already routes its verdicts and decisions inline -- ON COMMITTED, ON approuver -- so a guard restating one is a second spelling of the same fact. A guard cites a ZQL norm, and nothing else."], ["decision", "'DECISION OF' was deleted from the language on 2026-08-07. A step already routes its verdicts and decisions inline, so a guard restating one is a second spelling of the same fact. A guard cites a ZQL norm, and nothing else."]], "PARSE", [["called_by", "SEAM_UPWARD"], ["verdict", "PARSE"], ["decision", "PARSE"]], ["article:placement-3"]],
+      ["unexpected_character", "There is no production in this grammar that can parse an operator -- no operators, no conditionals, no loops, no comparisons, no arithmetic. Branching is declared as named guards on declared arrows; computation belongs to the ZQL flows a step invokes.", [], "PARSE", [], []],
+      ["dangling_reference", "Every arrow lands somewhere declared.", [], "", [], []]
     ],
     [
-      ["outcomes", ["success", "refused", "abandoned"], "OUTCOME is success, refused or abandoned, not '{value}': there is no HELD outcome. An instance waiting for a person is not finished -- declare a SUSPENDED state instead, with RESUMED_BY and RESUMES_AT"],
-      ["verdicts", ["committed", "rejected", "held"], ""],
-      ["breach_actions", ["notify", "reassign", "transition"], ""]
+      ["outcomes", ["success", "refused", "abandoned"], "OUTCOME is success, refused or abandoned, not '{value}': there is no HELD outcome. An instance waiting for a person is not finished -- declare a SUSPENDED state instead, with RESUMED_BY and RESUMES_AT", "PARSE"],
+      ["verdicts", ["committed", "rejected", "held"], "", ""],
+      ["breach_actions", ["notify", "reassign", "transition"], "", ""]
     ],
     [
     ],
     [
-      ["duration", "duration", "{VERB} {name}: '{value}' is not a duration -- a number and a unit: seconds, minutes, hours, days, working day, working days", ""],
-      ["landmark", "landmark", "{VERB} {name}: '{value}' is not a landmark -- the one form v0 knows is 'the Nth working day of next month'", ""],
-      ["deadline", "deadline", "{VERB} {name}: '{value}' is not a deadline -- a duration (a number and seconds, minutes, hours, days or working days) or the landmark 'the Nth working day of next month'. No deadline reads instance data: a duration after a payload field must arrive as a declared event", ""]
+      ["duration", "duration", "{VERB} {name}: '{value}' is not a duration -- a number and a unit: seconds, minutes, hours, days, working day, working days", "", "PARSE"],
+      ["landmark", "landmark", "{VERB} {name}: '{value}' is not a landmark -- the one form v0 knows is 'the Nth working day of next month'", "", "PARSE"],
+      ["deadline", "deadline", "{VERB} {name}: '{value}' is not a deadline -- a duration (a number and seconds, minutes, hours, days or working days) or the landmark 'the Nth working day of next month'. No deadline reads instance data: a duration after a payload field must arrive as a declared event", "", "PARSE"]
     ],
     [
-      ["node", [["invocation", 0, "decl"], ["task", 0, "decl"], ["event_wait", 0, "decl"], ["timer_wait", 0, "decl"], ["routing", 0, "decl"], ["compensation", 0, "decl"], ["terminal", 0, "decl"], ["suspended", 0, "decl"]], "C5: step {name} points at '{value}', which is not a declared step, terminal or suspension"],
-      ["step", [["invocation", 0, "decl"], ["task", 0, "decl"], ["event_wait", 0, "decl"], ["timer_wait", 0, "decl"], ["routing", 0, "decl"], ["compensation", 0, "decl"]], "C10: suspension {name} RESUMES_AT '{value}', which is not a declared step"]
+      ["node", [["invocation", 0, "decl"], ["task", 0, "decl"], ["event_wait", 0, "decl"], ["timer_wait", 0, "decl"], ["routing", 0, "decl"], ["compensation", 0, "decl"], ["terminal", 0, "decl"], ["suspended", 0, "decl"]], "C5: step {name} points at '{value}', which is not a declared step, terminal or suspension", "C5"],
+      ["step", [["invocation", 0, "decl"], ["task", 0, "decl"], ["event_wait", 0, "decl"], ["timer_wait", 0, "decl"], ["routing", 0, "decl"], ["compensation", 0, "decl"]], "C10: suspension {name} RESUMES_AT '{value}', which is not a declared step", "C10"]
     ],
     [
-      ["c3_neither", "invocation", "compensated_by absent and irreversible absent", "", "C3: step {name} invokes '{invokes}' without declaring COMPENSATED_BY or IRREVERSIBLE. An act that changes the world must say whether it can be taken back"],
-      ["c3_both", "invocation", "compensated_by present and irreversible present", "", "C3: step {name} declares both COMPENSATED_BY and IRREVERSIBLE; an act is one or the other"],
-      ["c6_invocation", "invocation", "not self reachable", "", "C6: step {name} is unreachable from the entry step. A step nothing can reach is a dead step"],
-      ["c6_task", "task", "not self reachable", "", "C6: step {name} is unreachable from the entry step. A step nothing can reach is a dead step"],
-      ["c6_event_wait", "event_wait", "not self reachable", "", "C6: step {name} is unreachable from the entry step. A step nothing can reach is a dead step"],
-      ["c6_timer_wait", "timer_wait", "not self reachable", "", "C6: step {name} is unreachable from the entry step. A step nothing can reach is a dead step"],
-      ["c6_routing", "routing", "not self reachable", "", "C6: step {name} is unreachable from the entry step. A step nothing can reach is a dead step"],
-      ["c6_compensation", "compensation", "not self reachable", "", "C6: step {name} is unreachable from the entry step. A step nothing can reach is a dead step"],
-      ["c7_an_ending", "workflow", "not exists terminal", "", "C7: workflow {name} declares no terminal. Every workflow must be able to end"],
-      ["c7_terminal", "terminal", "not self reachable", "", "C7: terminal {name} is unreachable. An ending nothing can reach is an ending that never happens"],
-      ["c7_suspended", "suspended", "not self reachable", "", "C7: suspension {name} is unreachable"],
-      ["c8_decisions_routed", "task", "not routes keyed_by decisions", "", "C8: step {name} declares the decision '{other}' and never routes it, or routes it without declaring it. Every declared decision is routed, and no arrow routes an undeclared one"],
-      ["c9_self_segregation", "actor", "segregated_from = self", "", "C9: actor {name} is SEGREGATED_FROM itself. Segregation separates two people, not one from a reflection"],
-      ["c15_guard", "guard", "not self referenced", "", "C15: guard {name} is declared and never used. Either it is a leftover, or an arrow somebody forgot to wire"],
-      ["c15_escalation", "escalation", "not self referenced", "", "C15: escalation {name} is declared and never used"],
-      ["c15_retry", "retry", "not self referenced", "", "C15: retry policy {name} is declared and never used"]
+      ["c3_neither", "invocation", "compensated_by absent and irreversible absent", "", "C3: step {name} invokes '{invokes}' without declaring COMPENSATED_BY or IRREVERSIBLE. An act that changes the world must say whether it can be taken back", "C3"],
+      ["c3_both", "invocation", "compensated_by present and irreversible present", "", "C3: step {name} declares both COMPENSATED_BY and IRREVERSIBLE; an act is one or the other", "C3"],
+      ["c6_invocation", "invocation", "not self reachable", "", "C6: step {name} is unreachable from the entry step. A step nothing can reach is a dead step", "C6"],
+      ["c6_task", "task", "not self reachable", "", "C6: step {name} is unreachable from the entry step. A step nothing can reach is a dead step", "C6"],
+      ["c6_event_wait", "event_wait", "not self reachable", "", "C6: step {name} is unreachable from the entry step. A step nothing can reach is a dead step", "C6"],
+      ["c6_timer_wait", "timer_wait", "not self reachable", "", "C6: step {name} is unreachable from the entry step. A step nothing can reach is a dead step", "C6"],
+      ["c6_routing", "routing", "not self reachable", "", "C6: step {name} is unreachable from the entry step. A step nothing can reach is a dead step", "C6"],
+      ["c6_compensation", "compensation", "not self reachable", "", "C6: step {name} is unreachable from the entry step. A step nothing can reach is a dead step", "C6"],
+      ["c7_an_ending", "workflow", "not exists terminal", "", "C7: workflow {name} declares no terminal. Every workflow must be able to end", "C7"],
+      ["c7_terminal", "terminal", "not self reachable", "", "C7: terminal {name} is unreachable. An ending nothing can reach is an ending that never happens", "C7"],
+      ["c7_suspended", "suspended", "not self reachable", "", "C7: suspension {name} is unreachable", "C7"],
+      ["c8_decisions_routed", "task", "not routes keyed_by decisions", "", "C8: step {name} declares the decision '{other}' and never routes it, or routes it without declaring it. Every declared decision is routed, and no arrow routes an undeclared one", "C8"],
+      ["c9_self_segregation", "actor", "segregated_from = self", "", "C9: actor {name} is SEGREGATED_FROM itself. Segregation separates two people, not one from a reflection", "C9"],
+      ["c15_guard", "guard", "not self referenced", "", "C15: guard {name} is declared and never used. Either it is a leftover, or an arrow somebody forgot to wire", "C15"],
+      ["c15_escalation", "escalation", "not self referenced", "", "C15: escalation {name} is declared and never used", "C15"],
+      ["c15_retry", "retry", "not self referenced", "", "C15: retry policy {name} is declared and never used", "C15"]
     ],
     [["workflow"], "workflow", ["invocation", "task", "event_wait", "timer_wait", "routing", "compensation"], [["workflow", "process"]]],
     [],
@@ -135,7 +137,7 @@ $aCourtLangs = [
     ],
     NULL,
     NULL,
-    [["flow", "flow", "calls", "step {name} names the flow '{value}', and the world declares no flow:{value}. A cross-artifact reference no court resolves is the defect C3 section 3.2 closes"]]
+    [["flow", "flow", "calls", "step {name} names the flow '{value}', and the world declares no flow:{value}. A cross-artifact reference no court resolves is the defect C3 section 3.2 closes", "UNRESOLVED_FLOW", ["article:placement-3.2"]]]
   ]
 ]
 CtUseLanguage("f")

@@ -60,6 +60,9 @@ expression language forged whole, judged by stz's 29 fixtures as stage 8, pinned
 | `spike/v10/fixtures.json`, `spike/v10/GRAMMAR.md` | **Haro v0.10** (the tenth rung, below): the WORLD as versioned data -- SYMBOL, a seat resolved against a C1 world.json handed to `check`, and PUBLISH, the kinds a sentence contributes; 7 fixtures first, the prose after |
 | `spike/z_v10.haro`, `spike/f_v10.haro` | Z publishing its world (flows, entities, norms, zones) and F resolving INVOKES and COMPENSATED_BY through a `flow` SYMBOL, publishing one `process`; the guard's Z and F since the tenth rung |
 | `spike/f/tontine_cycle.f` | the seam between two forged letters: an F workflow invoking two of Z's flows, resolved against the world Z's court emits from `tontine.z` |
+| `spike/v11/fixtures.json`, `spike/v11/GRAMMAR.md` | **Haro v0.11** (the eleventh rung, below): the Diagnostic Contract -- CODE, CODES and CITES, so every forged court answers `diagnose <file> [world]` in C2 v1.2.0's one object of six-field envelopes; 7 fixtures first, the prose after |
+| `spike/f_v11.haro` | F with RingFlex's own codes and cites declared beside its words (C1 to C15, FLOW_IS_ZQL, SEAM_UPWARD, UNRESOLVED_FLOW; article:placement-3 and -3.2); the guard's F since the eleventh rung |
+| `spike/rf_diag.ring` | RingFlex's own court asked for its C2 envelope on every original fixture and world, run read-only under official Ring by stage 14; the live judge of the forged court's codes |
 
 Nothing in `rnxc` or the VM changed. Nothing in a sibling repository changed.
 
@@ -734,6 +737,74 @@ contract they meet on is the family's, written before either existed.
 **What it does not do is named in `v10/GRAMMAR.md`**: the world is emitted and resolved,
 never stored; `ON SURFACE` is not a symbol; the C2 envelope is not emitted.
 
+## The eleventh rung -- Haro v0.11, the Diagnostic Contract -- 2026-10-02
+
+**Decided on the author's second delegation, the same day.** The tenth rung's record ended
+"the C2 diagnostic envelope -- six fields, JSON -- is not emitted ... The envelope is a
+decision for the family's courts together, not this one's alone." The family took that
+decision before Haro existed: C2 v1.2.0 (`stzzui/doc/diagnostic-contract.md`) is ratified
+law, RingFlex's court speaks it (`WflowDiagnose`, `WflowDiagnosticsJson`), and the
+charter's own section 5 names it as what every court owes. So of the rungs the author left
+unnamed -- NARRATE, FORMS, the envelope, N behind the Phase 1.5 study -- the envelope is
+the one with a contract already written and a judge already in the estate; the others
+need a decision of his first.
+
+**What a court needs to speak it is three clauses.** Fixtures first (`spike/v11/`, 7), then
+the prose. `CODE` on a CONSTRAINT, a UNION, a MENU, a RANGE, a FORMAT, a SYMBOL or a
+REFUSAL: the stable identifier that element refuses under, in the contract's format;
+`CODES` on a DECLARATION, a code per seat beside MESSAGES (RingFlex's C1 and C2 are the
+same TIMEOUT seat under two codes, so the code belongs to the seat), and on a REFUSAL, a
+code per NAMED word (`FLOW` is `FLOW_IS_ZQL`, `INVOKED_BY` is `SEAM_UPWARD`); `CITES`, the
+pinned instruments a SYMBOL's or a REFUSAL's refusal cites, `kind:value` in the four
+binding kinds. Every forged court gains `diagnose <file> [world]`: the same court, the
+same first refusal, answered as the contract's one object of six-field envelopes -- a
+refusal one `error` with its element's code and cites, a sentence with SYMBOL seats and no
+world one `NO_WORLD` warning at line 0, a clean sentence `"diagnostics": []`. Inside the
+court it is one function, `CtFailC`, which records the code and cites and raises the same
+one-line refusal `check` has always printed; `check` is unchanged to the byte on every
+fixture of every rung. An element without a CODE refuses under its kind's default, cited
+`rule:<its name>`, so no refusal leaves without an identifier; a grammar refusal is
+`PARSE` and cites nothing.
+
+    stage 1    v0.1 28 ... v0.10 7, v0.11 7 -- on rnxc and the oracle, byte-identical
+    stage 14   the contract's shape, by hand against the schema's rules, on every
+               diagnostic every forged court emits: 27 F fixtures, Z's tontine.z, A's
+               w_in_a.a, the machine's qemu_hello.machine, an unknown verb, a cyclic
+               algorithm -- 0 defects; every F fixture's error carries the code its
+               `-- EXPECT:` line names and the cite RingFlex gives it (rule:Cn,
+               article:placement-3, nothing for PARSE); resolution against RingFlex's
+               worlds gives UNRESOLVED_FLOW citing article:placement-3.2 on the step's
+               line and NO_WORLD a warning at line 0; then RingFlex's court ITSELF, live
+               under official Ring 1.27 on its 24 original fixtures and four worlds
+               through rf_diag.ring, read-only: the same first code, the same cites, the
+               same severities as the forged court on the re-expressed ones, all 28.
+               The same bytes on rnxc and the oracle on every diagnose run; first run
+               of the codes
+    stages 9-13  Z 16 of 16, Q 25 of 25, F 27 of 27 on f_v11.haro, A 35 of 35, the
+               world 9 of 9 -- unchanged
+    stage 6    edit to verdict, measured first in the pass: harb 9.1 ms; rnxc compiled 95.2, image 18.0; the oracle 123.4
+    the pass   fourteen stages, PASS in 142.1 s; --plant FAIL (36 failures, the envelope among them)
+
+**Two things the guard caught before the number was trusted, both harness.** A court
+forged BEFORE the forge learned the two new globals passed on rnxc and died on the
+oracle: `$cCourtCode`, first assigned inside `CtSetCode`, is that function's local on Ring
+and R24 at the next read, while Rule A makes it the global here -- C-2's own shape, caught
+by the oracle on `a_court.ring`, which stage 14 had not re-forged. Stage 14 re-forges
+every court it judges now. And the machine court was judged on `makeen_box.machine`, which
+the pinned declaration refuses by design (HF-31); the sentence it accepts is
+`qemu_hello.machine`, as stage 4 already knew.
+
+**And one timing was void and is not quoted.** The first full pass read stage 6 at 188 ms
+on rnxc, 246 alone -- and harb, Zig, untouched, at 25 ms against its 10: an orphaned
+shell launcher from an earlier session was spinning at a full core since 12:50 and the
+load stood at 48%. The machine, not the change; stopping the process is the author's,
+not this session's. Re-measured when the load fell, the numbers above are in line with
+every rung before.
+
+**What it does not do is named in `v11/GRAMMAR.md`**: no `col`; one error per run, as the
+court stops at its first refusal; no `why`/`todo`/`frames`; `diagnose` judges the sentence,
+never a run of it.
+
 ## The names -- `.haro`, not `.stzu` -- corrected 2026-10-02
 
 **At the author's word ("we agreed to use .haro instead of .stzu, no?").** D1 was ratified
@@ -804,7 +875,10 @@ whole guard re-run on the renamed tree: 28 + 30 + 27 + 23, 117 of 120, 32 of 32,
 11. ~~The WORLD as versioned data~~ -- built 2026-10-02 as Haro v0.10, the tenth rung above,
    on the author's delegation: SYMBOL and PUBLISH, C1 rows emitted and C3 3.2 resolved,
    judged by RingFlex's placement gate and the Z->F seam, nine of nine, first run.
-12. The forge as an `rnxc` verb (the ringpp session's `src/`, routed); the
+12. ~~The C2 diagnostic envelope~~ -- built 2026-10-02 as Haro v0.11, the eleventh rung
+   above, on the author's second delegation: CODE, CODES and CITES, every forged court's
+   `diagnose` judged by the contract's shape and by RingFlex's court live, 28 of 28 codes.
+13. The forge as an `rnxc` verb (the ringpp session's `src/`, routed); the
    Softanza-resident timing the charter's 2.6 asks for; the court's run time on the
    oracle under paths and views (6.4x the image this pass, named at stage 6); the
    ontology as versioned data, `ASK`, `NARRATE` and `FORMS`, the rows of section 3 the

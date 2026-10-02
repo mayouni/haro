@@ -193,7 +193,9 @@ func LangSource(aLang)
 	aRows = []
 	aD = LangGet(aLang, "declarations")
 	for i = 1 to len(aD)
-		aRows + ("[" + RingStr(aD[i][2]) + ", " + RingStr(aD[i][1]) + ", " + SeatsSource(aLang, aD[i][3]) + ", " + RingStr(aD[i][6]) + ", " + MessagesSource(aD[i][7]) + "]")
+		aCodes = []
+		if len(aD[i]) >= 8 aCodes = aD[i][8] ok
+		aRows + ("[" + RingStr(aD[i][2]) + ", " + RingStr(aD[i][1]) + ", " + SeatsSource(aLang, aD[i][3]) + ", " + RingStr(aD[i][6]) + ", " + MessagesSource(aD[i][7]) + ", " + MessagesSource(aCodes) + "]")
 	next
 	cKinds = RowsSource(aRows, nl)
 	aRows = []
@@ -207,19 +209,31 @@ func LangSource(aLang)
 	for i = 1 to len(aR)
 		aNamed = []
 		if len(aR[i]) >= 5 aNamed = aR[i][5] ok
-		aRows + ("[" + RingStr(aR[i][1]) + ", " + RingStr(aR[i][2]) + ", " + MessagesSource(aNamed) + "]")
+		cRCode = ""
+		aRCodes = []
+		aRCites = []
+		if len(aR[i]) >= 8
+			cRCode = aR[i][6]
+			aRCodes = aR[i][7]
+			aRCites = aR[i][8]
+		ok
+		aRows + ("[" + RingStr(aR[i][1]) + ", " + RingStr(aR[i][2]) + ", " + MessagesSource(aNamed) + ", " + RingStr(cRCode) + ", " + MessagesSource(aRCodes) + ", " + NamesSource(aRCites) + "]")
 	next
 	cRefusals = RowsSource(aRows, nl)
 	aRows = []
 	aM = LangGet(aLang, "menus")
 	for i = 1 to len(aM)
-		aRows + ("[" + RingStr(aM[i][1]) + ", " + NamesSource(aM[i][2]) + ", " + RingStr(aM[i][3]) + "]")
+		cMC = ""
+		if len(aM[i]) >= 5 cMC = aM[i][5] ok
+		aRows + ("[" + RingStr(aM[i][1]) + ", " + NamesSource(aM[i][2]) + ", " + RingStr(aM[i][3]) + ", " + RingStr(cMC) + "]")
 	next
 	cMenus = RowsSource(aRows, nl)
 	aRows = []
 	aRg = LangGet(aLang, "ranges")
 	for i = 1 to len(aRg)
-		aRows + ("[" + RingStr(aRg[i][1]) + ", " + aRg[i][2] + ", " + aRg[i][3] + ", " + RingStr(aRg[i][4]) + "]")
+		cRgC = ""
+		if len(aRg[i]) >= 6 cRgC = aRg[i][6] ok
+		aRows + ("[" + RingStr(aRg[i][1]) + ", " + aRg[i][2] + ", " + aRg[i][3] + ", " + RingStr(aRg[i][4]) + ", " + RingStr(cRgC) + "]")
 	next
 	cRanges = RowsSource(aRows, nl)
 	aRows = []
@@ -227,19 +241,25 @@ func LangSource(aLang)
 	for i = 1 to len(aFm)
 		cFold = ""
 		if len(aFm[i]) >= 5 cFold = aFm[i][5] ok
-		aRows + ("[" + RingStr(aFm[i][1]) + ", " + RingStr(aFm[i][2]) + ", " + RingStr(aFm[i][3]) + ", " + RingStr(cFold) + "]")
+		cFmC = ""
+		if len(aFm[i]) >= 6 cFmC = aFm[i][6] ok
+		aRows + ("[" + RingStr(aFm[i][1]) + ", " + RingStr(aFm[i][2]) + ", " + RingStr(aFm[i][3]) + ", " + RingStr(cFold) + ", " + RingStr(cFmC) + "]")
 	next
 	cFormats = RowsSource(aRows, nl)
 	aRows = []
 	aU = LangGet(aLang, "unions")
 	for i = 1 to len(aU)
-		aRows + ("[" + RingStr(aU[i][1]) + ", " + AltsSource(aLang, aU[i][2]) + ", " + RingStr(aU[i][3]) + "]")
+		cUC = ""
+		if len(aU[i]) >= 5 cUC = aU[i][5] ok
+		aRows + ("[" + RingStr(aU[i][1]) + ", " + AltsSource(aLang, aU[i][2]) + ", " + RingStr(aU[i][3]) + ", " + RingStr(cUC) + "]")
 	next
 	cUnions = RowsSource(aRows, nl)
 	aRows = []
 	aC = LangGet(aLang, "constraints")
 	for i = 1 to len(aC)
-		aRows + ("[" + RingStr(aC[i][1]) + ", " + RingStr(aC[i][2]) + ", " + RingStr(aC[i][3]) + ", " + RingStr(aC[i][4]) + ", " + RingStr(aC[i][5]) + "]")
+		cCC = ""
+		if len(aC[i]) >= 7 cCC = aC[i][7] ok
+		aRows + ("[" + RingStr(aC[i][1]) + ", " + RingStr(aC[i][2]) + ", " + RingStr(aC[i][3]) + ", " + RingStr(aC[i][4]) + ", " + RingStr(aC[i][5]) + ", " + RingStr(cCC) + "]")
 	next
 	cConstraints = RowsSource(aRows, nl)
 	aW = LangGet(aLang, "world")
@@ -262,7 +282,13 @@ func LangSource(aLang)
 	cSymbols = "["
 	for i = 1 to len(aSy)
 		if i > 1 cSymbols += ", " ok
-		cSymbols += "[" + RingStr(aSy[i][1]) + ", " + RingStr(aSy[i][2]) + ", " + RingStr(aSy[i][3]) + ", " + RingStr(aSy[i][4]) + "]"
+		cSyC = ""
+		aSyCites = []
+		if len(aSy[i]) >= 7
+			cSyC = aSy[i][6]
+			aSyCites = aSy[i][7]
+		ok
+		cSymbols += "[" + RingStr(aSy[i][1]) + ", " + RingStr(aSy[i][2]) + ", " + RingStr(aSy[i][3]) + ", " + RingStr(aSy[i][4]) + ", " + RingStr(cSyC) + ", " + NamesSource(aSyCites) + "]"
 	next
 	cSymbols += "]"
 	aRf = LangGet(aLang, "refine")
@@ -402,6 +428,7 @@ func ForgeCourt(aLang)
 	c += "$aCourtViews = []" + nl + "$aCourtSentenceKinds = []" + nl
 	c += "$aCourtExprs = []" + nl + "$aCourtWalks = []" + nl + "$aCourtAsk = NULL" + nl + "$aCourtRun = NULL" + nl
 	c += "$aCourtSymbols = []" + nl + "$aCourtWorldFile = NULL" + nl
+	c += "$cCourtCode = " + RingStr("PARSE") + nl + "$aCourtCites = []" + nl
 	c += ExprGlobals()
 	c += "$aCourtLangs = [" + nl
 	aRecs = ForgeLangRecords(aLang, [])

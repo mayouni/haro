@@ -65,6 +65,7 @@ STZU7_FIXTURES = os.path.join(HERE, 'v07', 'fixtures.json')
 STZU8_FIXTURES = os.path.join(HERE, 'v08', 'fixtures.json')
 STZU9_FIXTURES = os.path.join(HERE, 'v09', 'fixtures.json')
 STZU10_FIXTURES = os.path.join(HERE, 'v10', 'fixtures.json')
+STZU11_FIXTURES = os.path.join(HERE, 'v11', 'fixtures.json')
 
 
 def judge_stzu(exe, label, fixtures=STZU_FIXTURES):
@@ -74,7 +75,7 @@ def judge_stzu(exe, label, fixtures=STZU_FIXTURES):
     counts), world and points."""
     doc = json.load(open(fixtures, encoding='utf-8'))
     # the pinned v0.1 judge is stzu's; everything since is Haro's (D1)
-    assert doc['grammar'] in ('stzu', 'haro') and doc['version'] in ('0.1', '0.2', '0.3', '0.4', '0.5', '0.6', '0.7', '0.8', '0.9', '0.10')
+    assert doc['grammar'] in ('stzu', 'haro') and doc['version'] in ('0.1', '0.2', '0.3', '0.4', '0.5', '0.6', '0.7', '0.8', '0.9', '0.10', '0.11')
     passed = failed = 0
     outputs = {}
     with tempfile.TemporaryDirectory() as td:
@@ -146,7 +147,8 @@ def stage1():
                             ('v0.7, ASK -- the Q letter -- and ABSENT missing', STZU7_FIXTURES),
                             ('v0.8, what F needs: NAMED refusals, keyed pairs, a UNION of declarations, deadlines, ENTRY, three relations', STZU8_FIXTURES),
                             ('v0.9, what A needs: RUN, the structured steps, and a list of a UNION of declarations', STZU9_FIXTURES),
-                            ('v0.10, the WORLD as versioned data: SYMBOL and PUBLISH', STZU10_FIXTURES)):
+                            ('v0.10, the WORLD as versioned data: SYMBOL and PUBLISH', STZU10_FIXTURES),
+                            ('v0.11, the Diagnostic Contract: CODE, CODES, CITES', STZU11_FIXTURES)):
         print(f'stage 1 -- the Haro meta-court in pure Ring, judged by its fixtures ({label})')
         f1, o1 = judge_stzu(RNXC, 'rnxc', fixtures)
         f2, o2 = judge_stzu(ORACLE, 'oracle ring.exe', fixtures)
@@ -1033,7 +1035,7 @@ def stage10():
 
 # ---- stage 11: F, the flow of work -- RingFlex's .wflow re-declared, judged by its own fixtures
 
-F_STZU = os.path.join(HERE, 'f_v10.haro')   # f_v08.haro plus the flow SYMBOL and PUBLISH (the tenth rung); the 26 fixtures are unchanged
+F_STZU = os.path.join(HERE, 'f_v11.haro')   # f_v10.haro plus RingFlex's codes and cites (the eleventh rung); the 27 fixtures are unchanged
 F_DIR = os.path.join(HERE, 'f')
 F_FLOOR = 26
 RINGFLEX = r'D:\GitHub\ringflex'
@@ -1308,11 +1310,11 @@ def stage13():
     checks += 1; failures += 0 if ok else 1
     print(('  ok   ' if ok else '  FAIL ') + f'the lawful workflow resolves every INVOKES against world.json: {r.splitlines()[0][:60]}')
     r = both('f_court.ring', ['check', wf, worlds['world-missing-flow']], 'missing-flow')
-    ok = (not r.startswith('ok')) and 'UNRESOLVED' in r and 'notifier' in r and 'notifier_client' in r
+    ok = (not r.startswith('ok')) and 'declares no flow:' in r and 'notifier' in r and 'notifier_client' in r
     checks += 1; failures += 0 if ok else 1
     print(('  ok   ' if ok else '  FAIL ') + f'a world missing one flow refuses the step that names it, by both names: {r[:110]}')
     r = both('f_court.ring', ['check', wf, worlds['world-missing-compensating']], 'missing-compensating')
-    ok = (not r.startswith('ok')) and 'UNRESOLVED' in r and 'encaisser' in r and 'rembourser_paiement' in r
+    ok = (not r.startswith('ok')) and 'declares no flow:' in r and 'encaisser' in r and 'rembourser_paiement' in r
     checks += 1; failures += 0 if ok else 1
     print(('  ok   ' if ok else '  FAIL ') + f'a world missing the compensating flow refuses the compensating step by the flow\'s name: {r[:110]}')
     r = both('f_court.ring', ['check', wf], 'no-world')
@@ -1352,7 +1354,7 @@ def stage13():
             checks += 1; failures += 0 if ok else 1
             print(('  ok   ' if ok else '  FAIL ') + f'an F workflow invoking two Z flows resolves against the world Z emitted: {r.splitlines()[0][:60]}')
             r = both('f_court.ring', ['check', cyc, worlds['world']], 'seam-unresolved')
-            ok = (not r.startswith('ok')) and 'UNRESOLVED' in r and 'collect' in r
+            ok = (not r.startswith('ok')) and 'declares no flow:' in r and 'collect' in r
             checks += 1; failures += 0 if ok else 1
             print(('  ok   ' if ok else '  FAIL ') + f'and against RingFlex\'s world, which declares no collect, the deposit step is refused: {r[:100]}')
             fw = json.loads(both('f_court.ring', ['world', cyc], 'f-rows'))
@@ -1381,6 +1383,276 @@ def stage13():
             print(f'  FAIL RingFlex\'s placement gate did not hold: {out[-200:]}')
     else:
         print('  SKIP RingFlex\'s placement gate: official Ring 1.27 is not installed here')
+    return failures
+
+
+# ---- stage 14: the Diagnostic Contract (C2 v1.2.0) on every forged court, judged by the schema and by RingFlex's codes
+
+C2_SCHEMA = r'D:\GitHub\stzzui\doc\diagnostic-contract.schema.json'
+C2_CODE = re.compile(r'^[A-Z][A-Z0-9]*([_-][A-Z0-9]+)*$')
+C2_CITE = re.compile(r'^(rule|article|right|pattern):[A-Za-z0-9_.-]+$')
+C2_LANG = re.compile(r'^[a-z][a-z0-9_]*$')
+
+
+def c2_scalars_ok(v):
+    """C2 2.8, to full depth: no bare true, false or null anywhere."""
+    if v is None or isinstance(v, bool):
+        return False
+    if isinstance(v, dict):
+        return all(c2_scalars_ok(x) for x in v.values())
+    if isinstance(v, list):
+        return all(c2_scalars_ok(x) for x in v)
+    return True
+
+
+def c2_validate(report):
+    """The contract's shape, by hand (no jsonschema module here): returns a list of defects."""
+    bad = []
+    if not isinstance(report, dict) or 'diagnostics' not in report or not isinstance(report['diagnostics'], list):
+        return ['the machine form is not one object carrying a diagnostics array']
+    if not c2_scalars_ok(report):
+        bad.append('a bare true, false or null (2.8)')
+    for d in report['diagnostics']:
+        if not isinstance(d, dict):
+            bad.append('a diagnostic is not an object'); continue
+        for k in ('code', 'severity', 'message', 'span', 'cites', 'language'):
+            if k not in d:
+                bad.append(f'missing {k}')
+        if not isinstance(d.get('code'), str) or not C2_CODE.match(d.get('code', '')):
+            bad.append(f'code {d.get("code")!r} is not in the format')
+        if d.get('severity') not in ('error', 'warning'):
+            bad.append(f'severity {d.get("severity")!r} is off the ladder')
+        if not isinstance(d.get('message'), str) or not d.get('message'):
+            bad.append('an empty message')
+        sp = d.get('span')
+        if not isinstance(sp, dict) or set(sp) - {'file', 'line', 'col'} or 'file' not in sp or 'line' not in sp:
+            bad.append(f'span {sp!r} is not {{file, line[, col]}}')
+        else:
+            if not isinstance(sp['file'], str) or not sp['file']:
+                bad.append('span.file is empty')
+            if not isinstance(sp['line'], int) or isinstance(sp['line'], bool) or sp['line'] < 0:
+                bad.append(f'span.line {sp["line"]!r} is not an integer >= 0')
+        if not isinstance(d.get('cites'), list) or not all(isinstance(c, str) and C2_CITE.match(c) for c in d.get('cites', [])):
+            bad.append(f'cites {d.get("cites")!r} are not kind:value in the four kinds')
+        if not isinstance(d.get('language'), str) or not C2_LANG.match(d.get('language', '')):
+            bad.append(f'language {d.get("language")!r} is not a lowercase identifier')
+        if d.get('code') == 'PARSE' and d.get('cites'):
+            bad.append('PARSE cites something: a grammar diagnostic enforces no pinned instrument')
+    return bad
+
+
+RF_DIAG = os.path.join(HERE, 'rf_diag.ring')
+
+
+def stage14():
+    """The eleventh rung. Every forged court answers `diagnose <file> [world]`
+    in C2 v1.2.0's machine form. Judged three ways: the contract's own shape,
+    checked by hand against the schema's rules on every diagnostic every court
+    emits over its fixtures; RingFlex's codes -- its court, run live under
+    official Ring on its ORIGINAL fixtures and world fixtures through
+    rf_diag.ring (read-only), must give the same code, the same cites and the
+    same line-or-file-wide as the forged court gives on the re-expressed ones,
+    which is what CODE, CODES and CITES in f_v11.haro declare; and the family's
+    one consumer, which must be able to tell a clean run from no output."""
+    print('stage 14 -- the Diagnostic Contract (C2 v1.2.0): every forged court\'s `diagnose`, judged by the contract\'s shape and by RingFlex\'s own codes, live')
+    failures = 0
+    # every court this stage asks is re-forged first: a court forged before the
+    # forge learned a global is a court the ORACLE refuses (a `$name` first
+    # assigned inside a function is that function's local on Ring, R24 at the
+    # next read) while rnxc, under Rule A, runs it -- which is how a stale
+    # a_court.ring passed on one runtime and failed on the other
+    for stzu in (F_STZU, Z_STZU, A_STZU, os.path.join(HERE, 'machine_v03.haro')):
+        run_args(RNXC, ['forge.ring', stzu, '.'], HERE)
+    ab_diff = []
+    def both(court, args, label):
+        r = run_args(RNXC, [court] + args, HERE).strip()
+        o = run_args(ORACLE, [court] + args, HERE).strip()
+        if r != o:
+            ab_diff.append(label)
+        return r
+    # 1. the shape, on every court's fixtures
+    reports = {}
+    n_diag = 0
+    shape_bad = []
+    for name in sorted(f for f in os.listdir(F_DIR) if f.endswith('.f')):
+        r = both('f_court.ring', ['diagnose', os.path.join('f', name)], 'f:' + name)
+        try:
+            rep = json.loads(r)
+        except json.JSONDecodeError:
+            shape_bad.append((name, 'not JSON: ' + r[:80])); continue
+        bad = c2_validate(rep)
+        if bad:
+            shape_bad.append((name, '; '.join(bad)))
+        reports[name] = rep
+        n_diag += len(rep['diagnostics'])
+    # the machine sentence the forged court accepts (stage 4's rule: qemu_hello under the
+    # pinned declaration, makeen_box under machine_v03.haro; HF-31)
+    machine_sentence = r'D:\GitHub\harobanda\machines\qemu_hello.machine'
+    if not court_verdict(RNXC, 'machine_court.ring', machine_sentence)[0]:
+        machine_sentence = MAKEEN
+    others = [('z_court.ring', 'tontine.z'), ('a_court.ring', os.path.join('a', 'w_in_a.a')), ('machine_court.ring', machine_sentence)]
+    for court, f in others:
+        r = both(court, ['diagnose', f], court + ':' + os.path.basename(f))
+        try:
+            rep = json.loads(r)
+            bad = c2_validate(rep)
+            if rep['diagnostics']:
+                bad.append(f'{len(rep["diagnostics"])} diagnostic(s) on a clean sentence')
+        except json.JSONDecodeError:
+            bad = ['not JSON: ' + r[:80]]
+        if bad:
+            shape_bad.append((os.path.basename(f), '; '.join(bad)))
+    # a refusal of another language, and a cyclic algorithm, carry codes too
+    with tempfile.TemporaryDirectory() as td:
+        p = os.path.join(td, 'drop.z')
+        with open(p, 'w', encoding='utf-8', newline='') as fh:
+            fh.write('DROP TABLE deposit\n')
+        r = both('z_court.ring', ['diagnose', p], 'z:drop')
+        try:
+            rep = json.loads(r); bad = c2_validate(rep)
+            if len(rep['diagnostics']) != 1 or rep['diagnostics'][0]['code'] != 'UNKNOWN_VERB' or rep['diagnostics'][0]['severity'] != 'error':
+                bad.append(f'expected one UNKNOWN_VERB error, got {rep["diagnostics"]}')
+        except json.JSONDecodeError:
+            bad = ['not JSON: ' + r[:80]]
+        if bad:
+            shape_bad.append(('drop.z', '; '.join(bad)))
+        p = os.path.join(td, 'loop.a')
+        with open(p, 'w', encoding='utf-8', newline='') as fh:
+            fh.write('DEFINE ALGORITHM loop AS (STEPS [again], RESULT [n]) RATIONALE "x"\nDEFINE COMPUTE bump AS (INTO n, VALUE "n + 1") RATIONALE "x"\nDEFINE BRANCH again AS (WHEN "n < 10", THEN [bump, again]) RATIONALE "x"\n')
+        r = both('a_court.ring', ['diagnose', p], 'a:loop')
+        try:
+            rep = json.loads(r); bad = c2_validate(rep)
+            if len(rep['diagnostics']) != 1 or rep['diagnostics'][0]['code'] != 'CYCLE' or rep['diagnostics'][0]['cites'] != ['rule:run']:
+                bad.append(f'expected one CYCLE error citing rule:run, got {rep["diagnostics"]}')
+        except json.JSONDecodeError:
+            bad = ['not JSON: ' + r[:80]]
+        if bad:
+            shape_bad.append(('loop.a', '; '.join(bad)))
+    if shape_bad:
+        failures += len(shape_bad)
+        for name, why in shape_bad[:6]:
+            print(f'  FAIL {name}: {why}')
+    print(('  FAIL ' if shape_bad else '  ok   ') + f'the contract\'s shape on {n_diag} diagnostics over {len(reports)} F fixtures and 5 other sentences ({len(shape_bad)} defect(s))')
+    # 2. the codes RingFlex gives, from its own court, live
+    expect = {}
+    for name, rep in reports.items():
+        src = open(os.path.join(F_DIR, name), encoding='utf-8').read()
+        exp = f_expect(src)
+        kind, _, arg = exp.partition(' ')
+        if kind == 'refuse':
+            expect[name] = arg
+        elif kind == 'parse-error':
+            stem = name[:-2]
+            expect[name] = {'uses-flow': 'FLOW_IS_ZQL', 'invoked-by-flow': 'SEAM_UPWARD', 'step-invoked-by-flow': 'SEAM_UPWARD'}.get(stem, 'PARSE')
+        else:
+            expect[name] = None
+    code_bad = []
+    for name, rep in reports.items():
+        errs = [d for d in rep['diagnostics'] if d['severity'] == 'error']
+        warns = [d for d in rep['diagnostics'] if d['severity'] == 'warning']
+        want = expect[name]
+        if want is None:
+            if errs:
+                code_bad.append((name, f'clean, but {errs[0]["code"]}'))
+            if any(w['code'] != 'NO_WORLD' or w['span']['line'] != 0 for w in warns):
+                code_bad.append((name, f'a warning that is not NO_WORLD at line 0: {warns}'))
+        else:
+            if len(errs) != 1:
+                code_bad.append((name, f'expected one error, got {len(errs)}'))
+            elif errs[0]['code'] != want:
+                code_bad.append((name, f'code {errs[0]["code"]} where RingFlex says {want}'))
+            elif want.startswith('C') and want[1:].isdigit() and errs[0]['cites'] != ['rule:' + want]:
+                code_bad.append((name, f'cites {errs[0]["cites"]} where RingFlex cites rule:{want}'))
+            elif want in ('FLOW_IS_ZQL', 'SEAM_UPWARD') and errs[0]['cites'] != ['article:placement-3']:
+                code_bad.append((name, f'cites {errs[0]["cites"]} where RingFlex cites article:placement-3'))
+            elif want == 'PARSE' and errs[0]['cites']:
+                code_bad.append((name, f'PARSE cites {errs[0]["cites"]}'))
+            elif errs[0]['span']['line'] < 1:
+                code_bad.append((name, 'a court refusal at line 0'))
+    if code_bad:
+        failures += len(code_bad)
+        for name, why in code_bad[:6]:
+            print(f'  FAIL {name}: {why}')
+    print(('  FAIL ' if code_bad else '  ok   ') + f'every F fixture\'s code and cites are RingFlex\'s own, from its EXPECT lines ({len(code_bad)} differ)')
+    # the resolution codes against the world fixtures
+    wf = os.path.join('f', 'boundary-invokes-flow.f')
+    res_bad = []
+    for wname, want in (('world', None), ('world-missing-flow', 'UNRESOLVED_FLOW'), ('world-missing-compensating', 'UNRESOLVED_FLOW')):
+        r = both('f_court.ring', ['diagnose', wf, os.path.join(RINGFLEX_WORLDS, wname + '.json')], 'diag:' + wname)
+        try:
+            rep = json.loads(r)
+            bad = c2_validate(rep)
+            ds = rep['diagnostics']
+            if want is None and ds:
+                bad.append(f'expected no diagnostic, got {ds}')
+            if want and (len(ds) != 1 or ds[0]['code'] != want or ds[0]['cites'] != ['article:placement-3.2'] or ds[0]['span']['line'] < 1):
+                bad.append(f'expected one {want} citing article:placement-3.2 on a line, got {ds}')
+        except json.JSONDecodeError:
+            bad = ['not JSON: ' + r[:80]]
+        if bad:
+            res_bad.append((wname, '; '.join(bad)))
+    r = both('f_court.ring', ['diagnose', wf], 'diag:absent')
+    try:
+        ds = json.loads(r)['diagnostics']
+        if len(ds) != 1 or ds[0]['code'] != 'NO_WORLD' or ds[0]['severity'] != 'warning' or ds[0]['span']['line'] != 0 or ds[0]['cites'] != ['article:placement-3.2']:
+            res_bad.append(('absent', f'expected one NO_WORLD warning at line 0 citing article:placement-3.2, got {ds}'))
+    except json.JSONDecodeError:
+        res_bad.append(('absent', 'not JSON'))
+    if res_bad:
+        failures += len(res_bad)
+        for name, why in res_bad:
+            print(f'  FAIL resolution {name}: {why}')
+    print(('  FAIL ' if res_bad else '  ok   ') + 'the resolution codes: UNRESOLVED_FLOW citing article:placement-3.2 on the step\'s line, NO_WORLD a warning at line 0, as RingFlex\'s')
+    if PLANT:
+        failures += 1
+        print('  FAIL the envelope -- PLANTED')
+    if ab_diff:
+        failures += 1
+        print(f'  FAIL rnxc and the oracle differ on {len(ab_diff)} diagnose run(s): {ab_diff[:5]}')
+    else:
+        print(f'  ok   rnxc and the oracle print the same bytes on every diagnose run')
+    # 3. RingFlex's court live: its codes on its originals, compared one by one
+    if os.path.exists(RING_OFFICIAL) and os.path.isdir(RINGFLEX):
+        p = subprocess.run([RING_OFFICIAL, RF_DIAG], cwd=RINGFLEX, capture_output=True, timeout=120)
+        out = p.stdout.decode('utf-8', 'replace')
+        live = {}
+        for line in out.splitlines():
+            if '\t' in line:
+                k, _, js = line.partition('\t')
+                try:
+                    live[k] = json.loads(js)['diagnostics']
+                except (json.JSONDecodeError, KeyError):
+                    pass
+        live_bad = []
+        for name, rep in reports.items():
+            stem = name[:-2]
+            lk = stem + '.wflow'
+            if lk not in live:
+                continue
+            theirs = [d['code'] for d in live[lk]]
+            ours = [d['code'] for d in rep['diagnostics'] if d['severity'] == 'error']
+            if theirs[:1] != ours[:1]:
+                live_bad.append((name, f'RingFlex {theirs[:1]} / forged {ours[:1]}'))
+            elif theirs and sorted(live[lk][0]['cites']) != sorted([d for d in rep['diagnostics'] if d['severity'] == 'error'][0]['cites']):
+                live_bad.append((name, f'cites RingFlex {live[lk][0]["cites"]} / forged {[d for d in rep["diagnostics"] if d["severity"] == "error"][0]["cites"]}'))
+        for wname in ('world', 'world-missing-flow', 'world-missing-compensating', 'absent'):
+            if 'resolve:' + wname in live:
+                theirs = [(d['code'], d['severity']) for d in live['resolve:' + wname]]
+                rr = both('f_court.ring', ['diagnose', wf] + ([os.path.join(RINGFLEX_WORLDS, wname + '.json')] if wname != 'absent' else []), 'live:' + wname)
+                ours = [(d['code'], d['severity']) for d in json.loads(rr)['diagnostics']]
+                if theirs != ours:
+                    live_bad.append(('resolve:' + wname, f'RingFlex {theirs} / forged {ours}'))
+        if not live:
+            failures += 1
+            print(f'  FAIL RingFlex\'s court printed no envelopes: {out[-200:]}')
+        elif live_bad:
+            failures += len(live_bad)
+            for name, why in live_bad[:6]:
+                print(f'  FAIL {name}: {why}')
+        else:
+            print(f'  ok   RingFlex\'s own court, live under official Ring on its {len([k for k in live if k.endswith(".wflow")])} original fixtures and 4 worlds: the same first code, the same cites, the same severities as the forged court on the re-expressed ones')
+    else:
+        print('  SKIP RingFlex\'s court live: official Ring 1.27 is not installed here')
     return failures
 
 
@@ -1469,5 +1741,7 @@ if __name__ == '__main__':
         failures += stage12()
     if stage in (None, 13) and os.path.exists(Z_STZU) and os.path.exists(F_STZU):
         failures += stage13()
+    if stage in (None, 14) and os.path.exists(F_STZU) and os.path.exists(STZU11_FIXTURES):
+        failures += stage14()
     print(f'haro_forge: {"FAIL" if failures else "PASS"} ({failures} failure(s), {time.perf_counter()-t0:.1f} s)')
     sys.exit(1 if failures else 0)

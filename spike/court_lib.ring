@@ -30,6 +30,11 @@
 # order of the court is: shapes, the WORLD, the local types, the
 # CONSTRAINTs, then the references.
 #
+# v0.11 (haro/spike/v11/GRAMMAR.md): the Diagnostic Contract -- `diagnose
+# <file> [world]` answers the court's verdict as C2 v1.2.0's one object of
+# six-field envelopes; a typed refusal carries the declaration's CODE / CODES
+# and CITES (CtFailC), a parse-level one is PARSE with no cites.
+#
 # v0.10 (haro/spike/v10/GRAMMAR.md): the WORLD as versioned data -- a SYMBOL
 # seat resolves against a C1 world.json handed to `check <file> [world]`
 # (UNRESOLVED in the symbol's words; NO_WORLD a warning without one), and
@@ -90,6 +95,60 @@ func CtIsWordChar(c)
 
 func CtFail(nLine, cMsg)
 	raise($cCourtLang + " (line " + nLine + "): " + cMsg)
+
+# v0.11: a refusal that enforces a provision of the declaration -- the pinned
+# instrument -- carries its code and its cites out through two globals the
+# `diagnose` verb reads; a parse-level refusal leaves them at PARSE and [],
+# which C2 2.5 calls honest. A code of PARSE never cites.
+func CtFailC(nLine, cCode, aCites, cMsg)
+	CtSetCode(cCode, aCites)
+	CtFail(nLine, cMsg)
+
+func CtSetCode(cCode, aCites)
+	if cCode = "" cCode = "PARSE" ok
+	$cCourtCode = cCode
+	if cCode = "PARSE"
+		$aCourtCites = []
+	else
+		$aCourtCites = aCites
+	ok
+
+# a declaration kind's CODES entry for a seat, or ""
+func CtCodeFor(aKind, cSeat)
+	if len(aKind) < 6 return "" ok
+	for i = 1 to len(aKind[6])
+		if aKind[6][i][1] = cSeat return aKind[6][i][2] ok
+	next
+	return ""
+
+# the code and cites of a refusal that a declaration element owns: the
+# element's CODE when it has one (cited as rule:<CODE>), else a default code
+# cited as rule:<element name>
+func CtElementCode(cOwn, cDefault, cName)
+	if cOwn != "" return [cOwn, ["rule:" + cOwn]] ok
+	return [cDefault, ["rule:" + cName]]
+
+# a REFUSAL category's code, codes per NAMED word and cites
+func CtRefusalRow(cCategory)
+	for i = 1 to len($aCourtRefusals)
+		if $aCourtRefusals[i][1] = cCategory return $aCourtRefusals[i] ok
+	next
+	return NULL
+
+func CtRefusalCode(cCategory, cWord, cDefault)
+	aR = CtRefusalRow(cCategory)
+	if isNull(aR) return [cDefault, []] ok
+	cCode = ""
+	if cWord != "" and len(aR) >= 5
+		for i = 1 to len(aR[5])
+			if aR[5][i][1] = cWord cCode = aR[5][i][2] ok
+		next
+	ok
+	if cCode = "" and len(aR) >= 4 cCode = aR[4] ok
+	if cCode = "" cCode = cDefault ok
+	aCites = []
+	if len(aR) >= 6 aCites = aR[6] ok
+	return [cCode, aCites]
 
 func CtInList(cS, aL)
 	for i = 1 to len(aL)
@@ -347,8 +406,84 @@ func CtResolveWorld(aDecls)
 		if CtWorldHas($aCourtWorldFile, aSy[2], aSites[i][3]) loop ok
 		cMsg = aSy[4]
 		if cMsg = "" cMsg = "{VERB} {name} names '{value}', and the world declares no " + aSy[2] + ":{value}" ok
-		CtFail(aSites[i][4], "UNRESOLVED " + CtFill(cMsg, aSites[i][1], aSites[i][3]))
+		aCC = CtSymbolCode(aSy)
+		CtFailC(aSites[i][4], aCC[1], aCC[2], CtFill(cMsg, aSites[i][1], aSites[i][3]))
 	next
+
+# a SYMBOL's code (its CODE, else UNRESOLVED) and cites (its CITES, else rule:<name>)
+func CtSymbolCode(aSy)
+	cCode = "UNRESOLVED"
+	aCites = ["rule:" + aSy[1]]
+	if len(aSy) >= 6
+		if aSy[5] != "" cCode = aSy[5] ok
+		if len(aSy[6]) > 0 aCites = aSy[6] ok
+	ok
+	return [cCode, aCites]
+
+# ---- v0.11: the Diagnostic Contract (C2 v1.2.0) -------------------------------------
+# `diagnose <file> [world]` runs the same court and answers in the family's
+# machine form: one object carrying `diagnostics`, each a six-field envelope --
+# code, severity, message, span {file, line}, cites, language. A refusal is one
+# error (the court stops at the first); a sentence with SYMBOL seats and no
+# world adds one NO_WORLD warning at line 0; a clean run is `"diagnostics": []`.
+# No value is ever a bare true, false or null (C2 2.8).
+
+func CtStripPrefix(cMsg)
+	n = substr(cMsg, "): ")
+	if n > 0 return substr(cMsg, n + 3) ok
+	return cMsg
+
+func CtLineOf(cMsg)
+	nAt = substr(cMsg, "(line ")
+	if nAt = 0 return 0 ok
+	nEnd = substr(cMsg, "): ")
+	if nEnd <= nAt return 0 ok
+	return 0 + substr(cMsg, nAt + 6, nEnd - nAt - 6)
+
+func CtDiagnosticJson(aD)
+	c = '{"code": ' + CtJson(aD[1]) + ', "severity": ' + CtJson(aD[2]) + ', "message": ' + CtJson(aD[3])
+	c += ', "span": {"file": ' + CtJson(aD[4]) + ', "line": ' + aD[5] + '}, "cites": ['
+	for i = 1 to len(aD[6])
+		if i > 1 c += ", " ok
+		c += CtJson(aD[6][i])
+	next
+	c += '], "language": ' + CtJson($cCourtLang) + '}'
+	return c
+
+func CtDiagnosticsJson(aDiags)
+	c = '{"diagnostics": ['
+	for i = 1 to len(aDiags)
+		if i > 1 c += ", " ok
+		c += CtDiagnosticJson(aDiags[i])
+	next
+	return c + ']}'
+
+func CtDiagnose(cFile, cWorldPath)
+	aDiags = []
+	cSrc = read(cFile)
+	CtSetCode("PARSE", [])
+	cErr = ""
+	aDecls = NULL
+	try
+		if cWorldPath != "" $aCourtWorldFile = CtWorldLoad(cWorldPath) ok
+		aDecls = CtDeclare(cSrc)
+	catch
+		cErr = cCatchError
+	done
+	if cErr != ""
+		aDiags + [$cCourtCode, "error", CtStripPrefix(cErr), cFile, CtLineOf(cErr), $aCourtCites]
+		return aDiags
+	ok
+	if isNull($aCourtWorldFile) and len($aCourtSymbols) > 0
+		aSites = CtSymbolSites(aDecls)
+		if len(aSites) > 0
+			aSy = CtSymbolByName(aSites[1][2][2])
+			aCites = []
+			if not isNull(aSy) aCites = CtSymbolCode(aSy)[2] ok
+			aDiags + ["NO_WORLD", "warning", "no world to resolve against; " + len(aSites) + " symbol reference(s) unresolved, which is what C3 section 3.2 asks a project to close", cFile, 0, aCites]
+		ok
+	ok
+	return aDiags
 
 func CtWorldStem(cPath)
 	cName = cPath
@@ -471,7 +606,7 @@ func CtJudgeSentence(aDecl, aSeat, aClause)
 		cMsg = aSK[4]
 		if cMsg = "" cMsg = "{VERB} {name} is refused: {why} (line {line} of {value})" ok
 		cMsg = CtReplace(CtReplace(cMsg, "{why}", cWhy), "{line}", cLine)
-		CtFail(aDecl[3], CtFill(cMsg, aDecl, cRel))
+		CtFailC(aDecl[3], "SENTENCE", [], CtFill(cMsg, aDecl, cRel))
 	ok
 	$aCourtSentences + [$cCourtLang, aDecl[1], aDecl[2], aSeat[1], cRel, aInner, aSK[2]]
 
@@ -748,7 +883,10 @@ func CtWantUnion(aDecl, aClause, aSeat)
 	ok
 	cV = ""
 	if aClause[3][1] = "word" or aClause[3][1] = "string" or aClause[3][1] = "number" cV = aClause[3][2] ok
-	CtFail(aClause[2], CtFill(cMsg, aDecl, cV))
+	cOwn = ""
+	if len(aU) >= 4 cOwn = aU[4] ok
+	aCC = CtElementCode(cOwn, "UNION", aU[1])
+	CtFailC(aClause[2], aCC[1], aCC[2], CtFill(cMsg, aDecl, cV))
 
 # {name}, {VERB}, {value}, {other}, {seat} and {decl.seat} in a declared message
 func CtFill(cMsg, aDecl, cValue)
@@ -954,17 +1092,22 @@ func CtParseDecl()
 	if not (tV[1] = "keyword" and tV[2] = "DEFINE")
 		cMsg = CtRefusalMessage("unknown_verb")
 		if cMsg = "" cMsg = "the " + $cCourtLang + " verb set is closed (DEFINE)" ok
-		CtFail(tV[3], "Unknown verb '" + CtShown(tV) + "': " + cMsg)
+		aCC = CtRefusalCode("unknown_verb", "", "UNKNOWN_VERB")
+		CtFailC(tV[3], aCC[1], aCC[2], "Unknown verb '" + CtShown(tV) + "': " + cMsg)
 	ok
 	tK = CtNext()
 	aKind = NULL
 	if tK[1] = "keyword" aKind = CtKindByVerb(tK[2]) ok
 	if isNull(aKind)
 		cNamed = CtRefusalNamed("unknown_declaration", lower(CtShown(tK)))
-		if cNamed != "" CtFail(tK[3], cNamed) ok
+		if cNamed != ""
+			aCC = CtRefusalCode("unknown_declaration", lower(CtShown(tK)), "UNKNOWN_KIND")
+			CtFailC(tK[3], aCC[1], aCC[2], cNamed)
+		ok
 		cMsg = CtRefusalMessage("unknown_declaration")
 		if cMsg = "" cMsg = "the kinds are closed (" + CtJoin(CtVerbs(), ", ") + ")" ok
-		CtFail(tK[3], "Unknown kind '" + CtShown(tK) + "': " + cMsg)
+		aCC = CtRefusalCode("unknown_declaration", "", "UNKNOWN_KIND")
+		CtFailC(tK[3], aCC[1], [], "Unknown kind '" + CtShown(tK) + "': " + cMsg)
 	ok
 	tName = CtExpect("ident", "a lower_snake name")
 	tAs = CtNext()
@@ -986,10 +1129,14 @@ func CtParseDecl()
 		ok
 		if not CtInList(tC[2], aAllowed)
 			cNamed = CtRefusalNamed("unknown_seat", lower(tC[2]))
-			if cNamed != "" CtFail(tC[3], cNamed) ok
+			if cNamed != ""
+				aCC = CtRefusalCode("unknown_seat", lower(tC[2]), "UNKNOWN_CLAUSE")
+				CtFailC(tC[3], aCC[1], aCC[2], cNamed)
+			ok
 			cMsg = CtRefusalMessage("unknown_seat")
 			if cMsg = "" cMsg = "allowed are " + CtJoin(aAllowed, ", ") ok
-			CtFail(tC[3], "Unknown clause '" + tC[2] + "' for " + aKind[1] + ": " + cMsg)
+			aCC = CtRefusalCode("unknown_seat", "", "UNKNOWN_CLAUSE")
+			CtFailC(tC[3], aCC[1], [], "Unknown clause '" + tC[2] + "' for " + aKind[1] + ": " + cMsg)
 		ok
 		for i = 1 to len(aClauses)
 			if aClauses[i][1] = tC[2]
@@ -1050,6 +1197,7 @@ func CtWantShape(aDecl, aClause, cShape)
 # parse a whole source and judge what the declaration can judge; returns the
 # list of declarations
 func CtDeclare(cSrc)
+	CtSetCode("PARSE", [])
 	$aCourtToks = CtTokenize(cSrc)
 	$nCourtPos = 1
 	aDecls = []
@@ -1065,7 +1213,8 @@ func CtDeclare(cSrc)
 			if aDecls[i][2] = aDecls[j][2]
 				cMsg = CtRefusalMessage("duplicate_name")
 				if cMsg = "" cMsg = "one namespace, no duplicates" ok
-				CtFail(aDecls[i][3], "'" + aDecls[i][2] + "' is already declared (line " + aDecls[j][3] + "); " + cMsg)
+				aCC = CtRefusalCode("duplicate_name", "", "DUPLICATE_NAME")
+				CtFailC(aDecls[i][3], aCC[1], [], "'" + aDecls[i][2] + "' is already declared (line " + aDecls[j][3] + "); " + cMsg)
 			ok
 		next
 	next
@@ -1092,10 +1241,13 @@ func CtDeclare(cSrc)
 				if aC[k][1] = upper(aSeat[1]) bFound = 1 ok
 			next
 			if not bFound
-				# the declaration's own MESSAGES for a required seat speaks first (v0.4)
+				# the declaration's own MESSAGES for a required seat speaks first (v0.4);
+				# its CODES give the envelope's code (v0.11)
 				cMsgR = CtMessageFor(aKind, aSeat[1])
-				if cMsgR != "" CtFail(aD[3], CtFill(cMsgR, aD, "")) ok
-				CtFail(aD[3], upper(aSeat[1]) + " is required on " + aD[1] + " " + aD[2])
+				cCodeR = CtCodeFor(aKind, aSeat[1])
+				aCC = CtElementCode(cCodeR, "REQUIRED", aKind[2] + "." + aSeat[1])
+				if cMsgR != "" CtFailC(aD[3], aCC[1], aCC[2], CtFill(cMsgR, aD, "")) ok
+				CtFailC(aD[3], aCC[1], aCC[2], upper(aSeat[1]) + " is required on " + aD[1] + " " + aD[2])
 			ok
 		next
 	next
@@ -1118,13 +1270,13 @@ func CtDeclare(cSrc)
 			if aDecls[j][1] = aK[1] n++ ok
 		next
 		if n != 1
-			CtFail(aDecls[1][3], "A " + $cCourtLang + " file declares exactly one " + aK[1] + " (found " + n + ")")
+			CtFailC(aDecls[1][3], "WORLD_ONE", ["rule:world"], "A " + $cCourtLang + " file declares exactly one " + aK[1] + " (found " + n + ")")
 		ok
 	next
 	if $aCourtWorld[2] != ""
 		aK = CtKindByDeclName($aCourtWorld[2])
 		if not isNull(aK) and aDecls[1][1] != aK[1]
-			CtFail(aDecls[1][3], "The " + aK[1] + " declaration comes first")
+			CtFailC(aDecls[1][3], "WORLD_FIRST", ["rule:world"], "The " + aK[1] + " declaration comes first")
 		ok
 	ok
 
@@ -1159,7 +1311,10 @@ func CtDeclare(cSrc)
 					if $bCondUnread loop ok
 				ok
 				if bFail
-					CtFail(aD[3], CtFill(aCn[5], aD, ""))
+					cCnC = ""
+					if len(aCn) >= 6 cCnC = aCn[6] ok
+					aCC = CtElementCode(cCnC, "CONSTRAINT", aCn[1])
+					CtFailC(aD[3], aCC[1], aCC[2], CtFill(aCn[5], aD, ""))
 				ok
 			ok
 		next
@@ -1207,6 +1362,10 @@ func CtCheckNamed(cNames, cName)
 		if CtInList(cName, aM[2]) return "" ok
 		cMsg = aM[3]
 		if cMsg = "" cMsg = "is not a " + cNames + ": the menu is " + CtJoin(aM[2], ", ") ok
+		cOwn = ""
+		if len(aM) >= 4 cOwn = aM[4] ok
+		aCC = CtElementCode(cOwn, "MENU", aM[1])
+		CtSetCode(aCC[1], aCC[2])
 		return CtFill(cMsg, NULL, cName)
 	ok
 	aF = CtFormatByName(cNames)
@@ -1214,6 +1373,10 @@ func CtCheckNamed(cNames, cName)
 		if CtHasShape(cName, aF[2]) return "" ok
 		cMsg = aF[3]
 		if cMsg = "" cMsg = "is not a " + aF[2] ok
+		cOwn = ""
+		if len(aF) >= 5 cOwn = aF[5] ok
+		aCC = CtElementCode(cOwn, "FORMAT", aF[1])
+		CtSetCode(aCC[1], aCC[2])
 		return CtFill(cMsg, NULL, cName)
 	ok
 	return ""
@@ -1228,6 +1391,10 @@ func CtCheckScalar(aDecl, aSeat, cValue)
 		cMsg = aM[3]
 		if cMsg = "" cMsg = cClause + " is " + CtJoin(aM[2], ", ") ok
 		if substr(cMsg, "{value}") = 0 cMsg += ", not '{value}'" ok
+		cOwn = ""
+		if len(aM) >= 4 cOwn = aM[4] ok
+		aCC = CtElementCode(cOwn, "MENU", aM[1])
+		CtSetCode(aCC[1], aCC[2])
 		return CtFill(cMsg, aDecl, cValue)
 	but cK = "range"
 		aR = CtRangeByName(aSeat[2])
@@ -1236,12 +1403,20 @@ func CtCheckScalar(aDecl, aSeat, cValue)
 		if n >= 0 + aR[2] and n <= 0 + aR[3] return "" ok
 		cMsg = aR[4]
 		if cMsg = "" cMsg = cClause + " {value} is out of range (" + aR[2] + ".." + aR[3] + ")" ok
+		cOwn = ""
+		if len(aR) >= 5 cOwn = aR[5] ok
+		aCC = CtElementCode(cOwn, "RANGE", aR[1])
+		CtSetCode(aCC[1], aCC[2])
 		return CtFill(cMsg, aDecl, cValue)
 	but cK = "format"
 		aF = CtFormatByName(aSeat[2])
 		if isNull(aF) or CtHasShape(cValue, aF[2]) return "" ok
 		cMsg = aF[3]
 		if cMsg = "" cMsg = cClause + " is not a " + aF[2] + ": '{value}'" ok
+		cOwn = ""
+		if len(aF) >= 5 cOwn = aF[5] ok
+		aCC = CtElementCode(cOwn, "FORMAT", aF[1])
+		CtSetCode(aCC[1], aCC[2])
 		return CtFill(cMsg, aDecl, cValue)
 	but cK = "expr"
 		# v0.6: the text is an expression of the seat's language, or the refusal says why
@@ -1254,7 +1429,10 @@ func CtCheckScalar(aDecl, aSeat, cValue)
 		catch
 			cErr = cCatchError
 		done
-		if cErr != "" return cClause + " of " + aDecl[1] + " " + aDecl[2] + " is not a " + aSeat[2] + " expression -- " + cErr ok
+		if cErr != ""
+			CtSetCode("EXPRESSION", ["rule:" + aSeat[2]])
+			return cClause + " of " + aDecl[1] + " " + aDecl[2] + " is not a " + aSeat[2] + " expression -- " + cErr
+		ok
 		return ""
 	but cK = "decl"
 		aK = CtKindByDeclName(aSeat[2])
@@ -1262,8 +1440,11 @@ func CtCheckScalar(aDecl, aSeat, cValue)
 		for i = 1 to len($aCondDecls)
 			if $aCondDecls[i][1] = aK[1] and $aCondDecls[i][2] = cValue return "" ok
 		next
-		# the declaration's own MESSAGES for this seat speaks first (v0.3)
+		# the declaration's own MESSAGES for this seat speaks first (v0.3); its
+		# CODES give the envelope's code (v0.11)
 		aKd = CtKindByVerb(aDecl[1])
+		aCC = CtElementCode(CtCodeFor(aKd, aSeat[1]), "DANGLING", aKd[2] + "." + aSeat[1])
+		CtSetCode(aCC[1], aCC[2])
 		if len(aKd) >= 5
 			for i = 1 to len(aKd[5])
 				if aKd[5][i][1] = aSeat[1] return CtFill(aKd[5][i][2], aDecl, cValue) ok
@@ -1295,6 +1476,10 @@ func CtCheckUnionWord(aDecl, aSeat, cValue)
 	next
 	cMsg = aU[3]
 	if cMsg = "" cMsg = "{VERB} {name} " + upper(aSeat[1]) + " '{value}', which resolves to nothing: no such " + CtJoin(aVerbs, " or ") ok
+	cOwn = ""
+	if len(aU) >= 4 cOwn = aU[4] ok
+	aCC = CtElementCode(cOwn, "UNION", aU[1])
+	CtSetCode(aCC[1], aCC[2])
 	return CtFill(cMsg, aDecl, cValue)
 
 func CtCheckSeatValue(aDecl, aSeat, aClause, bRefs)
@@ -1345,6 +1530,7 @@ func CtCheckSeatValue(aDecl, aSeat, aClause, bRefs)
 				for i = 1 to len(aItems)
 					for j = 1 to i - 1
 						if aItems[j][1] = aItems[i][1]
+							CtSetCode("PARSE", [])
 							return "'" + aItems[i][1] + "' is named twice in " + upper(aSeat[1]) + " of " + aDecl[1] + " " + aDecl[2]
 						ok
 					next
@@ -1847,6 +2033,11 @@ func CtMain()
 		catch
 			? cCatchError
 		done
+	but cVerb = "diagnose"
+		# v0.11: the same court, in the family's machine form (C2 v1.2.0)
+		cWorldPath = ""
+		if len(sysargv) >= 5 cWorldPath = sysargv[5] ok
+		? CtDiagnosticsJson(CtDiagnose(sysargv[4], cWorldPath))
 	but cVerb = "world"
 		# v0.10: the sentence's own C1 rows, as JSON
 		cSrc = read(sysargv[4])
@@ -1923,5 +2114,5 @@ func CtMain()
 			? cCatchError
 		done
 	else
-		? "unknown verb '" + cVerb + "'; this court answers: check, refine, eval, walk, ask, run, world"
+		? "unknown verb '" + cVerb + "'; this court answers: check, refine, eval, walk, ask, run, world, diagnose"
 	ok
