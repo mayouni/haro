@@ -52,7 +52,7 @@ func StzuClauses(cKind)
 	but cKind = "FORM"
 		return [["SEATS", "seatlist"]]
 	but cKind = "EXPRESSION"
-		return [["AGGREGATES", "namelist"], ["OPERANDS", "namelist"], ["OPERATORS", "namelist"], ["VARIABLES", "namelist"]]
+		return [["AGGREGATES", "namelist"], ["CONTEXTS", "contextlist"], ["OPERANDS", "namelist"], ["OPERATORS", "namelist"], ["VARIABLES", "namelist"]]
 	but cKind = "REFUSAL"
 		return [["MESSAGE", "string"]]
 	but cKind = "MENU"
@@ -211,6 +211,14 @@ func InStrList(cS, aL)
 		if aL[i] = cS return 1 ok
 	next
 	return 0
+
+func StzuJoin(aL, cSep)
+	cOut = ""
+	for i = 1 to len(aL)
+		if i > 1 cOut += cSep ok
+		cOut += aL[i]
+	next
+	return cOut
 
 # character classes by byte code, never by string ordering (HF-30)
 func IsLowerStart(c)
@@ -487,6 +495,25 @@ func StzuParseTypeList()
 	StzuAdvance()
 	return aTypes
 
+# a context is [name, [variables], line]: [ seat: [a, b], ... ]   (v0.5)
+func StzuParseContextList()
+	StzuExpect("lbracket", "'['")
+	aCtx = []
+	while StzuPeek()[1] != "rbracket"
+		tN = StzuExpect("ident", "a seat name")
+		StzuExpect("colon", "':'")
+		aVars = StzuParseNameList()
+		aCtx + [tN[2], aVars, tN[3]]
+		if StzuPeek()[1] = "comma"
+			StzuAdvance()
+		but StzuPeek()[1] != "rbracket"
+			t = StzuPeek()
+			StzuFail(t[3], "Expected ',' or ']' but found '" + t[2] + "'")
+		ok
+	end
+	StzuAdvance()
+	return aCtx
+
 # a message is [seat, text, line]: [ seat: "text", ... ]   (v0.3)
 func StzuParseMessageList()
 	StzuExpect("lbracket", "'['")
@@ -567,6 +594,8 @@ func StzuParseDeclaration()
 			aClauses + [ct[2], StzuParseTypeList()]
 		but cShape = "messagelist"
 			aClauses + [ct[2], StzuParseMessageList()]
+		but cShape = "contextlist"
+			aClauses + [ct[2], StzuParseContextList()]
 		else
 			aClauses + [ct[2], StzuParsePointList()]
 		ok
@@ -598,7 +627,8 @@ func StzuParseDeclaration()
 #                 (names "" or a MENU/FORMAT; messages [seat, text, line] per reference seat, v0.3)
 #   unions:       [name, alternatives, message, line]            (an alternative [type, isList, line], v0.3)
 #   forms:        [name, seats, rationale, line]
-#   expressions:  [name, operators, operands, aggregates, variables, rationale, line]
+#   expressions:  [name, operators, operands, aggregates, variables, rationale, line, contexts]
+#                 (a context [seat, [variables], line], v0.5)
 #   refusals:     [name, message, rationale, line]
 #   menus:        [name, words, message, line]
 #   ranges:       [name, min, max, message, line]
@@ -729,7 +759,26 @@ func StzuDeclare(cSrc)
 				if HasClause(aClauses, "VARIABLES")
 					aVars = ClauseValue(aClauses, "VARIABLES")
 				ok
-				aExpressions + [cName, aOps, aOpd, aAgg, aVars, cRationale, nLine]
+				# v0.5: the seats a host offers the expression, each with the
+				# VARIABLES it admits
+				aCtx = []
+				if HasClause(aClauses, "CONTEXTS")
+					aCtx = ClauseValue(aClauses, "CONTEXTS")
+					if isNull(aVars) StzuFail(nLine, "CONTEXTS requires a VARIABLES clause: a seat is a choice among the variables") ok
+					for i = 1 to len(aCtx)
+						for j = 1 to i - 1
+							if aCtx[j][1] = aCtx[i][1]
+								StzuFail(aCtx[i][3], "context '" + aCtx[i][1] + "' is named twice")
+							ok
+						next
+						for j = 1 to len(aCtx[i][2])
+							if not InStrList(aCtx[i][2][j], aVars)
+								StzuFail(aCtx[i][3], "'" + aCtx[i][2][j] + "' is not a VARIABLE of " + cName + " (its VARIABLES: " + StzuJoin(aVars, ", ") + ")")
+							ok
+						next
+					next
+				ok
+				aExpressions + [cName, aOps, aOpd, aAgg, aVars, cRationale, nLine, aCtx]
 			but cKind = "REFUSAL"
 				if not InStrList(cName, StzuRefusalCategories())
 					StzuFail(nLine, "'" + cName + "' is not a refusal category")
@@ -1105,6 +1154,12 @@ func StzuPrintLanguage(aLang)
 	? "sentences " + len(LangGet(aLang, "sentences"))
 	? "views " + len(LangGet(aLang, "views"))
 	? "constraints " + len(LangGet(aLang, "constraints"))
+	nCtx = 0
+	aE = LangGet(aLang, "expressions")
+	for i = 1 to len(aE)
+		if len(aE[i]) >= 8 nCtx += len(aE[i][8]) ok
+	next
+	? "contexts " + nCtx
 	nWorld = 0
 	if not isNull(LangGet(aLang, "world")) nWorld = 1 ok
 	? "world " + nWorld

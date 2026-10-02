@@ -200,6 +200,12 @@ seat names a file of another declared language, judged by that language's own co
 sentences and views. The fleet language declared over the machine language
 (`fleet_v04.haro`) forges one court carrying both records, and it agrees with `harb` on
 32 of 32 -- this section's "composition is the normal way to declare a language", measured.
+**Haro v0.5, the same day (`haro/spike/v05/GRAMMAR.md`, 7 fixtures): an expression
+language forged whole.** `CONTEXTS` on an `EXPRESSION` says which seat admits which
+variables; W, the alphabet's W letter, declared by its own grammar text (`w_v05.haro`),
+is forged into its court AND its evaluator and its grammar for the decoder, and passes
+stz's 29 fixtures unadapted on `rnxc` and the oracle. The forge is measured on two
+shapes of language: sentences of `DEFINE`s, and an expression.
 
 **What the forge produces from one declaration** (Ringua's kit, 02-STACK's L1, now Haro's
 compiler verbs rather than separate organs): the parser; the court with the fixtures as its
@@ -453,6 +459,15 @@ my behalf"): Haro v0.4, the fleet language declared OVER the machine language** 
 the guard's stage 7: **32 of 32**, 0 defects, byte-identical on `rnxc` and the oracle,
 pinned at 32; 102.8 s a pass. The composition claim of section 3 has its number (HF-41).
 Record: `haro/SPIKE.md`, "The fourth rung".
+
+**The fifth rung, 2026-10-02, on the author's "next": Haro v0.5, W forged whole** (section
+3's note). An expression language -- the second shape the estate declares -- declared in
+Haro and forged into its court, its evaluator and its grammar: **29 of 29** of stz's W
+fixtures unadapted, byte-identical on `rnxc` and the oracle, the guard's stage 8, pinned
+at 29; 200 derivations of the emitted grammar all sentences to the court. Z is named and
+not taken: 06-ALPHABET's route 3 needs a runtime for a declared world, the
+computing-altitude bridge, and is the author's to open (HF-45). Record: `haro/SPIKE.md`,
+"The fifth rung".
 
 v0.1's spike (`twice.haro`, a definition with an intent clause) proved one altitude. The
 ruling asks for three to meet, and the estate has already named the smallest program that

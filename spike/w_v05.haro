@@ -1,0 +1,24 @@
+-- w_v05.haro -- W, the Softanza conditional-code grammar (stz/declarative/w, v0.1),
+-- declared in Haro v0.5 as an EXPRESSION language: the operators and operands it
+-- admits, the variables a seat may use, and which seat admits which. From this
+-- declaration the forge emits W's court AND its evaluator (w_expr.ring), judged by
+-- stz's 29 fixtures unadapted. The alphabet's W letter, declared by its own
+-- grammar's text (declarative/w/GRAMMAR.md), not re-designed.
+
+DEFINE LANGUAGE w AS (
+  VERSION "0.1",
+  GRAMMAR "0.1",
+  COURT "declarative/w/fixtures.json",
+  EXTENSION ".w"
+) RATIONALE "The string form of a condition or a small transform -- @item > 2, 2*@item, @accumulator + @item -- a closed grammar with no escape hatch into any host language"
+
+DEFINE EXPRESSION w AS (
+  OPERATORS [or, and, not, cmp, add, sub, mul, div, mod, neg],
+  OPERANDS [number, text, var],
+  VARIABLES [item, accumulator],
+  CONTEXTS [eval: [], map: [item], filter: [item], count: [item], partition: [item], groupby: [item], reduce: [accumulator, item], reduce_noinit: [accumulator, item]]
+) RATIONALE "Keywords and, or, not; = is equality, != and <> one operator, comparison non-associative; / is real division, % the mathematical modulo; the variables an expression may use are fixed by its seat, and an unknown @name is refused at compile time, by name, never silently nil"
+
+DEFINE REFUSAL unknown_verb AS (
+  MESSAGE "No function calls, no method calls, no indexing: a W string cannot reach the host."
+) RATIONALE "The closed grammar has no escape hatch; a word that is not and, or, not is refused"

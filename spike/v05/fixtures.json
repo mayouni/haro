@@ -1,0 +1,51 @@
+{
+  "grammar": "haro",
+  "version": "0.5",
+  "comment": "The Haro v0.5 conformance floor, written BEFORE the court that passes it (the W discipline: fixtures first, prose second). v0.5 grows v0.4 by what an EXPRESSION language needs to be forged whole -- its court AND its evaluator -- from its declaration (haro/SPIKE.md, the fifth rung: stz's W, the alphabet's W letter, 29 fixtures): CONTEXTS on an EXPRESSION, naming the seats a host offers the expression and which of its VARIABLES each seat admits; a language that is only an EXPRESSION, with no DECLARATION, is a language, and the forge emits <lang>_expr.ring for it. Every v0.4 fixture still passes: v0.5 refuses nothing v0.4 accepted. Rejects carry the fragment the refusal must contain.",
+  "accepts": [
+    {
+      "id": "A1",
+      "name": "CONTEXTS on an EXPRESSION: the seats the host offers the expression, each with the VARIABLES it admits; an empty list is a seat for constants",
+      "source": "DEFINE LANGUAGE w AS (VERSION \"0.1\", GRAMMAR \"0.1\", COURT \"x\", EXTENSION \".w\") RATIONALE \"x\"\nDEFINE EXPRESSION w AS (OPERATORS [or, and, not, cmp, add, sub, mul, div, mod, neg], OPERANDS [number, text, var], VARIABLES [item, accumulator], CONTEXTS [eval: [], map: [item], reduce: [accumulator, item]]) RATIONALE \"the seats fix the variables\"\n",
+      "expect": {"language": "w", "counts": {"declarations": 0, "expressions": 1}, "contexts": 3}
+    },
+    {
+      "id": "A2",
+      "name": "an EXPRESSION without CONTEXTS admits every VARIABLE in every seat, as v0.1 did",
+      "source": "DEFINE LANGUAGE w AS (VERSION \"0.1\", GRAMMAR \"0.1\", COURT \"x\", EXTENSION \".w\") RATIONALE \"x\"\nDEFINE EXPRESSION w AS (OPERATORS [cmp, add], OPERANDS [number, var], VARIABLES [item]) RATIONALE \"x\"\n",
+      "expect": {"language": "w", "counts": {"expressions": 1}, "contexts": 0}
+    },
+    {
+      "id": "A3",
+      "name": "a v0.4 declaration is a v0.5 declaration: v0.4's A6, unchanged",
+      "source": "DEFINE LANGUAGE set AS (VERSION \"0.4\", GRAMMAR \"0.4\", COURT \"x\", EXTENSION \".set\") RATIONALE \"x\"\nDEFINE FORMAT key64 AS (SHAPE hex64, FOLD case, MESSAGE \"KEY is 64 hex characters, and '{value}' is not one\") RATIONALE \"x\"\nDEFINE FORMAT head AS (SHAPE hex64_lower, MESSAGE \"THROUGH is 64 lowercase hex, and '{value}' is not\") RATIONALE \"x\"\nDEFINE DECLARATION group AS (VERB \"GROUP\", SEATS [link: name?]) RATIONALE \"x\"\nDEFINE DECLARATION member AS (VERB \"MEMBER\", SEATS [key: key64?]) RATIONALE \"x\"\nDEFINE DECLARATION retirement AS (VERB \"RETIREMENT\", SEATS [member: member, key: key64, through: head], MESSAGES [member: \"RETIREMENT {name} retires a key of {value}, and no MEMBER {value} is declared\", through: \"RETIREMENT {name} names no THROUGH\"]) RATIONALE \"x\"\nDEFINE WORLD set AS (ONE [group], FIRST group) RATIONALE \"x\"\nDEFINE CONSTRAINT one_key_one_member AS (ON member, WHEN \"key present and not key unique\", MESSAGE \"this key is already {other}'s key\") RATIONALE \"x\"\nDEFINE CONSTRAINT retired_once AS (ON retirement, WHEN \"earlier retirement where key = this.key\", MESSAGE \"this key is already retired as {other}\") RATIONALE \"x\"\n",
+      "expect": {"language": "set", "counts": {"declarations": 3, "formats": 2, "constraints": 2, "expressions": 0}, "contexts": 0}
+    }
+  ],
+  "rejects": [
+    {
+      "id": "R1",
+      "name": "a CONTEXT admits VARIABLES of the expression, not names of its own",
+      "source": "DEFINE LANGUAGE w AS (VERSION \"0.1\", GRAMMAR \"0.1\", COURT \"x\", EXTENSION \".w\") RATIONALE \"x\"\nDEFINE EXPRESSION w AS (OPERATORS [cmp], OPERANDS [number, var], VARIABLES [item], CONTEXTS [map: [thing]]) RATIONALE \"x\"\n",
+      "refusal": "not a VARIABLE of w"
+    },
+    {
+      "id": "R2",
+      "name": "CONTEXTS requires VARIABLES, since a seat is a choice among them",
+      "source": "DEFINE LANGUAGE w AS (VERSION \"0.1\", GRAMMAR \"0.1\", COURT \"x\", EXTENSION \".w\") RATIONALE \"x\"\nDEFINE EXPRESSION w AS (OPERATORS [cmp], OPERANDS [number], CONTEXTS [map: []]) RATIONALE \"x\"\n",
+      "refusal": "CONTEXTS requires a VARIABLES clause"
+    },
+    {
+      "id": "R3",
+      "name": "a context is named once",
+      "source": "DEFINE LANGUAGE w AS (VERSION \"0.1\", GRAMMAR \"0.1\", COURT \"x\", EXTENSION \".w\") RATIONALE \"x\"\nDEFINE EXPRESSION w AS (OPERATORS [cmp], OPERANDS [number, var], VARIABLES [item], CONTEXTS [map: [item], map: [item]]) RATIONALE \"x\"\n",
+      "refusal": "context 'map' is named twice"
+    },
+    {
+      "id": "R4",
+      "name": "the operator menu is still closed: an operator the menu lacks is unexpressible, not forbidden",
+      "source": "DEFINE LANGUAGE w AS (VERSION \"0.1\", GRAMMAR \"0.1\", COURT \"x\", EXTENSION \".w\") RATIONALE \"x\"\nDEFINE EXPRESSION w AS (OPERATORS [cmp, call], OPERANDS [number]) RATIONALE \"x\"\n",
+      "refusal": "not in the closed operator menu"
+    }
+  ]
+}
