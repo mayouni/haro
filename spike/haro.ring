@@ -13,6 +13,7 @@
 load "haro_lib.ring"
 
 $aStzuToks = []
+$aStzuUnions = []
 $nStzuPos = 1
 $aCondToks = []
 $nCondPos = 1

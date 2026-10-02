@@ -14,6 +14,7 @@
 load "haro_lib.ring"
 
 $aStzuToks = []
+$aStzuUnions = []
 $nStzuPos = 1
 $aCondToks = []
 $nCondPos = 1
@@ -186,7 +187,7 @@ func WalkSource(aW)
 
 # one language's record, as the court reads it (v0.4, grown in v0.6 and v0.7):
 # [name, ext, kinds, forms, refusals, menus, ranges, formats, unions,
-# constraints, world, points, floors, views, sentences, expressions, walks, ask]
+# constraints, world, points, floors, views, sentences, expressions, walks, ask, run]
 func LangSource(aLang)
 	nl = char(10)
 	aRows = []
@@ -287,6 +288,16 @@ func LangSource(aLang)
 	if not isNull(aAsk)
 		cAsk = "[" + RingStr(aAsk[1]) + ", " + NamesSource(aAsk[2]) + ", " + RingStr(aAsk[3]) + ", " + NamesSource(aAsk[4]) + "]"
 	ok
+	aRun = LangGet(aLang, "run")
+	cRun = "NULL"
+	if not isNull(aRun)
+		cRun = "["
+		for i = 1 to len(aRun[2])
+			if i > 1 cRun += ", " ok
+			cRun += "[" + RingStr(aRun[2][i][1]) + ", " + NamesSource(aRun[2][i][2]) + "]"
+		next
+		cRun += "]"
+	ok
 	c = "  [" + RingStr(LangGet(aLang, "name")) + ", " + RingStr(LangGet(aLang, "extension")) + "," + nl
 	c += "    " + cKinds + "," + nl
 	c += "    " + cForms + "," + nl
@@ -303,7 +314,8 @@ func LangSource(aLang)
 	c += "    " + cSentences + "," + nl
 	c += "    " + cExprs + "," + nl
 	c += "    " + cWalks + "," + nl
-	c += "    " + cAsk + nl
+	c += "    " + cAsk + "," + nl
+	c += "    " + cRun + nl
 	c += "  ]"
 	return c
 
@@ -339,11 +351,15 @@ func ForgeCourt(aLang)
 	# v0.6: the expression library rides along only when an EXPRESSION is declared
 	# (v0.7: or an ASK, whose rows are JSON); the question library only with an ASK
 	bAsk = not isNull(LangGet(aLang, "ask"))
-	if len(LangGet(aLang, "expressions")) > 0 or bAsk
+	bRun = not isNull(LangGet(aLang, "run"))
+	if len(LangGet(aLang, "expressions")) > 0 or bAsk or bRun
 		c += 'load "expr_lib.ring"' + nl
 	ok
 	if bAsk
 		c += 'load "ask_lib.ring"' + nl
+	ok
+	if bRun
+		c += 'load "run_lib.ring"' + nl
 	ok
 	c += nl
 	c += "$cCourtLang = " + '""' + nl + "$cCourtExt = " + '""' + nl + "$cCourtDir = " + '""' + nl
@@ -356,7 +372,7 @@ func ForgeCourt(aLang)
 	c += "$aCourtRanges = []" + nl + "$aCourtFormats = []" + nl + "$aCourtUnions = []" + nl + "$aCourtConstraints = []" + nl
 	c += "$aCourtWorld = [[], " + '""' + ", []]" + nl + "$aCourtPoints = []" + nl + "$aCourtFloors = []" + nl
 	c += "$aCourtViews = []" + nl + "$aCourtSentenceKinds = []" + nl
-	c += "$aCourtExprs = []" + nl + "$aCourtWalks = []" + nl + "$aCourtAsk = NULL" + nl
+	c += "$aCourtExprs = []" + nl + "$aCourtWalks = []" + nl + "$aCourtAsk = NULL" + nl + "$aCourtRun = NULL" + nl
 	c += ExprGlobals()
 	c += "$aCourtLangs = [" + nl
 	aRecs = ForgeLangRecords(aLang, [])

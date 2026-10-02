@@ -230,7 +230,16 @@ MENU-keyed sequence, a routing's branches GUARD-keyed pairs, and its fifteen cou
 seats, messages and three closed relations (`reachable`, `referenced`, `keyed_by`); no
 expression, by design. 26 of 26 of RingFlex's fixtures and reference workflows, re-expressed,
 on `rnxc` and the oracle, with RingFlex's own court holding the same expectations beside it.
-Four letters of the alphabet are forged from declarations now: Z, W, Q, F.
+Four letters of the alphabet are forged from declarations now: Z, W, Q, F. **Haro v0.9,
+the same day (`haro/spike/v09/GRAMMAR.md`, 10 fixtures): the A letter.** `RUN` -- which
+kind of a language runs and which kinds play COMPUTE, COLLECT, GROUP, BRANCH and ITERATE,
+each with its seats by role -- and a list seat of a UNION of declarations; `a_v09.haro`
+declares the ALGORITHM, the one letter with no shipped ancestor, from its three named
+sources, and the forge emits its runner: ITERATE over a snapshot of a declared collection,
+a step tree that re-enters itself refused at check -- the totality doctrine of section 3,
+structural. Judged by stz's 29 W cases and zing's formula cases re-expressed as algorithms
+(35 of 35 on `rnxc` and the oracle), because A has no suite of its own. Five letters of
+six are forged: Z, W, Q, F, A; N waits on the ringua Phase 1.5 study, the author's gate.
 
 **What the forge produces from one declaration** (Ringua's kit, 02-STACK's L1, now Haro's
 compiler verbs rather than separate organs): the parser; the court with the fixtures as its
@@ -519,6 +528,15 @@ byte-identical, first run, pinned; RingFlex's court 26 of 26 on the originals un
 Ring. v0.8 grew by what F needs (NAMED refusals, keyed pairs, a UNION of declarations,
 deadlines, ENTRY, three relations) and reversed two earlier fixtures out loud (HF-55).
 Record: `haro/SPIKE.md`, "The eighth rung".
+
+**The ninth rung, 2026-10-02, on the author's "next": Haro v0.9, the A letter** (section
+3's note). The ALGORITHM declared from its three named sources and forged into a court and
+a runner that stops by construction; judged by stz's and zing's own numbers re-expressed
+as algorithms: **35 of 35** on `rnxc` and the oracle, byte-identical, first run, pinned; a
+cyclic step tree refused at check. Three findings: an edit script's tolerance that
+duplicated two blocks across two commits (HF-57), the judge made from other repositories'
+numbers (HF-58), a list of a union judged by scalar shapes (HF-59). Five letters of six
+are forged. Record: `haro/SPIKE.md`, "The ninth rung".
 
 v0.1's spike (`twice.haro`, a definition with an intent clause) proved one altitude. The
 ruling asks for three to meet, and the estate has already named the smallest program that

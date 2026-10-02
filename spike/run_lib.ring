@@ -1,0 +1,216 @@
+# run_lib.ring -- the A letter: a declared language's structured steps, run
+# (Haro v0.9), in pure core Ring.
+#
+# A court FORGED from a .haro declaration that holds a RUN loads this file
+# beside court_lib.ring and expr_lib.ring, and carries the RUN as $aCourtRun
+# = [[role, [kind, seat, ...]], ...] -- OF [run kind, steps seat, result seat],
+# COMPUTE [kind, into, value], COLLECT [kind, into, value], GROUP [kind, into,
+# by, value], BRANCH [kind, when, then, else], ITERATE [kind, over, as, do].
+# The five constructs are Zcd's names for what Zex runs and VizCode composes
+# (SEQUENCE is the step list itself); the law is the alphabet's totality
+# doctrine: iteration is over a collection the record holds, over a SNAPSHOT
+# of it, so a COLLECT into the same list cannot lengthen the walk; a step
+# list that re-enters a step on the way down is refused at `check`
+# (RunCheckAcyclic) and again at `run`; there is no call and no recursion.
+#
+#   <court>.ring run <file> <algorithm> <record json>
+#
+# answers the algorithm's result as JSON: the value of its one result name,
+# or the list of several. A name read before it is written is refused by
+# name (the expression's ABSENT), never answered nil.
+#
+# Functions only; the globals are the generated court's.
+
+func RunRole(cRole)
+	for i = 1 to len($aCourtRun)
+		if $aCourtRun[i][1] = cRole return $aCourtRun[i][2] ok
+	next
+	return NULL
+
+func RunFail(cMsg)
+	CtFail(1, cMsg)
+
+# the construct a declaration plays: COMPUTE COLLECT GROUP BRANCH ITERATE, or ""
+func RunConstructOf(aDecl)
+	aKind = CtKindByVerb(aDecl[1])
+	if isNull(aKind) return "" ok
+	aRoles = ["COMPUTE", "COLLECT", "GROUP", "BRANCH", "ITERATE"]
+	for i = 1 to len(aRoles)
+		aR = RunRole(aRoles[i])
+		if not isNull(aR)
+			if aR[1] = aKind[2] return aRoles[i] ok
+		ok
+	next
+	return ""
+
+# the names a step list seat of a declaration holds, as written
+func RunStepsOf(aDecl, cSeat)
+	aL = CondListOf(aDecl, cSeat)
+	if isNull(aL) return [] ok
+	return aL
+
+# the step lists a declaration owns: its construct's list seats
+func RunChildLists(aDecl)
+	cC = RunConstructOf(aDecl)
+	aOut = []
+	if cC = "BRANCH"
+		aR = RunRole("BRANCH")
+		aOut + RunStepsOf(aDecl, aR[3])
+		aOut + RunStepsOf(aDecl, aR[4])
+	but cC = "ITERATE"
+		aR = RunRole("ITERATE")
+		aOut + RunStepsOf(aDecl, aR[4])
+	ok
+	return aOut
+
+# ---- the check: every algorithm's step tree is a tree ----------------------------------
+
+func RunCheckAcyclic(aDecls)
+	aOf = RunRole("OF")
+	if isNull(aOf) return ok
+	aK = CtKindByDeclName(aOf[1])
+	if isNull(aK) return ok
+	for i = 1 to len(aDecls)
+		if aDecls[i][1] != aK[1] loop ok
+		aSteps = RunStepsOf(aDecls[i], aOf[2])
+		for j = 1 to len(aSteps)
+			RunWalkCheck(aDecls, aSteps[j], [aDecls[i][2]])
+		next
+	next
+
+func RunWalkCheck(aDecls, cName, aPath)
+	if CtInList(cName, aPath)
+		RunFail("step '" + cName + "' re-enters itself through " + CtJoin(aPath, " > ") + ": an algorithm's steps form a tree, and no step may lead back to one on the way down")
+	ok
+	aD = CtDeclNamed(aDecls, cName)
+	if isNull(aD) return ok
+	aLists = RunChildLists(aD)
+	aNext = []
+	for i = 1 to len(aPath) aNext + aPath[i] next
+	aNext + cName
+	for i = 1 to len(aLists)
+		for j = 1 to len(aLists[i])
+			RunWalkCheck(aDecls, aLists[i][j], aNext)
+		next
+	next
+
+# ---- the run --------------------------------------------------------------------------------
+
+func RunExprNode(aDecl, cSeat)
+	return CtExprNode(aDecl, cSeat)
+
+# the record is $aExprRecord; a name is set in place
+func RunSet(cName, v)
+	for i = 2 to len($aExprRecord)
+		if $aExprRecord[i][1] = cName
+			$aExprRecord[i][2] = v
+			return
+		ok
+	next
+	aPair = [cName, v]
+	$aExprRecord + aPair
+
+func RunGet(cName)
+	return ExRefGet(cName)
+
+func RunSteps(aDecls, aSteps, aPath)
+	for i = 1 to len(aSteps)
+		RunStep(aDecls, aSteps[i], aPath)
+	next
+
+func RunStep(aDecls, cName, aPath)
+	if CtInList(cName, aPath) RunFail("step '" + cName + "' re-enters itself") ok
+	aD = CtDeclNamed(aDecls, cName)
+	if isNull(aD) RunFail("step '" + cName + "' is not declared") ok
+	cC = RunConstructOf(aD)
+	if cC = "" RunFail(aD[1] + " " + cName + " is not a step: it plays no construct of this language") ok
+	aNext = []
+	for i = 1 to len(aPath) aNext + aPath[i] next
+	aNext + cName
+	if cC = "COMPUTE"
+		aR = RunRole("COMPUTE")
+		cInto = CondScalar(aD, aR[2])
+		aNode = RunExprNode(aD, aR[3])
+		RunSet(cInto, ExEval(aNode, []))
+	but cC = "COLLECT"
+		aR = RunRole("COLLECT")
+		cInto = CondScalar(aD, aR[2])
+		aNode = RunExprNode(aD, aR[3])
+		v = ExEval(aNode, [])
+		aGot = RunGet(cInto)
+		aList = []
+		if aGot[1]
+			if not isList(aGot[2]) or ExIsObj(aGot[2]) RunFail("COLLECT " + cName + " into '" + cInto + "', which is not a list") ok
+			aList = aGot[2]
+		ok
+		aList + v
+		RunSet(cInto, aList)
+	but cC = "GROUP"
+		aR = RunRole("GROUP")
+		cInto = CondScalar(aD, aR[2])
+		k = ExEval(RunExprNode(aD, aR[3]), [])
+		v = ExEval(RunExprNode(aD, aR[4]), [])
+		cKey = "" + k
+		if isNumber(k) cKey = ExNumText(k) ok
+		aGot = RunGet(cInto)
+		aGroups = []
+		if aGot[1]
+			if not isList(aGot[2]) or ExIsObj(aGot[2]) RunFail("GROUP " + cName + " into '" + cInto + "', which is not a list of groups") ok
+			aGroups = aGot[2]
+		ok
+		nAt = 0
+		for j = 1 to len(aGroups)
+			if aGroups[j][1] = cKey nAt = j ok
+		next
+		if nAt = 0
+			aEntry = [cKey, [v]]
+			aGroups + aEntry
+		else
+			aGroups[nAt][2] + v
+		ok
+		RunSet(cInto, aGroups)
+	but cC = "BRANCH"
+		aR = RunRole("BRANCH")
+		aNode = RunExprNode(aD, aR[2])
+		if ExCondition(aNode, [])
+			RunSteps(aDecls, RunStepsOf(aD, aR[3]), aNext)
+		else
+			RunSteps(aDecls, RunStepsOf(aD, aR[4]), aNext)
+		ok
+	but cC = "ITERATE"
+		aR = RunRole("ITERATE")
+		cOver = CondScalar(aD, aR[2])
+		cAs = CondScalar(aD, aR[3])
+		aGot = RunGet(cOver)
+		if not aGot[1] RunFail("ITERATE " + cName + " over '" + cOver + "', which the record does not hold") ok
+		if not isList(aGot[2]) or ExIsObj(aGot[2]) RunFail("ITERATE " + cName + " over '" + cOver + "', which is not a list") ok
+		# a snapshot: the walk is as long as the list was when it began
+		aSnap = []
+		for j = 1 to len(aGot[2]) aSnap + aGot[2][j] next
+		aBody = RunStepsOf(aD, aR[4])
+		for j = 1 to len(aSnap)
+			RunSet(cAs, aSnap[j])
+			RunSteps(aDecls, aBody, aNext)
+		next
+	ok
+
+func RunAlgorithm(aDecls, cName, aRecord)
+	aOf = RunRole("OF")
+	if isNull(aOf) RunFail("this language declares no RUN, so nothing in it runs") ok
+	aD = CtDeclNamed(aDecls, cName)
+	if isNull(aD) RunFail("no declaration named '" + cName + "' in this file") ok
+	aK = CtKindByDeclName(aOf[1])
+	if isNull(aK) or aD[1] != aK[1] RunFail(aD[1] + " " + cName + " is not an " + aK[1] + ", and only an " + aK[1] + " runs") ok
+	if not ExIsObj(aRecord) RunFail("the record is a JSON object") ok
+	ExSetRecord(aRecord)
+	RunSteps(aDecls, RunStepsOf(aD, aOf[2]), [cName])
+	aNames = RunStepsOf(aD, aOf[3])
+	if len(aNames) = 0 return $aExprRecord ok
+	aVals = []
+	for i = 1 to len(aNames)
+		aGot = RunGet(aNames[i])
+		if not aGot[1] RunFail("the result '" + aNames[i] + "' was never computed") ok
+		aVals + aGot[2]
+	next
+	if len(aVals) = 1 return aVals[1] ok
+	return aVals

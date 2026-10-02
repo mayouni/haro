@@ -43,6 +43,7 @@ $aCourtSentenceKinds = []
 $aCourtExprs = []
 $aCourtWalks = []
 $aCourtAsk = NULL
+$aCourtRun = NULL
 $cExprLang = ""
 $aExprOperators = []
 $aExprOperands = []
@@ -105,7 +106,8 @@ $aCourtLangs = [
     [
       ["flows", "flow", "step", "flow", "order", ["validate", "enforcing.rule"], "compute", "formula", "on_fail"]
     ],
-    ["questions", ["flow"], "zexpr", ["where", "order", "limit"]]
+    ["questions", ["flow"], "zexpr", ["where", "order", "limit"]],
+    NULL
   ]
 ]
 CtUseLanguage("z")

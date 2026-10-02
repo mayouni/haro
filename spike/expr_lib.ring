@@ -597,6 +597,12 @@ func ExIsCondition(aNode)
 	cK = aNode[1]
 	return cK = "cmp" or cK = "and" or cK = "or" or cK = "not" or cK = "flag"
 
+# a condition's truth under the declared EQUALITY: value (zql) -- a boolean
+# shape or nothing; kind (W) -- the value's own truth (v0.9)
+func ExCondition(aNode, aEnv)
+	if $cExprEquality = "value" return ExBool(aNode, aEnv) ok
+	return ExTruthy(ExEval(aNode, aEnv))
+
 func ExBool(aNode, aEnv)
 	cK = aNode[1]
 	if cK = "cmp" return ExTruthy(ExEval(aNode, aEnv)) ok

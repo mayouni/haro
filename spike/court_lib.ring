@@ -30,6 +30,12 @@
 # order of the court is: shapes, the WORLD, the local types, the
 # CONSTRAINTs, then the references.
 #
+# v0.9 (haro/spike/v09/GRAMMAR.md): the RUN -- the A letter -- and the `run`
+# verb: `run <file> <algorithm> <record json>` walks an algorithm's step tree
+# on a record and answers its result (run_lib.ring, loaded by the generated
+# court when its language declares a RUN); a step tree with a cycle is
+# refused at check.
+#
 # v0.8 (haro/spike/v08/GRAMMAR.md): a refusal by NAME for a known trespasser;
 # pair lists keyed by a MENU (a sequence) or a DECLARATION (resolved) with
 # reference values; a UNION of declarations resolved by name; the references
@@ -182,6 +188,9 @@ func CtUseLanguage(cName)
 	# v0.7: the ASK [name, from kinds, where, clauses], or NULL
 	$aCourtAsk = NULL
 	if len(aE) >= 18 $aCourtAsk = aE[18] ok
+	# v0.9: the RUN [[role, [kind, seat, ...]], ...], or NULL
+	$aCourtRun = NULL
+	if len(aE) >= 19 $aCourtRun = aE[19] ok
 
 # the condition tables of every language the court carries, built once
 func CtBuildCondLangs()
@@ -237,7 +246,7 @@ func CtSnapshot()
 	        $aCourtMenus, $aCourtRanges, $aCourtFormats, $aCourtUnions, $aCourtConstraints,
 	        $aCourtWorld, $aCourtPoints, $aCourtFloors, $aCourtViews, $aCourtSentenceKinds,
 	        $aCourtToks, $nCourtPos, $aCondDecls, $cCondLang, $cCondOther, $bCondUnread,
-	        $aCondFormats, $aCondToks, $nCondPos, $aCourtExprs, $aCourtWalks, $aCourtAsk]
+	        $aCondFormats, $aCondToks, $nCondPos, $aCourtExprs, $aCourtWalks, $aCourtAsk, $aCourtRun]
 
 func CtRestore(aS)
 	$cCourtLang = aS[1]
@@ -268,6 +277,7 @@ func CtRestore(aS)
 	$aCourtExprs = aS[26]
 	$aCourtWalks = aS[27]
 	$aCourtAsk = aS[28]
+	$aCourtRun = aS[29]
 
 # ---- v0.6: the EXPRESSION tables, handed to expr_lib.ring ----------------------
 
@@ -511,6 +521,7 @@ func CtUnionHasDecls(cName)
 func CtSeatPasses(aSeat)
 	cK = CtTypeKind(aSeat)
 	if cK = "decl" return [0, 1] ok
+	if aSeat[3] and cK = "union" return [0, 1] ok
 	if cK = "union"
 		if CtUnionHasDecls(aSeat[2]) return [1, 1] ok
 		return [1, 0]
@@ -531,6 +542,7 @@ func CtClauseShape(aSeat)
 	cOf = aSeat[2]
 	cK = CtTypeKind(aSeat)
 	if aSeat[3]
+		if cK = "union" return "namelist" ok
 		if cK = "form"
 			aF = CtFormByName(cOf)
 			if isNull(aF) return "namelist" ok
@@ -946,9 +958,10 @@ func CtDeclare(cSrc)
 		aC = aD[4]
 		for j = 1 to len(aC)
 			aSeat = CtSeatByClause(aKind, aC[j][1])
-			if CtTypeKind(aSeat) = "union"
+			if CtTypeKind(aSeat) = "union" and not aSeat[3]
 				CtWantUnion(aD, aC[j], aSeat)
 			else
+				# a LIST of a union of declarations is a name list (v0.9)
 				CtWantShape(aD, aC[j], CtClauseShape(aSeat))
 			ok
 		next
@@ -1036,6 +1049,8 @@ func CtDeclare(cSrc)
 
 	# the references, last
 	CtCheckValues(aDecls, 1)
+	# v0.9: an algorithm's step tree is a tree
+	if not isNull($aCourtRun) RunCheckAcyclic(aDecls) ok
 	return aDecls
 
 # the NAMES and the typed seat values of every declaration: bRefs 0 checks
@@ -1163,7 +1178,7 @@ func CtCheckUnionWord(aDecl, aSeat, cValue)
 	return CtFill(cMsg, aDecl, cValue)
 
 func CtCheckSeatValue(aDecl, aSeat, aClause, bRefs)
-	if CtTypeKind(aSeat) = "union"
+	if CtTypeKind(aSeat) = "union" and not aSeat[3]
 		aAlt = CtUnionAlt(aSeat, aClause)
 		if isNull(aAlt) return "" ok
 		if aAlt[3] = "decl"
@@ -1180,6 +1195,19 @@ func CtCheckSeatValue(aDecl, aSeat, aClause, bRefs)
 	ok
 	cK = CtTypeKind(aSeat)
 	aItems = aClause[3][2]
+	if aSeat[3] and cK = "union"
+		# v0.9: a list of references to several kinds
+		aKind = CtKindByVerb(aDecl[1])
+		cMsgL = CtMessageFor(aKind, aSeat[1])
+		for i = 1 to len(aItems)
+			cWhy = CtCheckUnionWord(aDecl, aSeat, aItems[i])
+			if cWhy != ""
+				if cMsgL != "" return CtFill(cMsgL, aDecl, aItems[i]) ok
+				return cWhy
+			ok
+		next
+		return ""
+	ok
 	if cShape = "pairlist"
 		# v0.6: each pair's value takes the form's second seat's type; v0.8: a
 		# key is a name (once), a MENU word (a sequence, keys may repeat) or a
@@ -1724,6 +1752,21 @@ func CtMain()
 		catch
 			? cCatchError
 		done
+	but cVerb = "run"
+		# v0.9: an algorithm run on a record
+		if len(sysargv) < 6
+			? "usage: <court>.ring run <file" + $cCourtExt + "> <algorithm> <record json>"
+			return
+		ok
+		cSrc = read(sysargv[4])
+		try
+			aDecls = CtDeclare(cSrc)
+			if isNull($aCourtRun) CtFail(1, "this language declares no RUN, so nothing in it runs") ok
+			aRecord = ExJsonParse(sysargv[6])
+			? ExJson(RunAlgorithm(aDecls, sysargv[5], aRecord))
+		catch
+			? cCatchError
+		done
 	but cVerb = "ask"
 		# v0.7: a question of the declared world, answered on the rows handed in
 		if len(sysargv) < 6
@@ -1740,5 +1783,5 @@ func CtMain()
 			? cCatchError
 		done
 	else
-		? "unknown verb '" + cVerb + "'; this court answers: check, refine, eval, walk, ask"
+		? "unknown verb '" + cVerb + "'; this court answers: check, refine, eval, walk, ask, run"
 	ok

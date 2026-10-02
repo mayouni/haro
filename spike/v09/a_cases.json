@@ -1,0 +1,490 @@
+{
+  "grammar": "A",
+  "version": "0.9",
+  "judge": "stz's W fixtures (declarative/w/fixtures.json, 29 cases: 24 values and 5 refusals) and zing's conformance flow cases for the indice flow (3), re-expressed as algorithms of A in a/w_in_a.a with their expected values copied by the generator; plus 3 hand cases the W shape cannot say, computed by hand and marked 'hand'",
+  "sentence": "a/w_in_a.a",
+  "cases": [
+    {
+      "id": "eval-precedence",
+      "from": "stz W fixture eval-precedence (eval)",
+      "algorithm": "eval_precedence",
+      "input": {},
+      "expected": 11
+    },
+    {
+      "id": "eval-parens",
+      "from": "stz W fixture eval-parens (eval)",
+      "algorithm": "eval_parens",
+      "input": {},
+      "expected": 14
+    },
+    {
+      "id": "eval-unary-minus",
+      "from": "stz W fixture eval-unary-minus (eval)",
+      "algorithm": "eval_unary_minus",
+      "input": {},
+      "expected": 7
+    },
+    {
+      "id": "eval-modulo",
+      "from": "stz W fixture eval-modulo (eval)",
+      "algorithm": "eval_modulo",
+      "input": {},
+      "expected": 1
+    },
+    {
+      "id": "eval-division",
+      "from": "stz W fixture eval-division (eval)",
+      "algorithm": "eval_division",
+      "input": {},
+      "expected": 3.5
+    },
+    {
+      "id": "eval-nested-parens",
+      "from": "stz W fixture eval-nested-parens (eval)",
+      "algorithm": "eval_nested_parens",
+      "input": {},
+      "expected": 8
+    },
+    {
+      "id": "map-scale",
+      "from": "stz W fixture map-scale (map)",
+      "algorithm": "map_scale",
+      "input": {
+        "items": [
+          1,
+          2,
+          3
+        ]
+      },
+      "expected": [
+        2,
+        4,
+        6
+      ]
+    },
+    {
+      "id": "map-affine",
+      "from": "stz W fixture map-affine (map)",
+      "algorithm": "map_affine",
+      "input": {
+        "items": [
+          1,
+          2,
+          3
+        ]
+      },
+      "expected": [
+        2,
+        5,
+        8
+      ]
+    },
+    {
+      "id": "map-parity",
+      "from": "stz W fixture map-parity (map)",
+      "algorithm": "map_parity",
+      "input": {
+        "items": [
+          1,
+          2,
+          3,
+          4,
+          5
+        ]
+      },
+      "expected": [
+        1,
+        0,
+        1,
+        0,
+        1
+      ]
+    },
+    {
+      "id": "map-constant",
+      "from": "stz W fixture map-constant (map)",
+      "algorithm": "map_constant",
+      "input": {
+        "items": [
+          1,
+          2,
+          3
+        ]
+      },
+      "expected": [
+        7,
+        7,
+        7
+      ]
+    },
+    {
+      "id": "filter-gt",
+      "from": "stz W fixture filter-gt (filter)",
+      "algorithm": "filter_gt",
+      "input": {
+        "items": [
+          1,
+          2,
+          3,
+          4
+        ]
+      },
+      "expected": [
+        3,
+        4
+      ]
+    },
+    {
+      "id": "filter-ge",
+      "from": "stz W fixture filter-ge (filter)",
+      "algorithm": "filter_ge",
+      "input": {
+        "items": [
+          1,
+          2,
+          3,
+          4
+        ]
+      },
+      "expected": [
+        2,
+        3,
+        4
+      ]
+    },
+    {
+      "id": "filter-eq-string",
+      "from": "stz W fixture filter-eq-string (filter)",
+      "algorithm": "filter_eq_string",
+      "input": {
+        "items": [
+          "a",
+          "b",
+          "a"
+        ]
+      },
+      "expected": [
+        "a",
+        "a"
+      ]
+    },
+    {
+      "id": "filter-ne-string",
+      "from": "stz W fixture filter-ne-string (filter)",
+      "algorithm": "filter_ne_string",
+      "input": {
+        "items": [
+          "a",
+          "b",
+          "a"
+        ]
+      },
+      "expected": [
+        "a",
+        "a"
+      ]
+    },
+    {
+      "id": "filter-and",
+      "from": "stz W fixture filter-and (filter)",
+      "algorithm": "filter_and",
+      "input": {
+        "items": [
+          1,
+          2,
+          3,
+          4
+        ]
+      },
+      "expected": [
+        2,
+        3
+      ]
+    },
+    {
+      "id": "filter-or",
+      "from": "stz W fixture filter-or (filter)",
+      "algorithm": "filter_or",
+      "input": {
+        "items": [
+          1,
+          2,
+          3,
+          4
+        ]
+      },
+      "expected": [
+        1,
+        4
+      ]
+    },
+    {
+      "id": "filter-not",
+      "from": "stz W fixture filter-not (filter)",
+      "algorithm": "filter_not",
+      "input": {
+        "items": [
+          1,
+          2,
+          3,
+          4
+        ]
+      },
+      "expected": [
+        1,
+        2
+      ]
+    },
+    {
+      "id": "filter-arith-in-comparison",
+      "from": "stz W fixture filter-arith-in-comparison (filter)",
+      "algorithm": "filter_arith_in_comparison",
+      "input": {
+        "items": [
+          1,
+          2,
+          3,
+          4,
+          5,
+          6
+        ]
+      },
+      "expected": [
+        2,
+        4,
+        6
+      ]
+    },
+    {
+      "id": "count-gt",
+      "from": "stz W fixture count-gt (count)",
+      "algorithm": "count_gt",
+      "input": {
+        "items": [
+          1,
+          2,
+          3,
+          4
+        ]
+      },
+      "expected": 2
+    },
+    {
+      "id": "partition-gt",
+      "from": "stz W fixture partition-gt (partition)",
+      "algorithm": "partition_gt",
+      "input": {
+        "items": [
+          1,
+          2,
+          3,
+          4
+        ]
+      },
+      "expected": [
+        [
+          3,
+          4
+        ],
+        [
+          1,
+          2
+        ]
+      ]
+    },
+    {
+      "id": "groupby-parity",
+      "from": "stz W fixture groupby-parity (groupby)",
+      "algorithm": "groupby_parity",
+      "input": {
+        "items": [
+          1,
+          2,
+          3,
+          4,
+          5
+        ]
+      },
+      "expected": [
+        [
+          "1",
+          [
+            1,
+            3,
+            5
+          ]
+        ],
+        [
+          "0",
+          [
+            2,
+            4
+          ]
+        ]
+      ]
+    },
+    {
+      "id": "reduce-sum",
+      "from": "stz W fixture reduce-sum (reduce)",
+      "algorithm": "reduce_sum",
+      "input": {
+        "items": [
+          1,
+          2,
+          3,
+          4
+        ]
+      },
+      "expected": 10
+    },
+    {
+      "id": "reduce-sum-seeded",
+      "from": "stz W fixture reduce-sum-seeded (reduce)",
+      "algorithm": "reduce_sum_seeded",
+      "input": {
+        "items": [
+          1,
+          2,
+          3,
+          4
+        ]
+      },
+      "expected": 110
+    },
+    {
+      "id": "reduce-noinit-product",
+      "from": "stz W fixture reduce-noinit-product (reduce_noinit)",
+      "algorithm": "reduce_noinit_product",
+      "input": {
+        "items": [
+          1,
+          2,
+          3,
+          4
+        ]
+      },
+      "expected": 24
+    },
+    {
+      "id": "refuse-unknown-variable",
+      "from": "stz W fixture refuse-unknown-variable (refuse)",
+      "algorithm": "refuse_unknown_variable",
+      "input": {
+        "items": [
+          1
+        ]
+      },
+      "expected": "REFUSED",
+      "refusal": "'nosuch' is absent"
+    },
+    {
+      "id": "refuse-call",
+      "from": "stz W fixture refuse-call (refuse)",
+      "source": "DEFINE COLLECT each AS (INTO out, VALUE \"print(item)\") RATIONALE \"x\"\nDEFINE ITERATE over AS (OVER items, AS item, DO [each]) RATIONALE \"x\"\nDEFINE ALGORITHM algo AS (STEPS [over], RESULT [out]) RATIONALE \"x\"\n",
+      "refusal": "trailing input"
+    },
+    {
+      "id": "refuse-unclosed-paren",
+      "from": "stz W fixture refuse-unclosed-paren (refuse)",
+      "source": "DEFINE COLLECT each AS (INTO out, VALUE \"(item > 2\") RATIONALE \"x\"\nDEFINE ITERATE over AS (OVER items, AS item, DO [each]) RATIONALE \"x\"\nDEFINE ALGORITHM algo AS (STEPS [over], RESULT [out]) RATIONALE \"x\"\n",
+      "refusal": "unclosed '('"
+    },
+    {
+      "id": "refuse-trailing-garbage",
+      "from": "stz W fixture refuse-trailing-garbage (refuse)",
+      "source": "DEFINE COLLECT each AS (INTO out, VALUE \"item > 2 zzz\") RATIONALE \"x\"\nDEFINE ITERATE over AS (OVER items, AS item, DO [each]) RATIONALE \"x\"\nDEFINE ALGORITHM algo AS (STEPS [over], RESULT [out]) RATIONALE \"x\"\n",
+      "refusal": "trailing input"
+    },
+    {
+      "id": "refuse-empty",
+      "from": "stz W fixture refuse-empty (refuse)",
+      "source": "DEFINE COLLECT each AS (INTO out, VALUE \"\") RATIONALE \"x\"\nDEFINE ITERATE over AS (OVER items, AS item, DO [each]) RATIONALE \"x\"\nDEFINE ALGORITHM algo AS (STEPS [over], RESULT [out]) RATIONALE \"x\"\n",
+      "refusal": "empty expression"
+    },
+    {
+      "id": "zing-formula-29",
+      "from": "zing flow case: FORMULA: [4,5,3,4,5] computes 84 and completes",
+      "algorithm": "indice",
+      "input": {
+        "reponses": [
+          4,
+          5,
+          3,
+          4,
+          5
+        ]
+      },
+      "expected": 84
+    },
+    {
+      "id": "zing-formula-boundary-30",
+      "from": "zing flow case: FORMULA boundary: all fives compute exactly 100",
+      "algorithm": "indice",
+      "input": {
+        "reponses": [
+          5,
+          5,
+          5
+        ]
+      },
+      "expected": 100
+    },
+    {
+      "id": "zing-formula-31",
+      "from": "zing flow case: FORMULA: an empty survey is refused before computing",
+      "algorithm": "indice",
+      "input": {
+        "reponses": []
+      },
+      "expected": "VIDE"
+    },
+    {
+      "id": "hand-nested-iteration",
+      "from": "hand: nested iteration",
+      "algorithm": "products",
+      "input": {
+        "xs": [
+          1,
+          2,
+          3
+        ],
+        "ys": [
+          10,
+          100
+        ]
+      },
+      "expected": [
+        10,
+        100,
+        20,
+        200,
+        30,
+        300
+      ]
+    },
+    {
+      "id": "hand-running-maximum",
+      "from": "hand: a running maximum",
+      "algorithm": "maximum",
+      "input": {
+        "items": [
+          3,
+          9,
+          2,
+          7
+        ]
+      },
+      "expected": 9
+    },
+    {
+      "id": "hand-nested-branch",
+      "from": "hand: a branch inside a branch",
+      "algorithm": "grade",
+      "input": {
+        "score": 85
+      },
+      "expected": "B"
+    }
+  ]
+}

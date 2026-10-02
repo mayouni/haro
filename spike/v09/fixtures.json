@@ -1,0 +1,69 @@
+{
+  "grammar": "haro",
+  "version": "0.9",
+  "comment": "The Haro v0.9 conformance floor, written BEFORE the court that passes it (the W discipline: fixtures first, prose second). v0.9 grows v0.8 by what A -- the alphabet's A letter, the ALGORITHM: bounded iteration, structured steps, total (haro/SPIKE.md, the ninth rung) -- needs and nothing else: RUN, the kinetic declaration that says which kind of a language is run (OF: the kind, its steps list, its result names) and which kinds play the five structured constructs -- COMPUTE a value into a name, COLLECT a value into a list, GROUP values by a key, BRANCH on a condition into two step lists, ITERATE over a named collection with each item bound to a name through a step list -- each a kind and its seats by role; and a list seat whose element is a UNION of declarations (a step list names steps of several kinds). Nothing in a RUN can loop without a collection, and a step list that re-enters a step is refused: termination is structural. Every v0.8 fixture still passes: v0.9 refuses nothing v0.8 accepted. Rejects carry the fragment the refusal must contain.",
+  "accepts": [
+    {
+      "id": "A1",
+      "name": "a RUN: OF the run kind, and the five constructs each a kind and its seats by role",
+      "source": "DEFINE LANGUAGE a AS (VERSION \"0.9\", GRAMMAR \"0.9\", COURT \"x\", EXTENSION \".a\") RATIONALE \"x\"\nDEFINE EXPRESSION aexpr AS (OPERATORS [or, and, cmp, add, mul], OPERANDS [number, text, ref]) RATIONALE \"x\"\nDEFINE FORM word AS (SEATS [name: name]) RATIONALE \"x\"\nDEFINE DECLARATION compute AS (VERB \"COMPUTE\", SEATS [into: name, value: aexpr]) RATIONALE \"x\"\nDEFINE DECLARATION collect AS (VERB \"COLLECT\", SEATS [into: name, value: aexpr]) RATIONALE \"x\"\nDEFINE DECLARATION group AS (VERB \"GROUP\", SEATS [into: name, by: aexpr, value: aexpr]) RATIONALE \"x\"\nDEFINE DECLARATION branch AS (VERB \"BRANCH\", SEATS [when: aexpr, then: [step], else: [step]]) RATIONALE \"x\"\nDEFINE DECLARATION iterate AS (VERB \"ITERATE\", SEATS [over: name, as: name, do: [step]]) RATIONALE \"x\"\nDEFINE UNION step AS (OF [compute, collect, group, branch, iterate]) RATIONALE \"x\"\nDEFINE DECLARATION algorithm AS (VERB \"ALGORITHM\", SEATS [steps: [step], result: [word]]) RATIONALE \"x\"\nDEFINE RUN a AS (OF [algorithm, steps, result], COMPUTE [compute, into, value], COLLECT [collect, into, value], GROUP [group, into, by, value], BRANCH [branch, when, then, else], ITERATE [iterate, over, as, do]) RATIONALE \"x\"\n",
+      "expect": {"language": "a", "counts": {"declarations": 6, "unions": 1, "expressions": 1}, "runs": 1}
+    },
+    {
+      "id": "A2",
+      "name": "a RUN with OF and COMPUTE alone: a language of straight-line computations",
+      "source": "DEFINE LANGUAGE a AS (VERSION \"0.9\", GRAMMAR \"0.9\", COURT \"x\", EXTENSION \".a\") RATIONALE \"x\"\nDEFINE EXPRESSION aexpr AS (OPERATORS [add], OPERANDS [number, ref]) RATIONALE \"x\"\nDEFINE FORM word AS (SEATS [name: name]) RATIONALE \"x\"\nDEFINE DECLARATION compute AS (VERB \"COMPUTE\", SEATS [into: name, value: aexpr]) RATIONALE \"x\"\nDEFINE DECLARATION algorithm AS (VERB \"ALGORITHM\", SEATS [steps: [compute], result: [word]]) RATIONALE \"x\"\nDEFINE RUN a AS (OF [algorithm, steps, result], COMPUTE [compute, into, value]) RATIONALE \"x\"\n",
+      "expect": {"language": "a", "counts": {"declarations": 2}, "runs": 1}
+    },
+    {
+      "id": "A3",
+      "name": "a list seat whose element is a UNION of declarations: a step list names steps of several kinds",
+      "source": "DEFINE LANGUAGE a AS (VERSION \"0.9\", GRAMMAR \"0.9\", COURT \"x\", EXTENSION \".a\") RATIONALE \"x\"\nDEFINE DECLARATION compute AS (VERB \"COMPUTE\", SEATS [into: name]) RATIONALE \"x\"\nDEFINE DECLARATION collect AS (VERB \"COLLECT\", SEATS [into: name]) RATIONALE \"x\"\nDEFINE UNION step AS (OF [compute, collect]) RATIONALE \"x\"\nDEFINE DECLARATION algorithm AS (VERB \"ALGORITHM\", SEATS [steps: [step]]) RATIONALE \"x\"\n",
+      "expect": {"language": "a", "counts": {"declarations": 3, "unions": 1}, "runs": 0}
+    },
+    {
+      "id": "A4",
+      "name": "a v0.8 declaration is a v0.9 declaration: v0.8's A2, unchanged",
+      "source": "DEFINE LANGUAGE f AS (VERSION \"0.8\", GRAMMAR \"0.8\", COURT \"x\", EXTENSION \".f\") RATIONALE \"x\"\nDEFINE MENU verbs AS (WORDS [notify, reassign]) RATIONALE \"x\"\nDEFINE DECLARATION actor AS (VERB \"ACTOR\", SEATS [role: name]) RATIONALE \"x\"\nDEFINE DECLARATION guard AS (VERB \"GUARD\", SEATS [norm: name]) RATIONALE \"x\"\nDEFINE DECLARATION terminal AS (VERB \"TERMINAL\", SEATS [outcome: name]) RATIONALE \"x\"\nDEFINE DECLARATION step AS (VERB \"STEP\", SEATS [target: name]) RATIONALE \"x\"\nDEFINE UNION node AS (OF [step, terminal]) RATIONALE \"a target is a step or a terminal, told apart by name\"\nDEFINE FORM action AS (SEATS [verb: verbs, target: actor]) RATIONALE \"x\"\nDEFINE FORM branch AS (SEATS [guard: guard, target: node]) RATIONALE \"x\"\nDEFINE DECLARATION escalation AS (VERB \"ESCALATION\", SEATS [on_breach: [action]]) RATIONALE \"x\"\nDEFINE DECLARATION routing AS (VERB \"ROUTING\", SEATS [when: [branch], otherwise: node]) RATIONALE \"x\"\n",
+      "expect": {"language": "f", "counts": {"declarations": 6, "forms": 2, "unions": 1, "menus": 1}, "runs": 0}
+    }
+  ],
+  "rejects": [
+    {
+      "id": "R1",
+      "name": "OF names a DECLARATION of this language and its seats",
+      "source": "DEFINE LANGUAGE a AS (VERSION \"0.9\", GRAMMAR \"0.9\", COURT \"x\", EXTENSION \".a\") RATIONALE \"x\"\nDEFINE DECLARATION compute AS (VERB \"COMPUTE\", SEATS [into: name]) RATIONALE \"x\"\nDEFINE RUN a AS (OF [program, steps, result]) RATIONALE \"x\"\n",
+      "refusal": "OF: 'program' resolves to nothing"
+    },
+    {
+      "id": "R2",
+      "name": "a construct's value seat is an EXPRESSION seat of its kind",
+      "source": "DEFINE LANGUAGE a AS (VERSION \"0.9\", GRAMMAR \"0.9\", COURT \"x\", EXTENSION \".a\") RATIONALE \"x\"\nDEFINE FORM word AS (SEATS [name: name]) RATIONALE \"x\"\nDEFINE DECLARATION compute AS (VERB \"COMPUTE\", SEATS [into: name, value: text]) RATIONALE \"x\"\nDEFINE DECLARATION algorithm AS (VERB \"ALGORITHM\", SEATS [steps: [compute], result: [word]]) RATIONALE \"x\"\nDEFINE RUN a AS (OF [algorithm, steps, result], COMPUTE [compute, into, value]) RATIONALE \"x\"\n",
+      "refusal": "COMPUTE: 'value' is not an expression seat of compute"
+    },
+    {
+      "id": "R3",
+      "name": "each construct names a kind and exactly its roles' seats",
+      "source": "DEFINE LANGUAGE a AS (VERSION \"0.9\", GRAMMAR \"0.9\", COURT \"x\", EXTENSION \".a\") RATIONALE \"x\"\nDEFINE EXPRESSION aexpr AS (OPERATORS [cmp], OPERANDS [number, ref]) RATIONALE \"x\"\nDEFINE FORM word AS (SEATS [name: name]) RATIONALE \"x\"\nDEFINE DECLARATION branch AS (VERB \"BRANCH\", SEATS [when: aexpr, then: [branch]]) RATIONALE \"x\"\nDEFINE DECLARATION algorithm AS (VERB \"ALGORITHM\", SEATS [steps: [branch], result: [word]]) RATIONALE \"x\"\nDEFINE RUN a AS (OF [algorithm, steps, result], BRANCH [branch, when, then]) RATIONALE \"x\"\n",
+      "refusal": "BRANCH names a kind and three seats: when, then, else"
+    },
+    {
+      "id": "R4",
+      "name": "a .haro file declares at most one RUN",
+      "source": "DEFINE LANGUAGE a AS (VERSION \"0.9\", GRAMMAR \"0.9\", COURT \"x\", EXTENSION \".a\") RATIONALE \"x\"\nDEFINE FORM word AS (SEATS [name: name]) RATIONALE \"x\"\nDEFINE DECLARATION compute AS (VERB \"COMPUTE\", SEATS [into: name]) RATIONALE \"x\"\nDEFINE DECLARATION algorithm AS (VERB \"ALGORITHM\", SEATS [steps: [compute], result: [word]]) RATIONALE \"x\"\nDEFINE RUN a AS (OF [algorithm, steps, result]) RATIONALE \"x\"\nDEFINE RUN b AS (OF [algorithm, steps, result]) RATIONALE \"x\"\n",
+      "refusal": "at most one RUN"
+    },
+    {
+      "id": "R5",
+      "name": "a list seat's element UNION is a UNION of DECLARATIONs",
+      "source": "DEFINE LANGUAGE a AS (VERSION \"0.9\", GRAMMAR \"0.9\", COURT \"x\", EXTENSION \".a\") RATIONALE \"x\"\nDEFINE MENU words AS (WORDS [one, two]) RATIONALE \"x\"\nDEFINE FORMAT key AS (SHAPE hex64) RATIONALE \"x\"\nDEFINE UNION either AS (OF [words, key]) RATIONALE \"x\"\nDEFINE DECLARATION thing AS (VERB \"THING\", SEATS [items: [either]]) RATIONALE \"x\"\n",
+      "refusal": "a list seat's element UNION is a UNION of DECLARATIONs"
+    },
+    {
+      "id": "R6",
+      "name": "ITERATE's over and as seats are names, its do a list of steps",
+      "source": "DEFINE LANGUAGE a AS (VERSION \"0.9\", GRAMMAR \"0.9\", COURT \"x\", EXTENSION \".a\") RATIONALE \"x\"\nDEFINE EXPRESSION aexpr AS (OPERATORS [cmp], OPERANDS [number, ref]) RATIONALE \"x\"\nDEFINE FORM word AS (SEATS [name: name]) RATIONALE \"x\"\nDEFINE DECLARATION iterate AS (VERB \"ITERATE\", SEATS [over: aexpr, as: name, do: [iterate]]) RATIONALE \"x\"\nDEFINE DECLARATION algorithm AS (VERB \"ALGORITHM\", SEATS [steps: [iterate], result: [word]]) RATIONALE \"x\"\nDEFINE RUN a AS (OF [algorithm, steps, result], ITERATE [iterate, over, as, do]) RATIONALE \"x\"\n",
+      "refusal": "ITERATE: 'over' is not a name seat of iterate"
+    }
+  ]
+}

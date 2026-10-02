@@ -63,6 +63,7 @@ STZU5_FIXTURES = os.path.join(HERE, 'v05', 'fixtures.json')
 STZU6_FIXTURES = os.path.join(HERE, 'v06', 'fixtures.json')
 STZU7_FIXTURES = os.path.join(HERE, 'v07', 'fixtures.json')
 STZU8_FIXTURES = os.path.join(HERE, 'v08', 'fixtures.json')
+STZU9_FIXTURES = os.path.join(HERE, 'v09', 'fixtures.json')
 
 
 def judge_stzu(exe, label, fixtures=STZU_FIXTURES):
@@ -72,7 +73,7 @@ def judge_stzu(exe, label, fixtures=STZU_FIXTURES):
     counts), world and points."""
     doc = json.load(open(fixtures, encoding='utf-8'))
     # the pinned v0.1 judge is stzu's; everything since is Haro's (D1)
-    assert doc['grammar'] in ('stzu', 'haro') and doc['version'] in ('0.1', '0.2', '0.3', '0.4', '0.5', '0.6', '0.7', '0.8')
+    assert doc['grammar'] in ('stzu', 'haro') and doc['version'] in ('0.1', '0.2', '0.3', '0.4', '0.5', '0.6', '0.7', '0.8', '0.9')
     passed = failed = 0
     outputs = {}
     with tempfile.TemporaryDirectory() as td:
@@ -142,7 +143,8 @@ def stage1():
                             ('v0.5, CONTEXTS on an EXPRESSION', STZU5_FIXTURES),
                             ('v0.6, pair lists, the expression semantics and WALK', STZU6_FIXTURES),
                             ('v0.7, ASK -- the Q letter -- and ABSENT missing', STZU7_FIXTURES),
-                            ('v0.8, what F needs: NAMED refusals, keyed pairs, a UNION of declarations, deadlines, ENTRY, three relations', STZU8_FIXTURES)):
+                            ('v0.8, what F needs: NAMED refusals, keyed pairs, a UNION of declarations, deadlines, ENTRY, three relations', STZU8_FIXTURES),
+                            ('v0.9, what A needs: RUN, the structured steps, and a list of a UNION of declarations', STZU9_FIXTURES)):
         print(f'stage 1 -- the Haro meta-court in pure Ring, judged by its fixtures ({label})')
         f1, o1 = judge_stzu(RNXC, 'rnxc', fixtures)
         f2, o2 = judge_stzu(ORACLE, 'oracle ring.exe', fixtures)
@@ -1140,6 +1142,127 @@ def stage11():
     return failures
 
 
+# ---- stage 12: A, the algorithm -- stz's W cases and zing's formulas re-expressed as step trees
+
+A_STZU = os.path.join(HERE, 'a_v09.haro')
+A_SENTENCE = os.path.join('a', 'w_in_a.a')
+A_CASES = os.path.join(HERE, 'v09', 'a_cases.json')
+A_FLOOR = 35
+
+
+def a_run(exe, args):
+    return run_args(exe, ['a_court.ring'] + args, HERE).strip()
+
+
+def stage12():
+    """The ninth rung. a_v09.haro declares A -- five constructs, a step tree, a
+    RUN -- and the forge emits its court and its runner. The judge is other
+    repositories' numbers: stz's 29 W cases (map, filter, count, partition,
+    groupby, reduce, the constant evaluations and the five refusals) and
+    zing's formula cases, each re-expressed as an algorithm in a/w_in_a.a
+    with its expected value copied from the source file by the generator;
+    plus three hand cases that the W shape cannot say (nested iteration, a
+    running maximum, a branch inside a branch), each computed by hand and
+    marked so."""
+    print('stage 12 -- A, the algorithm: a_v09.haro -> a_court.ring and its runner, judged by stz\'s W cases and zing\'s formulas re-expressed as step trees')
+    failures = 0
+    out_rnx = run_args(RNXC, ['forge.ring', A_STZU, '.'], HERE).strip()
+    print('  rnxc  :', out_rnx.splitlines()[0] if out_rnx else 'NO OUTPUT')
+    if not out_rnx.startswith('forged a'):
+        print('  FAIL the forge did not forge A')
+        return 1
+    td = os.path.join(ROOT, 'runtime', 'haro-forge-oracle')
+    os.makedirs(td, exist_ok=True)
+    arts = ('a_court.ring', 'a.gbnf', 'a_expr.ring', 'a_expr.gbnf')
+    for art in arts:
+        if os.path.exists(os.path.join(td, art)):
+            os.remove(os.path.join(td, art))
+    out_or = run_args(ORACLE, ['forge.ring', A_STZU, '../../runtime/haro-forge-oracle'], HERE).strip()
+    print('  oracle:', out_or.splitlines()[0] if out_or else 'NO OUTPUT')
+    for art in arts:
+        a = open(os.path.join(HERE, art), 'rb').read()
+        b = open(os.path.join(td, art), 'rb').read() if os.path.exists(os.path.join(td, art)) else b''
+        if a != b:
+            failures += 1
+            print(f'  FAIL {art} differs between the two runtimes ({len(a)} vs {len(b)} bytes)')
+        else:
+            print(f'  ok   {art}: {len(a)} bytes, byte-identical on both runtimes')
+    doc = json.load(open(A_CASES, encoding='utf-8'))
+    assert doc['grammar'] == 'A' and doc['version'] == '0.9', 'unexpected A case file'
+    ab_diff = []
+    r = a_run(RNXC, ['check', A_SENTENCE])
+    o = a_run(ORACLE, ['check', A_SENTENCE])
+    if r != o:
+        ab_diff.append('check')
+    ok, fields = parse_verdict(r)
+    if not ok:
+        failures += 1
+        print(f'  FAIL w_in_a.a is refused: {fields}')
+    else:
+        print(f'  ok   w_in_a.a is a sentence of a: {fields.get("count ALGORITHM")} algorithms over {sum(int(v) for k, v in fields.items() if k.startswith("count ") and k != "count ALGORITHM")} steps')
+    passed = failed = 0
+    with tempfile.TemporaryDirectory() as tdr:
+        for case in doc['cases']:
+            if 'source' in case:
+                p = os.path.join(tdr, case['id'] + '.a')
+                with open(p, 'w', encoding='utf-8', newline='') as f:
+                    f.write(case['source'])
+                r = a_run(RNXC, ['check', p])
+                o = a_run(ORACLE, ['check', p])
+                ok = (not r.startswith('ok')) and case['refusal'] in r
+                why = '' if ok else f' -- expected a refusal holding {case["refusal"]!r}, got {r[:160]}'
+            else:
+                args = ['run', A_SENTENCE, case['algorithm'], json.dumps(case['input'])]
+                r = a_run(RNXC, args)
+                o = a_run(ORACLE, args)
+                if 'refusal' in case:
+                    ok = case['refusal'] in r
+                    why = '' if ok else f' -- expected a refusal holding {case["refusal"]!r}, got {r[:160]}'
+                else:
+                    try:
+                        got = json.loads(r)
+                        ok = got == case['expected']
+                        why = '' if ok else f' -- expected {json.dumps(case["expected"])} got {r[:160]}'
+                    except json.JSONDecodeError:
+                        ok = False
+                        why = f' -- not a value: {r[:160]}'
+            if r != o:
+                ab_diff.append(case['id'])
+            if PLANT and case['id'] == 'map-scale':
+                ok, why = False, ' -- PLANTED'
+            if ok:
+                passed += 1
+            else:
+                failed += 1
+                print(f'  FAIL {case["id"]} ({case["from"]}){why}')
+    n = len(doc['cases'])
+    print(f'A-CONFORMANCE (the forged runner on rnxc): {passed} passed, {failed} failed of {n}')
+    failures += failed
+    if ab_diff:
+        failures += 1
+        print(f'  FAIL rnxc and the oracle differ on {len(ab_diff)} case(s): {ab_diff}')
+    else:
+        print(f'  ok   rnxc and the oracle print the same bytes on all {n} cases and the sentence')
+    if A_FLOOR and passed < A_FLOOR:
+        failures += 1
+        print(f'  FAIL {passed} passed, under the pinned floor of {A_FLOOR}')
+    # the totality guard: a step tree that re-enters itself is refused at check
+    cyc = ('DEFINE ALGORITHM loop AS (STEPS [again], RESULT [n]) RATIONALE "x"\n'
+           'DEFINE COMPUTE bump AS (INTO n, VALUE "n + 1") RATIONALE "x"\n'
+           'DEFINE BRANCH again AS (WHEN "n < 10", THEN [bump, again]) RATIONALE "a loop in disguise"\n')
+    with tempfile.TemporaryDirectory() as tdr:
+        p = os.path.join(tdr, 'loop.a')
+        with open(p, 'w', encoding='utf-8', newline='') as f:
+            f.write(cyc)
+        r = a_run(RNXC, ['check', p])
+        if r.startswith('ok') or 're-enters itself' not in r:
+            failures += 1
+            print(f'  FAIL a step tree with a cycle was not refused at check: {r[:160]}')
+        else:
+            print('  ok   a step tree that re-enters itself is refused at check: termination is structural')
+    return failures
+
+
 def stage6(lang, court=None, n=15):
     court = court or f'{lang}_court.ring'
     print(f'stage 6 -- edit to verdict on makeen_box.machine, minima of {n}')
@@ -1221,5 +1344,7 @@ if __name__ == '__main__':
         failures += stage10()
     if stage in (None, 11) and os.path.exists(F_STZU) and os.path.isdir(F_DIR):
         failures += stage11()
+    if stage in (None, 12) and os.path.exists(A_STZU) and os.path.exists(A_CASES):
+        failures += stage12()
     print(f'haro_forge: {"FAIL" if failures else "PASS"} ({failures} failure(s), {time.perf_counter()-t0:.1f} s)')
     sys.exit(1 if failures else 0)

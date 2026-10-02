@@ -41,6 +41,7 @@ $aCourtSentenceKinds = []
 $aCourtExprs = []
 $aCourtWalks = []
 $aCourtAsk = NULL
+$aCourtRun = NULL
 $cExprLang = ""
 $aExprOperators = []
 $aExprOperands = []
@@ -129,6 +130,7 @@ $aCourtLangs = [
     ],
     [
     ],
+    NULL,
     NULL
   ]
 ]

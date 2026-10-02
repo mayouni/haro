@@ -1,0 +1,96 @@
+-- a_v09.haro -- A, the alphabet's A letter: the ALGORITHM -- bounded iteration,
+-- structured steps, total. The one letter with no shipped ancestor (06-ALPHABET):
+-- its constructs are extracted from Zex's bodies as Zcd names them (SEQUENCE, BRANCH,
+-- ITERATE) and VizCode composes them (one node, one rationale, children by kind),
+-- its totality law from RingFlex's seam (computation belongs in a declared, judged
+-- place) and from W (a total evaluator, no loop, no recursion, no user function).
+-- An algorithm's steps form a tree: a step is a COMPUTE, a COLLECT, a GROUP, a
+-- BRANCH into two step lists, or an ITERATE over a NAMED COLLECTION with each item
+-- bound through a step list. Nothing iterates but over a collection the record holds;
+-- a step list that re-enters a step is refused; termination is structural. Judged
+-- by numbers that are not mine: stz's 29 W cases and zing's formula cases,
+-- re-expressed as algorithms (haro/spike/a/, v09/a_cases.json). A PROPOSAL for the
+-- estate's A (HARO-A-01).
+
+DEFINE LANGUAGE a AS (
+  VERSION "0.9",
+  GRAMMAR "0.9",
+  COURT "stz/declarative/w/fixtures.json, zing/conformance/fixtures.json",
+  EXTENSION ".a"
+) RATIONALE "Computation without the halting problem, as the default venue: iteration is over declared collections only, no unbounded loop is expressible, termination is structural"
+
+-- ---- the expression language of every value and condition --------------------------------
+
+DEFINE EXPRESSION aexpr AS (
+  OPERATORS [or, and, not, cmp, add, sub, mul, div, mod, neg, round],
+  OPERANDS [number, text, ref, agg],
+  AGGREGATES [sum, count, avg, min, max],
+  ABSENT refuse, DIVISION refuse, EQUALITY kind
+) RATIONALE "W's grammar over the algorithm's names: a bare name reads the record (an input or a computed name), an aggregate reads a list the record holds; a name that holds nothing is refused by name, never answered nil; a number and a text are never equal, as on W's host"
+
+-- ---- the forms -------------------------------------------------------------------------------
+
+DEFINE FORM word AS (
+  SEATS [name: name]
+) RATIONALE "One name"
+
+-- ---- the constructs ----------------------------------------------------------------------------
+
+DEFINE DECLARATION compute AS (
+  VERB "COMPUTE",
+  SEATS [into: name, value: aexpr]
+) RATIONALE "A value, computed from the record, into a name of the record"
+
+DEFINE DECLARATION collect AS (
+  VERB "COLLECT",
+  SEATS [into: name, value: aexpr]
+) RATIONALE "A value appended to a list of the record; the list is born at the first COLLECT"
+
+DEFINE DECLARATION group AS (
+  VERB "GROUP",
+  SEATS [into: name, by: aexpr, value: aexpr]
+) RATIONALE "A value filed under a key, in the order keys first appear: the groups are a list of [key, values]"
+
+DEFINE DECLARATION branch AS (
+  VERB "BRANCH",
+  SEATS [when: aexpr, then: [step], else: [step]],
+  MESSAGES [then: "BRANCH {name} steps to '{value}', which is not a declared step", else: "BRANCH {name} steps to '{value}', which is not a declared step"]
+) RATIONALE "A condition and two step lists; the one taken is the one the condition's truth names"
+
+DEFINE DECLARATION iterate AS (
+  VERB "ITERATE",
+  SEATS [over: name, as: name, do: [step]],
+  MESSAGES [do: "ITERATE {name} steps to '{value}', which is not a declared step"]
+) RATIONALE "For each item of the collection the record holds under OVER, bound to AS, the DO steps -- over a snapshot of the collection, so a COLLECT into it cannot lengthen the walk"
+
+DEFINE UNION step AS (
+  OF [compute, collect, group, branch, iterate],
+  MESSAGE "{VERB} {name} steps to '{value}', which is not a declared step"
+) RATIONALE "A step is one of the five constructs, told apart by name"
+
+DEFINE DECLARATION algorithm AS (
+  VERB "ALGORITHM",
+  SEATS [steps: [step], result: [word]],
+  MESSAGES [steps: "ALGORITHM {name} steps to '{value}', which is not a declared step"]
+) RATIONALE "The steps, in order, and the names whose values are the answer: one name is its value, several are a list"
+
+-- ---- the run -----------------------------------------------------------------------------------
+
+DEFINE RUN a AS (
+  OF [algorithm, steps, result],
+  COMPUTE [compute, into, value],
+  COLLECT [collect, into, value],
+  GROUP [group, into, by, value],
+  BRANCH [branch, when, then, else],
+  ITERATE [iterate, over, as, do]
+) RATIONALE "What the forge emits a runner for: `run <file> <algorithm> <record json>` walks the steps on the record and answers the result"
+
+-- ---- the refusals -------------------------------------------------------------------------------
+
+DEFINE REFUSAL unknown_declaration AS (
+  MESSAGE "An algorithm is a tree of five constructs -- COMPUTE, COLLECT, GROUP, BRANCH, ITERATE -- and nothing else is expressible: no loop but over a collection, no recursion, no call."
+) RATIONALE "The totality doctrine, as a refusal"
+
+DEFINE REFUSAL dangling_reference AS (
+  MESSAGE "Every step named is a step declared."
+) RATIONALE "A step list resolves"
