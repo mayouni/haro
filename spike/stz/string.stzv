@@ -1,0 +1,25 @@
+-- string.stzv -- five families of stzString, as the forms document spells them
+-- (RemoveMany / RemoveManyCS / RemoveQ / RemoveWXT, FindNextSTCS, ReplaceQ,
+-- and the fluent twins) and as stzString.ring ships them. A family declares
+-- its base verb and the forms it offers; the court generates the members
+-- (`family`) and judges the shipped names against them (`spellings`).
+
+DEFINE FAMILY remove AS (
+  BASE "Remove", FORMS [many, cs, w, xt, fluent]
+) RATIONALE "Remove, RemoveMany, RemoveManyCS, RemoveQ and RemoveWXT are the forms document's own examples"
+
+DEFINE FAMILY find_next AS (
+  BASE "FindNext", FORMS [st, cs]
+) RATIONALE "FindNextSTCS is the document's example of suffix order as parameter order: the substring, then the start, then the flag"
+
+DEFINE FAMILY replace_all AS (
+  BASE "ReplaceAll", FORMS [cs, fluent]
+) RATIONALE "ReplaceAll, ReplaceAllCS, ReplaceAllQ and ReplaceAllCSQ: all four shipped, the smallest complete family"
+
+DEFINE FAMILY find_first AS (
+  BASE "FindFirst", FORMS [st, d, zz, cs]
+) RATIONALE "The shipped FindFirst family spells ST, D, ZZ and CS in several combinations; the forms it does NOT offer here (XT, Z, S) are the measurement"
+
+DEFINE FAMILY replace AS (
+  BASE "Replace", FORMS [cs, xt, w, fluent, passive]
+) RATIONALE "Replace offers the passive Replaced beside the fluent ReplaceQ: the two forms principle 7 tells apart by what they may mutate"

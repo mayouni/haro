@@ -30,6 +30,11 @@
 # order of the court is: shapes, the WORLD, the local types, the
 # CONSTRAINTs, then the references.
 #
+# v0.12 (haro/spike/v12/GRAMMAR.md): FORMS -- `family <file>` generates every
+# declared family from its base and the forms it offers; `spellings <file>
+# <names>` judges a list of names against the FORMS and the families
+# (forms_lib.ring, loaded only where a FORMS is declared).
+#
 # v0.11 (haro/spike/v11/GRAMMAR.md): the Diagnostic Contract -- `diagnose
 # <file> [world]` answers the court's verdict as C2 v1.2.0's one object of
 # six-field envelopes; a typed refusal carries the declaration's CODE / CODES
@@ -258,6 +263,9 @@ func CtUseLanguage(cName)
 	# v0.10: the SYMBOLs [name, kind, ref, message]
 	$aCourtSymbols = []
 	if len(aE) >= 20 $aCourtSymbols = aE[20] ok
+	# v0.12: the FORMS [name, fluent, passive, statement, params, family], or NULL
+	$aCourtFormset = NULL
+	if len(aE) >= 21 $aCourtFormset = aE[21] ok
 
 # the condition tables of every language the court carries, built once
 func CtBuildCondLangs()
@@ -314,7 +322,7 @@ func CtSnapshot()
 	        $aCourtWorld, $aCourtPoints, $aCourtFloors, $aCourtViews, $aCourtSentenceKinds,
 	        $aCourtToks, $nCourtPos, $aCondDecls, $cCondLang, $cCondOther, $bCondUnread,
 	        $aCondFormats, $aCondToks, $nCondPos, $aCourtExprs, $aCourtWalks, $aCourtAsk, $aCourtRun,
-	        $aCourtSymbols, $aCourtWorldFile]
+	        $aCourtSymbols, $aCourtWorldFile, $aCourtFormset]
 
 func CtRestore(aS)
 	$cCourtLang = aS[1]
@@ -348,6 +356,7 @@ func CtRestore(aS)
 	$aCourtRun = aS[29]
 	$aCourtSymbols = aS[30]
 	$aCourtWorldFile = aS[31]
+	$aCourtFormset = aS[32]
 
 # ---- v0.10: the world ------------------------------------------------------------------
 # A C1 world is JSON: {"world", "contract", "symbols": [{kind, name, span, rationale}],
@@ -1324,6 +1333,8 @@ func CtDeclare(cSrc)
 	CtCheckValues(aDecls, 1)
 	# v0.9: an algorithm's step tree is a tree
 	if not isNull($aCourtRun) RunCheckAcyclic(aDecls) ok
+	# v0.12: a family offers only forms the FORMS declares
+	if not isNull($aCourtFormset) FormsCheck(aDecls) ok
 	# v0.10: the symbols resolve against the world, when one is handed in
 	if not isNull($aCourtWorldFile) CtResolveWorld(aDecls) ok
 	return aDecls
@@ -2098,6 +2109,30 @@ func CtMain()
 		catch
 			? cCatchError
 		done
+	but cVerb = "family"
+		# v0.12: the members of every declared family, generated from the FORMS
+		cSrc = read(sysargv[4])
+		try
+			aDecls = CtDeclare(cSrc)
+			if isNull($aCourtFormset) CtFail(1, "this language declares no FORMS, so it spells no family") ok
+			FormsPrintFamilies(aDecls)
+		catch
+			? cCatchError
+		done
+	but cVerb = "spellings"
+		# v0.12: a list of names judged against the FORMS and the declared families
+		if len(sysargv) < 5
+			? "usage: <court>.ring spellings <file" + $cCourtExt + "> <names.txt>"
+			return
+		ok
+		cSrc = read(sysargv[4])
+		try
+			aDecls = CtDeclare(cSrc)
+			if isNull($aCourtFormset) CtFail(1, "this language declares no FORMS, so it judges no spelling") ok
+			FormsPrintSpellings(aDecls, FormsReadNames(sysargv[5]))
+		catch
+			? cCatchError
+		done
 	but cVerb = "ask"
 		# v0.7: a question of the declared world, answered on the rows handed in
 		if len(sysargv) < 6
@@ -2114,5 +2149,5 @@ func CtMain()
 			? cCatchError
 		done
 	else
-		? "unknown verb '" + cVerb + "'; this court answers: check, refine, eval, walk, ask, run, world, diagnose"
+		? "unknown verb '" + cVerb + "'; this court answers: check, refine, eval, walk, ask, run, world, diagnose, family, spellings"
 	ok

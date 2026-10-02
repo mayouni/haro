@@ -48,6 +48,7 @@ $aCourtSymbols = []
 $aCourtWorldFile = NULL
 $cCourtCode = "PARSE"
 $aCourtCites = []
+$aCourtFormset = NULL
 $cExprLang = ""
 $aExprOperators = []
 $aExprOperands = []
@@ -112,7 +113,8 @@ $aCourtLangs = [
     ],
     ["questions", ["flow"], "zexpr", ["where", "order", "limit"]],
     NULL,
-    []
+    [],
+    NULL
   ]
 ]
 CtUseLanguage("z")

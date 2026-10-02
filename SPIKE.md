@@ -63,6 +63,10 @@ expression language forged whole, judged by stz's 29 fixtures as stage 8, pinned
 | `spike/v11/fixtures.json`, `spike/v11/GRAMMAR.md` | **Haro v0.11** (the eleventh rung, below): the Diagnostic Contract -- CODE, CODES and CITES, so every forged court answers `diagnose <file> [world]` in C2 v1.2.0's one object of six-field envelopes; 7 fixtures first, the prose after |
 | `spike/f_v11.haro` | F with RingFlex's own codes and cites declared beside its words (C1 to C15, FLOW_IS_ZQL, SEAM_UPWARD, UNRESOLVED_FLOW; article:placement-3 and -3.2); the guard's F since the eleventh rung |
 | `spike/rf_diag.ring` | RingFlex's own court asked for its C2 envelope on every original fixture and world, run read-only under official Ring by stage 14; the live judge of the forged court's codes |
+| `spike/v12/fixtures.json`, `spike/v12/GRAMMAR.md` | **Haro v0.12** (the twelfth rung, below): FORMS -- principle 7's function-name grammar as data: FLUENT, PASSIVE, STATEMENT, PARAMS, FAMILY; one meaning per suffix; 10 fixtures first, the prose after |
+| `spike/stzv_v12.haro`, `spike/stz/string.stzv` | the Softanza vocabulary's FORMS as the forms document spells them, and five families of stzString declared by base verb and offered forms |
+| `spike/forms_lib.ring` | the FORMS library a forged court loads only where one is declared: `family` generates every member, `spellings` judges a list of names |
+| `spike/v12/doc_names.txt`, `spike/v12/forms_cases.json` | the forms document's own examples as names, with the verdict principle 7 gives each and the families it spells member for member; the pinned half of stage 15's judge |
 
 Nothing in `rnxc` or the VM changed. Nothing in a sibling repository changed.
 
@@ -805,6 +809,82 @@ every rung before.
 court stops at its first refusal; no `why`/`todo`/`frames`; `diagnose` judges the sentence,
 never a run of it.
 
+## The twelfth rung -- Haro v0.12, FORMS: the function-name grammar as data -- 2026-10-03
+
+**Decided on the author's "continue" after the eleventh rung, with the same four candidates
+in front of me** -- NARRATE, FORMS, a collecting court, N. NARRATE's shipped ancestor is
+stzn v0, a Luau script rendering an HTML page that is "never stored" (stz/README.md), so
+its judge is a decision of the author's before it is a rung; N is his gate. FORMS has what
+the other two lack: a rule already RULED -- principle 7, H-7, seven points, "the family
+generated from a declared rule, a hand-written member that disagrees refused" -- a guard
+already spelled out in PRINCIPLES.md ("a form fixture per rule; the family generator's
+output pinned; the checker run over the Softanza base unit printing members that
+disagree"), and a judge already in the estate: the forms document and the 46,493
+definitions it describes, "35 spellings of `find`" among them.
+
+**What the grammar needs is one clause with five seats.** Fixtures first (`spike/v12/`,
+10), then the prose. `FORMS`, at most one per language: `FLUENT` (the suffix that returns
+the receiver, `Q`), `PASSIVE` (the inflection of the form that may not mutate, `ed`),
+`STATEMENT` (the assertion suffix, `X`), `PARAMS` (the parameter suffixes, key by suffix:
+`cs: "CS"`, `st: "ST"`, `many: "Many"` ...) and `FAMILY` (the declaration kind that spells
+a family, its base-verb seat and its offered-forms seat). One meaning per suffix is a
+refusal of the meta-court -- the document's `FF`, future form and free form at once,
+cannot be declared (R1); a suffix is letters (R5). `stzv_v12.haro` declares the Softanza
+vocabulary's forms as the document spells them, and `stz/string.stzv` five families of
+stzString by base verb and offered forms. The forged court gains `family <file>`, every
+member generated -- each subset of the offered parameter forms in the order offered, as
+the plain name, the fluent name, the passive name -- and `spellings <file> <names>`, one
+verdict per name: the suffixes split off the end, longest first, each spelt once, the
+fluent form last, the statement form outermost; a fluent name requires its plain twin in
+the list (point 2); a name whose base is a declared family's must be a member that
+family generates (point 6); a trailing run of capitals no suffix spells is the FF clash
+(point 7). Suffix order is parameter order and is free, so `FindCSZZ` and `FindZZCS` both
+agree. The passive is applied only when a family is GENERATED (`Replace` to `Replaced`,
+`Spacify` to `Spacified`): no dictionary inverts it, so a name is never read as passive.
+
+    stage 1    v0.1 28 ... v0.11 7, v0.12 10 -- on rnxc and the oracle, byte-identical
+    stage 15   the three families the forms document spells, generated member for member
+               (24 names); the document's 30 names judged as principle 7 judges them --
+               RemoveFFQ the FF clash, UppercasingFQ a fluent form with no plain twin,
+               FindFirstXT a member outside its family, FindQCS the fluent form not last,
+               ToJSON a run no suffix spells; and FindLasteAsSection, WithoutSapces and
+               NearstTo AGREE, because the court judges the forms grammar and not the
+               dictionary. A family offering a form the FORMS does not declare is refused
+               under the code FORMS (the envelope of the rung before). Then the LIVE
+               census: every Find*, Replace* and Remove* definition of stzString.ring,
+               read from the author's tree (read-only) by the guard on every run --
+               595 definitions, 584 agree with the FORMS, 11 disagree, 41 generated members the tree does not ship; the floor is pinned at 584.
+               The same bytes on rnxc and the oracle on every run, first run of the cases
+    stages 9-14  Z 16 of 16, Q 25 of 25, F 27 of 27, A 35 of 35, the world 9 of 9, the
+               envelope 28 of 28 -- unchanged
+    stage 6    edit to verdict, measured first in the pass: harb 10.4 ms; rnxc compiled 92.6, image 18.0; the oracle 114.5
+    the pass   fifteen stages, PASS in 148.5 s; --plant FAIL (39 failures, RemoveFFQ among them)
+
+**The number the migration measures, read carefully.** The 584 agree with the forms
+GRAMMAR -- they parse into a base and declared suffixes, each once, the fluent form last.
+Of the 11 that do not, two are the grammar's own refusal (`FindSSZ`, `FindSSZZ`: the
+suffix `S` twice), one is a fluent form with no plain twin (`ReplaceNthCharQ`, and no
+`ReplaceNthChar` anywhere: point 2), and eight are shipped members OUTSIDE the forms their
+declared family offers (`FindFirstXT`, `FindFirstZ`, `FindFirstSZZ`, `ReplaceAllExcept`
+and its fluent twin, `ReplaceMany` and its kin) -- which is point 6 of H-7 doing its work
+on five families declared from the document's own examples, not a verdict on his tree. And 41
+members the five families GENERATE are not shipped (`FindNextST`, `FindFirstSTCS`,
+`RemoveCS`, `ReplaceCSQ` ...): what the compiler of principle 7 would add, named one by
+one. The court cannot see a misspelled WORD (`FindLasteAsSection` agrees); that refusal
+is the computing altitude's, an unknown name, and the record says so.
+
+**Found on the way.** A list seat is typed by a declared form, menu or kind, never by a
+bare `[name]` ("seat type 'name' resolves to nothing"), so a family's offered forms are a
+MENU of the FORMS' own words, and the FORMS pass is the second guard that the two agree.
+And `split` is Ring's standard library, which no forged court loads: the names file is
+read by hand. Both caught by the first fixture run, neither reached the record as a claim.
+
+**What it does not do is named in `v12/GRAMMAR.md`**: no dictionary; the passive only
+generated; point 1 (a passive body may not mutate), point 4 (W parsed at compile time) and
+point 5 (Many, Except, IsNot verified against the base's signature) need bodies and
+signatures, which are the computing altitude's; prefixes (`viz`, `rnd`) are read as part
+of the base.
+
 ## The names -- `.haro`, not `.stzu` -- corrected 2026-10-02
 
 **At the author's word ("we agreed to use .haro instead of .stzu, no?").** D1 was ratified
@@ -878,7 +958,10 @@ whole guard re-run on the renamed tree: 28 + 30 + 27 + 23, 117 of 120, 32 of 32,
 12. ~~The C2 diagnostic envelope~~ -- built 2026-10-02 as Haro v0.11, the eleventh rung
    above, on the author's second delegation: CODE, CODES and CITES, every forged court's
    `diagnose` judged by the contract's shape and by RingFlex's court live, 28 of 28 codes.
-13. The forge as an `rnxc` verb (the ringpp session's `src/`, routed); the
+13. ~~`FORMS` as data~~ -- built 2026-10-03 as Haro v0.12, the twelfth rung above, on the
+   author's "continue": the function-name grammar declared once, families generated,
+   stzString's 595 shipped spellings judged live, 584 agreeing; the 11 and the 41 named.
+14. The forge as an `rnxc` verb (the ringpp session's `src/`, routed); the
    Softanza-resident timing the charter's 2.6 asks for; the court's run time on the
    oracle under paths and views (6.4x the image this pass, named at stage 6); the
    ontology as versioned data, `ASK`, `NARRATE` and `FORMS`, the rows of section 3 the

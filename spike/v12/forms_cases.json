@@ -1,0 +1,42 @@
+{
+  "grammar": "stzv",
+  "version": "0.12",
+  "comment": "The judge of the forged stzv court, written BEFORE the court: the families the forms document spells, member for member as the rule generates them (each subset of the offered parameter forms in the order offered, as the plain name, then the fluent name, then the passive name), and the verdict principle 7 gives each of the document's names -- RemoveFFQ is the FF clash (point 7), UppercasingFQ a fluent form with no plain twin (point 2), FindFirstXT a member outside its family's offered forms (point 6), FindQCS the fluent form not last, ToJSON a trailing run no suffix spells; FindLasteAsSection, WithoutSapces and NearstTo AGREE, because this court judges the forms grammar and not the dictionary -- the misspelled form is the computing altitude's refusal (an unknown name), named in v12/GRAMMAR.md.",
+  "families": {
+    "find_next": ["FindNext", "FindNextST", "FindNextCS", "FindNextSTCS"],
+    "replace_all": ["ReplaceAll", "ReplaceAllQ", "ReplaceAllCS", "ReplaceAllCSQ"],
+    "find_first": ["FindFirst", "FindFirstST", "FindFirstD", "FindFirstSTD", "FindFirstZZ", "FindFirstSTZZ", "FindFirstDZZ", "FindFirstSTDZZ", "FindFirstCS", "FindFirstSTCS", "FindFirstDCS", "FindFirstSTDCS", "FindFirstZZCS", "FindFirstSTZZCS", "FindFirstDZZCS", "FindFirstSTDZZCS"]
+  },
+  "spellings": [
+    {"name": "RemoveMany", "verdict": "agree", "contains": "base=Remove forms=[many] member of remove"},
+    {"name": "RemoveManyCS", "verdict": "agree", "contains": "forms=[many, cs] member of remove"},
+    {"name": "RemoveQ", "verdict": "agree", "contains": "forms=[] fluent member of remove"},
+    {"name": "RemoveWXT", "verdict": "agree", "contains": "forms=[w, xt] member of remove"},
+    {"name": "FindNextSTCS", "verdict": "agree", "contains": "base=FindNext forms=[st, cs] member of find_next"},
+    {"name": "ReplaceQ", "verdict": "agree", "contains": "base=Replace forms=[] fluent member of replace"},
+    {"name": "Replaced", "verdict": "agree", "contains": "member of replace"},
+    {"name": "ReplacedCS", "verdict": "agree", "contains": "forms=[cs] member of replace"},
+    {"name": "UppercaseQ", "verdict": "agree", "contains": "base=Uppercase forms=[] fluent"},
+    {"name": "Spacified", "verdict": "agree", "contains": "base=Spacified forms=[]"},
+    {"name": "FindAsSections", "verdict": "agree", "contains": "base=FindAsSections forms=[]"},
+    {"name": "FindZZ", "verdict": "agree", "contains": "base=Find forms=[zz]"},
+    {"name": "FindCSZZ", "verdict": "agree", "contains": "forms=[cs, zz]"},
+    {"name": "FindZZCS", "verdict": "agree", "contains": "forms=[zz, cs]"},
+    {"name": "RemoveNonLettersExcept", "verdict": "agree", "contains": "base=RemoveNonLetters forms=[except]"},
+    {"name": "IsNotLetter", "verdict": "agree", "contains": "base=IsNotLetter"},
+    {"name": "vizFindAll", "verdict": "agree", "contains": "base=vizFindAll"},
+    {"name": "AllNumbersInQX", "verdict": "agree", "contains": "base=AllNumbersIn forms=[] fluent statement"},
+    {"name": "FindLasteAsSection", "verdict": "agree", "contains": "base=FindLasteAsSection"},
+    {"name": "WithoutSapces", "verdict": "agree", "contains": "base=WithoutSapces"},
+    {"name": "NearstTo", "verdict": "agree", "contains": "base=NearstTo"},
+    {"name": "ReplaceAllCSQ", "verdict": "agree", "contains": "forms=[cs] fluent member of replace_all"},
+    {"name": "FindFirstSTDZZ", "verdict": "agree", "contains": "forms=[st, d, zz] member of find_first"},
+    {"name": "RemoveFFQ", "verdict": "disagree", "contains": "the suffix F appears twice"},
+    {"name": "UppercasingFQ", "verdict": "disagree", "contains": "requires UppercasingF"},
+    {"name": "FindFirstXT", "verdict": "disagree", "contains": "the family find_first offers [st, d, zz, cs] and not the forms of FindFirstXT"},
+    {"name": "FindSSZ", "verdict": "disagree", "contains": "the suffix S appears twice"},
+    {"name": "FindQCS", "verdict": "disagree", "contains": "the fluent form Q is not last"},
+    {"name": "ReplaceNthCharQ", "verdict": "disagree", "contains": "requires ReplaceNthChar"},
+    {"name": "ToJSON", "verdict": "disagree", "contains": "ends in 'JSON', which no declared suffix spells"}
+  ]
+}

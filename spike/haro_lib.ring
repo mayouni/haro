@@ -18,6 +18,11 @@
 # closed question grammar: FROM which kinds, WHERE in which expression,
 # which optional CLAUSES (where, order, limit); and ABSENT missing.
 #
+# v0.12 (haro/spike/v12/GRAMMAR.md): FORMS -- a vocabulary's function-name
+# grammar as data (principle 7): the fluent, passive and statement forms, the
+# parameter suffixes, one meaning per suffix, and which declaration spells a
+# family from a base and the forms it offers.
+#
 # v0.11 (haro/spike/v11/GRAMMAR.md): the Diagnostic Contract (C2 v1.2.0) --
 # CODE, CODES and CITES, so a forged court speaks the family's envelope.
 #
@@ -107,6 +112,8 @@ func StzuClauses(cKind)
 		return [["BRANCH", "namelist"], ["COLLECT", "namelist"], ["COMPUTE", "namelist"], ["GROUP", "namelist"], ["ITERATE", "namelist"], ["OF", "namelist"]]
 	but cKind = "SYMBOL"
 		return [["CITES", "stringlist"], ["CODE", "string"], ["KIND", "string"], ["MESSAGE", "string"], ["REF", "string"]]
+	but cKind = "FORMS"
+		return [["FAMILY", "namelist"], ["FLUENT", "string"], ["PARAMS", "messagelist"], ["PASSIVE", "string"], ["STATEMENT", "string"]]
 	ok
 	return []
 
@@ -147,13 +154,15 @@ func StzuRequired(cKind)
 		return ["OF"]
 	but cKind = "SYMBOL"
 		return ["KIND"]
+	but cKind = "FORMS"
+		return ["PARAMS"]
 	ok
 	return []
 
 func StzuIsKind(cWord)
 	return InStrList(cWord, ["LANGUAGE", "DECLARATION", "FORM", "EXPRESSION", "REFUSAL",
 	                         "MENU", "RANGE", "FORMAT", "CONSTRAINT", "WORLD", "REFINE", "UNION",
-	                         "SENTENCE", "VIEW", "WALK", "ASK", "RUN", "SYMBOL"])
+	                         "SENTENCE", "VIEW", "WALK", "ASK", "RUN", "SYMBOL", "FORMS"])
 
 # C2 2.1: a code is ^[A-Z][A-Z0-9]*([_-][A-Z0-9]+)*$ ; C2 2.5: a cite is
 # kind:value, kind in rule|article|right|pattern, value [A-Za-z0-9_.-]+ (v0.11)
@@ -186,6 +195,22 @@ func StzuIsC2Cite(cS)
 		if not (IsUpperChar(c) or IsLowerChar(c) or IsDigitChar(c) or c = "_" or c = "." or c = "-") return 0 ok
 	next
 	return 1
+
+# v0.12: a suffix is letters, and no two roles spell the same one (the FF clash)
+func StzuWantSuffix(cS, nLine, cWhere)
+	if len(cS) = 0 StzuFail(nLine, "'" + cS + "' on " + cWhere + " is not a suffix: a suffix is letters") ok
+	for i = 1 to len(cS)
+		if not (IsUpperChar(cS[i]) or IsLowerChar(cS[i]))
+			StzuFail(nLine, "'" + cS + "' on " + cWhere + " is not a suffix: a suffix is letters")
+		ok
+	next
+
+func StzuWantOneMeaning(aSpelt, cRole, cSuffix, nLine)
+	for i = 1 to len(aSpelt)
+		if aSpelt[i][2] = cSuffix
+			StzuFail(nLine, "'" + cSuffix + "' is spelt twice, as " + aSpelt[i][1] + " and as " + cRole + ": one meaning per suffix")
+		ok
+	next
 
 func StzuWantCode(cCode, nLine, cWhere)
 	if not StzuIsC2Code(cCode)
@@ -833,6 +858,8 @@ func StzuParseDeclaration()
 #   ask:          [name, from kinds, where, clauses, rationale, line] or NULL   (v0.7)
 #   run:          [name, [[role, [kind, seat, ...]], ...], rationale, line] or NULL   (v0.9)
 #   symbols:      [name, kind, ref, message, line, code, cites]   (a seat type resolved against the world, v0.10; v0.11 code, cites)
+#   formset:      [name, fluent, passive, statement, params, family, rationale, line] or NULL
+#                 (v0.12: params [[key, suffix, line]], family [kind, base seat, forms seat] or [])
 #   (v0.11) declarations gain codes [[seat, code, line]] as their eighth element; refusals gain code,
 #   codes and cites as their sixth to eighth; menus, ranges, formats, unions and constraints a code last
 #                 and world gains publish: [[kind, symbolkind, line], ...] as its fifth element
@@ -882,6 +909,7 @@ func StzuDeclare(cSrc)
 	aWalks = []
 	aAsk = NULL
 	aRun = NULL
+	aFormset = NULL
 	aSymbols = []
 	aWorld = NULL
 	aRefine = NULL
@@ -1102,6 +1130,49 @@ func StzuDeclare(cSrc)
 				cMsg = ""
 				if HasClause(aClauses, "MESSAGE") cMsg = ClauseValue(aClauses, "MESSAGE") ok
 				aSymbols + [cName, cSKind, cRef, cMsg, nLine, StzuCodeOf(aClauses, nLine, cName), StzuCitesOf(aClauses, nLine, cName)]
+			but cKind = "FORMS"
+				# v0.12: a vocabulary's function-name grammar as data (principle 7)
+				if not isNull(aFormset)
+					StzuFail(nLine, "a .haro file declares at most one FORMS: a vocabulary spells its families one way (" + aFormset[1] + " is it)")
+				ok
+				cFluent = ""
+				if HasClause(aClauses, "FLUENT") cFluent = ClauseValue(aClauses, "FLUENT") ok
+				cPassive = ""
+				if HasClause(aClauses, "PASSIVE") cPassive = ClauseValue(aClauses, "PASSIVE") ok
+				cStmt = ""
+				if HasClause(aClauses, "STATEMENT") cStmt = ClauseValue(aClauses, "STATEMENT") ok
+				aParams = ClauseValue(aClauses, "PARAMS")
+				aSpelt = []
+				if cFluent != ""
+					StzuWantSuffix(cFluent, nLine, "FLUENT")
+					aSpelt + ["FLUENT", cFluent]
+				ok
+				if cPassive != ""
+					StzuWantSuffix(cPassive, nLine, "PASSIVE")
+					StzuWantOneMeaning(aSpelt, "PASSIVE", cPassive, nLine)
+					aSpelt + ["PASSIVE", cPassive]
+				ok
+				if cStmt != ""
+					StzuWantSuffix(cStmt, nLine, "STATEMENT")
+					StzuWantOneMeaning(aSpelt, "STATEMENT", cStmt, nLine)
+					aSpelt + ["STATEMENT", cStmt]
+				ok
+				for i = 1 to len(aParams)
+					if aParams[i][1] = "fluent" or aParams[i][1] = "passive"
+						StzuFail(aParams[i][3], "PARAMS: '" + aParams[i][1] + "' is the " + upper(aParams[i][1]) + " role's own word, not a parameter suffix")
+					ok
+					StzuWantSuffix(aParams[i][2], aParams[i][3], "PARAMS." + aParams[i][1])
+					StzuWantOneMeaning(aSpelt, aParams[i][1], aParams[i][2], aParams[i][3])
+					aSpelt + [aParams[i][1], aParams[i][2]]
+				next
+				aFamily = []
+				if HasClause(aClauses, "FAMILY")
+					aFamily = ClauseValue(aClauses, "FAMILY")
+					if len(aFamily) != 3
+						StzuFail(nLine, "FAMILY is [kind, base seat, forms seat]: the declaration kind that declares a family, its base-verb seat and its offered-forms seat")
+					ok
+				ok
+				aFormset = [cName, cFluent, cPassive, cStmt, aParams, aFamily, cRationale, nLine]
 			but cKind = "RUN"
 				if not isNull(aRun)
 					StzuFail(nLine, "a .haro file declares at most one RUN: a language runs one way (" + aRun[1] + " is it)")
@@ -1194,6 +1265,23 @@ func StzuDeclare(cSrc)
 			aShapes + cShape
 		next
 	next
+	# v0.12: a FORMS' FAMILY names a declared kind, a scalar base seat and a list forms seat
+	if not isNull(aFormset)
+		if len(aFormset[6]) = 3
+			aFam = aFormset[6]
+			aFK = NULL
+			for i = 1 to len(aDeclarations)
+				if aDeclarations[i][1] = aFam[1] aFK = aDeclarations[i] ok
+			next
+			if isNull(aFK) StzuFail(aFormset[8], "FAMILY: no declaration '" + aFam[1] + "'") ok
+			aBS = StzuSeatNamed(aFK[3], aFam[2])
+			if isNull(aBS) StzuFail(aFormset[8], "FAMILY: no seat '" + aFam[2] + "' on " + aFam[1]) ok
+			if aBS[3] StzuFail(aFormset[8], "FAMILY: the base seat '" + aFam[2] + "' of " + aFam[1] + " is one verb, not a list") ok
+			aFS = StzuSeatNamed(aFK[3], aFam[3])
+			if isNull(aFS) StzuFail(aFormset[8], "FAMILY: no seat '" + aFam[3] + "' on " + aFam[1]) ok
+			if not aFS[3] StzuFail(aFormset[8], "FAMILY: the forms seat '" + aFam[3] + "' of " + aFam[1] + " is a list of the forms offered") ok
+		ok
+	ok
 	# v0.11: CODES name seats of the declaration
 	for i = 1 to len(aDeclarations)
 		aCd = aDeclarations[i][8]
@@ -1318,7 +1406,8 @@ func StzuDeclare(cSrc)
 	         ["menus", aMenus], ["ranges", aRanges], ["formats", aFormats],
 	         ["constraints", aConstraints], ["world", aWorld], ["refine", aRefine],
 	         ["unions", aUnions], ["sentences", aSentences], ["views", aViews],
-	         ["walks", aWalks], ["ask", aAsk], ["run", aRun], ["symbols", aSymbols] ]
+	         ["walks", aWalks], ["ask", aAsk], ["run", aRun], ["symbols", aSymbols],
+	         ["formset", aFormset] ]
 	$cCondLang = cLName
 	$aCondLangs = StzuCondLangs(aRec, [])
 	$aCondFormats = []
@@ -1739,6 +1828,9 @@ func StzuPrintLanguage(aLang)
 	nSy = 0
 	if not isNull(aSy) nSy = len(aSy) ok
 	? "symbols " + nSy
+	nFs = 0
+	if not isNull(LangGet(aLang, "formset")) nFs = 1 ok
+	? "formsets " + nFs
 	nWorld = 0
 	if not isNull(LangGet(aLang, "world")) nWorld = 1 ok
 	? "world " + nWorld

@@ -1,0 +1,90 @@
+{
+  "grammar": "haro",
+  "version": "0.12",
+  "comment": "The Haro v0.12 conformance floor, written BEFORE the court that passes it (the W discipline: fixtures first, prose second). v0.12 grows v0.11 by the charter's section 3 row `FORMS inside a vocabulary` -- principle 7's function-name grammar declared as data: FORMS, at most one per language, with FLUENT (the suffix that returns the receiver), PASSIVE (the inflection of the form that may not mutate), STATEMENT (the assertion suffix), PARAMS (the parameter suffixes, key: suffix) and FAMILY (the declaration kind that spells a family, its base seat and its offered-forms seat). One meaning per suffix (R1, R2: the FF clash of the forms document); a suffix is letters (R5); a FAMILY names a declared kind with a scalar base seat and a list forms seat (R3, R6); at most one FORMS (R4). Every v0.11 fixture still passes: v0.12 refuses nothing v0.11 accepted (A2 is v0.11's A1).",
+  "accepts": [
+    {
+      "id": "A1",
+      "name": "a FORMS with the three forms, the parameter suffixes and the FAMILY declaration",
+      "source": "DEFINE LANGUAGE stzv AS (VERSION \"0.12\", GRAMMAR \"0.12\", COURT \"x\", EXTENSION \".stzv\") RATIONALE \"x\"\nDEFINE MENU offered AS (WORDS [cs, st, xt, many, fluent, passive]) RATIONALE \"x\"\nDEFINE DECLARATION family AS (VERB \"FAMILY\", SEATS [base: text, forms: [offered]?]) RATIONALE \"x\"\nDEFINE FORMS stz AS (FLUENT \"Q\", PASSIVE \"ed\", STATEMENT \"X\", PARAMS [cs: \"CS\", st: \"ST\", xt: \"XT\", many: \"Many\"], FAMILY [family, base, forms]) RATIONALE \"x\"\n",
+      "expect": {
+        "language": "stzv",
+        "counts": {
+          "declarations": 1,
+          "menus": 1
+        },
+        "formsets": 1
+      }
+    },
+    {
+      "id": "A2",
+      "name": "a v0.11 declaration is a v0.12 declaration: v0.11's A1, unchanged",
+      "source": "DEFINE LANGUAGE f AS (VERSION \"0.11\", GRAMMAR \"0.11\", COURT \"x\", EXTENSION \".f\") RATIONALE \"x\"\nDEFINE MENU outcomes AS (WORDS [success, refused], CODE \"PARSE\") RATIONALE \"x\"\nDEFINE DECLARATION terminal AS (VERB \"TERMINAL\", SEATS [outcome: outcomes]) RATIONALE \"x\"\nDEFINE DECLARATION step AS (VERB \"STEP\", SEATS [target: name]) RATIONALE \"x\"\nDEFINE UNION node AS (OF [step, terminal], CODE \"C5\") RATIONALE \"x\"\nDEFINE SYMBOL flow AS (KIND \"flow\", REF \"calls\", CODE \"UNRESOLVED_FLOW\", CITES [\"article:placement-3.2\"]) RATIONALE \"x\"\nDEFINE CONSTRAINT one_ending AS (ON terminal, WHEN \"outcome absent\", MESSAGE \"x\", CODE \"C7\") RATIONALE \"x\"\nDEFINE REFUSAL unknown_declaration AS (MESSAGE \"the declaration set is closed\", CODE \"PARSE\") RATIONALE \"x\"\n",
+      "expect": {
+        "language": "f",
+        "counts": {
+          "declarations": 2,
+          "constraints": 1,
+          "unions": 1,
+          "menus": 1,
+          "refusals": 1
+        },
+        "symbols": 1,
+        "formsets": 0
+      }
+    },
+    {
+      "id": "A3",
+      "name": "a FORMS of parameter suffixes alone: no fluent, no passive, no statement, no family",
+      "source": "DEFINE LANGUAGE v AS (VERSION \"0.12\", GRAMMAR \"0.12\", COURT \"x\", EXTENSION \".v\") RATIONALE \"x\"\nDEFINE FORMS v AS (PARAMS [cs: \"CS\"]) RATIONALE \"x\"\n",
+      "expect": {
+        "language": "v",
+        "formsets": 1
+      }
+    }
+  ],
+  "rejects": [
+    {
+      "id": "R1",
+      "name": "one meaning per suffix: two parameter forms spelt FF (the forms document's own clash)",
+      "source": "DEFINE LANGUAGE v AS (VERSION \"0.12\", GRAMMAR \"0.12\", COURT \"x\", EXTENSION \".v\") RATIONALE \"x\"\nDEFINE FORMS v AS (PARAMS [future: \"FF\", free: \"FF\"]) RATIONALE \"x\"\n",
+      "refusal": "'FF' is spelt twice, as future and as free: one meaning per suffix"
+    },
+    {
+      "id": "R2",
+      "name": "one meaning per suffix: the fluent form and a parameter form spelt the same",
+      "source": "DEFINE LANGUAGE v AS (VERSION \"0.12\", GRAMMAR \"0.12\", COURT \"x\", EXTENSION \".v\") RATIONALE \"x\"\nDEFINE FORMS v AS (FLUENT \"Q\", PARAMS [q: \"Q\"]) RATIONALE \"x\"\n",
+      "refusal": "'Q' is spelt twice, as FLUENT and as q: one meaning per suffix"
+    },
+    {
+      "id": "R3",
+      "name": "FAMILY names a seat the kind lacks",
+      "source": "DEFINE LANGUAGE v AS (VERSION \"0.12\", GRAMMAR \"0.12\", COURT \"x\", EXTENSION \".v\") RATIONALE \"x\"\nDEFINE DECLARATION family AS (VERB \"FAMILY\", SEATS [base: text]) RATIONALE \"x\"\nDEFINE FORMS v AS (PARAMS [cs: \"CS\"], FAMILY [family, base, forms]) RATIONALE \"x\"\n",
+      "refusal": "FAMILY: no seat 'forms' on family"
+    },
+    {
+      "id": "R4",
+      "name": "at most one FORMS per language",
+      "source": "DEFINE LANGUAGE v AS (VERSION \"0.12\", GRAMMAR \"0.12\", COURT \"x\", EXTENSION \".v\") RATIONALE \"x\"\nDEFINE FORMS one AS (PARAMS [cs: \"CS\"]) RATIONALE \"x\"\nDEFINE FORMS two AS (PARAMS [st: \"ST\"]) RATIONALE \"x\"\n",
+      "refusal": "a .haro file declares at most one FORMS"
+    },
+    {
+      "id": "R5",
+      "name": "a suffix is letters",
+      "source": "DEFINE LANGUAGE v AS (VERSION \"0.12\", GRAMMAR \"0.12\", COURT \"x\", EXTENSION \".v\") RATIONALE \"x\"\nDEFINE FORMS v AS (PARAMS [cs: \"C S\"]) RATIONALE \"x\"\n",
+      "refusal": "is not a suffix: a suffix is letters"
+    },
+    {
+      "id": "R6",
+      "name": "FAMILY's forms seat is a list",
+      "source": "DEFINE LANGUAGE v AS (VERSION \"0.12\", GRAMMAR \"0.12\", COURT \"x\", EXTENSION \".v\") RATIONALE \"x\"\nDEFINE MENU offered AS (WORDS [cs]) RATIONALE \"x\"\nDEFINE DECLARATION family AS (VERB \"FAMILY\", SEATS [base: text, forms: offered]) RATIONALE \"x\"\nDEFINE FORMS v AS (PARAMS [cs: \"CS\"], FAMILY [family, base, forms]) RATIONALE \"x\"\n",
+      "refusal": "the forms seat 'forms' of family is a list of the forms offered"
+    },
+    {
+      "id": "R7",
+      "name": "a parameter key may not take the fluent role's own word",
+      "source": "DEFINE LANGUAGE v AS (VERSION \"0.12\", GRAMMAR \"0.12\", COURT \"x\", EXTENSION \".v\") RATIONALE \"x\"\nDEFINE FORMS v AS (FLUENT \"Q\", PARAMS [fluent: \"F\"]) RATIONALE \"x\"\n",
+      "refusal": "PARAMS: 'fluent' is the FLUENT role's own word"
+    }
+  ]
+}

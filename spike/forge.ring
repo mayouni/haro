@@ -340,6 +340,12 @@ func LangSource(aLang)
 		next
 		cRun += "]"
 	ok
+	# v0.12: the FORMS [name, fluent, passive, statement, [[key, suffix], ...], [kind, base, forms]], or NULL
+	aFs = LangGet(aLang, "formset")
+	cFormset = "NULL"
+	if not isNull(aFs)
+		cFormset = "[" + RingStr(aFs[1]) + ", " + RingStr(aFs[2]) + ", " + RingStr(aFs[3]) + ", " + RingStr(aFs[4]) + ", " + MessagesSource(aFs[5]) + ", " + NamesSource(aFs[6]) + "]"
+	ok
 	c = "  [" + RingStr(LangGet(aLang, "name")) + ", " + RingStr(LangGet(aLang, "extension")) + "," + nl
 	c += "    " + cKinds + "," + nl
 	c += "    " + cForms + "," + nl
@@ -358,7 +364,8 @@ func LangSource(aLang)
 	c += "    " + cWalks + "," + nl
 	c += "    " + cAsk + "," + nl
 	c += "    " + cRun + "," + nl
-	c += "    " + cSymbols + nl
+	c += "    " + cSymbols + "," + nl
+	c += "    " + cFormset + nl
 	c += "  ]"
 	return c
 
@@ -395,6 +402,7 @@ func ForgeCourt(aLang)
 	# (v0.7: or an ASK, whose rows are JSON); the question library only with an ASK
 	bAsk = not isNull(LangGet(aLang, "ask"))
 	bRun = not isNull(LangGet(aLang, "run"))
+	bFormset = not isNull(LangGet(aLang, "formset"))
 	aSyL = LangGet(aLang, "symbols")
 	bSym = 0
 	if not isNull(aSyL)
@@ -415,6 +423,9 @@ func ForgeCourt(aLang)
 	if bRun
 		c += 'load "run_lib.ring"' + nl
 	ok
+	if bFormset
+		c += 'load "forms_lib.ring"' + nl
+	ok
 	c += nl
 	c += "$cCourtLang = " + '""' + nl + "$cCourtExt = " + '""' + nl + "$cCourtDir = " + '""' + nl
 	c += "$aCourtToks = []" + nl + "$nCourtPos = 1" + nl
@@ -429,6 +440,7 @@ func ForgeCourt(aLang)
 	c += "$aCourtExprs = []" + nl + "$aCourtWalks = []" + nl + "$aCourtAsk = NULL" + nl + "$aCourtRun = NULL" + nl
 	c += "$aCourtSymbols = []" + nl + "$aCourtWorldFile = NULL" + nl
 	c += "$cCourtCode = " + RingStr("PARSE") + nl + "$aCourtCites = []" + nl
+	c += "$aCourtFormset = NULL" + nl
 	c += ExprGlobals()
 	c += "$aCourtLangs = [" + nl
 	aRecs = ForgeLangRecords(aLang, [])

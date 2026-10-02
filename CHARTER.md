@@ -176,7 +176,7 @@ no expression position, no escape):
 | **`ASK`** (the pragmatics stratum) | absent | the language's own closed query grammar (the Q letter) and the human languages its natural door speaks; NL asks, never declares; the engine compiles to this grammar and never to host code [R, mission.md rules 1-2]. *The query grammar is built, v0.7 (the seventh rung); the natural door is not.* |
 | **`NARRATE`** | absent | how a run of the language is narrated back (stzn); the court's voice |
 | **`REFINE`** | absent | which declared points of a sentence may be refined, by whom, within what bounds, at what trust floor (section 7) |
-| **`FORMS` inside a vocabulary** | absent | the function-name grammar of principle 7 declared as data for the computing altitude's families |
+| **`FORMS` inside a vocabulary** | absent | the function-name grammar of principle 7 declared as data for the computing altitude's families. *Built, v0.12 (the twelfth rung): FLUENT, PASSIVE, STATEMENT, PARAMS and FAMILY; the families generated, the shipped spellings judged live.* |
 
 **Built 2026-10-01, the first slice of two of these rows -- Haro v0.2, the spike's second
 rung (`haro/spike/v02/GRAMMAR.md`, 30 fixtures, `haro/SPIKE.md`).** `WORLD` as cardinality
@@ -254,6 +254,13 @@ the words, and every forged court answering `diagnose <file> [world]` in C2 v1.2
 object of six-field envelopes -- a refusal one error with its element's code and cites, no
 world one warning at line 0, a clean sentence an empty array. F declares RingFlex's own codes;
 judged against the contract's shape and against RingFlex's court live, 28 of 28, first run.
+**Haro v0.12, 2026-10-03 (`haro/spike/v12/GRAMMAR.md`, 10 fixtures): FORMS as data.** The
+`FORMS` row above and principle 7's own guard: the fluent, passive and statement forms, the
+parameter suffixes with one meaning each, and the FAMILY declaration that spells a family from
+a base verb and the forms it offers. `stzv_v12.haro` declares Softanza's forms as the document
+spells them; the court generates every member and judges stzString's 595 shipped spellings
+live -- 584 agree, 11 do not, 41 generated members are not shipped -- the number the migration
+measures, read from the author's tree and never written to it.
 
 **What the forge produces from one declaration** (Ringua's kit, 02-STACK's L1, now Haro's
 compiler verbs rather than separate organs): the parser; the court with the fixtures as its
@@ -566,6 +573,12 @@ RingFlex's court run live on its originals: **28 of 28** codes, cites and severi
 first run, the same bytes on `rnxc` and the oracle (HF-61). Record: `haro/SPIKE.md`, "The
 eleventh rung".
 
+**The twelfth rung, 2026-10-03, on the author's "continue": Haro v0.12, FORMS as data**
+(section 3's last row, principle 7's guard). FLUENT, PASSIVE, STATEMENT, PARAMS, FAMILY; the
+forged court's `family` and `spellings`; judged by the forms document's own examples (30
+names, 3 families member for member) and by stzString's 595 shipped spellings read live:
+**584 agree**, the 11 and the 41 named (HF-62). Record: `haro/SPIKE.md`, "The twelfth rung".
+
 v0.1's spike (`twice.haro`, a definition with an intent clause) proved one altitude. The
 ruling asks for three to meet, and the estate has already named the smallest program that
 makes them: the alphabet's own proof obligation, "Z re-expressed through stzf from `z.stzu`
@@ -625,7 +638,7 @@ v0.1's eight, each kept, and three the ruling adds. The full text of each is in
 | 4 | refuse, then explain | the meta-court's channel, C2 | refusal phrasing declared beside the grammar, in jargon | v0.1: C2 + why/todo/frames; v0.11: every forged court's `diagnose`, its codes and cites declared beside the words (CODE, CODES, CITES) |
 | 5 | self-describing | `RATIONALE` mandatory (C6 3.8) | `explain` on every declaration (Ringua's CLI contract) | v0.1: the intent clause |
 | 6 | cheap to be wrong | the meta-court in ms | a total language terminates; the court judges in ms | v0.1: compile-time verdicts, the library resident |
-| 7 | forms as execution modes | `FORMS` declared as data | closed verb sets, one word per letter | v0.1: the forms as grammar, families from a rule |
+| 7 | forms as execution modes | `FORMS` declared as data -- v0.12: FLUENT, PASSIVE, STATEMENT, PARAMS, FAMILY; the families generated, the spellings judged | closed verb sets, one word per letter | v0.1: the forms as grammar, families from a rule |
 | 8 | humans read; agents write | **amended again**: the default venue is declarative and natural; N drafts, the court judges, the human ratifies | the agent's sentence is the human's sentence | the expert venue, one governed door |
 | 9 | **declaring a language is as easy as declaring a variable** | the founding act is first-class: a language is a value with a version, a court, a grammar; composition over the alphabet is the normal way | | |
 | 10 | **every change is a refinement** | a grammar version is a point with its fixtures as cascade | every named thing is a point; the refinement is the agent's write surface | profiles are refinements of the library |

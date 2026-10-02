@@ -66,6 +66,7 @@ STZU8_FIXTURES = os.path.join(HERE, 'v08', 'fixtures.json')
 STZU9_FIXTURES = os.path.join(HERE, 'v09', 'fixtures.json')
 STZU10_FIXTURES = os.path.join(HERE, 'v10', 'fixtures.json')
 STZU11_FIXTURES = os.path.join(HERE, 'v11', 'fixtures.json')
+STZU12_FIXTURES = os.path.join(HERE, 'v12', 'fixtures.json')
 
 
 def judge_stzu(exe, label, fixtures=STZU_FIXTURES):
@@ -75,7 +76,7 @@ def judge_stzu(exe, label, fixtures=STZU_FIXTURES):
     counts), world and points."""
     doc = json.load(open(fixtures, encoding='utf-8'))
     # the pinned v0.1 judge is stzu's; everything since is Haro's (D1)
-    assert doc['grammar'] in ('stzu', 'haro') and doc['version'] in ('0.1', '0.2', '0.3', '0.4', '0.5', '0.6', '0.7', '0.8', '0.9', '0.10', '0.11')
+    assert doc['grammar'] in ('stzu', 'haro') and doc['version'] in ('0.1', '0.2', '0.3', '0.4', '0.5', '0.6', '0.7', '0.8', '0.9', '0.10', '0.11', '0.12')
     passed = failed = 0
     outputs = {}
     with tempfile.TemporaryDirectory() as td:
@@ -148,7 +149,8 @@ def stage1():
                             ('v0.8, what F needs: NAMED refusals, keyed pairs, a UNION of declarations, deadlines, ENTRY, three relations', STZU8_FIXTURES),
                             ('v0.9, what A needs: RUN, the structured steps, and a list of a UNION of declarations', STZU9_FIXTURES),
                             ('v0.10, the WORLD as versioned data: SYMBOL and PUBLISH', STZU10_FIXTURES),
-                            ('v0.11, the Diagnostic Contract: CODE, CODES, CITES', STZU11_FIXTURES)):
+                            ('v0.11, the Diagnostic Contract: CODE, CODES, CITES', STZU11_FIXTURES),
+                            ('v0.12, FORMS: the function-name grammar as data', STZU12_FIXTURES)):
         print(f'stage 1 -- the Haro meta-court in pure Ring, judged by its fixtures ({label})')
         f1, o1 = judge_stzu(RNXC, 'rnxc', fixtures)
         f2, o2 = judge_stzu(ORACLE, 'oracle ring.exe', fixtures)
@@ -1656,6 +1658,166 @@ def stage14():
     return failures
 
 
+# ---- stage 15: FORMS, principle 7's function-name grammar as data, judged by the forms document and by Softanza's own spellings
+
+STZV_STZU = os.path.join(HERE, 'stzv_v12.haro')
+STZV_SENTENCE = os.path.join('stz', 'string.stzv')
+FORMS_CASES = os.path.join(HERE, 'v12', 'forms_cases.json')
+DOC_NAMES = os.path.join('v12', 'doc_names.txt')
+STZ_STRING = r'D:\GitHub\stzlib\libraries\stzlib\base\string\stzString.ring'
+# the pinned floor of the live census: how many of stzString's Find*, Replace* and
+# Remove* definitions agree with the FORMS stzv_v12.haro declares (measured 2026-10-02)
+FORMS_FLOOR = 584
+
+
+def stzv_run(exe, args):
+    return run_args(exe, ['stzv_court.ring'] + args, HERE).strip()
+
+
+def stage15():
+    """The twelfth rung. stzv_v12.haro declares the Softanza vocabulary's
+    FORMS -- the fluent, passive and statement forms, the parameter suffixes,
+    one meaning per suffix, and the FAMILY declaration that spells a family
+    from a base verb and the forms it offers -- and the forge emits a court
+    with `family` (the members, generated) and `spellings` (a list of names
+    judged). Two judges that are not mine: the forms document's own examples
+    (stz-functions-as-linguistic-expressions.md), re-expressed as names with
+    the verdict principle 7's rule gives each; and Softanza's shipped
+    spellings, every Find*, Replace* and Remove* definition of stzString.ring
+    read live from the author's tree (read-only), whose agreement count is
+    pinned and whose disagreements are the number the migration measures."""
+    print('stage 15 -- FORMS, the function-name grammar as data: stzv_v12.haro -> stzv_court.ring with `family` and `spellings`, judged by the forms document and by stzString\'s own spellings')
+    failures = 0
+    out_rnx = run_args(RNXC, ['forge.ring', STZV_STZU, '.'], HERE).strip()
+    print('  rnxc  :', out_rnx.splitlines()[0] if out_rnx else 'NO OUTPUT')
+    if not out_rnx.startswith('forged stzv'):
+        print('  FAIL the forge did not forge stzv')
+        return 1
+    td = os.path.join(ROOT, 'runtime', 'haro-forge-oracle')
+    os.makedirs(td, exist_ok=True)
+    arts = ('stzv_court.ring', 'stzv.gbnf')
+    for art in arts:
+        if os.path.exists(os.path.join(td, art)):
+            os.remove(os.path.join(td, art))
+    out_or = run_args(ORACLE, ['forge.ring', STZV_STZU, '../../runtime/haro-forge-oracle'], HERE).strip()
+    print('  oracle:', out_or.splitlines()[0] if out_or else 'NO OUTPUT')
+    for art in arts:
+        a = open(os.path.join(HERE, art), 'rb').read()
+        b = open(os.path.join(td, art), 'rb').read() if os.path.exists(os.path.join(td, art)) else b''
+        if a != b:
+            failures += 1
+            print(f'  FAIL {art} differs between the two runtimes ({len(a)} vs {len(b)} bytes)')
+        else:
+            print(f'  ok   {art}: {len(a)} bytes, byte-identical on both runtimes')
+    ab_diff = []
+    def both(args, label):
+        r = stzv_run(RNXC, args)
+        o = stzv_run(ORACLE, args)
+        if r != o:
+            ab_diff.append(label)
+        return r
+    r = both(['check', STZV_SENTENCE], 'check')
+    if not r.startswith('ok'):
+        failures += 1
+        print(f'  FAIL string.stzv is refused: {r[:200]}')
+    else:
+        print(f'  ok   string.stzv is a sentence of stzv: {[l for l in r.splitlines() if l.startswith("count ")]}')
+    # a family offering a form the FORMS does not declare is refused, under the FORMS code (C2)
+    with tempfile.TemporaryDirectory() as tdir:
+        p = os.path.join(tdir, 'bad.stzv')
+        with open(p, 'w', encoding='utf-8', newline='') as fh:
+            fh.write('DEFINE FAMILY find AS (BASE "Find", FORMS [cs, deep]) RATIONALE "x"\n')
+        r = both(['diagnose', p], 'diagnose:bad')
+        try:
+            ds = json.loads(r)['diagnostics']
+            if len(ds) != 1 or ds[0]['code'] != 'FORMS' or ds[0]['cites'] != ['rule:FORMS'] or 'deep' not in ds[0]['message']:
+                failures += 1
+                print(f'  FAIL a family offering an undeclared form: expected one FORMS error naming deep, got {ds}')
+            else:
+                print('  ok   a family offering a form the FORMS does not declare is refused, code FORMS citing rule:FORMS (the menu that types the seat)')
+        except (json.JSONDecodeError, KeyError):
+            failures += 1
+            print(f'  FAIL a family offering an undeclared form: not an envelope: {r[:120]}')
+    # the forms document's examples: the families it spells and the verdicts its names get
+    doc = json.load(open(FORMS_CASES, encoding='utf-8'))
+    assert doc['grammar'] == 'stzv' and doc['version'] == '0.12', 'unexpected forms case file'
+    fam = both(['family', STZV_SENTENCE], 'family')
+    got_fams = {}
+    cur = None
+    for line in fam.splitlines():
+        if line.startswith('family '):
+            cur = line[len('family '):].split(':')[0]
+            got_fams[cur] = []
+        elif line.startswith('  ') and cur:
+            got_fams[cur].append(line.strip())
+    fam_bad = 0
+    for name, members in doc['families'].items():
+        if got_fams.get(name) != members:
+            fam_bad += 1
+            print(f'  FAIL family {name}: expected {members}, got {got_fams.get(name)}')
+    failures += fam_bad
+    print(('  FAIL ' if fam_bad else '  ok   ') + f'{len(doc["families"])} families of the forms document generated member for member ({sum(len(m) for m in doc["families"].values())} names)')
+    sp = both(['spellings', STZV_SENTENCE, DOC_NAMES], 'spellings:doc')
+    verdicts = {}
+    for line in sp.splitlines():
+        if line.startswith('agree ') or line.startswith('disagree '):
+            kind, _, rest = line.partition(' ')
+            nm = rest.split(':')[0].split(' ')[0]
+            verdicts[nm] = (kind, line)
+    sp_bad = 0
+    n_cases = 0
+    for case in doc['spellings']:
+        n_cases += 1
+        got = verdicts.get(case['name'])
+        if got is None:
+            sp_bad += 1; print(f'  FAIL {case["name"]}: no verdict'); continue
+        if got[0] != case['verdict'] or case.get('contains', '') not in got[1]:
+            sp_bad += 1; print(f'  FAIL {case["name"]}: expected {case["verdict"]} containing {case.get("contains", "")!r}, got: {got[1]}')
+    if PLANT:
+        sp_bad += 1
+        print('  FAIL RemoveFFQ -- PLANTED')
+    failures += sp_bad
+    print(('  FAIL ' if sp_bad else '  ok   ') + f'{n_cases} names of the forms document judged as principle 7 judges them ({sp_bad} differ)')
+    if ab_diff:
+        failures += 1
+        print(f'  FAIL rnxc and the oracle differ on {len(ab_diff)} run(s): {ab_diff}')
+    else:
+        print('  ok   rnxc and the oracle print the same bytes on every family and spellings run')
+    # the live census: Softanza's own spellings, read-only
+    if not os.path.exists(STZ_STRING):
+        print('  SKIP the live census: stzString.ring is not at its path')
+        return failures
+    src = open(STZ_STRING, encoding='utf-8', errors='replace').read()
+    names = sorted(set(re.findall(r'^\s*def\s+((?:Find|Replace|Remove)[A-Za-z0-9_]*)', src, re.M | re.I)))
+    names_path = os.path.join(ROOT, 'runtime', 'stz_names.txt')
+    with open(names_path, 'w', encoding='utf-8', newline='') as fh:
+        fh.write('\n'.join(names) + '\n')
+    r = stzv_run(RNXC, ['spellings', STZV_SENTENCE, names_path])
+    o = stzv_run(ORACLE, ['spellings', STZV_SENTENCE, names_path])
+    summary = [l for l in r.splitlines() if l.startswith('spellings:')]
+    m = re.match(r'spellings: (\d+) agree, (\d+) disagree of (\d+); (\d+) declared members missing', summary[0]) if summary else None
+    if r != o:
+        failures += 1
+        print('  FAIL rnxc and the oracle differ on the live census')
+    if not m:
+        failures += 1
+        print(f'  FAIL the census printed no summary: {r[-200:]}')
+    else:
+        agree, disagree, total, missing = (int(x) for x in m.groups())
+        dis = [l for l in r.splitlines() if l.startswith('disagree ')]
+        print(f'  {len(names)} definitions of stzString.ring (Find*, Replace*, Remove*), read-only: {agree} agree with the FORMS, {disagree} disagree, {missing} declared members missing')
+        for l in dis[:8]:
+            print('    ' + l[:150])
+        if len(dis) > 8:
+            print(f'    ... and {len(dis) - 8} more')
+        if FORMS_FLOOR and agree < FORMS_FLOOR:
+            failures += 1
+            print(f'  FAIL {agree} agree, under the pinned floor of {FORMS_FLOOR}')
+        elif FORMS_FLOOR:
+            print(f'  ok   {agree} agree, at or above the pinned floor of {FORMS_FLOOR}; the same bytes on both runtimes')
+    return failures
+
+
 def stage6(lang, court=None, n=15):
     court = court or f'{lang}_court.ring'
     print(f'stage 6 -- edit to verdict on makeen_box.machine, minima of {n}')
@@ -1743,5 +1905,7 @@ if __name__ == '__main__':
         failures += stage13()
     if stage in (None, 14) and os.path.exists(F_STZU) and os.path.exists(STZU11_FIXTURES):
         failures += stage14()
+    if stage in (None, 15) and os.path.exists(STZV_STZU) and os.path.exists(FORMS_CASES):
+        failures += stage15()
     print(f'haro_forge: {"FAIL" if failures else "PASS"} ({failures} failure(s), {time.perf_counter()-t0:.1f} s)')
     sys.exit(1 if failures else 0)

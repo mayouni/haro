@@ -46,6 +46,7 @@ $aCourtSymbols = []
 $aCourtWorldFile = NULL
 $cCourtCode = "PARSE"
 $aCourtCites = []
+$aCourtFormset = NULL
 $cExprLang = ""
 $aExprOperators = []
 $aExprOperands = []
@@ -120,7 +121,8 @@ $aCourtLangs = [
     ],
     NULL,
     NULL,
-    []
+    [],
+    NULL
   ],
   ["machine", ".machine",
     [
@@ -256,7 +258,8 @@ $aCourtLangs = [
     ],
     NULL,
     NULL,
-    []
+    [],
+    NULL
   ]
 ]
 CtUseLanguage("fleet")

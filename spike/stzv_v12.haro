@@ -1,0 +1,42 @@
+-- stzv_v12.haro -- the Softanza vocabulary's FORMS (Haro v0.12): principle 7's
+-- function-name grammar declared as data, the charter's section 3 row "FORMS
+-- inside a vocabulary". What the forms document spells in prose
+-- (stzlib base/doc/narrations/stz-functions-as-linguistic-expressions.md: the
+-- fluent Q, the passive Verbed, the statement X, the parameter suffixes CS, ST,
+-- XT, IB, the plural Many, the exceptional Except, the conditional W, the future F)
+-- and principle 7 ruled (H-7: one meaning per suffix, suffix order is parameter
+-- order, the family generated from a declared base and the forms it offers,
+-- a hand-written member that disagrees refused) is declared here once, and the
+-- forged court spells every family from it and judges every shipped name
+-- against it. The judge is the document's own examples and stzString.ring's
+-- own definitions, read live. A PROPOSAL for the vocabulary (HARO-FORMS-01).
+
+DEFINE LANGUAGE stzv AS (
+  VERSION "0.12",
+  GRAMMAR "0.12",
+  COURT "stzlib/libraries/stzlib/base/doc/narrations/stz-functions-as-linguistic-expressions.md, stzlib base/string/stzString.ring",
+  EXTENSION ".stzv"
+) RATIONALE "The computing altitude's families are declared at the declaring altitude and generated from a rule, never typed by hand: one declaration of the forms grammar, one declaration per base verb"
+
+DEFINE MENU offered AS (
+  WORDS [cs, st, xt, ib, d, z, zz, s, w, f, many, except, fluent, passive],
+  MESSAGE "FAMILY {name} offers '{value}', which the FORMS declares no form for: the forms are cs, st, xt, ib, d, z, zz, s, w, f, many, except, fluent, passive",
+  CODE "FORMS"
+) RATIONALE "The words a family may offer are the FORMS' own keys and its two named forms; a list seat is typed by a menu, so the court checks each word before the FORMS pass does"
+
+DEFINE DECLARATION family AS (
+  VERB "FAMILY",
+  SEATS [base: text, forms: [offered]?]
+) RATIONALE "A base verb and the forms it offers; every member of the family is generated from them, and a shipped member outside them disagrees with its own rule"
+
+DEFINE FORMS stz AS (
+  FLUENT "Q",
+  PASSIVE "ed",
+  STATEMENT "X",
+  PARAMS [cs: "CS", st: "ST", xt: "XT", ib: "IB", d: "D", z: "Z", zz: "ZZ", s: "S", w: "W", f: "F", many: "Many", except: "Except"],
+  FAMILY [family, base, forms]
+) RATIONALE "The forms document's grammar: a name is a base, then parameter suffixes each spelt once in parameter order, then the fluent Q that returns the receiver, then the statement X; the passive is the inflected verb. One meaning per suffix, so the document's FF (future and free form) cannot be declared twice"
+
+DEFINE REFUSAL unknown_declaration AS (
+  MESSAGE "A vocabulary declares families and nothing else: a base verb and the forms it offers. The members are generated, never declared."
+) RATIONALE "The whole point of the forms grammar is that no member is typed by hand"
