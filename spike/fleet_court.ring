@@ -4,7 +4,7 @@
 # by court_lib.ring over the records below, one per language -- this one first, then
 # every language a SENTENCE seat names: kinds [VERB, name, seats, names, messages],
 # forms, refusals, menus, ranges, formats, unions, constraints, world, points, floors,
-# views, sentences, expressions and walks.
+# views, sentences, expressions, walks and the ask.
 
 load "court_lib.ring"
 
@@ -40,6 +40,7 @@ $aCourtViews = []
 $aCourtSentenceKinds = []
 $aCourtExprs = []
 $aCourtWalks = []
+$aCourtAsk = NULL
 $cExprLang = ""
 $aExprOperators = []
 $aExprOperands = []
@@ -111,7 +112,8 @@ $aCourtLangs = [
     [
     ],
     [
-    ]
+    ],
+    NULL
   ],
   ["machine", ".machine",
     [
@@ -244,7 +246,8 @@ $aCourtLangs = [
     [
     ],
     [
-    ]
+    ],
+    NULL
   ]
 ]
 CtUseLanguage("fleet")

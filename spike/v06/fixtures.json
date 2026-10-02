@@ -70,9 +70,9 @@
   "rejects": [
     {
       "id": "R1",
-      "name": "ABSENT takes zero or refuse",
+      "name": "ABSENT takes zero, missing or refuse",
       "source": "DEFINE LANGUAGE z AS (VERSION \"0.6\", GRAMMAR \"0.6\", COURT \"x\", EXTENSION \".z\") RATIONALE \"x\"\nDEFINE EXPRESSION zexpr AS (OPERATORS [cmp], OPERANDS [number, ref], ABSENT nil) RATIONALE \"x\"\n",
-      "refusal": "ABSENT takes zero or refuse"
+      "refusal": "ABSENT takes zero, missing or refuse"
     },
     {
       "id": "R2",

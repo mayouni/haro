@@ -30,6 +30,11 @@
 # order of the court is: shapes, the WORLD, the local types, the
 # CONSTRAINTs, then the references.
 #
+# v0.7 (haro/spike/v07/GRAMMAR.md): the ASK -- the Q letter -- and the `ask`
+# verb: `ask <file> "<question>" <rows json>` answers a question of the
+# declared world on the records handed in (ask_lib.ring, loaded by the
+# generated court when its language declares an ASK).
+#
 # v0.6 (haro/spike/v06/GRAMMAR.md): a list of a FORM that is a name and a
 # scalar is written as name: value pairs; a seat typed by an EXPRESSION holds
 # an expression text the court parses with the expression's own menus
@@ -157,6 +162,9 @@ func CtUseLanguage(cName)
 		$aCourtExprs = aE[16]
 		$aCourtWalks = aE[17]
 	ok
+	# v0.7: the ASK [name, from kinds, where, clauses], or NULL
+	$aCourtAsk = NULL
+	if len(aE) >= 18 $aCourtAsk = aE[18] ok
 
 # the condition tables of every language the court carries, built once
 func CtBuildCondLangs()
@@ -200,7 +208,7 @@ func CtSnapshot()
 	        $aCourtMenus, $aCourtRanges, $aCourtFormats, $aCourtUnions, $aCourtConstraints,
 	        $aCourtWorld, $aCourtPoints, $aCourtFloors, $aCourtViews, $aCourtSentenceKinds,
 	        $aCourtToks, $nCourtPos, $aCondDecls, $cCondLang, $cCondOther, $bCondUnread,
-	        $aCondFormats, $aCondToks, $nCondPos, $aCourtExprs, $aCourtWalks]
+	        $aCondFormats, $aCondToks, $nCondPos, $aCourtExprs, $aCourtWalks, $aCourtAsk]
 
 func CtRestore(aS)
 	$cCourtLang = aS[1]
@@ -230,6 +238,7 @@ func CtRestore(aS)
 	$nCondPos = aS[25]
 	$aCourtExprs = aS[26]
 	$aCourtWalks = aS[27]
+	$aCourtAsk = aS[28]
 
 # ---- v0.6: the EXPRESSION tables, handed to expr_lib.ring ----------------------
 
@@ -1440,7 +1449,7 @@ func CtEval(aDecls, cDecl, cSeat, aRecord)
 	aNode = CtExprNode(aD, cSeat)
 	if isNull(aNode) raise(upper(cSeat) + " is not written on " + aD[1] + " " + aD[2]) ok
 	ExSetRecord(aRecord)
-	return ExTruthy(ExEval(aNode, []))
+	return ExBool(aNode, [])
 
 # a guard of a step: [node, reason], or [NULL, ""] when the seat is not written
 func CtGuard(aDecls, aStep, cPath)
@@ -1486,7 +1495,8 @@ func CtWalk(aDecls, cName, aRecord)
 		if nAt > len(aSteps)
 			aSteps + aEntry
 		else
-			insert(aSteps, nAt, aEntry)
+			# Ring's insert() puts the item AFTER the index: before j is after j-1 (HF-52)
+			insert(aSteps, nAt - 1, aEntry)
 		ok
 	next
 	ExSetRecord(aRecord)
@@ -1507,7 +1517,7 @@ func CtWalk(aDecls, cName, aRecord)
 		for j = 1 to len(aG)
 			aGuard = CtGuard(aDecls, aStep, aG[j])
 			if isNull(aGuard[1]) loop ok
-			if not ExTruthy(ExEval(aGuard[1], []))
+			if not ExBool(aGuard[1], [])
 				aOut = [ExObjMark(), ["status", "failed"], ["at", aStep[2]]]
 				if aW[9] != ""
 					cCode = CondScalar(aStep, aW[9])
@@ -1525,10 +1535,10 @@ func CtWalk(aDecls, cName, aRecord)
 	aOut = [ExObjMark(), ["status", "complete"], ["computed", aComputed]]
 	return aOut
 
-# the command: check <file> | refine <file> <file.rfn> | eval ... | walk ...
+# the command: check <file> | refine <file> <file.rfn> | eval ... | walk ... | ask ...
 func CtMain()
 	if len(sysargv) < 4
-		? "usage: <court>.ring check <file" + $cCourtExt + "> | refine <file" + $cCourtExt + "> <file.rfn> | eval <file> <decl> <seat> <json> | walk <file> <name> <json>"
+		? "usage: <court>.ring check <file" + $cCourtExt + "> | refine <file" + $cCourtExt + "> <file.rfn> | eval <file> <decl> <seat> <json> | walk <file> <name> <json> | ask <file> <question> <rows json>"
 		return
 	ok
 	cVerb = sysargv[3]
@@ -1578,6 +1588,21 @@ func CtMain()
 		catch
 			? cCatchError
 		done
+	but cVerb = "ask"
+		# v0.7: a question of the declared world, answered on the rows handed in
+		if len(sysargv) < 6
+			? "usage: <court>.ring ask <file" + $cCourtExt + "> <question> <rows json>"
+			return
+		ok
+		cSrc = read(sysargv[4])
+		try
+			aDecls = CtDeclare(cSrc)
+			if isNull($aCourtAsk) CtFail(1, "this language declares no ASK, so it answers no question") ok
+			aRows = ExJsonParse(sysargv[6])
+			? ExJson(AskRun(aDecls, sysargv[5], aRows))
+		catch
+			? cCatchError
+		done
 	else
-		? "unknown verb '" + cVerb + "'; this court answers: check, refine, eval, walk"
+		? "unknown verb '" + cVerb + "'; this court answers: check, refine, eval, walk, ask"
 	ok

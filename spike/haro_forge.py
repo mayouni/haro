@@ -15,7 +15,7 @@ are added below as they are built.
 Usage: python haro/spike/haro_forge.py [--stage N] [--plant]
   --plant   plants a known-wrong verdict to prove the guard can fail.
 """
-import json, os, subprocess, sys, tempfile, time
+import json, os, re, shutil, subprocess, sys, tempfile, time
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 ROOT = os.path.abspath(os.path.join(HERE, '..', '..'))
@@ -61,6 +61,7 @@ STZU3_FIXTURES = os.path.join(HERE, 'v03', 'fixtures.json')
 STZU4_FIXTURES = os.path.join(HERE, 'v04', 'fixtures.json')
 STZU5_FIXTURES = os.path.join(HERE, 'v05', 'fixtures.json')
 STZU6_FIXTURES = os.path.join(HERE, 'v06', 'fixtures.json')
+STZU7_FIXTURES = os.path.join(HERE, 'v07', 'fixtures.json')
 
 
 def judge_stzu(exe, label, fixtures=STZU_FIXTURES):
@@ -70,7 +71,7 @@ def judge_stzu(exe, label, fixtures=STZU_FIXTURES):
     counts), world and points."""
     doc = json.load(open(fixtures, encoding='utf-8'))
     # the pinned v0.1 judge is stzu's; everything since is Haro's (D1)
-    assert doc['grammar'] in ('stzu', 'haro') and doc['version'] in ('0.1', '0.2', '0.3', '0.4', '0.5', '0.6')
+    assert doc['grammar'] in ('stzu', 'haro') and doc['version'] in ('0.1', '0.2', '0.3', '0.4', '0.5', '0.6', '0.7')
     passed = failed = 0
     outputs = {}
     with tempfile.TemporaryDirectory() as td:
@@ -138,7 +139,8 @@ def stage1():
                             ('v0.3, the UNION, MESSAGES and the relations', STZU3_FIXTURES),
                             ('v0.4, the SENTENCE, the VIEW and the paths', STZU4_FIXTURES),
                             ('v0.5, CONTEXTS on an EXPRESSION', STZU5_FIXTURES),
-                            ('v0.6, pair lists, the expression semantics and WALK', STZU6_FIXTURES)):
+                            ('v0.6, pair lists, the expression semantics and WALK', STZU6_FIXTURES),
+                            ('v0.7, ASK -- the Q letter -- and ABSENT missing', STZU7_FIXTURES)):
         print(f'stage 1 -- the Haro meta-court in pure Ring, judged by its fixtures ({label})')
         f1, o1 = judge_stzu(RNXC, 'rnxc', fixtures)
         f2, o2 = judge_stzu(ORACLE, 'oracle ring.exe', fixtures)
@@ -754,7 +756,7 @@ def stage8():
 
 # ---- stage 9: Z, a WORLD forged whole -- court AND runtime -- judged by zing's 16 cases
 
-Z_STZU = os.path.join(HERE, 'z_v06.haro')
+Z_STZU = os.path.join(HERE, 'z_v07.haro')   # z_v06.haro plus the ASK (the seventh rung); the 16 cases are unchanged
 Z_SENTENCE = 'tontine.z'
 Z_FIXTURES = r'D:\GitHub\zing\conformance\fixtures.json'
 Z_FLOOR = 16
@@ -785,7 +787,7 @@ def stage9():
         return 1
     td = os.path.join(ROOT, 'runtime', 'haro-forge-oracle')
     os.makedirs(td, exist_ok=True)
-    arts = ('z_court.ring', 'z.gbnf', 'z_expr.ring', 'z_expr.gbnf')
+    arts = ('z_court.ring', 'z.gbnf', 'z_expr.ring', 'z_expr.gbnf', 'z_ask.gbnf')
     for art in arts:
         if os.path.exists(os.path.join(td, art)):
             os.remove(os.path.join(td, art))
@@ -874,8 +876,30 @@ def stage9():
             else:
                 failed += 1
                 print(f'  FAIL reject {text!r}: {r[:160]}')
+    # the walk orders the steps by ORDER, not by their place in the file: the
+    # same sentence with every STEP declaration in reverse order must answer
+    # the flow cases identically (HF-52: Ring's insert() is after-the-index)
+    src = open(os.path.join(HERE, Z_SENTENCE), encoding='utf-8').read()
+    blocks = src.split('DEFINE STEP ')
+    steps = ['DEFINE STEP ' + b for b in blocks[1:]]
+    # a block runs to the next DEFINE; keep what follows the last step's own text
+    tail_at = steps[-1].find('DEFINE ', 1)
+    tail = steps[-1][tail_at:] if tail_at > 0 else ''
+    if tail_at > 0:
+        steps[-1] = steps[-1][:tail_at]
+    reversed_src = blocks[0] + ''.join(reversed(steps)) + tail
+    with tempfile.TemporaryDirectory() as tdr:
+        p = os.path.join(tdr, 'tontine_reversed.z')
+        with open(p, 'w', encoding='utf-8', newline='') as f:
+            f.write(reversed_src)
+        for case in doc['flowCases']:
+            r1 = z_run(RNXC, ['walk', Z_SENTENCE, case['flow'], json.dumps(case['data'])])
+            r2 = z_run(RNXC, ['walk', p, case['flow'], json.dumps(case['data'])])
+            if r1 != r2:
+                failed += 1
+                print(f"  FAIL the walk depends on where its steps stand in the file: {case['name']}: {r2[:120]}")
     n = len(doc['normCases']) + len(doc['flowCases']) + len(doc['rejects'])
-    print(f'Z-CONFORMANCE (the forged court and runtime on rnxc): {passed} passed, {failed} failed of {n}')
+    print(f'Z-CONFORMANCE (the forged court and runtime on rnxc): {passed} passed, {failed} failed of {n}; the {len(doc["flowCases"])} flow cases identical with the steps declared in reverse')
     failures += failed
     if ab_diff:
         failures += 1
@@ -885,6 +909,119 @@ def stage9():
     if Z_FLOOR and passed < Z_FLOOR:
         failures += 1
         print(f'  FAIL {passed} passed, under the pinned floor of {Z_FLOOR}')
+    return failures
+
+
+# ---- stage 10: Q, the question grammar of the declared world, judged by zing's own answers
+
+Q_FIXTURES = os.path.join(HERE, 'v07', 'q_cases.json')
+Q_FLOOR = 25
+ZING = r'D:\GitHub\zing\cli\zig-out\bin\zing.exe'
+ZING_EXAMPLE = r'D:\GitHub\zing\examples\bedrock-query'
+ANSI = re.compile(r'\x1b\[[0-9;]*m')
+
+
+def zing_rows(out):
+    rows = []
+    for line in out.splitlines():
+        m = re.match(r'\s*#(\d+)\s+\S+ \S+\s+by \S+ -- (.*)$', line)
+        if m:
+            rows.append(json.loads(m.group(2)))
+    return rows
+
+
+def stage10():
+    """The seventh rung. z_v07.haro adds the ASK (the Q letter) to Z; the forged
+    court's `ask` verb answers a question on the rows handed in; the judge is
+    zing itself: v07/q_cases.json holds zing's own answers to 25 questions on a
+    scratch copy of its bedrock-query example (6 ledger deposits plus 4 replayed
+    through `zing flow`), captured by the probe that wrote the file, and this
+    stage re-runs zing live when it is built here and reports any drift. The
+    one case zing and the declared altitude answer differently (a FROM that
+    names no declared flow: zing lists nothing, Haro refuses) is marked
+    haro_only and recorded as HF-51."""
+    print('stage 10 -- Q, the question grammar of a declared world: z_v07.haro\'s ASK -> the ask verb and z_ask.gbnf, judged by zing\'s own answers on its bedrock-query example')
+    failures = 0
+    doc = json.load(open(Q_FIXTURES, encoding='utf-8'))
+    assert doc['grammar'] == 'Q' and doc['version'] == '0.7', 'unexpected Q fixture file'
+    rows_json = json.dumps(doc['rows'])
+    passed = failed = 0
+    ab_diff = []
+    for case in doc['cases']:
+        args = ['ask', Z_SENTENCE, case['query'], rows_json]
+        r = z_run(RNXC, args)
+        o = z_run(ORACLE, args)
+        if r != o:
+            ab_diff.append(case['id'])
+        if 'refusal' in case:
+            ok = (not r.startswith('[')) and case['refusal'] in r
+            why = '' if ok else f' -- expected a refusal holding {case["refusal"]!r}, got {r[:160]}'
+        else:
+            try:
+                got = json.loads(r)
+                ok = got == case['expect']
+                why = '' if ok else f' -- expected {json.dumps(case["expect"])[:120]}, got {r[:160]}'
+            except json.JSONDecodeError:
+                ok = False
+                why = f' -- not an answer: {r[:160]}'
+        if PLANT and case['id'] == 'q03':
+            ok, why = False, ' -- PLANTED'
+        if ok:
+            passed += 1
+        else:
+            failed += 1
+            print(f'  FAIL {case["id"]}: {case["query"]}{why}')
+    n = len(doc['cases'])
+    print(f'Q-CONFORMANCE (the forged court\'s ask verb on rnxc): {passed} passed, {failed} failed of {n}')
+    failures += failed
+    if ab_diff:
+        failures += 1
+        print(f'  FAIL rnxc and the oracle differ on {len(ab_diff)} question(s): {ab_diff}')
+    else:
+        print(f'  ok   rnxc and the oracle print the same bytes on all {n} questions')
+    if Q_FLOOR and passed < Q_FLOOR:
+        failures += 1
+        print(f'  FAIL {passed} passed, under the pinned floor of {Q_FLOOR}')
+    # zing live: the fixture's answers are zing's, re-taken when zing is built here
+    if os.path.exists(ZING) and os.path.isdir(ZING_EXAMPLE):
+        env = dict(os.environ)
+        env['STZW_WIDTH'] = '200'
+        with tempfile.TemporaryDirectory() as td:
+            work = os.path.join(td, 'tontine')
+            shutil.copytree(ZING_EXAMPLE, work)
+            def zing(args):
+                p = subprocess.run([ZING] + args, cwd=work, capture_output=True, env=env, timeout=60)
+                return p.returncode, ANSI.sub('', p.stdout.decode('utf-8', 'replace') + p.stderr.decode('utf-8', 'replace'))
+            for data, actor in doc['replay']:
+                rc, out = zing(['flow', 'collect', '--data', json.dumps(data), '--actor', actor])
+                if 'COMMITTED' not in out:
+                    failures += 1
+                    print(f'  FAIL zing did not commit the replayed deposit {json.dumps(data)}: {out[:160]}')
+            live_rows = []
+            for line in open(os.path.join(work, '.stz', 'bedrock.jsonl'), encoding='utf-8'):
+                if line.strip():
+                    live_rows.append(json.loads(json.loads(line)['data']))
+            if live_rows != doc['rows']:
+                failures += 1
+                print(f'  FAIL the fixture\'s rows are not zing\'s ledger: {len(live_rows)} live against {len(doc["rows"])} in the file')
+            agree = judged = 0
+            for case in doc['cases']:
+                if case.get('haro_only'):
+                    continue
+                judged += 1
+                rc, out = zing(['query', case['query']])
+                if 'refusal' in case:
+                    ok = rc != 0 and not zing_rows(out)
+                else:
+                    ok = rc == 0 and zing_rows(out) == case['expect']
+                if ok:
+                    agree += 1
+                else:
+                    failures += 1
+                    print(f'  FAIL zing live disagrees with the fixture on {case["id"]}: {case["query"]} -> {out.strip()[:160]}')
+            print(f'  ok   zing live, on its own example replayed: agrees with the fixture on {agree} of {judged} judged questions; {n - judged} haro-only (HF-51)')
+    else:
+        print('  SKIP zing is not built here; the fixture stands on the answers captured from it')
     return failures
 
 
@@ -933,14 +1070,20 @@ if __name__ == '__main__':
         if a.startswith('--haro='):
             stzu = os.path.abspath(a.split('=', 1)[1])
     failures = 0
-    if stage in (None, 1):
-        failures += stage1()
     lang = None
+    # the timing (stage 6) is measured FIRST in a full pass, on the machine as
+    # it is when the pass starts: measured after stages 1-5, which write
+    # hundreds of fixture files and launch hundreds of processes, it read
+    # 114 ms with harb's own control at 1.85x its idle figure (HF-53)
     if stage in (None, 2, 3, 4, 5, 6):
         f2, lang = stage2(stzu)
         failures += f2
-        if lang and stage in (None, 3):
-            failures += stage3(lang, floor=AGREE_FLOOR if os.path.basename(stzu) == 'machine_v03.haro' else 0)
+        if lang and stage in (None, 6):
+            failures += stage6(lang)
+    if stage in (None, 1):
+        failures += stage1()
+    if lang and stage in (None, 3):
+        failures += stage3(lang, floor=AGREE_FLOOR if os.path.basename(stzu) == 'machine_v03.haro' else 0)
     # the fourth rung: the fleet language, a vocabulary over the machine language,
     # forged from fleet_v04.haro (which names machine_v03.haro beside it) and judged
     # against harb's fleet fixtures; `--stage=7` runs it alone
@@ -953,11 +1096,13 @@ if __name__ == '__main__':
         failures += stage4(lang)
     if lang and stage in (None, 5):
         failures += stage5(lang, v02=os.path.basename(stzu) in ('machine_v02.haro', 'machine_v03.haro'))
-    if lang and stage in (None, 6):
-        failures += stage6(lang)
     if stage in (None, 8) and os.path.exists(W_STZU):
         failures += stage8()
     if stage in (None, 9) and os.path.exists(Z_STZU):
         failures += stage9()
+    if stage in (None, 10) and os.path.exists(Z_STZU) and os.path.exists(Q_FIXTURES):
+        if stage == 10:
+            run_args(RNXC, ['forge.ring', Z_STZU, '.'], HERE)
+        failures += stage10()
     print(f'haro_forge: {"FAIL" if failures else "PASS"} ({failures} failure(s), {time.perf_counter()-t0:.1f} s)')
     sys.exit(1 if failures else 0)

@@ -1,0 +1,81 @@
+{
+  "grammar": "haro",
+  "version": "0.7",
+  "comment": "The Haro v0.7 conformance floor, written BEFORE the court that passes it (the W discipline: fixtures first, prose second). v0.7 grows v0.6 by ASK -- the Q letter: the language's own closed question grammar (haro/CHARTER.md section 3's ASK row; haro/SPIKE.md, the seventh rung): FROM the kinds a question may name, WHERE the EXPRESSION a condition is written in, CLAUSES the optional clauses the question admits (where, order, limit) -- and by one word on an EXPRESSION's ABSENT: missing, zing's own reading of a reference to nothing (0 to arithmetic, the empty text to a comparison, first in an order). Every v0.6 fixture still passes: v0.7 refuses nothing v0.6 accepted. Rejects carry the fragment the refusal must contain.",
+  "accepts": [
+    {
+      "id": "A1",
+      "name": "an ASK: FROM the kinds a question names, WHERE its expression, CLAUSES the optional clauses it admits",
+      "source": "DEFINE LANGUAGE z AS (VERSION \"0.7\", GRAMMAR \"0.7\", COURT \"x\", EXTENSION \".z\") RATIONALE \"x\"\nDEFINE EXPRESSION zexpr AS (OPERATORS [or, and, cmp, contains], OPERANDS [number, text, ref], ABSENT missing, EQUALITY value) RATIONALE \"x\"\nDEFINE DECLARATION flow AS (VERB \"FLOW\", SEATS []) RATIONALE \"x\"\nDEFINE ASK questions AS (FROM [flow], WHERE zexpr, CLAUSES [where, order, limit]) RATIONALE \"SELECT * FROM flow [WHERE expr] [ORDER BY field] [LIMIT n]\"\n",
+      "expect": {"language": "z", "counts": {"declarations": 1, "expressions": 1}, "asks": 1}
+    },
+    {
+      "id": "A2",
+      "name": "an ASK with FROM alone: a question that lists, with no condition, no order and no limit",
+      "source": "DEFINE LANGUAGE z AS (VERSION \"0.7\", GRAMMAR \"0.7\", COURT \"x\", EXTENSION \".z\") RATIONALE \"x\"\nDEFINE DECLARATION flow AS (VERB \"FLOW\", SEATS []) RATIONALE \"x\"\nDEFINE DECLARATION entity AS (VERB \"ENTITY\", SEATS []) RATIONALE \"x\"\nDEFINE ASK listing AS (FROM [flow, entity]) RATIONALE \"x\"\n",
+      "expect": {"language": "z", "counts": {"declarations": 2}, "asks": 1}
+    },
+    {
+      "id": "A3",
+      "name": "ABSENT missing: a reference to nothing reads as 0 to arithmetic, the empty text to a comparison, first in an order",
+      "source": "DEFINE LANGUAGE z AS (VERSION \"0.7\", GRAMMAR \"0.7\", COURT \"x\", EXTENSION \".z\") RATIONALE \"x\"\nDEFINE EXPRESSION zexpr AS (OPERATORS [cmp, add], OPERANDS [number, ref], ABSENT missing, DIVISION calm, EQUALITY value) RATIONALE \"x\"\n",
+      "expect": {"language": "z", "counts": {"expressions": 1}, "asks": 0}
+    },
+    {
+      "id": "A4",
+      "name": "a v0.6 declaration is a v0.7 declaration: v0.6's A4, unchanged",
+      "source": "DEFINE LANGUAGE z AS (VERSION \"0.6\", GRAMMAR \"0.6\", COURT \"x\", EXTENSION \".z\") RATIONALE \"x\"\nDEFINE EXPRESSION zexpr AS (OPERATORS [or, and, cmp, add, sub, mul, div, round], OPERANDS [number, text, ref, agg], AGGREGATES [sum, count], ABSENT zero, DIVISION calm, EQUALITY value) RATIONALE \"x\"\nDEFINE MENU actors AS (WORDS [collector, treasurer, system]) RATIONALE \"x\"\nDEFINE DECLARATION norm AS (VERB \"NORM\", SEATS [rule: zexpr, message: text]) RATIONALE \"x\"\nDEFINE DECLARATION flow AS (VERB \"FLOW\", SEATS []) RATIONALE \"x\"\nDEFINE DECLARATION step AS (VERB \"STEP\", SEATS [flow: flow, order: number, actor: actors, validate: zexpr?, enforcing: norm?, compute: name?, formula: zexpr?, on_fail: text?]) RATIONALE \"x\"\nDEFINE WALK flows AS (OF flow, STEPS step, THROUGH flow, ORDER order, GUARDS [validate, enforcing.rule], COMPUTE compute, FORMULA formula, FAIL on_fail) RATIONALE \"a record walks a flow's steps in order; a guard that fails stops it there\"\n",
+      "expect": {"language": "z", "counts": {"declarations": 3, "expressions": 1, "menus": 1}, "walks": 1, "asks": 0}
+    }
+  ],
+  "rejects": [
+    {
+      "id": "R1",
+      "name": "FROM names DECLARATIONs of this language",
+      "source": "DEFINE LANGUAGE z AS (VERSION \"0.7\", GRAMMAR \"0.7\", COURT \"x\", EXTENSION \".z\") RATIONALE \"x\"\nDEFINE DECLARATION flow AS (VERB \"FLOW\", SEATS []) RATIONALE \"x\"\nDEFINE ASK questions AS (FROM [river]) RATIONALE \"x\"\n",
+      "refusal": "resolves to nothing"
+    },
+    {
+      "id": "R2",
+      "name": "WHERE names an EXPRESSION",
+      "source": "DEFINE LANGUAGE z AS (VERSION \"0.7\", GRAMMAR \"0.7\", COURT \"x\", EXTENSION \".z\") RATIONALE \"x\"\nDEFINE MENU actors AS (WORDS [collector]) RATIONALE \"x\"\nDEFINE DECLARATION flow AS (VERB \"FLOW\", SEATS []) RATIONALE \"x\"\nDEFINE ASK questions AS (FROM [flow], WHERE actors, CLAUSES [where]) RATIONALE \"x\"\n",
+      "refusal": "WHERE must name an EXPRESSION"
+    },
+    {
+      "id": "R3",
+      "name": "CLAUSES is a closed menu: where, order, limit",
+      "source": "DEFINE LANGUAGE z AS (VERSION \"0.7\", GRAMMAR \"0.7\", COURT \"x\", EXTENSION \".z\") RATIONALE \"x\"\nDEFINE EXPRESSION zexpr AS (OPERATORS [cmp], OPERANDS [number, ref]) RATIONALE \"x\"\nDEFINE DECLARATION flow AS (VERB \"FLOW\", SEATS []) RATIONALE \"x\"\nDEFINE ASK questions AS (FROM [flow], WHERE zexpr, CLAUSES [where, group]) RATIONALE \"x\"\n",
+      "refusal": "is not a clause a question admits"
+    },
+    {
+      "id": "R4",
+      "name": "a question that admits where names the expression it is written in",
+      "source": "DEFINE LANGUAGE z AS (VERSION \"0.7\", GRAMMAR \"0.7\", COURT \"x\", EXTENSION \".z\") RATIONALE \"x\"\nDEFINE DECLARATION flow AS (VERB \"FLOW\", SEATS []) RATIONALE \"x\"\nDEFINE ASK questions AS (FROM [flow], CLAUSES [where]) RATIONALE \"x\"\n",
+      "refusal": "CLAUSES admits where, so WHERE names"
+    },
+    {
+      "id": "R5",
+      "name": "a .haro file declares at most one ASK",
+      "source": "DEFINE LANGUAGE z AS (VERSION \"0.7\", GRAMMAR \"0.7\", COURT \"x\", EXTENSION \".z\") RATIONALE \"x\"\nDEFINE DECLARATION flow AS (VERB \"FLOW\", SEATS []) RATIONALE \"x\"\nDEFINE ASK a AS (FROM [flow]) RATIONALE \"x\"\nDEFINE ASK b AS (FROM [flow]) RATIONALE \"x\"\n",
+      "refusal": "at most one ASK"
+    },
+    {
+      "id": "R6",
+      "name": "FROM names at least one kind",
+      "source": "DEFINE LANGUAGE z AS (VERSION \"0.7\", GRAMMAR \"0.7\", COURT \"x\", EXTENSION \".z\") RATIONALE \"x\"\nDEFINE DECLARATION flow AS (VERB \"FLOW\", SEATS []) RATIONALE \"x\"\nDEFINE ASK questions AS (FROM []) RATIONALE \"x\"\n",
+      "refusal": "FROM names at least one kind"
+    },
+    {
+      "id": "R7",
+      "name": "a WHERE expression no clause admits is unexpressible",
+      "source": "DEFINE LANGUAGE z AS (VERSION \"0.7\", GRAMMAR \"0.7\", COURT \"x\", EXTENSION \".z\") RATIONALE \"x\"\nDEFINE EXPRESSION zexpr AS (OPERATORS [cmp], OPERANDS [number, ref]) RATIONALE \"x\"\nDEFINE DECLARATION flow AS (VERB \"FLOW\", SEATS []) RATIONALE \"x\"\nDEFINE ASK questions AS (FROM [flow], WHERE zexpr, CLAUSES [limit]) RATIONALE \"x\"\n",
+      "refusal": "WHERE names an expression no clause admits"
+    },
+    {
+      "id": "R8",
+      "name": "ABSENT takes zero, missing or refuse",
+      "source": "DEFINE LANGUAGE z AS (VERSION \"0.7\", GRAMMAR \"0.7\", COURT \"x\", EXTENSION \".z\") RATIONALE \"x\"\nDEFINE EXPRESSION zexpr AS (OPERATORS [cmp], OPERANDS [number, ref], ABSENT nil) RATIONALE \"x\"\n",
+      "refusal": "ABSENT takes zero, missing or refuse"
+    }
+  ]
+}

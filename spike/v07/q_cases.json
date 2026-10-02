@@ -1,0 +1,722 @@
+{
+  "grammar": "Q",
+  "version": "0.7",
+  "judge": "zing.exe (D:/GitHub/zing/cli/zig-out/bin, the Zig runtime of ZQL) run on a scratch copy of zing's examples/bedrock-query -- its ledger of 6 committed deposits, then the 4 of `replay` committed through `zing flow collect` -- and `zing query` for every question below, captured 2026-10-02 by haro/spike/haro_forge.py's probe; stage 10 re-runs zing live when it is built here and reports any drift from these answers",
+  "sentence": "tontine.z",
+  "ask": "questions",
+  "from": "collect",
+  "replay": [
+    [
+      {
+        "member": "Sanda",
+        "amount": "7500",
+        "round": 3
+      },
+      "moussa"
+    ],
+    [
+      {
+        "member": "amina",
+        "amount": 100
+      },
+      "haoua"
+    ],
+    [
+      {
+        "member": "Boubacar",
+        "amount": 12000,
+        "round": 2
+      },
+      "haoua"
+    ],
+    [
+      {
+        "member": "Zeinab",
+        "amount": 5000,
+        "round": 3
+      },
+      "moussa"
+    ]
+  ],
+  "rows": [
+    {
+      "member": "Aminata",
+      "amount": 5000,
+      "round": 1
+    },
+    {
+      "member": "Moussa",
+      "amount": 2500,
+      "round": 1
+    },
+    {
+      "member": "Fatima",
+      "amount": 7500,
+      "round": 2
+    },
+    {
+      "member": "Aminata",
+      "amount": 5000,
+      "round": 1
+    },
+    {
+      "member": "Moussa",
+      "amount": 2500,
+      "round": 1
+    },
+    {
+      "member": "Fatima",
+      "amount": 7500,
+      "round": 2
+    },
+    {
+      "member": "Sanda",
+      "amount": "7500",
+      "round": 3
+    },
+    {
+      "member": "amina",
+      "amount": 100
+    },
+    {
+      "member": "Boubacar",
+      "amount": 12000,
+      "round": 2
+    },
+    {
+      "member": "Zeinab",
+      "amount": 5000,
+      "round": 3
+    }
+  ],
+  "cases": [
+    {
+      "id": "q01",
+      "query": "SELECT * FROM collect",
+      "expect": [
+        {
+          "member": "Aminata",
+          "amount": 5000,
+          "round": 1
+        },
+        {
+          "member": "Moussa",
+          "amount": 2500,
+          "round": 1
+        },
+        {
+          "member": "Fatima",
+          "amount": 7500,
+          "round": 2
+        },
+        {
+          "member": "Aminata",
+          "amount": 5000,
+          "round": 1
+        },
+        {
+          "member": "Moussa",
+          "amount": 2500,
+          "round": 1
+        },
+        {
+          "member": "Fatima",
+          "amount": 7500,
+          "round": 2
+        },
+        {
+          "member": "Sanda",
+          "amount": "7500",
+          "round": 3
+        },
+        {
+          "member": "amina",
+          "amount": 100
+        },
+        {
+          "member": "Boubacar",
+          "amount": 12000,
+          "round": 2
+        },
+        {
+          "member": "Zeinab",
+          "amount": 5000,
+          "round": 3
+        }
+      ]
+    },
+    {
+      "id": "q02",
+      "query": "SELECT * FROM collect WHERE round = 1",
+      "expect": [
+        {
+          "member": "Aminata",
+          "amount": 5000,
+          "round": 1
+        },
+        {
+          "member": "Moussa",
+          "amount": 2500,
+          "round": 1
+        },
+        {
+          "member": "Aminata",
+          "amount": 5000,
+          "round": 1
+        },
+        {
+          "member": "Moussa",
+          "amount": 2500,
+          "round": 1
+        }
+      ]
+    },
+    {
+      "id": "q03",
+      "query": "SELECT * FROM collect ORDER BY amount DESC LIMIT 1",
+      "expect": [
+        {
+          "member": "Boubacar",
+          "amount": 12000,
+          "round": 2
+        }
+      ]
+    },
+    {
+      "id": "q04",
+      "query": "SELECT * FROM collect WHERE member CONTAINS \"ami\"",
+      "expect": [
+        {
+          "member": "Aminata",
+          "amount": 5000,
+          "round": 1
+        },
+        {
+          "member": "Aminata",
+          "amount": 5000,
+          "round": 1
+        },
+        {
+          "member": "amina",
+          "amount": 100
+        }
+      ]
+    },
+    {
+      "id": "q05",
+      "query": "SELECT * FROM collect ORDER BY amount",
+      "expect": [
+        {
+          "member": "amina",
+          "amount": 100
+        },
+        {
+          "member": "Moussa",
+          "amount": 2500,
+          "round": 1
+        },
+        {
+          "member": "Moussa",
+          "amount": 2500,
+          "round": 1
+        },
+        {
+          "member": "Aminata",
+          "amount": 5000,
+          "round": 1
+        },
+        {
+          "member": "Aminata",
+          "amount": 5000,
+          "round": 1
+        },
+        {
+          "member": "Zeinab",
+          "amount": 5000,
+          "round": 3
+        },
+        {
+          "member": "Fatima",
+          "amount": 7500,
+          "round": 2
+        },
+        {
+          "member": "Fatima",
+          "amount": 7500,
+          "round": 2
+        },
+        {
+          "member": "Sanda",
+          "amount": "7500",
+          "round": 3
+        },
+        {
+          "member": "Boubacar",
+          "amount": 12000,
+          "round": 2
+        }
+      ]
+    },
+    {
+      "id": "q06",
+      "query": "SELECT * FROM collect ORDER BY round DESC",
+      "expect": [
+        {
+          "member": "Sanda",
+          "amount": "7500",
+          "round": 3
+        },
+        {
+          "member": "Zeinab",
+          "amount": 5000,
+          "round": 3
+        },
+        {
+          "member": "Fatima",
+          "amount": 7500,
+          "round": 2
+        },
+        {
+          "member": "Fatima",
+          "amount": 7500,
+          "round": 2
+        },
+        {
+          "member": "Boubacar",
+          "amount": 12000,
+          "round": 2
+        },
+        {
+          "member": "Aminata",
+          "amount": 5000,
+          "round": 1
+        },
+        {
+          "member": "Moussa",
+          "amount": 2500,
+          "round": 1
+        },
+        {
+          "member": "Aminata",
+          "amount": 5000,
+          "round": 1
+        },
+        {
+          "member": "Moussa",
+          "amount": 2500,
+          "round": 1
+        },
+        {
+          "member": "amina",
+          "amount": 100
+        }
+      ]
+    },
+    {
+      "id": "q07",
+      "query": "SELECT * FROM collect ORDER BY round",
+      "expect": [
+        {
+          "member": "amina",
+          "amount": 100
+        },
+        {
+          "member": "Aminata",
+          "amount": 5000,
+          "round": 1
+        },
+        {
+          "member": "Moussa",
+          "amount": 2500,
+          "round": 1
+        },
+        {
+          "member": "Aminata",
+          "amount": 5000,
+          "round": 1
+        },
+        {
+          "member": "Moussa",
+          "amount": 2500,
+          "round": 1
+        },
+        {
+          "member": "Fatima",
+          "amount": 7500,
+          "round": 2
+        },
+        {
+          "member": "Fatima",
+          "amount": 7500,
+          "round": 2
+        },
+        {
+          "member": "Boubacar",
+          "amount": 12000,
+          "round": 2
+        },
+        {
+          "member": "Sanda",
+          "amount": "7500",
+          "round": 3
+        },
+        {
+          "member": "Zeinab",
+          "amount": 5000,
+          "round": 3
+        }
+      ]
+    },
+    {
+      "id": "q08",
+      "query": "SELECT * FROM collect WHERE amount >= 7500 AND round = 2",
+      "expect": [
+        {
+          "member": "Fatima",
+          "amount": 7500,
+          "round": 2
+        },
+        {
+          "member": "Fatima",
+          "amount": 7500,
+          "round": 2
+        },
+        {
+          "member": "Boubacar",
+          "amount": 12000,
+          "round": 2
+        }
+      ]
+    },
+    {
+      "id": "q09",
+      "query": "SELECT * FROM collect WHERE amount > 5000 OR member = \"Aminata\" LIMIT 3",
+      "expect": [
+        {
+          "member": "Aminata",
+          "amount": 5000,
+          "round": 1
+        },
+        {
+          "member": "Fatima",
+          "amount": 7500,
+          "round": 2
+        },
+        {
+          "member": "Aminata",
+          "amount": 5000,
+          "round": 1
+        }
+      ]
+    },
+    {
+      "id": "q10",
+      "query": "SELECT * FROM collect WHERE round = 1 ORDER BY member DESC",
+      "expect": [
+        {
+          "member": "Moussa",
+          "amount": 2500,
+          "round": 1
+        },
+        {
+          "member": "Moussa",
+          "amount": 2500,
+          "round": 1
+        },
+        {
+          "member": "Aminata",
+          "amount": 5000,
+          "round": 1
+        },
+        {
+          "member": "Aminata",
+          "amount": 5000,
+          "round": 1
+        }
+      ]
+    },
+    {
+      "id": "q11",
+      "query": "SELECT * FROM collect WHERE amount = \"5000\"",
+      "expect": [
+        {
+          "member": "Aminata",
+          "amount": 5000,
+          "round": 1
+        },
+        {
+          "member": "Aminata",
+          "amount": 5000,
+          "round": 1
+        },
+        {
+          "member": "Zeinab",
+          "amount": 5000,
+          "round": 3
+        }
+      ]
+    },
+    {
+      "id": "q12",
+      "query": "SELECT * FROM collect ORDER BY member",
+      "expect": [
+        {
+          "member": "Aminata",
+          "amount": 5000,
+          "round": 1
+        },
+        {
+          "member": "Aminata",
+          "amount": 5000,
+          "round": 1
+        },
+        {
+          "member": "Boubacar",
+          "amount": 12000,
+          "round": 2
+        },
+        {
+          "member": "Fatima",
+          "amount": 7500,
+          "round": 2
+        },
+        {
+          "member": "Fatima",
+          "amount": 7500,
+          "round": 2
+        },
+        {
+          "member": "Moussa",
+          "amount": 2500,
+          "round": 1
+        },
+        {
+          "member": "Moussa",
+          "amount": 2500,
+          "round": 1
+        },
+        {
+          "member": "Sanda",
+          "amount": "7500",
+          "round": 3
+        },
+        {
+          "member": "Zeinab",
+          "amount": 5000,
+          "round": 3
+        },
+        {
+          "member": "amina",
+          "amount": 100
+        }
+      ]
+    },
+    {
+      "id": "q13",
+      "query": "SELECT * FROM collect WHERE round = 3",
+      "expect": [
+        {
+          "member": "Sanda",
+          "amount": "7500",
+          "round": 3
+        },
+        {
+          "member": "Zeinab",
+          "amount": 5000,
+          "round": 3
+        }
+      ]
+    },
+    {
+      "id": "q14",
+      "query": "SELECT * FROM collect LIMIT 2",
+      "expect": [
+        {
+          "member": "Aminata",
+          "amount": 5000,
+          "round": 1
+        },
+        {
+          "member": "Moussa",
+          "amount": 2500,
+          "round": 1
+        }
+      ]
+    },
+    {
+      "id": "q15",
+      "query": "SELECT * FROM collect ORDER BY amount ASC LIMIT 2",
+      "expect": [
+        {
+          "member": "amina",
+          "amount": 100
+        },
+        {
+          "member": "Moussa",
+          "amount": 2500,
+          "round": 1
+        }
+      ]
+    },
+    {
+      "id": "q16",
+      "query": "SELECT * FROM collect WHERE round >= 2 ORDER BY amount DESC",
+      "expect": [
+        {
+          "member": "Boubacar",
+          "amount": 12000,
+          "round": 2
+        },
+        {
+          "member": "Fatima",
+          "amount": 7500,
+          "round": 2
+        },
+        {
+          "member": "Fatima",
+          "amount": 7500,
+          "round": 2
+        },
+        {
+          "member": "Sanda",
+          "amount": "7500",
+          "round": 3
+        },
+        {
+          "member": "Zeinab",
+          "amount": 5000,
+          "round": 3
+        }
+      ]
+    },
+    {
+      "id": "q17",
+      "query": "DROP TABLE collect",
+      "refusal": "Unknown verb 'DROP'",
+      "zing": "query (col 1) Unknown verb 'DROP'. The ZQL verb set is closed -- destructive or unrecognized operations are not part of the grammar."
+    },
+    {
+      "id": "q18",
+      "query": "SELECT * FROM collect LIMIT 2 ORDER BY amount",
+      "refusal": "Unexpected 'ORDER'",
+      "zing": "query (col 31) Unexpected 'ORDER' after the query. The ZQL verb set is closed -- destructive or unrecognized operations are not part of the grammar."
+    },
+    {
+      "id": "q19",
+      "query": "SELECT member FROM collect",
+      "refusal": "SELECT * only",
+      "zing": "query (col 8) Expected star but found 'member'"
+    },
+    {
+      "id": "q20",
+      "query": "SELECT * FROM nowhere",
+      "refusal": "resolves to nothing",
+      "haro_only": true,
+      "zing_rows": [],
+      "note": "zing answers no rows for a FROM that names no declared flow; the declared altitude refuses a name that resolves to nothing (HF-51)"
+    },
+    {
+      "id": "q21",
+      "query": "SELECT * FROM collect WHERE amount",
+      "refusal": "WHERE is not a condition",
+      "zing": "query (col 35) Expected a comparison operator after operand"
+    },
+    {
+      "id": "q22",
+      "query": "SELECT * FROM collect WHERE",
+      "refusal": "empty expression",
+      "zing": "query (col 28) Expected a value or field reference, found ''"
+    },
+    {
+      "id": "q23",
+      "query": "SELECT * FROM collect ORDER BY amount LIMIT 0",
+      "expect": []
+    },
+    {
+      "id": "q24",
+      "query": "SELECT * FROM collect WHERE member CONTAINS \"\"",
+      "expect": [
+        {
+          "member": "Aminata",
+          "amount": 5000,
+          "round": 1
+        },
+        {
+          "member": "Moussa",
+          "amount": 2500,
+          "round": 1
+        },
+        {
+          "member": "Fatima",
+          "amount": 7500,
+          "round": 2
+        },
+        {
+          "member": "Aminata",
+          "amount": 5000,
+          "round": 1
+        },
+        {
+          "member": "Moussa",
+          "amount": 2500,
+          "round": 1
+        },
+        {
+          "member": "Fatima",
+          "amount": 7500,
+          "round": 2
+        },
+        {
+          "member": "Sanda",
+          "amount": "7500",
+          "round": 3
+        },
+        {
+          "member": "amina",
+          "amount": 100
+        },
+        {
+          "member": "Boubacar",
+          "amount": 12000,
+          "round": 2
+        },
+        {
+          "member": "Zeinab",
+          "amount": 5000,
+          "round": 3
+        }
+      ]
+    },
+    {
+      "id": "q25",
+      "query": "SELECT * FROM collect WHERE round = 1 AND amount > 3000 OR round = 2",
+      "expect": [
+        {
+          "member": "Aminata",
+          "amount": 5000,
+          "round": 1
+        },
+        {
+          "member": "Fatima",
+          "amount": 7500,
+          "round": 2
+        },
+        {
+          "member": "Aminata",
+          "amount": 5000,
+          "round": 1
+        },
+        {
+          "member": "Fatima",
+          "amount": 7500,
+          "round": 2
+        },
+        {
+          "member": "Boubacar",
+          "amount": 12000,
+          "round": 2
+        }
+      ]
+    }
+  ]
+}

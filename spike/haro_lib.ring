@@ -14,6 +14,14 @@
 # WALK, the one kinetic kind -- which kind is walked, by which steps, in
 # what order, under which guards, computing what, failing how.
 #
+# v0.7 (haro/spike/v07/GRAMMAR.md): ASK, the Q letter -- the language's own
+# closed question grammar: FROM which kinds, WHERE in which expression,
+# which optional CLAUSES (where, order, limit); and ABSENT missing.
+#
+# v0.7 (haro/spike/v07/GRAMMAR.md): ASK, the Q letter -- the language's own
+# closed question grammar: FROM which kinds, WHERE in which expression,
+# which optional CLAUSES (where, order, limit); and ABSENT missing.
+#
 # The same file runs on rnxc and on the oracle and must print the same bytes.
 # Refusals are one channel, "stzu (line N): message". Functions only; the
 # globals ($aStzuToks, $nStzuPos, and cond_lib's) are born in the root file.
@@ -80,6 +88,8 @@ func StzuClauses(cKind)
 		return [["MESSAGE", "string"], ["OF", "typelist"]]
 	but cKind = "WALK"
 		return [["COMPUTE", "ident"], ["FAIL", "ident"], ["FORMULA", "ident"], ["GUARDS", "pathlist"], ["OF", "ident"], ["ORDER", "ident"], ["STEPS", "ident"], ["THROUGH", "ident"]]
+	but cKind = "ASK"
+		return [["CLAUSES", "namelist"], ["FROM", "namelist"], ["WHERE", "ident"]]
 	ok
 	return []
 
@@ -114,13 +124,15 @@ func StzuRequired(cKind)
 		return ["ONE"]
 	but cKind = "WALK"
 		return ["OF", "STEPS", "THROUGH", "ORDER"]
+	but cKind = "ASK"
+		return ["FROM"]
 	ok
 	return []
 
 func StzuIsKind(cWord)
 	return InStrList(cWord, ["LANGUAGE", "DECLARATION", "FORM", "EXPRESSION", "REFUSAL",
 	                         "MENU", "RANGE", "FORMAT", "CONSTRAINT", "WORLD", "REFINE", "UNION",
-	                         "SENTENCE", "VIEW", "WALK"])
+	                         "SENTENCE", "VIEW", "WALK", "ASK"])
 
 # the directory part of a path, "" when none (core Ring has no dirname)
 func StzuDirOf(cPath)
@@ -668,6 +680,8 @@ func StzuParseDeclaration()
 #                  EQUALITY kind|value)
 #   walks:        [name, of, steps, through, order, guards, compute, formula, fail, line]
 #                 (guards a list of [path, line]; compute, formula, fail "" when absent, v0.6)
+#   ask:          [name, from kinds, where, clauses, rationale, line] or NULL   (v0.7)
+#   ask:          [name, from kinds, where, clauses, rationale, line] or NULL   (v0.7)
 #   refusals:     [name, message, rationale, line]
 #   menus:        [name, words, message, line]
 #   ranges:       [name, min, max, message, line]
@@ -712,6 +726,7 @@ func StzuDeclare(cSrc)
 	aSentences = []
 	aViews = []
 	aWalks = []
+	aAsk = NULL
 	aWorld = NULL
 	aRefine = NULL
 	aDeclared = []
@@ -822,8 +837,8 @@ func StzuDeclare(cSrc)
 				cAbsent = ""
 				if HasClause(aClauses, "ABSENT")
 					cAbsent = ClauseValue(aClauses, "ABSENT")
-					if cAbsent != "zero" and cAbsent != "refuse"
-						StzuFail(nLine, "ABSENT takes zero or refuse: what a reference to nothing reads as; '" + cAbsent + "' is neither")
+					if cAbsent != "zero" and cAbsent != "missing" and cAbsent != "refuse"
+						StzuFail(nLine, "ABSENT takes zero, missing or refuse: what a reference to nothing reads as; '" + cAbsent + "' is none of them")
 					ok
 				ok
 				cDivision = ""
@@ -890,6 +905,24 @@ func StzuDeclare(cSrc)
 				cWhere = ""
 				if HasClause(aClauses, "WHERE") cWhere = ClauseValue(aClauses, "WHERE") ok
 				aViews + [cName, cOn, ClauseValue(aClauses, "ONE"), cNamed, cWhere, nLine]
+			but cKind = "ASK"
+				if not isNull(aAsk)
+					StzuFail(nLine, "a .haro file declares at most one ASK: a language asks in one grammar (" + aAsk[1] + " is it)")
+				ok
+				cWhere = ""
+				if HasClause(aClauses, "WHERE") cWhere = ClauseValue(aClauses, "WHERE") ok
+				aCl = []
+				if HasClause(aClauses, "CLAUSES") aCl = ClauseValue(aClauses, "CLAUSES") ok
+				aAsk = [cName, ClauseValue(aClauses, "FROM"), cWhere, aCl, cRationale, nLine]
+			but cKind = "ASK"
+				if not isNull(aAsk)
+					StzuFail(nLine, "a .haro file declares at most one ASK: a language asks in one grammar (" + aAsk[1] + " is it)")
+				ok
+				cWhere = ""
+				if HasClause(aClauses, "WHERE") cWhere = ClauseValue(aClauses, "WHERE") ok
+				aCl = []
+				if HasClause(aClauses, "CLAUSES") aCl = ClauseValue(aClauses, "CLAUSES") ok
+				aAsk = [cName, ClauseValue(aClauses, "FROM"), cWhere, aCl, cRationale, nLine]
 			but cKind = "WALK"
 				aGuards = []
 				if HasClause(aClauses, "GUARDS") aGuards = ClauseValue(aClauses, "GUARDS") ok
@@ -1052,7 +1085,7 @@ func StzuDeclare(cSrc)
 	         ["menus", aMenus], ["ranges", aRanges], ["formats", aFormats],
 	         ["constraints", aConstraints], ["world", aWorld], ["refine", aRefine],
 	         ["unions", aUnions], ["sentences", aSentences], ["views", aViews],
-	         ["walks", aWalks] ]
+	         ["walks", aWalks], ["ask", aAsk] ]
 	$cCondLang = cLName
 	$aCondLangs = StzuCondLangs(aRec, [])
 	$aCondFormats = []
@@ -1171,6 +1204,72 @@ func StzuDeclare(cSrc)
 			ok
 		ok
 	next
+
+	# v0.7: the ASK names the kinds a question may ask, the expression its
+	# condition is written in, and the optional clauses it admits
+	if not isNull(aAsk)
+		nL = aAsk[6]
+		aFrom = aAsk[2]
+		if len(aFrom) = 0 StzuFail(nL, "FROM names at least one kind a question may ask") ok
+		for i = 1 to len(aFrom)
+			cK = DeclaredKind(aDeclared, aFrom[i])
+			if cK = "" StzuFail(nL, "FROM: '" + aFrom[i] + "' resolves to nothing in this declaration") ok
+			if cK != "DECLARATION" StzuFail(nL, "FROM must name a DECLARATION; '" + aFrom[i] + "' is a " + cK) ok
+		next
+		if aAsk[3] != ""
+			cK = DeclaredKind(aDeclared, aAsk[3])
+			if cK = "" StzuFail(nL, "WHERE: '" + aAsk[3] + "' resolves to nothing in this declaration") ok
+			if cK != "EXPRESSION" StzuFail(nL, "WHERE must name an EXPRESSION; '" + aAsk[3] + "' is a " + cK) ok
+		ok
+		aCl = aAsk[4]
+		for i = 1 to len(aCl)
+			if not InStrList(aCl[i], ["where", "order", "limit"])
+				StzuFail(nL, "'" + aCl[i] + "' is not a clause a question admits: where, order, limit")
+			ok
+			for j = 1 to i - 1
+				if aCl[j] = aCl[i] StzuFail(nL, "clause '" + aCl[i] + "' is named twice") ok
+			next
+		next
+		if InStrList("where", aCl) and aAsk[3] = ""
+			StzuFail(nL, "CLAUSES admits where, so WHERE names the expression a condition is written in")
+		ok
+		if aAsk[3] != "" and not InStrList("where", aCl)
+			StzuFail(nL, "WHERE names an expression no clause admits: add where to CLAUSES, or drop WHERE")
+		ok
+	ok
+
+	# v0.7: the ASK names the kinds a question may ask, the expression its
+	# condition is written in, and the optional clauses it admits
+	if not isNull(aAsk)
+		nL = aAsk[6]
+		aFrom = aAsk[2]
+		if len(aFrom) = 0 StzuFail(nL, "FROM names at least one kind a question may ask") ok
+		for i = 1 to len(aFrom)
+			cK = DeclaredKind(aDeclared, aFrom[i])
+			if cK = "" StzuFail(nL, "FROM: '" + aFrom[i] + "' resolves to nothing in this declaration") ok
+			if cK != "DECLARATION" StzuFail(nL, "FROM must name a DECLARATION; '" + aFrom[i] + "' is a " + cK) ok
+		next
+		if aAsk[3] != ""
+			cK = DeclaredKind(aDeclared, aAsk[3])
+			if cK = "" StzuFail(nL, "WHERE: '" + aAsk[3] + "' resolves to nothing in this declaration") ok
+			if cK != "EXPRESSION" StzuFail(nL, "WHERE must name an EXPRESSION; '" + aAsk[3] + "' is a " + cK) ok
+		ok
+		aCl = aAsk[4]
+		for i = 1 to len(aCl)
+			if not InStrList(aCl[i], ["where", "order", "limit"])
+				StzuFail(nL, "'" + aCl[i] + "' is not a clause a question admits: where, order, limit")
+			ok
+			for j = 1 to i - 1
+				if aCl[j] = aCl[i] StzuFail(nL, "clause '" + aCl[i] + "' is named twice") ok
+			next
+		next
+		if InStrList("where", aCl) and aAsk[3] = ""
+			StzuFail(nL, "CLAUSES admits where, so WHERE names the expression a condition is written in")
+		ok
+		if aAsk[3] != "" and not InStrList("where", aCl)
+			StzuFail(nL, "WHERE names an expression no clause admits: add where to CLAUSES, or drop WHERE")
+		ok
+	ok
 
 	# the REFINE: every point is a seat of a declaration; kinds and floors are closed
 	if not isNull(aRefine)
@@ -1357,6 +1456,9 @@ func StzuPrintLanguage(aLang)
 	next
 	? "contexts " + nCtx
 	? "walks " + len(LangGet(aLang, "walks"))
+	nAsks = 0
+	if not isNull(LangGet(aLang, "ask")) nAsks = 1 ok
+	? "asks " + nAsks
 	nWorld = 0
 	if not isNull(LangGet(aLang, "world")) nWorld = 1 ok
 	? "world " + nWorld

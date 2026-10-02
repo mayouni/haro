@@ -7,7 +7,8 @@
 # VARIABLES, its CONTEXTS -- the seats a host offers the expression, each
 # with the variables it admits -- and, since v0.6, the three semantics an
 # evaluator needs and the declaration says: ABSENT (what a reference to
-# nothing reads as: zero, or refuse), DIVISION (what a division by zero
+# nothing reads as: zero; missing, zql's -- 0 to arithmetic, the empty
+# text to a comparison; or refuse), DIVISION (what a division by zero
 # yields: calm, 0, or refuse), EQUALITY (kind: a number and a text are never
 # equal, W's rule; value: a numeric text and its number are one value,
 # ZQL's). The grammar is W's (stz/declarative/w/GRAMMAR.md), the one
@@ -515,6 +516,8 @@ func ExEval(aNode, aEnv)
 		aGot = ExRefGet(aNode[2])
 		if aGot[1] return aGot[2] ok
 		if $cExprAbsent = "zero" return 0 ok
+		# missing (zql.zig's .missing): 0 to arithmetic, "" to a comparison
+		if $cExprAbsent = "missing" return ExNullMark() ok
 		ExFail("'" + aNode[2] + "' is absent from the record")
 	ok
 	if cK = "agg" return ExAggregate(aNode[2], aNode[3]) ok
@@ -586,6 +589,31 @@ func ExEval(aNode, aEnv)
 		return 0
 	ok
 	ExFail("internal -- unknown node kind " + cK)
+
+# a condition's truth (v0.6/v0.7, zql.zig evalExpr): a comparison, and, or,
+# not and a flag have a truth; an arithmetic node, a reference or a text has
+# none and reads false -- `WHERE amount` matches nothing
+func ExIsCondition(aNode)
+	cK = aNode[1]
+	return cK = "cmp" or cK = "and" or cK = "or" or cK = "not" or cK = "flag"
+
+func ExBool(aNode, aEnv)
+	cK = aNode[1]
+	if cK = "cmp" return ExTruthy(ExEval(aNode, aEnv)) ok
+	if cK = "flag" return aNode[2] ok
+	if cK = "not"
+		if ExBool(aNode[2], aEnv) return 0 ok
+		return 1
+	ok
+	if cK = "and"
+		if not ExBool(aNode[2], aEnv) return 0 ok
+		return ExBool(aNode[3], aEnv)
+	ok
+	if cK = "or"
+		if ExBool(aNode[2], aEnv) return 1 ok
+		return ExBool(aNode[3], aEnv)
+	ok
+	return 0
 
 # equality by value and by kind: a number and a string are never equal (W's
 # rule on the Luau host), whatever the host's own = would say

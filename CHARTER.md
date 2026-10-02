@@ -173,7 +173,7 @@ no expression position, no escape):
 | `LANGUAGE`, `DECLARATION`, `FORM`, `EXPRESSION`, `REFUSAL` | the five meta-kinds | kept, with their menus, their meta-court and their refusal channel |
 | `RATIONALE` on every declaration | mandatory (C6 3.8) | kept; it is principle 5 at this altitude |
 | **`WORLD`** (the knowledge stratum) | absent | the ontology declared beside the grammar: entities, relations, constraints, as versioned data (C1, `world.json`); never a mutable runtime store [R, mission.md rule 3] |
-| **`ASK`** (the pragmatics stratum) | absent | the language's own closed query grammar (the Q letter) and the human languages its natural door speaks; NL asks, never declares; the engine compiles to this grammar and never to host code [R, mission.md rules 1-2] |
+| **`ASK`** (the pragmatics stratum) | absent | the language's own closed query grammar (the Q letter) and the human languages its natural door speaks; NL asks, never declares; the engine compiles to this grammar and never to host code [R, mission.md rules 1-2]. *The query grammar is built, v0.7 (the seventh rung); the natural door is not.* |
 | **`NARRATE`** | absent | how a run of the language is narrated back (stzn); the court's voice |
 | **`REFINE`** | absent | which declared points of a sentence may be refined, by whom, within what bounds, at what trust floor (section 7) |
 | **`FORMS` inside a vocabulary** | absent | the function-name grammar of principle 7 declared as data for the computing altitude's families |
@@ -215,7 +215,13 @@ alphabet's Z letter, declared in the Commons' shape (`z_v06.haro`) and zing's 16
 cases judged on the forged court and walker unadapted: 16 of 16 on `rnxc` and the oracle.
 This is section 7's "the forge produces the runtime" with its first number, and the
 `WORLD` row above has its second slice: the declared world's norms and flows RUN. The
-notation gap between ZQL v0 and the Commons is HF-47 and the author's (D8).
+notation gap between ZQL v0 and the Commons is HF-47 and the author's (D8). **Haro v0.7,
+the same day (`haro/spike/v07/GRAMMAR.md`, 12 fixtures): the Q letter.** `ASK` -- the row
+above, "the language's own closed query grammar" -- says FROM which kinds a question may
+be asked, WHERE in which expression, and which clauses it admits; the forge emits the
+question grammar and the court's `ask` verb, and the judge is zing itself: its own
+answers to 25 questions on its bedrock-query example, re-taken live by the guard, 25 of
+25 on `rnxc` and the oracle. The natural door of the same row -- N -- is not built.
 
 **What the forge produces from one declaration** (Ringua's kit, 02-STACK's L1, now Haro's
 compiler verbs rather than separate organs): the parser; the court with the fixtures as its
@@ -488,6 +494,14 @@ pinned at 16, first run. Three findings: the notation gap (HF-47, D8), the pinne
 narrowing a new rule (HF-48), the guard catching a 20 ms regression the rung would have
 shipped (HF-49). Record: `haro/SPIKE.md`, "The sixth rung".
 
+**The seventh rung, 2026-10-02, on the author's "then next": Haro v0.7, the Q letter**
+(section 3's note). `ASK` forged into the question grammar and the court's `ask` verb,
+and judged by a RUNTIME: zing's own answers to 25 questions on its bedrock-query example,
+captured into the fixture and re-taken live by the guard's stage 10 -- **25 of 25** on
+`rnxc` and the oracle, byte-identical, pinned. Three findings: `ABSENT missing` (HF-50),
+zing's unresolved FROM (HF-51), and Ring's after-the-index `insert()` that had left the
+walk's ordering untested (HF-52). Record: `haro/SPIKE.md`, "The seventh rung".
+
 v0.1's spike (`twice.haro`, a definition with an intent clause) proved one altitude. The
 ruling asks for three to meet, and the estate has already named the smallest program that
 makes them: the alphabet's own proof obligation, "Z re-expressed through stzf from `z.stzu`
@@ -634,7 +648,10 @@ already pins.
   from Haro's declaring altitude, is Zin's call "recorded, never forced from here" [R,
   06-ALPHABET]; the charter asks nothing and records the lossless elevation.
 
-- **D8 -- ZQL's notation, opened by the sixth rung (2026-10-02, HF-47).** ZQL v0 writes
+- **D8 -- ZQL's notation, opened by the sixth rung (2026-10-02, HF-47) -- RULED 2026-10-02:
+  the Commons' shape** ("go with the Commons' shape for D8"). StzZql's `GRAMMAR.md` moves to
+  it and zing's three runtimes follow; `z_v06.haro` and `tontine.z` are the proposal, routed
+  through Central (HARO-Z-02). Haro admits no second notation for a kind. ZQL v0 writes
   `ENTITY deposit (id: uuid, ...)`, `NORM x AS (RULE: expr, MESSAGE: "...")`, `STEP 1: RECORD
   -> { ... }` and `AS JSON INTO`; the Grammar Commons writes `DEFINE KIND name AS (CLAUSE
   value, ...) RATIONALE`, and section 3 says every letter does. Haro v0.6 declares Z in the

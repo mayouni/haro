@@ -4,10 +4,11 @@
 # by court_lib.ring over the records below, one per language -- this one first, then
 # every language a SENTENCE seat names: kinds [VERB, name, seats, names, messages],
 # forms, refusals, menus, ranges, formats, unions, constraints, world, points, floors,
-# views, sentences, expressions and walks.
+# views, sentences, expressions, walks and the ask.
 
 load "court_lib.ring"
 load "expr_lib.ring"
+load "ask_lib.ring"
 
 $cCourtLang = ""
 $cCourtExt = ""
@@ -41,6 +42,7 @@ $aCourtViews = []
 $aCourtSentenceKinds = []
 $aCourtExprs = []
 $aCourtWalks = []
+$aCourtAsk = NULL
 $cExprLang = ""
 $aExprOperators = []
 $aExprOperands = []
@@ -98,11 +100,12 @@ $aCourtLangs = [
     [
     ],
     [
-      ["zexpr", ["or", "and", "not", "cmp", "contains", "add", "sub", "mul", "div", "round", "neg"], ["number", "text", "flag", "ref", "agg"], ["sum", "count"], [], [], "zero", "calm", "value"]
+      ["zexpr", ["or", "and", "not", "cmp", "contains", "add", "sub", "mul", "div", "round", "neg"], ["number", "text", "flag", "ref", "agg"], ["sum", "count"], [], [], "missing", "calm", "value"]
     ],
     [
       ["flows", "flow", "step", "flow", "order", ["validate", "enforcing.rule"], "compute", "formula", "on_fail"]
-    ]
+    ],
+    ["questions", ["flow"], "zexpr", ["where", "order", "limit"]]
   ]
 ]
 CtUseLanguage("z")

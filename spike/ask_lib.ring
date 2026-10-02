@@ -1,0 +1,304 @@
+# ask_lib.ring -- the Q letter: a declared language's question grammar, judged
+# and answered (Haro v0.7), in pure core Ring.
+#
+# A court FORGED from a .haro declaration that holds an ASK loads this file
+# beside court_lib.ring and expr_lib.ring, and carries the ASK as
+# $aCourtAsk = [name, from kinds, where expression, clauses]. The question
+# grammar is ZQL's SELECT (StzZql GRAMMAR.md 6; zing cli/src/zql.zig
+# parseQuery and query_cmd.zig), the one question shape the estate pins:
+#
+#   SELECT * FROM name [WHERE expr] [ORDER BY field [ASC | DESC]] [LIMIT n]
+#
+# FROM names a declaration of one of the ASK's kinds (a name that resolves
+# to nothing is refused here, where zing answers no rows -- HF-51). WHERE is
+# written in the ASK's expression and must be a CONDITION: a comparison,
+# and, or, not, a flag; an arithmetic node has no boolean meaning (zql.zig
+# evalExpr), and zing refuses "WHERE amount" as well. ORDER BY orders by a
+# field of the records: numeric when both can be numbers, by bytes
+# otherwise, a missing field first (zql.zig orderValues), ties in the
+# records' own order. LIMIT keeps the first n. The keywords are the
+# upper-case words, as zing reads them; a lower-case `order` is a field.
+# The clauses the ASK does not admit (CLAUSES) are refused by name.
+#
+#   <court>.ring ask <file> "<question>" <rows json>
+#
+# answers the matching records as a JSON list, in order. The rows are the
+# harness's: the declared altitude holds no store, so the records that
+# walked the FROM declaration are handed in, as zing hands its ledger's. A
+# question never writes.
+#
+# Functions only; the globals are the generated court's.
+
+func AskIsSpace(c)
+	return c = " " or c = char(9) or c = char(13) or c = char(10)
+
+# the word starting at i is exactly cKw, bounded by the text's edges or spaces
+func AskWordAt(cQ, i, cKw)
+	n = len(cKw)
+	if i + n - 1 > len(cQ) return 0 ok
+	if substr(cQ, i, n) != cKw return 0 ok
+	if i > 1 and not AskIsSpace(cQ[i - 1]) return 0 ok
+	if i + n <= len(cQ) and not AskIsSpace(cQ[i + n]) return 0 ok
+	return 1
+
+func AskTrim(cS)
+	i = 1
+	j = len(cS)
+	while i <= j and AskIsSpace(cS[i])
+		i++
+	end
+	while j >= i and AskIsSpace(cS[j])
+		j--
+	end
+	if j < i return "" ok
+	return substr(cS, i, j - i + 1)
+
+# the words of a text, split on spaces
+func AskWords(cS)
+	aW = []
+	cCur = ""
+	for i = 1 to len(cS)
+		if AskIsSpace(cS[i])
+			if cCur != "" aW + cCur ok
+			cCur = ""
+		else
+			cCur += cS[i]
+		ok
+	next
+	if cCur != "" aW + cCur ok
+	return aW
+
+func AskIsName(cW)
+	if len(cW) = 0 return 0 ok
+	for i = 1 to len(cW)
+		if not (CtIsLowerish(cW[i]) or CtIsDigit(cW[i]) or cW[i] = "_") return 0 ok
+	next
+	return 1
+
+func AskIsField(cW)
+	if len(cW) = 0 return 0 ok
+	for i = 1 to len(cW)
+		if not (CtIsLowerish(cW[i]) or CtIsDigit(cW[i]) or cW[i] = "_" or cW[i] = ".") return 0 ok
+	next
+	return 1
+
+func AskIsNumber(cW)
+	if len(cW) = 0 return 0 ok
+	for i = 1 to len(cW)
+		if not CtIsDigit(cW[i]) return 0 ok
+	next
+	return 1
+
+func AskFail(cMsg)
+	CtFail(1, cMsg)
+
+# the parsed question: [from, where node or NULL, order field, descending, limit or -1]
+func AskParse(aDecls, cQ)
+	aAsk = $aCourtAsk
+	if isNull(aAsk) AskFail("this language declares no ASK, so it answers no question") ok
+	n = len(cQ)
+	# the frame keywords, at depth 0 and outside quotes
+	nWhere = 0
+	nOrder = 0
+	nLimit = 0
+	i = 1
+	nDepth = 0
+	cQuote = ""
+	while i <= n
+		c = cQ[i]
+		if cQuote != ""
+			if c = cQuote cQuote = "" ok
+			i++
+			loop
+		ok
+		if c = "'" or c = '"'
+			cQuote = c
+			i++
+			loop
+		ok
+		if c = "(" nDepth++ ok
+		if c = ")" nDepth-- ok
+		if nDepth = 0 and (i = 1 or AskIsSpace(cQ[i - 1]))
+			if nWhere = 0 and AskWordAt(cQ, i, "WHERE") nWhere = i ok
+			if nOrder = 0 and AskWordAt(cQ, i, "ORDER") nOrder = i ok
+			if nLimit = 0 and AskWordAt(cQ, i, "LIMIT") nLimit = i ok
+		ok
+		i++
+	end
+	# the segments, in textual order
+	aSeg = []
+	if nWhere > 0 aSeg + [nWhere, "WHERE"] ok
+	if nOrder > 0 aSeg + [nOrder, "ORDER"] ok
+	if nLimit > 0 aSeg + [nLimit, "LIMIT"] ok
+	for a = 1 to len(aSeg)
+		for b = a + 1 to len(aSeg)
+			if aSeg[b][1] < aSeg[a][1]
+				aT = aSeg[a]
+				aSeg[a] = aSeg[b]
+				aSeg[b] = aT
+			ok
+		next
+	next
+	nHeadEnd = n + 1
+	if len(aSeg) > 0 nHeadEnd = aSeg[1][1] ok
+	cHead = ""
+	if nHeadEnd > 1 cHead = AskTrim(substr(cQ, 1, nHeadEnd - 1)) ok
+	aW = AskWords(cHead)
+	if len(aW) = 0 or aW[1] != "SELECT"
+		cVerb = ""
+		if len(aW) > 0 cVerb = aW[1] ok
+		cMsg = CtRefusalMessage("unknown_verb")
+		if cMsg = "" cMsg = "a question opens with SELECT" ok
+		AskFail("Unknown verb '" + cVerb + "': " + cMsg)
+	ok
+	if len(aW) < 2 or aW[2] != "*"
+		cFound = ""
+		if len(aW) >= 2 cFound = aW[2] ok
+		AskFail("Expected '*' after SELECT: a question asks for whole records (SELECT * only), found '" + cFound + "'")
+	ok
+	if len(aW) < 3 or aW[3] != "FROM"
+		cFound = ""
+		if len(aW) >= 3 cFound = aW[3] ok
+		AskFail("Expected FROM after SELECT *, found '" + cFound + "'")
+	ok
+	if len(aW) < 4 AskFail("Expected a name after FROM") ok
+	cFrom = aW[4]
+	if not AskIsName(cFrom) AskFail("FROM takes a lower_snake name, found '" + cFrom + "'") ok
+	if len(aW) > 4 AskFail("Unexpected '" + aW[5] + "' after the question") ok
+	# FROM resolves to a declaration of one of the ASK's kinds
+	aVerbs = []
+	aFromDecl = NULL
+	for k = 1 to len(aAsk[2])
+		aK = CtKindByDeclName(aAsk[2][k])
+		if isNull(aK) loop ok
+		aVerbs + aK[1]
+		for d = 1 to len(aDecls)
+			if aDecls[d][1] = aK[1] and aDecls[d][2] = cFrom aFromDecl = aDecls[d] ok
+		next
+	next
+	if isNull(aFromDecl)
+		cMsg = CtRefusalMessage("dangling_reference")
+		cOut = "FROM '" + cFrom + "' resolves to nothing: no such " + CtJoin(aVerbs, " or ")
+		if cMsg != "" cOut += " -- " + cMsg ok
+		AskFail(cOut)
+	ok
+	aWhere = NULL
+	cField = ""
+	bDesc = 0
+	nLim = -1
+	nSeen = 0
+	for s = 1 to len(aSeg)
+		nStart = aSeg[s][1]
+		nEnd = n
+		if s < len(aSeg) nEnd = aSeg[s + 1][1] - 1 ok
+		cText = AskTrim(substr(cQ, nStart, nEnd - nStart + 1))
+		cKind = aSeg[s][2]
+		nRank = 1
+		if cKind = "ORDER" nRank = 2 ok
+		if cKind = "LIMIT" nRank = 3 ok
+		if nRank <= nSeen AskFail("Unexpected '" + cKind + "' after the question") ok
+		nSeen = nRank
+		if not CtInList(lower(cKind), aAsk[4])
+			AskFail(cKind + " is not a clause of " + aAsk[1] + " (its clauses: " + CtJoin(aAsk[4], ", ") + ")")
+		ok
+		if cKind = "WHERE"
+			cExpr = AskTrim(substr(cText, 6))
+			aE = CtExprByName(aAsk[3])
+			if isNull(aE) AskFail("the court carries no EXPRESSION called '" + aAsk[3] + "'") ok
+			CtExprUse(aE)
+			cErr = ""
+			try
+				aWhere = ExParse(cExpr, [])
+			catch
+				cErr = cCatchError
+			done
+			if cErr != "" AskFail("WHERE: " + cErr) ok
+			if not ExIsCondition(aWhere)
+				AskFail("WHERE is not a condition: a comparison, and, or, not -- '" + cExpr + "' computes a value")
+			ok
+		but cKind = "ORDER"
+			aOW = AskWords(cText)
+			if len(aOW) < 2 or aOW[2] != "BY" AskFail("Expected BY after ORDER") ok
+			if len(aOW) < 3 AskFail("Expected a field after ORDER BY") ok
+			cField = aOW[3]
+			if not AskIsField(cField) AskFail("ORDER BY takes a field name, found '" + cField + "'") ok
+			if len(aOW) >= 4
+				if aOW[4] = "DESC"
+					bDesc = 1
+				but aOW[4] = "ASC"
+					bDesc = 0
+				else
+					AskFail("Unexpected '" + aOW[4] + "' after the question")
+				ok
+			ok
+			if len(aOW) > 4 AskFail("Unexpected '" + aOW[5] + "' after the question") ok
+		else
+			aLW = AskWords(cText)
+			if len(aLW) < 2 AskFail("Expected a number after LIMIT") ok
+			if not AskIsNumber(aLW[2]) AskFail("LIMIT takes a number, found '" + aLW[2] + "'") ok
+			nLim = 0 + aLW[2]
+			if len(aLW) > 2 AskFail("Unexpected '" + aLW[3] + "' after the question") ok
+		ok
+	next
+	return [cFrom, aWhere, cField, bDesc, nLim]
+
+# the order of two records on a field: -1, 0, 1 (zql.zig orderValues)
+func AskOrder(aA, aB, cField)
+	ExSetRecord(aA)
+	va = ExRefGet(cField)
+	ExSetRecord(aB)
+	vb = ExRefGet(cField)
+	if not va[1] and not vb[1] return 0 ok
+	if not va[1] return -1 ok
+	if not vb[1] return 1 ok
+	na = ExNumOf(va[2])
+	nb = ExNumOf(vb[2])
+	if na[1] and nb[1]
+		if na[2] < nb[2] return -1 ok
+		if na[2] > nb[2] return 1 ok
+		return 0
+	ok
+	return ExStrOrder(ExStr(va[2]), ExStr(vb[2]))
+
+func AskRun(aDecls, cQ, aRows)
+	aQ = AskParse(aDecls, cQ)
+	if not isList(aRows) or ExIsObj(aRows) AskFail("the rows are a JSON list of records") ok
+	aOut = []
+	for i = 1 to len(aRows)
+		if not ExIsObj(aRows[i]) AskFail("row " + i + " is not a JSON object") ok
+		if not isNull(aQ[2])
+			ExSetRecord(aRows[i])
+			if not ExBool(aQ[2], []) loop ok
+		ok
+		aOut + aRows[i]
+	next
+	if aQ[3] != ""
+		# a stable insertion: a record goes after every one it does not precede
+		aSorted = []
+		for i = 1 to len(aOut)
+			nAt = len(aSorted) + 1
+			for j = 1 to len(aSorted)
+				nCmp = AskOrder(aOut[i], aSorted[j], aQ[3])
+				if aQ[4] nCmp = -nCmp ok
+				if nCmp < 0
+					nAt = j
+					exit
+				ok
+			next
+			if nAt > len(aSorted)
+				aSorted + aOut[i]
+			else
+				# Ring's insert() puts the item AFTER the index: before j is after j-1 (HF-52)
+				insert(aSorted, nAt - 1, aOut[i])
+			ok
+		next
+		aOut = aSorted
+	ok
+	if aQ[5] >= 0 and len(aOut) > aQ[5]
+		aCut = []
+		for i = 1 to aQ[5]
+			aCut + aOut[i]
+		next
+		aOut = aCut
+	ok
+	return aOut
