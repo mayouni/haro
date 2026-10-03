@@ -5,8 +5,10 @@ checks that judge them were run on these cases (the W discipline: fixtures first
 
   court   a defect the EXISTING meta-vocabulary makes the forged court refuse: its message must hold the
           text declared in n_v17.haro, and `diagnose` must carry the code declared there
-  rule    a defect the existing court CANNOT see (it must still say `ok`) and the rule of the next rung must
-          catch: n_model.rules() must answer the code. Each is what v0.17 would add as a check
+  rule    a defect the vocabulary of v0.16 CANNOT see (its court said `ok` to each, before the rung) and a rule of
+          the seventeenth rung must catch: the forged court must answer the code (`diagnose`), and the
+          reference model (n_model.rules()) must answer the same codes. `surfaces` marks a case that only the
+          surface's own court can judge: it is asked with `check <file> surfaces`
 
 Each case is one replacement in n/tontine.n, anchored: the old text must occur exactly once.
 """
@@ -20,8 +22,8 @@ def C(cid, name, old, new, message, code=None):
     court.append({'id': cid, 'name': name, 'old': old, 'new': new, 'message': message, 'code': code})
 
 
-def R(cid, name, old, new, code):
-    rule.append({'id': cid, 'name': name, 'old': old, 'new': new, 'code': code})
+def R(cid, name, old, new, code, surfaces=False):
+    rule.append({'id': cid, 'name': name, 'old': old, 'new': new, 'code': code, 'surfaces': surfaces})
 
 
 # ---- the existing vocabulary: references, menus, required seats, one namespace, closure ----------------------------
@@ -45,7 +47,7 @@ C('C09', 'a declaration N does not have: N never declares', 'DEFINE STEP find_be
   "N asks; it never declares the world, the facts or a rule", None)
 C('C10', 'a free-text slot: the one thing a question may not carry', 'DEFINE MEANING num AS (\n  SLOT number', 'DEFINE MEANING num AS (\n  SLOT text',
   "SLOT is none, number or entity, not 'text'", 'PARSE')
-C('C11', 'a digit set the court does not know', 'DIGITS ascii,\n  NAMES upper_first,\n  REFUSES [\n    character: "the question', 'DIGITS arabic_indic,\n  NAMES upper_first,\n  REFUSES [\n    character: "the question',
+C('C11', 'a digit set the court does not know', 'DIGITS ascii,\n  NAMES upper_first,\n  JOINS "and",\n  REFUSES [\n    character: "the question', 'DIGITS arabic_indic,\n  NAMES upper_first,\n  JOINS "and",\n  REFUSES [\n    character: "the question',
   "DIGITS is ascii", 'PARSE')
 C('C12', 'a refusal kind that does not exist', 'ambiguous: "the question needs one answer', 'name: "the question needs one answer',
   "not 'name'", 'PARSE')
@@ -71,17 +73,18 @@ R('R06', 'a frame with both a target and steps', 'SHAPE [show, deposit], TARGET 
 R('R07', 'a surface that cannot tell in a tongue, with no frame template to cover it', 'TELLS [english, french]', 'TELLS [english]', 'N_TELL_UNCOVERED')
 R('R08', 'an ANSWERS with no EMPTY: an answer may be nobody', 'EMPTY [english: "Nobody received the pot in round {num}.", french: "Personne n\'a reçu la cagnotte au tour {num}."]', 'EMPTY [english: "Nobody received the pot in round {num}."]', 'N_TELL_UNCOVERED')
 R('R09', 'a tongue that cannot say one kind of refusal', ',\n    surface: "la source a refusé la question compilée : {what}"', '', 'N_REFUSAL_UNCOVERED')
-R('R10', 'a tongue that widens the gate beyond the court\'s safe set', 'ALLOWS "-\'?,.",\n  DIGITS ascii,\n  NAMES upper_first,\n  REFUSES [\n    character: "la question', 'ALLOWS "-\'?,.;",\n  DIGITS ascii,\n  NAMES upper_first,\n  REFUSES [\n    character: "la question', 'N_GATE_WIDENED')
+R('R10', 'a tongue that widens the gate beyond the court\'s safe set', 'ALLOWS "-\'?,.",\n  DIGITS ascii,\n  NAMES upper_first,\n  JOINS "et",\n  REFUSES [\n    character: "la question', 'ALLOWS "-\'?,.;",\n  DIGITS ascii,\n  NAMES upper_first,\n  JOINS "et",\n  REFUSES [\n    character: "la question', 'N_GATE_WIDENED')
 R('R11', 'a word that means two things in one tongue', 'WORDS [english: "who", french: "qui"]', 'WORDS [english: "who show", french: "qui"]', 'N_WORD_AMBIGUOUS')
 R('R12', 'a word both ignored and meaningful', 'IGNORES "the a an of me please', 'IGNORES "deposits the a an of me please', 'N_WORD_IGNORED')
 R('R13', 'a meaning with no words in a tongue', 'WORDS [english: "who", french: "qui"]', 'WORDS [english: "who"]', 'N_TONGUE_UNCOVERED')
 R('R14', 'an entity meaning of a kind its surface does not enumerate', 'SLOT entity, OF member, FROM graph', 'SLOT entity, OF person, FROM graph', 'N_ENTITY_UNKNOWN')
 R('R15', 'a surface that does not enumerate what a meaning draws from it', 'ENTITIES [member, round, role],', 'ENTITIES [round, role],', 'N_ENTITY_UNKNOWN')
-R('R16', 'a ledger query the ledger\'s own court refuses', 'QUERY "SELECT * FROM collect WHERE amount < {num}"', 'QUERY "SELECT member FROM collect WHERE amount < {num}"', 'N_QUERY_REFUSED')
+R('R16', 'a ledger query the ledger\'s own court refuses', 'QUERY "SELECT * FROM collect WHERE amount < {num}"', 'QUERY "SELECT member FROM collect WHERE amount < {num}"', 'N_QUERY_REFUSED', surfaces=True)
 R('R17', 'a graph pattern that is not three terms', 'QUERY "?x received_pot_in round{num}",\n  ANSWERS', 'QUERY "?x received_pot_in",\n  ANSWERS', 'N_QUERY_REFUSED')
 R('R18', 'an example its own text does not reach', 'ASKING [english: "show deposits over 5000", french: "montre les dépôts au dessus de 5000"]', 'ASKING [english: "show deposits over five thousand", french: "montre les dépôts au dessus de 5000"]', 'N_EXAMPLE_FAILED')
 R('R19', 'an example whose tongues compile to different queries', 'ASKING [english: "show deposits over 5000", french: "montre les dépôts au dessus de 5000"]', 'ASKING [english: "show deposits over 5000", french: "montre les dépôts au dessus de 4000"]', 'N_EXAMPLE_DIVERGES')
 R('R20', 'a counterexample that IS understood', 'ASKING [english: "what is the meaning of life"], REFUSED word', 'ASKING [english: "show deposits"], REFUSED word', 'N_COUNTEREXAMPLE_FAILED')
+R('R21', 'a surface whose world is not there', 'WORLD "../../study/phase15/data/tontine.zknw"', 'WORLD "../../study/phase15/data/nowhere.zknw"', 'N_WORLD_UNREAD')
 
 doc = {
     'grammar': 'haro-n', 'version': '0.17',

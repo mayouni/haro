@@ -52,6 +52,8 @@ $cCourtCode = "PARSE"
 $aCourtCites = []
 $aCourtFormset = NULL
 $aCourtNarrate = NULL
+$aCourtUnderstand = NULL
+$bNSurfaces = 0
 $bCourtCollect = 0
 $aCourtFound = []
 $aCourtBroken = []
@@ -118,7 +120,8 @@ $aCourtLangs = [
     [["OF", ["algorithm", "steps", "result"]], ["COMPUTE", ["compute", "into", "value"]], ["COLLECT", ["collect", "into", "value"]], ["GROUP", ["group", "into", "by", "value"]], ["BRANCH", ["branch", "when", "then", "else"]], ["ITERATE", ["iterate", "over", "as", "do"]]],
     [],
     NULL,
-    ["telling", "", "", "I stopped: {message} ({code})", [], [["run", "Running {algorithm} on {record}."], ["compute", "{name}: {into} is now {value}."], ["collect", "{name}: {value} added to {into}."], ["group", "{name}: {value} filed under {key} in {into}."], ["branch", "{name}: when {when} the {taken} steps are taken."], ["iterate", "{name}: for each of the {count} items of {over}, as {as}:"], ["result", "{algorithm} answers {result}."]]]
+    ["telling", "", "", "I stopped: {message} ({code})", [], [["run", "Running {algorithm} on {record}."], ["compute", "{name}: {into} is now {value}."], ["collect", "{name}: {value} added to {into}."], ["group", "{name}: {value} filed under {key} in {into}."], ["branch", "{name}: when {when} the {taken} steps are taken."], ["iterate", "{name}: for each of the {count} items of {over}, as {as}:"], ["result", "{algorithm} answers {result}."]]],
+    NULL
   ]
 ]
 CtUseLanguage("a")

@@ -49,6 +49,8 @@ $cCourtCode = "PARSE"
 $aCourtCites = []
 $aCourtFormset = NULL
 $aCourtNarrate = NULL
+$aCourtUnderstand = NULL
+$bNSurfaces = 0
 $bCourtCollect = 0
 $aCourtFound = []
 $aCourtBroken = []
@@ -132,6 +134,7 @@ $aCourtLangs = [
     NULL,
     NULL,
     [],
+    NULL,
     NULL,
     NULL
   ],
@@ -270,6 +273,7 @@ $aCourtLangs = [
     NULL,
     NULL,
     [],
+    NULL,
     NULL,
     NULL
   ]

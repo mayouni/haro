@@ -357,6 +357,17 @@ func LangSource(aLang)
 	if not isNull(aNr)
 		cNarrate = "[" + RingStr(aNr[1]) + ", " + RingStr(aNr[2]) + ", " + RingStr(aNr[3]) + ", " + RingStr(aNr[4]) + ", " + MessagesSource(aNr[5]) + ", " + MessagesSource(aNr[8]) + "]"
 	ok
+	# v0.17: the UNDERSTAND [name, [[role, kind], ...]], or NULL
+	aUn = LangGet(aLang, "understand")
+	cUnderstand = "NULL"
+	if not isNull(aUn)
+		cUnderstand = "[" + RingStr(aUn[1]) + ", ["
+		for i = 1 to len(aUn[2])
+			if i > 1 cUnderstand += ", " ok
+			cUnderstand += "[" + RingStr(aUn[2][i][1]) + ", " + RingStr(aUn[2][i][2][1]) + "]"
+		next
+		cUnderstand += "]]"
+	ok
 	c = "  [" + RingStr(LangGet(aLang, "name")) + ", " + RingStr(LangGet(aLang, "extension")) + "," + nl
 	c += "    " + cKinds + "," + nl
 	c += "    " + cForms + "," + nl
@@ -377,7 +388,8 @@ func LangSource(aLang)
 	c += "    " + cRun + "," + nl
 	c += "    " + cSymbols + "," + nl
 	c += "    " + cFormset + "," + nl
-	c += "    " + cNarrate + nl
+	c += "    " + cNarrate + "," + nl
+	c += "    " + cUnderstand + nl
 	c += "  ]"
 	return c
 
@@ -416,6 +428,7 @@ func ForgeCourt(aLang)
 	bRun = not isNull(LangGet(aLang, "run"))
 	bFormset = not isNull(LangGet(aLang, "formset"))
 	bNarrate = not isNull(LangGet(aLang, "narrate"))
+	bUnderstand = not isNull(LangGet(aLang, "understand"))
 	aSyL = LangGet(aLang, "symbols")
 	bSym = 0
 	if not isNull(aSyL)
@@ -448,6 +461,9 @@ func ForgeCourt(aLang)
 	if bNarrate
 		c += 'load "narrate_lib.ring"' + nl
 	ok
+	if bUnderstand
+		c += 'load "n_lib.ring"' + nl
+	ok
 	c += nl
 	c += "$cCourtLang = " + '""' + nl + "$cCourtExt = " + '""' + nl + "$cCourtDir = " + '""' + nl
 	c += "$aCourtToks = []" + nl + "$nCourtPos = 1" + nl
@@ -463,6 +479,7 @@ func ForgeCourt(aLang)
 	c += "$aCourtSymbols = []" + nl + "$aCourtWorldFile = NULL" + nl
 	c += "$cCourtCode = " + RingStr("PARSE") + nl + "$aCourtCites = []" + nl
 	c += "$aCourtFormset = NULL" + nl + "$aCourtNarrate = NULL" + nl
+	c += "$aCourtUnderstand = NULL" + nl + "$bNSurfaces = 0" + nl
 	c += "$bCourtCollect = 0" + nl + "$aCourtFound = []" + nl + "$aCourtBroken = []" + nl
 	c += "$bRunTrace = 0" + nl + "$aRunTrace = []" + nl + "$nRunDepth = 0" + nl + "$bAskTrace = 0" + nl + "$aAskTrace = []" + nl
 	c += ExprGlobals()

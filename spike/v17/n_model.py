@@ -13,6 +13,21 @@ drawing is complete and does not lean on any one engine.
 """
 import os, re, subprocess
 
+def fold(s):
+    """Case folding, as the court does it: ASCII, and the Latin-1 letters U+00C0 to U+00DE (not U+00D7); no other
+    script. A tongue whose script has case needs the court to learn it, in the open."""
+    return ''.join(chr(ord(c) + 32) if 'A' <= c <= 'Z' or ('\u00c0' <= c <= '\u00de' and c != '\u00d7') else c for c in s)
+
+
+def upper_first(s):
+    return (chr(ord(s[0]) - 32) if s and 'a' <= s[0] <= 'z' else s[:1]) + s[1:]
+
+
+def words(s):
+    """Split on a space, a tab, a line feed or a carriage return -- the court splits on bytes, never on a Unicode space."""
+    return [w for w in re.split(r'[ \t\r\n]+', s) if w]
+
+
 SAFE_PUNCTUATION = "-'?,."          # the court's safe set: a tongue may allow a subset, never more
 SEPARATORS = "'?,."                 # of these, all but the hyphen separate words
 REFUSAL_KINDS = ('character', 'word', 'shape', 'ambiguous', 'surface')
@@ -112,6 +127,8 @@ def parse(text):
 # ---- the world: a surface's versioned artifact (.zknw: facts `s | p | o`, an ontology section) ----------------
 
 def read_world(path):
+    if not os.path.exists(path):
+        return None                      # a world that is not there: the rules' N_WORLD_UNREAD
     triples, laws, section = [], [], None
     for raw in open(path, encoding='utf-8').read().splitlines():
         t = raw.strip()
@@ -149,12 +166,18 @@ class N:
             return [], []
         if w not in self._triples:
             self._triples[w] = read_world(os.path.join(self.base, w))
-        return self._triples[w]
+        return self._triples[w] or ([], [])
+
+    def world_read(self, surface):
+        s = self.by['SURFACE'][surface]
+        w = s.get('WORLD')
+        self.world(surface)
+        return not w or self._triples[w] is not None
 
     def entities(self, meaning):
         """The ids a surface enumerates for the entity kind a meaning is OF."""
         m = self.by['MEANING'][meaning]
-        if m.get('SLOT') != 'entity':
+        if m.get('SLOT') != 'entity' or m.get('FROM') not in self.by.get('SURFACE', {}) or not m.get('OF'):
             return []
         triples, _ = self.world(m.get('FROM'))
         return [s for s, p, o in triples if p == 'is-a' and o == m.get('OF')]
@@ -162,18 +185,18 @@ class N:
     # -- the lexicon of a tongue: words -> (meaning, entity id or None) -------------------------------------------
     def lexicon(self, tongue):
         t = self.by['TONGUE'][tongue]
-        ignored = set(w.lower() for w in t.get('IGNORES', '').split())
-        words, clashes = {}, []
+        ignored = set(fold(w) for w in words(t.get('IGNORES', '')))
+        lex, clashes = {}, []
 
         def add(word, meaning, ent=None):
-            w = word.lower()
-            if w in words and words[w] != (meaning, ent):
-                clashes.append((w, words[w][0], meaning))
-            words[w] = (meaning, ent)
+            w = fold(word)
+            if w in lex and lex[w] != (meaning, ent):
+                clashes.append((w, lex[w][0], meaning))
+            lex[w] = (meaning, ent)
         for m in self.kinds('MEANING'):
             for tg, txt in m.pairs('WORDS'):
                 if tg == tongue:
-                    for w in txt.split():
+                    for w in words(txt):
                         add(w, m.name)
             if m.get('SLOT') == 'entity':
                 for ent in self.entities(m.name):
@@ -181,17 +204,17 @@ class N:
         for a in self.kinds('ALIAS'):
             for tg, txt in a.pairs('WORDS'):
                 if tg == tongue:
-                    for w in txt.split():
+                    for w in words(txt):
                         add(w, a.get('MEANING'), a.get('ENTITY'))
-        return ignored, words, clashes
+        return ignored, lex, clashes
 
     def canonical(self, tongue, ent):
         """The word an answer is told in: an alias's first word, else the tongue's own spelling of a name."""
         for a in self.kinds('ALIAS'):
             if a.get('ENTITY') == ent:
                 for tg, txt in a.pairs('WORDS'):
-                    if tg == tongue:
-                        return txt.split()[0]
+                    if tg == tongue and words(txt):
+                        return words(txt)[0]
         return spell(ent, self.by['TONGUE'][tongue].get('NAMES', 'as_is'))
 
     # -- the gate and the tokens -----------------------------------------------------------------------------------------
@@ -209,23 +232,72 @@ class N:
         bad = self.gate(tongue, text)
         if bad is not None:
             return None, ('character', bad)
-        ignored, words, _ = self.lexicon(tongue)
+        ignored, lex, _ = self.lexicon(tongue)
         norm = text
         for sep in SEPARATORS:
             norm = norm.replace(sep, ' ')
         out = []
-        for raw in norm.split():
-            w = raw.lower()
+        self._skipped = []
+        for raw in words(norm):
+            w = fold(raw)
             if w in ignored:
+                self._skipped.append(raw)
                 continue
-            if w in words:
-                meaning, ent = words[w]
+            if w in lex:
+                meaning, ent = lex[w]
                 out.append((meaning, ent, raw))
             elif self.num and w.isascii() and w.isdigit() and len(w) <= MAX_DIGITS:
                 out.append((self.num, w, raw))
             else:
                 return None, ('word', raw)
         return out, None
+
+    def tokens_full(self, tongue, text):
+        """What the court's `tokens` answers: the tokens with their slots and the words that were ignored."""
+        toks, ref = self.tokens(tongue, text)
+        if ref:
+            return {'refused': ref[0], 'what': ref[1]}
+        return {'tongue': tongue, 'tokens': [dict({'meaning': m, 'word': raw}, **({'slot': ent} if ent else {})) for m, ent, raw in toks],
+                'ignored': list(self._skipped)}
+
+    def vocabulary(self, tongue):
+        """What the court's `vocabulary` answers: the lexicon in order, what the tongue does not cover, the clashes."""
+        ignored, wds, clashes = self.lexicon(tongue)
+        ign = [fold(w) for w in words(self.by['TONGUE'][tongue].get('IGNORES', ''))]
+        return {'tongue': tongue, 'ignored': ign,
+                'words': [dict({'word': w, 'meaning': m}, **({'entity': e} if e else {})) for w, (m, e) in wds.items()],
+                'uncovered': [m.name for m in self.kinds('MEANING') if m.get('SLOT') == 'none' and tongue not in {t for t, _ in m.pairs('WORDS')}],
+                'clashes': [{'word': w, 'meanings': [a, b]} for w, a, b in clashes]}
+
+    def examples_report(self):
+        """What the court's `examples` answers: the sentence's own conformance, counted."""
+        r = {'declared': 0, 'texts': 0, 'understood': 0, 'failed': 0, 'diverging': 0}
+        for ex in self.kinds('EXAMPLE'):
+            r['declared'] += 1
+            seen = set()
+            for tg, txt in ex.pairs('ASKING'):
+                if tg not in self.by['TONGUE']:
+                    continue
+                r['texts'] += 1
+                u = self.understand(tg, txt)
+                if u.get('frame') == ex.get('MEANS'):
+                    r['understood'] += 1
+                    seen.add(u['surface'] + ' ' + u.get('query', '') + ''.join(' => ' + st[0] + ' ' + st[1] for st in u.get('steps', [])))
+                else:
+                    r['failed'] += 1
+            r['diverging'] += len(seen) > 1
+        c = {'declared': 0, 'texts': 0, 'refused': 0, 'failed': 0}
+        for ce in self.kinds('COUNTEREXAMPLE'):
+            c['declared'] += 1
+            for tg, txt in ce.pairs('ASKING'):
+                if tg not in self.by['TONGUE']:
+                    continue
+                c['texts'] += 1
+                if self.understand(tg, txt).get('refused') == ce.get('REFUSED'):
+                    c['refused'] += 1
+                else:
+                    c['failed'] += 1
+        return {'examples': r, 'counterexamples': c}
 
     def refusal(self, tongue, kind, what):
         for k, txt in self.by['TONGUE'][tongue].pairs('REFUSES'):
@@ -256,10 +328,11 @@ class N:
                     lawful = f.get('TARGET') in surfaces and f.get('QUERY') is not None
                 if not lawful:
                     return {'refused': 'surface', 'what': f.name, 'message': self.refusal(tongue, 'surface', f.name)}
-                if f.get('STEPS'):
+                if f.get('STEPS') is not None:
                     r['surface'] = 'plan'
-                    r['query'] = ' => '.join(self.fill(self.by['STEP'][s].get('QUERY'), slots, self.by['STEP'][s].get('TARGET'), partial=True)
-                                             for s in f.names('STEPS'))
+                    r['steps'] = [(self.by['STEP'][s].get('TARGET'), self.fill(self.by['STEP'][s].get('QUERY'), slots, self.by['STEP'][s].get('TARGET'), partial=True),
+                                   self.by['STEP'][s].get('BINDS') or '') for s in f.names('STEPS')]
+                    r['query'] = ' => '.join(q for _, q, _ in r['steps'])
                 else:
                     r['surface'] = f.get('TARGET')
                     r['query'] = self.fill(f.get('QUERY'), slots, f.get('TARGET'))
@@ -271,8 +344,8 @@ class N:
         out = template
         spells = dict(self.by['SURFACE'][surface].pairs('SPELLS'))
         for name, val in slots.items():
-            m = self.by['MEANING'][name]
-            if m.get('SLOT') == 'entity':
+            m = self.by['MEANING'].get(name)
+            if m is not None and m.get('SLOT') == 'entity':
                 val = spell(val, spells.get(m.get('OF'), 'as_is'))
             out = out.replace('{' + name + '}', val)
         return out
@@ -280,8 +353,9 @@ class N:
     # -- ask: the graph surface answered, and told ------------------------------------------------------------------------
     def run_pattern(self, surface, query):
         triples, _ = self.world(surface)
-        terms = query.split()
-        assert len(terms) == 3
+        terms = words(query)
+        if len(terms) != 3:
+            return None                  # not a triple pattern: the surface refuses it
         ans = []
         for tr in triples:
             if all(q.startswith('?') or q == t for q, t in zip(terms, tr)):
@@ -295,20 +369,41 @@ class N:
         if 'refused' in u:
             return u
         f = self.by['FRAME'][u['frame']]
+        u['run'] = []
         if u['surface'] == 'plan':
             s1 = self.by['STEP'][f.names('STEPS')[0]]
-            ans = self.run_pattern(s1.get('TARGET'), self.fill(s1.get('QUERY'), u['slots'], s1.get('TARGET')))
+            q1 = self.fill(s1.get('QUERY'), u['slots'], s1.get('TARGET'))
+            if self.by['SURFACE'][s1.get('TARGET')].get('KIND') != 'pattern':
+                u['run'].append(self.run_of(s1.get('TARGET'), q1))
+                return u
+            ans = self.run_pattern(s1.get('TARGET'), q1)
+            if ans is None:
+                return {'refused': 'surface', 'what': q1, 'message': self.refusal(tongue, 'surface', q1)}
+            if len(ans) > 1:
+                what = ' '.join(ans)
+                return {'refused': 'ambiguous', 'what': what, 'message': self.refusal(tongue, 'ambiguous', what)}
             u['answer'] = ans
             u['told'] = self.tell(tongue, f, ans, u['slots'])
-            if len(ans) == 1:
+            if len(ans) == 1 and len(f.names('STEPS')) > 1:
                 s2 = self.by['STEP'][f.names('STEPS')[1]]
-                u['query2'] = self.fill(s2.get('QUERY'), dict(u['slots'], **{s1.get('BINDS'): ans[0]}), s2.get('TARGET'))
+                bound = dict(u['slots'], **({s1.get('BINDS'): ans[0]} if s1.get('BINDS') else {}))
+                u['query2'] = self.fill(s2.get('QUERY'), bound, s2.get('TARGET'))
+                if self.by['SURFACE'][s2.get('TARGET')].get('KIND') != 'pattern':
+                    u['run'].append(self.run_of(s2.get('TARGET'), u['query2']))
             return u
         if self.by['SURFACE'][u['surface']].get('KIND') == 'pattern':
             ans = self.run_pattern(u['surface'], u['query'])
+            if ans is None:
+                return {'refused': 'surface', 'what': u['query'], 'message': self.refusal(tongue, 'surface', u['query'])}
             u['answer'] = ans
             u['told'] = self.tell(tongue, f, ans, u['slots'])
+        else:
+            u['run'].append(self.run_of(u['surface'], u['query']))
         return u
+
+    def run_of(self, surface, query):
+        s = self.by['SURFACE'][surface]
+        return (surface, s.get('COURT') or '', s.get('WORLD') or '', query)
 
     def tell(self, tongue, frame, answer, slots):
         key = 'ANSWERS' if answer else 'EMPTY'
@@ -316,24 +411,24 @@ class N:
         if tpl is None:
             return None
         names = [self.canonical(tongue, a) for a in answer]
-        conj = {'english': ' and ', 'french': ' et '}.get(tongue, ' and ')
+        conj = ' ' + (self.by['TONGUE'][tongue].get('JOINS') or 'and') + ' '
         joined = names[0] if len(names) == 1 else (', '.join(names[:-1]) + conj + names[-1] if names else '')
         out = tpl.replace('{answer}', joined)
         for name, val in slots.items():
-            m = self.by['MEANING'][name]
-            if m.get('SLOT') == 'entity':
+            m = self.by['MEANING'].get(name)
+            if m is not None and m.get('SLOT') == 'entity':
                 val = self.canonical(tongue, val)
             out = out.replace('{' + name + '}', val)
         return out
 
 
 def spell(ent, how):
-    return ent[:1].upper() + ent[1:] if how == 'upper_first' else ent
+    return upper_first(ent) if how == 'upper_first' else ent
 
 
 # ---- the rules the existing meta-vocabulary cannot say: the v0.17 court's added checks -----------------------------
 
-PLACEHOLDER = re.compile(r'\{(\w+)\}')
+PLACEHOLDER = re.compile(r'\{([A-Za-z0-9_\u0080-\U0010ffff]+)\}')
 
 
 def default_surface_check(surface, query, runner=None):
@@ -341,9 +436,10 @@ def default_surface_check(surface, query, runner=None):
     court's `ask` over no rows answers [] for a lawful question and refuses the rest."""
     g = surface.get('GRAMMAR')
     if g == 'triples':
-        return (len(query.split()) == 3, 'a triple pattern is three terms')
-    if g == 'ZQL ASK' and runner:
-        return runner(query)
+        return (len(words(query)) == 3, 'a triple pattern is three terms')
+    court = words(surface.get('COURT') or '')
+    if runner and len(court) >= 2 and court[0].endswith('.ring') and surface.get('WORLD'):
+        return runner(query)             # a surface whose court is a court file is asked as the Q letter's court is
     return (True, '')
 
 
@@ -366,6 +462,9 @@ def rules(n, runner=None):
     def add(code, d, msg):
         f.append((code, d.line, msg))
     meanings = n.by.get('MEANING', {})
+    for sf in n.kinds('SURFACE'):
+        if sf.get('WORLD') and not n.world_read(sf.name):
+            add('N_WORLD_UNREAD', sf, f"SURFACE {sf.name} reads the world '{sf.get('WORLD')}', which cannot be read from the sentence's folder")
     for fr in n.kinds('FRAME'):
         shape = fr.names('SHAPE')
         slots = [m for m in shape if meanings.get(m) and meanings[m].get('SLOT') in ('number', 'entity')]
@@ -399,7 +498,7 @@ def rules(n, runner=None):
         targets = [(fr.get('TARGET'), fr.get('QUERY'))] if has_q else [(n.by['STEP'][s].get('TARGET'), n.by['STEP'][s].get('QUERY')) for s in fr.names('STEPS') if s in n.by['STEP']]
         for tgt, q in targets:
             sf = n.by['SURFACE'].get(tgt)
-            if sf is None or q is None:
+            if sf is None or not q:
                 continue
             ok, why = default_surface_check(sf, sample_fill(q, n, tgt), runner)
             if not ok:
@@ -430,9 +529,9 @@ def rules(n, runner=None):
         _, _, clashes = n.lexicon(t.name)
         for w, a, b in clashes:
             add('N_WORD_AMBIGUOUS', t, f"in {t.name} the word '{w}' means both {a} and {b}")
-        ignored, words, _ = n.lexicon(t.name)
-        for w in sorted(ignored & set(words)):
-            add('N_WORD_IGNORED', t, f"in {t.name} the word '{w}' is both ignored and a word of {words[w][0]}")
+        ignored, lex, _ = n.lexicon(t.name)
+        for w in sorted(ignored & set(lex)):
+            add('N_WORD_IGNORED', t, f"in {t.name} the word '{w}' is both ignored and a word of {lex[w][0]}")
     for m in n.kinds('MEANING'):
         slot = m.get('SLOT')
         if slot == 'none':

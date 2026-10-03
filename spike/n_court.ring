@@ -8,6 +8,7 @@
 
 load "court_lib.ring"
 load "world_stub.ring"
+load "n_lib.ring"
 
 $cCourtLang = ""
 $cCourtExt = ""
@@ -49,6 +50,8 @@ $cCourtCode = "PARSE"
 $aCourtCites = []
 $aCourtFormset = NULL
 $aCourtNarrate = NULL
+$aCourtUnderstand = NULL
+$bNSurfaces = 0
 $bCourtCollect = 0
 $aCourtFound = []
 $aCourtBroken = []
@@ -74,7 +77,7 @@ $aExprOverlay = []
 $aCourtLangs = [
   ["n", ".n",
     [
-      ["TONGUE", "tongue", [["code", "text", 0, 0, "prim"], ["ignores", "text", 0, 0, "prim"], ["allows", "text", 0, 1, "prim"], ["digits", "digit_sets", 0, 1, "menu"], ["names", "spellings", 0, 1, "menu"], ["refuses", "refusal_text", 1, 0, "form"]], "", [["code", "TONGUE {name} needs its CODE, the language's own short name (en, fr)"], ["ignores", "TONGUE {name} needs IGNORES, the words a question may carry that mean nothing (the, a, de, le); an empty text if none"]], [["code", "TONGUE_INCOMPLETE"], ["ignores", "TONGUE_INCOMPLETE"]]],
+      ["TONGUE", "tongue", [["code", "text", 0, 0, "prim"], ["ignores", "text", 0, 0, "prim"], ["allows", "text", 0, 1, "prim"], ["digits", "digit_sets", 0, 1, "menu"], ["names", "spellings", 0, 1, "menu"], ["joins", "text", 0, 1, "prim"], ["refuses", "refusal_text", 1, 0, "form"]], "", [["code", "TONGUE {name} needs its CODE, the language's own short name (en, fr)"], ["ignores", "TONGUE {name} needs IGNORES, the words a question may carry that mean nothing (the, a, de, le); an empty text if none"]], [["code", "TONGUE_INCOMPLETE"], ["ignores", "TONGUE_INCOMPLETE"]]],
       ["MEANING", "meaning", [["slot", "slots", 0, 0, "menu"], ["of", "name", 0, 1, "prim"], ["from", "surface", 0, 1, "decl"], ["words", "in_tongue", 1, 1, "form"]], "", [["slot", "MEANING {name} needs a SLOT: none, number or entity"], ["from", "MEANING {name} draws its entities from '{value}', which is not a declared surface"]], [["slot", "MEANING_INCOMPLETE"], ["from", "DANGLING_SURFACE"]]],
       ["ALIAS", "alias", [["meaning", "meaning", 0, 0, "decl"], ["entity", "text", 0, 0, "prim"], ["words", "in_tongue", 1, 0, "form"]], "", [["meaning", "ALIAS {name} is of '{value}', which is not a declared meaning"]], [["meaning", "DANGLING_MEANING"]]],
       ["SURFACE", "surface", [["kind", "surface_kinds", 0, 0, "menu"], ["grammar", "text", 0, 0, "prim"], ["court", "text", 0, 0, "prim"], ["world", "text", 0, 1, "prim"], ["entities", "word", 1, 1, "form"], ["spells", "spelling", 1, 1, "form"], ["tells", "tongue", 1, 1, "decl"]], "", [["kind", "SURFACE {name} needs a KIND: query or pattern"], ["grammar", "SURFACE {name} needs its GRAMMAR, the closed query grammar its court judges"], ["court", "SURFACE {name} needs its COURT, the court that judges and runs a query: a surface is a protocol, never a library"], ["tells", "SURFACE {name} tells in '{value}', which is not a declared tongue"]], [["kind", "SURFACE_INCOMPLETE"], ["grammar", "SURFACE_INCOMPLETE"], ["court", "SURFACE_INCOMPLETE"], ["tells", "DANGLING_TONGUE"]]],
@@ -123,7 +126,8 @@ $aCourtLangs = [
     NULL,
     [],
     NULL,
-    NULL
+    NULL,
+    ["n", [["TONGUE", "tongue"], ["MEANING", "meaning"], ["ALIAS", "alias"], ["SURFACE", "surface"], ["STEP", "step"], ["FRAME", "frame"], ["EXAMPLE", "example"], ["COUNTEREXAMPLE", "counterexample"]]]
   ]
 ]
 CtUseLanguage("n")

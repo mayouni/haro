@@ -1,20 +1,22 @@
-"""Judges the N letter as DRAWN: python haro/spike/v17/n_check.py [--plant]   (exit 1 on any failure)
+"""Judges N as BUILT, the seventeenth rung: python haro/spike/v17/n_check.py [--plant]   (exit 1 on any failure)
 
-  A  the letter and the sentence: n_v17.haro is a lawful declaration and n/tontine.n a lawful sentence, on rnxc and
-     on the oracle, byte for byte
-  B  17 defects the EXISTING meta-vocabulary must make the forged court refuse, with the message and code the
-     letter declares
-  C  20 defects the existing court CANNOT see (it says `ok`) and that the rules of the next rung must catch:
-     n_model.rules() must answer the declared code. The unmutated sentence has no finding, the ledger's own court
-     judging every ledger query it holds
-  D  the model, read from the sentence ALONE, reproduces the Phase 1.5 study's behaviour on all 74 questions:
-     the closed query each compiles to, the graph answers, the sentences told, the kind of every refusal, the
-     meaning sequence identical across the two tongues of every pair. It shares no code with the study's pipeline
-  E  the check can fail: the same comparison with the gate removed from the model must disagree on the attacks
+  A  the letter, the forge and the sentence: the meta-court accepts n_v17.haro (its UNDERSTAND included), the forge
+     forges N from it, and the forged court accepts n/tontine.n -- `check`, and `check ... surfaces`, which asks the
+     ledger's own court to judge every ledger query -- on rnxc and on the oracle, byte for byte
+  B  17 defects the declaration's own vocabulary catches: refused with the message and code the letter declares
+  C  21 defects a rule of the rung must catch: the forged court answers the declared code, and the reference model
+     (n_model.rules, a second implementation read from the sentence alone) answers the same codes; the unmutated
+     sentence has no finding; rnxc and the oracle print the same bytes
+  C' each of the 15 codes, switched off in the court in turn, is the one thing that makes its fixtures fail
+  D  the REAL court, asked the Phase 1.5 study's 74 questions, answers what the study answered -- the closed query,
+     the graph answer, the sentence told, the refusal kind, one meaning sequence in both tongues of every pair --
+     and what the model answers; `tokens`, `vocabulary` and `examples` agree with the model; a sample of the asks is
+     byte-identical on the oracle
+  E  the check can fail: the same comparison on a court whose gate is removed disagrees on the attacks
 
 Reads the study's fixtures and its recorded run (haro/study/phase15/); runs nothing of Softanza.
 """
-import json, os, re, subprocess, sys, tempfile
+import json, os, re, shutil, subprocess, sys, tempfile
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 SP = os.path.abspath(os.path.join(HERE, '..'))
@@ -27,6 +29,7 @@ sys.path.insert(0, HERE)
 import n_model
 
 fails = []
+NOCACHE = dict(os.environ, RNXC_NOCACHE='1')
 
 
 def check(ok, text):
@@ -35,8 +38,8 @@ def check(ok, text):
         fails.append(text)
 
 
-def court(exe, args, cwd=SP):
-    r = subprocess.run([exe] + args, capture_output=True, cwd=cwd, env=dict(os.environ, RNXC_NOCACHE='1'), timeout=300)
+def court(exe, args, cwd=SP, cache=False):
+    r = subprocess.run([exe] + args, capture_output=True, cwd=cwd, env=os.environ if cache else NOCACHE, timeout=300)
     return r.stdout.decode('utf-8', 'replace').replace('\r\n', '\n').strip()
 
 
@@ -45,26 +48,39 @@ def both(args):
     return a, a == b
 
 
-print('n_check -- the N letter as drawn (n_v17.haro, n/tontine.n)')
+print('n_check -- N as built (n_v17.haro, n/tontine.n, the forged n_court.ring)')
+SENTENCE = os.path.join('n', 'tontine.n')
+# a mutated sentence is written beside the real one, so the worlds it names are found where they are
+for stale in os.listdir(os.path.join(SP, 'n')):
+    if stale.startswith('_mut_'):
+        os.remove(os.path.join(SP, 'n', stale))
+
 # the forge first: a court forged before the forge learned something is a court the oracle refuses (HF-61)
 out = court(RNXC, ['forge.ring', 'n_v17.haro', '.'])
 check(out.startswith('forged n'), f'the forge forges N from n_v17.haro: {out.splitlines()[0][:80] if out else "NO OUTPUT"}')
 doc = json.load(open(os.path.join(HERE, 'fixtures.json'), encoding='utf-8'))
 sentence = open(os.path.join(SP, doc['sentence']), encoding='utf-8', newline='').read()
 # the floors: a judge that checks nothing cannot pass
-COURT_FLOOR, RULES_FLOOR, STUDY_FLOOR, PAIRS_FLOOR = 17, 20, 74, 17
+COURT_FLOOR, RULES_FLOOR, CODES_FLOOR, STUDY_FLOOR, PAIRS_FLOOR = 17, 21, 15, 74, 17
 check(len(doc['court']) >= COURT_FLOOR and len(doc['rules']) >= RULES_FLOOR,
       f"the fixtures hold {len(doc['court'])} court cases and {len(doc['rules'])} rule cases, at or above the pinned floors of {COURT_FLOOR} and {RULES_FLOOR}")
+CODES = sorted({c['code'] for c in doc['rules']})
+check(len(CODES) >= CODES_FLOOR, f'the rule fixtures reach {len(CODES)} codes, at or above the pinned floor of {CODES_FLOOR}')
 
 # ---- A -------------------------------------------------------------------------------------------------------------------
 a, same = both(['haro.ring', 'n_v17.haro', 'all'])
-check(a.startswith('ok') and same, 'A the meta-court accepts n_v17.haro, the same bytes on both runtimes')
-a, same = both(['n_court.ring', 'check', doc['sentence']])
+check(a.startswith('ok') and same and 'understands 1' in a, 'A the meta-court accepts n_v17.haro, its UNDERSTAND included, the same bytes on both runtimes')
+a, same = both(['n_court.ring', 'check', SENTENCE])
 check(a.startswith('ok') and same, 'A the forged N court accepts n/tontine.n, the same bytes on both runtimes (' + ', '.join(f'{l.split()[1]} {l.split()[2]}' for l in a.splitlines() if l.startswith('count ')) + ')')
+a, same = both(['n_court.ring', 'check', SENTENCE, 'surfaces'])
+check(a.startswith('ok') and same, 'A `check ... surfaces` asks the ledger\'s own court to judge every ledger query: accepted, the same bytes on both runtimes')
+u1, u2 = court(RNXC, ['n_court.ring', 'examples', SENTENCE]), court(ORACLE, ['n_court.ring', 'examples', SENTENCE])
+check(u1 == u2 and json.loads(u1)['examples']['failed'] == 0, f'A `examples` on both runtimes: {u1[:110]}')
 
-# ---- the ledger's own court, as the surface that judges a ledger query -------------------------------------------------
+
 def ledger_runner(query):
-    r = subprocess.run([RNXC, 'z_court.ring', 'ask', 'tontine.z', query, '[]'], capture_output=True, cwd=SP, env=dict(os.environ, RNXC_NOCACHE='1'), timeout=120)
+    """The ledger's own court as the surface that judges a ledger query: what the court's `surfaces` does, from outside."""
+    r = subprocess.run([RNXC, 'z_court.ring', 'ask', 'tontine.z', query, '[]'], capture_output=True, cwd=SP, env=NOCACHE, timeout=120)
     o = r.stdout.decode('utf-8', 'replace').strip()
     return (o.startswith('['), o[:120])
 
@@ -88,30 +104,94 @@ with tempfile.TemporaryDirectory() as td:
 for cid, why in bad[:5]:
     print(f'  FAIL {cid}: {why}')
 fails.extend(f'B {c}' for c, _ in bad)
-check(not bad, f"B {len(doc['court'])} defects the existing vocabulary catches are refused by the forged court, with the declared message and code, the same on both runtimes ({len(bad)} differ)")
+check(not bad, f"B {len(doc['court'])} defects the declaration's own vocabulary catches are refused by the forged court, with the declared message and code, the same on both runtimes ({len(bad)} differ)")
 
 # ---- C -------------------------------------------------------------------------------------------------------------------
-n0 = n_model.N(sentence, STUDY)
+n0 = n_model.N(sentence, os.path.join(SP, 'n'))
 base = n_model.rules(n0, ledger_runner)
-check(not base, f'C the unmutated sentence has no finding: {len(n0.decls)} declarations, every ledger query judged by the ledger\'s own court ({base[:1]})')
-bad, unseen = [], 0
-with tempfile.TemporaryDirectory() as td:
-    p = os.path.join(td, 'x.n')
+d0 = json.loads(court(RNXC, ['n_court.ring', 'diagnose', SENTENCE, 'surfaces']))['diagnostics']
+check(not base and not d0, f'C the unmutated sentence has no finding, in the court or in the model: {len(n0.decls)} declarations, every ledger query judged by the ledger\'s own court ({base[:1]} {d0[:1]})')
+
+
+def mutate(case, root=SP):
+    """Write the case's sentence beside the real one; returns its path relative to the spike folder."""
+    assert sentence.count(case['old']) == 1, (case['id'], sentence.count(case['old']))
+    rel = os.path.join('n', '_mut_' + case['id'] + '.n')
+    open(os.path.join(SP, rel), 'w', encoding='utf-8', newline='').write(sentence.replace(case['old'], case['new']))
+    return rel
+
+
+def codes_of(exe, rel, surfaces, cwd=SP):
+    d = json.loads(court(exe, ['n_court.ring', 'diagnose', rel] + (['surfaces'] if surfaces else []), cwd=cwd))
+    return sorted(x['code'] for x in d['diagnostics']), d
+
+
+bad = []
+try:
     for c in doc['rules']:
-        assert sentence.count(c['old']) == 1, (c['id'], sentence.count(c['old']))
-        mutated = sentence.replace(c['old'], c['new'])
-        open(p, 'w', encoding='utf-8', newline='').write(mutated)
-        if not court(RNXC, ['n_court.ring', 'check', p]).startswith('ok'):
-            bad.append((c['id'], 'the existing court already refuses it: this is not a rule of the next rung'))
-            continue
-        unseen += 1
-        got = [x[0] for x in n_model.rules(n_model.N(mutated, STUDY), ledger_runner)]
+        rel = mutate(c)
+        got, d = codes_of(RNXC, rel, c['surfaces'])
+        want = sorted(x[0] for x in n_model.rules(n_model.N(open(os.path.join(SP, rel), encoding='utf-8', newline='').read(), os.path.join(SP, 'n')),
+                                                  ledger_runner if c['surfaces'] else None))
         if c['code'] not in got:
-            bad.append((c['id'], f"expected {c['code']}, got {sorted(set(got))}"))
+            bad.append((c['id'], f"the court did not answer {c['code']}: {sorted(set(got))}"))
+        elif got != want:
+            bad.append((c['id'], f"the court answers {sorted(set(got))}, the model {sorted(set(want))}"))
+        elif not all(x['severity'] == 'error' and x['language'] == 'n' and x['cites'] == ['rule:' + x['code'].lower()] for x in d['diagnostics']):
+            bad.append((c['id'], 'a finding is not a C2 envelope with its rule cite'))
+        else:
+            args = ['n_court.ring', 'check', rel] + (['surfaces'] if c['surfaces'] else [])
+            r, same = both(args)
+            if r.startswith('ok') or not same or c['code'] not in json.dumps(d):
+                bad.append((c['id'], f"`check` {'agrees' if same else 'differs between the runtimes'}: {r[:90]!r}"))
+finally:
+    for f in os.listdir(os.path.join(SP, 'n')):
+        if f.startswith('_mut_'):
+            os.remove(os.path.join(SP, 'n', f))
 for cid, why in bad[:5]:
     print(f'  FAIL {cid}: {why}')
 fails.extend(f'C {c}' for c, _ in bad)
-check(not bad, f"C {len(doc['rules'])} defects the existing court says `ok` to ({unseen} of them) are each caught by the rule that names them ({len(bad)} not)")
+check(not bad, f"C {len(doc['rules'])} defects are caught by the forged court with the declared code, as the model catches them, `check` refusing and the runtimes agreeing ({len(bad)} not)")
+
+
+# ---- C' ------------------------------------------------------------------------------------------------------------------
+def court_copy(patch=None):
+    """A copy of the court's files, one of them patched: a court that differs from the real one in exactly one thing."""
+    td = tempfile.mkdtemp(dir=os.path.join(ROOT, 'runtime'))
+    for f in os.listdir(SP):
+        if f.endswith('.ring'):
+            shutil.copy(os.path.join(SP, f), td)
+    for f in ('tontine.z',):
+        shutil.copy(os.path.join(SP, f), td)
+    if patch:
+        p = os.path.join(td, 'n_lib.ring')
+        s = open(p, encoding='utf-8', newline='').read()
+        old, new = patch
+        assert s.count(old) == 1, (old, s.count(old))
+        open(p, 'w', encoding='utf-8', newline='').write(s.replace(old, new))
+    return td
+
+
+bad = []
+try:
+    for code in CODES:
+        td = court_copy(('func NatAdd(aF, cCode, nLine, cMsg)\n', f'func NatAdd(aF, cCode, nLine, cMsg)\n\tif cCode = "{code}" return ok\n'))
+        for c in doc['rules']:
+            if c['code'] != code:
+                continue
+            rel = mutate(c)
+            r = json.loads(court(RNXC, [os.path.join(td, 'n_court.ring'), 'diagnose', os.path.join(SP, rel)] + (['surfaces'] if c['surfaces'] else []), cwd=td))
+            if code in [x['code'] for x in r['diagnostics']]:
+                bad.append((code, f"{c['id']}: the code is still answered with its rule switched off"))
+        shutil.rmtree(td)
+finally:
+    for f in os.listdir(os.path.join(SP, 'n')):
+        if f.startswith('_mut_'):
+            os.remove(os.path.join(SP, 'n', f))
+for cid, why in bad[:5]:
+    print(f'  FAIL {cid}: {why}')
+fails.extend(f"C' {c}" for c, _ in bad)
+check(not bad, f"C' each of the {len(CODES)} codes, with its rule switched off in the court, is no longer answered: every rule is the one thing that catches its fixtures ({len(bad)} still answered)")
 
 # ---- D -------------------------------------------------------------------------------------------------------------------
 study = json.load(open(os.path.join(STUDY, 'fixtures', 'questions.json'), encoding='utf-8'))['cases']
@@ -137,6 +217,47 @@ def norm_target(t):
     return t.replace('"', "'")
 
 
+def normalise(j):
+    """What the court's JSON says, in the shape the model answers (and the study's judge reads)."""
+    if 'refused' in j:
+        r = j['refused']
+        return {'refused': r['kind'], 'what': r['what'], 'message': r['message']}
+    u = {'frame': j['frame'], 'surface': j['surface'], 'slots': j['slots']}
+    if 'steps' in j:
+        u['steps'] = [(s['surface'], s['query'], s.get('binds', '')) for s in j['steps']]
+        u['query'] = ' => '.join(q for _, q, _ in u['steps'])
+    else:
+        u['query'] = j['query']
+    for k in ('answer', 'told', 'query2'):
+        if k in j:
+            u[k] = j[k]
+    u['run'] = [(r['surface'], r['court'], r['world'], r['query']) for r in j.get('run', [])]
+    return u
+
+
+class CourtN:
+    """The forged court, asked as the model is asked: n_court.ring on rnxc, one process a question."""
+
+    def __init__(self, cwd=SP, court_file='n_court.ring', sentence_path=SENTENCE, cache=True):
+        self.cwd, self.court_file, self.sentence_path, self.cache = cwd, court_file, sentence_path, cache
+        self.memo = {}
+
+    def say(self, verb, tongue, text, exe=RNXC):
+        key = (verb, tongue, text, exe)
+        if key not in self.memo:
+            self.memo[key] = court(exe, [self.court_file, verb, self.sentence_path, tongue, text], cwd=self.cwd, cache=self.cache and exe == RNXC)
+        return self.memo[key]
+
+    def ask(self, tongue, text):
+        return normalise(json.loads(self.say('ask', tongue, text)))
+
+    def tokens(self, tongue, text):
+        j = json.loads(self.say('tokens', tongue, text))
+        if 'refused' in j:
+            return None, (j['refused']['kind'], j['refused']['what'])
+        return [(t['meaning'], t.get('slot'), t['word']) for t in j['tokens']], None
+
+
 def judge(model):
     out = []
     n_ok = 0
@@ -148,12 +269,12 @@ def judge(model):
         u = model.ask(tg, text)
         if e['kind'] == 'refused':
             if u.get('refused') != recorded[c['id']]:
-                out.append((c['id'], f"the study refused it as {recorded[c['id']]}, the model: {u.get('refused') or u.get('frame')}"))
+                out.append((c['id'], f"the study refused it as {recorded[c['id']]}, the answer: {u.get('refused') or u.get('frame')}"))
             else:
                 n_ok += 1
             continue
         if 'frame' not in u:
-            out.append((c['id'], f"the study compiled it, the model refused it as {u['refused']} ({u['what']!r})"))
+            out.append((c['id'], f"the study compiled it, the answer refused it as {u['refused']} ({u['what']!r})"))
             continue
         want = norm_target(e['target'])
         if u['frame'] != FRAME(e['frame']) or u['query'] != want or u['surface'] != e['kind']:
@@ -179,25 +300,83 @@ def judge(model):
 
 if PLANT:
     study[0]['expect']['target'] += ' PLANTED'
-diffs, n_ok, split, n_pairs = judge(n0)
+real = CourtN()
+diffs, n_ok, split, n_pairs = judge(real)
 check(len(study) >= STUDY_FLOOR, f'D the study\'s fixtures hold {len(study)} questions, at or above the pinned floor of {STUDY_FLOOR}')
 for cid, why in diffs[:6]:
     print(f'  FAIL D {cid}: {why}')
 fails.extend(f'D {c}' for c, _ in diffs)
-check(not diffs, f'D the model, from the sentence alone, reproduces the study on {n_ok} of {len(study)} questions: the closed query, the graph answer, the sentence told, the refusal kind ({len(diffs)} differ)')
+check(not diffs, f'D the forged court, asked the study\'s questions, reproduces the study on {n_ok} of {len(study)}: the closed query, the graph answer, the sentence told, the refusal kind ({len(diffs)} differ)')
 check(not split and n_pairs >= PAIRS_FLOOR, f'D the meaning sequence is identical in English and French for {n_pairs - len(split)} of {n_pairs} pairs ({split[:3]})')
 
+# the court and the model, field for field, on every question; tokens too
+unlike, tk_unlike = [], []
+for c in study:
+    text = c['text'].replace('~NL~', '\n')
+    tg = TONGUE[c['lang']]
+    a = {k: v for k, v in real.ask(tg, text).items() if v is not None}
+    m = n0.ask(tg, text)
+    b = {k: v for k, v in m.items() if v is not None}
+    if 'steps' in b:
+        b['steps'] = [tuple(x) for x in b['steps']]
+    b['run'] = [tuple(x) for x in b.get('run', [])] if 'refused' not in b else []
+    if 'refused' in a:
+        a, b = {k: a[k] for k in ('refused', 'what', 'message')}, {k: b[k] for k in ('refused', 'what', 'message')}
+    else:
+        a['run'] = a.get('run', [])
+    if a != b:
+        unlike.append((c['id'], f'court {a} / model {b}'))
+    tj = json.loads(real.say('tokens', tg, text))
+    tm = n0.tokens_full(tg, text)
+    if 'refused' in tj:
+        same_t = tm.get('refused') == tj['refused']['kind'] and tm.get('what') == tj['refused']['what']
+    else:
+        same_t = tj == tm
+    if not same_t:
+        tk_unlike.append((c['id'], f'court {tj} / model {tm}'))
+for cid, why in (unlike + tk_unlike)[:4]:
+    print(f'  FAIL D {cid}: {why[:300]}')
+fails.extend(f'D court/model {c}' for c, _ in unlike + tk_unlike)
+check(not unlike and not tk_unlike, f'D the court and the model agree field for field on `ask` and on `tokens` for all {len(study)} questions ({len(unlike)} and {len(tk_unlike)} differ)')
+
+voc = [(tg, json.loads(court(RNXC, ['n_court.ring', 'vocabulary', SENTENCE, tg], cache=True)), n0.vocabulary(tg)) for tg in ('english', 'french')]
+ex_c, ex_m = json.loads(court(RNXC, ['n_court.ring', 'examples', SENTENCE], cache=True)), n0.examples_report()
+check(all(c == m for _, c, m in voc) and ex_c == ex_m and sum(len(c['words']) for _, c, _ in voc) > 60,
+      f"D `vocabulary` (both tongues, {sum(len(c['words']) for _, c, _ in voc)} words) and `examples` ({ex_c['examples']['understood']} of {ex_c['examples']['texts']} texts understood, {ex_c['counterexamples']['refused']} of {ex_c['counterexamples']['texts']} refused) agree with the model")
+
+# a sample of the asks on the oracle: the same bytes (the oracle takes ~0.6 s a question, so one in four)
+sample = [c for i, c in enumerate(study) if i % 4 == 0]
+odd = []
+for c in sample:
+    text = c['text'].replace('~NL~', '\n')
+    tg = TONGUE[c['lang']]
+    if real.say('ask', tg, text) != real.say('ask', tg, text, exe=ORACLE):
+        odd.append(c['id'])
+check(not odd and len(sample) >= 18, f'D {len(sample)} of the questions, asked on the oracle, give the same bytes as on rnxc ({odd[:3]})')
+
 # ---- E -------------------------------------------------------------------------------------------------------------------
-class NoGate(n_model.N):
-    def gate(self, tongue, text):
-        return None
-
-
-ng = NoGate(sentence, STUDY)
-d2, _, _, _ = judge(ng)
-attacks = {c['id'] for c in study if c['group'] == 'attack'}
-caught = {cid for cid, _ in d2 if cid in attacks}
-check(len(caught) >= 10, f'E the comparison can fail: with the gate removed from the model it disagrees with the study on {len(caught)} of {len(attacks)} attacks')
+td = court_copy(('func NatGate(aT, cText)\n', 'func NatGate(aT, cText)\n\treturn ""\n'))
+try:
+    r = json.loads(court(RNXC, [os.path.join(td, 'n_court.ring'), 'diagnose', os.path.join(SP, SENTENCE)], cwd=td))
+    check('N_COUNTEREXAMPLE_FAILED' in [x['code'] for x in r['diagnostics']],
+          f"E a court without its gate is refused by the sentence's own counterexamples: {len(r['diagnostics'])} finding(s), N_COUNTEREXAMPLE_FAILED among them")
+finally:
+    shutil.rmtree(td)
+td = court_copy(('func NatGate(aT, cText)\n', 'func NatGate(aT, cText)\n\treturn ""\n'))
+try:
+    p = os.path.join(td, 'n_lib.ring')
+    lib = open(p, encoding='utf-8', newline='').read()
+    assert lib.count('func NatCheckRules(aDecls)\n') == 1
+    open(p, 'w', encoding='utf-8', newline='').write(lib.replace('func NatCheckRules(aDecls)\n', 'func NatCheckRules(aDecls)\n\treturn 0\n'))
+    nogate = CourtN(cwd=td, court_file=os.path.join(td, 'n_court.ring'), sentence_path=os.path.join(SP, SENTENCE), cache=False)
+    attacks = [c for c in study if c['group'] == 'attack']
+    save, study[:] = list(study), attacks
+    d2, _, _, _ = judge(nogate)
+    study[:] = save
+finally:
+    shutil.rmtree(td)
+caught = {cid for cid, _ in d2}
+check(len(caught) >= 10, f'E the comparison can fail: with the gate removed from the court it disagrees with the study on {len(caught)} of {len(attacks)} attacks')
 
 print(f'n_check: {"FAIL" if fails else "PASS"} ({len(fails)} failure(s))')
 sys.exit(1 if fails else 0)

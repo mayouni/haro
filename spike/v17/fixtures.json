@@ -1,7 +1,7 @@
 {
  "grammar": "haro-n",
  "version": "0.17",
- "comment": "Writes v17/fixtures.json: the conformance floor of the N letter as DRAWN (n_v17.haro, n/tontine.n).\n\nComposed from the letter's own declared MESSAGES and CODES and from the rules in GRAMMAR.md -- before the\nchecks that judge them were run on these cases (the W discipline: fixtures first). Two kinds:\n\n  court   a defect the EXISTING meta-vocabulary makes the forged court refuse: its message must hold the\n          text declared in n_v17.haro, and `diagnose` must carry the code declared there\n  rule    a defect the existing court CANNOT see (it must still say `ok`) and the rule of the next rung must\n          catch: n_model.rules() must answer the code. Each is what v0.17 would add as a check\n\nEach case is one replacement in n/tontine.n, anchored: the old text must occur exactly once.",
+ "comment": "Writes v17/fixtures.json: the conformance floor of the N letter as DRAWN (n_v17.haro, n/tontine.n).\n\nComposed from the letter's own declared MESSAGES and CODES and from the rules in GRAMMAR.md -- before the\nchecks that judge them were run on these cases (the W discipline: fixtures first). Two kinds:\n\n  court   a defect the EXISTING meta-vocabulary makes the forged court refuse: its message must hold the\n          text declared in n_v17.haro, and `diagnose` must carry the code declared there\n  rule    a defect the vocabulary of v0.16 CANNOT see (its court said `ok` to each, before the rung) and a rule of\n          the seventeenth rung must catch: the forged court must answer the code (`diagnose`), and the\n          reference model (n_model.rules()) must answer the same codes. `surfaces` marks a case that only the\n          surface's own court can judge: it is asked with `check <file> surfaces`\n\nEach case is one replacement in n/tontine.n, anchored: the old text must occur exactly once.",
  "sentence": "n/tontine.n",
  "letter": "n_v17.haro",
  "court": [
@@ -88,8 +88,8 @@
   {
    "id": "C11",
    "name": "a digit set the court does not know",
-   "old": "DIGITS ascii,\n  NAMES upper_first,\n  REFUSES [\n    character: \"the question",
-   "new": "DIGITS arabic_indic,\n  NAMES upper_first,\n  REFUSES [\n    character: \"the question",
+   "old": "DIGITS ascii,\n  NAMES upper_first,\n  JOINS \"and\",\n  REFUSES [\n    character: \"the question",
+   "new": "DIGITS arabic_indic,\n  NAMES upper_first,\n  JOINS \"and\",\n  REFUSES [\n    character: \"the question",
    "message": "DIGITS is ascii",
    "code": "PARSE"
   },
@@ -148,140 +148,168 @@
    "name": "a placeholder in a QUERY that is not a slot of the shape",
    "old": "QUERY \"SELECT * FROM collect WHERE amount > {num}\"",
    "new": "QUERY \"SELECT * FROM collect WHERE amount > {amnt}\"",
-   "code": "N_SLOT_UNKNOWN"
+   "code": "N_SLOT_UNKNOWN",
+   "surfaces": false
   },
   {
    "id": "R02",
    "name": "a placeholder in an ANSWERS that is not a slot",
    "old": "{answer} received the pot in round {num}.",
    "new": "{winner} received the pot in round {num}.",
-   "code": "N_SLOT_UNKNOWN"
+   "code": "N_SLOT_UNKNOWN",
+   "surfaces": false
   },
   {
    "id": "R03",
    "name": "a plan step using a slot nothing bound",
    "old": "QUERY \"SELECT * FROM collect WHERE member = '{member}'\"\n) RATIONALE \"That member",
    "new": "QUERY \"SELECT * FROM collect WHERE member = '{memberr}'\"\n) RATIONALE \"That member",
-   "code": "N_SLOT_UNKNOWN"
+   "code": "N_SLOT_UNKNOWN",
+   "surfaces": false
   },
   {
    "id": "R04",
    "name": "a slot meaning twice in one shape",
    "old": "SHAPE [show, deposit, member, over, num], TARGET ledger,",
    "new": "SHAPE [show, deposit, member, member, num], TARGET ledger,",
-   "code": "N_SLOT_REPEATED"
+   "code": "N_SLOT_REPEATED",
+   "surfaces": false
   },
   {
    "id": "R05",
    "name": "a frame with neither a target and query nor steps",
    "old": "SHAPE [show, deposit], TARGET ledger, QUERY \"SELECT * FROM collect\"",
    "new": "SHAPE [show, deposit], QUERY \"SELECT * FROM collect\"",
-   "code": "N_FRAME_TARGET"
+   "code": "N_FRAME_TARGET",
+   "surfaces": false
   },
   {
    "id": "R06",
    "name": "a frame with both a target and steps",
    "old": "SHAPE [show, deposit], TARGET ledger, QUERY \"SELECT * FROM collect\"",
    "new": "SHAPE [show, deposit], TARGET ledger, QUERY \"SELECT * FROM collect\", STEPS [find_beneficiary]",
-   "code": "N_FRAME_TARGET"
+   "code": "N_FRAME_TARGET",
+   "surfaces": false
   },
   {
    "id": "R07",
    "name": "a surface that cannot tell in a tongue, with no frame template to cover it",
    "old": "TELLS [english, french]",
    "new": "TELLS [english]",
-   "code": "N_TELL_UNCOVERED"
+   "code": "N_TELL_UNCOVERED",
+   "surfaces": false
   },
   {
    "id": "R08",
    "name": "an ANSWERS with no EMPTY: an answer may be nobody",
    "old": "EMPTY [english: \"Nobody received the pot in round {num}.\", french: \"Personne n'a reçu la cagnotte au tour {num}.\"]",
    "new": "EMPTY [english: \"Nobody received the pot in round {num}.\"]",
-   "code": "N_TELL_UNCOVERED"
+   "code": "N_TELL_UNCOVERED",
+   "surfaces": false
   },
   {
    "id": "R09",
    "name": "a tongue that cannot say one kind of refusal",
    "old": ",\n    surface: \"la source a refusé la question compilée : {what}\"",
    "new": "",
-   "code": "N_REFUSAL_UNCOVERED"
+   "code": "N_REFUSAL_UNCOVERED",
+   "surfaces": false
   },
   {
    "id": "R10",
    "name": "a tongue that widens the gate beyond the court's safe set",
-   "old": "ALLOWS \"-'?,.\",\n  DIGITS ascii,\n  NAMES upper_first,\n  REFUSES [\n    character: \"la question",
-   "new": "ALLOWS \"-'?,.;\",\n  DIGITS ascii,\n  NAMES upper_first,\n  REFUSES [\n    character: \"la question",
-   "code": "N_GATE_WIDENED"
+   "old": "ALLOWS \"-'?,.\",\n  DIGITS ascii,\n  NAMES upper_first,\n  JOINS \"et\",\n  REFUSES [\n    character: \"la question",
+   "new": "ALLOWS \"-'?,.;\",\n  DIGITS ascii,\n  NAMES upper_first,\n  JOINS \"et\",\n  REFUSES [\n    character: \"la question",
+   "code": "N_GATE_WIDENED",
+   "surfaces": false
   },
   {
    "id": "R11",
    "name": "a word that means two things in one tongue",
    "old": "WORDS [english: \"who\", french: \"qui\"]",
    "new": "WORDS [english: \"who show\", french: \"qui\"]",
-   "code": "N_WORD_AMBIGUOUS"
+   "code": "N_WORD_AMBIGUOUS",
+   "surfaces": false
   },
   {
    "id": "R12",
    "name": "a word both ignored and meaningful",
    "old": "IGNORES \"the a an of me please",
    "new": "IGNORES \"deposits the a an of me please",
-   "code": "N_WORD_IGNORED"
+   "code": "N_WORD_IGNORED",
+   "surfaces": false
   },
   {
    "id": "R13",
    "name": "a meaning with no words in a tongue",
    "old": "WORDS [english: \"who\", french: \"qui\"]",
    "new": "WORDS [english: \"who\"]",
-   "code": "N_TONGUE_UNCOVERED"
+   "code": "N_TONGUE_UNCOVERED",
+   "surfaces": false
   },
   {
    "id": "R14",
    "name": "an entity meaning of a kind its surface does not enumerate",
    "old": "SLOT entity, OF member, FROM graph",
    "new": "SLOT entity, OF person, FROM graph",
-   "code": "N_ENTITY_UNKNOWN"
+   "code": "N_ENTITY_UNKNOWN",
+   "surfaces": false
   },
   {
    "id": "R15",
    "name": "a surface that does not enumerate what a meaning draws from it",
    "old": "ENTITIES [member, round, role],",
    "new": "ENTITIES [round, role],",
-   "code": "N_ENTITY_UNKNOWN"
+   "code": "N_ENTITY_UNKNOWN",
+   "surfaces": false
   },
   {
    "id": "R16",
    "name": "a ledger query the ledger's own court refuses",
    "old": "QUERY \"SELECT * FROM collect WHERE amount < {num}\"",
    "new": "QUERY \"SELECT member FROM collect WHERE amount < {num}\"",
-   "code": "N_QUERY_REFUSED"
+   "code": "N_QUERY_REFUSED",
+   "surfaces": true
   },
   {
    "id": "R17",
    "name": "a graph pattern that is not three terms",
    "old": "QUERY \"?x received_pot_in round{num}\",\n  ANSWERS",
    "new": "QUERY \"?x received_pot_in\",\n  ANSWERS",
-   "code": "N_QUERY_REFUSED"
+   "code": "N_QUERY_REFUSED",
+   "surfaces": false
   },
   {
    "id": "R18",
    "name": "an example its own text does not reach",
    "old": "ASKING [english: \"show deposits over 5000\", french: \"montre les dépôts au dessus de 5000\"]",
    "new": "ASKING [english: \"show deposits over five thousand\", french: \"montre les dépôts au dessus de 5000\"]",
-   "code": "N_EXAMPLE_FAILED"
+   "code": "N_EXAMPLE_FAILED",
+   "surfaces": false
   },
   {
    "id": "R19",
    "name": "an example whose tongues compile to different queries",
    "old": "ASKING [english: \"show deposits over 5000\", french: \"montre les dépôts au dessus de 5000\"]",
    "new": "ASKING [english: \"show deposits over 5000\", french: \"montre les dépôts au dessus de 4000\"]",
-   "code": "N_EXAMPLE_DIVERGES"
+   "code": "N_EXAMPLE_DIVERGES",
+   "surfaces": false
   },
   {
    "id": "R20",
    "name": "a counterexample that IS understood",
    "old": "ASKING [english: \"what is the meaning of life\"], REFUSED word",
    "new": "ASKING [english: \"show deposits\"], REFUSED word",
-   "code": "N_COUNTEREXAMPLE_FAILED"
+   "code": "N_COUNTEREXAMPLE_FAILED",
+   "surfaces": false
+  },
+  {
+   "id": "R21",
+   "name": "a surface whose world is not there",
+   "old": "WORLD \"../../study/phase15/data/tontine.zknw\"",
+   "new": "WORLD \"../../study/phase15/data/nowhere.zknw\"",
+   "code": "N_WORLD_UNREAD",
+   "surfaces": false
   }
  ]
 }

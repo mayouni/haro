@@ -18,6 +18,8 @@
 # closed question grammar: FROM which kinds, WHERE in which expression,
 # which optional CLAUSES (where, order, limit); and ABSENT missing.
 #
+# v0.17 (haro/spike/v17/GRAMMAR.md): UNDERSTAND -- how a human language reaches closed questions: the eight
+# kinds that play TONGUE, MEANING, ALIAS, SURFACE, STEP, FRAME, EXAMPLE and COUNTEREXAMPLE.
 # v0.13 (haro/spike/v13/GRAMMAR.md): NARRATE -- how a run of the language is
 # narrated back, the court's voice: a template per declaration kind, an
 # opening, an ending, a refusal; a projection of the sentence, never stored,
@@ -121,6 +123,8 @@ func StzuClauses(cKind)
 		return [["FAMILY", "namelist"], ["FLUENT", "string"], ["PARAMS", "messagelist"], ["PASSIVE", "string"], ["STATEMENT", "string"]]
 	but cKind = "NARRATE"
 		return [["ENDS", "string"], ["OPENS", "string"], ["REFUSES", "string"], ["SAYS", "messagelist"], ["TELLS", "messagelist"]]
+	but cKind = "UNDERSTAND"
+		return [["ALIAS", "namelist"], ["COUNTEREXAMPLE", "namelist"], ["EXAMPLE", "namelist"], ["FRAME", "namelist"], ["MEANING", "namelist"], ["STEP", "namelist"], ["SURFACE", "namelist"], ["TONGUE", "namelist"]]
 	ok
 	return []
 
@@ -165,13 +169,15 @@ func StzuRequired(cKind)
 		return ["PARAMS"]
 	but cKind = "NARRATE"
 		return []
+	but cKind = "UNDERSTAND"
+		return ["TONGUE", "MEANING", "ALIAS", "SURFACE", "STEP", "FRAME", "EXAMPLE", "COUNTEREXAMPLE"]
 	ok
 	return []
 
 func StzuIsKind(cWord)
 	return InStrList(cWord, ["LANGUAGE", "DECLARATION", "FORM", "EXPRESSION", "REFUSAL",
 	                         "MENU", "RANGE", "FORMAT", "CONSTRAINT", "WORLD", "REFINE", "UNION",
-	                         "SENTENCE", "VIEW", "WALK", "ASK", "RUN", "SYMBOL", "FORMS", "NARRATE"])
+	                         "SENTENCE", "VIEW", "WALK", "ASK", "RUN", "SYMBOL", "FORMS", "NARRATE", "UNDERSTAND"])
 
 # C2 2.1: a code is ^[A-Z][A-Z0-9]*([_-][A-Z0-9]+)*$ ; C2 2.5: a cite is
 # kind:value, kind in rule|article|right|pattern, value [A-Za-z0-9_.-]+ (v0.11)
@@ -1074,6 +1080,7 @@ func StzuDeclare(cSrc)
 	aRun = NULL
 	aFormset = NULL
 	aNarrate = NULL
+	aUnderstand = NULL
 	aSymbols = []
 	aWorld = NULL
 	aRefine = NULL
@@ -1386,6 +1393,17 @@ func StzuDeclare(cSrc)
 						if HasClause(aClauses, aRoleNames[i]) aRoles + [aRoleNames[i], ClauseValue(aClauses, aRoleNames[i])] ok
 					next
 					aRun = [cName, aRoles, cRationale, nLine]
+				but cKind = "UNDERSTAND"
+					# v0.17: how a human language reaches closed questions -- the kinds that play the eight roles of N
+					if not isNull(aUnderstand)
+						StzuFail(nLine, "a .haro file declares at most one UNDERSTAND: a language is understood one way (" + aUnderstand[1] + " is it)")
+					ok
+					aRoles = []
+					aRoleNames = ["TONGUE", "MEANING", "ALIAS", "SURFACE", "STEP", "FRAME", "EXAMPLE", "COUNTEREXAMPLE"]
+					for i = 1 to len(aRoleNames)
+						aRoles + [aRoleNames[i], ClauseValue(aClauses, aRoleNames[i])]
+					next
+					aUnderstand = [cName, aRoles, cRationale, nLine]
 				but cKind = "ASK"
 					if not isNull(aAsk)
 						StzuFail(nLine, "a .haro file declares at most one ASK: a language asks in one grammar (" + aAsk[1] + " is it)")
@@ -1708,7 +1726,7 @@ func StzuDeclare(cSrc)
 	         ["constraints", aConstraints], ["world", aWorld], ["refine", aRefine],
 	         ["unions", aUnions], ["sentences", aSentences], ["views", aViews],
 	         ["walks", aWalks], ["ask", aAsk], ["run", aRun], ["symbols", aSymbols],
-	         ["formset", aFormset], ["narrate", aNarrate] ]
+	         ["formset", aFormset], ["narrate", aNarrate], ["understand", aUnderstand] ]
 	$cCondLang = cLName
 	$aCondLangs = StzuCondLangs(aRec, [])
 	$aCondFormats = []
@@ -1924,6 +1942,46 @@ func StzuDeclare(cSrc)
 						if not aS[3]
 							StzuFail(nL, cRole + ": '" + cSeat + "' is not a list seat of " + aNames[1])
 						ok
+					ok
+				next
+			next
+		catch
+			StzuNote(cCatchError)
+		done
+	ok
+
+	# v0.17: the UNDERSTAND names, for each of the eight roles, the one declaration of this language that plays it,
+	# and that declaration has the seats the emitted court reads (no declaration plays two roles)
+	if not isNull(aUnderstand)
+		try
+			nL = aUnderstand[4]
+			aRoles = aUnderstand[2]
+			for i = 1 to len(aRoles)
+				cRole = aRoles[i][1]
+				aNames = aRoles[i][2]
+				aWant = []
+				if cRole = "TONGUE" aWant = ["code", "ignores", "allows", "digits", "names", "joins", "refuses"] ok
+				if cRole = "MEANING" aWant = ["slot", "of", "from", "words"] ok
+				if cRole = "ALIAS" aWant = ["meaning", "entity", "words"] ok
+				if cRole = "SURFACE" aWant = ["kind", "grammar", "court", "world", "entities", "spells", "tells"] ok
+				if cRole = "STEP" aWant = ["target", "query", "binds"] ok
+				if cRole = "FRAME" aWant = ["shape", "target", "query", "steps", "answers", "empty"] ok
+				if cRole = "EXAMPLE" aWant = ["means", "asking"] ok
+				if cRole = "COUNTEREXAMPLE" aWant = ["asking", "refused"] ok
+				if len(aNames) != 1
+					StzuFail(nL, cRole + " names the one DECLARATION that plays it -- " + len(aNames) + " name(s) given")
+				ok
+				cK = DeclaredKind(aDeclared, aNames[1])
+				if cK = "" StzuFail(nL, cRole + ": '" + aNames[1] + "' resolves to nothing in this declaration") ok
+				if cK != "DECLARATION" StzuFail(nL, cRole + " must name a DECLARATION; '" + aNames[1] + "' is a " + cK) ok
+				for j = 1 to i - 1
+					if aRoles[j][2][1] = aNames[1]
+						StzuFail(nL, cRole + " and " + aRoles[j][1] + " name the same declaration '" + aNames[1] + "': a declaration plays one role")
+					ok
+				next
+				for j = 1 to len(aWant)
+					if not StzuHasSeat(aDeclarations, aNames[1], aWant[j])
+						StzuFail(nL, cRole + ": no seat '" + aWant[j] + "' on " + aNames[1] + " -- the court of this language reads it")
 					ok
 				next
 			next
@@ -2163,6 +2221,9 @@ func StzuPrintLanguage(aLang)
 	nNr = 0
 	if not isNull(LangGet(aLang, "narrate")) nNr = 1 ok
 	? "narrates " + nNr
+	nUn = 0
+	if not isNull(LangGet(aLang, "understand")) nUn = 1 ok
+	? "understands " + nUn
 	nWorld = 0
 	if not isNull(LangGet(aLang, "world")) nWorld = 1 ok
 	? "world " + nWorld

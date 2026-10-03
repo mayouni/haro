@@ -52,6 +52,8 @@ $cCourtCode = "PARSE"
 $aCourtCites = []
 $aCourtFormset = NULL
 $aCourtNarrate = NULL
+$aCourtUnderstand = NULL
+$bNSurfaces = 0
 $bCourtCollect = 0
 $aCourtFound = []
 $aCourtBroken = []
@@ -126,7 +128,8 @@ $aCourtLangs = [
     NULL,
     [],
     NULL,
-    ["telling", "", "", "I stopped: {message} ({code})", [], [["ask", "Asking {from}: {question}"], ["matched", "{count} of the {total} rows match."], ["ordered", "Ordered by {field} {direction}."], ["cut", "Only the first {limit} are kept."], ["answer", "The answer is {count} row(s): {rows}"]]]
+    ["telling", "", "", "I stopped: {message} ({code})", [], [["ask", "Asking {from}: {question}"], ["matched", "{count} of the {total} rows match."], ["ordered", "Ordered by {field} {direction}."], ["cut", "Only the first {limit} are kept."], ["answer", "The answer is {count} row(s): {rows}"]]],
+    NULL
   ]
 ]
 CtUseLanguage("z")

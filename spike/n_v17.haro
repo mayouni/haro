@@ -1,9 +1,9 @@
 -- n_v17.haro -- N, the alphabet's sixth letter: the NATURAL. DRAWN from Ringua's Phase 1.5 study
 -- (haro/study/phase15/STUDY.md), in the declaring altitude Haro already has: nothing here is new
--- meta-vocabulary, so the meta-court accepts it today and the forge emits a court that CHECKS sentences of
--- N. What the forge cannot yet emit is the dynamic half -- the `understand`, `ask` and `tokens` verbs --
--- which needs one meta-clause, UNDERSTAND, drawn in v17/GRAMMAR.md and NOT built (it would be the
--- seventeenth rung). Every kind and every seat below traces to a finding of the study (K1-K10).
+-- meta-vocabulary but one (UNDERSTAND, at the end), so the meta-court accepts it and the forge emits a court that CHECKS sentences of
+-- N. The dynamic half -- the `tokens`, `understand`, `ask`, `vocabulary` and `examples` verbs and the fourteen
+-- rules of v17/GRAMMAR.md section 4b -- is what the one meta-clause, UNDERSTAND (the seventeenth rung), makes
+-- the forge emit. Every kind and every seat below traces to a finding of the study (K1-K10).
 --
 -- N ASKS; IT NEVER DECLARES (06-ALPHABET, ratified 2026-09-27). A sentence of N declares tongues, meanings,
 -- aliases, surfaces, frames, steps and examples -- how a human language reaches closed questions of a
@@ -74,13 +74,13 @@ DEFINE FORM spelling AS (
 
 DEFINE DECLARATION tongue AS (
   VERB "TONGUE",
-  SEATS [code: text, ignores: text, allows: text?, digits: digit_sets?, names: spellings?, refuses: [refusal_text]],
+  SEATS [code: text, ignores: text, allows: text?, digits: digit_sets?, names: spellings?, joins: text?, refuses: [refusal_text]],
   MESSAGES [
     code: "TONGUE {name} needs its CODE, the language's own short name (en, fr)",
     ignores: "TONGUE {name} needs IGNORES, the words a question may carry that mean nothing (the, a, de, le); an empty text if none"
   ],
   CODES [code: "TONGUE_INCOMPLETE", ignores: "TONGUE_INCOMPLETE"]
-) RATIONALE "A human language the surface speaks: its code, the words it lets pass, the punctuation it allows beyond letters, digits and the space (and only from the court's safe set: a tongue cannot widen the gate -- K4), how it writes a name in an answer (a tongue's own convention), and how it refuses (K8)"
+) RATIONALE "A human language the surface speaks: its code, the words it lets pass, the punctuation it allows beyond letters, digits and the space (and only from the court's safe set: a tongue cannot widen the gate -- K4), how it writes a name in an answer and the word that joins the last of several (a tongue's own conventions; found by building the court, the drawing had put French's `et` in code), and how it refuses (K8)"
 
 DEFINE DECLARATION meaning AS (
   VERB "MEANING",
@@ -150,3 +150,10 @@ DEFINE REFUSAL unknown_declaration AS (
 DEFINE REFUSAL dangling_reference AS (
   MESSAGE "This name resolves to nothing the sentence declares: a tongue, a meaning, a surface, a step or a frame."
 ) RATIONALE "Every word of a tongue is a word of a declared meaning, every shape a list of declared meanings, every target a declared surface"
+
+-- ---- the meta-clause: what the forge emits the dynamic verbs for ---------------------------------------
+
+DEFINE UNDERSTAND n AS (
+  TONGUE [tongue], MEANING [meaning], ALIAS [alias], SURFACE [surface],
+  STEP [step], FRAME [frame], EXAMPLE [example], COUNTEREXAMPLE [counterexample]
+) RATIONALE "Which declarations of this language play the eight roles of a human language over a declared world; the forge emits tokens, understand, ask, vocabulary and examples for them, and the fourteen rules of GRAMMAR section 4b as the court's own"

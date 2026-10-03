@@ -30,6 +30,11 @@
 # order of the court is: shapes, the WORLD, the local types, the
 # CONSTRAINTs, then the references.
 #
+# v0.17 (haro/spike/v17/GRAMMAR.md): UNDERSTAND -- a language that declares how a human language reaches its
+# closed questions gets `tokens`, `understand`, `ask`, `vocabulary` and `examples`, and the rules of its
+# sentences (n_lib.ring, loaded only by a court forged from such a language): `check <file> surfaces` asks each
+# surface's own court to judge its queries too.
+#
 # v0.14 (haro/spike/v14/GRAMMAR.md): a court that collects -- `diagnose` goes on
 # past a refusal to the next element of every pass and answers every finding,
 # in the order of the file; `check` still stops at the first, to the byte.
@@ -310,6 +315,9 @@ func CtUseLanguage(cName)
 	# v0.13: the NARRATE [name, opens, ends, refuses, says], or NULL
 	$aCourtNarrate = NULL
 	if len(aE) >= 22 $aCourtNarrate = aE[22] ok
+	# v0.17: the UNDERSTAND [name, [[role, kind], ...]], or NULL -- a human language reaches closed questions (n_lib.ring)
+	$aCourtUnderstand = NULL
+	if len(aE) >= 23 $aCourtUnderstand = aE[23] ok
 
 # the condition tables of every language the court carries, built once
 func CtBuildCondLangs()
@@ -366,7 +374,7 @@ func CtSnapshot()
 	        $aCourtWorld, $aCourtPoints, $aCourtFloors, $aCourtViews, $aCourtSentenceKinds,
 	        $aCourtToks, $nCourtPos, $aCondDecls, $cCondLang, $cCondOther, $bCondUnread,
 	        $aCondFormats, $aCondToks, $nCondPos, $aCourtExprs, $aCourtWalks, $aCourtAsk, $aCourtRun,
-	        $aCourtSymbols, $aCourtWorldFile, $aCourtFormset, $aCourtNarrate]
+	        $aCourtSymbols, $aCourtWorldFile, $aCourtFormset, $aCourtNarrate, $aCourtUnderstand]
 
 func CtRestore(aS)
 	$cCourtLang = aS[1]
@@ -402,6 +410,7 @@ func CtRestore(aS)
 	$aCourtWorldFile = aS[31]
 	$aCourtFormset = aS[32]
 	$aCourtNarrate = aS[33]
+	$aCourtUnderstand = aS[34]
 
 # ---- v0.11: the Diagnostic Contract (C2 v1.2.0) -------------------------------------
 # `diagnose <file> [world]` runs the same court and answers in the family's
@@ -1318,6 +1327,15 @@ func CtDeclare(cSrc)
 			CtNote(cCatchError)
 		done
 	ok
+	# v0.17: the rules of a language that is UNDERSTOOD (n_lib.ring). They read a sentence whose references
+	# resolve, so a sentence that already has a finding is not read by them; `check` stops at the first
+	if not isNull($aCourtUnderstand) and len($aCourtFound) = 0
+		try
+			NatCheckRules(aDecls)
+		catch
+			CtNote(cCatchError)
+		done
+	ok
 	# v0.10: the symbols resolve against the world, when one is handed in
 	if not isNull($aCourtWorldFile) CtResolveWorld(aDecls) ok
 	return aDecls
@@ -2032,7 +2050,11 @@ func CtMain()
 		# without more input"), never a refusal
 		cSrc = read(sysargv[4])
 		try
-			if len(sysargv) >= 5 $aCourtWorldFile = CtWorldLoad(sysargv[5]) ok
+			# v0.17: `surfaces` asks each surface's own court to judge its queries (a language that is understood)
+			if not isNull($aCourtUnderstand) and len(sysargv) >= 5
+				if sysargv[5] = "surfaces" $bNSurfaces = 1 ok
+			ok
+			if len(sysargv) >= 5 and not $bNSurfaces $aCourtWorldFile = CtWorldLoad(sysargv[5]) ok
 			aDecls = CtDeclare(cSrc)
 			CtPrintVerdict(aDecls)
 			if isNull($aCourtWorldFile) and len($aCourtSymbols) > 0
@@ -2047,7 +2069,10 @@ func CtMain()
 	but cVerb = "diagnose"
 		# v0.11: the same court, in the family's machine form (C2 v1.2.0)
 		cWorldPath = ""
-		if len(sysargv) >= 5 cWorldPath = sysargv[5] ok
+		if not isNull($aCourtUnderstand) and len(sysargv) >= 5
+			if sysargv[5] = "surfaces" $bNSurfaces = 1 ok
+		ok
+		if len(sysargv) >= 5 and not $bNSurfaces cWorldPath = sysargv[5] ok
 		? CtDiagnosticsJson(CtDiagnose(sysargv[4], cWorldPath))
 	but cVerb = "world"
 		# v0.10: the sentence's own C1 rows, as JSON
@@ -2171,6 +2196,10 @@ func CtMain()
 		catch
 			? cCatchError
 		done
+	but not isNull($aCourtUnderstand) and CtInList(cVerb, ["tokens", "understand", "ask", "vocabulary", "examples"])
+		# v0.17: a human language over a declared world, understood (n_lib.ring); `ask` here takes a tongue and
+		# a text, where the Q letter's takes a question and rows -- different courts, different arguments
+		NatMain(cVerb)
 	but cVerb = "ask"
 		# v0.7: a question of the declared world, answered on the rows handed in
 		if len(sysargv) < 6

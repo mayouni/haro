@@ -6,7 +6,7 @@
 root ::= ws decl (ws decl)* ws
 decl ::= decl_TONGUE | decl_MEANING | decl_ALIAS | decl_SURFACE | decl_STEP | decl_FRAME | decl_EXAMPLE | decl_COUNTEREXAMPLE
 decl_TONGUE ::= "DEFINE" sp "TONGUE" sp ident sp "AS" ws "(" ws (clause_TONGUE (ws "," ws clause_TONGUE)* (ws ",")?)? ws ")" ws "RATIONALE" sp string
-clause_TONGUE ::= "CODE" sp string | "IGNORES" sp string | "ALLOWS" sp string | "DIGITS" sp ident | "NAMES" sp ident | "REFUSES" sp pairlist
+clause_TONGUE ::= "CODE" sp string | "IGNORES" sp string | "ALLOWS" sp string | "DIGITS" sp ident | "NAMES" sp ident | "JOINS" sp string | "REFUSES" sp pairlist
 decl_MEANING ::= "DEFINE" sp "MEANING" sp ident sp "AS" ws "(" ws (clause_MEANING (ws "," ws clause_MEANING)* (ws ",")?)? ws ")" ws "RATIONALE" sp string
 clause_MEANING ::= "SLOT" sp ident | "OF" sp ident | "FROM" sp ident | "WORDS" sp pairlist
 decl_ALIAS ::= "DEFINE" sp "ALIAS" sp ident sp "AS" ws "(" ws (clause_ALIAS (ws "," ws clause_ALIAS)* (ws ",")?)? ws ")" ws "RATIONALE" sp string

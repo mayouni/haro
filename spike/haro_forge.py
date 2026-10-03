@@ -69,6 +69,7 @@ STZU11_FIXTURES = os.path.join(HERE, 'v11', 'fixtures.json')
 STZU12_FIXTURES = os.path.join(HERE, 'v12', 'fixtures.json')
 STZU13_FIXTURES = os.path.join(HERE, 'v13', 'fixtures.json')
 STZU16_FIXTURES = os.path.join(HERE, 'v16', 'fixtures.json')
+STZU17_FIXTURES = os.path.join(HERE, 'v17', 'meta_fixtures.json')
 
 
 def judge_stzu(exe, label, fixtures=STZU_FIXTURES):
@@ -78,7 +79,7 @@ def judge_stzu(exe, label, fixtures=STZU_FIXTURES):
     counts), world and points."""
     doc = json.load(open(fixtures, encoding='utf-8'))
     # the pinned v0.1 judge is stzu's; everything since is Haro's (D1)
-    assert doc['grammar'] in ('stzu', 'haro') and doc['version'] in ('0.1', '0.2', '0.3', '0.4', '0.5', '0.6', '0.7', '0.8', '0.9', '0.10', '0.11', '0.12', '0.13', '0.16')
+    assert doc['grammar'] in ('stzu', 'haro') and doc['version'] in ('0.1', '0.2', '0.3', '0.4', '0.5', '0.6', '0.7', '0.8', '0.9', '0.10', '0.11', '0.12', '0.13', '0.16', '0.17')
     passed = failed = 0
     outputs = {}
     with tempfile.TemporaryDirectory() as td:
@@ -154,7 +155,8 @@ def stage1():
                             ('v0.11, the Diagnostic Contract: CODE, CODES, CITES', STZU11_FIXTURES),
                             ('v0.12, FORMS: the function-name grammar as data', STZU12_FIXTURES),
                             ('v0.13, NARRATE: the court\'s voice', STZU13_FIXTURES),
-                            ('v0.16, NARRATE tells a run and a question', STZU16_FIXTURES)):
+                            ('v0.16, NARRATE tells a run and a question', STZU16_FIXTURES),
+                            ('v0.17, UNDERSTAND: what a human language reaches closed questions with', STZU17_FIXTURES)):
         print(f'stage 1 -- the Haro meta-court in pure Ring, judged by its fixtures ({label})')
         f1, o1 = judge_stzu(RNXC, 'rnxc', fixtures)
         f2, o2 = judge_stzu(ORACLE, 'oracle ring.exe', fixtures)

@@ -15,6 +15,7 @@ DEFINE TONGUE english AS (
   ALLOWS "-'?,.",
   DIGITS ascii,
   NAMES upper_first,
+  JOINS "and",
   REFUSES [
     character: "the question carries a character this language does not use: {what}",
     word: "the word '{what}' is not part of the tontine's vocabulary",
@@ -30,6 +31,7 @@ DEFINE TONGUE french AS (
   ALLOWS "-'?,.",
   DIGITS ascii,
   NAMES upper_first,
+  JOINS "et",
   REFUSES [
     character: "la question contient un caractere que cette langue n'emploie pas : {what}",
     word: "le mot « {what} » ne fait pas partie du vocabulaire de la tontine",
@@ -121,13 +123,13 @@ DEFINE ALIAS collector AS (
 -- ---- the surfaces: where a question ends -----------------------------------------------------------------
 
 DEFINE SURFACE ledger AS (
-  KIND query, GRAMMAR "ZQL ASK", COURT "z_court.ring ask",
+  KIND query, GRAMMAR "ZQL ASK", COURT "z_court.ring ask", WORLD "../tontine.z",
   SPELLS [member: upper_first],
   TELLS [english, french]
 ) RATIONALE "The ledger of deposits, asked in zing's closed query grammar; a member is spelled the way the ledger spells it (Moussa, not moussa). Its court judges a query and runs it; it answers in English as the Z court's own voice and in French as a second declaration"
 
 DEFINE SURFACE graph AS (
-  KIND pattern, GRAMMAR "triples", COURT "stzKnowledgeGraph.Query", WORLD "data/tontine.zknw",
+  KIND pattern, GRAMMAR "triples", COURT "stzKnowledgeGraph.Query", WORLD "../../study/phase15/data/tontine.zknw",
   ENTITIES [member, round, role],
   SPELLS [member: as_is]
 ) RATIONALE "The tontine's knowledge graph: a question ends as a triple pattern, three terms, ?x a variable. Until the knowledge tier is a court of its own, stzKnowledgeGraph serves this protocol; N depends on the protocol, not on it"
