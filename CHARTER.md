@@ -239,7 +239,7 @@ sources, and the forge emits its runner: ITERATE over a snapshot of a declared c
 a step tree that re-enters itself refused at check -- the totality doctrine of section 3,
 structural. Judged by stz's 29 W cases and zing's formula cases re-expressed as algorithms
 (35 of 35 on `rnxc` and the oracle), because A has no suite of its own. Five letters of
-six are forged: Z, W, Q, F, A; N waits on the ringua Phase 1.5 study, the author's gate.
+six are forged: Z, W, Q, F, A; N waits on the ringua Phase 1.5 study, the author's gate (the study ran 2026-10-03: `haro/study/phase15/STUDY.md`).
 **Haro v0.10, the same day (`haro/spike/v10/GRAMMAR.md`, 7 fixtures): the WORLD as versioned
 data.** The `WORLD` row above, past cardinality and entry: `SYMBOL`, a seat resolved against a
 C1 `world.json` when the court is handed one, and `PUBLISH`, the kinds a sentence contributes
@@ -636,6 +636,15 @@ answers rebuilt from the lines, 22 questions against their own clauses), by narr
 by hand, and by thirteen protections each proved load-bearing (HF-66). Record: `haro/SPIKE.md`,
 "The sixteenth rung".
 
+**The Phase 1.5 study, 2026-10-03, on the author's "run the Phase 1.5 study"** (not a rung: ringua's exemplar
+extension study, run from `haro/study/phase15/`). The tontine given a knowledge graph (`stzKnowledgeGraph`, 19
+facts and a law, a 25-line text artifact) and a natural-language question surface in English and French that is
+`stzNatural`'s architecture with its compile target changed to ZQL and triple patterns, judged by the ledger's
+court on two runtimes, zing live, an independent evaluator and hand-composed expectations; NaturalLib 1.27 as
+shipped found open (a `?` statement in a question ran; unknown prose silently accepted; it does not run on
+Ring++). The engine verdict is confirmed on the architecture and corrected on two claims; the closure is a
+gate's (HF-67). Record: `haro/study/phase15/STUDY.md`.
+
 v0.1's spike (`twice.haro`, a definition with an intent clause) proved one altitude. The
 ruling asks for three to meet, and the estate has already named the smallest program that
 makes them: the alphabet's own proof obligation, "Z re-expressed through stzf from `z.stzu`
@@ -828,6 +837,13 @@ already pins.
 - **D13 -- N and the Phase 1.5 study: the gate holds.** Not a decision to take: the study
   (the tontine given a graph and a natural door in two human languages, mission.md 6) is an
   experiment, and no ruling produces its result. N is built behind it, as the alphabet says.
+  **UPDATE 2026-10-03 -- the study ran, on the author's "run the Phase 1.5 study"** (`haro/study/phase15/`,
+  `STUDY.md`). The roadmap's condition -- the composed exemplar answers domain questions in two human
+  languages without the answer path leaving the closed surfaces -- is met on the measurements (74 questions,
+  English and French; 17 of 17 pairs compile to one closed query; 16 attacks refused with the canary at 0, and at 1
+  with the gate removed; the same bytes on official Ring 1.27 and on Ring++), **with one qualification: the
+  closure is the gate's, because `stzNatural`'s shipped tokenizer evaluates bracketed text**. Whether that closes
+  the gate is the author's reading. **No N API is drawn**: STUDY.md section 6 (K1-K10) is the input to one.
 
 - **D14 -- the forge as an `rnxc` verb: stays the ringpp session's, routed.** Today the forge
   is Ring source `rnxc` runs (`rnxc forge.ring <file>`); a verb is a change to

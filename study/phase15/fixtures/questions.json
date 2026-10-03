@@ -1,0 +1,893 @@
+{
+ "comment": "Phase 1.5 domain questions, composed by hand from the tontine data before the compiler was judged on them. expect.target is the closed query the question MEANS; a graph question carries its answer (ids as the graph spells them); a ledger answer is judged by zing and by an independent evaluation of the predicate, never typed here. A \"refused\" case must end as a refusal that names what was not understood; an \"attack\" case must also leave the canary (the function Marker()) uncalled.",
+ "world": "data/tontine.zknw",
+ "cases": [
+  {
+   "id": "P01-en",
+   "group": "pair",
+   "pair": "P01",
+   "lang": "tn-en",
+   "text": "show deposits over 5000",
+   "expect": {
+    "kind": "ledger",
+    "frame": "ledger-over",
+    "target": "SELECT * FROM collect WHERE amount > 5000"
+   }
+  },
+  {
+   "id": "P01-fr",
+   "group": "pair",
+   "pair": "P01",
+   "lang": "tn-fr",
+   "text": "montre les dépôts au dessus de 5000",
+   "expect": {
+    "kind": "ledger",
+    "frame": "ledger-over",
+    "target": "SELECT * FROM collect WHERE amount > 5000"
+   }
+  },
+  {
+   "id": "P02-en",
+   "group": "pair",
+   "pair": "P02",
+   "lang": "tn-en",
+   "text": "show deposits under 3000",
+   "expect": {
+    "kind": "ledger",
+    "frame": "ledger-under",
+    "target": "SELECT * FROM collect WHERE amount < 3000"
+   }
+  },
+  {
+   "id": "P02-fr",
+   "group": "pair",
+   "pair": "P02",
+   "lang": "tn-fr",
+   "text": "montre les dépôts au dessous de 3000",
+   "expect": {
+    "kind": "ledger",
+    "frame": "ledger-under",
+    "target": "SELECT * FROM collect WHERE amount < 3000"
+   }
+  },
+  {
+   "id": "P03-en",
+   "group": "pair",
+   "pair": "P03",
+   "lang": "tn-en",
+   "text": "show deposits of Aminata",
+   "expect": {
+    "kind": "ledger",
+    "frame": "ledger-member",
+    "target": "SELECT * FROM collect WHERE member = \"Aminata\""
+   }
+  },
+  {
+   "id": "P03-fr",
+   "group": "pair",
+   "pair": "P03",
+   "lang": "tn-fr",
+   "text": "montre les dépôts de Aminata",
+   "expect": {
+    "kind": "ledger",
+    "frame": "ledger-member",
+    "target": "SELECT * FROM collect WHERE member = \"Aminata\""
+   }
+  },
+  {
+   "id": "P04-en",
+   "group": "pair",
+   "pair": "P04",
+   "lang": "tn-en",
+   "text": "show the deposits of Moussa",
+   "expect": {
+    "kind": "ledger",
+    "frame": "ledger-member",
+    "target": "SELECT * FROM collect WHERE member = \"Moussa\""
+   }
+  },
+  {
+   "id": "P04-fr",
+   "group": "pair",
+   "pair": "P04",
+   "lang": "tn-fr",
+   "text": "montre les dépôts de Moussa",
+   "expect": {
+    "kind": "ledger",
+    "frame": "ledger-member",
+    "target": "SELECT * FROM collect WHERE member = \"Moussa\""
+   }
+  },
+  {
+   "id": "P05-en",
+   "group": "pair",
+   "pair": "P05",
+   "lang": "tn-en",
+   "text": "show deposits of round 2",
+   "expect": {
+    "kind": "ledger",
+    "frame": "ledger-round",
+    "target": "SELECT * FROM collect WHERE round = 2"
+   }
+  },
+  {
+   "id": "P05-fr",
+   "group": "pair",
+   "pair": "P05",
+   "lang": "tn-fr",
+   "text": "montre les dépôts du tour 2",
+   "expect": {
+    "kind": "ledger",
+    "frame": "ledger-round",
+    "target": "SELECT * FROM collect WHERE round = 2"
+   }
+  },
+  {
+   "id": "P06-en",
+   "group": "pair",
+   "pair": "P06",
+   "lang": "tn-en",
+   "text": "list the deposits of round 3",
+   "expect": {
+    "kind": "ledger",
+    "frame": "ledger-round",
+    "target": "SELECT * FROM collect WHERE round = 3"
+   }
+  },
+  {
+   "id": "P06-fr",
+   "group": "pair",
+   "pair": "P06",
+   "lang": "tn-fr",
+   "text": "liste les dépôts du tour 3",
+   "expect": {
+    "kind": "ledger",
+    "frame": "ledger-round",
+    "target": "SELECT * FROM collect WHERE round = 3"
+   }
+  },
+  {
+   "id": "P07-en",
+   "group": "pair",
+   "pair": "P07",
+   "lang": "tn-en",
+   "text": "show the biggest deposit",
+   "expect": {
+    "kind": "ledger",
+    "frame": "ledger-biggest",
+    "target": "SELECT * FROM collect ORDER BY amount DESC LIMIT 1"
+   }
+  },
+  {
+   "id": "P07-fr",
+   "group": "pair",
+   "pair": "P07",
+   "lang": "tn-fr",
+   "text": "montre le plus gros dépôt",
+   "expect": {
+    "kind": "ledger",
+    "frame": "ledger-biggest",
+    "target": "SELECT * FROM collect ORDER BY amount DESC LIMIT 1"
+   }
+  },
+  {
+   "id": "P08-en",
+   "group": "pair",
+   "pair": "P08",
+   "lang": "tn-en",
+   "text": "show deposits of Aminata over 4000",
+   "expect": {
+    "kind": "ledger",
+    "frame": "ledger-member-over",
+    "target": "SELECT * FROM collect WHERE member = \"Aminata\" AND amount > 4000"
+   }
+  },
+  {
+   "id": "P08-fr",
+   "group": "pair",
+   "pair": "P08",
+   "lang": "tn-fr",
+   "text": "montre les dépôts de Aminata au dessus de 4000",
+   "expect": {
+    "kind": "ledger",
+    "frame": "ledger-member-over",
+    "target": "SELECT * FROM collect WHERE member = \"Aminata\" AND amount > 4000"
+   }
+  },
+  {
+   "id": "P09-en",
+   "group": "pair",
+   "pair": "P09",
+   "lang": "tn-en",
+   "text": "show deposits",
+   "expect": {
+    "kind": "ledger",
+    "frame": "ledger-all",
+    "target": "SELECT * FROM collect"
+   }
+  },
+  {
+   "id": "P09-fr",
+   "group": "pair",
+   "pair": "P09",
+   "lang": "tn-fr",
+   "text": "montre les dépôts",
+   "expect": {
+    "kind": "ledger",
+    "frame": "ledger-all",
+    "target": "SELECT * FROM collect"
+   }
+  },
+  {
+   "id": "P10-en",
+   "group": "pair",
+   "pair": "P10",
+   "lang": "tn-en",
+   "text": "who received the pot in round 2",
+   "expect": {
+    "kind": "graph",
+    "frame": "graph-pot",
+    "target": "[\"?x\", \"received_pot_in\", \"round2\"]",
+    "answer": [
+     "moussa"
+    ],
+    "say": "Moussa received the pot in round 2."
+   }
+  },
+  {
+   "id": "P10-fr",
+   "group": "pair",
+   "pair": "P10",
+   "lang": "tn-fr",
+   "text": "qui a reçu la cagnotte au tour 2",
+   "expect": {
+    "kind": "graph",
+    "frame": "graph-pot",
+    "target": "[\"?x\", \"received_pot_in\", \"round2\"]",
+    "answer": [
+     "moussa"
+    ],
+    "say": "Moussa a reçu la cagnotte au tour 2."
+   }
+  },
+  {
+   "id": "P11-en",
+   "group": "pair",
+   "pair": "P11",
+   "lang": "tn-en",
+   "text": "who received the pot in round 1",
+   "expect": {
+    "kind": "graph",
+    "frame": "graph-pot",
+    "target": "[\"?x\", \"received_pot_in\", \"round1\"]",
+    "answer": [
+     "fatima"
+    ],
+    "say": "Fatima received the pot in round 1."
+   }
+  },
+  {
+   "id": "P11-fr",
+   "group": "pair",
+   "pair": "P11",
+   "lang": "tn-fr",
+   "text": "qui a reçu la cagnotte au tour 1",
+   "expect": {
+    "kind": "graph",
+    "frame": "graph-pot",
+    "target": "[\"?x\", \"received_pot_in\", \"round1\"]",
+    "answer": [
+     "fatima"
+    ],
+    "say": "Fatima a reçu la cagnotte au tour 1."
+   }
+  },
+  {
+   "id": "P12-en",
+   "group": "pair",
+   "pair": "P12",
+   "lang": "tn-en",
+   "text": "who guarantees Sanda",
+   "expect": {
+    "kind": "graph",
+    "frame": "graph-guarantor",
+    "target": "[\"?x\", \"guarantees\", \"sanda\"]",
+    "answer": [
+     "boubacar"
+    ],
+    "say": "Boubacar guarantees Sanda."
+   }
+  },
+  {
+   "id": "P12-fr",
+   "group": "pair",
+   "pair": "P12",
+   "lang": "tn-fr",
+   "text": "qui se porte garant de Sanda",
+   "expect": {
+    "kind": "graph",
+    "frame": "graph-guarantor",
+    "target": "[\"?x\", \"guarantees\", \"sanda\"]",
+    "answer": [
+     "boubacar"
+    ],
+    "say": "Boubacar se porte garant de Sanda."
+   }
+  },
+  {
+   "id": "P13-en",
+   "group": "pair",
+   "pair": "P13",
+   "lang": "tn-en",
+   "text": "who is guaranteed by Aminata",
+   "expect": {
+    "kind": "graph",
+    "frame": "graph-guaranteed-by",
+    "target": "[\"aminata\", \"guarantees\", \"?x\"]",
+    "answer": [
+     "moussa"
+    ],
+    "say": "Aminata guarantees Moussa."
+   }
+  },
+  {
+   "id": "P13-fr",
+   "group": "pair",
+   "pair": "P13",
+   "lang": "tn-fr",
+   "text": "qui est garanti par Aminata",
+   "expect": {
+    "kind": "graph",
+    "frame": "graph-guaranteed-by",
+    "target": "[\"aminata\", \"guarantees\", \"?x\"]",
+    "answer": [
+     "moussa"
+    ],
+    "say": "Aminata se porte garant de Moussa."
+   }
+  },
+  {
+   "id": "P14-en",
+   "group": "pair",
+   "pair": "P14",
+   "lang": "tn-en",
+   "text": "who is the treasurer",
+   "expect": {
+    "kind": "graph",
+    "frame": "graph-role",
+    "target": "[\"?x\", \"holds_role\", \"treasurer\"]",
+    "answer": [
+     "zeinab"
+    ],
+    "say": "The treasurer is Zeinab."
+   }
+  },
+  {
+   "id": "P14-fr",
+   "group": "pair",
+   "pair": "P14",
+   "lang": "tn-fr",
+   "text": "qui est le trésorier",
+   "expect": {
+    "kind": "graph",
+    "frame": "graph-role",
+    "target": "[\"?x\", \"holds_role\", \"treasurer\"]",
+    "answer": [
+     "zeinab"
+    ],
+    "say": "Le trésorier est Zeinab."
+   }
+  },
+  {
+   "id": "P15-en",
+   "group": "pair",
+   "pair": "P15",
+   "lang": "tn-en",
+   "text": "who is the collector",
+   "expect": {
+    "kind": "graph",
+    "frame": "graph-role",
+    "target": "[\"?x\", \"holds_role\", \"collector\"]",
+    "answer": [
+     "boubacar"
+    ],
+    "say": "The collector is Boubacar."
+   }
+  },
+  {
+   "id": "P15-fr",
+   "group": "pair",
+   "pair": "P15",
+   "lang": "tn-fr",
+   "text": "qui est le collecteur",
+   "expect": {
+    "kind": "graph",
+    "frame": "graph-role",
+    "target": "[\"?x\", \"holds_role\", \"collector\"]",
+    "answer": [
+     "boubacar"
+    ],
+    "say": "Le collecteur est Boubacar."
+   }
+  },
+  {
+   "id": "P16-en",
+   "group": "pair",
+   "pair": "P16",
+   "lang": "tn-en",
+   "text": "show the deposits of the beneficiary of round 2",
+   "expect": {
+    "kind": "plan",
+    "frame": "plan-beneficiary-deposits",
+    "target": "[\"?x\", \"received_pot_in\", \"round2\"] => SELECT * FROM collect WHERE member = \"{MEMBER}\"",
+    "answer": [
+     "moussa"
+    ],
+    "say": "The beneficiary of round 2 is Moussa."
+   }
+  },
+  {
+   "id": "P16-fr",
+   "group": "pair",
+   "pair": "P16",
+   "lang": "tn-fr",
+   "text": "montre les dépôts du bénéficiaire du tour 2",
+   "expect": {
+    "kind": "plan",
+    "frame": "plan-beneficiary-deposits",
+    "target": "[\"?x\", \"received_pot_in\", \"round2\"] => SELECT * FROM collect WHERE member = \"{MEMBER}\"",
+    "answer": [
+     "moussa"
+    ],
+    "say": "Le bénéficiaire du tour 2 est Moussa."
+   }
+  },
+  {
+   "id": "P17-en",
+   "group": "pair",
+   "pair": "P17",
+   "lang": "tn-en",
+   "text": "show the deposits of the beneficiary of round 1",
+   "expect": {
+    "kind": "plan",
+    "frame": "plan-beneficiary-deposits",
+    "target": "[\"?x\", \"received_pot_in\", \"round1\"] => SELECT * FROM collect WHERE member = \"{MEMBER}\"",
+    "answer": [
+     "fatima"
+    ],
+    "say": "The beneficiary of round 1 is Fatima."
+   }
+  },
+  {
+   "id": "P17-fr",
+   "group": "pair",
+   "pair": "P17",
+   "lang": "tn-fr",
+   "text": "montre les dépôts du bénéficiaire du tour 1",
+   "expect": {
+    "kind": "plan",
+    "frame": "plan-beneficiary-deposits",
+    "target": "[\"?x\", \"received_pot_in\", \"round1\"] => SELECT * FROM collect WHERE member = \"{MEMBER}\"",
+    "answer": [
+     "fatima"
+    ],
+    "say": "Le bénéficiaire du tour 1 est Fatima."
+   }
+  },
+  {
+   "id": "V01",
+   "group": "variant",
+   "lang": "tn-en",
+   "text": "list all deposits above 7500",
+   "expect": {
+    "kind": "ledger",
+    "frame": "ledger-over",
+    "target": "SELECT * FROM collect WHERE amount > 7500"
+   }
+  },
+  {
+   "id": "V02",
+   "group": "variant",
+   "lang": "tn-en",
+   "text": "display the largest deposit",
+   "expect": {
+    "kind": "ledger",
+    "frame": "ledger-biggest",
+    "target": "SELECT * FROM collect ORDER BY amount DESC LIMIT 1"
+   }
+  },
+  {
+   "id": "V03",
+   "group": "variant",
+   "lang": "tn-en",
+   "text": "SHOW DEPOSITS OVER 5000",
+   "expect": {
+    "kind": "ledger",
+    "frame": "ledger-over",
+    "target": "SELECT * FROM collect WHERE amount > 5000"
+   }
+  },
+  {
+   "id": "V04",
+   "group": "variant",
+   "lang": "tn-en",
+   "text": "show deposits over 5000?",
+   "expect": {
+    "kind": "ledger",
+    "frame": "ledger-over",
+    "target": "SELECT * FROM collect WHERE amount > 5000"
+   }
+  },
+  {
+   "id": "V05",
+   "group": "variant",
+   "lang": "tn-en",
+   "text": "who got the pot in round 3",
+   "expect": {
+    "kind": "graph",
+    "frame": "graph-pot",
+    "target": "[\"?x\", \"received_pot_in\", \"round3\"]",
+    "answer": [
+     "aminata"
+    ],
+    "say": "Aminata received the pot in round 3."
+   }
+  },
+  {
+   "id": "V06",
+   "group": "variant",
+   "lang": "tn-fr",
+   "text": "Montre les dépôts de AMINATA",
+   "expect": {
+    "kind": "ledger",
+    "frame": "ledger-member",
+    "target": "SELECT * FROM collect WHERE member = \"Aminata\""
+   }
+  },
+  {
+   "id": "V07",
+   "group": "variant",
+   "lang": "tn-fr",
+   "text": "montre les depots au dessus de 5000",
+   "expect": {
+    "kind": "ledger",
+    "frame": "ledger-over",
+    "target": "SELECT * FROM collect WHERE amount > 5000"
+   }
+  },
+  {
+   "id": "V09",
+   "group": "variant",
+   "lang": "tn-en",
+   "text": "show me the deposits please",
+   "expect": {
+    "kind": "ledger",
+    "frame": "ledger-all",
+    "target": "SELECT * FROM collect"
+   }
+  },
+  {
+   "id": "V08",
+   "group": "variant",
+   "lang": "tn-en",
+   "text": "who received the pot in round 9",
+   "expect": {
+    "kind": "graph",
+    "frame": "graph-pot",
+    "target": "[\"?x\", \"received_pot_in\", \"round9\"]",
+    "answer": [],
+    "say": "Nobody received the pot in round 9."
+   }
+  },
+  {
+   "id": "N01",
+   "group": "refuse",
+   "lang": "tn-en",
+   "text": "what is the meaning of life",
+   "expect": {
+    "kind": "refused",
+    "why": "a word outside the vocabulary"
+   }
+  },
+  {
+   "id": "N02",
+   "group": "refuse",
+   "lang": "tn-en",
+   "text": "who guarantees",
+   "expect": {
+    "kind": "refused",
+    "why": "a question without its object: no question has this shape"
+   }
+  },
+  {
+   "id": "N03",
+   "group": "refuse",
+   "lang": "tn-en",
+   "text": "show deposits over",
+   "expect": {
+    "kind": "refused",
+    "why": "a comparison without its number"
+   }
+  },
+  {
+   "id": "N04",
+   "group": "refuse",
+   "lang": "tn-en",
+   "text": "show deposits of Mallory",
+   "expect": {
+    "kind": "refused",
+    "why": "a name the world does not know"
+   }
+  },
+  {
+   "id": "N05",
+   "group": "refuse",
+   "lang": "tn-fr",
+   "text": "montre les dépôts de Mallory",
+   "expect": {
+    "kind": "refused",
+    "why": "a name the world does not know"
+   }
+  },
+  {
+   "id": "N06",
+   "group": "refuse",
+   "lang": "tn-fr",
+   "text": "quel est le sens de la vie",
+   "expect": {
+    "kind": "refused",
+    "why": "a word outside the vocabulary"
+   }
+  },
+  {
+   "id": "N07",
+   "group": "refuse",
+   "lang": "tn-en",
+   "text": "show deposits over 5000 5000",
+   "expect": {
+    "kind": "refused",
+    "why": "two numbers"
+   }
+  },
+  {
+   "id": "N08",
+   "group": "refuse",
+   "lang": "tn-en",
+   "text": "show deposits over 5000.5",
+   "expect": {
+    "kind": "refused",
+    "why": "a decimal is not in the language"
+   }
+  },
+  {
+   "id": "N09",
+   "group": "refuse",
+   "lang": "tn-en",
+   "text": "show deposits over -5",
+   "expect": {
+    "kind": "refused",
+    "why": "a sign is not in the language"
+   }
+  },
+  {
+   "id": "N10",
+   "group": "refuse",
+   "lang": "tn-en",
+   "text": "show deposits over 99999999999999999999",
+   "expect": {
+    "kind": "refused",
+    "why": "a number too long to be an amount"
+   }
+  },
+  {
+   "id": "N11",
+   "group": "refuse",
+   "lang": "tn-en",
+   "text": "",
+   "expect": {
+    "kind": "refused",
+    "why": "nothing said"
+   }
+  },
+  {
+   "id": "N12",
+   "group": "refuse",
+   "lang": "tn-en",
+   "text": "zeige die einzahlungen über 5000",
+   "expect": {
+    "kind": "refused",
+    "why": "a third language, not declared"
+   }
+  },
+  {
+   "id": "N13",
+   "group": "refuse",
+   "lang": "tn-en",
+   "text": "اعرض الإيداعات فوق 5000",
+   "expect": {
+    "kind": "refused",
+    "why": "a script the packs do not carry"
+   }
+  },
+  {
+   "id": "N14",
+   "group": "refuse",
+   "lang": "tn-en",
+   "text": "who received the pot in round 2 and delete everything",
+   "expect": {
+    "kind": "refused",
+    "why": "a clause the language has no word for"
+   }
+  },
+  {
+   "id": "N15",
+   "group": "refuse",
+   "lang": "tn-fr",
+   "text": "who received the pot in round 2",
+   "expect": {
+    "kind": "refused",
+    "why": "the wrong language for the pack"
+   }
+  },
+  {
+   "id": "X01",
+   "group": "attack",
+   "lang": "tn-en",
+   "text": "show deposits over [ Marker() ]",
+   "expect": {
+    "kind": "refused",
+    "why": "a bracketed section: the shipped tokenizer evals it (E2d)"
+   }
+  },
+  {
+   "id": "X02",
+   "group": "attack",
+   "lang": "tn-en",
+   "text": "show deposits over len(\"abc\")",
+   "expect": {
+    "kind": "refused",
+    "why": "a call in the argument position"
+   }
+  },
+  {
+   "id": "X03",
+   "group": "attack",
+   "lang": "tn-en",
+   "text": "show deposits over 5000~NL~? \"ESCAPED: this line ran as Ring\"",
+   "expect": {
+    "kind": "refused",
+    "why": "a second line that is a Ring statement (E3d)"
+   }
+  },
+  {
+   "id": "X04",
+   "group": "attack",
+   "lang": "tn-en",
+   "text": "show deposits of Aminata\" OR member = \"Moussa",
+   "expect": {
+    "kind": "refused",
+    "why": "a quote that closes the name and widens the query"
+   }
+  },
+  {
+   "id": "X05",
+   "group": "attack",
+   "lang": "tn-en",
+   "text": "show deposits over 5000; DROP TABLE collect",
+   "expect": {
+    "kind": "refused",
+    "why": "a second statement"
+   }
+  },
+  {
+   "id": "X06",
+   "group": "attack",
+   "lang": "tn-en",
+   "text": "show deposits over 5000 OR 1=1",
+   "expect": {
+    "kind": "refused",
+    "why": "a tautology"
+   }
+  },
+  {
+   "id": "X07",
+   "group": "attack",
+   "lang": "tn-en",
+   "text": "drop deposits",
+   "expect": {
+    "kind": "refused",
+    "why": "a verb the language does not have"
+   }
+  },
+  {
+   "id": "X08",
+   "group": "attack",
+   "lang": "tn-en",
+   "text": "select * from collect",
+   "expect": {
+    "kind": "refused",
+    "why": "raw ZQL"
+   }
+  },
+  {
+   "id": "X09",
+   "group": "attack",
+   "lang": "tn-en",
+   "text": "Marker()",
+   "expect": {
+    "kind": "refused",
+    "why": "a bare call"
+   }
+  },
+  {
+   "id": "X10",
+   "group": "attack",
+   "lang": "tn-en",
+   "text": "show deposits over 1:5",
+   "expect": {
+    "kind": "refused",
+    "why": "a range: the tokenizer evals those too"
+   }
+  },
+  {
+   "id": "X11",
+   "group": "attack",
+   "lang": "tn-en",
+   "text": "show deposits over `Marker()`",
+   "expect": {
+    "kind": "refused",
+    "why": "a backquoted string"
+   }
+  },
+  {
+   "id": "X12",
+   "group": "attack",
+   "lang": "tn-en",
+   "text": "show deposits over {Marker()}",
+   "expect": {
+    "kind": "refused",
+    "why": "braces"
+   }
+  },
+  {
+   "id": "X13",
+   "group": "attack",
+   "lang": "tn-fr",
+   "text": "montre les dépôts de Aminata~NL~Marker()",
+   "expect": {
+    "kind": "refused",
+    "why": "a newline, then a call"
+   }
+  },
+  {
+   "id": "X14",
+   "group": "attack",
+   "lang": "tn-en",
+   "text": "show deposits over $nMarker",
+   "expect": {
+    "kind": "refused",
+    "why": "a Ring global"
+   }
+  },
+  {
+   "id": "X15",
+   "group": "attack",
+   "lang": "tn-en",
+   "text": "show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show show",
+   "expect": {
+    "kind": "refused",
+    "why": "a very long question"
+   }
+  },
+  {
+   "id": "X16",
+   "group": "attack",
+   "lang": "tn-en",
+   "text": "show deposits over ［ Marker() ］",
+   "expect": {
+    "kind": "refused",
+    "why": "full-width brackets: bytes the gate lets through, a shape the tokenizer must not read as a section"
+   }
+  }
+ ]
+}

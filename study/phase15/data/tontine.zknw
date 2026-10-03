@@ -1,0 +1,25 @@
+knowledge "tontine"
+
+facts
+    aminata | is-a | member
+    moussa | is-a | member
+    fatima | is-a | member
+    sanda | is-a | member
+    boubacar | is-a | member
+    zeinab | is-a | member
+    round1 | is-a | round
+    round2 | is-a | round
+    round3 | is-a | round
+    treasurer | is-a | role
+    collector | is-a | role
+    fatima | received_pot_in | round1
+    moussa | received_pot_in | round2
+    aminata | received_pot_in | round3
+    boubacar | guarantees | sanda
+    fatima | guarantees | zeinab
+    aminata | guarantees | moussa
+    zeinab | holds_role | treasurer
+    boubacar | holds_role | collector
+
+ontology
+    received_pot_in | unique

@@ -1,0 +1,6 @@
+E3a [show deposits over 5000] query=<SELECT * FROM collect WHERE amount > 5000> error=<>
+E3b [montre les depots au dessus de 5000] query=<SELECT * FROM collect WHERE amount > 5000> error=<>
+E3c1 [show deposits over lots] query=<> error=<>
+E3c2 [show me the deposits please] query=<> error=<>
+ESCAPED: this line ran as Ring
+E3d [show deposits over 5000 | ? "ESCAPED: this line ran as Ring"] query=<SELECT * FROM collect WHERE amount > 5000> error=<>

@@ -76,6 +76,7 @@ expression language forged whole, judged by stz's 29 fixtures as stage 8, pinned
 | `spike/haro_mutate.py` | five operators that put a defect of a known kind into a sound declaration without moving a line, and the stage rule they are judged by: the union of single defects |
 | `spike/v16/GRAMMAR.md`, `spike/v16/fixtures.json`, `spike/v16/run_cases.json` | **Haro v0.16** (the sixteenth rung, below): NARRATE gains TELLS -- a template per event of a run or of a question; `narrate-run` and `narrate-ask`; the narration is a projection of the run itself; three runs and a question, and the same court under a voice that tells almost nothing, composed by hand before the court |
 | `spike/a_v16.haro`, `spike/z_v16.haro` | A with a voice that tells a run and Z with one that tells a question: `a_v09.haro` and `z_v10.haro` plus a NARRATE (the guard's `A_STZU` and `Z_STZU` since this rung; the 35 cases and 25 questions are unchanged) |
+| `study/phase15/` | **The Phase 1.5 study** (ringua's exemplar extension study, run 2026-10-03; not a rung): `STUDY.md`, the experiments E1-E4, `nlq.ring` (stzNatural's architecture retargeted to closed queries), the judges, 74 hand-composed questions in English and French, the tontine's knowledge graph as a text artifact; `python haro/study/phase15/study_run.py` |
 | `spike/world_lib.ring`, `spike/world_stub.ring` | the world's functions (SYMBOL resolution, the C1 rows), moved out of `court_lib.ring` and loaded only where a SYMBOL or PUBLISH is declared, and the stub that stands elsewhere |
 
 Nothing in `rnxc` or the VM changed. Nothing in a sibling repository changed.
@@ -1170,6 +1171,27 @@ docstring.
 expression (`{value}` is the number); one template per event, no wording by value; the laws
 judge shape and values, not that a template reads well; N, the language of the natural, still
 waits on its study.
+
+## The Phase 1.5 study -- run 2026-10-03
+
+**On the author's "run the Phase 1.5 study".** Ringua's gate for the natural letter (06-ALPHABET: "the named gate
+before any N API is drawn"): give the tontine a small knowledge graph and a natural-language question surface
+compiled to a closed query grammar, in at least two human languages, and say what composes, what resists, and what the
+kit must provide. It is not a rung and forged no letter; it is `haro/study/phase15/`, and `STUDY.md` is its result.
+
+    E3  NaturalLib 1.27 as shipped      9 of 9 facts: the question is Ring source evaluated; unknown prose silently
+                                        accepted; absent from Ring++
+    E1  the knowledge graph             stzKnowledgeGraph, 19 facts + a law, a 25-line text artifact, reloaded
+    E2  stzNatural as shipped, then     refuses a tontine question; the vocabulary as data gives ONE semantic form
+        retargeted by data              in English and French (3 of 3); its tokenizer evals bracketed text
+    E4  the composed exemplar           74 questions, G1-G7: closed targets, answers, 17 of 17 pairs identical across
+                                        languages, 16 attacks refused with the canary at 0 (and 1 without the gate),
+                                        refusals by name, the court refusing tampering, answers told in each language,
+                                        the same 111 lines on official Ring 1.27 and on Ring++
+
+**The qualification is the finding**: the closure is the gate's, because the shipped tokenizer is open (HF-67). The
+engine choice is confirmed on the architecture and corrected on two claims. **No N API is drawn**: STUDY.md section
+6 lists ten requirements (K1-K10) of the knowledge and pragmatics tiers, each traced to a measurement.
 
 ## The names -- `.haro`, not `.stzu` -- corrected 2026-10-02
 
