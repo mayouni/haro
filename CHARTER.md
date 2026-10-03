@@ -656,6 +656,8 @@ one growth the rung needs is a meta-clause, `UNDERSTAND`. **Decisions D-N1 to D-
 recorded with their costs** (GRAMMAR section 9); the drafting half of N (`propose`) is reserved, not drawn. Guard
 stage 20 (HF-68).
 
+**N, built, 2026-10-04, on the author's "build rung 17"** (`haro/spike/v17/GRAMMAR.md`, the seventeenth rung, Haro v0.17). The meta-court takes the one meta-clause the drawing asked for, `UNDERSTAND` (eight roles, each one declaration with the seats the court reads; 12 fixtures in stage 1); the forge emits a court that carries `n_lib.ring`: the rules of GRAMMAR 4b (15 codes, 21 fixtures, each load-bearing) and the verbs `tokens`, `understand`, `ask`, `vocabulary`, `examples`, with `check <file> surfaces` asking the ledger's own court to judge every ledger query. The forged court reproduces the study on 74 of 74 questions and agrees with the reference model field for field. Found by building and recorded as decisions: case folding is ASCII and Latin-1 only (D-N16), N never runs a query surface and hands the host a `run` hint (D-N17), `surfaces` is opt-in (D-N18), a tongue needs a `JOINS` seat, a world that cannot be read is a finding (`N_WORLD_UNREAD`). Guard: 20 stages, PASS in 333.4 s, every plant fails (HF-69). `propose` stays reserved.
+
 v0.1's spike (`twice.haro`, a definition with an intent clause) proved one altitude. The
 ruling asks for three to meet, and the estate has already named the smallest program that
 makes them: the alphabet's own proof obligation, "Z re-expressed through stzf from `z.stzu`

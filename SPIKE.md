@@ -77,7 +77,7 @@ expression language forged whole, judged by stz's 29 fixtures as stage 8, pinned
 | `spike/v16/GRAMMAR.md`, `spike/v16/fixtures.json`, `spike/v16/run_cases.json` | **Haro v0.16** (the sixteenth rung, below): NARRATE gains TELLS -- a template per event of a run or of a question; `narrate-run` and `narrate-ask`; the narration is a projection of the run itself; three runs and a question, and the same court under a voice that tells almost nothing, composed by hand before the court |
 | `spike/a_v16.haro`, `spike/z_v16.haro` | A with a voice that tells a run and Z with one that tells a question: `a_v09.haro` and `z_v10.haro` plus a NARRATE (the guard's `A_STZU` and `Z_STZU` since this rung; the 35 cases and 25 questions are unchanged) |
 | `study/phase15/` | **The Phase 1.5 study** (ringua's exemplar extension study, run 2026-10-03; not a rung): `STUDY.md`, the experiments E1-E4, `nlq.ring` (stzNatural's architecture retargeted to closed queries), the judges, 74 hand-composed questions in English and French, the tontine's knowledge graph as a text artifact; `python haro/study/phase15/study_run.py` |
-| `spike/n_v17.haro`, `spike/n/tontine.n`, `spike/n_court.ring`, `spike/v17/` | **N, drawn** (the natural letter's API, 2026-10-03; not a built rung): the letter in the existing meta-vocabulary, the tontine's natural door in English and French, the court forged from the letter, `GRAMMAR.md` (the API, 15 decisions), 17 + 20 fixtures, `n_model.py` (the reference model), `n_check.py` (the judge; guard stage 20) |
+| `spike/n_v17.haro`, `spike/n/tontine.n`, `spike/n_court.ring`, `spike/v17/` | **N** (drawn 2026-10-03, **built 2026-10-04 as Haro v0.17, the seventeenth rung**): the letter and its `UNDERSTAND`, the tontine's natural door in English and French, the court forged from the letter with `n_lib.ring` (the verbs and the 15 rules), `GRAMMAR.md` (the API, 18 decisions), 17 + 21 + 12 fixtures, `n_model.py` (the reference model), `n_check.py` (the judge; guard stage 20) |
 | `spike/world_lib.ring`, `spike/world_stub.ring` | the world's functions (SYMBOL resolution, the C1 rows), moved out of `court_lib.ring` and loaded only where a SYMBOL or PUBLISH is declared, and the stub that stands elsewhere |
 
 Nothing in `rnxc` or the VM changed. Nothing in a sibling repository changed.
@@ -1221,6 +1221,31 @@ the tokenizer; fixed in `34f61e1` and recorded in STUDY section 8.
 ratifies). The study measured asking only; the verb is named, its contract stated from the ratified text, and nothing
 about it is derived. **Not drawn either**: the knowledge tier (K1, K2), Hausa and Arabic skins, spelled numbers, a plan
 over a set, a produced binary.
+
+## The seventeenth rung -- Haro v0.17, N built: UNDERSTAND -- 2026-10-04
+
+**On the author's "build rung 17"** (the session was cut by a power outage in Niamey and resumed; the work was committed
+before the cut, `fcdc4d4`). The drawing's one growth, the meta-clause `UNDERSTAND`, and everything it makes the forge
+emit, built and judged by the drawing's own fixtures.
+
+    haro_lib.ring   UNDERSTAND: at most one; eight role clauses (TONGUE MEANING ALIAS SURFACE STEP FRAME EXAMPLE
+                    COUNTEREXAMPLE), each naming one DECLARATION with the seats the court reads; verdict `understands`
+    forge.ring      the language record's 23rd element, `load "n_lib.ring"`, `$aCourtUnderstand` and `$bNSurfaces` in
+                    every court (all committed courts re-forged)
+    court_lib.ring  the rules hook in CtDeclare, the verbs through NatMain, `check|diagnose <file> surfaces`
+    n_lib.ring      tokens, understand, ask, vocabulary, examples; the 15 rules; the gate; the surface protocol
+    n_v17.haro      + the UNDERSTAND and a JOINS seat on TONGUE;  n/tontine.n: JOINS, worlds relative to its folder
+    stage 1         + v0.17: 12 fixtures of the meta-clause (3 accepts, 9 rejects), both runtimes byte for byte
+    stage 20        the judge now tests the REAL court (HF-69): 17 + 21 fixtures, 15 codes each load-bearing, 74
+                    questions, court = model field for field, 19 asks byte-identical on the oracle, the gate canary
+    the pass        PASS, 20 stages in 333.4 s (stage 6: 89.7 ms against the pinned 100); --plant FAIL on stage 1,
+                    stage 20 and n_check
+
+**What building found** (HF-69): the model had decided Unicode for the host (case, space, `\w`), so the court's byte
+semantics became decisions D-N16; a tongue needs `JOINS`; a world that cannot be read is `N_WORLD_UNREAD`; a plan with
+several answers is `ambiguous`; N cannot run a ledger (D-N17); `surfaces` is opt-in (D-N18). **Not claimed:** that N
+generalises -- one sentence (the tontine), two tongues; the study's 74 questions were its source. **Still reserved:**
+`propose`.
 
 ## The names -- `.haro`, not `.stzu` -- corrected 2026-10-02
 
