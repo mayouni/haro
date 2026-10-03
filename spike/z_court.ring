@@ -8,6 +8,7 @@
 
 load "court_lib.ring"
 load "expr_lib.ring"
+load "world_lib.ring"
 load "ask_lib.ring"
 
 $cCourtLang = ""
@@ -50,6 +51,9 @@ $cCourtCode = "PARSE"
 $aCourtCites = []
 $aCourtFormset = NULL
 $aCourtNarrate = NULL
+$bCourtCollect = 0
+$aCourtFound = []
+$aCourtBroken = []
 $cExprLang = ""
 $aExprOperators = []
 $aExprOperands = []

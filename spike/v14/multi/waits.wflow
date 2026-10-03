@@ -1,0 +1,24 @@
+-- two untimed waits, both reachable: C1 and C2
+WORKFLOW bad ( DEFINITION_VERSION "0.1.0", ZQL "x/app.zql", SURFACES "x.face", CALENDAR c VERSION "1", LOCALE fr )
+RATIONALE "Two waits that could last for ever."
+ACTOR a ROLE r
+STEP go
+  INVOKES do_it
+  IRREVERSIBLE
+  ON COMMITTED -> ask_it
+  ON REJECTED  -> wait_it
+  ON HELD      -> fini
+  RATIONALE "Routes to both waits."
+STEP ask_it
+  ASKS a
+  ON SURFACE s
+  DECISIONS [ok]
+  SLA 1 working day
+  ON ok -> fini
+  RATIONALE "A human task with no timeout."
+STEP wait_it
+  AWAITS EVENT something
+  CORRELATED BY key
+  ON RECEIVED -> fini
+  RATIONALE "An event wait with no timeout."
+TERMINAL fini OUTCOME SUCCESS RATIONALE "Done."

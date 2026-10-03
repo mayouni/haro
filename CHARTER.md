@@ -270,6 +270,12 @@ narrated with the author's own reason. Judged by a narration composed by hand fi
 the StzNarration law and stzn's honesty guard, read by Python: 5 lawful sentences whole,
 92 seat values verbatim, 22 refusals as the envelope's own line (HF-63). Section 3's rows are
 now all built but ASK's natural door, which is N's.
+**Haro v0.14, the same day (`haro/spike/v14/GRAMMAR.md`; no clause grew): a court that
+collects.** `diagnose` notes a refusal at each raising site and goes on, so a sentence wrong
+in several places answers every finding, in the order of the file; `check` still stops at the
+first, to the byte; a sentence that does not parse stops the run. Judged by RingFlex's own
+`Check()` pass, live: five sentences with hand predictions (four right, one corrected), 11
+(code, declaration) pairs the same, all 24 original fixtures the same on every finding (HF-64).
 
 **What the forge produces from one declaration** (Ringua's kit, 02-STACK's L1, now Haro's
 compiler verbs rather than separate organs): the parser; the court with the fixtures as its
@@ -594,6 +600,13 @@ ENDS, REFUSES; `f_v13.haro`; the forged court's `narrate`; judged by a hand-writ
 and by the StzNarration law and stzn's honesty guard read in Python -- 5 lawful sentences
 narrated whole, 22 refused ones as the envelope's own line, never parsed back, never stored
 (HF-63). Record: `haro/SPIKE.md`, "The thirteenth rung".
+
+**The fourteenth rung, 2026-10-03, on the author's "continue": Haro v0.14, a court that
+collects.** `diagnose` answers every finding and `check` the first; judged by RingFlex's own
+`Check()` live -- five multi-defect sentences with hand predictions, 11 pairs the same, all 24
+original fixtures the same on every finding, nothing cascading (HF-64). The world's 121
+lines left `court_lib.ring` to keep the cold start under its pinned 100 ms. Record:
+`haro/SPIKE.md`, "The fourteenth rung".
 
 v0.1's spike (`twice.haro`, a definition with an intent clause) proved one altitude. The
 ruling asks for three to meet, and the estate has already named the smallest program that

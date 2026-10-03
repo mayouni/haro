@@ -8,6 +8,7 @@
 
 load "court_lib.ring"
 load "expr_lib.ring"
+load "world_lib.ring"
 load "narrate_lib.ring"
 
 $cCourtLang = ""
@@ -50,6 +51,9 @@ $cCourtCode = "PARSE"
 $aCourtCites = []
 $aCourtFormset = NULL
 $aCourtNarrate = NULL
+$bCourtCollect = 0
+$aCourtFound = []
+$aCourtBroken = []
 $cExprLang = ""
 $aExprOperators = []
 $aExprOperands = []
@@ -91,6 +95,7 @@ $aCourtLangs = [
       ["unknown_declaration", "The RingFlex declaration set is closed -- a workflow says what it declares, and nothing else is expressible.", [["flow", "'FLOW' belongs to ZQL, not to RingFlex. A workflow step INVOKES a ZQL flow by name; it never declares one."], ["invoked_by", "'INVOKED_BY' claims the seam runs upward. It does not: a workflow step INVOKES a ZQL flow, and a ZQL flow may never contain a workflow -- the seam is closed downward (placement contract C3, section 3). What starts a workflow is an event or a person, and a workflow says so nowhere."], ["forever", "'FOREVER' was deleted from the language (author decision, 2026-08-06). A wait without a TIMEOUT is refused, and the dossier that genuinely cannot be timed out is a SUSPENDED state."]], "PARSE", [["flow", "FLOW_IS_ZQL"], ["invoked_by", "SEAM_UPWARD"], ["forever", "PARSE"]], ["article:placement-3"]],
       ["unknown_seat", "a step is exactly one of six kinds, and each says exactly what it says", [["called_by", "'CALLED_BY' claims the seam runs upward. It does not: a workflow step INVOKES a ZQL flow, and a ZQL flow may never contain a workflow -- the seam is closed downward (placement contract C3, section 3)."], ["verdict", "'VERDICT OF' was deleted from the language on 2026-08-07. A step already routes its verdicts and decisions inline -- ON COMMITTED, ON approuver -- so a guard restating one is a second spelling of the same fact. A guard cites a ZQL norm, and nothing else."], ["decision", "'DECISION OF' was deleted from the language on 2026-08-07. A step already routes its verdicts and decisions inline, so a guard restating one is a second spelling of the same fact. A guard cites a ZQL norm, and nothing else."]], "PARSE", [["called_by", "SEAM_UPWARD"], ["verdict", "PARSE"], ["decision", "PARSE"]], ["article:placement-3"]],
       ["unexpected_character", "There is no production in this grammar that can parse an operator -- no operators, no conditionals, no loops, no comparisons, no arithmetic. Branching is declared as named guards on declared arrows; computation belongs to the ZQL flows a step invokes.", [], "PARSE", [], []],
+      ["duplicate_name", "One name, one declaration: an arrow to a name that two declarations share would be ambiguous.", [], "C14", [], ["rule:C14"]],
       ["dangling_reference", "Every arrow lands somewhere declared.", [], "", [], []]
     ],
     [

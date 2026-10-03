@@ -1561,10 +1561,12 @@ def stage14():
             if any(w['code'] != 'NO_WORLD' or w['span']['line'] != 0 for w in warns):
                 code_bad.append((name, f'a warning that is not NO_WORLD at line 0: {warns}'))
         else:
-            if len(errs) != 1:
-                code_bad.append((name, f'expected one error, got {len(errs)}'))
-            elif errs[0]['code'] != want:
-                code_bad.append((name, f'code {errs[0]["code"]} where RingFlex says {want}'))
+            # a collecting court may state one law more than once (a missing TIMEOUT and a missing
+            # ON_TIMEOUT are two seats under C1): every error carries RingFlex's code
+            if not errs:
+                code_bad.append((name, 'expected an error, got none'))
+            elif any(e['code'] != want for e in errs):
+                code_bad.append((name, f'codes {sorted(set(e["code"] for e in errs))} where RingFlex says {want}'))
             elif want.startswith('C') and want[1:].isdigit() and errs[0]['cites'] != ['rule:' + want]:
                 code_bad.append((name, f'cites {errs[0]["cites"]} where RingFlex cites rule:{want}'))
             elif want in ('FLOW_IS_ZQL', 'SEAM_UPWARD') and errs[0]['cites'] != ['article:placement-3']:
@@ -2000,6 +2002,176 @@ def stage16():
     return failures
 
 
+# ---- stage 17: a court that collects, judged by RingFlex's own Check() pass live
+
+MULTI_DIR = os.path.join(HERE, 'v14', 'multi')
+MULTI_CASES = os.path.join(HERE, 'v14', 'multi_cases.json')
+RF_MULTI = os.path.join(HERE, 'rf_multi.ring')
+WFLOW_START = re.compile(r'^[A-Z_]+\s+(\w+)')
+F_START = re.compile(r'^DEFINE\s+\w+\s+(\w+)')
+NO_DECL_CODES = ('PARSE', 'FLOW_IS_ZQL', 'SEAM_UPWARD')
+
+
+def decl_starts(path, notation):
+    out = []
+    rx = F_START if notation == 'f' else WFLOW_START
+    for i, line in enumerate(open(path, encoding='utf-8').read().splitlines(), 1):
+        m = rx.match(line)
+        if m:
+            out.append((i, m.group(1)))
+    return out
+
+
+def decl_at(starts, line):
+    name = None
+    for ln, nm in starts:
+        if ln <= line:
+            name = nm
+    return name
+
+
+def pairs_of(diags, starts):
+    """(code, declaration) for each error; a grammar refusal names no declaration -- the two
+    notations spell the same sentence on different lines, so only its code is compared."""
+    out = []
+    for d in diags:
+        if d['severity'] != 'error':
+            continue
+        out.append((d['code'], None if d['code'] in NO_DECL_CODES else decl_at(starts, d['span']['line'])))
+    return out
+
+
+def rf_findings(paths, script):
+    p = subprocess.run([RING_OFFICIAL, script] + paths, cwd=RINGFLEX, capture_output=True, timeout=180)
+    live = {}
+    for line in p.stdout.decode('utf-8', 'replace').splitlines():
+        if '\t' in line:
+            k, _, js = line.partition('\t')
+            try:
+                live[os.path.basename(k)] = json.loads(js)['diagnostics']
+            except (json.JSONDecodeError, KeyError):
+                pass
+    return live
+
+
+def stage17():
+    """The fourteenth rung. `diagnose` goes on past a refusal to the next element of
+    every pass and answers every finding, in the order of the file; `check` still
+    stops at the first. The judge is RingFlex's own court: its Check() pass collects
+    every finding, run live under official Ring (read-only) on the .wflow twin of five
+    sentences with several defects written, with my predictions, BEFORE the court, and on
+    its 24 original fixtures. The forged court must report every (code, declaration) pair
+    RingFlex reports and no pair RingFlex does not; it may say a pair more often (a missing
+    TIMEOUT and a missing ON_TIMEOUT are two seats under one law)."""
+    print('stage 17 -- a court that collects: `diagnose` answers every finding, judged by RingFlex\'s own Check() pass, live')
+    failures = 0
+    run_args(RNXC, ['forge.ring', F_STZU, '.'], HERE)
+    ab_diff = []
+    def both(args, label):
+        r = narr_run(RNXC, args)
+        o = narr_run(ORACLE, args)
+        if r != o:
+            ab_diff.append(label)
+        return r
+    if not (os.path.exists(RING_OFFICIAL) and os.path.isdir(RINGFLEX)):
+        print('  SKIP RingFlex\'s court live: official Ring 1.27 is not installed here')
+        return 0
+    doc = json.load(open(MULTI_CASES, encoding='utf-8'))
+    wpaths = [os.path.join(MULTI_DIR, c['name'] + '.wflow') for c in doc['cases']]
+    live = rf_findings(wpaths, RF_MULTI)
+    miss = [c['name'] for c in doc['cases'] if c['name'] + '.wflow' not in live]
+    if miss:
+        print(f'  FAIL RingFlex printed nothing for {miss}')
+        return 1
+    # 1. the hand-written predictions against RingFlex, then the forged court against RingFlex
+    pred_bad = []
+    forged_bad = []
+    n_pairs = n_more = 0
+    for c in doc['cases']:
+        name = c['name']
+        wstarts = decl_starts(os.path.join(MULTI_DIR, name + '.wflow'), 'wflow')
+        fstarts = decl_starts(os.path.join(MULTI_DIR, name + '.f'), 'f')
+        rf = sorted((a, b or '') for a, b in pairs_of(live[name + '.wflow'], wstarts))
+        hand = sorted((code, d) for code, ds in c['predict'].items() for d in ds)
+        if rf != hand:
+            pred_bad.append((name, f'hand {hand} / RingFlex {rf}'))
+        fd = json.loads(both(['diagnose', os.path.join('v14', 'multi', name + '.f')], 'multi:' + name))['diagnostics']
+        fg = sorted((a, b or '') for a, b in pairs_of(fd, fstarts))
+        if set(fg) != set(rf):
+            forged_bad.append((name, f'forged {sorted(set(fg))} / RingFlex {sorted(set(rf))}'))
+        for pr in set(rf):
+            n_pairs += 1
+            want_n = 1 if pr[0] in doc.get('stated_once', []) else rf.count(pr)
+            if fg.count(pr) < want_n:
+                forged_bad.append((name, f'{pr} said {fg.count(pr)} time(s), RingFlex says {rf.count(pr)}'))
+            elif fg.count(pr) > want_n:
+                n_more += 1
+    # the one prediction RingFlex corrected is recorded in the case file itself
+    corrected = [c['name'] for c in doc['cases'] if c.get('missed')]
+    if pred_bad:
+        failures += len(pred_bad)
+        for name, why in pred_bad:
+            print(f'  FAIL prediction {name}: {why}')
+    print(('  FAIL ' if pred_bad else '  ok   ') + f'the hand-written predictions are RingFlex\'s findings ({len(doc["cases"])} sentences; {len(corrected)} corrected after RingFlex spoke: {", ".join(corrected) or "none"})')
+    if forged_bad:
+        failures += len(forged_bad)
+        for name, why in forged_bad[:6]:
+            print(f'  FAIL {name}: {why}')
+    print(('  FAIL ' if forged_bad else '  ok   ') + f'the forged court reports every (code, declaration) pair RingFlex reports and none it does not: {n_pairs} pairs over {len(doc["cases"])} sentences, {n_more} said more often')
+    # 2. no cascade where RingFlex finds one thing: the 24 originals, every finding, not only the first
+    names = sorted(f[:-len('.wflow')] for f in os.listdir(os.path.join(RINGFLEX, 'fixtures')) if f.endswith('.wflow'))
+    wpaths = [os.path.join(RINGFLEX, 'fixtures', n + '.wflow') for n in names]
+    live2 = rf_findings(wpaths, RF_MULTI)
+    orig_bad = []
+    n_orig = 0
+    for n in names:
+        fpath = os.path.join(F_DIR, n + '.f')
+        if not os.path.exists(fpath) or n + '.wflow' not in live2:
+            continue
+        n_orig += 1
+        rf = sorted((a, b or '') for a, b in pairs_of(live2[n + '.wflow'], decl_starts(os.path.join(RINGFLEX, 'fixtures', n + '.wflow'), 'wflow')))
+        fd = json.loads(both(['diagnose', os.path.join('f', n + '.f')], 'orig:' + n))['diagnostics']
+        fg = sorted((a, b or '') for a, b in pairs_of(fd, decl_starts(fpath, 'f')))
+        if set(fg) != set(rf):
+            orig_bad.append((n, f'forged {sorted(set(fg))} / RingFlex {sorted(set(rf))}'))
+    if orig_bad:
+        failures += len(orig_bad)
+        for name, why in orig_bad[:6]:
+            print(f'  FAIL {name}: {why}')
+    print(('  FAIL ' if orig_bad else '  ok   ') + f'collecting adds nothing where RingFlex finds one thing: all {n_orig} original fixtures, every finding, the same (code, declaration) pairs ({len(orig_bad)} differ)')
+    # 3. `check` is unchanged: one line, the first refusal, which is one of the findings
+    r = both(['check', os.path.join('v14', 'multi', 'three_laws.f')], 'check')
+    fd = json.loads(both(['diagnose', os.path.join('v14', 'multi', 'three_laws.f')], 'check-d'))['diagnostics']
+    if len(r.splitlines()) != 1 or not any(d['message'] in r for d in fd):
+        failures += 1
+        print(f'  FAIL check on a sentence with several defects is not one line, one of the findings: {r[:140]!r}')
+    else:
+        print('  ok   check still stops at the first refusal, one line, to the byte: it is one of the findings diagnose answers')
+    # 4. a sentence that does not parse has nothing to collect from: one finding, the parse's
+    fd = json.loads(both(['diagnose', os.path.join('f', 'uses-flow.f')], 'parse'))['diagnostics']
+    if len(fd) != 1 or fd[0]['code'] != 'FLOW_IS_ZQL':
+        failures += 1
+        print(f'  FAIL a sentence that does not parse answered {[d["code"] for d in fd]}')
+    else:
+        print('  ok   a sentence that does not parse is one finding, the parse\'s: there is no declaration to judge past it')
+    # 5. a sentence with no defect is still the empty array
+    fd = json.loads(both(['diagnose', os.path.join('f', 'minimal-clean.f')], 'clean'))['diagnostics']
+    if [d for d in fd if d['severity'] == 'error']:
+        failures += 1
+        print('  FAIL a clean sentence answered an error')
+    else:
+        print('  ok   a clean sentence has no error')
+    if PLANT:
+        failures += 1
+        print('  FAIL the collection -- PLANTED')
+    if ab_diff:
+        failures += 1
+        print(f'  FAIL rnxc and the oracle differ on {len(ab_diff)} run(s): {ab_diff[:5]}')
+    else:
+        print('  ok   rnxc and the oracle print the same bytes on every diagnose and check run')
+    return failures
+
+
 def stage6(lang, court=None, n=15):
     court = court or f'{lang}_court.ring'
     print(f'stage 6 -- edit to verdict on makeen_box.machine, minima of {n}')
@@ -2091,5 +2263,7 @@ if __name__ == '__main__':
         failures += stage15()
     if stage in (None, 16) and os.path.exists(F_STZU) and os.path.exists(NARR_CASES):
         failures += stage16()
+    if stage in (None, 17) and os.path.exists(F_STZU) and os.path.exists(MULTI_CASES):
+        failures += stage17()
     print(f'haro_forge: {"FAIL" if failures else "PASS"} ({failures} failure(s), {time.perf_counter()-t0:.1f} s)')
     sys.exit(1 if failures else 0)

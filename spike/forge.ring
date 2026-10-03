@@ -425,6 +425,12 @@ func ForgeCourt(aLang)
 	if len(LangGet(aLang, "expressions")) > 0 or bAsk or bRun or bSym
 		c += 'load "expr_lib.ring"' + nl
 	ok
+	# v0.14: the world functions load only where the language declares a world; a stub stands elsewhere
+	if bSym
+		c += 'load "world_lib.ring"' + nl
+	else
+		c += 'load "world_stub.ring"' + nl
+	ok
 	if bAsk
 		c += 'load "ask_lib.ring"' + nl
 	ok
@@ -452,6 +458,7 @@ func ForgeCourt(aLang)
 	c += "$aCourtSymbols = []" + nl + "$aCourtWorldFile = NULL" + nl
 	c += "$cCourtCode = " + RingStr("PARSE") + nl + "$aCourtCites = []" + nl
 	c += "$aCourtFormset = NULL" + nl + "$aCourtNarrate = NULL" + nl
+	c += "$bCourtCollect = 0" + nl + "$aCourtFound = []" + nl + "$aCourtBroken = []" + nl
 	c += ExprGlobals()
 	c += "$aCourtLangs = [" + nl
 	aRecs = ForgeLangRecords(aLang, [])

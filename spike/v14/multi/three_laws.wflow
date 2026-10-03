@@ -1,0 +1,20 @@
+-- three different laws broken in one file: C5, C1, C6, C15
+WORKFLOW bad ( DEFINITION_VERSION "0.1.0", ZQL "x/app.zql", SURFACES "x.face", CALENDAR c VERSION "1", LOCALE fr )
+RATIONALE "Three different laws broken in one file."
+ACTOR a ROLE r
+GUARD unread = NORM some_norm HOLDS
+STEP go
+  INVOKES do_it
+  IRREVERSIBLE
+  ON COMMITTED -> nowhere_at_all
+  ON REJECTED  -> fini
+  ON HELD      -> fini
+  RATIONALE "One arrow points at nothing."
+STEP ask_it
+  ASKS a
+  ON SURFACE s
+  DECISIONS [ok]
+  SLA 1 working day
+  ON ok -> fini
+  RATIONALE "A human task that could sleep for ever, and nothing reaches it."
+TERMINAL fini OUTCOME SUCCESS RATIONALE "Done."

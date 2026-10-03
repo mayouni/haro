@@ -1,0 +1,11 @@
+-- two laws: C9 and C4
+WORKFLOW bad ( DEFINITION_VERSION "0.1.0", ZQL "x/app.zql", SURFACES "x.face", CALENDAR c VERSION "1", LOCALE fr )
+RATIONALE "Two laws broken in one file."
+ACTOR a ROLE r SEGREGATED_FROM a
+STEP go
+  INVOKES do_it
+  IRREVERSIBLE
+  ON COMMITTED -> fini
+  ON REJECTED  -> fini
+  RATIONALE "ON HELD is missing."
+TERMINAL fini OUTCOME SUCCESS RATIONALE "Done."

@@ -305,6 +305,11 @@ DEFINE REFUSAL unexpected_character AS (
   CODE "PARSE"
 ) RATIONALE "The load-bearing wall, and it is structural"
 
+DEFINE REFUSAL duplicate_name AS (
+  MESSAGE "One name, one declaration: an arrow to a name that two declarations share would be ambiguous.",
+  CODE "C14", CITES ["rule:C14"]
+) RATIONALE "C14: no name is declared twice in a workflow; RingFlex states it per kind and per namespace, the forged court once, for the namespace"
+
 DEFINE REFUSAL dangling_reference AS (
   MESSAGE "Every arrow lands somewhere declared."
 ) RATIONALE "C5, C10, C11, C12: every reference resolves"

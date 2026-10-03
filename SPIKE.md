@@ -70,6 +70,9 @@ expression language forged whole, judged by stz's 29 fixtures as stage 8, pinned
 | `spike/v13/fixtures.json`, `spike/v13/GRAMMAR.md` | **Haro v0.13** (the thirteenth rung, below): NARRATE -- the court's voice: SAYS, OPENS, ENDS, REFUSES; a placeholder the voice cannot fill is refused; 10 fixtures first, the prose after |
 | `spike/f_v13.haro`, `spike/narrate_lib.ring` | F with a voice (workflow, actor, invocation, terminal spoken; the rest narrated plainly with their rationale), and the library a forged court loads only where a NARRATE is declared: `narrate <file>` |
 | `spike/v13/narration_cases.json` | the narration of the smallest lawful workflow, composed by hand before the court: the hand-written half of stage 16's judge |
+| `spike/v14/GRAMMAR.md`, `spike/v14/multi_cases.json`, `spike/v14/multi/` | **Haro v0.14** (the fourteenth rung, below): a court that collects -- no clause grew; `diagnose` answers every finding, `check` the first; five sentences with several defects in two notations and my hand predictions of them, written before the court |
+| `spike/rf_multi.ring` | RingFlex's own court asked for every finding on the files it is given, run read-only under official Ring by stage 17: the live judge of the collecting court |
+| `spike/world_lib.ring`, `spike/world_stub.ring` | the world's functions (SYMBOL resolution, the C1 rows), moved out of `court_lib.ring` and loaded only where a SYMBOL or PUBLISH is declared, and the stub that stands elsewhere |
 
 Nothing in `rnxc` or the VM changed. Nothing in a sibling repository changed.
 
@@ -939,6 +942,77 @@ duplicate name. Removed by line number (HF-57's rule); a dry run now writes noth
 **What it does not do is named in `v13/GRAMMAR.md`**: no skin; the first language's voice
 only; sentences, not runs (`run` and `ask` are not narrated); `NO_WORLD` is not narrated.
 
+## The fourteenth rung -- Haro v0.14, a court that collects -- 2026-10-03
+
+**Decided on the author's "continue", with the choice already named at the end of the
+thirteenth rung: the court that collects needs no ruling.** v0.11 gave every forged court the
+Diagnostic Contract's `diagnostics` array and filled it with at most one error, because every
+court stopped at its first refusal. The shipped court does not: RingFlex's `Check()` runs six
+passes and returns every finding, which is both the reason to build this and the judge. The
+rung grows no clause; the declaring altitude is v0.13's. What grows is `diagnose`: a pass that
+meets a refusal notes it and goes on to the next element, a sentence that does not parse
+stops the run (nothing is left to judge, as in RingFlex), `check` still stops at its first
+refusal to the byte. One function, `CtNote`, and a `try` at each site that raises.
+
+**Fixtures first, and a prediction.** Five sentences with several defects, each in RingFlex's
+notation and in the Commons' (`spike/v14/multi/`), and for each a hand prediction of what a
+court that collects must report (`multi_cases.json`), written before the court. Then RingFlex
+spoke, live under official Ring 1.27 (`rf_multi.ring`, read-only): four predictions right, one
+corrected -- it states C14 twice on a duplicated name, once per kind and once per namespace.
+
+    stage 1    v0.1 28 ... v0.13 10 -- unchanged (no clause grew)
+    stage 17   the forged court reports every (code, declaration) pair RingFlex reports
+               and none it does not: 11 pairs over 5 sentences, 3 said more often (a
+               missing TIMEOUT and ON_TIMEOUT are two seats under C1), never fewer, one
+               named exception (C14, one namespace rule); all 24 original fixtures, every
+               finding and not only the first, give the same pairs -- no cascade; `check`
+               still one line, the first refusal; a sentence that does not parse is one
+               finding; the same bytes on rnxc and the oracle on every run
+    stages 2-16  machine 117/117 and fleet 32/32 against harb, W 29, Z 16, Q 25, F 27, A 35,
+               the world 9, the envelope 28, FORMS 584 of 595, the voice -- unchanged
+    stage 6    edit to verdict: the last full pass was taken under another session's build and FAILED this stage at 189.9 ms (the untouched Zig court at 22 ms against its usual 10); the quiet readings before it were 95.4 and 95.1 ms for rnxc compiled
+    the pass   17 stages, 16 passing and the timing failing under load (below); --plant FAIL (44 failures, the collection among them)
+
+**What the new judge found that 24 single-defect fixtures could not.** A name declared twice
+was `DUPLICATE_NAME` in the forged F court and C14 in RingFlex's; no original fixture
+exercises C14, so it had never been asked. F declares that refusal with RingFlex's code and
+cite now, and the court passes a refusal's own cites rather than none. Two more were the
+guard's own: stage 14 asserted exactly one error per refused fixture -- a statement about
+first-refusal courts, now "every error carries RingFlex's code" -- and a family offering an
+undeclared form was refused twice, by the menu typing the seat and by the FORMS pass behind
+it; the second says nothing the first said.
+
+**What it cost, and the lesson of HF-49 paying it back.** 112 lines in `court_lib.ring`,
+which every court compiles on every run, took the machine court's cold start from 92-96 ms to
+99-101 against the pinned 100. `world_lib.ring` now holds the world's functions, loaded only
+where a SYMBOL or a PUBLISH is declared, and a 25-line `world_stub.ring` stands elsewhere:
+121 lines out of `court_lib.ring` for 25 in. A/B in a scratch copy, minima of 15: 97.9 ms
+before the move, 89.7 and 90.4 after. The guard's own readings on a quiet machine: 95.4 and
+95.1.
+
+**Two slips of mine, each caught by its own symptom.** A slice written for a five-character
+suffix on a six-character one (`.wflow`) made the originals loop match nothing, and the stage
+passed it with a count that read "all 0 original fixtures" -- the printed count is what gave
+it away, and a stage that checks nothing and passes is the thing the guard exists to refuse.
+And a bash heredoc with an unbalanced quote killed a whole write before it began; nothing was
+written, and the files went in with the file tool instead.
+
+**The machine was not quiet, and the last pass says so.** Another session's `zig` build ran
+at a core and a half for most of this rung and was still running when it ended: the untouched
+Zig court read 2x to 4x its usual 10 ms. In the last full pass every stage but the timing
+passed, and the timing FAILED -- 189.9 ms against a pinned 100 on a machine where harb itself
+read 22 -- so this rung's guard is 16 stages passing and one failing under load, not a clean
+pass. What was measured clean, before the load rose and after the world's functions moved: the
+guard's own stage 6 at 95.4 and 95.1 ms, and a scratch-copy A/B at 97.9 ms before the move and
+89.7 and 90.4 after. An interleaved A/B of the committed court against this one, taken under
+the load, was inconclusive (minima ratio 0.97, medians 1.15, both sides at 190 ms and up) and is
+not claimed. The loaded readings are not quoted as measurements; the re-take on a quiet
+machine is the first thing to do when one exists.
+
+**What it does not do is named in `v14/GRAMMAR.md`**: `check`, `narrate` and `refine` stop at
+the first refusal; the first finding per site; the file's order, not RingFlex's pass order;
+the meta-court (`.haro` files) does not collect; a broken declaration is silent past its shape.
+
 ## The names -- `.haro`, not `.stzu` -- corrected 2026-10-02
 
 **At the author's word ("we agreed to use .haro instead of .stzu, no?").** D1 was ratified
@@ -1019,7 +1093,11 @@ whole guard re-run on the renamed tree: 28 + 30 + 27 + 23, 117 of 120, 32 of 32,
    author's blanket delegation: the voice declared, `narrate` projecting a sentence,
    judged by the StzNarration law and stzn's honesty guard; section 3's rows are all built
    but ASK's natural door, which is N's.
-15. The forge as an `rnxc` verb (the ringpp session's `src/`, routed); the
+15. ~~A court that collects~~ -- built 2026-10-03 as Haro v0.14, the fourteenth rung above,
+   on the author's "continue": `diagnose` answers every finding, judged by RingFlex's own
+   `Check()` live; what is left in that direction is the meta-court collecting, so an
+   author of a `.haro` file sees every defect at once.
+16. The forge as an `rnxc` verb (the ringpp session's `src/`, routed); the
    Softanza-resident timing the charter's 2.6 asks for; the court's run time on the
    oracle under paths and views (6.4x the image this pass, named at stage 6); the
    ontology as versioned data, `ASK`, `NARRATE` and `FORMS`, the rows of section 3 the

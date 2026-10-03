@@ -1,0 +1,12 @@
+-- a name declared twice, and an arrow to nowhere: C14 and C5
+WORKFLOW bad ( DEFINITION_VERSION "0.1.0", ZQL "x/app.zql", SURFACES "x.face", CALENDAR c VERSION "1", LOCALE fr )
+RATIONALE "A name twice and an arrow to nowhere."
+STEP go
+  INVOKES do_it
+  IRREVERSIBLE
+  ON COMMITTED -> nowhere_at_all
+  ON REJECTED  -> fini
+  ON HELD      -> fini
+  RATIONALE "One arrow points at nothing."
+TERMINAL fini OUTCOME SUCCESS RATIONALE "Done."
+TERMINAL fini OUTCOME REFUSED RATIONALE "The same name again."

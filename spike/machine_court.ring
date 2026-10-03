@@ -7,6 +7,7 @@
 # views, sentences, expressions, walks and the ask.
 
 load "court_lib.ring"
+load "world_stub.ring"
 
 $cCourtLang = ""
 $cCourtExt = ""
@@ -48,6 +49,9 @@ $cCourtCode = "PARSE"
 $aCourtCites = []
 $aCourtFormset = NULL
 $aCourtNarrate = NULL
+$bCourtCollect = 0
+$aCourtFound = []
+$aCourtBroken = []
 $cExprLang = ""
 $aExprOperators = []
 $aExprOperands = []

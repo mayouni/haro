@@ -1,0 +1,13 @@
+{
+  "grammar": "haro",
+  "version": "0.14",
+  "comment": "The hand-written half of stage 17's judge, written BEFORE the court: for each sentence with several defects, the (code: declarations) a court that collects must report -- read from the rules, not from any run. The judge is RingFlex's own court, run live under official Ring on the .wflow twin of each sentence, whose Check() pass collects every finding (src/wflow.ring); a prediction that RingFlex contradicts is corrected and the miss recorded. The forged court must report every pair RingFlex reports and no pair RingFlex does not: it may say a pair more than once (a missing TIMEOUT and a missing ON_TIMEOUT are two seats under one law, C1), never fewer times than RingFlex, never on another declaration, never a code RingFlex does not give. One exception, named: C14 is stated once by the forged court, which has one rule for the namespace (a duplicate within a kind is a duplicate in the namespace), where RingFlex states it per kind and per namespace -- one law said twice -- so for the codes in stated_once the count that must be reached is one.",
+  "stated_once": ["C14"],
+  "cases": [
+    {"name": "three_laws", "predict": {"C5": ["go"], "C1": ["ask_it"], "C6": ["ask_it"], "C15": ["unread"]}},
+    {"name": "two_laws", "predict": {"C9": ["a"], "C4": ["go"]}},
+    {"name": "two_routes", "predict": {"C4": ["go", "go"]}},
+    {"name": "names_twice", "predict": {"C14": ["fini", "fini"], "C5": ["go"]}, "missed": "predicted C14 once; RingFlex states it twice on the second terminal, once per kind and once per namespace (src/wflow.ring CheckNames), and is the judge"},
+    {"name": "waits", "predict": {"C1": ["ask_it"], "C2": ["wait_it"]}}
+  ]
+}

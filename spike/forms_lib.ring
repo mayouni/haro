@@ -90,6 +90,15 @@ func FormsFamilies(aDecls)
 	next
 	return aOut
 
+# a collecting court has already refused this word on this line, through the menu that types
+# the seat: the FORMS pass is the second guard and says nothing twice (v0.14)
+func FormsAlreadySaid(nLine, cWord)
+	if not $bCourtCollect return 0 ok
+	for i = 1 to len($aCourtFound)
+		if $aCourtFound[i][3] = nLine and $aCourtFound[i][1] = "FORMS" and substr($aCourtFound[i][4], "'" + cWord + "'") > 0 return 1 ok
+	next
+	return 0
+
 # at check: a family offers only forms the FORMS declares, each once
 func FormsCheck(aDecls)
 	aFam = FormsFamilies(aDecls)
@@ -98,7 +107,7 @@ func FormsCheck(aDecls)
 		aSeen = []
 		for j = 1 to len(aFam[i][3])
 			cW = aFam[i][3][j]
-			if not InStrListCs(cW, aOffered)
+			if not InStrListCs(cW, aOffered) and not FormsAlreadySaid(aFam[i][4], cW)
 				FormsFail(aFam[i][4], "FAMILY " + aFam[i][1] + " offers '" + cW + "', which the FORMS " + $aCourtFormset[1] + " declares no form for: it declares " + CtJoin(aOffered, ", "))
 			ok
 			if InStrListCs(cW, aSeen)

@@ -30,6 +30,10 @@
 # order of the court is: shapes, the WORLD, the local types, the
 # CONSTRAINTs, then the references.
 #
+# v0.14 (haro/spike/v14/GRAMMAR.md): a court that collects -- `diagnose` goes on
+# past a refusal to the next element of every pass and answers every finding,
+# in the order of the file; `check` still stops at the first, to the byte.
+#
 # v0.13 (haro/spike/v13/GRAMMAR.md): NARRATE -- `narrate <file>` answers the
 # sentence back in the language's own voice (narrate_lib.ring, loaded only where
 # a NARRATE is declared): a projection of the sentence on stdout, never stored,
@@ -113,6 +117,38 @@ func CtFail(nLine, cMsg)
 func CtFailC(nLine, cCode, aCites, cMsg)
 	CtSetCode(cCode, aCites)
 	CtFail(nLine, cMsg)
+
+# v0.14: a collecting court. In collect mode a refusal that a pass meets at one
+# of its raising sites is NOTED and the pass goes on to its next element; out
+# of collect mode it is raised again, same string, same globals, so `check` is
+# unchanged to the byte. A declaration whose clause has the wrong SHAPE is
+# broken: the passes that read its values say nothing more about it.
+func CtNote(cErr)
+	if not $bCourtCollect raise(cErr) ok
+	$aCourtFound + [$cCourtCode, $aCourtCites, CtLineOf(cErr), CtStripPrefix(cErr)]
+	CtSetCode("PARSE", [])
+
+func CtIsBroken(nDecl)
+	for i = 1 to len($aCourtBroken)
+		if $aCourtBroken[i] = nDecl return 1 ok
+	next
+	return 0
+
+# the findings in the order of the file, ties in the order they were met
+func CtSortFound(aF)
+	aOut = []
+	for i = 1 to len(aF)
+		nAt = len(aOut) + 1
+		for j = len(aOut) to 1 step -1
+			if aOut[j][3] > aF[i][3]
+				nAt = j
+			else
+				exit
+			ok
+		next
+		insert(aOut, nAt - 1, aF[i])
+	next
+	return aOut
 
 func CtSetCode(cCode, aCites)
 	if cCode = "" cCode = "PARSE" ok
@@ -367,77 +403,6 @@ func CtRestore(aS)
 	$aCourtFormset = aS[32]
 	$aCourtNarrate = aS[33]
 
-# ---- v0.10: the world ------------------------------------------------------------------
-# A C1 world is JSON: {"world", "contract", "symbols": [{kind, name, span, rationale}],
-# "refs": [{from, to, kind, span}]}; read with expr_lib's reader, matched case-blind
-# (C1 3.1). $aCourtWorldFile is NULL (no world handed in) or the loaded world's
-# symbols; a SYMBOL seat resolves against it in the court's last pass.
-
-func CtSymbolByName(cName)
-	for i = 1 to len($aCourtSymbols)
-		if $aCourtSymbols[i][1] = cName return $aCourtSymbols[i] ok
-	next
-	return NULL
-
-func CtWorldLoad(cPath)
-	if not fexists(cPath) CtFail(1, "no world artifact at '" + cPath + "'") ok
-	aW = ExJsonParse(read(cPath))
-	if not ExIsObj(aW) CtFail(1, "'" + cPath + "' is not a C1 world: not a JSON object") ok
-	aGot = ExObjGet(aW, "symbols")
-	if not aGot[1] CtFail(1, "'" + cPath + "' has no symbols table; it is not a C1 world") ok
-	return aGot[2]
-
-func CtWorldHas(aSymbols, cKind, cName)
-	for i = 1 to len(aSymbols)
-		aK = ExObjGet(aSymbols[i], "kind")
-		aN = ExObjGet(aSymbols[i], "name")
-		if aK[1] and aN[1]
-			if lower("" + aK[2]) = lower(cKind) and lower("" + aN[2]) = lower(cName) return 1 ok
-		ok
-	next
-	return 0
-
-# every SYMBOL seat of the sentence, as [decl, seat, value, line]
-func CtSymbolSites(aDecls)
-	aOut = []
-	for i = 1 to len(aDecls)
-		aD = aDecls[i]
-		aKind = CtKindByVerb(aD[1])
-		aC = aD[4]
-		for j = 1 to len(aC)
-			aSeat = CtSeatByClause(aKind, aC[j][1])
-			if isNull(aSeat) loop ok
-			if CtTypeKind(aSeat) != "symbol" loop ok
-			if aC[j][3][1] != "word" loop ok
-			aOut + [aD, aSeat, aC[j][3][2], aC[j][2]]
-		next
-	next
-	return aOut
-
-# C3 3.2: every SYMBOL seat resolves to its KIND in the world; the first that
-# does not is refused in the SYMBOL's own words
-func CtResolveWorld(aDecls)
-	aSites = CtSymbolSites(aDecls)
-	for i = 1 to len(aSites)
-		aSy = CtSymbolByName(aSites[i][2][2])
-		if isNull(aSy) loop ok
-		if CtWorldHas($aCourtWorldFile, aSy[2], aSites[i][3]) loop ok
-		cMsg = aSy[4]
-		if cMsg = "" cMsg = "{VERB} {name} names '{value}', and the world declares no " + aSy[2] + ":{value}" ok
-		aCC = CtSymbolCode(aSy)
-		CtFailC(aSites[i][4], aCC[1], aCC[2], CtFill(cMsg, aSites[i][1], aSites[i][3]))
-	next
-
-# a SYMBOL's code (its CODE, else UNRESOLVED) and cites (its CITES, else rule:<name>)
-func CtSymbolCode(aSy)
-	cCode = "UNRESOLVED"
-	aCites = ["rule:" + aSy[1]]
-	if len(aSy) >= 6
-		if aSy[5] != "" cCode = aSy[5] ok
-		if len(aSy[6]) > 0 aCites = aSy[6] ok
-	ok
-	return [cCode, aCites]
-
 # ---- v0.11: the Diagnostic Contract (C2 v1.2.0) -------------------------------------
 # `diagnose <file> [world]` runs the same court and answers in the family's
 # machine form: one object carrying `diagnostics`, each a six-field envelope --
@@ -480,6 +445,10 @@ func CtDiagnose(cFile, cWorldPath)
 	aDiags = []
 	cSrc = read(cFile)
 	CtSetCode("PARSE", [])
+	# v0.14: this verb collects -- every pass goes on past a refusal to its next element
+	$bCourtCollect = 1
+	$aCourtFound = []
+	$aCourtBroken = []
 	cErr = ""
 	aDecls = NULL
 	try
@@ -488,8 +457,17 @@ func CtDiagnose(cFile, cWorldPath)
 	catch
 		cErr = cCatchError
 	done
+	$bCourtCollect = 0
+	# a refusal nothing could resume from (the sentence did not parse, or a pass met
+	# something it cannot judge past) ends the run and is the last finding
 	if cErr != ""
-		aDiags + [$cCourtCode, "error", CtStripPrefix(cErr), cFile, CtLineOf(cErr), $aCourtCites]
+		$aCourtFound + [$cCourtCode, $aCourtCites, CtLineOf(cErr), CtStripPrefix(cErr)]
+	ok
+	if len($aCourtFound) > 0
+		aF = CtSortFound($aCourtFound)
+		for i = 1 to len(aF)
+			aDiags + [aF[i][1], "error", aF[i][4], cFile, aF[i][3], aF[i][2]]
+		next
 		return aDiags
 	ok
 	if isNull($aCourtWorldFile) and len($aCourtSymbols) > 0
@@ -502,52 +480,6 @@ func CtDiagnose(cFile, cWorldPath)
 		ok
 	ok
 	return aDiags
-
-func CtWorldStem(cPath)
-	cName = cPath
-	for i = len(cPath) to 1 step -1
-		if cPath[i] = "/" or cPath[i] = char(92)
-			cName = substr(cPath, i + 1)
-			exit
-		ok
-	next
-	n = 0
-	for i = 1 to len(cName)
-		if cName[i] = "." n = i ok
-	next
-	if n > 1 cName = left(cName, n - 1) ok
-	return cName
-
-# the sentence's own C1 rows: a symbol per declaration of a PUBLISH kind, a ref
-# per SYMBOL seat from the FIRST published declaration (the process) to the
-# symbol it names -- and nothing else: a court emits only what it can prove
-func CtWorldRows(aDecls, cFile)
-	aPublish = []
-	if len($aCourtWorld) >= 4 aPublish = $aCourtWorld[4] ok
-	aSymbols = []
-	cFrom = ""
-	for i = 1 to len(aDecls)
-		aD = aDecls[i]
-		for j = 1 to len(aPublish)
-			aK = CtKindByDeclName(aPublish[j][1])
-			if isNull(aK) or aK[1] != aD[1] loop ok
-			aRow = [ExObjMark(), ["kind", aPublish[j][2]], ["name", aD[2]], ["span", [ExObjMark(), ["file", cFile], ["line", aD[3]]]], ["rationale", aD[5]]]
-			aSymbols + aRow
-			if cFrom = "" cFrom = aPublish[j][2] + ":" + aD[2] ok
-		next
-	next
-	if cFrom = "" cFrom = $cCourtLang + ":" + CtWorldStem(cFile) ok
-	aRefs = []
-	aSites = CtSymbolSites(aDecls)
-	for i = 1 to len(aSites)
-		aSy = CtSymbolByName(aSites[i][2][2])
-		if isNull(aSy) loop ok
-		cRef = aSy[3]
-		if cRef = "" cRef = "cites" ok
-		aRow = [ExObjMark(), ["from", cFrom], ["to", aSy[2] + ":" + aSites[i][3]], ["kind", cRef], ["span", [ExObjMark(), ["file", cFile], ["line", aSites[i][4]]]]]
-		aRefs + aRow
-	next
-	return [ExObjMark(), ["world", CtWorldStem(cFile)], ["contract", "1.0"], ["symbols", aSymbols], ["refs", aRefs]]
 
 # ---- v0.6: the EXPRESSION tables, handed to expr_lib.ring ----------------------
 
@@ -603,11 +535,14 @@ func CtJudgeSentence(aDecl, aSeat, aClause)
 	$cCourtDir = CtDirOf(cPath)
 	cErr = ""
 	aInner = NULL
+	bWas = $bCourtCollect
+	$bCourtCollect = 0
 	try
 		aInner = CtDeclare(cText)
 	catch
 		cErr = cCatchError
 	done
+	$bCourtCollect = bWas
 	CtRestore(aSnap)
 	if cErr != ""
 		# "<lang> (line N): why" -> why and N
@@ -1232,7 +1167,12 @@ func CtDeclare(cSrc)
 				cMsg = CtRefusalMessage("duplicate_name")
 				if cMsg = "" cMsg = "one namespace, no duplicates" ok
 				aCC = CtRefusalCode("duplicate_name", "", "DUPLICATE_NAME")
-				CtFailC(aDecls[i][3], aCC[1], [], "'" + aDecls[i][2] + "' is already declared (line " + aDecls[j][3] + "); " + cMsg)
+				try
+					CtFailC(aDecls[i][3], aCC[1], aCC[2], "'" + aDecls[i][2] + "' is already declared (line " + aDecls[j][3] + "); " + cMsg)
+				catch
+					CtNote(cCatchError)
+				done
+				exit
 			ok
 		next
 	next
@@ -1243,12 +1183,17 @@ func CtDeclare(cSrc)
 		aC = aD[4]
 		for j = 1 to len(aC)
 			aSeat = CtSeatByClause(aKind, aC[j][1])
-			if CtTypeKind(aSeat) = "union" and not aSeat[3]
-				CtWantUnion(aD, aC[j], aSeat)
-			else
-				# a LIST of a union of declarations is a name list (v0.9)
-				CtWantShape(aD, aC[j], CtClauseShape(aSeat))
-			ok
+			try
+				if CtTypeKind(aSeat) = "union" and not aSeat[3]
+					CtWantUnion(aD, aC[j], aSeat)
+				else
+					# a LIST of a union of declarations is a name list (v0.9)
+					CtWantShape(aD, aC[j], CtClauseShape(aSeat))
+				ok
+			catch
+				CtNote(cCatchError)
+				$aCourtBroken + i
+			done
 		next
 		aSeats = aKind[3]
 		for j = 1 to len(aSeats)
@@ -1264,8 +1209,12 @@ func CtDeclare(cSrc)
 				cMsgR = CtMessageFor(aKind, aSeat[1])
 				cCodeR = CtCodeFor(aKind, aSeat[1])
 				aCC = CtElementCode(cCodeR, "REQUIRED", aKind[2] + "." + aSeat[1])
-				if cMsgR != "" CtFailC(aD[3], aCC[1], aCC[2], CtFill(cMsgR, aD, "")) ok
-				CtFailC(aD[3], aCC[1], aCC[2], upper(aSeat[1]) + " is required on " + aD[1] + " " + aD[2])
+				try
+					if cMsgR != "" CtFailC(aD[3], aCC[1], aCC[2], CtFill(cMsgR, aD, "")) ok
+					CtFailC(aD[3], aCC[1], aCC[2], upper(aSeat[1]) + " is required on " + aD[1] + " " + aD[2])
+				catch
+					CtNote(cCatchError)
+				done
 			ok
 		next
 	next
@@ -1288,13 +1237,21 @@ func CtDeclare(cSrc)
 			if aDecls[j][1] = aK[1] n++ ok
 		next
 		if n != 1
-			CtFailC(aDecls[1][3], "WORLD_ONE", ["rule:world"], "A " + $cCourtLang + " file declares exactly one " + aK[1] + " (found " + n + ")")
+			try
+				CtFailC(aDecls[1][3], "WORLD_ONE", ["rule:world"], "A " + $cCourtLang + " file declares exactly one " + aK[1] + " (found " + n + ")")
+			catch
+				CtNote(cCatchError)
+			done
 		ok
 	next
 	if $aCourtWorld[2] != ""
 		aK = CtKindByDeclName($aCourtWorld[2])
 		if not isNull(aK) and aDecls[1][1] != aK[1]
-			CtFailC(aDecls[1][3], "WORLD_FIRST", ["rule:world"], "The " + aK[1] + " declaration comes first")
+			try
+				CtFailC(aDecls[1][3], "WORLD_FIRST", ["rule:world"], "The " + aK[1] + " declaration comes first")
+			catch
+				CtNote(cCatchError)
+			done
 		ok
 	ok
 
@@ -1317,6 +1274,7 @@ func CtDeclare(cSrc)
 		for j = 1 to len(aDecls)
 			aD = aDecls[j]
 			if aD[1] != aK[1] loop ok
+			if CtIsBroken(j) loop ok
 			$cCondOther = ""
 			$bCondUnread = 0
 			bWhen = CondEval(aWhen, aD)
@@ -1332,7 +1290,11 @@ func CtDeclare(cSrc)
 					cCnC = ""
 					if len(aCn) >= 6 cCnC = aCn[6] ok
 					aCC = CtElementCode(cCnC, "CONSTRAINT", aCn[1])
-					CtFailC(aD[3], aCC[1], aCC[2], CtFill(aCn[5], aD, ""))
+					try
+						CtFailC(aD[3], aCC[1], aCC[2], CtFill(aCn[5], aD, ""))
+					catch
+						CtNote(cCatchError)
+					done
 				ok
 			ok
 		next
@@ -1341,9 +1303,21 @@ func CtDeclare(cSrc)
 	# the references, last
 	CtCheckValues(aDecls, 1)
 	# v0.9: an algorithm's step tree is a tree
-	if not isNull($aCourtRun) RunCheckAcyclic(aDecls) ok
+	if not isNull($aCourtRun)
+		try
+			RunCheckAcyclic(aDecls)
+		catch
+			CtNote(cCatchError)
+		done
+	ok
 	# v0.12: a family offers only forms the FORMS declares
-	if not isNull($aCourtFormset) FormsCheck(aDecls) ok
+	if not isNull($aCourtFormset)
+		try
+			FormsCheck(aDecls)
+		catch
+			CtNote(cCatchError)
+		done
+	ok
 	# v0.10: the symbols resolve against the world, when one is handed in
 	if not isNull($aCourtWorldFile) CtResolveWorld(aDecls) ok
 	return aDecls
@@ -1352,12 +1326,19 @@ func CtDeclare(cSrc)
 # the local types and skips the references, 1 the references alone
 func CtCheckValues(aDecls, bRefs)
 	for i = 1 to len(aDecls)
+		if CtIsBroken(i) loop ok
 		aD = aDecls[i]
 		aKind = CtKindByVerb(aD[1])
 		if not bRefs
 			if len(aKind) >= 4 and aKind[4] != ""
 				cWhy = CtCheckNamed(aKind[4], aD[2])
-				if cWhy != "" CtFail(aD[3], "'" + aD[2] + "' " + cWhy) ok
+				if cWhy != ""
+					try
+						CtFail(aD[3], "'" + aD[2] + "' " + cWhy)
+					catch
+						CtNote(cCatchError)
+					done
+				ok
 			ok
 		ok
 		aC = aD[4]
@@ -1367,11 +1348,21 @@ func CtCheckValues(aDecls, bRefs)
 			if not aP[bRefs + 1] loop ok
 			if CtTypeKind(aSeat) = "sentence"
 				# v0.4: the file a SENTENCE seat names is judged in its own language
-				CtJudgeSentence(aD, aSeat, aC[j])
+				try
+					CtJudgeSentence(aD, aSeat, aC[j])
+				catch
+					CtNote(cCatchError)
+				done
 				loop
 			ok
 			cWhy = CtCheckSeatValue(aD, aSeat, aC[j], bRefs)
-			if cWhy != "" CtFail(aC[j][2], cWhy) ok
+			if cWhy != ""
+				try
+					CtFail(aC[j][2], cWhy)
+				catch
+					CtNote(cCatchError)
+				done
+			ok
 		next
 	next
 

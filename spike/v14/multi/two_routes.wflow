@@ -1,0 +1,9 @@
+-- one step, two missing verdicts: C4 twice
+WORKFLOW bad ( DEFINITION_VERSION "0.1.0", ZQL "x/app.zql", SURFACES "x.face", CALENDAR c VERSION "1", LOCALE fr )
+RATIONALE "One step missing two of its three endings."
+STEP go
+  INVOKES do_it
+  IRREVERSIBLE
+  ON COMMITTED -> fini
+  RATIONALE "ON REJECTED and ON HELD are missing."
+TERMINAL fini OUTCOME SUCCESS RATIONALE "Done."
