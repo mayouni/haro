@@ -2848,6 +2848,30 @@ def stage20():
     return failures
 
 
+# ---- stage 21: the v0.3 scans -- two of the Compass's principles, held by a guard (charter section 15)
+
+CHARTER_SCANS = os.path.join(HERE, 'charter_scans.py')
+
+
+def stage21():
+    """Principle 13's refusal rule and principle 14, read off the committed tree: no refusal text addresses or names a
+    person, and no letter outside the machine's declares a width. Each scan is made to fail first, on planted text."""
+    print('stage 21 -- the v0.3 scans: a refusal names a state and never a person; a declared language names no width')
+    failures = 0
+    p = subprocess.run([sys.executable, CHARTER_SCANS], capture_output=True, cwd=ROOT, timeout=300)
+    out = p.stdout.decode('utf-8', 'replace').replace('\r\n', '\n')
+    for line in out.splitlines():
+        if line.startswith('  ') or line.startswith('charter_scans:'):
+            print(line)
+    if p.returncode != 0:
+        failures += 1
+        print(f'  FAIL charter_scans.py exited {p.returncode}')
+    if PLANT:
+        failures += 1
+        print('  FAIL the v0.3 scans -- PLANTED')
+    return failures
+
+
 def stage6(lang, court=None, n=15):
     court = court or f'{lang}_court.ring'
     print(f'stage 6 -- edit to verdict on makeen_box.machine, minima of {n}')
@@ -2947,5 +2971,7 @@ if __name__ == '__main__':
         failures += stage19()
     if stage in (None, 20) and os.path.exists(N_CHECK):
         failures += stage20()
+    if stage in (None, 21) and os.path.exists(CHARTER_SCANS):
+        failures += stage21()
     print(f'haro_forge: {"FAIL" if failures else "PASS"} ({failures} failure(s), {time.perf_counter()-t0:.1f} s)')
     sys.exit(1 if failures else 0)

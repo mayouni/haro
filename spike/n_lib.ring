@@ -857,6 +857,18 @@ func NatTempFile()
 func NatQuote(cS)
 	return char(34) + cS + char(34)
 
+# a surface's court that is a court FILE is a sibling of this court: a bare name ending in _court.ring, never a path.
+# `check ... surfaces` RUNS it, so what a sentence may name there is a door, and the door is one folder wide
+func NatCourtIsSibling(cFile)
+	if len(cFile) <= 11 return 0 ok
+	if right(cFile, 11) != "_court.ring" return 0 ok
+	for i = 1 to len(cFile)
+		cC = cFile[i]
+		if cC = "/" or cC = char(92) or cC = ":" return 0 ok
+	next
+	if substr(cFile, "..") > 0 return 0 ok
+	return 1
+
 # [ok?, why]: a surface judges a query of its grammar WITHOUT data. `triples` is three terms, judged here; a
 # surface whose COURT is a court file is asked as the Q letter's court is -- its own `ask` over no rows answers
 # [] for a lawful question and refuses the rest -- and only when the check was asked to reach the surfaces
@@ -869,6 +881,7 @@ func NatSurfaceCheck(aN, aSf, cQuery)
 	aCw = NatWords(NatText(aSf, "court"))
 	if len(aCw) < 2 return [1, ""] ok
 	if right(aCw[1], 5) != ".ring" return [1, ""] ok
+	if not NatCourtIsSibling(aCw[1]) return [1, ""] ok
 	if NatText(aSf, "world") = "" return [1, ""] ok
 	cCourt = aCw[1]
 	cDir = CtDirOf(sysargv[2])
@@ -909,6 +922,14 @@ func NatRules(aN)
 			next
 			if not bRead
 				NatAdd(aF, "N_WORLD_UNREAD", aSurf[i][3], "SURFACE " + aSurf[i][2] + " reads the world '" + NatText(aSurf[i], "world") + "', which cannot be read from the sentence's folder")
+			ok
+		ok
+	next
+	for i = 1 to len(aSurf)
+		aCw = NatWords(NatText(aSurf[i], "court"))
+		if len(aCw) > 0
+			if right(aCw[1], 5) = ".ring" and not NatCourtIsSibling(aCw[1])
+				NatAdd(aF, "N_SURFACE_COURT", aSurf[i][3], "SURFACE " + aSurf[i][2] + " names the court file '" + aCw[1] + "': a surface's court is a court beside this one, a bare name ending in _court.ring and never a path, because `check ... surfaces` runs it")
 			ok
 		ok
 	next

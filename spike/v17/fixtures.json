@@ -310,6 +310,14 @@
    "new": "WORLD \"../../study/phase15/data/nowhere.zknw\"",
    "code": "N_WORLD_UNREAD",
    "surfaces": false
+  },
+  {
+   "id": "R22",
+   "name": "a surface whose court is a path: `check ... surfaces` would run whatever the sentence names",
+   "old": "COURT \"z_court.ring ask\"",
+   "new": "COURT \"../z_court.ring ask\"",
+   "code": "N_SURFACE_COURT",
+   "surfaces": false
   }
  ]
 }

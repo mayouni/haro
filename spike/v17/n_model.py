@@ -431,6 +431,11 @@ def spell(ent, how):
 PLACEHOLDER = re.compile(r'\{([A-Za-z0-9_\u0080-\U0010ffff]+)\}')
 
 
+def court_is_sibling(name):
+    """A surface's court that is a court file is a bare name ending in _court.ring, never a path: `check ... surfaces` runs it."""
+    return name.endswith('_court.ring') and len(name) > len('_court.ring') and not any(c in name for c in '/\\:') and '..' not in name
+
+
 def default_surface_check(surface, query, runner=None):
     """A surface judges a query of its grammar WITHOUT data. 'triples': exactly three terms. 'ZQL ASK': the Z
     court's `ask` over no rows answers [] for a lawful question and refuses the rest."""
@@ -438,7 +443,7 @@ def default_surface_check(surface, query, runner=None):
     if g == 'triples':
         return (len(words(query)) == 3, 'a triple pattern is three terms')
     court = words(surface.get('COURT') or '')
-    if runner and len(court) >= 2 and court[0].endswith('.ring') and surface.get('WORLD'):
+    if runner and len(court) >= 2 and court_is_sibling(court[0]) and surface.get('WORLD'):
         return runner(query)             # a surface whose court is a court file is asked as the Q letter's court is
     return (True, '')
 
@@ -463,6 +468,9 @@ def rules(n, runner=None):
         f.append((code, d.line, msg))
     meanings = n.by.get('MEANING', {})
     for sf in n.kinds('SURFACE'):
+        cw = words(sf.get('COURT') or '')
+        if cw and cw[0].endswith('.ring') and not court_is_sibling(cw[0]):
+            add('N_SURFACE_COURT', sf, f"SURFACE {sf.name} names the court file '{cw[0]}': a surface's court is a court beside this one, a bare name ending in _court.ring and never a path, because `check ... surfaces` runs it")
         if sf.get('WORLD') and not n.world_read(sf.name):
             add('N_WORLD_UNREAD', sf, f"SURFACE {sf.name} reads the world '{sf.get('WORLD')}', which cannot be read from the sentence's folder")
     for fr in n.kinds('FRAME'):

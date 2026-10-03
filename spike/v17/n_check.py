@@ -4,10 +4,11 @@
      forges N from it, and the forged court accepts n/tontine.n -- `check`, and `check ... surfaces`, which asks the
      ledger's own court to judge every ledger query -- on rnxc and on the oracle, byte for byte
   B  17 defects the declaration's own vocabulary catches: refused with the message and code the letter declares
-  C  21 defects a rule of the rung must catch: the forged court answers the declared code, and the reference model
+  C  22 defects a rule of the rung must catch: the forged court answers the declared code, and the reference model
      (n_model.rules, a second implementation read from the sentence alone) answers the same codes; the unmutated
      sentence has no finding; rnxc and the oracle print the same bytes
-  C' each of the 15 codes, switched off in the court in turn, is the one thing that makes its fixtures fail
+  C' each of the 16 codes, switched off in the court in turn, is the one thing that makes its fixtures fail
+  C'' the door: `check ... surfaces` runs the court a sentence names, so a court named by a path is refused and NOT run
   D  the REAL court, asked the Phase 1.5 study's 74 questions, answers what the study answered -- the closed query,
      the graph answer, the sentence told, the refusal kind, one meaning sequence in both tongues of every pair --
      and what the model answers; `tokens`, `vocabulary` and `examples` agree with the model; a sample of the asks is
@@ -61,7 +62,7 @@ check(out.startswith('forged n'), f'the forge forges N from n_v17.haro: {out.spl
 doc = json.load(open(os.path.join(HERE, 'fixtures.json'), encoding='utf-8'))
 sentence = open(os.path.join(SP, doc['sentence']), encoding='utf-8', newline='').read()
 # the floors: a judge that checks nothing cannot pass
-COURT_FLOOR, RULES_FLOOR, CODES_FLOOR, STUDY_FLOOR, PAIRS_FLOOR = 17, 21, 15, 74, 17
+COURT_FLOOR, RULES_FLOOR, CODES_FLOOR, STUDY_FLOOR, PAIRS_FLOOR = 17, 22, 16, 74, 17
 check(len(doc['court']) >= COURT_FLOOR and len(doc['rules']) >= RULES_FLOOR,
       f"the fixtures hold {len(doc['court'])} court cases and {len(doc['rules'])} rule cases, at or above the pinned floors of {COURT_FLOOR} and {RULES_FLOOR}")
 CODES = sorted({c['code'] for c in doc['rules']})
@@ -192,6 +193,41 @@ for cid, why in bad[:5]:
     print(f'  FAIL {cid}: {why}')
 fails.extend(f"C' {c}" for c, _ in bad)
 check(not bad, f"C' each of the {len(CODES)} codes, with its rule switched off in the court, is no longer answered: every rule is the one thing that catches its fixtures ({len(bad)} still answered)")
+
+# ---- C'' -----------------------------------------------------------------------------------------------------------------
+# `check ... surfaces` RUNS the court file a surface names, so what a sentence may name there is a door (principle 12, the
+# Compass's "no effect without a door"): a sibling court, never a path. A program that proves it ran by writing a marker is
+# named by a path (must not run) and, as the control, beside the court (must run, or the marker shows nothing)
+MARKER = os.path.join(ROOT, 'runtime', 'zz_marker.txt')
+PROGRAM = 'write("../../runtime/zz_marker.txt", "ran")\n'
+HOSTILE, SIBLING = os.path.join(SP, 'v17', 'zz_marker.ring'), os.path.join(SP, 'zz_marker_court.ring')
+
+
+def marker_after(court_name):
+    rel = mutate({'id': 'M1', 'old': 'COURT "z_court.ring ask"', 'new': 'COURT "' + court_name + ' ask"'})
+    seen = {}
+    for exe in (RNXC, ORACLE):
+        if os.path.exists(MARKER):
+            os.remove(MARKER)
+        r = court(exe, ['n_court.ring', 'check', rel, 'surfaces'])
+        seen[os.path.basename(exe)] = (os.path.exists(MARKER), 'names the court file' in r)
+        if os.path.exists(MARKER):
+            os.remove(MARKER)
+    return seen
+
+
+try:
+    for f in (HOSTILE, SIBLING):
+        open(f, 'w', encoding='utf-8', newline='').write(PROGRAM)
+    hostile, control = marker_after('v17/zz_marker.ring'), marker_after('zz_marker_court.ring')
+finally:
+    for f in (HOSTILE, SIBLING, MARKER) + tuple(os.path.join(SP, 'n', x) for x in os.listdir(os.path.join(SP, 'n')) if x.startswith('_mut_')):
+        if os.path.exists(f):
+            os.remove(f)
+check(all(not ran and said for ran, said in hostile.values()),
+      f"C'' a court named by a path is refused (N_SURFACE_COURT) and the program it names is NOT run, on both runtimes ({hostile})")
+check(all(ran for ran, _ in control.values()),
+      f"C'' the control: the same program, named as a court beside the court, IS run -- so the marker can show a run ({control})")
 
 # ---- D -------------------------------------------------------------------------------------------------------------------
 study = json.load(open(os.path.join(STUDY, 'fixtures', 'questions.json'), encoding='utf-8'))['cases']

@@ -85,6 +85,7 @@ R('R18', 'an example its own text does not reach', 'ASKING [english: "show depos
 R('R19', 'an example whose tongues compile to different queries', 'ASKING [english: "show deposits over 5000", french: "montre les dépôts au dessus de 5000"]', 'ASKING [english: "show deposits over 5000", french: "montre les dépôts au dessus de 4000"]', 'N_EXAMPLE_DIVERGES')
 R('R20', 'a counterexample that IS understood', 'ASKING [english: "what is the meaning of life"], REFUSED word', 'ASKING [english: "show deposits"], REFUSED word', 'N_COUNTEREXAMPLE_FAILED')
 R('R21', 'a surface whose world is not there', 'WORLD "../../study/phase15/data/tontine.zknw"', 'WORLD "../../study/phase15/data/nowhere.zknw"', 'N_WORLD_UNREAD')
+R('R22', 'a surface whose court is a path: `check ... surfaces` would run whatever the sentence names', 'COURT "z_court.ring ask"', 'COURT "../z_court.ring ask"', 'N_SURFACE_COURT')
 
 doc = {
     'grammar': 'haro-n', 'version': '0.17',
