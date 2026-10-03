@@ -1,7 +1,8 @@
-# N, drawn -- the natural letter's API (Haro v0.17, as drawn; the dynamic half is not built)
+# N, built -- the natural letter's API (Haro v0.17, the seventeenth rung)
 
 **Drawn from Ringua's Phase 1.5 study** (`haro/study/phase15/STUDY.md`, section 6, K1-K10), on the author's
-"draw the N API from the study". **Written after** the fixtures in `fixtures.json` and the sentence
+"draw the N API from the study" (commit `20d6851`), and **built** on his "build rung 17": the `UNDERSTAND` meta-clause,
+the forged court's five verbs and fifteen rules, judged against the drawing's own fixtures. **Written after** the fixtures in `fixtures.json` and the sentence
 `n/tontine.n` (the W discipline: fixtures first, prose second) -- and after the study's own 74 questions, which are
 the judge of whether the drawing loses anything.
 
@@ -16,16 +17,17 @@ evaluated; a name in it is never passed on. **N asks. It never declares.**
 | | status | where |
 |---|---|---|
 | the letter: eight kinds, five menus, four forms | **built.** Accepted by the meta-court on rnxc and the oracle, byte for byte, using **no new meta-vocabulary** | `n_v17.haro` |
-| the forged court: `check` and `diagnose` on sentences of N | **built.** Judges the 17 defects of section 4a. (The court's usage line lists `refine`, `eval`, `walk` and `ask` too: those answer only for a letter that declares the kind they read, and N declares none.) | `n_court.ring`, forged from the letter |
+| the forged court: `check` and `diagnose` on sentences of N | **built.** Judges the 17 defects of section 4a and the rules of section 4b. (The court's usage line lists `refine`, `eval` and `walk` too: those answer only for a letter that declares the kind they read, and N declares none.) | `n_court.ring`, forged from the letter |
 | a sentence of N: the tontine's natural door | **built.** 85 declarations, English and French | `n/tontine.n` |
-| the rules the existing vocabulary cannot say | **drawn, executable as a model.** 14 codes, 20 fixtures; the existing court says `ok` to all 20 | `v17/n_model.py` (`rules`) |
-| `understand`, `ask`, `tokens`, `vocabulary`, `examples` | **drawn, executable as a model; not emitted by the forge.** The model reproduces the study on 74 of 74 questions | `v17/n_model.py` |
-| the meta-clause that makes the forge emit them: `UNDERSTAND` | **drawn (section 8), not built.** Building it is the seventeenth rung | -- |
+| the rules the existing vocabulary cannot say | **built.** 15 codes, 21 fixtures; the v0.16 court said `ok` to the first 20, each of the 15 rules switched off in turn fails its fixtures | `n_lib.ring` (`NatRules`), `v17/n_model.py` (`rules`, the reference) |
+| `understand`, `ask`, `tokens`, `vocabulary`, `examples` | **built.** The forged court reproduces the study on 74 of 74 questions and agrees with the model field for field | `n_lib.ring` (`NatMain`) |
+| the meta-clause that makes the forge emit them: `UNDERSTAND` | **built (section 8).** The meta-court checks it (12 fixtures, `v17/meta_fixtures.json`, stage 1); the forge emits the court's loads and globals | `haro_lib.ring`, `forge.ring` |
 | `propose` (N drafts a sentence of another letter) | **reserved, not drawn.** The study did not measure it (section 10) | -- |
 
-`python haro/spike/v17/n_check.py` judges all of it; `--plant` fails it. **The model is not the court.** It is a
-second implementation of the same behaviour, read from the sentence alone, sharing no code with the study's pipeline:
-the evidence that the drawing is complete and does not lean on `stzNatural` or any one engine.
+`python haro/spike/v17/n_check.py` judges all of it; `--plant` fails it. **The model is no longer the court, and
+is kept as its reference.** It is a second implementation of the same behaviour, read from the sentence alone, sharing
+no code with the study's pipeline nor with the court's: the court and the model are compared field for field on every
+question, which is how a defect of the port, or of the drawing, is told apart.
 
 ## 1. What is ratified, and what the drawing keeps to
 
@@ -92,10 +94,13 @@ menu (`SLOT text` is refused: **there is no free-text slot**); `SLOT`, `COURT` r
 `SURFACE_INCOMPLETE`); one namespace; a RATIONALE on every declaration; **and rule 1 as a refusal**: a kind N does not
 have is refused with *"N asks; it never declares the world, the facts or a rule"*.
 
-### 4b. Drawn, not enforced yet -- the rung's checks, executable as a model (20 fixtures, `C`)
+### 4b. Enforced by the forged court since the seventeenth rung (21 fixtures, `C`)
 
-Each is a sentence the **existing court calls `ok`** and the model refuses; each rule was switched off in turn and its
-fixtures failed (14 of 14 held).
+Each is a sentence the **v0.16 court called `ok`** (recorded in HF-68, before the rung); the forged court now answers
+the code, in `diagnose` as a C2 envelope citing `rule:<code>` in lower case, and the model answers the same codes. Each
+rule is switched off in turn **in the court** (a copy with the one `NatAdd` for that code muted) and its fixtures stop
+being caught: 15 of 15 hold. A rule reads a sentence whose references resolve: a sentence that already has a finding of
+section 4a is not read by them, and `check` stops at the first finding, by line and then by code.
 
 | code | the rule | traced to |
 |---|---|---|
@@ -113,6 +118,7 @@ fixtures failed (14 of 14 held).
 | `N_EXAMPLE_FAILED` | each EXAMPLE text, in each tongue, is understood as the frame it MEANS | K10 |
 | `N_EXAMPLE_DIVERGES` | the tongues of one example compile to the **same** query (the multilingual invariance, G2, as a law of the sentence) | K10 |
 | `N_COUNTEREXAMPLE_FAILED` | each COUNTEREXAMPLE is refused, as the kind it names | K10 |
+| `N_WORLD_UNREAD` | a SURFACE's WORLD is a file the court can read, from the sentence's own folder. **Found by building**: the drawing's model crashed on a missing world, and a court that cannot read a world cannot judge a single example | K1 |
 
 ## 5. The court's verbs
 
@@ -122,14 +128,17 @@ fixtures failed (14 of 14 held).
 
 | verb | status | arguments | answers |
 |---|---|---|---|
-| `check` | built | `<file>` | `ok` and the counts, or the first refusal; **the rung adds 4b** |
-| `diagnose` | built | `<file>` | the C2 envelope of every finding |
-| `tokens` | drawn | `<file> <tongue> <text>` | the semantic form, below |
-| `understand` | drawn | `<file> <tongue> <text>` | the frame, the surface, the closed query, the slots; or a refusal |
-| `ask` | drawn | `<file> <tongue> <text>` | `understand`, run on the surfaces, and told |
-| `vocabulary` | drawn | `<file> <tongue>` | the words by meaning, the entities, the aliases, the ignored words; and what is uncovered |
-| `examples` | drawn | `<file>` | the sentence's own conformance: how many understood, diverging, refused, failing |
+| `check` | built | `<file> [surfaces]` | `ok` and the counts, or the first refusal; **runs 4b**. `surfaces` also asks each surface's own court to judge its queries (D-N18) |
+| `diagnose` | built | `<file> [surfaces]` | the C2 envelope of every finding |
+| `tokens` | built | `<file> <tongue> <text>` | the semantic form, below |
+| `understand` | built | `<file> <tongue> <text>` | the frame, the surface, the closed query, the slots; or a refusal |
+| `ask` | built | `<file> <tongue> <text>` | `understand`, run on the surfaces, and told |
+| `vocabulary` | built | `<file> <tongue>` | the words by meaning, the entities, the aliases, the ignored words; and what is uncovered |
+| `examples` | built | `<file>` | the sentence's own conformance: how many understood, diverging, refused, failing |
 | `propose` | **reserved** | -- | section 10 |
+
+A tongue is named as the sentence names it (`english`, `french`); a text is one argument. The court refuses a sentence
+that has a finding, so a question is only ever asked of a sentence that has passed `check`.
 
 **`tokens`** -- the auditable intermediate, the one thing a reader can check a question against:
 
@@ -145,7 +154,12 @@ fixtures failed (14 of 14 held).
               "steps": [{"surface": "graph", "query": "?x received_pot_in round2", "binds": "member"},
                         {"surface": "ledger", "query": "SELECT * FROM collect WHERE member = '{member}'"}]}
 
-**`ask`** adds what the surfaces answered and how it is told:
+**`ask`** adds what the surfaces answered and how it is told. **It runs only a `pattern` surface** (a triple pattern
+over the facts of the surface's world); a `query` surface -- the ledger -- is **not run by N** (D-N17): `ask` answers its
+closed query and a `run` hint the host performs, `"run": [{"surface": "ledger", "court": "z_court.ring ask", "world":
+"../tontine.z", "query": "SELECT * FROM collect WHERE amount > 5000"}]`, because the rows are the host's, not the
+sentence's. A plan whose first step is a pattern runs it, binds the one entity, and answers the second query filled
+(`query2`) and its `run` hint:
 
     {"frame": "graph_guarantor", "surface": "graph", "query": "?x guarantees sanda", "answer": ["boubacar"], "told": "Boubacar guarantees Sanda."}
     a ledger question: "rows": [...], "told": <the ledger's voice, in the tongue>
@@ -174,7 +188,10 @@ A surface is a **protocol**, never a library. N knows no ZQL and no `stzKnowledg
 | `surface-entities <kind>` | the ids of an entity kind, to generate a lexicon | -- (the ledger enumerates none) | the facts `x | is-a | <kind>` of the world artifact |
 | `surface-tell <tongue> <answer>` | optional: the surface's own voice | `narrate-ask`: English as shipped, French as a second declaration | none: the frame's `ANSWERS` tell |
 
-The ledger needs **no change** to serve this. The graph's court does not exist as a Haro court: until the knowledge tier
+Implemented as written, with one convention: a surface whose `COURT` is `<file>.ring <verb>` is asked as
+`<runtime> <file>.ring <verb> <world> "<query>" []`, in the court's own folder, and judges a query lawful when its stdout
+is a JSON list; `triples` is judged by the court itself (exactly three terms). Only the first line of a refusal is
+kept, and the nested runtime's own stderr is not an answer. The ledger needs **no change** to serve this. The graph's court does not exist as a Haro court: until the knowledge tier
 (K1) provides one, an adapter over `stzKnowledgeGraph` serves the protocol, as in the study.
 
 ## 7. The gate
@@ -200,10 +217,15 @@ voice). N needs one, which names the kinds that play the roles:
       STEP [step], FRAME [frame], EXAMPLE [example], COUNTEREXAMPLE [counterexample]
     ) RATIONALE "What the forge emits tokens, understand, ask, vocabulary and examples for, and the checks of section 4b"
 
-The meta-court accepts none of this today (`UNDERSTAND` is an unknown kind); it is the only growth of the meta-vocabulary
-the drawing asks for. The algorithm of `understand` is the model's (`v17/n_model.py`): gate; separators; lowercase;
-each token ignored, a word of a meaning, a generated entity or alias word, or digits (1 to 12); the meanings, in order,
-against each frame's SHAPE; the template filled.
+**Built.** The meta-court takes `UNDERSTAND` as a kind (at most one; each of the eight role clauses names exactly one
+`DECLARATION`; no declaration plays two roles; each has the seats the court reads, which is how a letter that plays
+the roles with other declarations is understood the same way) and reports `understands 1`. The forge adds the
+language record's 23rd element, `load "n_lib.ring"` and the two globals every court now carries (`$aCourtUnderstand`,
+`$bNSurfaces`); every committed court was re-forged. It is the only growth of the meta-vocabulary the drawing asked for.
+The algorithm of `understand` is the model's, ported (`n_lib.ring`): gate; separators; case folding; each token ignored,
+a word of a meaning, a generated entity or alias word, or digits (1 to 12); the meanings, in order, against each
+frame's SHAPE; the template filled. **Found by building:** a tongue needs a `JOINS` seat (the word that joins the last
+of several names in an answer: `and`, `et`) -- the drawing had put French's `et` in code.
 
 ## 9. The decisions, and what each costs
 
@@ -218,7 +240,7 @@ Taken on the author's standing delegation, each reversible by naming it.
 | D-N5 | **Names come from the world, numbers from digits**: slots are none, number or entity; **no text slot** | a name the world does not know is refused as an unknown *word*; no free-text search |
 | D-N6 | **The gate is the court's**, not the author's: an allow-list that `ALLOWS` can only narrow | a language whose punctuation is outside the safe set cannot be asked in until the court widens it, in the open |
 | D-N7 | **Surfaces are protocol**: N depends on no query grammar and no graph library | the graph surface has no Haro court yet: an adapter stands in |
-| D-N8 | **A frame is judged by its surface when the sentence is checked** | `check` needs the surface's court to run: the ledger's court is called with sample slots |
+| D-N8 | **A frame is judged by its surface when the sentence is checked** | `check` needs the surface's court to run: the ledger's court is called with sample slots -- **on `check ... surfaces` only** (D-N18); `triples` is judged always |
 | D-N9 | An answer is told by the surface's voice or the frame's template; **every tongue must be coverable** | a second language is a second voice declaration for a surface that has one (the French Z court) |
 | D-N10 | **Examples are part of the sentence** and `check` runs them | a sentence's check costs a run of its own conformance |
 | D-N11 | **Five refusal kinds**, each said per tongue | a tongue authors five messages |
@@ -226,6 +248,9 @@ Taken on the author's standing delegation, each reversible by naming it.
 | D-N13 | **A plan binds exactly one entity or stops** | no plan over a set; the several-answers case is refused, not iterated |
 | D-N14 | **Spelling is declared per surface** (`SPELLS`): the ledger says Moussa, the graph moussa | **a convention, not identity** (K2): it held for 6 of 6 names and fails the first name that is not `upper_first` |
 | D-N15 | **The drafting half is reserved**, not drawn from a study that did not measure it | N cannot yet propose a sentence: section 10 |
+| D-N16 | **Case is folded for ASCII and Latin-1 only** (the court works on bytes: U+00C0 to U+00DE except U+00D7, and A-Z) | a tongue whose script has case (Greek, Cyrillic, Turkish dotted i) is not folded until the court learns it, in the open; the model folds the same way, so the two cannot drift |
+| D-N17 | **N never runs a `query` surface**: `ask` answers its closed query and a `run` hint | a host that wants the ledger's rows performs the hint itself; the told sentence of a ledger answer is the ledger's voice, not N's |
+| D-N18 | **`check` asks the surfaces' own courts only on `surfaces`** (`check <file> surfaces`) | the default `check` is 0.7 s; with `surfaces` it shells out once per ledger query (rnxc 0.8 s, the oracle 2.7 s for the tontine). Without it a query the ledger refuses is not caught until the flag is given |
 
 ## 10. What is not drawn, on purpose
 
@@ -260,27 +285,35 @@ Taken on the author's standing delegation, each reversible by naming it.
 
 ## 12. How it was judged
 
-`python haro/spike/v17/n_check.py` (about half a minute; `--plant` fails it):
+`python haro/spike/v17/n_check.py` (about 95 s; `--plant` fails it; guard stage 20):
 
-    A  n_v17.haro accepted by the meta-court, n/tontine.n by the forged court: both runtimes, the same bytes
-    B  17 defects the existing vocabulary catches: each refused with the message and the code the letter declares
-    C  20 defects the existing court calls `ok`: each caught by the rule that names it; the unmutated sentence
-       has no finding, every ledger query judged by the ledger's own court; each of the 14 rules switched off in turn
-       failed its fixtures
-    D  the model, from the sentence alone, reproduces the study on 74 of 74 questions -- the closed query, the graph
-       answer, the sentence told, the kind of every refusal -- and the meaning sequence is identical in English and
-       French for 17 of 17 pairs
-    E  the comparison can fail: with the gate removed from the model it disagrees with the study on 13 of 16 attacks
+    A  n_v17.haro accepted by the meta-court (its UNDERSTAND included), the forge forges N, n/tontine.n accepted by the
+       forged court -- `check`, and `check ... surfaces` -- and `examples` run: both runtimes, the same bytes
+    B  17 defects the declaration's own vocabulary catches: each refused with the message and the code the letter declares
+    C  21 defects a rule must catch: the forged court answers the declared code as a C2 envelope citing its rule, the model
+       answers the same codes, `check` refuses and the runtimes agree; the unmutated sentence has no finding, every
+       ledger query judged by the ledger's own court
+    C' each of the 15 codes switched off in the court in turn: its fixtures stop being caught
+    D  the REAL court, asked the study's 74 questions, reproduces the study -- the closed query, the graph answer, the
+       sentence told, the kind of every refusal -- one meaning sequence in both tongues of 17 of 17 pairs; the court and
+       the model agree field for field on `ask` and `tokens` for all 74, and on `vocabulary` and `examples`; 19 of the
+       asks, one in four, are byte-identical on the oracle
+    E  the check can fail: a court without its gate is refused by the sentence's own counterexamples, and with the rules
+       off too it disagrees with the study on 13 of 16 attacks
 
 **What D does and does not show.** The sentence was derived from the study's data, so D shows the drawing can *express*
 everything the study used, and that the behaviour is specifiable without `stzNatural`. It does not show that N
-generalises beyond 74 questions, and it judges my own design: the real test is the next rung's court passing these same
-fixtures, and the author's reading of section 9.
+generalises beyond 74 questions, and it judges my own design. The court now passes the same fixtures the drawing was
+judged by (the real test the drawing named); what is left is the author's reading of section 9, and a second sentence
+(another domain, another language) -- the generality is still unmeasured.
 
 ## Files
 
     n_v17.haro  n_court.ring  n.gbnf        the letter, and the court forged from it
     n/tontine.n                              the sentence: the tontine's natural door
-    v17/fixtures.json  v17/mk_fixtures.py    17 court cases and 20 rule cases
-    v17/n_model.py                           the reference model: parse, rules, understand, ask, tokens
+    n_lib.ring                               the court's dynamic half: tokens, understand, ask, vocabulary, examples, the rules
+    v17/fixtures.json  v17/mk_fixtures.py    17 court cases and 21 rule cases
+    v17/meta_fixtures.json  v17/mk_meta_fixtures.py   the 12 fixtures of the UNDERSTAND meta-clause (stage 1)
+    v17/n_model.py                           the reference model: parse, rules, understand, ask, tokens, vocabulary, examples
+    v17/n_check.py                           the judge (guard stage 20)
     v17/n_check.py  v17/probe_rejects.py     the judge; the exploration that preceded the fixtures

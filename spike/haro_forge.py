@@ -2820,19 +2820,19 @@ def stage19():
     return failures
 
 
-# ---- stage 20: N, the natural letter, as drawn from Ringua's Phase 1.5 study
+# ---- stage 20: N, the natural letter, drawn from Ringua's Phase 1.5 study and built (rung 17)
 
 N_CHECK = os.path.join(HERE, 'v17', 'n_check.py')
 
 
 def stage20():
-    """The seventeenth rung's drawing: n_v17.haro declares N in the meta-vocabulary Haro already has, the forge emits
-    a court that checks sentences of N, and n/tontine.n is the tontine's natural door in English and French. The
-    judges are v17/n_check.py's: the letter and the sentence accepted on both runtimes; 17 defects the existing
-    vocabulary refuses with the declared message and code; 20 defects it calls ok that the rules of the next rung
-    must catch (each rule switched off fails its fixtures); and a reference model, read from the sentence alone,
-    reproducing the study's behaviour on 74 of 74 questions. The dynamic half is DRAWN and modelled, not built."""
-    print('stage 20 -- N, the natural letter as drawn: n_v17.haro -> n_court.ring, n/tontine.n, judged by v17/n_check.py (the model reproduces the Phase 1.5 study on 74 questions)')
+    """The seventeenth rung: n_v17.haro declares N and, with the UNDERSTAND meta-clause, the forge emits a court that
+    checks sentences of N (17 defects the declaration's vocabulary refuses, 21 more the court's own rules catch, each
+    of the 15 codes load-bearing) and answers tokens, understand, ask, vocabulary and examples; n/tontine.n is the
+    tontine's natural door in English and French. The judge is v17/n_check.py's: the REAL court, asked the Phase 1.5
+    study's 74 questions, answers what the study answered and what a reference model (read from the sentence alone)
+    answers, a sample byte-identical on the oracle; with its gate removed it disagrees on the attacks."""
+    print('stage 20 -- N, the natural letter built: n_v17.haro (UNDERSTAND) -> n_court.ring, n/tontine.n, judged by v17/n_check.py (the forged court reproduces the Phase 1.5 study on 74 questions)')
     failures = 0
     p = subprocess.run([sys.executable, N_CHECK], capture_output=True, cwd=ROOT, timeout=900)
     out = p.stdout.decode('utf-8', 'replace').replace('\r\n', '\n')
