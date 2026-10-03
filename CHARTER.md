@@ -239,7 +239,7 @@ sources, and the forge emits its runner: ITERATE over a snapshot of a declared c
 a step tree that re-enters itself refused at check -- the totality doctrine of section 3,
 structural. Judged by stz's 29 W cases and zing's formula cases re-expressed as algorithms
 (35 of 35 on `rnxc` and the oracle), because A has no suite of its own. Five letters of
-six are forged: Z, W, Q, F, A; N waits on the ringua Phase 1.5 study, the author's gate (the study ran 2026-10-03: `haro/study/phase15/STUDY.md`).
+six are forged: Z, W, Q, F, A; N waits on the ringua Phase 1.5 study, the author's gate (the study ran 2026-10-03: `haro/study/phase15/STUDY.md`; the N API is then drawn: `haro/spike/v17/GRAMMAR.md`).
 **Haro v0.10, the same day (`haro/spike/v10/GRAMMAR.md`, 7 fixtures): the WORLD as versioned
 data.** The `WORLD` row above, past cardinality and entry: `SYMBOL`, a seat resolved against a
 C1 `world.json` when the court is handed one, and `PUBLISH`, the kinds a sentence contributes
@@ -645,6 +645,17 @@ shipped found open (a `?` statement in a question ran; unknown prose silently ac
 Ring++). The engine verdict is confirmed on the architecture and corrected on two claims; the closure is a
 gate's (HF-67). Record: `haro/study/phase15/STUDY.md`.
 
+**N, drawn, 2026-10-03, on the author's "draw the N API from the study"** (`haro/spike/v17/GRAMMAR.md`; not a built
+rung). `n_v17.haro` declares the natural letter -- eight kinds (TONGUE, MEANING, ALIAS, SURFACE, STEP, FRAME,
+EXAMPLE, COUNTEREXAMPLE), five menus, four forms -- **in the meta-vocabulary Haro already has**: the meta-court
+accepts it and the forge emits a court that checks sentences of N. `n/tontine.n` is the tontine's natural door in
+English and French (85 declarations). The rules the existing vocabulary cannot say are drawn as an executable
+model (`v17/n_model.py`): 14 codes, 20 fixtures the existing court calls `ok`, each rule switched off failing its
+fixtures; and that model, read from the sentence alone, reproduces the study's behaviour on 74 of 74 questions. The
+one growth the rung needs is a meta-clause, `UNDERSTAND`. **Decisions D-N1 to D-N15, taken on the delegation and
+recorded with their costs** (GRAMMAR section 9); the drafting half of N (`propose`) is reserved, not drawn. Guard
+stage 20 (HF-68).
+
 v0.1's spike (`twice.haro`, a definition with an intent clause) proved one altitude. The
 ruling asks for three to meet, and the estate has already named the smallest program that
 makes them: the alphabet's own proof obligation, "Z re-expressed through stzf from `z.stzu`
@@ -843,7 +854,8 @@ already pins.
   English and French; 17 of 17 pairs compile to one closed query; 16 attacks refused with the canary at 0, and at 1
   with the gate removed; the same bytes on official Ring 1.27 and on Ring++), **with one qualification: the
   closure is the gate's, because `stzNatural`'s shipped tokenizer evaluates bracketed text**. Whether that closes
-  the gate is the author's reading. **No N API is drawn**: STUDY.md section 6 (K1-K10) is the input to one.
+  the gate is the author's reading. **The N API was then drawn from it**, on the author's "draw the N API from the study"
+  (`haro/spike/v17/GRAMMAR.md`): drawn, not built. STUDY.md section 6 (K1-K10) was its input.
 
 - **D14 -- the forge as an `rnxc` verb: stays the ringpp session's, routed.** Today the forge
   is Ring source `rnxc` runs (`rnxc forge.ring <file>`); a verb is a change to

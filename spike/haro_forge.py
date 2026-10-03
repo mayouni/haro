@@ -2818,6 +2818,34 @@ def stage19():
     return failures
 
 
+# ---- stage 20: N, the natural letter, as drawn from Ringua's Phase 1.5 study
+
+N_CHECK = os.path.join(HERE, 'v17', 'n_check.py')
+
+
+def stage20():
+    """The seventeenth rung's drawing: n_v17.haro declares N in the meta-vocabulary Haro already has, the forge emits
+    a court that checks sentences of N, and n/tontine.n is the tontine's natural door in English and French. The
+    judges are v17/n_check.py's: the letter and the sentence accepted on both runtimes; 17 defects the existing
+    vocabulary refuses with the declared message and code; 20 defects it calls ok that the rules of the next rung
+    must catch (each rule switched off fails its fixtures); and a reference model, read from the sentence alone,
+    reproducing the study's behaviour on 74 of 74 questions. The dynamic half is DRAWN and modelled, not built."""
+    print('stage 20 -- N, the natural letter as drawn: n_v17.haro -> n_court.ring, n/tontine.n, judged by v17/n_check.py (the model reproduces the Phase 1.5 study on 74 questions)')
+    failures = 0
+    p = subprocess.run([sys.executable, N_CHECK], capture_output=True, cwd=ROOT, timeout=900)
+    out = p.stdout.decode('utf-8', 'replace').replace('\r\n', '\n')
+    for line in out.splitlines():
+        if line.startswith('  ') or line.startswith('n_check:'):
+            print(line)
+    if p.returncode != 0:
+        failures += 1
+        print(f'  FAIL n_check.py exited {p.returncode}')
+    if PLANT:
+        failures += 1
+        print('  FAIL the drawn N letter -- PLANTED')
+    return failures
+
+
 def stage6(lang, court=None, n=15):
     court = court or f'{lang}_court.ring'
     print(f'stage 6 -- edit to verdict on makeen_box.machine, minima of {n}')
@@ -2915,5 +2943,7 @@ if __name__ == '__main__':
         failures += stage18()
     if stage in (None, 19) and os.path.exists(RUN_CASES16) and os.path.exists(A_CASES):
         failures += stage19()
+    if stage in (None, 20) and os.path.exists(N_CHECK):
+        failures += stage20()
     print(f'haro_forge: {"FAIL" if failures else "PASS"} ({failures} failure(s), {time.perf_counter()-t0:.1f} s)')
     sys.exit(1 if failures else 0)

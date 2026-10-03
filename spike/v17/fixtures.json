@@ -1,0 +1,287 @@
+{
+ "grammar": "haro-n",
+ "version": "0.17",
+ "comment": "Writes v17/fixtures.json: the conformance floor of the N letter as DRAWN (n_v17.haro, n/tontine.n).\n\nComposed from the letter's own declared MESSAGES and CODES and from the rules in GRAMMAR.md -- before the\nchecks that judge them were run on these cases (the W discipline: fixtures first). Two kinds:\n\n  court   a defect the EXISTING meta-vocabulary makes the forged court refuse: its message must hold the\n          text declared in n_v17.haro, and `diagnose` must carry the code declared there\n  rule    a defect the existing court CANNOT see (it must still say `ok`) and the rule of the next rung must\n          catch: n_model.rules() must answer the code. Each is what v0.17 would add as a check\n\nEach case is one replacement in n/tontine.n, anchored: the old text must occur exactly once.",
+ "sentence": "n/tontine.n",
+ "letter": "n_v17.haro",
+ "court": [
+  {
+   "id": "C01",
+   "name": "a column keyed by a tongue nobody declared",
+   "old": "WORDS [english: \"who\", french: \"qui\"]",
+   "new": "WORDS [english: \"who\", german: \"wer\"]",
+   "message": "which resolves to nothing",
+   "code": null
+  },
+  {
+   "id": "C02",
+   "name": "a frame whose shape names no meaning",
+   "old": "SHAPE [show, deposit, over, num], TARGET ledger",
+   "new": "SHAPE [show, deposit, ovr, num], TARGET ledger",
+   "message": "FRAME ledger_over has 'ovr' in its SHAPE, which is not a declared meaning",
+   "code": "DANGLING_MEANING"
+  },
+  {
+   "id": "C03",
+   "name": "a frame aimed at no surface",
+   "old": "SHAPE [show, deposit], TARGET ledger,",
+   "new": "SHAPE [show, deposit], TARGET ledgr,",
+   "message": "FRAME ledger_all is aimed at 'ledgr', which is not a declared surface",
+   "code": "DANGLING_SURFACE"
+  },
+  {
+   "id": "C04",
+   "name": "an example that means no frame",
+   "old": "MEANS ledger_over,\n  ASKING [english: \"show deposits over 5000\"",
+   "new": "MEANS ledger_ovr,\n  ASKING [english: \"show deposits over 5000\"",
+   "message": "EXAMPLE p01 means 'ledger_ovr', which is not a declared frame",
+   "code": "DANGLING_FRAME"
+  },
+  {
+   "id": "C05",
+   "name": "a step aimed at no surface",
+   "old": "TARGET graph, QUERY \"?x received_pot_in round{num}\", BINDS member",
+   "new": "TARGET grph, QUERY \"?x received_pot_in round{num}\", BINDS member",
+   "message": "STEP find_beneficiary is aimed at 'grph', which is not a declared surface",
+   "code": "DANGLING_SURFACE"
+  },
+  {
+   "id": "C06",
+   "name": "a surface that tells in no tongue",
+   "old": "TELLS [english, french]",
+   "new": "TELLS [english, german]",
+   "message": "SURFACE ledger tells in 'german', which is not a declared tongue",
+   "code": "DANGLING_TONGUE"
+  },
+  {
+   "id": "C07",
+   "name": "a meaning that draws from no surface",
+   "old": "SLOT entity, OF member, FROM graph",
+   "new": "SLOT entity, OF member, FROM grph",
+   "message": "MEANING member draws its entities from 'grph', which is not a declared surface",
+   "code": "DANGLING_SURFACE"
+  },
+  {
+   "id": "C08",
+   "name": "an alias of no meaning",
+   "old": "MEANING role, ENTITY \"treasurer\"",
+   "new": "MEANING rol, ENTITY \"treasurer\"",
+   "message": "ALIAS treasurer is of 'rol', which is not a declared meaning",
+   "code": "DANGLING_MEANING"
+  },
+  {
+   "id": "C09",
+   "name": "a declaration N does not have: N never declares",
+   "old": "DEFINE STEP find_beneficiary AS (",
+   "new": "DEFINE NORM positive_deposit AS (RULE \"amount > 0\") RATIONALE \"x\"\n\nDEFINE STEP find_beneficiary AS (",
+   "message": "N asks; it never declares the world, the facts or a rule",
+   "code": null
+  },
+  {
+   "id": "C10",
+   "name": "a free-text slot: the one thing a question may not carry",
+   "old": "DEFINE MEANING num AS (\n  SLOT number",
+   "new": "DEFINE MEANING num AS (\n  SLOT text",
+   "message": "SLOT is none, number or entity, not 'text'",
+   "code": "PARSE"
+  },
+  {
+   "id": "C11",
+   "name": "a digit set the court does not know",
+   "old": "DIGITS ascii,\n  NAMES upper_first,\n  REFUSES [\n    character: \"the question",
+   "new": "DIGITS arabic_indic,\n  NAMES upper_first,\n  REFUSES [\n    character: \"the question",
+   "message": "DIGITS is ascii",
+   "code": "PARSE"
+  },
+  {
+   "id": "C12",
+   "name": "a refusal kind that does not exist",
+   "old": "ambiguous: \"the question needs one answer",
+   "new": "name: \"the question needs one answer",
+   "message": "not 'name'",
+   "code": "PARSE"
+  },
+  {
+   "id": "C13",
+   "name": "a spelling that does not exist",
+   "old": "SPELLS [member: upper_first],",
+   "new": "SPELLS [member: shouting],",
+   "message": "a spelling is as_is or upper_first, not 'shouting'",
+   "code": "PARSE"
+  },
+  {
+   "id": "C14",
+   "name": "a meaning with no slot",
+   "old": "DEFINE MEANING show AS (\n  SLOT none,",
+   "new": "DEFINE MEANING show AS (",
+   "message": "MEANING show needs a SLOT",
+   "code": "MEANING_INCOMPLETE"
+  },
+  {
+   "id": "C15",
+   "name": "a surface with no court: a surface is a protocol",
+   "old": "KIND query, GRAMMAR \"ZQL ASK\", COURT \"z_court.ring ask\",",
+   "new": "KIND query, GRAMMAR \"ZQL ASK\",",
+   "message": "SURFACE ledger needs its COURT",
+   "code": "SURFACE_INCOMPLETE"
+  },
+  {
+   "id": "C16",
+   "name": "a declaration without its rationale",
+   "old": "DEFINE ALIAS collector AS (\n  MEANING role, ENTITY \"collector\",\n  WORDS [english: \"collector\", french: \"collecteur\"]\n) RATIONALE \"The member who takes the deposits\"",
+   "new": "DEFINE ALIAS collector AS (\n  MEANING role, ENTITY \"collector\",\n  WORDS [english: \"collector\", french: \"collecteur\"]\n)",
+   "message": "RATIONALE is mandatory on every declaration",
+   "code": null
+  },
+  {
+   "id": "C17",
+   "name": "a name declared twice: one namespace",
+   "old": "DEFINE MEANING under AS (",
+   "new": "DEFINE MEANING over AS (",
+   "message": "'over' is already declared",
+   "code": null
+  }
+ ],
+ "rules": [
+  {
+   "id": "R01",
+   "name": "a placeholder in a QUERY that is not a slot of the shape",
+   "old": "QUERY \"SELECT * FROM collect WHERE amount > {num}\"",
+   "new": "QUERY \"SELECT * FROM collect WHERE amount > {amnt}\"",
+   "code": "N_SLOT_UNKNOWN"
+  },
+  {
+   "id": "R02",
+   "name": "a placeholder in an ANSWERS that is not a slot",
+   "old": "{answer} received the pot in round {num}.",
+   "new": "{winner} received the pot in round {num}.",
+   "code": "N_SLOT_UNKNOWN"
+  },
+  {
+   "id": "R03",
+   "name": "a plan step using a slot nothing bound",
+   "old": "QUERY \"SELECT * FROM collect WHERE member = '{member}'\"\n) RATIONALE \"That member",
+   "new": "QUERY \"SELECT * FROM collect WHERE member = '{memberr}'\"\n) RATIONALE \"That member",
+   "code": "N_SLOT_UNKNOWN"
+  },
+  {
+   "id": "R04",
+   "name": "a slot meaning twice in one shape",
+   "old": "SHAPE [show, deposit, member, over, num], TARGET ledger,",
+   "new": "SHAPE [show, deposit, member, member, num], TARGET ledger,",
+   "code": "N_SLOT_REPEATED"
+  },
+  {
+   "id": "R05",
+   "name": "a frame with neither a target and query nor steps",
+   "old": "SHAPE [show, deposit], TARGET ledger, QUERY \"SELECT * FROM collect\"",
+   "new": "SHAPE [show, deposit], QUERY \"SELECT * FROM collect\"",
+   "code": "N_FRAME_TARGET"
+  },
+  {
+   "id": "R06",
+   "name": "a frame with both a target and steps",
+   "old": "SHAPE [show, deposit], TARGET ledger, QUERY \"SELECT * FROM collect\"",
+   "new": "SHAPE [show, deposit], TARGET ledger, QUERY \"SELECT * FROM collect\", STEPS [find_beneficiary]",
+   "code": "N_FRAME_TARGET"
+  },
+  {
+   "id": "R07",
+   "name": "a surface that cannot tell in a tongue, with no frame template to cover it",
+   "old": "TELLS [english, french]",
+   "new": "TELLS [english]",
+   "code": "N_TELL_UNCOVERED"
+  },
+  {
+   "id": "R08",
+   "name": "an ANSWERS with no EMPTY: an answer may be nobody",
+   "old": "EMPTY [english: \"Nobody received the pot in round {num}.\", french: \"Personne n'a reçu la cagnotte au tour {num}.\"]",
+   "new": "EMPTY [english: \"Nobody received the pot in round {num}.\"]",
+   "code": "N_TELL_UNCOVERED"
+  },
+  {
+   "id": "R09",
+   "name": "a tongue that cannot say one kind of refusal",
+   "old": ",\n    surface: \"la source a refusé la question compilée : {what}\"",
+   "new": "",
+   "code": "N_REFUSAL_UNCOVERED"
+  },
+  {
+   "id": "R10",
+   "name": "a tongue that widens the gate beyond the court's safe set",
+   "old": "ALLOWS \"-'?,.\",\n  DIGITS ascii,\n  NAMES upper_first,\n  REFUSES [\n    character: \"la question",
+   "new": "ALLOWS \"-'?,.;\",\n  DIGITS ascii,\n  NAMES upper_first,\n  REFUSES [\n    character: \"la question",
+   "code": "N_GATE_WIDENED"
+  },
+  {
+   "id": "R11",
+   "name": "a word that means two things in one tongue",
+   "old": "WORDS [english: \"who\", french: \"qui\"]",
+   "new": "WORDS [english: \"who show\", french: \"qui\"]",
+   "code": "N_WORD_AMBIGUOUS"
+  },
+  {
+   "id": "R12",
+   "name": "a word both ignored and meaningful",
+   "old": "IGNORES \"the a an of me please",
+   "new": "IGNORES \"deposits the a an of me please",
+   "code": "N_WORD_IGNORED"
+  },
+  {
+   "id": "R13",
+   "name": "a meaning with no words in a tongue",
+   "old": "WORDS [english: \"who\", french: \"qui\"]",
+   "new": "WORDS [english: \"who\"]",
+   "code": "N_TONGUE_UNCOVERED"
+  },
+  {
+   "id": "R14",
+   "name": "an entity meaning of a kind its surface does not enumerate",
+   "old": "SLOT entity, OF member, FROM graph",
+   "new": "SLOT entity, OF person, FROM graph",
+   "code": "N_ENTITY_UNKNOWN"
+  },
+  {
+   "id": "R15",
+   "name": "a surface that does not enumerate what a meaning draws from it",
+   "old": "ENTITIES [member, round, role],",
+   "new": "ENTITIES [round, role],",
+   "code": "N_ENTITY_UNKNOWN"
+  },
+  {
+   "id": "R16",
+   "name": "a ledger query the ledger's own court refuses",
+   "old": "QUERY \"SELECT * FROM collect WHERE amount < {num}\"",
+   "new": "QUERY \"SELECT member FROM collect WHERE amount < {num}\"",
+   "code": "N_QUERY_REFUSED"
+  },
+  {
+   "id": "R17",
+   "name": "a graph pattern that is not three terms",
+   "old": "QUERY \"?x received_pot_in round{num}\",\n  ANSWERS",
+   "new": "QUERY \"?x received_pot_in\",\n  ANSWERS",
+   "code": "N_QUERY_REFUSED"
+  },
+  {
+   "id": "R18",
+   "name": "an example its own text does not reach",
+   "old": "ASKING [english: \"show deposits over 5000\", french: \"montre les dépôts au dessus de 5000\"]",
+   "new": "ASKING [english: \"show deposits over five thousand\", french: \"montre les dépôts au dessus de 5000\"]",
+   "code": "N_EXAMPLE_FAILED"
+  },
+  {
+   "id": "R19",
+   "name": "an example whose tongues compile to different queries",
+   "old": "ASKING [english: \"show deposits over 5000\", french: \"montre les dépôts au dessus de 5000\"]",
+   "new": "ASKING [english: \"show deposits over 5000\", french: \"montre les dépôts au dessus de 4000\"]",
+   "code": "N_EXAMPLE_DIVERGES"
+  },
+  {
+   "id": "R20",
+   "name": "a counterexample that IS understood",
+   "old": "ASKING [english: \"what is the meaning of life\"], REFUSED word",
+   "new": "ASKING [english: \"show deposits\"], REFUSED word",
+   "code": "N_COUNTEREXAMPLE_FAILED"
+  }
+ ]
+}

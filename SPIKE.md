@@ -77,6 +77,7 @@ expression language forged whole, judged by stz's 29 fixtures as stage 8, pinned
 | `spike/v16/GRAMMAR.md`, `spike/v16/fixtures.json`, `spike/v16/run_cases.json` | **Haro v0.16** (the sixteenth rung, below): NARRATE gains TELLS -- a template per event of a run or of a question; `narrate-run` and `narrate-ask`; the narration is a projection of the run itself; three runs and a question, and the same court under a voice that tells almost nothing, composed by hand before the court |
 | `spike/a_v16.haro`, `spike/z_v16.haro` | A with a voice that tells a run and Z with one that tells a question: `a_v09.haro` and `z_v10.haro` plus a NARRATE (the guard's `A_STZU` and `Z_STZU` since this rung; the 35 cases and 25 questions are unchanged) |
 | `study/phase15/` | **The Phase 1.5 study** (ringua's exemplar extension study, run 2026-10-03; not a rung): `STUDY.md`, the experiments E1-E4, `nlq.ring` (stzNatural's architecture retargeted to closed queries), the judges, 74 hand-composed questions in English and French, the tontine's knowledge graph as a text artifact; `python haro/study/phase15/study_run.py` |
+| `spike/n_v17.haro`, `spike/n/tontine.n`, `spike/n_court.ring`, `spike/v17/` | **N, drawn** (the natural letter's API, 2026-10-03; not a built rung): the letter in the existing meta-vocabulary, the tontine's natural door in English and French, the court forged from the letter, `GRAMMAR.md` (the API, 15 decisions), 17 + 20 fixtures, `n_model.py` (the reference model), `n_check.py` (the judge; guard stage 20) |
 | `spike/world_lib.ring`, `spike/world_stub.ring` | the world's functions (SYMBOL resolution, the C1 rows), moved out of `court_lib.ring` and loaded only where a SYMBOL or PUBLISH is declared, and the stub that stands elsewhere |
 
 Nothing in `rnxc` or the VM changed. Nothing in a sibling repository changed.
@@ -1192,6 +1193,34 @@ kit must provide. It is not a rung and forged no letter; it is `haro/study/phase
 **The qualification is the finding**: the closure is the gate's, because the shipped tokenizer is open (HF-67). The
 engine choice is confirmed on the architecture and corrected on two claims. **No N API is drawn**: STUDY.md section
 6 lists ten requirements (K1-K10) of the knowledge and pragmatics tiers, each traced to a measurement.
+
+## N, drawn -- 2026-10-03
+
+**On the author's "draw the N API from the study".** The study's section 6 listed ten requirements (K1-K10) of the
+knowledge and pragmatics tiers; the drawing turns them into the natural letter's API and **builds none of its dynamic
+half**. `haro/spike/v17/GRAMMAR.md` is the API: eight kinds a sentence of N declares, the court's verbs (`tokens`,
+`understand`, `ask`, `vocabulary`, `examples`), the surface protocol, the gate, and fifteen decisions with their costs.
+
+    n_v17.haro      the letter: 8 kinds, 5 menus, 4 forms -- accepted by the meta-court, no new meta-vocabulary
+    n_court.ring    forged from it: `check` and `diagnose` on sentences of N
+    n/tontine.n     the tontine's natural door, English and French: 85 declarations (2 tongues, 14 meanings, 2 aliases,
+                    2 surfaces, 2 steps, 12 frames, 26 examples, 25 counterexamples)
+    stage 20        17 defects the existing vocabulary refuses (message and code as the letter declares); 20 the
+                    existing court calls ok and the model must refuse, 14 rules each switched off failing its
+                    fixtures; the model reproduces the study on 74 of 74 questions; the same meaning sequence in both
+                    languages for 17 of 17 pairs; the comparison fails when the gate is removed (13 of 16 attacks)
+    the pass        PASS, 20 stages in 312 s; --plant FAIL
+
+**What the drawing found.** A letter can be drawn in the meta-vocabulary Haro already has, and a reference model of
+the dynamic half makes "what the existing court enforces" and "what the next rung must add" a measured line: 17
+rules are the court's today, 14 more are the rung's. The rung needs one growth, a meta-clause `UNDERSTAND` (section 8
+of GRAMMAR), which the meta-court does not accept yet. **And it found a flaw in the study**: attack X16 never reached
+the tokenizer; fixed in `34f61e1` and recorded in STUDY section 8.
+
+**Reserved, not drawn**: `propose` (N drafts a sentence of another letter, a proposal the court judges and a human
+ratifies). The study measured asking only; the verb is named, its contract stated from the ratified text, and nothing
+about it is derived. **Not drawn either**: the knowledge tier (K1, K2), Hausa and Arabic skins, spelled numbers, a plan
+over a set, a produced binary.
 
 ## The names -- `.haro`, not `.stzu` -- corrected 2026-10-02
 

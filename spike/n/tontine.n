@@ -1,0 +1,438 @@
+-- tontine.n -- the tontine's natural door, in English and French: a sentence of N (n_v17.haro).
+--
+-- Everything the Phase 1.5 study's working pipeline holds as DATA (haro/study/phase15/nlq.ring) is declared here
+-- and nothing else: two tongues, fourteen meanings, two aliases, two surfaces, two steps of one plan, twelve
+-- frames, and the sentence's own examples. n_sufficiency.py generates the pipeline's tables FROM this file and
+-- runs the study's 74 questions on them: the same 111 lines, so the drawing loses nothing the study used.
+--
+-- This sentence asks. It declares no world (tontine.z does), no fact (data/tontine.zknw holds them) and no rule.
+
+-- ---- the tongues ------------------------------------------------------------------------------------
+
+DEFINE TONGUE english AS (
+  CODE "en",
+  IGNORES "the a an of me please is are in by than all did does was were to for pot",
+  ALLOWS "-'?,.",
+  DIGITS ascii,
+  NAMES upper_first,
+  REFUSES [
+    character: "the question carries a character this language does not use: {what}",
+    word: "the word '{what}' is not part of the tontine's vocabulary",
+    shape: "the words are known but no question has this shape: {what}",
+    ambiguous: "the question needs one answer to go on and found several: {what}",
+    surface: "the surface refused the question this one compiled to: {what}"
+  ]
+) RATIONALE "English: the words a question may carry that mean nothing, the punctuation it may use, names written with a capital, and five refusals in English"
+
+DEFINE TONGUE french AS (
+  CODE "fr",
+  IGNORES "le la les l de des du d au aux a est se porte par un une moi plus pot cagnotte",
+  ALLOWS "-'?,.",
+  DIGITS ascii,
+  NAMES upper_first,
+  REFUSES [
+    character: "la question contient un caractere que cette langue n'emploie pas : {what}",
+    word: "le mot « {what} » ne fait pas partie du vocabulaire de la tontine",
+    shape: "les mots sont connus mais aucune question n'a cette forme : {what}",
+    ambiguous: "la question demande une seule réponse pour continuer et en a trouvé plusieurs : {what}",
+    surface: "la source a refusé la question compilée : {what}"
+  ]
+) RATIONALE "Le français, tel que la tontine le parle à Niamey et à Paris: les mots qui ne comptent pas, la ponctuation permise, les noms en majuscule, cinq refus en français"
+
+-- ---- the meanings: one per thing a question can mean, its words a column per tongue -------------------
+
+DEFINE MEANING show AS (
+  SLOT none,
+  WORDS [english: "show list display give", french: "montre montrez affiche liste"]
+) RATIONALE "The request to see: the verb of every question about deposits"
+
+DEFINE MEANING who AS (
+  SLOT none,
+  WORDS [english: "who", french: "qui"]
+) RATIONALE "The request for a person: the verb of every question the graph answers"
+
+DEFINE MEANING deposit AS (
+  SLOT none,
+  WORDS [english: "deposit deposits", french: "depot depots dépôt dépôts"]
+) RATIONALE "The ledger's one entity: one member's contribution to one round"
+
+DEFINE MEANING over AS (
+  SLOT none,
+  WORDS [english: "over above exceeding more", french: "dessus superieur supérieur"]
+) RATIONALE "A comparison: greater than"
+
+DEFINE MEANING under AS (
+  SLOT none,
+  WORDS [english: "under below less", french: "dessous inferieur inférieur"]
+) RATIONALE "A comparison: less than"
+
+DEFINE MEANING round AS (
+  SLOT none,
+  WORDS [english: "round", french: "tour"]
+) RATIONALE "The round of the circle; the number after it names which"
+
+DEFINE MEANING biggest AS (
+  SLOT none,
+  WORDS [english: "biggest largest highest", french: "gros grand"]
+) RATIONALE "The greatest: with deposit, the one largest amount"
+
+DEFINE MEANING received AS (
+  SLOT none,
+  WORDS [english: "received got", french: "recu reçu"]
+) RATIONALE "The pot was received: the relation received_pot_in"
+
+DEFINE MEANING guarantees AS (
+  SLOT none,
+  WORDS [english: "guarantees guarantee", french: "garant garantit"]
+) RATIONALE "Who stands guarantor for whom, read subject first"
+
+DEFINE MEANING guaranteed_by AS (
+  SLOT none,
+  WORDS [english: "guaranteed", french: "garanti"]
+) RATIONALE "The same relation read the other way: guaranteed BY"
+
+DEFINE MEANING beneficiary AS (
+  SLOT none,
+  WORDS [english: "beneficiary", french: "beneficiaire bénéficiaire"]
+) RATIONALE "The member who received a round's pot: the one question that crosses two surfaces"
+
+DEFINE MEANING num AS (
+  SLOT number
+) RATIONALE "A number the question wrote in digits; the only thing of a question's own text that reaches a query, and then only as digits"
+
+DEFINE MEANING member AS (
+  SLOT entity, OF member, FROM graph
+) RATIONALE "A member of the circle, by name: the words are the graph's own members, in every tongue, because the world has them -- never because the question wrote one"
+
+DEFINE MEANING role AS (
+  SLOT entity, OF role, FROM graph
+) RATIONALE "A role a member holds: the words are the aliases below, per tongue"
+
+DEFINE ALIAS treasurer AS (
+  MEANING role, ENTITY "treasurer",
+  WORDS [english: "treasurer", french: "trésorier tresorier"]
+) RATIONALE "The first word of a tongue is the one an answer is told in: Le trésorier est Zeinab, with the accent"
+
+DEFINE ALIAS collector AS (
+  MEANING role, ENTITY "collector",
+  WORDS [english: "collector", french: "collecteur"]
+) RATIONALE "The member who takes the deposits"
+
+-- ---- the surfaces: where a question ends -----------------------------------------------------------------
+
+DEFINE SURFACE ledger AS (
+  KIND query, GRAMMAR "ZQL ASK", COURT "z_court.ring ask",
+  SPELLS [member: upper_first],
+  TELLS [english, french]
+) RATIONALE "The ledger of deposits, asked in zing's closed query grammar; a member is spelled the way the ledger spells it (Moussa, not moussa). Its court judges a query and runs it; it answers in English as the Z court's own voice and in French as a second declaration"
+
+DEFINE SURFACE graph AS (
+  KIND pattern, GRAMMAR "triples", COURT "stzKnowledgeGraph.Query", WORLD "data/tontine.zknw",
+  ENTITIES [member, round, role],
+  SPELLS [member: as_is]
+) RATIONALE "The tontine's knowledge graph: a question ends as a triple pattern, three terms, ?x a variable. Until the knowledge tier is a court of its own, stzKnowledgeGraph serves this protocol; N depends on the protocol, not on it"
+
+-- ---- the plan: a question across two surfaces -------------------------------------------------------------
+
+DEFINE STEP find_beneficiary AS (
+  TARGET graph, QUERY "?x received_pot_in round{num}", BINDS member
+) RATIONALE "Who received the pot of that round: exactly one member, or the plan stops"
+
+DEFINE STEP deposits_of_beneficiary AS (
+  TARGET ledger, QUERY "SELECT * FROM collect WHERE member = '{member}'"
+) RATIONALE "That member's deposits, from the member the step before bound"
+
+-- ---- the frames: the shapes of a question --------------------------------------------------------------------
+
+DEFINE FRAME ledger_all AS (
+  SHAPE [show, deposit], TARGET ledger, QUERY "SELECT * FROM collect"
+) RATIONALE "Show the deposits"
+
+DEFINE FRAME ledger_over AS (
+  SHAPE [show, deposit, over, num], TARGET ledger, QUERY "SELECT * FROM collect WHERE amount > {num}"
+) RATIONALE "Show the deposits over an amount"
+
+DEFINE FRAME ledger_under AS (
+  SHAPE [show, deposit, under, num], TARGET ledger, QUERY "SELECT * FROM collect WHERE amount < {num}"
+) RATIONALE "Show the deposits under an amount"
+
+DEFINE FRAME ledger_member AS (
+  SHAPE [show, deposit, member], TARGET ledger, QUERY "SELECT * FROM collect WHERE member = '{member}'"
+) RATIONALE "Show one member's deposits"
+
+DEFINE FRAME ledger_round AS (
+  SHAPE [show, deposit, round, num], TARGET ledger, QUERY "SELECT * FROM collect WHERE round = {num}"
+) RATIONALE "Show one round's deposits"
+
+DEFINE FRAME ledger_biggest AS (
+  SHAPE [show, biggest, deposit], TARGET ledger, QUERY "SELECT * FROM collect ORDER BY amount DESC LIMIT 1"
+) RATIONALE "Show the largest deposit"
+
+DEFINE FRAME ledger_member_over AS (
+  SHAPE [show, deposit, member, over, num], TARGET ledger,
+  QUERY "SELECT * FROM collect WHERE member = '{member}' AND amount > {num}"
+) RATIONALE "Show one member's deposits over an amount"
+
+DEFINE FRAME graph_pot AS (
+  SHAPE [who, received, round, num], TARGET graph, QUERY "?x received_pot_in round{num}",
+  ANSWERS [english: "{answer} received the pot in round {num}.", french: "{answer} a reçu la cagnotte au tour {num}."],
+  EMPTY [english: "Nobody received the pot in round {num}.", french: "Personne n'a reçu la cagnotte au tour {num}."]
+) RATIONALE "Who received the pot of a round"
+
+DEFINE FRAME graph_guarantor AS (
+  SHAPE [who, guarantees, member], TARGET graph, QUERY "?x guarantees {member}",
+  ANSWERS [english: "{answer} guarantees {member}.", french: "{answer} se porte garant de {member}."],
+  EMPTY [english: "Nobody guarantees {member}.", french: "Personne ne se porte garant de {member}."]
+) RATIONALE "Who guarantees a member"
+
+DEFINE FRAME graph_guaranteed_by AS (
+  SHAPE [who, guaranteed_by, member], TARGET graph, QUERY "{member} guarantees ?x",
+  ANSWERS [english: "{member} guarantees {answer}.", french: "{member} se porte garant de {answer}."],
+  EMPTY [english: "{member} guarantees nobody.", french: "{member} ne se porte garant de personne."]
+) RATIONALE "Whom a member guarantees"
+
+DEFINE FRAME graph_role AS (
+  SHAPE [who, role], TARGET graph, QUERY "?x holds_role {role}",
+  ANSWERS [english: "The {role} is {answer}.", french: "Le {role} est {answer}."],
+  EMPTY [english: "Nobody is the {role}.", french: "Personne n'est {role}."]
+) RATIONALE "Who holds a role"
+
+DEFINE FRAME beneficiary_deposits AS (
+  SHAPE [show, deposit, beneficiary, round, num], STEPS [find_beneficiary, deposits_of_beneficiary],
+  ANSWERS [english: "The beneficiary of round {num} is {answer}.", french: "Le bénéficiaire du tour {num} est {answer}."],
+  EMPTY [english: "Nobody received the pot in round {num}, so there is no beneficiary.", french: "Personne n'a reçu la cagnotte au tour {num} : il n'y a pas de bénéficiaire."]
+) RATIONALE "The deposits of the member who received a round's pot: a plan, the first step told by the frame, the last by the ledger's voice"
+
+-- ---- the examples: what the sentence promises to understand, in every tongue -----------------------------
+
+DEFINE EXAMPLE p01 AS (
+  MEANS ledger_over,
+  ASKING [english: "show deposits over 5000", french: "montre les dépôts au dessus de 5000"]
+) RATIONALE "A comparison over the amount"
+
+DEFINE EXAMPLE p02 AS (
+  MEANS ledger_under,
+  ASKING [english: "show deposits under 3000", french: "montre les dépôts au dessous de 3000"]
+) RATIONALE "The other comparison"
+
+DEFINE EXAMPLE p03 AS (
+  MEANS ledger_member,
+  ASKING [english: "show deposits of Aminata", french: "montre les dépôts de Aminata"]
+) RATIONALE "One member, named"
+
+DEFINE EXAMPLE p04 AS (
+  MEANS ledger_member,
+  ASKING [english: "show the deposits of Moussa", french: "montre les dépôts de Moussa"]
+) RATIONALE "Another member: the words come from the graph, not from the question"
+
+DEFINE EXAMPLE p05 AS (
+  MEANS ledger_round,
+  ASKING [english: "show deposits of round 2", french: "montre les dépôts du tour 2"]
+) RATIONALE "One round"
+
+DEFINE EXAMPLE p06 AS (
+  MEANS ledger_round,
+  ASKING [english: "list the deposits of round 3", french: "liste les dépôts du tour 3"]
+) RATIONALE "One round, another verb"
+
+DEFINE EXAMPLE p07 AS (
+  MEANS ledger_biggest,
+  ASKING [english: "show the biggest deposit", french: "montre le plus gros dépôt"]
+) RATIONALE "The largest"
+
+DEFINE EXAMPLE p08 AS (
+  MEANS ledger_member_over,
+  ASKING [english: "show deposits of Aminata over 4000", french: "montre les dépôts de Aminata au dessus de 4000"]
+) RATIONALE "Two conditions at once"
+
+DEFINE EXAMPLE p09 AS (
+  MEANS ledger_all,
+  ASKING [english: "show deposits", french: "montre les dépôts"]
+) RATIONALE "No condition"
+
+DEFINE EXAMPLE p10 AS (
+  MEANS graph_pot,
+  ASKING [english: "who received the pot in round 2", french: "qui a reçu la cagnotte au tour 2"]
+) RATIONALE "A relation, by round"
+
+DEFINE EXAMPLE p11 AS (
+  MEANS graph_pot,
+  ASKING [english: "who received the pot in round 1", french: "qui a reçu la cagnotte au tour 1"]
+) RATIONALE "A relation, by round"
+
+DEFINE EXAMPLE p12 AS (
+  MEANS graph_guarantor,
+  ASKING [english: "who guarantees Sanda", french: "qui se porte garant de Sanda"]
+) RATIONALE "A relation, object known"
+
+DEFINE EXAMPLE p13 AS (
+  MEANS graph_guaranteed_by,
+  ASKING [english: "who is guaranteed by Aminata", french: "qui est garanti par Aminata"]
+) RATIONALE "A relation, subject known"
+
+DEFINE EXAMPLE p14 AS (
+  MEANS graph_role,
+  ASKING [english: "who is the treasurer", french: "qui est le trésorier"]
+) RATIONALE "A role, through its alias"
+
+DEFINE EXAMPLE p15 AS (
+  MEANS graph_role,
+  ASKING [english: "who is the collector", french: "qui est le collecteur"]
+) RATIONALE "A role, through its alias"
+
+DEFINE EXAMPLE p16 AS (
+  MEANS beneficiary_deposits,
+  ASKING [english: "show the deposits of the beneficiary of round 2", french: "montre les dépôts du bénéficiaire du tour 2"]
+) RATIONALE "A plan across the graph and the ledger"
+
+DEFINE EXAMPLE p17 AS (
+  MEANS beneficiary_deposits,
+  ASKING [english: "show the deposits of the beneficiary of round 1", french: "montre les dépôts du bénéficiaire du tour 1"]
+) RATIONALE "A plan across the graph and the ledger"
+
+DEFINE EXAMPLE v01 AS (
+  MEANS ledger_over,
+  ASKING [english: "list all deposits above 7500"]
+) RATIONALE "Synonyms the vocabulary declares"
+
+DEFINE EXAMPLE v02 AS (
+  MEANS ledger_biggest,
+  ASKING [english: "display the largest deposit"]
+) RATIONALE "Synonyms the vocabulary declares"
+
+DEFINE EXAMPLE v03 AS (
+  MEANS ledger_over,
+  ASKING [english: "SHOW DEPOSITS OVER 5000"]
+) RATIONALE "Case does not matter"
+
+DEFINE EXAMPLE v04 AS (
+  MEANS ledger_over,
+  ASKING [english: "show deposits over 5000?"]
+) RATIONALE "A trailing question mark is punctuation, allowed"
+
+DEFINE EXAMPLE v05 AS (
+  MEANS graph_pot,
+  ASKING [english: "who got the pot in round 3"]
+) RATIONALE "A synonym of received"
+
+DEFINE EXAMPLE v06 AS (
+  MEANS ledger_member,
+  ASKING [french: "Montre les dépôts de AMINATA"]
+) RATIONALE "A name in capitals is the same member"
+
+DEFINE EXAMPLE v07 AS (
+  MEANS ledger_over,
+  ASKING [french: "montre les depots au dessus de 5000"]
+) RATIONALE "Without the accents"
+
+DEFINE EXAMPLE v08 AS (
+  MEANS graph_pot,
+  ASKING [english: "who received the pot in round 9"]
+) RATIONALE "A round the graph does not know is a lawful question with an empty answer, not a refusal: the template builds the id, and the surface answers nobody"
+
+DEFINE EXAMPLE v09 AS (
+  MEANS ledger_all,
+  ASKING [english: "show me the deposits please"]
+) RATIONALE "Politeness words the tongue ignores"
+
+-- ---- the counterexamples: what the sentence promises NOT to understand -------------------------------------
+
+DEFINE COUNTEREXAMPLE n01 AS (
+  ASKING [english: "what is the meaning of life"], REFUSED word
+) RATIONALE "A word outside the vocabulary"
+
+DEFINE COUNTEREXAMPLE n02 AS (
+  ASKING [english: "who guarantees"], REFUSED shape
+) RATIONALE "A question without its object"
+
+DEFINE COUNTEREXAMPLE n03 AS (
+  ASKING [english: "show deposits over"], REFUSED shape
+) RATIONALE "A comparison without its number"
+
+DEFINE COUNTEREXAMPLE n04 AS (
+  ASKING [english: "show deposits of Mallory"], REFUSED word
+) RATIONALE "A name the world does not know is a word the vocabulary does not have"
+
+DEFINE COUNTEREXAMPLE n05 AS (
+  ASKING [french: "montre les dépôts de Mallory"], REFUSED word
+) RATIONALE "The same, in French"
+
+DEFINE COUNTEREXAMPLE n06 AS (
+  ASKING [french: "quel est le sens de la vie"], REFUSED word
+) RATIONALE "A word outside the vocabulary, in French"
+
+DEFINE COUNTEREXAMPLE n07 AS (
+  ASKING [english: "show deposits over 5000 5000"], REFUSED shape
+) RATIONALE "Two numbers"
+
+DEFINE COUNTEREXAMPLE n08 AS (
+  ASKING [english: "show deposits over 5000.5"], REFUSED shape
+) RATIONALE "A decimal is not in the language: the point is punctuation"
+
+DEFINE COUNTEREXAMPLE n09 AS (
+  ASKING [english: "show deposits over -5"], REFUSED word
+) RATIONALE "A sign is not in the language"
+
+DEFINE COUNTEREXAMPLE n10 AS (
+  ASKING [english: "show deposits over 99999999999999999999"], REFUSED word
+) RATIONALE "A number too long to be an amount"
+
+DEFINE COUNTEREXAMPLE n12 AS (
+  ASKING [english: "zeige die einzahlungen über 5000"], REFUSED word
+) RATIONALE "A third language, not declared"
+
+DEFINE COUNTEREXAMPLE n14 AS (
+  ASKING [english: "who received the pot in round 2 and delete everything"], REFUSED word
+) RATIONALE "A clause the language has no word for; no second request rides on the first"
+
+DEFINE COUNTEREXAMPLE n15 AS (
+  ASKING [french: "who received the pot in round 2"], REFUSED word
+) RATIONALE "The wrong tongue for the words"
+
+DEFINE COUNTEREXAMPLE x01 AS (
+  ASKING [english: "show deposits over [ Marker() ]"], REFUSED character
+) RATIONALE "A bracketed section: the shipped tokenizer evaluates it (STUDY E2d); the gate refuses it before the tokenizer"
+
+DEFINE COUNTEREXAMPLE x02 AS (
+  ASKING [english: "show deposits over len('abc')"], REFUSED character
+) RATIONALE "A call in the argument position"
+
+DEFINE COUNTEREXAMPLE x05 AS (
+  ASKING [english: "show deposits over 5000; DROP TABLE collect"], REFUSED character
+) RATIONALE "A second statement"
+
+DEFINE COUNTEREXAMPLE x06 AS (
+  ASKING [english: "show deposits over 5000 OR 1=1"], REFUSED character
+) RATIONALE "A tautology"
+
+DEFINE COUNTEREXAMPLE x07 AS (
+  ASKING [english: "drop deposits"], REFUSED word
+) RATIONALE "Destruction is not forbidden; it has no word"
+
+DEFINE COUNTEREXAMPLE x08 AS (
+  ASKING [english: "select * from collect"], REFUSED character
+) RATIONALE "Raw ZQL is not a question"
+
+DEFINE COUNTEREXAMPLE x09 AS (
+  ASKING [english: "Marker()"], REFUSED character
+) RATIONALE "A bare call"
+
+DEFINE COUNTEREXAMPLE x10 AS (
+  ASKING [english: "show deposits over 1:5"], REFUSED character
+) RATIONALE "A range: the tokenizer evaluates those too"
+
+DEFINE COUNTEREXAMPLE x11 AS (
+  ASKING [english: "show deposits over `Marker()`"], REFUSED character
+) RATIONALE "A backquoted string"
+
+DEFINE COUNTEREXAMPLE x12 AS (
+  ASKING [english: "show deposits over {Marker()}"], REFUSED character
+) RATIONALE "Braces"
+
+DEFINE COUNTEREXAMPLE x14 AS (
+  ASKING [english: "show deposits over $nMarker"], REFUSED character
+) RATIONALE "A Ring global"
+
+DEFINE COUNTEREXAMPLE x16 AS (
+  ASKING [english: "show deposits over ［ 5000 ］"], REFUSED word
+) RATIONALE "Full-width brackets are bytes the gate lets through; they must be an unknown word and never a bracketed section"
