@@ -1,0 +1,24 @@
+{
+  "grammar": "haro",
+  "version": "0.15",
+  "comment": "The hand-written half of stage 18's judge, written BEFORE the court's behaviour was read: for each file, WHICH findings the meta-court that collects must give and on which line, composed from the rules (the line a refusal carries is the line the court already gave it in default mode: the declaration's own, except a missing RATIONALE, which is found where the next DEFINE begins). Wording is not pinned beyond a fragment of it. `four.haro`: an unknown clause, a seat typed by nothing, a missing RATIONALE, a name twice -- and `e`, typed by the declaration that did not read, says nothing. `cascade.haro`: ONE defect, an unknown clause on `a`, and everything that names `a` -- a seat, a form, a seat typed by the form, a constraint -- says nothing. `barrier.haro`: a seat typed by nothing and a constraint on a kind nothing declares; the second is a relation, judged only once every type resolves, so only the first is reported. `relations.haro`: two constraints on kinds nothing declares, and a sound one between them: both reported, because nothing earlier is wrong. `clean.haro`: no defect, so `all` prints exactly what the default prints.",
+  "cases": [
+    {"file": "four.haro", "findings": [
+      {"line": 2, "contains": "Unknown clause 'BOGUS'"},
+      {"line": 3, "contains": "seat type 'missing_type' resolves to nothing"},
+      {"line": 5, "contains": "carries its RATIONALE"},
+      {"line": 5, "contains": "'b' is already declared"}
+    ]},
+    {"file": "cascade.haro", "findings": [
+      {"line": 2, "contains": "Unknown clause 'BOGUS'"}
+    ]},
+    {"file": "barrier.haro", "findings": [
+      {"line": 2, "contains": "seat type 'nowhere' resolves to nothing"}
+    ]},
+    {"file": "relations.haro", "findings": [
+      {"line": 3, "contains": "zz_one"},
+      {"line": 5, "contains": "zz_two"}
+    ]},
+    {"file": "clean.haro", "findings": []}
+  ]
+}

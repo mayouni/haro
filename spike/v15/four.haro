@@ -1,0 +1,6 @@
+DEFINE LANGUAGE x AS (VERSION "0.15", GRAMMAR "0.15", COURT "x", EXTENSION ".x") RATIONALE "x"
+DEFINE DECLARATION a AS (VERB "A", SEATS [s: name], BOGUS 1) RATIONALE "an unknown clause"
+DEFINE DECLARATION b AS (VERB "B", SEATS [s: missing_type]) RATIONALE "a seat typed by nothing"
+DEFINE DECLARATION c AS (VERB "C", SEATS [s: name])
+DEFINE DECLARATION b AS (VERB "D", SEATS [s: name]) RATIONALE "the name b twice"
+DEFINE DECLARATION e AS (VERB "E", SEATS [s: a]) RATIONALE "a seat typed by the broken a"

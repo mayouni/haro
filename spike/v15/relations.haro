@@ -1,0 +1,5 @@
+DEFINE LANGUAGE x AS (VERSION "0.15", GRAMMAR "0.15", COURT "x", EXTENSION ".x") RATIONALE "x"
+DEFINE DECLARATION a AS (VERB "A", SEATS [s: name]) RATIONALE "sound"
+DEFINE CONSTRAINT c1 AS (ON zz_one, WHEN "s absent", MESSAGE "x") RATIONALE "a relation to nothing"
+DEFINE CONSTRAINT c2 AS (ON a, WHEN "s absent", MESSAGE "x") RATIONALE "sound"
+DEFINE CONSTRAINT c3 AS (ON zz_two, WHEN "s absent", MESSAGE "x") RATIONALE "another relation to nothing"

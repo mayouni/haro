@@ -1,0 +1,4 @@
+DEFINE LANGUAGE x AS (VERSION "0.15", GRAMMAR "0.15", COURT "x", EXTENSION ".x") RATIONALE "x"
+DEFINE DECLARATION a AS (VERB "A", SEATS [s: nowhere]) RATIONALE "a seat typed by nothing: found while the types resolve"
+DEFINE DECLARATION b AS (VERB "B", SEATS [s: name]) RATIONALE "sound"
+DEFINE CONSTRAINT c1 AS (ON zz_nokind, WHEN "s absent", MESSAGE "x") RATIONALE "a constraint on a kind nothing declares: a relation, judged only once every type resolves"

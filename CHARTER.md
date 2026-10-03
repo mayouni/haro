@@ -276,6 +276,14 @@ in several places answers every finding, in the order of the file; `check` still
 first, to the byte; a sentence that does not parse stops the run. Judged by RingFlex's own
 `Check()` pass, live: five sentences with hand predictions (four right, one corrected), 11
 (code, declaration) pairs the same, all 24 original fixtures the same on every finding (HF-64).
+**Haro v0.15, the same day (`haro/spike/v15/GRAMMAR.md`; no clause grew): the meta-court
+collects.** `haro.ring <file> all` answers every defect of a language declaration, in the order
+of the file, where the default answers the first -- an author who mistyped a clause, forgot a
+RATIONALE and named a type nothing declares now sees all three. Three phases and a barrier:
+read and register, resolve, and only then the relations among declarations, which are
+undefined while one of them is missing. Judged by the court's own first refusal one defect at
+a time over the real declarations of seven letters -- 183 single defects and 116 combinations,
+zero differences -- and by five files whose findings were written by hand (HF-65).
 
 **What the forge produces from one declaration** (Ringua's kit, 02-STACK's L1, now Haro's
 compiler verbs rather than separate organs): the parser; the court with the fixtures as its
@@ -607,6 +615,13 @@ collects.** `diagnose` answers every finding and `check` the first; judged by Ri
 original fixtures the same on every finding, nothing cascading (HF-64). The world's 121
 lines left `court_lib.ring` to keep the cold start under its pinned 100 ms. Record:
 `haro/SPIKE.md`, "The fourteenth rung".
+
+**The fifteenth rung, 2026-10-03, on the author's "do meta-court collecting": Haro v0.15, the
+meta-court collects.** `haro.ring <file> all`; three phases and a barrier; judged by the
+court's own first refusal over mutated real declarations (183 singles, 116 combinations, zero
+differences, every protection proved load-bearing by switching it off) and by five hand-written
+files (HF-65). The owed timing re-take was taken on a quiet machine: 94.0 ms against the pinned
+100. Record: `haro/SPIKE.md`, "The fifteenth rung".
 
 v0.1's spike (`twice.haro`, a definition with an intent clause) proved one altitude. The
 ruling asks for three to meet, and the estate has already named the smallest program that

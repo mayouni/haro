@@ -28,17 +28,57 @@ $aCondLangs = []
 $cCondLang = ""
 $aCourtSentences = []
 $cStzuDir = ""
+$bStzuCollect = 0
+$aStzuFound = []
+$aStzuBroken = []
+$aStzuLastName = ""
+$aStzuUnresolved = []
 
 if len(sysargv) < 3
-	? "usage: haro.ring <file.haro>"
+	? "usage: haro.ring <file.haro> [all]"
 else
 	cPath = sysargv[3]
 	cSrc = read(cPath)
 	$cStzuDir = StzuDirOf(cPath)
-	try
-		aLang = StzuDeclare(cSrc)
-		StzuPrintLanguage(aLang)
-	catch
-		? cCatchError
-	done
+	bAll = 0
+	if len(sysargv) >= 4
+		if sysargv[4] = "all" bAll = 1 ok
+	ok
+	if bAll
+		HaroAll(cSrc)
+	else
+		try
+			aLang = StzuDeclare(cSrc)
+			StzuPrintLanguage(aLang)
+		catch
+			? cCatchError
+		done
+	ok
 ok
+
+# v0.15: `all` -- every defect of the declaration, one line each, in the order of the file.
+# A FUNCTION, not top-level code, on purpose: on Ring a bare assignment inside a function to a
+# name that exists as a global writes the GLOBAL, so the names used here (cE, aL, aFd) must be
+# ones no script-level variable of this file is called -- cErr and aLang are, and StzuDeclare
+# assigns both of its own (found on the oracle: its cErr leaked into the top level's)
+func HaroAll(cText)
+	$bStzuCollect = 1
+	cE = ""
+	aL = NULL
+	try
+		aL = StzuDeclare(cText)
+	catch
+		cE = cCatchError
+	done
+	$bStzuCollect = 0
+	if cE != ""
+		$aStzuFound + [StzuLineOf(cE), StzuStripPrefix(cE)]
+	ok
+	if len($aStzuFound) > 0
+		aFd = StzuSortFound($aStzuFound)
+		for k = 1 to len(aFd)
+			? "haro (line " + aFd[k][1] + "): " + aFd[k][2]
+		next
+	else
+		StzuPrintLanguage(aL)
+	ok

@@ -2172,6 +2172,146 @@ def stage17():
     return failures
 
 
+# ---- stage 18: the meta-court that collects, judged by its own first refusal, one defect at a time
+
+META_CASES = os.path.join(HERE, 'v15', 'multi_cases.json')
+LAW_BASES = ['f_v13.haro', 'z_v10.haro', 'a_v09.haro', 'machine_v03.haro', 'stzv_v12.haro', 'w_v05.haro', 'fleet_v04.haro']
+# the seeds are chosen so that every protection of the court is load-bearing under THIS sampling
+# (each was switched off in turn and the stage failed); HARO_LAW_SEEDS / HARO_LAW_PER only widen it
+LAW_SEEDS = tuple(int(x) for x in os.environ.get('HARO_LAW_SEEDS', '1').split(','))
+LAW_PER = int(os.environ.get('HARO_LAW_PER', '8'))
+# floors on how much the law must actually check: a stage that checks nothing passes (HF-64's "all 0")
+LAW_SINGLES_FLOOR = 165
+LAW_COMBOS_FLOOR = 100
+META_LINE = re.compile(r'^haro \(line (\d+)\): (.*)$')
+
+
+def meta_run(exe, path, mode=None):
+    out = run_args(exe, ['haro.ring', path] + ([mode] if mode else []), HERE)
+    return [l for l in out.split('\n') if l != '']
+
+
+def stage18():
+    """The fifteenth rung. The meta-court gains `haro.ring <file> all`: every defect of a
+    language declaration, one line each, in the order of the file, where it gave the first.
+    The judge is the court's own first refusal. A defect put into a sound declaration by
+    haro_mutate.py is refused alone in default mode; the court that collects must give
+    exactly that one line for it (nothing echoing it), and for several defects on different
+    declarations exactly the union of their single lines (nothing hidden behind another).
+    Defects found while the declarations are read, registered and have their types resolved
+    come before the relations among declarations are judged (a barrier, as RingFlex's parser
+    stands before its Check()), so when any of the first two kinds is present the relational
+    ones wait. Before that, five files whose findings were written by hand."""
+    print('stage 18 -- the meta-court that collects: `haro.ring <file> all`, judged by its own first refusal one defect at a time, and by findings written by hand')
+    failures = 0
+    ab_diff = []
+    def both(path, mode):
+        r = meta_run(RNXC, path, mode)
+        o = meta_run(ORACLE, path, mode)
+        if r != o:
+            ab_diff.append(os.path.basename(path) + ':' + str(mode))
+        return r
+    # 1. the hand-written cases
+    doc = json.load(open(META_CASES, encoding='utf-8'))
+    hand_bad = 0
+    for c in doc['cases']:
+        path = os.path.join('v15', c['file'])
+        got = both(path, 'all')
+        if not c['findings']:
+            want = meta_run(RNXC, path, None)
+            if got != want or not got or got[0] != 'ok':
+                hand_bad += 1
+                print(f'  FAIL {c["file"]}: a clean declaration must print what the default prints')
+            continue
+        parsed = [META_LINE.match(l) for l in got]
+        if len(got) != len(c['findings']) or not all(parsed):
+            hand_bad += 1
+            print(f'  FAIL {c["file"]}: {len(got)} line(s), {len(c["findings"])} written by hand: {got[:6]}')
+            continue
+        for m, w in zip(parsed, c['findings']):
+            if int(m.group(1)) != w['line'] or w['contains'] not in m.group(2):
+                hand_bad += 1
+                print(f'  FAIL {c["file"]}: line {m.group(1)} {m.group(2)[:70]!r}, written by hand: line {w["line"]} containing {w["contains"]!r}')
+                break
+    failures += hand_bad
+    print(('  FAIL ' if hand_bad else '  ok   ') + f'{len(doc["cases"])} files whose findings were written by hand: the same findings on the same lines ({hand_bad} differ)')
+    # 2. the union law, on the real declarations of the letters
+    import random, haro_mutate as hm
+    mut = os.path.join(HERE, 'zz_mut.haro')
+    n_single = n_combo = n_clean = 0
+    law_bad = []
+    try:
+        for seed in LAW_SEEDS:
+            rng = random.Random(seed)
+            for base in LAW_BASES:
+                text = open(os.path.join(HERE, base), encoding='utf-8', newline='').read()
+                head, stmts = hm.split_statements(text)
+                elig = hm.eligible(head, stmts, text)
+                if seed == LAW_SEEDS[0]:
+                    n_clean += 1
+                    if both(os.path.join(HERE, base), 'all') != meta_run(RNXC, os.path.join(HERE, base), None):
+                        law_bad.append((base, 'a sound declaration: all differs from the default'))
+                pick = []
+                for op in ('clause', 'rationale', 'dup', 'dangle', 'on'):
+                    cands = [e for e in elig if e['op'] == op]
+                    rng.shuffle(cands)
+                    pick += cands[:LAW_PER]
+                singles = {}
+                for m in pick:
+                    mt = hm.apply(text, [m])
+                    if mt is None:
+                        continue
+                    with open(mut, 'w', encoding='utf-8', newline='') as fh:
+                        fh.write(mt)
+                    d = meta_run(RNXC, mut, None)
+                    a = both(mut, 'all')
+                    singles[(m['op'], m['at'])] = (m, d)
+                    n_single += 1
+                    if not (len(d) == 1 and a == d):
+                        law_bad.append((base, f'{m["op"]} at {m["at"]} alone: default {d[:1]}, all gave {len(a)} line(s)'))
+                keys = list(singles)
+                for size in (2, 3, 4):
+                    for _ in range(LAW_PER):
+                        if len(keys) < size:
+                            break
+                        ch = rng.sample(keys, size)
+                        muts = [singles[k][0] for k in ch]
+                        mt = hm.apply(text, muts)
+                        if mt is None:
+                            continue
+                        with open(mut, 'w', encoding='utf-8', newline='') as fh:
+                            fh.write(mt)
+                        lo = min(hm.STAGE[singles[k][0]['op']] for k in ch)
+                        want = sorted(l for k in ch for l in singles[k][1] if hm.STAGE[singles[k][0]['op']] <= 2 or lo == 3)
+                        got = sorted(both(mut, 'all'))
+                        n_combo += 1
+                        if got != want:
+                            law_bad.append((base, f'{[(k[0], k[1]) for k in ch]}: wanted {len(want)} line(s), got {len(got)}'))
+    finally:
+        try:
+            os.remove(mut)
+        except OSError:
+            pass
+    failures += len(law_bad)
+    for base, why in law_bad[:6]:
+        print(f'  FAIL {base}: {why}')
+    print(('  FAIL ' if law_bad else '  ok   ') + f'the union law: {n_clean} sound declarations print what the default prints; {n_single} single defects each give exactly their own line; {n_combo} combinations of two to four give exactly the union ({len(law_bad)} differ)')
+    if n_single < LAW_SINGLES_FLOOR or n_combo < LAW_COMBOS_FLOOR:
+        failures += 1
+        print(f'  FAIL the law checked {n_single} single(s) and {n_combo} combination(s), under the pinned floors of {LAW_SINGLES_FLOOR} and {LAW_COMBOS_FLOOR}')
+    elif LAW_SINGLES_FLOOR:
+        print(f'  ok   at or above the pinned floors of {LAW_SINGLES_FLOOR} single(s) and {LAW_COMBOS_FLOOR} combination(s)')
+    if PLANT:
+        failures += 1
+        print('  FAIL the meta-court collection -- PLANTED')
+    if ab_diff:
+        failures += 1
+        print(f'  FAIL rnxc and the oracle differ on {len(ab_diff)} run(s): {ab_diff[:5]}')
+    else:
+        print('  ok   rnxc and the oracle print the same bytes on every collecting run')
+    return failures
+
+
 def stage6(lang, court=None, n=15):
     court = court or f'{lang}_court.ring'
     print(f'stage 6 -- edit to verdict on makeen_box.machine, minima of {n}')
@@ -2265,5 +2405,7 @@ if __name__ == '__main__':
         failures += stage16()
     if stage in (None, 17) and os.path.exists(F_STZU) and os.path.exists(MULTI_CASES):
         failures += stage17()
+    if stage in (None, 18) and os.path.exists(META_CASES):
+        failures += stage18()
     print(f'haro_forge: {"FAIL" if failures else "PASS"} ({failures} failure(s), {time.perf_counter()-t0:.1f} s)')
     sys.exit(1 if failures else 0)

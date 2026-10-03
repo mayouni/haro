@@ -29,6 +29,11 @@ $aCondLangs = []
 $cCondLang = ""
 $aCourtSentences = []
 $cStzuDir = ""
+$bStzuCollect = 0
+$aStzuFound = []
+$aStzuBroken = []
+$aStzuLastName = ""
+$aStzuUnresolved = []
 
 # The top level's names are its own (cInPath, cOutDir, ...): on Ring a
 # function's bare assignment to a name that exists as a global WRITES THE

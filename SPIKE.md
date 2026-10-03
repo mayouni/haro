@@ -72,6 +72,8 @@ expression language forged whole, judged by stz's 29 fixtures as stage 8, pinned
 | `spike/v13/narration_cases.json` | the narration of the smallest lawful workflow, composed by hand before the court: the hand-written half of stage 16's judge |
 | `spike/v14/GRAMMAR.md`, `spike/v14/multi_cases.json`, `spike/v14/multi/` | **Haro v0.14** (the fourteenth rung, below): a court that collects -- no clause grew; `diagnose` answers every finding, `check` the first; five sentences with several defects in two notations and my hand predictions of them, written before the court |
 | `spike/rf_multi.ring` | RingFlex's own court asked for every finding on the files it is given, run read-only under official Ring by stage 17: the live judge of the collecting court |
+| `spike/v15/GRAMMAR.md`, `spike/v15/multi_cases.json`, `spike/v15/*.haro` | **Haro v0.15** (the fifteenth rung, below): the meta-court collects -- no clause grew; `haro.ring <file> all` answers every defect, the default the first; three phases and a barrier; five files whose findings were written by hand |
+| `spike/haro_mutate.py` | five operators that put a defect of a known kind into a sound declaration without moving a line, and the stage rule they are judged by: the union of single defects |
 | `spike/world_lib.ring`, `spike/world_stub.ring` | the world's functions (SYMBOL resolution, the C1 rows), moved out of `court_lib.ring` and loaded only where a SYMBOL or PUBLISH is declared, and the stub that stands elsewhere |
 
 Nothing in `rnxc` or the VM changed. Nothing in a sibling repository changed.
@@ -1007,11 +1009,88 @@ guard's own stage 6 at 95.4 and 95.1 ms, and a scratch-copy A/B at 97.9 ms befor
 89.7 and 90.4 after. An interleaved A/B of the committed court against this one, taken under
 the load, was inconclusive (minima ratio 0.97, medians 1.15, both sides at 190 ms and up) and is
 not claimed. The loaded readings are not quoted as measurements; the re-take on a quiet
-machine is the first thing to do when one exists.
+machine is the first thing to do when one exists. **Re-taken clean in the fifteenth rung's pass: 94.0 ms compiled, 13.1 reused, the untouched Zig court at 5.8.**
 
 **What it does not do is named in `v14/GRAMMAR.md`**: `check`, `narrate` and `refine` stop at
 the first refusal; the first finding per site; the file's order, not RingFlex's pass order;
 the meta-court (`.haro` files) does not collect; a broken declaration is silent past its shape.
+
+## The fifteenth rung -- Haro v0.15, the meta-court collects -- 2026-10-03
+
+**On the author's "do meta-court collecting".** The last two rungs made the COURTS the forge
+emits collect; the court that judges a LANGUAGE -- `haro.ring`, which every `.haro` file passes
+through -- still stopped at its first refusal, so an author who had mistyped a clause,
+forgotten a RATIONALE and named a type nothing declares learned it one build at a time. No
+clause grew. `haro.ring <file> all` answers every defect, one line each, in the order of the
+file; `haro.ring <file>` prints exactly what it printed, and all thirteen fixture sets (198
+cases) pass on both runtimes in default mode to prove it. One function, `StzuNote`, and a
+`try` at each element of the declaration loop and of the nineteen whole-file passes.
+
+**The design is three phases and a barrier, and it was found by being wrong.** The first cut
+collected everywhere and a mutation run gave 49 problems in 70: one unknown clause on one
+declaration drew eight more findings from the views, constraints and walks that named it.
+The court now READS and REGISTERS each declaration, RESOLVES every type, and judges the
+RELATIONS among declarations -- sentences, views, constraints, walks, the ask, the run, the
+points -- only if the first two phases found nothing, because a relation is undefined while
+one of its terms is not there. RingFlex stands on the same barrier (its parser raises, its
+`Check()` collects after it). Inside the first two phases a finding that is an echo says
+nothing: one that quotes a declaration that did not read, one about a declaration whose seat
+types did not resolve, one about a seat typed by a FORM that did not.
+
+**There was no expected text to write, so the judge is the court's own first refusal.** Five
+operators (`haro_mutate.py`) put a defect of a known kind into a sound declaration without
+moving a line -- an unknown clause, a missing RATIONALE, a name taken, a seat typed by
+nothing, a constraint on a kind nothing declares -- and the law is metamorphic: ONE defect
+gives exactly the one line the default gives for it, SEVERAL on different declarations give
+exactly the union (the relational ones waiting while an earlier kind is present), a sound
+file prints what the default prints. Applied to the real declarations of F, Z, A, the
+machine, the forms, W and the fleet.
+
+    stage 1    v0.1 28 ... v0.14 (no fixtures: no clause grew) -- 198 cases, default mode,
+               on rnxc and the oracle, byte-identical
+    stage 18   five files whose findings were written by hand BEFORE the court's behaviour
+               was read (an unknown clause, a seat typed by nothing, a missing RATIONALE and
+               a name twice with a seat typed by the broken one silent; one defect with a
+               seat, a form, a seat typed by the form and a constraint all naming it, all
+               silent; the barrier; two relational defects both reported; a sound file): the
+               same findings on the same lines. Then the law: 7 sound declarations, 183
+               single defects and 116 combinations of two to four, 0 differ, floors pinned
+               at 165 and 100; the same bytes on rnxc and the oracle on every run
+    exploration  ten seeds at eight per operator, zero differences on the final code
+    stages 2-17  unchanged
+    stage 6    harb 5.8 ms; rnxc compiled 94.0, image 13.1; the oracle 118.7 -- clean, on a quiet machine
+    the pass   PASS, 18 stages in 247 s; --plant FAIL (44 failures, the meta-court collection among them)
+
+**Each protection was proved load-bearing by switching it off, and two were removed.** The
+barrier, the memory of a declaration whose types did not resolve, the silence on a quoted
+broken name, the seat check on a FORM that did not resolve, the memory of that FORM and the
+MESSAGES-pass skip each fail the stage when off, under the stage's own sampling. Registering
+a broken name as declared -- the first thought -- never mattered, and the seat check for a
+declaration that did not read mattered only while it did: both are gone. The seeds were
+chosen for it: at four mutations per operator the second never mattered in eight seeds, at
+eight per operator seed 1 makes all six matter.
+
+**Two things that were not the court's, each caught by something that could only have caught
+it here.** `haro.ring`'s top level named a variable `cErr`, and on the oracle a bare
+assignment in a function to a name that exists as a global writes the GLOBAL: `StzuDeclare`'s
+own `cErr` leaked into it and the oracle printed one finding twice that `rnxc` printed once
+-- C-2's trap from the other side, found because the stage runs both runtimes, and fixed by
+making the branch a function. And a pattern in the mutation helper held two backspace
+characters where `\b` was meant, so the relational operator matched nothing and the
+exploration reported "0 problems" over a population with no relational defect in it; the
+list of operators printed beside the count gave it away.
+
+**THE OWED TIMING RE-TAKE, taken.** The last rung's guard failed its timing stage under
+another session's build and was left owing a clean reading. This pass is on a quiet machine
+(the untouched Zig court at 5.8 ms, against 10 on an ordinary day and 17 to 40 under that
+build): rnxc compiled 94.0 ms against the pinned 100, image reused 13.1, the oracle 118.7. All
+eighteen stages pass in 247 s, and the world's move out of `court_lib.ring` has paid its
+debt: 94.0 is where the 92-96 of before the fourteenth rung stood.
+
+**What it does not do is named in `v15/GRAMMAR.md`**: the tokenizer is not resumable (an
+unterminated string ends the run, as in RingFlex); an unreadable LANGUAGE ends it; a SENTENCE
+seat's file is one phase-3 finding; and the silence on a quoted name is textual in the one
+place it quotes.
 
 ## The names -- `.haro`, not `.stzu` -- corrected 2026-10-02
 
@@ -1097,7 +1176,11 @@ whole guard re-run on the renamed tree: 28 + 30 + 27 + 23, 117 of 120, 32 of 32,
    on the author's "continue": `diagnose` answers every finding, judged by RingFlex's own
    `Check()` live; what is left in that direction is the meta-court collecting, so an
    author of a `.haro` file sees every defect at once.
-16. The forge as an `rnxc` verb (the ringpp session's `src/`, routed); the
+16. ~~The meta-court collecting~~ -- built 2026-10-03 as Haro v0.15, the fifteenth rung above, on
+   the author's "do meta-court collecting": `haro.ring <file> all`, three phases and a barrier,
+   judged by the court's own first refusal one defect at a time (183 singles, 116
+   combinations, zero differences) and by five files written by hand.
+17. The forge as an `rnxc` verb (the ringpp session's `src/`, routed); the
    Softanza-resident timing the charter's 2.6 asks for; the court's run time on the
    oracle under paths and views (6.4x the image this pass, named at stage 6); the
    ontology as versioned data, `ASK`, `NARRATE` and `FORMS`, the rows of section 3 the

@@ -1,0 +1,6 @@
+DEFINE LANGUAGE x AS (VERSION "0.15", GRAMMAR "0.15", COURT "x", EXTENSION ".x") RATIONALE "x"
+DEFINE DECLARATION a AS (VERB "A", SEATS [s: name], BOGUS 1) RATIONALE "the one defect: an unknown clause"
+DEFINE DECLARATION b AS (VERB "B", SEATS [s: a]) RATIONALE "typed by the declaration that did not read"
+DEFINE FORM f AS (SEATS [k: a]) RATIONALE "a form typed by it too"
+DEFINE DECLARATION c AS (VERB "C", SEATS [s: f], MESSAGES [s: "m"]) RATIONALE "a seat typed by the form"
+DEFINE CONSTRAINT c1 AS (ON a, WHEN "s absent", MESSAGE "x") RATIONALE "and a constraint on it"
