@@ -10,6 +10,7 @@ load "court_lib.ring"
 load "expr_lib.ring"
 load "world_stub.ring"
 load "run_lib.ring"
+load "narrate_lib.ring"
 
 $cCourtLang = ""
 $cCourtExt = ""
@@ -54,6 +55,11 @@ $aCourtNarrate = NULL
 $bCourtCollect = 0
 $aCourtFound = []
 $aCourtBroken = []
+$bRunTrace = 0
+$aRunTrace = []
+$nRunDepth = 0
+$bAskTrace = 0
+$aAskTrace = []
 $cExprLang = ""
 $aExprOperators = []
 $aExprOperands = []
@@ -112,7 +118,7 @@ $aCourtLangs = [
     [["OF", ["algorithm", "steps", "result"]], ["COMPUTE", ["compute", "into", "value"]], ["COLLECT", ["collect", "into", "value"]], ["GROUP", ["group", "into", "by", "value"]], ["BRANCH", ["branch", "when", "then", "else"]], ["ITERATE", ["iterate", "over", "as", "do"]]],
     [],
     NULL,
-    NULL
+    ["telling", "", "", "I stopped: {message} ({code})", [], [["run", "Running {algorithm} on {record}."], ["compute", "{name}: {into} is now {value}."], ["collect", "{name}: {value} added to {into}."], ["group", "{name}: {value} filed under {key} in {into}."], ["branch", "{name}: when {when} the {taken} steps are taken."], ["iterate", "{name}: for each of the {count} items of {over}, as {as}:"], ["result", "{algorithm} answers {result}."]]]
   ]
 ]
 CtUseLanguage("a")

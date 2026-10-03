@@ -136,3 +136,182 @@ func NarrateRun(cFile)
 		ok
 	next
 	? NarFill(cEnds, aTop)
+
+# ---- v0.16: a run and a question, told ---------------------------------------------------
+#
+#   <court>.ring narrate-run <file> <algorithm> <record json>
+#   <court>.ring narrate-ask <file> <question> <rows json>
+#
+# The narration is a PROJECTION OF THE RUN ITSELF: the very run `run` or `ask` makes, with a
+# flag raised so that each step records what it did as it does it (run_lib's RunNote, ask_lib's
+# AskNote) -- never a second execution, never a replay, so what is told cannot differ from what
+# was done. Each event is told in the template the voice's TELLS gives its key, or in a plain
+# default; a step nested under another is indented two spaces a level; values are printed as
+# `run` and `ask` print them. The same two laws as `narrate`: written to stdout and nowhere
+# else, and no verb reads a narration back.
+
+func NarTellText(cKey)
+	aT = $aCourtNarrate[6]
+	for i = 1 to len(aT)
+		if aT[i][1] = cKey return aT[i][2] ok
+	next
+	return ""
+
+func NarIndent(n)
+	cOut = ""
+	for i = 1 to n
+		cOut += "  "
+	next
+	return cOut
+
+# the one refusal line, as `narrate` gives it
+func NarRefuse(cErr, cBase)
+	cRefuses = $aCourtNarrate[4]
+	if cRefuses = "" cRefuses = "I stopped at line {line}: {message}" ok
+	cCites = ""
+	for i = 1 to len($aCourtCites)
+		if i > 1 cCites += ", " ok
+		cCites += $aCourtCites[i]
+	next
+	? NarFill(cRefuses, [["language", $cCourtLang], ["file", cBase], ["line", "" + CtLineOf(cErr)], ["code", $cCourtCode], ["message", CtStripPrefix(cErr)], ["cites", cCites]])
+
+# one step of a run, told: [depth, name, value, key, taken, count]
+func NarTellStep(aDecls, aE)
+	aD = CtDeclNamed(aDecls, aE[2])
+	aKind = CtKindByVerb(aD[1])
+	cT = ""
+	if not isNull(aKind) cT = NarTellText(aKind[2]) ok
+	if cT = ""
+		# a step the voice does not tell: its verb and name, and what it DID, read off the event's own fields
+		cL = lower(aD[1]) + " " + aD[2]
+		if aE[5] != ""
+			cL += ": " + aE[5]
+		but aE[6] != ""
+			cL += ": " + aE[6] + " item(s)"
+		but aE[4] != ""
+			cL += ": " + aE[3] + " under " + aE[4]
+		but aE[3] != ""
+			cL += ": " + aE[3]
+		ok
+		return cL
+	ok
+	aVals = [["name", aD[2]], ["verb", aD[1]], ["rationale", aD[5]], ["line", "" + aD[3]], ["value", aE[3]], ["key", aE[4]], ["taken", aE[5]], ["count", aE[6]]]
+	# what the step DID is told before what was written: a seat that shares a name with one of the
+	# event's own placeholders ({value} of a compute is the number it made, not the expression
+	# that made it) is shadowed, so no key is filled twice
+	if not isNull(aKind)
+		for j = 1 to len(aKind[3])
+			cSeatKey = aKind[3][j][1]
+			bTaken = 0
+			for m = 1 to len(aVals)
+				if aVals[m][1] = cSeatKey bTaken = 1 ok
+			next
+			if not bTaken
+				aVals + [cSeatKey, NarSeatText(aD, cSeatKey)]
+			ok
+		next
+	ok
+	return NarFill(cT, aVals)
+
+func NarTellRun(cFile, cAlg, cRec)
+	CtSetCode("PARSE", [])
+	cBase = NarBaseName(cFile)
+	cErr = ""
+	aDecls = NULL
+	try
+		aDecls = CtDeclare(read(cFile))
+	catch
+		cErr = cCatchError
+	done
+	if cErr != ""
+		NarRefuse(cErr, cBase)
+		return
+	ok
+	aRecord = NULL
+	try
+		aRecord = ExJsonParse(cRec)
+	catch
+		cErr = cCatchError
+	done
+	if cErr != ""
+		NarRefuse(cErr, cBase)
+		return
+	ok
+	cRecText = ExJson(aRecord)
+	$bRunTrace = 1
+	$aRunTrace = []
+	$nRunDepth = 0
+	aRes = NULL
+	try
+		aRes = RunAlgorithm(aDecls, cAlg, aRecord)
+	catch
+		cErr = cCatchError
+	done
+	$bRunTrace = 0
+	cT = NarTellText("run")
+	if cT = "" cT = "Running {algorithm}." ok
+	? NarFill(cT, [["language", $cCourtLang], ["file", cBase], ["algorithm", cAlg], ["record", cRecText]])
+	for i = 1 to len($aRunTrace)
+		aE = $aRunTrace[i]
+		? NarIndent(aE[1]) + NarTellStep(aDecls, aE)
+	next
+	if cErr != ""
+		NarRefuse(cErr, cBase)
+		return
+	ok
+	cT = NarTellText("result")
+	if cT = "" cT = "{algorithm} answers {result}." ok
+	? NarFill(cT, [["language", $cCourtLang], ["file", cBase], ["algorithm", cAlg], ["result", ExJson(aRes)]])
+
+func NarAskDefault(cEvent)
+	if cEvent = "ask" return "Asking {from}." ok
+	if cEvent = "matched" return "{count} of {total} matched." ok
+	if cEvent = "ordered" return "Ordered by {field}." ok
+	if cEvent = "cut" return "Cut to {limit}." ok
+	return "{count} answered: {rows}"
+
+func NarTellAsk(cFile, cQ, cRows)
+	CtSetCode("PARSE", [])
+	cBase = NarBaseName(cFile)
+	cErr = ""
+	aDecls = NULL
+	try
+		aDecls = CtDeclare(read(cFile))
+	catch
+		cErr = cCatchError
+	done
+	if cErr != ""
+		NarRefuse(cErr, cBase)
+		return
+	ok
+	aRows = NULL
+	try
+		aRows = ExJsonParse(cRows)
+	catch
+		cErr = cCatchError
+	done
+	if cErr != ""
+		NarRefuse(cErr, cBase)
+		return
+	ok
+	$bAskTrace = 1
+	$aAskTrace = []
+	try
+		AskRun(aDecls, cQ, aRows)
+	catch
+		cErr = cCatchError
+	done
+	$bAskTrace = 0
+	for i = 1 to len($aAskTrace)
+		aE = $aAskTrace[i]
+		cT = NarTellText(aE[1])
+		if cT = "" cT = NarAskDefault(aE[1]) ok
+		aVals = [["language", $cCourtLang], ["file", cBase]]
+		for j = 1 to len(aE[2])
+			aVals + aE[2][j]
+		next
+		? NarFill(cT, aVals)
+	next
+	if cErr != ""
+		NarRefuse(cErr, cBase)
+	ok

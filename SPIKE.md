@@ -74,6 +74,8 @@ expression language forged whole, judged by stz's 29 fixtures as stage 8, pinned
 | `spike/rf_multi.ring` | RingFlex's own court asked for every finding on the files it is given, run read-only under official Ring by stage 17: the live judge of the collecting court |
 | `spike/v15/GRAMMAR.md`, `spike/v15/multi_cases.json`, `spike/v15/*.haro` | **Haro v0.15** (the fifteenth rung, below): the meta-court collects -- no clause grew; `haro.ring <file> all` answers every defect, the default the first; three phases and a barrier; five files whose findings were written by hand |
 | `spike/haro_mutate.py` | five operators that put a defect of a known kind into a sound declaration without moving a line, and the stage rule they are judged by: the union of single defects |
+| `spike/v16/GRAMMAR.md`, `spike/v16/fixtures.json`, `spike/v16/run_cases.json` | **Haro v0.16** (the sixteenth rung, below): NARRATE gains TELLS -- a template per event of a run or of a question; `narrate-run` and `narrate-ask`; the narration is a projection of the run itself; three runs and a question, and the same court under a voice that tells almost nothing, composed by hand before the court |
+| `spike/a_v16.haro`, `spike/z_v16.haro` | A with a voice that tells a run and Z with one that tells a question: `a_v09.haro` and `z_v10.haro` plus a NARRATE (the guard's `A_STZU` and `Z_STZU` since this rung; the 35 cases and 25 questions are unchanged) |
 | `spike/world_lib.ring`, `spike/world_stub.ring` | the world's functions (SYMBOL resolution, the C1 rows), moved out of `court_lib.ring` and loaded only where a SYMBOL or PUBLISH is declared, and the stub that stands elsewhere |
 
 Nothing in `rnxc` or the VM changed. Nothing in a sibling repository changed.
@@ -1092,6 +1094,83 @@ unterminated string ends the run, as in RingFlex); an unreadable LANGUAGE ends i
 seat's file is one phase-3 finding; and the silence on a quoted name is textual in the one
 place it quotes.
 
+## The sixteenth rung -- Haro v0.16, NARRATE tells a run and a question -- 2026-10-03
+
+**On the author's "narrate a run".** v0.13 gave a language a voice that could say what a
+SENTENCE is. It could not say what a RUN did, and a run is what stzn is for: the machine
+speaking back is a narration of an execution, not of its source. `NARRATE` gains `TELLS`, a
+template per event of a run (`run`, `result`, and any step kind that plays a construct of the
+RUN) or of a question (`ask`, `matched`, `ordered`, `cut`, `answer`), and two verbs answer in the
+language's own voice: `narrate-run <file> <algorithm> <record>` and `narrate-ask <file>
+<question> <rows>`. A voice may now tell and say nothing -- TELLS alone is a voice.
+
+**The narration is a projection of THE run, not a second one.** `narrate-run` calls the same
+`RunAlgorithm` that `run` calls, once, with a flag raised; each step records what it did as it
+does it and the record is told afterwards. Nothing is re-evaluated, so what is told cannot
+differ from what was done. A step under another is two spaces deeper. The flag is off in every
+other verb, which every earlier stage proves by passing byte for byte.
+
+**Fixtures and hand narrations first.** `v16/fixtures.json` is twelve cases the meta-court
+must judge (three accepted, nine refused: an event neither of a run nor a question, a
+placeholder an event cannot fill, a question told by a language with no ASK, a run told by one
+with no RUN, an event told twice, an unclosed brace, a voice that says and tells nothing, a
+step's placeholder used for the run's) and `v16/run_cases.json` is three runs and a question
+composed line by line before the court was run, plus the same court under a voice that tells
+almost nothing, also by hand. All twelve fixtures pass on both runtimes; the hand narrations
+failed once, on a real defect, before any law was written.
+
+    stage 1    v0.16: 12 of 12, on rnxc and the oracle; every earlier set unchanged
+    stage 19   the hand narrations (3 runs, 1 question); 30 runs narrated whole and 1 refused
+               partway, each parsed into the tree its declarations and record say it must be;
+               31 answers rebuilt from the told lines; 22 questions narrated and 6 refused;
+               the plain voice (3 runs, 1 question); one execution; nothing stored; a told run
+               is not a sentence; the refusals of a language with no voice, no RUN or no ASK;
+               rnxc and the oracle byte-identical on every run. Floors pinned at 30 runs,
+               31 rebuilt answers, 22 questions
+    stages 2-18  unchanged (stage 16's voiceless language is now the machine's: z has a voice)
+    stage 6    harb 4.9 ms; rnxc compiled 82.7, image 12.8; the oracle 109.8 -- on a quiet machine
+    the pass   PASS, 19 stages in 226 s; --plant FAIL (48 failures, the telling among them)
+
+**The judges are laws Python reads out of the declarations, none of them asking the court what
+it meant.** The narration is parsed into the tree the sentence and the record say it must be:
+the answer told is the answer the stz and zing fixtures give; the depth-0 steps are the
+declared STEPS in order; an ITERATE walks as many items as the list holds and runs its body once
+per item; a BRANCH's steps are those of the arm it announced, under the condition it declares;
+every collected, computed or filed value, rebuilt from the told lines alone, is the value the
+answer holds. A question's matched, order, cut and answer lines agree with its own clauses and
+zing's rows. The templates the laws parse are checked against the declaration's own, so the judge
+cannot drift from the voice it judges.
+
+**Three rules were decided on the way, each found by reading what the court said and not by a
+fixture.** (1) A step's `{value}` is the number it made, not the expression that made it: the
+first cut filled both and told `113 + 4 * 2` for `11` and `3 + 4 * 2` -- the hand narration
+failed on it first, and an event's placeholders shadow a seat of the same name now. (2) A step
+the voice does not tell is told plainly from the event's own fields (a branch the arm it took, a
+loop how many items, a group the key): the first default read only the value, so a branch and a
+loop said nothing of what happened. (3) A `cut` is told only when the limit dropped rows --
+"only the first 5 are kept" over three matches is untrue, and none of zing's 25 questions puts a
+limit above the match count, so none could have caught it; three more do, with the answer zing
+gave the same question without the limit.
+
+**Every protection was switched off in turn and the stage failed: thirteen of thirteen.** A
+branch announcing the wrong arm, a loop one item over, a loop or a branch that does not keep
+its depth, an empty indent, a collect that tells the list and not the item, a compute that
+tells nothing, an event that does not shadow a seat, the plain wording, a question counting one
+match too many, ordered backwards, a cut told over nothing dropped, and a narration that runs the
+algorithm a second time. The laws fire on eleven; the other two -- the shadow and the plain
+wording -- are the hand-composed narrations' to catch, since the laws judge shape and values and
+not prose. The first run of the stage had no defect to report, which is not evidence of
+anything on its own; this table is.
+
+**One miscount, caught before it was filed:** the hand cases are three runs and a question, and
+three files said four runs. Corrected in the grammar note, the cases file and the stage's
+docstring.
+
+**What it does not do is named in `v16/GRAMMAR.md`**: a voice cannot reach the text of a step's
+expression (`{value}` is the number); one template per event, no wording by value; the laws
+judge shape and values, not that a template reads well; N, the language of the natural, still
+waits on its study.
+
 ## The names -- `.haro`, not `.stzu` -- corrected 2026-10-02
 
 **At the author's word ("we agreed to use .haro instead of .stzu, no?").** D1 was ratified
@@ -1180,7 +1259,11 @@ whole guard re-run on the renamed tree: 28 + 30 + 27 + 23, 117 of 120, 32 of 32,
    the author's "do meta-court collecting": `haro.ring <file> all`, three phases and a barrier,
    judged by the court's own first refusal one defect at a time (183 singles, 116
    combinations, zero differences) and by five files written by hand.
-17. The forge as an `rnxc` verb (the ringpp session's `src/`, routed); the
+17. ~~Narrating a run~~ -- built 2026-10-03 as Haro v0.16, the sixteenth rung above, on the
+   author's "narrate a run": `TELLS`, `narrate-run` and `narrate-ask`, a projection of the run
+   itself, judged by laws read in Python (30 runs, 31 answers rebuilt, 22 questions), by
+   narrations written by hand first, and by thirteen protections each switched off.
+18. The forge as an `rnxc` verb (the ringpp session's `src/`, routed); the
    Softanza-resident timing the charter's 2.6 asks for; the court's run time on the
    oracle under paths and views (6.4x the image this pass, named at stage 6); the
    ontology as versioned data, `ASK`, `NARRATE` and `FORMS`, the rows of section 3 the

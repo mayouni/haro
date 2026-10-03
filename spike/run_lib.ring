@@ -114,6 +114,13 @@ func RunSet(cName, v)
 func RunGet(cName)
 	return ExRefGet(cName)
 
+# v0.16: what a step did, recorded as it runs and only when a narration asked: [depth, name, value, key, taken, count]
+func RunNote(cName, cValue, cKey, cTaken, cCount)
+	$aRunTrace + [$nRunDepth, cName, cValue, cKey, cTaken, cCount]
+
+func RunDepth(n)
+	$nRunDepth = $nRunDepth + n
+
 func RunSteps(aDecls, aSteps, aPath)
 	for i = 1 to len(aSteps)
 		RunStep(aDecls, aSteps[i], aPath)
@@ -132,7 +139,9 @@ func RunStep(aDecls, cName, aPath)
 		aR = RunRole("COMPUTE")
 		cInto = CondScalar(aD, aR[2])
 		aNode = RunExprNode(aD, aR[3])
-		RunSet(cInto, ExEval(aNode, []))
+		vC = ExEval(aNode, [])
+		RunSet(cInto, vC)
+		if $bRunTrace RunNote(cName, ExJson(vC), "", "", "") ok
 	but cC = "COLLECT"
 		aR = RunRole("COLLECT")
 		cInto = CondScalar(aD, aR[2])
@@ -146,6 +155,7 @@ func RunStep(aDecls, cName, aPath)
 		ok
 		aList + v
 		RunSet(cInto, aList)
+		if $bRunTrace RunNote(cName, ExJson(v), "", "", "") ok
 	but cC = "GROUP"
 		aR = RunRole("GROUP")
 		cInto = CondScalar(aD, aR[2])
@@ -170,14 +180,21 @@ func RunStep(aDecls, cName, aPath)
 			aGroups[nAt][2] + v
 		ok
 		RunSet(cInto, aGroups)
+		if $bRunTrace RunNote(cName, ExJson(v), cKey, "", "") ok
 	but cC = "BRANCH"
 		aR = RunRole("BRANCH")
 		aNode = RunExprNode(aD, aR[2])
-		if ExCondition(aNode, [])
+		bThen = ExCondition(aNode, [])
+		cTook = "else"
+		if bThen cTook = "then" ok
+		if $bRunTrace RunNote(cName, "", "", cTook, "") ok
+		RunDepth(1)
+		if bThen
 			RunSteps(aDecls, RunStepsOf(aD, aR[3]), aNext)
 		else
 			RunSteps(aDecls, RunStepsOf(aD, aR[4]), aNext)
 		ok
+		RunDepth(-1)
 	but cC = "ITERATE"
 		aR = RunRole("ITERATE")
 		cOver = CondScalar(aD, aR[2])
@@ -189,10 +206,13 @@ func RunStep(aDecls, cName, aPath)
 		aSnap = []
 		for j = 1 to len(aGot[2]) aSnap + aGot[2][j] next
 		aBody = RunStepsOf(aD, aR[4])
+		if $bRunTrace RunNote(cName, "", "", "", "" + len(aSnap)) ok
+		RunDepth(1)
 		for j = 1 to len(aSnap)
 			RunSet(cAs, aSnap[j])
 			RunSteps(aDecls, aBody, aNext)
 		next
+		RunDepth(-1)
 	ok
 
 func RunAlgorithm(aDecls, cName, aRecord)

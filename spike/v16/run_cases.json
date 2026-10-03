@@ -1,0 +1,120 @@
+{
+  "grammar": "haro",
+  "version": "0.16",
+  "comment": "The hand-written half of stage 19's judge, written BEFORE the court that narrates a run: three runs and one question, composed line by line from the algorithm's steps and the record, with the voice declared in a_v16.haro and z_v16.haro. A step nested under another is indented two spaces a level. JSON values are printed as the `run` and `ask` verbs print them (a comma and a space, a colon and a space). The branch told is the one the condition took, and the steps under it are the ones that ran -- composed by evaluating `item > 2` by hand over the record, never by reading the court.",
+  "runs": [
+    {
+      "sentence": "a/w_in_a.a",
+      "algorithm": "eval_precedence",
+      "record": "{}",
+      "narration": [
+        "Running eval_precedence on {}.",
+        "eval_precedence_value: out is now 11.",
+        "eval_precedence answers 11."
+      ]
+    },
+    {
+      "sentence": "a/w_in_a.a",
+      "algorithm": "map_scale",
+      "record": "{\"items\":[1,2,3]}",
+      "narration": [
+        "Running map_scale on {\"items\": [1, 2, 3]}.",
+        "map_scale_over: for each of the 3 items of items, as item:",
+        "  map_scale_each: 2 added to out.",
+        "  map_scale_each: 4 added to out.",
+        "  map_scale_each: 6 added to out.",
+        "map_scale answers [2, 4, 6]."
+      ]
+    },
+    {
+      "sentence": "a/w_in_a.a",
+      "algorithm": "filter_gt",
+      "record": "{\"items\":[1,3,2,4]}",
+      "narration": [
+        "Running filter_gt on {\"items\": [1, 3, 2, 4]}.",
+        "filter_gt_over: for each of the 4 items of items, as item:",
+        "  filter_gt_test: when item > 2 the else steps are taken.",
+        "  filter_gt_test: when item > 2 the then steps are taken.",
+        "    filter_gt_keep: 3 added to out.",
+        "  filter_gt_test: when item > 2 the else steps are taken.",
+        "  filter_gt_test: when item > 2 the then steps are taken.",
+        "    filter_gt_keep: 4 added to out.",
+        "filter_gt answers [3, 4]."
+      ]
+    }
+  ],
+  "asks": [
+    {
+      "sentence": "tontine.z",
+      "question": "SELECT * FROM collect WHERE amount > 100 ORDER BY amount DESC LIMIT 1",
+      "rows": "[{\"id\":1,\"amount\":50},{\"id\":2,\"amount\":150},{\"id\":3,\"amount\":120}]",
+      "narration": [
+        "Asking collect: SELECT * FROM collect WHERE amount > 100 ORDER BY amount DESC LIMIT 1",
+        "2 of the 3 rows match.",
+        "Ordered by amount DESC.",
+        "Only the first 1 are kept.",
+        "The answer is 1 row(s): [{\"id\": 2, \"amount\": 150}]"
+      ]
+    }
+  ],
+  "defaults": {
+    "comment": "The same court under a voice that tells almost nothing, composed by hand BEFORE the default path ran: an event the voice does not tell is told plainly -- the step's verb and name and what it DID, read off the event's own fields (a branch says which arm, a loop how many items, a group the key it filed under), and a question's events in their plainest form. A (a voice that tells only `result`) and Z (a voice that tells only `answer`) are derived from a_v16.haro and z_v16.haro by the guard, and the court they forge is replaced by the real one afterwards.",
+    "a_tells": "result: \"{result} is the answer.\"",
+    "z_tells": "answer: \"{count} row(s) came back.\"",
+    "runs": [
+      {
+        "sentence": "a/w_in_a.a",
+        "algorithm": "eval_precedence",
+        "record": "{}",
+        "narration": [
+          "Running eval_precedence.",
+          "compute eval_precedence_value: 11",
+          "11 is the answer."
+        ]
+      },
+      {
+        "sentence": "a/w_in_a.a",
+        "algorithm": "filter_gt",
+        "record": "{\"items\":[1,3,2,4]}",
+        "narration": [
+          "Running filter_gt.",
+          "iterate filter_gt_over: 4 item(s)",
+          "  branch filter_gt_test: else",
+          "  branch filter_gt_test: then",
+          "    collect filter_gt_keep: 3",
+          "  branch filter_gt_test: else",
+          "  branch filter_gt_test: then",
+          "    collect filter_gt_keep: 4",
+          "[3, 4] is the answer."
+        ]
+      },
+      {
+        "sentence": "a/w_in_a.a",
+        "algorithm": "groupby_parity",
+        "record": "{\"items\":[1,2,3]}",
+        "narration": [
+          "Running groupby_parity.",
+          "iterate groupby_parity_over: 3 item(s)",
+          "  group groupby_parity_file: 1 under 1",
+          "  group groupby_parity_file: 2 under 0",
+          "  group groupby_parity_file: 3 under 1",
+          "[[\"1\", [1, 3]], [\"0\", [2]]] is the answer."
+        ]
+      }
+    ],
+    "asks": [
+      {
+        "sentence": "tontine.z",
+        "question": "SELECT * FROM collect WHERE amount > 100 ORDER BY amount DESC LIMIT 1",
+        "rows": "[{\"id\":1,\"amount\":50},{\"id\":2,\"amount\":150},{\"id\":3,\"amount\":120}]",
+        "narration": [
+          "Asking collect.",
+          "2 of 3 matched.",
+          "Ordered by amount.",
+          "Cut to 1.",
+          "1 row(s) came back."
+        ]
+      }
+    ]
+  }
+}

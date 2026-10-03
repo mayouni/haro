@@ -284,6 +284,12 @@ read and register, resolve, and only then the relations among declarations, whic
 undefined while one of them is missing. Judged by the court's own first refusal one defect at
 a time over the real declarations of seven letters -- 183 single defects and 116 combinations,
 zero differences -- and by five files whose findings were written by hand (HF-65).
+**Haro v0.16, the same day (`haro/spike/v16/GRAMMAR.md`; one clause grew): NARRATE tells a run
+and a question.** `TELLS` is a template per event of a run or of a question, and `narrate-run`
+and `narrate-ask` answer in the language's own voice -- a projection of the run itself, one
+execution, never stored, never read back. Judged by laws read in Python out of the
+declarations (30 runs, 31 answers rebuilt from the told lines, 22 questions), by narrations
+written by hand before the court, and by thirteen protections each switched off (HF-66).
 
 **What the forge produces from one declaration** (Ringua's kit, 02-STACK's L1, now Haro's
 compiler verbs rather than separate organs): the parser; the court with the fixtures as its
@@ -622,6 +628,13 @@ court's own first refusal over mutated real declarations (183 singles, 116 combi
 differences, every protection proved load-bearing by switching it off) and by five hand-written
 files (HF-65). The owed timing re-take was taken on a quiet machine: 94.0 ms against the pinned
 100. Record: `haro/SPIKE.md`, "The fifteenth rung".
+
+**The sixteenth rung, 2026-10-03, on the author's "narrate a run": Haro v0.16, NARRATE tells
+a run and a question.** `TELLS`; `narrate-run` and `narrate-ask`; judged by laws read in Python
+(the told answer, the declared steps in order, every loop's count, every branch's arm, 31
+answers rebuilt from the lines, 22 questions against their own clauses), by narrations written
+by hand, and by thirteen protections each proved load-bearing (HF-66). Record: `haro/SPIKE.md`,
+"The sixteenth rung".
 
 v0.1's spike (`twice.haro`, a definition with an intent clause) proved one altitude. The
 ruling asks for three to meet, and the estate has already named the smallest program that

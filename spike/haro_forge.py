@@ -68,6 +68,7 @@ STZU10_FIXTURES = os.path.join(HERE, 'v10', 'fixtures.json')
 STZU11_FIXTURES = os.path.join(HERE, 'v11', 'fixtures.json')
 STZU12_FIXTURES = os.path.join(HERE, 'v12', 'fixtures.json')
 STZU13_FIXTURES = os.path.join(HERE, 'v13', 'fixtures.json')
+STZU16_FIXTURES = os.path.join(HERE, 'v16', 'fixtures.json')
 
 
 def judge_stzu(exe, label, fixtures=STZU_FIXTURES):
@@ -77,7 +78,7 @@ def judge_stzu(exe, label, fixtures=STZU_FIXTURES):
     counts), world and points."""
     doc = json.load(open(fixtures, encoding='utf-8'))
     # the pinned v0.1 judge is stzu's; everything since is Haro's (D1)
-    assert doc['grammar'] in ('stzu', 'haro') and doc['version'] in ('0.1', '0.2', '0.3', '0.4', '0.5', '0.6', '0.7', '0.8', '0.9', '0.10', '0.11', '0.12', '0.13')
+    assert doc['grammar'] in ('stzu', 'haro') and doc['version'] in ('0.1', '0.2', '0.3', '0.4', '0.5', '0.6', '0.7', '0.8', '0.9', '0.10', '0.11', '0.12', '0.13', '0.16')
     passed = failed = 0
     outputs = {}
     with tempfile.TemporaryDirectory() as td:
@@ -152,7 +153,8 @@ def stage1():
                             ('v0.10, the WORLD as versioned data: SYMBOL and PUBLISH', STZU10_FIXTURES),
                             ('v0.11, the Diagnostic Contract: CODE, CODES, CITES', STZU11_FIXTURES),
                             ('v0.12, FORMS: the function-name grammar as data', STZU12_FIXTURES),
-                            ('v0.13, NARRATE: the court\'s voice', STZU13_FIXTURES)):
+                            ('v0.13, NARRATE: the court\'s voice', STZU13_FIXTURES),
+                            ('v0.16, NARRATE tells a run and a question', STZU16_FIXTURES)):
         print(f'stage 1 -- the Haro meta-court in pure Ring, judged by its fixtures ({label})')
         f1, o1 = judge_stzu(RNXC, 'rnxc', fixtures)
         f2, o2 = judge_stzu(ORACLE, 'oracle ring.exe', fixtures)
@@ -768,7 +770,7 @@ def stage8():
 
 # ---- stage 9: Z, a WORLD forged whole -- court AND runtime -- judged by zing's 16 cases
 
-Z_STZU = os.path.join(HERE, 'z_v10.haro')   # z_v07.haro plus PUBLISH (the tenth rung); the 16 cases and 25 questions are unchanged
+Z_STZU = os.path.join(HERE, 'z_v16.haro')   # z_v10.haro plus a NARRATE that tells a question (the sixteenth rung); the 16 cases and 25 questions are unchanged
 Z_SENTENCE = 'tontine.z'
 Z_FIXTURES = r'D:\GitHub\zing\conformance\fixtures.json'
 Z_FLOOR = 16
@@ -1152,7 +1154,7 @@ def stage11():
 
 # ---- stage 12: A, the algorithm -- stz's W cases and zing's formulas re-expressed as step trees
 
-A_STZU = os.path.join(HERE, 'a_v09.haro')
+A_STZU = os.path.join(HERE, 'a_v16.haro')   # a_v09.haro plus a NARRATE that tells a run (the sixteenth rung); the 35 cases are unchanged
 A_SENTENCE = os.path.join('a', 'w_in_a.a')
 A_CASES = os.path.join(HERE, 'v09', 'a_cases.json')
 A_FLOOR = 35
@@ -1980,17 +1982,19 @@ def stage16():
     else:
         print('  ok   narrating writes no file: the narration is a rendering of a run, never stored')
     # 5. a language that declares no voice has none (re-forged first: a court forged before the
-    # forge learned a global is a court the oracle refuses and rnxc runs, HF-61)
-    run_args(RNXC, ['forge.ring', Z_STZU, '.'], HERE)
-    r = both_z = run_args(RNXC, ['z_court.ring', 'narrate', 'tontine.z'], HERE).strip()
-    o = run_args(ORACLE, ['z_court.ring', 'narrate', 'tontine.z'], HERE).strip()
+    # forge learned a global is a court the oracle refuses and rnxc runs, HF-61). z had been the
+    # voiceless one until the sixteenth rung gave it a voice that tells a question; the machine
+    # language declares none
+    run_args(RNXC, ['forge.ring', os.path.join(HERE, 'machine_v03.haro'), '.'], HERE)
+    r = run_args(RNXC, ['machine_court.ring', 'narrate', 'x'], HERE).strip()
+    o = run_args(ORACLE, ['machine_court.ring', 'narrate', 'x'], HERE).strip()
     if r != o:
-        ab_diff.append('z:narrate')
+        ab_diff.append('machine:narrate')
     if 'declares no NARRATE' not in r:
         failures += 1
         print(f'  FAIL a court with no NARRATE narrated: {r[:120]}')
     else:
-        print('  ok   a language that declares no NARRATE has no voice: z refuses to narrate')
+        print('  ok   a language that declares no NARRATE has no voice: the machine language refuses to narrate')
     if PLANT:
         failures += 1
         print('  FAIL the voice -- PLANTED')
@@ -2312,6 +2316,508 @@ def stage18():
     return failures
 
 
+# ---- stage 19: NARRATE tells a run and a question, judged by laws Python reads out of the declarations
+
+RUN_CASES16 = os.path.join(HERE, 'v16', 'run_cases.json')
+A_TELLS = {
+    'run': 'Running {algorithm} on {record}.',
+    'compute': '{name}: {into} is now {value}.',
+    'collect': '{name}: {value} added to {into}.',
+    'group': '{name}: {value} filed under {key} in {into}.',
+    'branch': '{name}: when {when} the {taken} steps are taken.',
+    'iterate': '{name}: for each of the {count} items of {over}, as {as}:',
+    'result': '{algorithm} answers {result}.',
+}
+Z_TELLS = {
+    'ask': 'Asking {from}: {question}',
+    'matched': '{count} of the {total} rows match.',
+    'ordered': 'Ordered by {field} {direction}.',
+    'cut': 'Only the first {limit} are kept.',
+    'answer': 'The answer is {count} row(s): {rows}',
+}
+A16_RUNS_FLOOR = 30
+A16_REBUILT_FLOOR = 31
+Z16_ASKS_FLOOR = 22
+# a LIMIT above what matched cuts nothing, so a question with one has the answer of the same question
+# without it -- which zing already gave: (the question, the fixture case whose answer it shares)
+Q16_UNCUT = [('SELECT * FROM collect LIMIT 99', 'q01'), ('SELECT * FROM collect WHERE round = 1 LIMIT 99', 'q02'),
+             ('SELECT * FROM collect ORDER BY amount LIMIT 10', 'q05')]
+
+
+def read_tells(path):
+    """The voice as the declaration spells it, read by Python: key -> template."""
+    text = open(path, encoding='utf-8').read()
+    m = re.search(r'TELLS \[\n(.*?)\n  \],', text, re.S)
+    return dict(re.findall(r'(\w+): "([^"]*)"', m.group(1))) if m else {}
+
+
+def step_defs(path):
+    """name -> the step's seats, read by Python from the sentence's own text."""
+    out = {}
+    for kind, name, body, _ in read_definitions(path):
+        def one(rx):
+            m = re.search(rx, body)
+            return m.group(1) if m else None
+
+        def lst(key):
+            m = re.search(r'\b' + key + r'\s*\[([^\]]*)\]', body)
+            return [x.strip() for x in m.group(1).split(',') if x.strip()] if m else None
+        out[name] = {'kind': kind, 'into': one(r'\bINTO\s+(\w+)'), 'when': one(r'\bWHEN\s+"([^"]*)"'),
+                     'over': one(r'\bOVER\s+(\w+)'), 'as': one(r'\bAS\s+(\w+)'), 'then': lst('THEN'),
+                     'else': lst('ELSE'), 'do': lst('DO'), 'steps': lst('STEPS'), 'result': lst('RESULT')}
+    return out
+
+
+class _Cut(Exception):
+    pass
+
+
+class _Lost(Exception):
+    pass
+
+
+def judge_run(lines, defs, alg, rec, expected, refusal):
+    """The laws of a told run. The narration is parsed into the tree the declarations
+    and the record say it must be -- never by asking the court what it meant -- and the
+    values it shows are rebuilt and compared with the answer the stz and zing fixtures
+    give. Returns (problems, number of names rebuilt from what was told)."""
+    bad = []
+    rebuilt_n = 0
+    if len(lines) < 2:
+        return [f'{len(lines)} line(s) told'], 0
+    m = re.match(r'^Running (\w+) on (.*)\.$', lines[0])
+    if not m or m.group(1) != alg:
+        return [f'the first line does not announce {alg}: {lines[0][:80]!r}'], 0
+    try:
+        if json.loads(m.group(2)) != rec:
+            bad.append('the record told is not the record given')
+    except ValueError:
+        bad.append('the record told is not JSON')
+    last = lines[-1]
+    body = lines[1:-1]
+    if refusal is not None and (not last.startswith('I stopped: ') or refusal not in last):
+        bad.append(f'a refused run does not end on the refusal: {last[:100]!r}')
+    pos = [0]
+    told = {'collect': {}, 'compute': {}, 'group': {}}
+
+    def take(depth, name):
+        if pos[0] >= len(body):
+            raise _Cut()
+        line = body[pos[0]]
+        pos[0] += 1
+        ind = '  ' * depth
+        if not line.startswith(ind) or line[len(ind):len(ind) + 1] == ' ':
+            bad.append(f'{name} is told at the wrong depth: {line[:70]!r} (want {depth})')
+            raise _Lost()
+        t = line[len(ind):]
+        if not t.startswith(name + ': '):
+            bad.append(f'{name} is the declared step here and the narration tells {t[:60]!r}')
+            raise _Lost()
+        return t[len(name) + 2:]
+
+    def is_(rx, t, name):
+        m2 = re.match(rx, t)
+        if not m2:
+            bad.append(f'{name} is not told in the voice: {t[:70]!r}')
+            raise _Lost()
+        return m2
+
+    def walk(names, depth, env):
+        for name in names:
+            d = defs[name]
+            k = d['kind']
+            t = take(depth, name)
+            if k == 'COMPUTE':
+                m2 = is_(r'^(\w+) is now (.*)\.$', t, name)
+                if m2.group(1) != d['into']:
+                    bad.append(f'{name} computes into {d["into"]} and the narration says {m2.group(1)}')
+                told['compute'].setdefault(d['into'], []).append(json.loads(m2.group(2)))
+            elif k == 'COLLECT':
+                m2 = is_(r'^(.*) added to (\w+)\.$', t, name)
+                if m2.group(2) != d['into']:
+                    bad.append(f'{name} collects into {d["into"]} and the narration says {m2.group(2)}')
+                told['collect'].setdefault(d['into'], []).append(json.loads(m2.group(1)))
+            elif k == 'GROUP':
+                m2 = is_(r'^(.*) filed under (.*) in (\w+)\.$', t, name)
+                if m2.group(3) != d['into']:
+                    bad.append(f'{name} groups into {d["into"]} and the narration says {m2.group(3)}')
+                gl = told['group'].setdefault(d['into'], [])
+                key, val = m2.group(2), json.loads(m2.group(1))
+                for pair in gl:
+                    if pair[0] == key:
+                        pair[1].append(val)
+                        break
+                else:
+                    gl.append([key, [val]])
+            elif k == 'BRANCH':
+                m2 = is_(r'^when (.*) the (then|else) steps are taken\.$', t, name)
+                if m2.group(1) != d['when']:
+                    bad.append(f'{name} is declared WHEN {d["when"]!r} and the narration says {m2.group(1)!r}')
+                walk(d[m2.group(2)] or [], depth + 1, env)
+            elif k == 'ITERATE':
+                m2 = is_(r'^for each of the (\d+) items of (\w+), as (\w+):$', t, name)
+                n = int(m2.group(1))
+                if m2.group(2) != d['over'] or m2.group(3) != d['as']:
+                    bad.append(f'{name} is declared OVER {d["over"]} AS {d["as"]} and the narration says {m2.group(2)}, {m2.group(3)}')
+                lst = env.get(d['over'])
+                if not isinstance(lst, list):
+                    bad.append(f'{name} iterates over {d["over"]}, which holds no list here')
+                    raise _Lost()
+                if n != len(lst):
+                    bad.append(f'{name}: the narration walks {n} item(s) of a list of {len(lst)}')
+                    raise _Lost()
+                for p in range(n):
+                    walk(d['do'] or [], depth + 1, dict(env, **{d['as']: lst[p]}))
+
+    ended = True
+    try:
+        walk(defs[alg]['steps'], 0, dict(rec))
+        if pos[0] != len(body):
+            bad.append(f'{len(body) - pos[0]} line(s) left over after the declared steps')
+    except _Cut:
+        ended = False
+        if refusal is None:
+            bad.append('the narration stops before the declared steps do')
+    except _Lost:
+        return bad, 0
+    if refusal is not None:
+        # the told steps are a prefix of the run, and a refused run answers nothing
+        if re.match(r'^(\w+) answers ', last):
+            bad.append('a refused run is told as answering')
+        return bad, 0
+    m = re.match(r'^(\w+) answers (.*)\.$', last)
+    if not m or m.group(1) != alg:
+        return bad + [f'the last line is not {alg}\'s answer: {last[:80]!r}'], 0
+    try:
+        got = json.loads(m.group(2))
+    except ValueError:
+        return bad + ['the answer told is not JSON'], 0
+    if got != expected:
+        bad.append(f'the answer told is {m.group(2)[:60]} and the fixture says {json.dumps(expected)[:60]}')
+    # every name the answer is made of, rebuilt from what the narration said was added, computed or filed
+    res = defs[alg]['result']
+    vals = expected if len(res) > 1 else [expected]
+    writes = {}
+
+    def scan(names):
+        for n in names:
+            d = defs[n]
+            if d['kind'] in ('COMPUTE', 'COLLECT', 'GROUP'):
+                writes.setdefault(d['into'], set()).add(d['kind'])
+            elif d['kind'] == 'BRANCH':
+                scan(d['then'] or [])
+                scan(d['else'] or [])
+            elif d['kind'] == 'ITERATE':
+                scan(d['do'] or [])
+    scan(defs[alg]['steps'])
+    for i, r in enumerate(res):
+        kinds = writes.get(r, set())
+        if kinds == {'COLLECT'}:
+            rebuilt = told['collect'].get(r, [])
+        elif kinds == {'GROUP'}:
+            rebuilt = [[k, vs] for k, vs in told['group'].get(r, [])]
+            vals_i = [[str(k), vs] for k, vs in vals[i]]
+            if rebuilt != vals_i:
+                bad.append(f'{r}: rebuilt from the told lines {json.dumps(rebuilt)[:70]}, the fixture says {json.dumps(vals[i])[:70]}')
+            rebuilt_n += 1
+            continue
+        elif kinds == {'COMPUTE'} and r in told['compute']:
+            rebuilt = told['compute'][r][-1]
+        else:
+            continue
+        rebuilt_n += 1
+        if rebuilt != vals[i]:
+            bad.append(f'{r}: rebuilt from the told lines {json.dumps(rebuilt)[:70]}, the fixture says {json.dumps(vals[i])[:70]}')
+    return bad, rebuilt_n
+
+
+def judge_ask(lines, query, rows_total, expect, refusal):
+    """The laws of a told question: how many matched of how many, the order, the cut and the
+    answer are checked against the query's own clauses and the answer zing gave, never against
+    the court's own evaluation of the condition."""
+    if refusal is not None:
+        if len(lines) != 1 or not lines[0].startswith('I stopped: ') or refusal not in lines[0]:
+            return [f'a refused question is not told as the one refusal: {lines[0][:100]!r}']
+        return []
+    bad = []
+    m = re.match(r'^SELECT \* FROM (\w+)(.*)$', query)
+    frm, rest = m.group(1), m.group(2)
+    order = re.search(r'\bORDER BY (\w+)(?: (ASC|DESC))?', rest)
+    limit = re.search(r'\bLIMIT (\d+)', rest)
+    want_n = None
+    i = 0
+
+    def line():
+        nonlocal i
+        if i >= len(lines):
+            return ''
+        i += 1
+        return lines[i - 1]
+    l = line()
+    if l != f'Asking {frm}: {query}':
+        bad.append(f'the first line is {l[:80]!r}')
+    l = line()
+    m = re.match(r'^(\d+) of the (\d+) rows match\.$', l)
+    if not m:
+        return bad + [f'no matched line: {l[:80]!r}']
+    n_match, total = int(m.group(1)), int(m.group(2))
+    if total != rows_total:
+        bad.append(f'{total} rows told, {rows_total} given')
+    kept = n_match
+    if limit:
+        kept = min(n_match, int(limit.group(1)))
+    if kept != len(expect):
+        bad.append(f'{n_match} matched under a {limit.group(0) if limit else "no limit"} cannot leave the {len(expect)} rows the fixture answers')
+    if order:
+        l = line()
+        if l != f'Ordered by {order.group(1)} {order.group(2) or "ASC"}.':
+            bad.append(f'the order told is {l[:70]!r} for {order.group(0)}')
+    if limit and n_match > int(limit.group(1)):
+        l = line()
+        if l != f'Only the first {int(limit.group(1))} are kept.':
+            bad.append(f'the cut told is {l[:70]!r} for {limit.group(0)} over {n_match} matches')
+    l = line()
+    m = re.match(r'^The answer is (\d+) row\(s\): (.*)$', l)
+    if not m:
+        return bad + [f'no answer line: {l[:80]!r}']
+    if int(m.group(1)) != len(expect):
+        bad.append(f'{m.group(1)} row(s) told, {len(expect)} answered')
+    try:
+        if json.loads(m.group(2)) != expect:
+            bad.append('the rows told are not the rows the fixture answers')
+    except ValueError:
+        bad.append('the rows told are not JSON')
+    if i != len(lines):
+        bad.append(f'{len(lines) - i} line(s) told after the answer (a cut or an order told that did not happen?)')
+    return bad
+
+
+def one_call(body, call):
+    return body.count(call) == 1
+
+
+def stage19():
+    """The sixteenth rung. NARRATE gains TELLS, a template per event of a run or a question,
+    and `narrate-run` / `narrate-ask` answer in the language's own voice. The narration is a
+    projection of the very run `run` or `ask` makes -- a flag raised, each step noting what it
+    did -- never a replay and never stored. The judges are laws read in Python out of the
+    declarations and the cases' own expected values, none of them asking the court what it
+    meant: the told answer is the fixture's answer; the depth-0 steps are the declared STEPS,
+    in order; an ITERATE walks as many items as the list holds and its steps run once per item;
+    a BRANCH's steps are those of the arm it announced; every collected, computed or filed
+    value rebuilt from the lines is the value the answer holds. A question's matched, order,
+    cut and answer lines agree with its own clauses and zing's rows. Plus three runs and a
+    question composed by hand BEFORE the court, and the same court under a voice that tells
+    almost nothing, also composed by hand."""
+    print('stage 19 -- NARRATE tells a run and a question: a_v16.haro and z_v16.haro -> `narrate-run` and `narrate-ask`, judged by laws read in Python')
+    failures = 0
+    for stzu, lead in ((A_STZU, 'forged a'), (Z_STZU, 'forged z')):
+        out = run_args(RNXC, ['forge.ring', stzu, '.'], HERE).strip()
+        if not out.startswith(lead):
+            print(f'  FAIL the forge did not forge {os.path.basename(stzu)}: {out[:100]}')
+            return 1
+    ab_diff = []
+
+    def both(court, args, label):
+        r = run_args(RNXC, [court] + args, HERE).strip()
+        o = run_args(ORACLE, [court] + args, HERE).strip()
+        if r != o:
+            ab_diff.append(label)
+        return r
+    # 0. the voice the judge assumes is the voice the declaration spells
+    voice_bad = 0
+    for path, want, tag in ((A_STZU, A_TELLS, 'a'), (Z_STZU, Z_TELLS, 'z')):
+        got = read_tells(path)
+        if got != want:
+            voice_bad += 1
+            print(f'  FAIL the judge reads the voice of {tag} as {want} and the declaration spells {got}')
+    failures += voice_bad
+    if not voice_bad:
+        print('  ok   the templates the laws parse are the templates a_v16.haro and z_v16.haro declare')
+    doc = json.load(open(RUN_CASES16, encoding='utf-8'))
+    # 1. hand-written narrations: three runs and a question
+    bad_hand = 0
+    for c in doc['runs']:
+        r = both('a_court.ring', ['narrate-run', c['sentence'], c['algorithm'], c['record']], 'hand:' + c['algorithm'])
+        if r != '\n'.join(c['narration']):
+            bad_hand += 1
+            print(f'  FAIL the hand-written narration of {c["algorithm"]}')
+            for a, b in zip(r.splitlines() + [''] * 12, c['narration'] + [''] * 12):
+                if a != b:
+                    print('    court :', a[:140]); print('    hand  :', b[:140]); break
+    for c in doc['asks']:
+        r = both('z_court.ring', ['narrate-ask', c['sentence'], c['question'], c['rows']], 'hand:ask')
+        if r != '\n'.join(c['narration']):
+            bad_hand += 1
+            print('  FAIL the hand-written narration of a question')
+            for a, b in zip(r.splitlines() + [''] * 8, c['narration'] + [''] * 8):
+                if a != b:
+                    print('    court :', a[:140]); print('    hand  :', b[:140]); break
+    failures += bad_hand
+    if not bad_hand:
+        print(f'  ok   {len(doc["runs"])} runs and {len(doc["asks"])} question narrated as composed by hand before the court')
+    # 2. every A case that runs: the laws
+    defs = step_defs(os.path.join(HERE, A_SENTENCE))
+    acases = json.load(open(A_CASES, encoding='utf-8'))
+    n_runs = n_refused = n_rebuilt = 0
+    run_bad = []
+    for c in acases['cases']:
+        if 'algorithm' not in c:
+            continue
+        refusal = c.get('refusal')
+        r = both('a_court.ring', ['narrate-run', A_SENTENCE, c['algorithm'], json.dumps(c['input'])], 'run:' + c['id'])
+        bad, rb = judge_run(r.splitlines(), defs, c['algorithm'], c['input'], c.get('expected'), refusal)
+        if refusal is None:
+            n_runs += 1
+        else:
+            n_refused += 1
+        n_rebuilt += rb
+        if PLANT and c['id'] == 'map-scale':
+            bad = bad + ['PLANTED']
+        for b in bad:
+            run_bad.append((c['id'], b))
+    failures += len(run_bad)
+    for cid, why in run_bad[:6]:
+        print(f'  FAIL {cid}: {why}')
+    print(('  FAIL ' if run_bad else '  ok   ') + f'told runs: {n_runs} narrated whole and {n_refused} refused partway, each parsed into the tree its declarations and record say it must be -- the answer, the declared steps in order, every loop\'s item count, every branch\'s arm, and {n_rebuilt} answer(s) rebuilt from the lines ({len(run_bad)} defect(s))')
+    if n_runs < A16_RUNS_FLOOR or n_rebuilt < A16_REBUILT_FLOOR:
+        failures += 1
+        print(f'  FAIL the laws judged {n_runs} run(s) and rebuilt {n_rebuilt} answer(s), under the pinned floors of {A16_RUNS_FLOOR} and {A16_REBUILT_FLOOR}')
+    else:
+        print(f'  ok   at or above the pinned floors of {A16_RUNS_FLOOR} runs and {A16_REBUILT_FLOOR} rebuilt answers')
+    # 3. every Q case: the laws
+    qdoc = json.load(open(Q_FIXTURES, encoding='utf-8'))
+    rows_json = json.dumps(qdoc['rows'])
+    n_asks = n_qref = 0
+    ask_bad = []
+    for c in qdoc['cases']:
+        refusal = c.get('refusal')
+        r = both('z_court.ring', ['narrate-ask', Z_SENTENCE, c['query'], rows_json], 'ask:' + c['id'])
+        b = judge_ask(r.splitlines(), c['query'], len(qdoc['rows']), c.get('expect'), refusal)
+        if refusal is None:
+            n_asks += 1
+        else:
+            n_qref += 1
+        for x in b:
+            ask_bad.append((c['id'], x))
+    by_id = {c['id']: c for c in qdoc['cases']}
+    for query, base_id in Q16_UNCUT:
+        r = both('z_court.ring', ['narrate-ask', Z_SENTENCE, query, rows_json], 'ask:uncut:' + base_id)
+        for x in judge_ask(r.splitlines(), query, len(qdoc['rows']), by_id[base_id]['expect'], None):
+            ask_bad.append(('uncut ' + base_id, x))
+        n_asks += 1
+    failures += len(ask_bad)
+    for cid, why in ask_bad[:6]:
+        print(f'  FAIL {cid}: {why}')
+    print(('  FAIL ' if ask_bad else '  ok   ') + f'told questions: {n_asks} narrated and {n_qref} refused, each line checked against the query\'s own clauses and zing\'s rows -- how many matched of how many, the order, the cut (told only when it dropped rows), the answer ({len(ask_bad)} defect(s))')
+    if n_asks < Z16_ASKS_FLOOR:
+        failures += 1
+        print(f'  FAIL the laws judged {n_asks} question(s), under the pinned floor of {Z16_ASKS_FLOOR}')
+    # 4. the default voice: an event the voice does not tell is told plainly; hand-written
+    d = doc['defaults']
+    def variant(stzu, tells, label):
+        text = open(stzu, encoding='utf-8').read()
+        new = re.sub(r'TELLS \[\n.*?\n  \],', 'TELLS [\n    ' + tells + '\n  ],', text, flags=re.S)
+        assert new != text
+        with open(os.path.join(tdir, label + '.haro'), 'w', encoding='utf-8', newline='') as fh:
+            fh.write(new)
+        return os.path.join(tdir, label + '.haro')
+    bad_def = 0
+    with tempfile.TemporaryDirectory() as tdir:
+        try:
+            out = run_args(RNXC, ['forge.ring', variant(A_STZU, d['a_tells'], 'a_plain'), '.'], HERE).strip()
+            if not out.startswith('forged a'):
+                bad_def += 1
+                print(f'  FAIL the plain voice of a did not forge: {out[:100]}')
+            for c in d['runs']:
+                r = both('a_court.ring', ['narrate-run', c['sentence'], c['algorithm'], c['record']], 'plain:' + c['algorithm'])
+                if r != '\n'.join(c['narration']):
+                    bad_def += 1
+                    print(f'  FAIL the plain narration of {c["algorithm"]}')
+                    for x, y in zip(r.splitlines() + [''] * 12, c['narration'] + [''] * 12):
+                        if x != y:
+                            print('    court :', x[:140]); print('    hand  :', y[:140]); break
+            out = run_args(RNXC, ['forge.ring', variant(Z_STZU, d['z_tells'], 'z_plain'), '.'], HERE).strip()
+            if not out.startswith('forged z'):
+                bad_def += 1
+                print(f'  FAIL the plain voice of z did not forge: {out[:100]}')
+            for c in d['asks']:
+                r = both('z_court.ring', ['narrate-ask', c['sentence'], c['question'], c['rows']], 'plain:ask')
+                if r != '\n'.join(c['narration']):
+                    bad_def += 1
+                    print('  FAIL the plain narration of a question')
+                    for x, y in zip(r.splitlines() + [''] * 8, c['narration'] + [''] * 8):
+                        if x != y:
+                            print('    court :', x[:140]); print('    hand  :', y[:140]); break
+        finally:
+            for stzu in (A_STZU, Z_STZU):
+                run_args(RNXC, ['forge.ring', stzu, '.'], HERE)
+    failures += bad_def
+    if not bad_def:
+        print(f'  ok   a voice that tells almost nothing: {len(d["runs"])} runs and {len(d["asks"])} question told plainly, as composed by hand; the real courts re-forged after')
+    # 5. one run, one question: the narration is the run, not a second execution of it
+    src = open(os.path.join(HERE, 'narrate_lib.ring'), encoding='utf-8').read()
+    def body_of(fn):
+        i = src.index('func ' + fn + '(')
+        j = src.find('\nfunc ', i + 1)
+        return src[i:j if j > 0 else len(src)]
+    ok_run = one_call(body_of('NarTellRun'), 'RunAlgorithm(')
+    ok_ask = one_call(body_of('NarTellAsk'), 'AskRun(')
+    doctored = body_of('NarTellRun') + '\n\taRes = RunAlgorithm(aDecls, cAlg, aRecord)\n'
+    if one_call(doctored, 'RunAlgorithm('):
+        failures += 1
+        print('  FAIL the one-execution law cannot fail: it passes a narration that runs the algorithm twice')
+    elif not (ok_run and ok_ask):
+        failures += 1
+        print('  FAIL a narration executes the run or the question more than once (or not at all): it is a replay, not a projection')
+    else:
+        print('  ok   a narration is one execution: NarTellRun calls RunAlgorithm once and NarTellAsk calls AskRun once (and the check fails on a doctored copy that calls it twice)')
+    # 6. never stored, never read back
+    before = sorted(os.listdir(HERE))
+    both('a_court.ring', ['narrate-run', A_SENTENCE, 'map_scale', '{"items":[1,2,3]}'], 'stored:a')
+    both('z_court.ring', ['narrate-ask', Z_SENTENCE, 'SELECT * FROM collect LIMIT 1', rows_json], 'stored:z')
+    after = sorted(os.listdir(HERE))
+    if before != after:
+        failures += 1
+        print('  FAIL telling a run or a question changed the folder: a narration is stored')
+    else:
+        print('  ok   telling writes no file: a narration is a rendering of a run, never stored')
+    with tempfile.TemporaryDirectory() as tdir:
+        nar = both('a_court.ring', ['narrate-run', A_SENTENCE, 'map_scale', '{"items":[1,2,3]}'], 'back')
+        p = os.path.join(tdir, 'back.a')
+        with open(p, 'w', encoding='utf-8', newline='') as fh:
+            fh.write(nar + '\n')
+        r = run_args(RNXC, ['a_court.ring', 'check', p], HERE).strip()
+        if r.startswith('ok'):
+            failures += 1
+            print('  FAIL a told run was accepted as a sentence of A: the court reads one back')
+        else:
+            print('  ok   a told run is not a sentence of the language: the court refuses it, and has no verb that reads one back')
+    # 7. a voice needs a run to tell, and a run needs a voice
+    refuse_bad = 0
+    for court, verb, want, what in (('machine_court.ring', 'narrate-run', 'declares no NARRATE', 'a language with no voice'),
+                                    ('f_court.ring', 'narrate-run', 'declares no RUN', 'a voice over a language with no RUN'),
+                                    ('f_court.ring', 'narrate-ask', 'declares no ASK', 'a voice over a language with no ASK'),
+                                    ('a_court.ring', 'narrate-ask', 'declares no ASK', 'a language with a RUN and no ASK'),
+                                    ('z_court.ring', 'narrate-run', 'declares no RUN', 'a language with an ASK and no RUN')):
+        r = both(court, [verb, 'x', 'y', '[]'], f'refuse:{court}:{verb}')
+        if want not in r:
+            refuse_bad += 1
+            failures += 1
+            print(f'  FAIL {what} told something: {r[:120]}')
+    if not refuse_bad:
+        print('  ok   a language with no voice, no RUN or no ASK refuses the verb it cannot honour, and says which')
+    if PLANT:
+        failures += 1
+        print('  FAIL the telling -- PLANTED')
+    if ab_diff:
+        failures += 1
+        print(f'  FAIL rnxc and the oracle differ on {len(ab_diff)} run(s): {ab_diff[:5]}')
+    else:
+        print('  ok   rnxc and the oracle print the same bytes on every told run and question')
+    return failures
+
+
 def stage6(lang, court=None, n=15):
     court = court or f'{lang}_court.ring'
     print(f'stage 6 -- edit to verdict on makeen_box.machine, minima of {n}')
@@ -2407,5 +2913,7 @@ if __name__ == '__main__':
         failures += stage17()
     if stage in (None, 18) and os.path.exists(META_CASES):
         failures += stage18()
+    if stage in (None, 19) and os.path.exists(RUN_CASES16) and os.path.exists(A_CASES):
+        failures += stage19()
     print(f'haro_forge: {"FAIL" if failures else "PASS"} ({failures} failure(s), {time.perf_counter()-t0:.1f} s)')
     sys.exit(1 if failures else 0)

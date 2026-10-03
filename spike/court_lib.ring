@@ -2121,6 +2121,32 @@ func CtMain()
 		catch
 			? cCatchError
 		done
+	but cVerb = "narrate-run"
+		# v0.16: an algorithm run on a record, told in the language's own voice -- the same run `run` makes, never a second one
+		if len(sysargv) < 6
+			? "usage: <court>.ring narrate-run <file" + $cCourtExt + "> <algorithm> <record json>"
+			return
+		ok
+		try
+			if isNull($aCourtNarrate) CtFail(1, "this language declares no NARRATE, so it has no voice") ok
+			if isNull($aCourtRun) CtFail(1, "this language declares no RUN, so nothing in it runs") ok
+			NarTellRun(sysargv[4], sysargv[5], sysargv[6])
+		catch
+			? cCatchError
+		done
+	but cVerb = "narrate-ask"
+		# v0.16: a question answered on rows, told in the language's own voice -- the same answer `ask` gives
+		if len(sysargv) < 6
+			? "usage: <court>.ring narrate-ask <file" + $cCourtExt + "> <question> <rows json>"
+			return
+		ok
+		try
+			if isNull($aCourtNarrate) CtFail(1, "this language declares no NARRATE, so it has no voice") ok
+			if isNull($aCourtAsk) CtFail(1, "this language declares no ASK, so it answers no question") ok
+			NarTellAsk(sysargv[4], sysargv[5], sysargv[6])
+		catch
+			? cCatchError
+		done
 	but cVerb = "family"
 		# v0.12: the members of every declared family, generated from the FORMS
 		cSrc = read(sysargv[4])
@@ -2161,5 +2187,5 @@ func CtMain()
 			? cCatchError
 		done
 	else
-		? "unknown verb '" + cVerb + "'; this court answers: check, refine, eval, walk, ask, run, world, diagnose, family, spellings, narrate"
+		? "unknown verb '" + cVerb + "'; this court answers: check, refine, eval, walk, ask, run, world, diagnose, family, spellings, narrate, narrate-run, narrate-ask"
 	ok

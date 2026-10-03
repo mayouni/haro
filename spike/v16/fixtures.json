@@ -1,0 +1,91 @@
+{
+  "grammar": "haro",
+  "version": "0.16",
+  "comment": "The Haro v0.16 conformance floor, written BEFORE the court that passes it (the W discipline: fixtures first, prose second). v0.16 grows v0.15 by the last thing NARRATE could not do: tell a RUN. NARRATE gains TELLS, a template per event of a run -- `run` and `result` for a language that declares a RUN, any declaration kind that plays a construct of it (compute, collect, group, branch, iterate), and `ask`, `matched`, `ordered`, `cut`, `answer` for one that declares an ASK. A template fills the placeholders its event has (R2, R9), every brace closes (R7); an event is told once (R5); a key is an event of a RUN or an ASK this language declares (R3, R6) or a declaration playing a construct (R1, R4). A voice may now tell and say nothing: TELLS alone is a voice (A1), and one that does neither narrates nothing (R8, which is v0.13's R7 and still says so). Every v0.15 fixture still passes: v0.16 refuses nothing v0.15 accepted (A3).",
+  "accepts": [
+    {
+      "id": "A1",
+      "name": "a voice that TELLS a run, and says nothing: TELLS alone is a voice",
+      "source": "DEFINE LANGUAGE a AS (VERSION \"0.16\", GRAMMAR \"0.16\", COURT \"x\", EXTENSION \".a\") RATIONALE \"x\"\nDEFINE EXPRESSION aexpr AS (OPERATORS [or, and, cmp, add, mul], OPERANDS [number, text, ref]) RATIONALE \"x\"\nDEFINE FORM word AS (SEATS [name: name]) RATIONALE \"x\"\nDEFINE DECLARATION compute AS (VERB \"COMPUTE\", SEATS [into: name, value: aexpr]) RATIONALE \"x\"\nDEFINE DECLARATION collect AS (VERB \"COLLECT\", SEATS [into: name, value: aexpr]) RATIONALE \"x\"\nDEFINE DECLARATION group AS (VERB \"GROUP\", SEATS [into: name, by: aexpr, value: aexpr]) RATIONALE \"x\"\nDEFINE DECLARATION branch AS (VERB \"BRANCH\", SEATS [when: aexpr, then: [step], else: [step]]) RATIONALE \"x\"\nDEFINE DECLARATION iterate AS (VERB \"ITERATE\", SEATS [over: name, as: name, do: [step]]) RATIONALE \"x\"\nDEFINE UNION step AS (OF [compute, collect, group, branch, iterate]) RATIONALE \"x\"\nDEFINE DECLARATION algorithm AS (VERB \"ALGORITHM\", SEATS [steps: [step], result: [word]]) RATIONALE \"x\"\nDEFINE RUN a AS (OF [algorithm, steps, result], COMPUTE [compute, into, value], COLLECT [collect, into, value], GROUP [group, into, by, value], BRANCH [branch, when, then, else], ITERATE [iterate, over, as, do]) RATIONALE \"x\"\nDEFINE NARRATE voice AS (TELLS [run: \"Running {algorithm} on {record}.\", compute: \"{name}: {into} is now {value}.\", iterate: \"{name}: {count} items of {over}, as {as}:\", branch: \"{name}: the {taken} steps, when {when}.\", result: \"{algorithm} answers {result}.\"]) RATIONALE \"x\"\n",
+      "expect": {
+        "language": "a",
+        "narrates": 1
+      }
+    },
+    {
+      "id": "A2",
+      "name": "a voice that TELLS a question: ask, matched, ordered, cut and answer, beside a SAYS",
+      "source": "DEFINE LANGUAGE z AS (VERSION \"0.16\", GRAMMAR \"0.16\", COURT \"x\", EXTENSION \".z\") RATIONALE \"x\"\nDEFINE EXPRESSION zexpr AS (OPERATORS [or, and, cmp, contains], OPERANDS [number, text, ref], ABSENT missing, EQUALITY value) RATIONALE \"x\"\nDEFINE DECLARATION flow AS (VERB \"FLOW\", SEATS []) RATIONALE \"x\"\nDEFINE ASK questions AS (FROM [flow], WHERE zexpr, CLAUSES [where, order, limit]) RATIONALE \"x\"\nDEFINE NARRATE voice AS (SAYS [flow: \"{name}\"], TELLS [ask: \"Asking {from}: {question}\", matched: \"{count} of the {total} rows match.\", ordered: \"Ordered by {field} {direction}.\", cut: \"Only the first {limit} are kept.\", answer: \"The answer is {count} row(s): {rows}\"]) RATIONALE \"x\"\n",
+      "expect": {
+        "language": "z",
+        "narrates": 1,
+        "asks": 1
+      }
+    },
+    {
+      "id": "A3",
+      "name": "a v0.15 voice is a v0.16 voice: a NARRATE of SAYS alone, unchanged",
+      "source": "DEFINE LANGUAGE shop AS (VERSION \"0.16\", GRAMMAR \"0.16\", COURT \"x\", EXTENSION \".shop\") RATIONALE \"x\"\nDEFINE DECLARATION till AS (VERB \"TILL\", SEATS [holds: name]) RATIONALE \"x\"\nDEFINE NARRATE voice AS (SAYS [till: \"{name} holds {holds}\"]) RATIONALE \"x\"\n",
+      "expect": {
+        "language": "shop",
+        "narrates": 1
+      }
+    }
+  ],
+  "rejects": [
+    {
+      "id": "R1",
+      "name": "TELLS names something that is neither an event nor a declaration",
+      "source": "DEFINE LANGUAGE a AS (VERSION \"0.16\", GRAMMAR \"0.16\", COURT \"x\", EXTENSION \".a\") RATIONALE \"x\"\nDEFINE EXPRESSION aexpr AS (OPERATORS [or, and, cmp, add, mul], OPERANDS [number, text, ref]) RATIONALE \"x\"\nDEFINE FORM word AS (SEATS [name: name]) RATIONALE \"x\"\nDEFINE DECLARATION compute AS (VERB \"COMPUTE\", SEATS [into: name, value: aexpr]) RATIONALE \"x\"\nDEFINE DECLARATION collect AS (VERB \"COLLECT\", SEATS [into: name, value: aexpr]) RATIONALE \"x\"\nDEFINE DECLARATION group AS (VERB \"GROUP\", SEATS [into: name, by: aexpr, value: aexpr]) RATIONALE \"x\"\nDEFINE DECLARATION branch AS (VERB \"BRANCH\", SEATS [when: aexpr, then: [step], else: [step]]) RATIONALE \"x\"\nDEFINE DECLARATION iterate AS (VERB \"ITERATE\", SEATS [over: name, as: name, do: [step]]) RATIONALE \"x\"\nDEFINE UNION step AS (OF [compute, collect, group, branch, iterate]) RATIONALE \"x\"\nDEFINE DECLARATION algorithm AS (VERB \"ALGORITHM\", SEATS [steps: [step], result: [word]]) RATIONALE \"x\"\nDEFINE RUN a AS (OF [algorithm, steps, result], COMPUTE [compute, into, value], COLLECT [collect, into, value], GROUP [group, into, by, value], BRANCH [branch, when, then, else], ITERATE [iterate, over, as, do]) RATIONALE \"x\"\nDEFINE NARRATE voice AS (TELLS [drawer: \"{name}\"]) RATIONALE \"x\"\n",
+      "refusal": "TELLS: no declaration 'drawer'"
+    },
+    {
+      "id": "R2",
+      "name": "a template fills only the placeholders its event has",
+      "source": "DEFINE LANGUAGE a AS (VERSION \"0.16\", GRAMMAR \"0.16\", COURT \"x\", EXTENSION \".a\") RATIONALE \"x\"\nDEFINE EXPRESSION aexpr AS (OPERATORS [or, and, cmp, add, mul], OPERANDS [number, text, ref]) RATIONALE \"x\"\nDEFINE FORM word AS (SEATS [name: name]) RATIONALE \"x\"\nDEFINE DECLARATION compute AS (VERB \"COMPUTE\", SEATS [into: name, value: aexpr]) RATIONALE \"x\"\nDEFINE DECLARATION collect AS (VERB \"COLLECT\", SEATS [into: name, value: aexpr]) RATIONALE \"x\"\nDEFINE DECLARATION group AS (VERB \"GROUP\", SEATS [into: name, by: aexpr, value: aexpr]) RATIONALE \"x\"\nDEFINE DECLARATION branch AS (VERB \"BRANCH\", SEATS [when: aexpr, then: [step], else: [step]]) RATIONALE \"x\"\nDEFINE DECLARATION iterate AS (VERB \"ITERATE\", SEATS [over: name, as: name, do: [step]]) RATIONALE \"x\"\nDEFINE UNION step AS (OF [compute, collect, group, branch, iterate]) RATIONALE \"x\"\nDEFINE DECLARATION algorithm AS (VERB \"ALGORITHM\", SEATS [steps: [step], result: [word]]) RATIONALE \"x\"\nDEFINE RUN a AS (OF [algorithm, steps, result], COMPUTE [compute, into, value], COLLECT [collect, into, value], GROUP [group, into, by, value], BRANCH [branch, when, then, else], ITERATE [iterate, over, as, do]) RATIONALE \"x\"\nDEFINE NARRATE voice AS (TELLS [compute: \"{name} is {colour}\"]) RATIONALE \"x\"\n",
+      "refusal": "'{colour}' in TELLS compute is not a placeholder the voice can fill"
+    },
+    {
+      "id": "R3",
+      "name": "a question is told only by a language that declares an ASK",
+      "source": "DEFINE LANGUAGE a AS (VERSION \"0.16\", GRAMMAR \"0.16\", COURT \"x\", EXTENSION \".a\") RATIONALE \"x\"\nDEFINE EXPRESSION aexpr AS (OPERATORS [or, and, cmp, add, mul], OPERANDS [number, text, ref]) RATIONALE \"x\"\nDEFINE FORM word AS (SEATS [name: name]) RATIONALE \"x\"\nDEFINE DECLARATION compute AS (VERB \"COMPUTE\", SEATS [into: name, value: aexpr]) RATIONALE \"x\"\nDEFINE DECLARATION collect AS (VERB \"COLLECT\", SEATS [into: name, value: aexpr]) RATIONALE \"x\"\nDEFINE DECLARATION group AS (VERB \"GROUP\", SEATS [into: name, by: aexpr, value: aexpr]) RATIONALE \"x\"\nDEFINE DECLARATION branch AS (VERB \"BRANCH\", SEATS [when: aexpr, then: [step], else: [step]]) RATIONALE \"x\"\nDEFINE DECLARATION iterate AS (VERB \"ITERATE\", SEATS [over: name, as: name, do: [step]]) RATIONALE \"x\"\nDEFINE UNION step AS (OF [compute, collect, group, branch, iterate]) RATIONALE \"x\"\nDEFINE DECLARATION algorithm AS (VERB \"ALGORITHM\", SEATS [steps: [step], result: [word]]) RATIONALE \"x\"\nDEFINE RUN a AS (OF [algorithm, steps, result], COMPUTE [compute, into, value], COLLECT [collect, into, value], GROUP [group, into, by, value], BRANCH [branch, when, then, else], ITERATE [iterate, over, as, do]) RATIONALE \"x\"\nDEFINE NARRATE voice AS (TELLS [ask: \"Asking {from}\"]) RATIONALE \"x\"\n",
+      "refusal": "TELLS: 'ask' tells a question, and this language declares no ASK"
+    },
+    {
+      "id": "R4",
+      "name": "TELLS names a declaration that plays no construct of the RUN",
+      "source": "DEFINE LANGUAGE a AS (VERSION \"0.16\", GRAMMAR \"0.16\", COURT \"x\", EXTENSION \".a\") RATIONALE \"x\"\nDEFINE EXPRESSION aexpr AS (OPERATORS [or, and, cmp, add, mul], OPERANDS [number, text, ref]) RATIONALE \"x\"\nDEFINE FORM word AS (SEATS [name: name]) RATIONALE \"x\"\nDEFINE DECLARATION compute AS (VERB \"COMPUTE\", SEATS [into: name, value: aexpr]) RATIONALE \"x\"\nDEFINE DECLARATION collect AS (VERB \"COLLECT\", SEATS [into: name, value: aexpr]) RATIONALE \"x\"\nDEFINE DECLARATION group AS (VERB \"GROUP\", SEATS [into: name, by: aexpr, value: aexpr]) RATIONALE \"x\"\nDEFINE DECLARATION branch AS (VERB \"BRANCH\", SEATS [when: aexpr, then: [step], else: [step]]) RATIONALE \"x\"\nDEFINE DECLARATION iterate AS (VERB \"ITERATE\", SEATS [over: name, as: name, do: [step]]) RATIONALE \"x\"\nDEFINE UNION step AS (OF [compute, collect, group, branch, iterate]) RATIONALE \"x\"\nDEFINE DECLARATION algorithm AS (VERB \"ALGORITHM\", SEATS [steps: [step], result: [word]]) RATIONALE \"x\"\nDEFINE RUN a AS (OF [algorithm, steps, result], COMPUTE [compute, into, value], COLLECT [collect, into, value], GROUP [group, into, by, value], BRANCH [branch, when, then, else], ITERATE [iterate, over, as, do]) RATIONALE \"x\"\nDEFINE NARRATE voice AS (TELLS [algorithm: \"{name}\"]) RATIONALE \"x\"\n",
+      "refusal": "TELLS: 'algorithm' plays no construct of this language's RUN"
+    },
+    {
+      "id": "R5",
+      "name": "an event is told once",
+      "source": "DEFINE LANGUAGE a AS (VERSION \"0.16\", GRAMMAR \"0.16\", COURT \"x\", EXTENSION \".a\") RATIONALE \"x\"\nDEFINE EXPRESSION aexpr AS (OPERATORS [or, and, cmp, add, mul], OPERANDS [number, text, ref]) RATIONALE \"x\"\nDEFINE FORM word AS (SEATS [name: name]) RATIONALE \"x\"\nDEFINE DECLARATION compute AS (VERB \"COMPUTE\", SEATS [into: name, value: aexpr]) RATIONALE \"x\"\nDEFINE DECLARATION collect AS (VERB \"COLLECT\", SEATS [into: name, value: aexpr]) RATIONALE \"x\"\nDEFINE DECLARATION group AS (VERB \"GROUP\", SEATS [into: name, by: aexpr, value: aexpr]) RATIONALE \"x\"\nDEFINE DECLARATION branch AS (VERB \"BRANCH\", SEATS [when: aexpr, then: [step], else: [step]]) RATIONALE \"x\"\nDEFINE DECLARATION iterate AS (VERB \"ITERATE\", SEATS [over: name, as: name, do: [step]]) RATIONALE \"x\"\nDEFINE UNION step AS (OF [compute, collect, group, branch, iterate]) RATIONALE \"x\"\nDEFINE DECLARATION algorithm AS (VERB \"ALGORITHM\", SEATS [steps: [step], result: [word]]) RATIONALE \"x\"\nDEFINE RUN a AS (OF [algorithm, steps, result], COMPUTE [compute, into, value], COLLECT [collect, into, value], GROUP [group, into, by, value], BRANCH [branch, when, then, else], ITERATE [iterate, over, as, do]) RATIONALE \"x\"\nDEFINE NARRATE voice AS (TELLS [compute: \"{name}\", compute: \"{value}\"]) RATIONALE \"x\"\n",
+      "refusal": "TELLS: 'compute' is told twice"
+    },
+    {
+      "id": "R6",
+      "name": "a run is told only by a language that declares a RUN",
+      "source": "DEFINE LANGUAGE z AS (VERSION \"0.16\", GRAMMAR \"0.16\", COURT \"x\", EXTENSION \".z\") RATIONALE \"x\"\nDEFINE EXPRESSION zexpr AS (OPERATORS [or, and, cmp, contains], OPERANDS [number, text, ref], ABSENT missing, EQUALITY value) RATIONALE \"x\"\nDEFINE DECLARATION flow AS (VERB \"FLOW\", SEATS []) RATIONALE \"x\"\nDEFINE ASK questions AS (FROM [flow], WHERE zexpr, CLAUSES [where, order, limit]) RATIONALE \"x\"\nDEFINE NARRATE voice AS (TELLS [run: \"Running {algorithm}\"]) RATIONALE \"x\"\n",
+      "refusal": "TELLS: 'run' tells a run, and this language declares no RUN"
+    },
+    {
+      "id": "R7",
+      "name": "every brace closes in a template that tells",
+      "source": "DEFINE LANGUAGE a AS (VERSION \"0.16\", GRAMMAR \"0.16\", COURT \"x\", EXTENSION \".a\") RATIONALE \"x\"\nDEFINE EXPRESSION aexpr AS (OPERATORS [or, and, cmp, add, mul], OPERANDS [number, text, ref]) RATIONALE \"x\"\nDEFINE FORM word AS (SEATS [name: name]) RATIONALE \"x\"\nDEFINE DECLARATION compute AS (VERB \"COMPUTE\", SEATS [into: name, value: aexpr]) RATIONALE \"x\"\nDEFINE DECLARATION collect AS (VERB \"COLLECT\", SEATS [into: name, value: aexpr]) RATIONALE \"x\"\nDEFINE DECLARATION group AS (VERB \"GROUP\", SEATS [into: name, by: aexpr, value: aexpr]) RATIONALE \"x\"\nDEFINE DECLARATION branch AS (VERB \"BRANCH\", SEATS [when: aexpr, then: [step], else: [step]]) RATIONALE \"x\"\nDEFINE DECLARATION iterate AS (VERB \"ITERATE\", SEATS [over: name, as: name, do: [step]]) RATIONALE \"x\"\nDEFINE UNION step AS (OF [compute, collect, group, branch, iterate]) RATIONALE \"x\"\nDEFINE DECLARATION algorithm AS (VERB \"ALGORITHM\", SEATS [steps: [step], result: [word]]) RATIONALE \"x\"\nDEFINE RUN a AS (OF [algorithm, steps, result], COMPUTE [compute, into, value], COLLECT [collect, into, value], GROUP [group, into, by, value], BRANCH [branch, when, then, else], ITERATE [iterate, over, as, do]) RATIONALE \"x\"\nDEFINE NARRATE voice AS (TELLS [compute: \"{name is now\"]) RATIONALE \"x\"\n",
+      "refusal": "a '{' is never closed in TELLS compute"
+    },
+    {
+      "id": "R8",
+      "name": "a voice that says and tells nothing narrates nothing",
+      "source": "DEFINE LANGUAGE a AS (VERSION \"0.16\", GRAMMAR \"0.16\", COURT \"x\", EXTENSION \".a\") RATIONALE \"x\"\nDEFINE EXPRESSION aexpr AS (OPERATORS [or, and, cmp, add, mul], OPERANDS [number, text, ref]) RATIONALE \"x\"\nDEFINE FORM word AS (SEATS [name: name]) RATIONALE \"x\"\nDEFINE DECLARATION compute AS (VERB \"COMPUTE\", SEATS [into: name, value: aexpr]) RATIONALE \"x\"\nDEFINE DECLARATION collect AS (VERB \"COLLECT\", SEATS [into: name, value: aexpr]) RATIONALE \"x\"\nDEFINE DECLARATION group AS (VERB \"GROUP\", SEATS [into: name, by: aexpr, value: aexpr]) RATIONALE \"x\"\nDEFINE DECLARATION branch AS (VERB \"BRANCH\", SEATS [when: aexpr, then: [step], else: [step]]) RATIONALE \"x\"\nDEFINE DECLARATION iterate AS (VERB \"ITERATE\", SEATS [over: name, as: name, do: [step]]) RATIONALE \"x\"\nDEFINE UNION step AS (OF [compute, collect, group, branch, iterate]) RATIONALE \"x\"\nDEFINE DECLARATION algorithm AS (VERB \"ALGORITHM\", SEATS [steps: [step], result: [word]]) RATIONALE \"x\"\nDEFINE RUN a AS (OF [algorithm, steps, result], COMPUTE [compute, into, value], COLLECT [collect, into, value], GROUP [group, into, by, value], BRANCH [branch, when, then, else], ITERATE [iterate, over, as, do]) RATIONALE \"x\"\nDEFINE NARRATE voice AS (OPENS \"{file}\") RATIONALE \"x\"\n",
+      "refusal": "NARRATE requires the SAYS clause"
+    },
+    {
+      "id": "R9",
+      "name": "the run's own placeholders are the run's: {result} is not a step's",
+      "source": "DEFINE LANGUAGE a AS (VERSION \"0.16\", GRAMMAR \"0.16\", COURT \"x\", EXTENSION \".a\") RATIONALE \"x\"\nDEFINE EXPRESSION aexpr AS (OPERATORS [or, and, cmp, add, mul], OPERANDS [number, text, ref]) RATIONALE \"x\"\nDEFINE FORM word AS (SEATS [name: name]) RATIONALE \"x\"\nDEFINE DECLARATION compute AS (VERB \"COMPUTE\", SEATS [into: name, value: aexpr]) RATIONALE \"x\"\nDEFINE DECLARATION collect AS (VERB \"COLLECT\", SEATS [into: name, value: aexpr]) RATIONALE \"x\"\nDEFINE DECLARATION group AS (VERB \"GROUP\", SEATS [into: name, by: aexpr, value: aexpr]) RATIONALE \"x\"\nDEFINE DECLARATION branch AS (VERB \"BRANCH\", SEATS [when: aexpr, then: [step], else: [step]]) RATIONALE \"x\"\nDEFINE DECLARATION iterate AS (VERB \"ITERATE\", SEATS [over: name, as: name, do: [step]]) RATIONALE \"x\"\nDEFINE UNION step AS (OF [compute, collect, group, branch, iterate]) RATIONALE \"x\"\nDEFINE DECLARATION algorithm AS (VERB \"ALGORITHM\", SEATS [steps: [step], result: [word]]) RATIONALE \"x\"\nDEFINE RUN a AS (OF [algorithm, steps, result], COMPUTE [compute, into, value], COLLECT [collect, into, value], GROUP [group, into, by, value], BRANCH [branch, when, then, else], ITERATE [iterate, over, as, do]) RATIONALE \"x\"\nDEFINE NARRATE voice AS (TELLS [compute: \"{name} answers {result}\"]) RATIONALE \"x\"\n",
+      "refusal": "'{result}' in TELLS compute is not a placeholder the voice can fill"
+    }
+  ]
+}

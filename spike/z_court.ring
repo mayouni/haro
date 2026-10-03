@@ -10,6 +10,7 @@ load "court_lib.ring"
 load "expr_lib.ring"
 load "world_lib.ring"
 load "ask_lib.ring"
+load "narrate_lib.ring"
 
 $cCourtLang = ""
 $cCourtExt = ""
@@ -54,6 +55,11 @@ $aCourtNarrate = NULL
 $bCourtCollect = 0
 $aCourtFound = []
 $aCourtBroken = []
+$bRunTrace = 0
+$aRunTrace = []
+$nRunDepth = 0
+$bAskTrace = 0
+$aAskTrace = []
 $cExprLang = ""
 $aExprOperators = []
 $aExprOperands = []
@@ -120,7 +126,7 @@ $aCourtLangs = [
     NULL,
     [],
     NULL,
-    NULL
+    ["telling", "", "", "I stopped: {message} ({code})", [], [["ask", "Asking {from}: {question}"], ["matched", "{count} of the {total} rows match."], ["ordered", "Ordered by {field} {direction}."], ["cut", "Only the first {limit} are kept."], ["answer", "The answer is {count} row(s): {rows}"]]]
   ]
 ]
 CtUseLanguage("z")

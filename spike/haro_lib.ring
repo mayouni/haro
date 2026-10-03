@@ -120,7 +120,7 @@ func StzuClauses(cKind)
 	but cKind = "FORMS"
 		return [["FAMILY", "namelist"], ["FLUENT", "string"], ["PARAMS", "messagelist"], ["PASSIVE", "string"], ["STATEMENT", "string"]]
 	but cKind = "NARRATE"
-		return [["ENDS", "string"], ["OPENS", "string"], ["REFUSES", "string"], ["SAYS", "messagelist"]]
+		return [["ENDS", "string"], ["OPENS", "string"], ["REFUSES", "string"], ["SAYS", "messagelist"], ["TELLS", "messagelist"]]
 	ok
 	return []
 
@@ -164,7 +164,7 @@ func StzuRequired(cKind)
 	but cKind = "FORMS"
 		return ["PARAMS"]
 	but cKind = "NARRATE"
-		return ["SAYS"]
+		return []
 	ok
 	return []
 
@@ -204,6 +204,40 @@ func StzuIsC2Cite(cS)
 		if not (IsUpperChar(c) or IsLowerChar(c) or IsDigitChar(c) or c = "_" or c = "." or c = "-") return 0 ok
 	next
 	return 1
+
+# v0.16: the placeholders an event of a run or a question can fill, or a refusal naming why it cannot be told
+func StzuTellPlaceholders(cKey, aDeclarations, aRun, aAsk, cLName, nLine)
+	if cKey = "run" or cKey = "result"
+		if isNull(aRun) StzuFail(nLine, "TELLS: '" + cKey + "' tells a run, and this language declares no RUN") ok
+		if cKey = "run" return ["language", "file", "algorithm", "record"] ok
+		return ["language", "file", "algorithm", "result"]
+	ok
+	if InStrList(cKey, ["ask", "matched", "ordered", "cut", "answer"])
+		if isNull(aAsk) StzuFail(nLine, "TELLS: '" + cKey + "' tells a question, and this language declares no ASK") ok
+		if cKey = "ask" return ["language", "file", "question", "from"] ok
+		if cKey = "matched" return ["count", "total", "from"] ok
+		if cKey = "ordered" return ["field", "direction"] ok
+		if cKey = "cut" return ["limit", "dropped", "count"] ok
+		return ["count", "rows"]
+	ok
+	aDecl = NULL
+	for j = 1 to len(aDeclarations)
+		if aDeclarations[j][1] = cKey aDecl = aDeclarations[j] ok
+	next
+	if isNull(aDecl) StzuFail(nLine, "TELLS: no declaration '" + cKey + "' in " + cLName) ok
+	if isNull(aRun) StzuFail(nLine, "TELLS: '" + cKey + "' tells a step, and this language declares no RUN") ok
+	bPlays = 0
+	for r = 1 to len(aRun[2])
+		if aRun[2][r][1] != "OF"
+			if aRun[2][r][2][1] = cKey bPlays = 1 ok
+		ok
+	next
+	if not bPlays StzuFail(nLine, "TELLS: '" + cKey + "' plays no construct of this language's RUN") ok
+	aOk = ["name", "verb", "rationale", "line", "value", "key", "taken", "count"]
+	for j = 1 to len(aDecl[3])
+		aOk + aDecl[3][j][1]
+	next
+	return aOk
 
 # v0.13: every {word} of a template names a placeholder the voice can fill, and every brace closes
 func StzuCheckTemplate(cT, aAllowed, nLine, cWhere)
@@ -986,7 +1020,7 @@ func StzuParseDeclaration()
 #   ask:          [name, from kinds, where, clauses, rationale, line] or NULL   (v0.7)
 #   run:          [name, [[role, [kind, seat, ...]], ...], rationale, line] or NULL   (v0.9)
 #   symbols:      [name, kind, ref, message, line, code, cites]   (a seat type resolved against the world, v0.10; v0.11 code, cites)
-#   narrate:      [name, opens, ends, refuses, says [[kind, template, line]], rationale, line] or NULL   (v0.13)
+#   narrate:      [name, opens, ends, refuses, says [[kind, template, line]], rationale, line, tells] or NULL   (v0.13; tells [[event, template, line]], v0.16)
 #   formset:      [name, fluent, passive, statement, params, family, rationale, line] or NULL
 #                 (v0.12: params [[key, suffix, line]], family [kind, base seat, forms seat] or [])
 #   (v0.11) declarations gain codes [[seat, code, line]] as their eighth element; refusals gain code,
@@ -1319,7 +1353,14 @@ func StzuDeclare(cSrc)
 					if HasClause(aClauses, "ENDS") cEnds = ClauseValue(aClauses, "ENDS") ok
 					cRefuses = ""
 					if HasClause(aClauses, "REFUSES") cRefuses = ClauseValue(aClauses, "REFUSES") ok
-					aSays = ClauseValue(aClauses, "SAYS")
+					# v0.16: a voice SAYS what a sentence is, TELLS what a run did, or both; one that does neither narrates nothing
+					if not HasClause(aClauses, "SAYS") and not HasClause(aClauses, "TELLS")
+						StzuFail(nLine, "NARRATE requires the SAYS clause or the TELLS clause: a voice that says and tells nothing narrates nothing")
+					ok
+					aSays = []
+					if HasClause(aClauses, "SAYS") aSays = ClauseValue(aClauses, "SAYS") ok
+					aTells = []
+					if HasClause(aClauses, "TELLS") aTells = ClauseValue(aClauses, "TELLS") ok
 					for i = 1 to len(aSays)
 						for j = 1 to i - 1
 							if aSays[j][1] = aSays[i][1]
@@ -1327,7 +1368,14 @@ func StzuDeclare(cSrc)
 							ok
 						next
 					next
-					aNarrate = [cName, cOpens, cEnds, cRefuses, aSays, cRationale, nLine]
+					for i = 1 to len(aTells)
+						for j = 1 to i - 1
+							if aTells[j][1] = aTells[i][1]
+								StzuFail(aTells[i][3], "TELLS: '" + aTells[i][1] + "' is told twice")
+							ok
+						next
+					next
+					aNarrate = [cName, cOpens, cEnds, cRefuses, aSays, cRationale, nLine, aTells]
 				but cKind = "RUN"
 					if not isNull(aRun)
 						StzuFail(nLine, "a .haro file declares at most one RUN: a language runs one way (" + aRun[1] + " is it)")
@@ -1464,6 +1512,12 @@ func StzuDeclare(cSrc)
 					aOk + aNK[3][j][1]
 				next
 				StzuCheckTemplate(aSays[i][2], aOk, aSays[i][3], "SAYS " + aSays[i][1])
+			next
+			# v0.16: TELLS names an event of a run or of a question, or a declaration that plays a construct of the RUN
+			aTells = aNarrate[8]
+			for i = 1 to len(aTells)
+				aOkT = StzuTellPlaceholders(aTells[i][1], aDeclarations, aRun, aAsk, cLName, aTells[i][3])
+				StzuCheckTemplate(aTells[i][2], aOkT, aTells[i][3], "TELLS " + aTells[i][1])
 			next
 			if aNarrate[2] != "" StzuCheckTemplate(aNarrate[2], ["language", "file", "count"], aNarrate[7], "OPENS") ok
 			if aNarrate[3] != "" StzuCheckTemplate(aNarrate[3], ["language", "file", "count"], aNarrate[7], "ENDS") ok

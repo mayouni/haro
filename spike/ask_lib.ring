@@ -260,9 +260,14 @@ func AskOrder(aA, aB, cField)
 	ok
 	return ExStrOrder(ExStr(va[2]), ExStr(vb[2]))
 
+# v0.16: what a question did, recorded as it ran and only when a narration asked: [event, [[key, text], ...]]
+func AskNote(cEvent, aVals)
+	$aAskTrace + [cEvent, aVals]
+
 func AskRun(aDecls, cQ, aRows)
 	aQ = AskParse(aDecls, cQ)
 	if not isList(aRows) or ExIsObj(aRows) AskFail("the rows are a JSON list of records") ok
+	if $bAskTrace AskNote("ask", [["question", cQ], ["from", aQ[1]]]) ok
 	aOut = []
 	for i = 1 to len(aRows)
 		if not ExIsObj(aRows[i]) AskFail("row " + i + " is not a JSON object") ok
@@ -272,6 +277,7 @@ func AskRun(aDecls, cQ, aRows)
 		ok
 		aOut + aRows[i]
 	next
+	if $bAskTrace AskNote("matched", [["count", "" + len(aOut)], ["total", "" + len(aRows)], ["from", aQ[1]]]) ok
 	if aQ[3] != ""
 		# a stable insertion: a record goes after every one it does not precede
 		aSorted = []
@@ -294,11 +300,19 @@ func AskRun(aDecls, cQ, aRows)
 		next
 		aOut = aSorted
 	ok
+	if $bAskTrace and aQ[3] != ""
+		cDir = "ASC"
+		if aQ[4] cDir = "DESC" ok
+		AskNote("ordered", [["field", aQ[3]], ["direction", cDir]])
+	ok
 	if aQ[5] >= 0 and len(aOut) > aQ[5]
+		# told only when the limit DROPPED rows: "only the first 5 are kept" over three matches would be untrue
+		if $bAskTrace AskNote("cut", [["limit", "" + aQ[5]], ["dropped", "" + (len(aOut) - aQ[5])], ["count", "" + aQ[5]]]) ok
 		aCut = []
 		for i = 1 to aQ[5]
 			aCut + aOut[i]
 		next
 		aOut = aCut
 	ok
+	if $bAskTrace AskNote("answer", [["count", "" + len(aOut)], ["rows", ExJson(aOut)]]) ok
 	return aOut

@@ -54,6 +54,11 @@ $aCourtNarrate = NULL
 $bCourtCollect = 0
 $aCourtFound = []
 $aCourtBroken = []
+$bRunTrace = 0
+$aRunTrace = []
+$nRunDepth = 0
+$bAskTrace = 0
+$aAskTrace = []
 $cExprLang = ""
 $aExprOperators = []
 $aExprOperands = []
@@ -147,7 +152,7 @@ $aCourtLangs = [
     NULL,
     [["flow", "flow", "calls", "step {name} names the flow '{value}', and the world declares no flow:{value}. A cross-artifact reference no court resolves is the defect C3 section 3.2 closes", "UNRESOLVED_FLOW", ["article:placement-3.2"]]],
     NULL,
-    ["workflow_voice", "{file} is a workflow sentence in {language}, {count} declarations.", "{count} declarations, all read.", "I stopped at line {line}: {message} ({code})", [["workflow", "The workflow {name} speaks to the ZQL file {zql}, calendar {calendar}, in {locale}: {rationale}"], ["actor", "{name} may act as {role}. {rationale}"], ["invocation", "{name} invokes the flow {invokes}; committed it goes to {on_committed}, rejected to {on_rejected}, held to {on_held}. {rationale}"], ["terminal", "{name} ends the workflow as {outcome}. {rationale}"]]]
+    ["workflow_voice", "{file} is a workflow sentence in {language}, {count} declarations.", "{count} declarations, all read.", "I stopped at line {line}: {message} ({code})", [["workflow", "The workflow {name} speaks to the ZQL file {zql}, calendar {calendar}, in {locale}: {rationale}"], ["actor", "{name} may act as {role}. {rationale}"], ["invocation", "{name} invokes the flow {invokes}; committed it goes to {on_committed}, rejected to {on_rejected}, held to {on_held}. {rationale}"], ["terminal", "{name} ends the workflow as {outcome}. {rationale}"]], []]
   ]
 ]
 CtUseLanguage("f")

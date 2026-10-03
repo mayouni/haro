@@ -355,7 +355,7 @@ func LangSource(aLang)
 	aNr = LangGet(aLang, "narrate")
 	cNarrate = "NULL"
 	if not isNull(aNr)
-		cNarrate = "[" + RingStr(aNr[1]) + ", " + RingStr(aNr[2]) + ", " + RingStr(aNr[3]) + ", " + RingStr(aNr[4]) + ", " + MessagesSource(aNr[5]) + "]"
+		cNarrate = "[" + RingStr(aNr[1]) + ", " + RingStr(aNr[2]) + ", " + RingStr(aNr[3]) + ", " + RingStr(aNr[4]) + ", " + MessagesSource(aNr[5]) + ", " + MessagesSource(aNr[8]) + "]"
 	ok
 	c = "  [" + RingStr(LangGet(aLang, "name")) + ", " + RingStr(LangGet(aLang, "extension")) + "," + nl
 	c += "    " + cKinds + "," + nl
@@ -464,6 +464,7 @@ func ForgeCourt(aLang)
 	c += "$cCourtCode = " + RingStr("PARSE") + nl + "$aCourtCites = []" + nl
 	c += "$aCourtFormset = NULL" + nl + "$aCourtNarrate = NULL" + nl
 	c += "$bCourtCollect = 0" + nl + "$aCourtFound = []" + nl + "$aCourtBroken = []" + nl
+	c += "$bRunTrace = 0" + nl + "$aRunTrace = []" + nl + "$nRunDepth = 0" + nl + "$bAskTrace = 0" + nl + "$aAskTrace = []" + nl
 	c += ExprGlobals()
 	c += "$aCourtLangs = [" + nl
 	aRecs = ForgeLangRecords(aLang, [])
