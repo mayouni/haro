@@ -230,6 +230,12 @@ Each requirement traces to a finding above, as the mission's discipline asks: no
    count caught it, and control characters are named by code now.
 6. E1's first run admitted a second beneficiary into the artifact (20 facts); the probe now runs after the
    artifact is written.
+7. **Attack X16 did not test what it said it tested** (found 2026-10-03, while reading the results to draw the N
+   API). It was meant to show that full-width brackets (bytes the gate lets through) are never read as a
+   bracketed section, but it had `Marker()` inside, so the gate refused it at the parenthesis and the lookalike
+   never reached the tokenizer. The fixture is now `show deposits over ［ 5000 ］` and is refused as the unknown
+   word `［`, which is the claim. The study's numbers did not change (74 questions, 16 attacks); what was
+   overstated was one attack's coverage.
 
 ## 9. What is not decided here
 

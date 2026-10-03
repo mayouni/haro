@@ -883,10 +883,10 @@
    "id": "X16",
    "group": "attack",
    "lang": "tn-en",
-   "text": "show deposits over ［ Marker() ］",
+   "text": "show deposits over ［ 5000 ］",
    "expect": {
     "kind": "refused",
-    "why": "full-width brackets: bytes the gate lets through, a shape the tokenizer must not read as a section"
+    "why": "full-width brackets: bytes the gate lets through; they must be an unknown word, never a bracketed section (this had `Marker()` inside until 2026-10-03: the gate refused at the parenthesis and the lookalike was never tested)"
    }
   }
  ]

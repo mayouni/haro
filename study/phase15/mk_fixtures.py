@@ -114,7 +114,7 @@ for cid, lang, text, why in [
     ('X13', 'tn-fr', 'montre les dépôts de Aminata~NL~Marker()', 'a newline, then a call'),
     ('X14', 'tn-en', 'show deposits over $nMarker', 'a Ring global'),
     ('X15', 'tn-en', 'show' + ' show' * 2000, 'a very long question'),
-    ('X16', 'tn-en', 'show deposits over ［ Marker() ］', 'full-width brackets: bytes the gate lets through, a shape the tokenizer must not read as a section'),
+    ('X16', 'tn-en', 'show deposits over ［ 5000 ］', 'full-width brackets: bytes the gate lets through; they must be an unknown word, never a bracketed section (this had `Marker()` inside until 2026-10-03: the gate refused at the parenthesis and the lookalike was never tested)'),
 ]:
     single(cid, 'attack', lang, text, 'refused', why=why)
 
