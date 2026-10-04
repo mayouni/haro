@@ -187,7 +187,8 @@ all of Softanza       6,068 Ring files, 0 failing:
    future        53   44 exact, 9 refused          tools 1: 1
 ```
 
-**The numbers are the stress's** (`probes/stress.py`, `probes/stress_big.py`), taken after the failures it found were
+**Re-run in full on 2026-10-04, after rnxc's print flag, bare return and `&&`/`||` were fixed (HF-74) and rule 3 became Ring's: the same
+counts, base in quarters, the files over 120 KB, max, core, engine, future and tools -- 6,068 files, none failing.** **The numbers are the stress's** (`probes/stress.py`, `probes/stress_big.py`), taken after the failures it found were
 repaired; the last repair (a byte-order mark before a `load`, which only turns a failure into a pass) came between the quarters,
 and its one file was re-run alone. Across the runs the stress found, in order -- the bare return split from its value inside a class; a `return` cut at a
 `+`; a call chain cut at a dot; `end` read as a name; a brace on a whole assignment; `private` read as an identifier; the
