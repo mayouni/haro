@@ -160,8 +160,9 @@ def recover_export(path):
 
 
 def recover_any(path):
-    """The export when CST_EXPORT=1 (the real parse), else the heuristic recovery from the text dump."""
-    return (recover_export if os.environ.get('CST_EXPORT') == '1' else recover)(path)
+    """The export (the parser's own tree, src/dumpjson.zig) -- unless CST_EXPORT=0, which asks for the heuristic recovery from the text dump
+    that rung 18 was first written against; haro/spike/v18/probes/export_vs_dump.py compares the two."""
+    return (recover if os.environ.get('CST_EXPORT') == '0' else recover_export)(path)
 
 
 if __name__ == '__main__':
