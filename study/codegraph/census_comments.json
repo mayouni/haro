@@ -1,0 +1,42 @@
+{
+ "softanza base": {
+  "files": 5728,
+  "lines": 917948,
+  "comment_lines": 158628,
+  "promise_lines": 8306,
+  "tag_lines": 7,
+  "bytes": 26848405,
+  "comment_bytes": 7204622,
+  "promise_files": 2969
+ },
+ "softanza core": {
+  "files": 36,
+  "lines": 9903,
+  "comment_lines": 1472,
+  "promise_lines": 427,
+  "tag_lines": 0,
+  "bytes": 235065,
+  "comment_bytes": 56683,
+  "promise_files": 11
+ },
+ "ringpp haro spike": {
+  "files": 27,
+  "lines": 11864,
+  "comment_lines": 1157,
+  "promise_lines": 0,
+  "tag_lines": 0,
+  "bytes": 426838,
+  "comment_bytes": 80449,
+  "promise_files": 0
+ },
+ "ringpp bench+tests": {
+  "files": 155,
+  "lines": 6146,
+  "comment_lines": 1048,
+  "promise_lines": 0,
+  "tag_lines": 0,
+  "bytes": 154173,
+  "comment_bytes": 56339,
+  "promise_files": 0
+ }
+}

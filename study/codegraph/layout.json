@@ -1,0 +1,32 @@
+{
+ "spike": {
+  "files": 20,
+  "orig": 410346,
+  "printed": 388627,
+  "leaves": 81938,
+  "nodes": 121890,
+  "hidden": 10853,
+  "comments": 1110,
+  "comment_bytes": 75096
+ },
+ "stdlib": {
+  "files": 20,
+  "orig": 4865,
+  "printed": 4400,
+  "leaves": 637,
+  "nodes": 1046,
+  "hidden": 52,
+  "comments": 18,
+  "comment_bytes": 701
+ },
+ "softanza": {
+  "files": 31,
+  "orig": 107147,
+  "printed": 100105,
+  "leaves": 14017,
+  "nodes": 21388,
+  "hidden": 1509,
+  "comments": 636,
+  "comment_bytes": 38840
+ }
+}

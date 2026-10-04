@@ -1,0 +1,79 @@
+[
+ {
+  "file": "haro/spike/court_lib.ring",
+  "revisions": 12,
+  "pairs": 11,
+  "kept": 14320,
+  "changed": 277,
+  "lost": 16,
+  "median_pair": 0.9918500407497962,
+  "pairs_95": 10,
+  "all": 11
+ },
+ {
+  "file": "haro/spike/haro_lib.ring",
+  "revisions": 12,
+  "pairs": 11,
+  "kept": 13206,
+  "changed": 223,
+  "lost": 0,
+  "median_pair": 0.9870283018867925,
+  "pairs_95": 10,
+  "all": 11
+ },
+ {
+  "file": "haro/spike/forge.ring",
+  "revisions": 12,
+  "pairs": 11,
+  "kept": 6396,
+  "changed": 69,
+  "lost": 0,
+  "median_pair": 0.9967897271268058,
+  "pairs_95": 10,
+  "all": 11
+ },
+ {
+  "file": "haro/spike/n_lib.ring",
+  "revisions": 2,
+  "pairs": 1,
+  "kept": 876,
+  "changed": 0,
+  "lost": 0,
+  "median_pair": 1.0,
+  "pairs_95": 1,
+  "all": 1
+ },
+ {
+  "file": "libraries/stzlib/base/meta/stzCodeGraph.ring",
+  "revisions": 7,
+  "pairs": 6,
+  "kept": 1252,
+  "changed": 186,
+  "lost": 13,
+  "median_pair": 0.9771825396825398,
+  "pairs_95": 5,
+  "all": 6
+ },
+ {
+  "file": "libraries/stzlib/base/refine/stzRefinableCode.ring",
+  "revisions": 6,
+  "pairs": 5,
+  "kept": 1163,
+  "changed": 15,
+  "lost": 5,
+  "median_pair": 0.9785714285714285,
+  "pairs_95": 5,
+  "all": 5
+ },
+ {
+  "file": "libraries/stzlib/base/natural/stzNatural.ring",
+  "revisions": 12,
+  "pairs": 11,
+  "kept": 11789,
+  "changed": 127,
+  "lost": 0,
+  "median_pair": 0.9954212454212454,
+  "pairs_95": 10,
+  "all": 11
+ }
+]

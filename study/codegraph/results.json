@@ -1,0 +1,2582 @@
+{
+ "D:\\GitHub\\ringpp\\haro\\spike\\a_court.ring": {
+  "group": "spike",
+  "status": "same",
+  "bytes": 4725,
+  "detail": null
+ },
+ "D:\\GitHub\\ringpp\\haro\\spike\\a_expr.ring": {
+  "group": "spike",
+  "status": "same",
+  "bytes": 852,
+  "detail": null
+ },
+ "D:\\GitHub\\ringpp\\haro\\spike\\ask_lib.ring": {
+  "group": "spike",
+  "status": "same",
+  "bytes": 9893,
+  "detail": null
+ },
+ "D:\\GitHub\\ringpp\\haro\\spike\\cond_lib.ring": {
+  "group": "spike",
+  "status": "same",
+  "bytes": 48116,
+  "detail": null
+ },
+ "D:\\GitHub\\ringpp\\haro\\spike\\court_lib.ring": {
+  "group": "spike",
+  "status": "same",
+  "bytes": 73888,
+  "detail": null
+ },
+ "D:\\GitHub\\ringpp\\haro\\spike\\expr_lib.ring": {
+  "group": "spike",
+  "status": "same",
+  "bytes": 24881,
+  "detail": null
+ },
+ "D:\\GitHub\\ringpp\\haro\\spike\\f_court.ring": {
+  "group": "spike",
+  "status": "same",
+  "bytes": 14159,
+  "detail": null
+ },
+ "D:\\GitHub\\ringpp\\haro\\spike\\fleet_court.ring": {
+  "group": "spike",
+  "status": "same",
+  "bytes": 25995,
+  "detail": null
+ },
+ "D:\\GitHub\\ringpp\\haro\\spike\\forge.ring": {
+  "group": "spike",
+  "status": "same",
+  "bytes": 30673,
+  "detail": null
+ },
+ "D:\\GitHub\\ringpp\\haro\\spike\\forms_lib.ring": {
+  "group": "spike",
+  "status": "same",
+  "bytes": 9995,
+  "detail": null
+ },
+ "D:\\GitHub\\ringpp\\haro\\spike\\gbnf_probe.ring": {
+  "group": "spike",
+  "status": "same",
+  "bytes": 764,
+  "detail": null
+ },
+ "D:\\GitHub\\ringpp\\haro\\spike\\haro.ring": {
+  "group": "spike",
+  "status": "same",
+  "bytes": 2249,
+  "detail": null
+ },
+ "D:\\GitHub\\ringpp\\haro\\spike\\haro_lib.ring": {
+  "group": "spike",
+  "status": "same",
+  "bytes": 81810,
+  "detail": null
+ },
+ "D:\\GitHub\\ringpp\\haro\\spike\\machine_court.ring": {
+  "group": "spike",
+  "status": "same",
+  "bytes": 19852,
+  "detail": null
+ },
+ "D:\\GitHub\\ringpp\\haro\\spike\\n_court.ring": {
+  "group": "spike",
+  "status": "same",
+  "bytes": 6994,
+  "detail": null
+ },
+ "D:\\GitHub\\ringpp\\haro\\spike\\n_lib.ring": {
+  "group": "spike",
+  "status": "same",
+  "bytes": 36540,
+  "detail": null
+ },
+ "D:\\GitHub\\ringpp\\haro\\spike\\narrate_lib.ring": {
+  "group": "spike",
+  "status": "same",
+  "bytes": 9064,
+  "detail": null
+ },
+ "D:\\GitHub\\ringpp\\haro\\spike\\rf_diag.ring": {
+  "group": "spike",
+  "status": "same",
+  "bytes": 1432,
+  "detail": null
+ },
+ "D:\\GitHub\\ringpp\\haro\\spike\\rf_multi.ring": {
+  "group": "spike",
+  "status": "same",
+  "bytes": 710,
+  "detail": null
+ },
+ "D:\\GitHub\\ringpp\\haro\\spike\\run_lib.ring": {
+  "group": "spike",
+  "status": "same",
+  "bytes": 7754,
+  "detail": null
+ },
+ "D:\\GitHub\\ringpp\\haro\\spike\\stzv_court.ring": {
+  "group": "spike",
+  "status": "same",
+  "bytes": 2965,
+  "detail": null
+ },
+ "D:\\GitHub\\ringpp\\haro\\spike\\w_expr.ring": {
+  "group": "spike",
+  "status": "same",
+  "bytes": 1009,
+  "detail": null
+ },
+ "D:\\GitHub\\ringpp\\haro\\spike\\world_lib.ring": {
+  "group": "spike",
+  "status": "same",
+  "bytes": 4613,
+  "detail": null
+ },
+ "D:\\GitHub\\ringpp\\haro\\spike\\world_stub.ring": {
+  "group": "spike",
+  "status": "same",
+  "bytes": 769,
+  "detail": null
+ },
+ "D:\\GitHub\\ringpp\\haro\\spike\\z_court.ring": {
+  "group": "spike",
+  "status": "same",
+  "bytes": 5278,
+  "detail": null
+ },
+ "D:\\GitHub\\ringpp\\haro\\spike\\z_expr.ring": {
+  "group": "spike",
+  "status": "same",
+  "bytes": 844,
+  "detail": null
+ },
+ "D:\\GitHub\\ringpp\\vendor\\ring-stdlib\\libraries\\stdlib\\stdbase.ring": {
+  "group": "stdlib",
+  "status": "same",
+  "bytes": 343,
+  "detail": null
+ },
+ "D:\\GitHub\\ringpp\\vendor\\ring-stdlib\\libraries\\stdlib\\stdclasses.ring": {
+  "group": "stdlib",
+  "status": "same",
+  "bytes": 593,
+  "detail": null
+ },
+ "D:\\GitHub\\ringpp\\vendor\\ring-stdlib\\libraries\\stdlib\\stdconversion.ring": {
+  "group": "stdlib",
+  "status": "same",
+  "bytes": 1090,
+  "detail": null
+ },
+ "D:\\GitHub\\ringpp\\vendor\\ring-stdlib\\libraries\\stdlib\\stddatatype.ring": {
+  "group": "stdlib",
+  "status": "same",
+  "bytes": 2741,
+  "detail": null
+ },
+ "D:\\GitHub\\ringpp\\vendor\\ring-stdlib\\libraries\\stdlib\\stddatetime.ring": {
+  "group": "stdlib",
+  "status": "same",
+  "bytes": 1401,
+  "detail": null
+ },
+ "D:\\GitHub\\ringpp\\vendor\\ring-stdlib\\libraries\\stdlib\\stddebug.ring": {
+  "group": "stdlib",
+  "status": "same",
+  "bytes": 620,
+  "detail": null
+ },
+ "D:\\GitHub\\ringpp\\vendor\\ring-stdlib\\libraries\\stdlib\\stdfile.ring": {
+  "group": "stdlib",
+  "status": "same",
+  "bytes": 1984,
+  "detail": null
+ },
+ "D:\\GitHub\\ringpp\\vendor\\ring-stdlib\\libraries\\stdlib\\stdfunctions.ring": {
+  "group": "stdlib",
+  "status": "same",
+  "bytes": 9278,
+  "detail": null
+ },
+ "D:\\GitHub\\ringpp\\vendor\\ring-stdlib\\libraries\\stdlib\\stdhashtable.ring": {
+  "group": "stdlib",
+  "status": "same",
+  "bytes": 1131,
+  "detail": null
+ },
+ "D:\\GitHub\\ringpp\\vendor\\ring-stdlib\\libraries\\stdlib\\stdinternet.ring": {
+  "group": "stdlib",
+  "status": "same",
+  "bytes": 655,
+  "detail": null
+ },
+ "D:\\GitHub\\ringpp\\vendor\\ring-stdlib\\libraries\\stdlib\\stdlib.ring": {
+  "group": "stdlib",
+  "status": "same",
+  "bytes": 386,
+  "detail": null
+ },
+ "D:\\GitHub\\ringpp\\vendor\\ring-stdlib\\libraries\\stdlib\\stdlibcore.ring": {
+  "group": "stdlib",
+  "status": "same",
+  "bytes": 32151,
+  "detail": null
+ },
+ "D:\\GitHub\\ringpp\\vendor\\ring-stdlib\\libraries\\stdlib\\stdlist.ring": {
+  "group": "stdlib",
+  "status": "same",
+  "bytes": 2289,
+  "detail": null
+ },
+ "D:\\GitHub\\ringpp\\vendor\\ring-stdlib\\libraries\\stdlib\\stdmath.ring": {
+  "group": "stdlib",
+  "status": "same",
+  "bytes": 3270,
+  "detail": null
+ },
+ "D:\\GitHub\\ringpp\\vendor\\ring-stdlib\\libraries\\stdlib\\stdmysql.ring": {
+  "group": "stdlib",
+  "status": "same",
+  "bytes": 1499,
+  "detail": null
+ },
+ "D:\\GitHub\\ringpp\\vendor\\ring-stdlib\\libraries\\stdlib\\stdodbc.ring": {
+  "group": "stdlib",
+  "status": "same",
+  "bytes": 1722,
+  "detail": null
+ },
+ "D:\\GitHub\\ringpp\\vendor\\ring-stdlib\\libraries\\stdlib\\stdpostgresql.ring": {
+  "group": "stdlib",
+  "status": "same",
+  "bytes": 2076,
+  "detail": null
+ },
+ "D:\\GitHub\\ringpp\\vendor\\ring-stdlib\\libraries\\stdlib\\stdqueue.ring": {
+  "group": "stdlib",
+  "status": "same",
+  "bytes": 795,
+  "detail": null
+ },
+ "D:\\GitHub\\ringpp\\vendor\\ring-stdlib\\libraries\\stdlib\\stdsecurity.ring": {
+  "group": "stdlib",
+  "status": "same",
+  "bytes": 1524,
+  "detail": null
+ },
+ "D:\\GitHub\\ringpp\\vendor\\ring-stdlib\\libraries\\stdlib\\stdsqlite.ring": {
+  "group": "stdlib",
+  "status": "same",
+  "bytes": 1685,
+  "detail": null
+ },
+ "D:\\GitHub\\ringpp\\vendor\\ring-stdlib\\libraries\\stdlib\\stdstack.ring": {
+  "group": "stdlib",
+  "status": "same",
+  "bytes": 906,
+  "detail": null
+ },
+ "D:\\GitHub\\ringpp\\vendor\\ring-stdlib\\libraries\\stdlib\\stdstring.ring": {
+  "group": "stdlib",
+  "status": "same",
+  "bytes": 3635,
+  "detail": null
+ },
+ "D:\\GitHub\\ringpp\\vendor\\ring-stdlib\\libraries\\stdlib\\stdsystem.ring": {
+  "group": "stdlib",
+  "status": "same",
+  "bytes": 1340,
+  "detail": null
+ },
+ "D:\\GitHub\\ringpp\\vendor\\ring-stdlib\\libraries\\stdlib\\stdtree.ring": {
+  "group": "stdlib",
+  "status": "same",
+  "bytes": 1189,
+  "detail": null
+ },
+ "D:\\GitHub\\ringpp\\vendor\\ring-stdlib\\libraries\\stdlib\\usestdlibcore.ring": {
+  "group": "stdlib",
+  "status": "same",
+  "bytes": 230,
+  "detail": null
+ },
+ "D:\\GitHub\\ringpp\\vendor\\ring-stdlib\\load\\bignumber.ring": {
+  "group": "stdlib",
+  "status": "same",
+  "bytes": 48,
+  "detail": null
+ },
+ "D:\\GitHub\\ringpp\\vendor\\ring-stdlib\\load\\cjson.ring": {
+  "group": "stdlib",
+  "status": "same",
+  "bytes": 45,
+  "detail": null
+ },
+ "D:\\GitHub\\ringpp\\vendor\\ring-stdlib\\load\\codegenlib.ring": {
+  "group": "stdlib",
+  "status": "same",
+  "bytes": 48,
+  "detail": null
+ },
+ "D:\\GitHub\\ringpp\\vendor\\ring-stdlib\\load\\consolecolors.ring": {
+  "group": "stdlib",
+  "status": "same",
+  "bytes": 61,
+  "detail": null
+ },
+ "D:\\GitHub\\ringpp\\vendor\\ring-stdlib\\load\\csvlib.ring": {
+  "group": "stdlib",
+  "status": "same",
+  "bytes": 42,
+  "detail": null
+ },
+ "D:\\GitHub\\ringpp\\vendor\\ring-stdlib\\load\\dialog.ring": {
+  "group": "stdlib",
+  "status": "same",
+  "bytes": 50,
+  "detail": null
+ },
+ "D:\\GitHub\\ringpp\\vendor\\ring-stdlib\\load\\fastpro.ring": {
+  "group": "stdlib",
+  "status": "same",
+  "bytes": 49,
+  "detail": null
+ },
+ "D:\\GitHub\\ringpp\\vendor\\ring-stdlib\\load\\foxring.ring": {
+  "group": "stdlib",
+  "status": "same",
+  "bytes": 44,
+  "detail": null
+ },
+ "D:\\GitHub\\ringpp\\vendor\\ring-stdlib\\load\\freeglut.ring": {
+  "group": "stdlib",
+  "status": "same",
+  "bytes": 51,
+  "detail": null
+ },
+ "D:\\GitHub\\ringpp\\vendor\\ring-stdlib\\load\\gameengine.ring": {
+  "group": "stdlib",
+  "status": "same",
+  "bytes": 50,
+  "detail": null
+ },
+ "D:\\GitHub\\ringpp\\vendor\\ring-stdlib\\load\\gamelib.ring": {
+  "group": "stdlib",
+  "status": "same",
+  "bytes": 49,
+  "detail": null
+ },
+ "D:\\GitHub\\ringpp\\vendor\\ring-stdlib\\load\\guilib.ring": {
+  "group": "stdlib",
+  "status": "same",
+  "bytes": 42,
+  "detail": null
+ },
+ "D:\\GitHub\\ringpp\\vendor\\ring-stdlib\\load\\httplib.ring": {
+  "group": "stdlib",
+  "status": "same",
+  "bytes": 49,
+  "detail": null
+ },
+ "D:\\GitHub\\ringpp\\vendor\\ring-stdlib\\load\\internetlib.ring": {
+  "group": "stdlib",
+  "status": "same",
+  "bytes": 54,
+  "detail": null
+ },
+ "D:\\GitHub\\ringpp\\vendor\\ring-stdlib\\load\\jsonlib.ring": {
+  "group": "stdlib",
+  "status": "same",
+  "bytes": 44,
+  "detail": null
+ },
+ "D:\\GitHub\\ringpp\\vendor\\ring-stdlib\\load\\libcurl.ring": {
+  "group": "stdlib",
+  "status": "same",
+  "bytes": 46,
+  "detail": null
+ },
+ "D:\\GitHub\\ringpp\\vendor\\ring-stdlib\\load\\libsdl.ring": {
+  "group": "stdlib",
+  "status": "same",
+  "bytes": 44,
+  "detail": null
+ },
+ "D:\\GitHub\\ringpp\\vendor\\ring-stdlib\\load\\libui.ring": {
+  "group": "stdlib",
+  "status": "same",
+  "bytes": 45,
+  "detail": null
+ },
+ "D:\\GitHub\\ringpp\\vendor\\ring-stdlib\\load\\libuv.ring": {
+  "group": "stdlib",
+  "status": "same",
+  "bytes": 45,
+  "detail": null
+ },
+ "D:\\GitHub\\ringpp\\vendor\\ring-stdlib\\load\\lightguilib.ring": {
+  "group": "stdlib",
+  "status": "same",
+  "bytes": 47,
+  "detail": null
+ },
+ "D:\\GitHub\\ringpp\\vendor\\ring-stdlib\\load\\markdown.ring": {
+  "group": "stdlib",
+  "status": "same",
+  "bytes": 52,
+  "detail": null
+ },
+ "D:\\GitHub\\ringpp\\vendor\\ring-stdlib\\load\\matrixlib.ring": {
+  "group": "stdlib",
+  "status": "same",
+  "bytes": 48,
+  "detail": null
+ },
+ "D:\\GitHub\\ringpp\\vendor\\ring-stdlib\\load\\murmurhashlib.ring": {
+  "group": "stdlib",
+  "status": "same",
+  "bytes": 58,
+  "detail": null
+ },
+ "D:\\GitHub\\ringpp\\vendor\\ring-stdlib\\load\\mysqllib.ring": {
+  "group": "stdlib",
+  "status": "same",
+  "bytes": 48,
+  "detail": null
+ },
+ "D:\\GitHub\\ringpp\\vendor\\ring-stdlib\\load\\nappgui.ring": {
+  "group": "stdlib",
+  "status": "same",
+  "bytes": 49,
+  "detail": null
+ },
+ "D:\\GitHub\\ringpp\\vendor\\ring-stdlib\\load\\naturallib.ring": {
+  "group": "stdlib",
+  "status": "same",
+  "bytes": 50,
+  "detail": null
+ },
+ "D:\\GitHub\\ringpp\\vendor\\ring-stdlib\\load\\naturalsyntaxoff.ring": {
+  "group": "stdlib",
+  "status": "same",
+  "bytes": 68,
+  "detail": null
+ },
+ "D:\\GitHub\\ringpp\\vendor\\ring-stdlib\\load\\naturalsyntaxon.ring": {
+  "group": "stdlib",
+  "status": "same",
+  "bytes": 67,
+  "detail": null
+ },
+ "D:\\GitHub\\ringpp\\vendor\\ring-stdlib\\load\\objectslib.ring": {
+  "group": "stdlib",
+  "status": "same",
+  "bytes": 50,
+  "detail": null
+ },
+ "D:\\GitHub\\ringpp\\vendor\\ring-stdlib\\load\\odbclib.ring": {
+  "group": "stdlib",
+  "status": "same",
+  "bytes": 46,
+  "detail": null
+ },
+ "D:\\GitHub\\ringpp\\vendor\\ring-stdlib\\load\\opengl11lib.ring": {
+  "group": "stdlib",
+  "status": "same",
+  "bytes": 61,
+  "detail": null
+ },
+ "D:\\GitHub\\ringpp\\vendor\\ring-stdlib\\load\\opengl12lib.ring": {
+  "group": "stdlib",
+  "status": "same",
+  "bytes": 61,
+  "detail": null
+ },
+ "D:\\GitHub\\ringpp\\vendor\\ring-stdlib\\load\\opengl13lib.ring": {
+  "group": "stdlib",
+  "status": "same",
+  "bytes": 61,
+  "detail": null
+ },
+ "D:\\GitHub\\ringpp\\vendor\\ring-stdlib\\load\\opengl14lib.ring": {
+  "group": "stdlib",
+  "status": "same",
+  "bytes": 61,
+  "detail": null
+ },
+ "D:\\GitHub\\ringpp\\vendor\\ring-stdlib\\load\\opengl15lib.ring": {
+  "group": "stdlib",
+  "status": "same",
+  "bytes": 61,
+  "detail": null
+ },
+ "D:\\GitHub\\ringpp\\vendor\\ring-stdlib\\load\\opengl20lib.ring": {
+  "group": "stdlib",
+  "status": "same",
+  "bytes": 61,
+  "detail": null
+ },
+ "D:\\GitHub\\ringpp\\vendor\\ring-stdlib\\load\\opengl21lib.ring": {
+  "group": "stdlib",
+  "status": "same",
+  "bytes": 61,
+  "detail": null
+ },
+ "D:\\GitHub\\ringpp\\vendor\\ring-stdlib\\load\\opengl30lib.ring": {
+  "group": "stdlib",
+  "status": "same",
+  "bytes": 61,
+  "detail": null
+ },
+ "D:\\GitHub\\ringpp\\vendor\\ring-stdlib\\load\\opengl31lib.ring": {
+  "group": "stdlib",
+  "status": "same",
+  "bytes": 61,
+  "detail": null
+ },
+ "D:\\GitHub\\ringpp\\vendor\\ring-stdlib\\load\\opengl32lib.ring": {
+  "group": "stdlib",
+  "status": "same",
+  "bytes": 61,
+  "detail": null
+ },
+ "D:\\GitHub\\ringpp\\vendor\\ring-stdlib\\load\\opengl33lib.ring": {
+  "group": "stdlib",
+  "status": "same",
+  "bytes": 61,
+  "detail": null
+ },
+ "D:\\GitHub\\ringpp\\vendor\\ring-stdlib\\load\\opengl40lib.ring": {
+  "group": "stdlib",
+  "status": "same",
+  "bytes": 61,
+  "detail": null
+ },
+ "D:\\GitHub\\ringpp\\vendor\\ring-stdlib\\load\\opengl41lib.ring": {
+  "group": "stdlib",
+  "status": "same",
+  "bytes": 61,
+  "detail": null
+ },
+ "D:\\GitHub\\ringpp\\vendor\\ring-stdlib\\load\\opengl42lib.ring": {
+  "group": "stdlib",
+  "status": "same",
+  "bytes": 61,
+  "detail": null
+ },
+ "D:\\GitHub\\ringpp\\vendor\\ring-stdlib\\load\\opengl43lib.ring": {
+  "group": "stdlib",
+  "status": "same",
+  "bytes": 61,
+  "detail": null
+ },
+ "D:\\GitHub\\ringpp\\vendor\\ring-stdlib\\load\\opengl44lib.ring": {
+  "group": "stdlib",
+  "status": "same",
+  "bytes": 61,
+  "detail": null
+ },
+ "D:\\GitHub\\ringpp\\vendor\\ring-stdlib\\load\\opengl45lib.ring": {
+  "group": "stdlib",
+  "status": "same",
+  "bytes": 61,
+  "detail": null
+ },
+ "D:\\GitHub\\ringpp\\vendor\\ring-stdlib\\load\\opengl46lib.ring": {
+  "group": "stdlib",
+  "status": "same",
+  "bytes": 61,
+  "detail": null
+ },
+ "D:\\GitHub\\ringpp\\vendor\\ring-stdlib\\load\\openssllib.ring": {
+  "group": "stdlib",
+  "status": "same",
+  "bytes": 52,
+  "detail": null
+ },
+ "D:\\GitHub\\ringpp\\vendor\\ring-stdlib\\load\\pdfgen.ring": {
+  "group": "stdlib",
+  "status": "same",
+  "bytes": 47,
+  "detail": null
+ },
+ "D:\\GitHub\\ringpp\\vendor\\ring-stdlib\\load\\postgresqllib.ring": {
+  "group": "stdlib",
+  "status": "same",
+  "bytes": 58,
+  "detail": null
+ },
+ "D:\\GitHub\\ringpp\\vendor\\ring-stdlib\\load\\qtcore.ring": {
+  "group": "stdlib",
+  "status": "same",
+  "bytes": 42,
+  "detail": null
+ },
+ "D:\\GitHub\\ringpp\\vendor\\ring-stdlib\\load\\raylib.ring": {
+  "group": "stdlib",
+  "status": "same",
+  "bytes": 52,
+  "detail": null
+ },
+ "D:\\GitHub\\ringpp\\vendor\\ring-stdlib\\load\\rogueutil.ring": {
+  "group": "stdlib",
+  "status": "same",
+  "bytes": 57,
+  "detail": null
+ },
+ "D:\\GitHub\\ringpp\\vendor\\ring-stdlib\\load\\simplejson.ring": {
+  "group": "stdlib",
+  "status": "same",
+  "bytes": 54,
+  "detail": null
+ },
+ "D:\\GitHub\\ringpp\\vendor\\ring-stdlib\\load\\sockets.ring": {
+  "group": "stdlib",
+  "status": "same",
+  "bytes": 49,
+  "detail": null
+ },
+ "D:\\GitHub\\ringpp\\vendor\\ring-stdlib\\load\\sqlitelib.ring": {
+  "group": "stdlib",
+  "status": "same",
+  "bytes": 50,
+  "detail": null
+ },
+ "D:\\GitHub\\ringpp\\vendor\\ring-stdlib\\load\\stbimage.ring": {
+  "group": "stdlib",
+  "status": "same",
+  "bytes": 51,
+  "detail": null
+ },
+ "D:\\GitHub\\ringpp\\vendor\\ring-stdlib\\load\\stdfunctions.ring": {
+  "group": "stdlib",
+  "status": "same",
+  "bytes": 49,
+  "detail": null
+ },
+ "D:\\GitHub\\ringpp\\vendor\\ring-stdlib\\load\\stdlib.ring": {
+  "group": "stdlib",
+  "status": "same",
+  "bytes": 137,
+  "detail": null
+ },
+ "D:\\GitHub\\ringpp\\vendor\\ring-stdlib\\load\\stdlibclasses.ring": {
+  "group": "stdlib",
+  "status": "same",
+  "bytes": 141,
+  "detail": null
+ },
+ "D:\\GitHub\\ringpp\\vendor\\ring-stdlib\\load\\stdlibcore.ring": {
+  "group": "stdlib",
+  "status": "same",
+  "bytes": 144,
+  "detail": null
+ },
+ "D:\\GitHub\\ringpp\\vendor\\ring-stdlib\\load\\threads.ring": {
+  "group": "stdlib",
+  "status": "same",
+  "bytes": 49,
+  "detail": null
+ },
+ "D:\\GitHub\\ringpp\\vendor\\ring-stdlib\\load\\tilengine.ring": {
+  "group": "stdlib",
+  "status": "same",
+  "bytes": 53,
+  "detail": null
+ },
+ "D:\\GitHub\\ringpp\\vendor\\ring-stdlib\\load\\tokenslib.ring": {
+  "group": "stdlib",
+  "status": "same",
+  "bytes": 48,
+  "detail": null
+ },
+ "D:\\GitHub\\ringpp\\vendor\\ring-stdlib\\load\\tracelib.ring": {
+  "group": "stdlib",
+  "status": "same",
+  "bytes": 46,
+  "detail": null
+ },
+ "D:\\GitHub\\ringpp\\vendor\\ring-stdlib\\load\\typehints.ring": {
+  "group": "stdlib",
+  "status": "same",
+  "bytes": 48,
+  "detail": null
+ },
+ "D:\\GitHub\\ringpp\\vendor\\ring-stdlib\\load\\weblib.ring": {
+  "group": "stdlib",
+  "status": "same",
+  "bytes": 132,
+  "detail": null
+ },
+ "D:\\GitHub\\ringpp\\vendor\\ring-stdlib\\load\\webview.ring": {
+  "group": "stdlib",
+  "status": "same",
+  "bytes": 51,
+  "detail": null
+ },
+ "D:\\GitHub\\ringpp\\vendor\\ring-stdlib\\load\\winapi.ring": {
+  "group": "stdlib",
+  "status": "same",
+  "bytes": 53,
+  "detail": null
+ },
+ "D:\\GitHub\\ringpp\\vendor\\ring-stdlib\\load\\wincreg.ring": {
+  "group": "stdlib",
+  "status": "same",
+  "bytes": 55,
+  "detail": null
+ },
+ "D:\\GitHub\\ringpp\\vendor\\ring-stdlib\\load\\winlib.ring": {
+  "group": "stdlib",
+  "status": "same",
+  "bytes": 53,
+  "detail": null
+ },
+ "D:\\GitHub\\ringpp\\vendor\\ring-stdlib\\load\\zerolib.ring": {
+  "group": "stdlib",
+  "status": "same",
+  "bytes": 44,
+  "detail": null
+ },
+ "D:\\GitHub\\ringpp\\vendor\\ring-stdlib\\load\\ziplib.ring": {
+  "group": "stdlib",
+  "status": "same",
+  "bytes": 44,
+  "detail": null
+ },
+ "D:\\GitHub\\ringpp\\bench\\01_string_build.ring": {
+  "group": "ringpp",
+  "status": "same",
+  "bytes": 1503,
+  "detail": null
+ },
+ "D:\\GitHub\\ringpp\\bench\\02_unit_costs.ring": {
+  "group": "ringpp",
+  "status": "same",
+  "bytes": 2121,
+  "detail": null
+ },
+ "D:\\GitHub\\ringpp\\bench\\03_lists.ring": {
+  "group": "ringpp",
+  "status": "same",
+  "bytes": 2302,
+  "detail": null
+ },
+ "D:\\GitHub\\ringpp\\bench\\04_genarray_breakeven.ring": {
+  "group": "ringpp",
+  "status": "same",
+  "bytes": 1629,
+  "detail": null
+ },
+ "D:\\GitHub\\ringpp\\bench\\05_registered_blocks.ring": {
+  "group": "ringpp",
+  "status": "same",
+  "bytes": 1095,
+  "detail": null
+ },
+ "D:\\GitHub\\ringpp\\bench\\06_substates.ring": {
+  "group": "ringpp",
+  "status": "same",
+  "bytes": 1560,
+  "detail": null
+ },
+ "D:\\GitHub\\ringpp\\bench\\07_by_value_tax.ring": {
+  "group": "ringpp",
+  "status": "same",
+  "bytes": 2079,
+  "detail": null
+ },
+ "D:\\GitHub\\ringpp\\bench\\08_string_ops_tax.ring": {
+  "group": "ringpp",
+  "status": "same",
+  "bytes": 2559,
+  "detail": null
+ },
+ "D:\\GitHub\\ringpp\\bench\\09_inplace_patch.ring": {
+  "group": "ringpp",
+  "status": "same",
+  "bytes": 1813,
+  "detail": null
+ },
+ "D:\\GitHub\\ringpp\\bench\\10_pointer_reach.ring": {
+  "group": "ringpp",
+  "status": "same",
+  "bytes": 624,
+  "detail": null
+ },
+ "D:\\GitHub\\ringpp\\bench\\11_unit_costs.ring": {
+  "group": "ringpp",
+  "status": "same",
+  "bytes": 1690,
+  "detail": null
+ },
+ "D:\\GitHub\\ringpp\\bench\\11_varptr_scope.ring": {
+  "group": "ringpp",
+  "status": "same",
+  "bytes": 1171,
+  "detail": null
+ },
+ "D:\\GitHub\\ringpp\\bench\\12_softanza_replace.ring": {
+  "group": "ringpp",
+  "status": "same",
+  "bytes": 8251,
+  "detail": null
+ },
+ "D:\\GitHub\\ringpp\\bench\\12_typehints_channel.ring": {
+  "group": "ringpp",
+  "status": "same",
+  "bytes": 473,
+  "detail": null
+ },
+ "D:\\GitHub\\ringpp\\bench\\13_bytecode_channel.ring": {
+  "group": "ringpp",
+  "status": "same",
+  "bytes": 1205,
+  "detail": null
+ },
+ "D:\\GitHub\\ringpp\\bench\\14_numeric_array.ring": {
+  "group": "ringpp",
+  "status": "same",
+  "bytes": 2565,
+  "detail": null
+ },
+ "D:\\GitHub\\ringpp\\bench\\15_memcpy_nul_source.ring": {
+  "group": "ringpp",
+  "status": "same",
+  "bytes": 3184,
+  "detail": null
+ },
+ "D:\\GitHub\\ringpp\\bench\\16_empty_catch_leak.ring": {
+  "group": "ringpp",
+  "status": "same",
+  "bytes": 1575,
+  "detail": null
+ },
+ "D:\\GitHub\\ringpp\\bench\\17_list_build_shape.ring": {
+  "group": "ringpp",
+  "status": "same",
+  "bytes": 2178,
+  "detail": null
+ },
+ "D:\\GitHub\\ringpp\\bench\\app.ring": {
+  "group": "ringpp",
+  "status": "same",
+  "bytes": 279,
+  "detail": null
+ },
+ "D:\\GitHub\\ringpp\\bench\\app_run.ring": {
+  "group": "ringpp",
+  "status": "same",
+  "bytes": 30,
+  "detail": null
+ },
+ "D:\\GitHub\\ringpp\\bench\\arity.ring": {
+  "group": "ringpp",
+  "status": "same",
+  "bytes": 1154,
+  "detail": null
+ },
+ "D:\\GitHub\\ringpp\\bench\\arity_run.ring": {
+  "group": "ringpp",
+  "status": "same",
+  "bytes": 46,
+  "detail": null
+ },
+ "D:\\GitHub\\ringpp\\bench\\at.ring": {
+  "group": "ringpp",
+  "status": "same",
+  "bytes": 1010,
+  "detail": null
+ },
+ "D:\\GitHub\\ringpp\\bench\\at_run.ring": {
+  "group": "ringpp",
+  "status": "same",
+  "bytes": 63,
+  "detail": null
+ },
+ "D:\\GitHub\\ringpp\\bench\\bi.ring": {
+  "group": "ringpp",
+  "status": "same",
+  "bytes": 778,
+  "detail": null
+ },
+ "D:\\GitHub\\ringpp\\bench\\bi_run.ring": {
+  "group": "ringpp",
+  "status": "same",
+  "bytes": 140,
+  "detail": null
+ },
+ "D:\\GitHub\\ringpp\\bench\\bis_f.ring": {
+  "group": "ringpp",
+  "status": "same",
+  "bytes": 517,
+  "detail": null
+ },
+ "D:\\GitHub\\ringpp\\bench\\bits.ring": {
+  "group": "ringpp",
+  "status": "same",
+  "bytes": 577,
+  "detail": null
+ },
+ "D:\\GitHub\\ringpp\\bench\\bits_run.ring": {
+  "group": "ringpp",
+  "status": "same",
+  "bytes": 175,
+  "detail": null
+ },
+ "D:\\GitHub\\ringpp\\bench\\blt.ring": {
+  "group": "ringpp",
+  "status": "same",
+  "bytes": 2315,
+  "detail": null
+ },
+ "D:\\GitHub\\ringpp\\bench\\blt_run.ring": {
+  "group": "ringpp",
+  "status": "same",
+  "bytes": 183,
+  "detail": null
+ },
+ "D:\\GitHub\\ringpp\\bench\\braces.ring": {
+  "group": "ringpp",
+  "status": "same",
+  "bytes": 93,
+  "detail": null
+ },
+ "D:\\GitHub\\ringpp\\bench\\bridge.ring": {
+  "group": "ringpp",
+  "status": "same",
+  "bytes": 2835,
+  "detail": null
+ },
+ "D:\\GitHub\\ringpp\\bench\\bt.ring": {
+  "group": "ringpp",
+  "status": "same",
+  "bytes": 627,
+  "detail": null
+ },
+ "D:\\GitHub\\ringpp\\bench\\bt_run.ring": {
+  "group": "ringpp",
+  "status": "same",
+  "bytes": 86,
+  "detail": null
+ },
+ "D:\\GitHub\\ringpp\\bench\\callsite_defects.ring": {
+  "group": "ringpp",
+  "status": "same",
+  "bytes": 1578,
+  "detail": null
+ },
+ "D:\\GitHub\\ringpp\\bench\\callsite_defects_display.ring": {
+  "group": "ringpp",
+  "status": "same",
+  "bytes": 799,
+  "detail": null
+ },
+ "D:\\GitHub\\ringpp\\bench\\cdemo.ring": {
+  "group": "ringpp",
+  "status": "same",
+  "bytes": 404,
+  "detail": null
+ },
+ "D:\\GitHub\\ringpp\\bench\\clos.ring": {
+  "group": "ringpp",
+  "status": "same",
+  "bytes": 503,
+  "detail": null
+ },
+ "D:\\GitHub\\ringpp\\bench\\clos_run.ring": {
+  "group": "ringpp",
+  "status": "same",
+  "bytes": 52,
+  "detail": null
+ },
+ "D:\\GitHub\\ringpp\\bench\\cls.ring": {
+  "group": "ringpp",
+  "status": "same",
+  "bytes": 1577,
+  "detail": null
+ },
+ "D:\\GitHub\\ringpp\\bench\\cls_run.ring": {
+  "group": "ringpp",
+  "status": "same",
+  "bytes": 65,
+  "detail": null
+ },
+ "D:\\GitHub\\ringpp\\bench\\cmpd.ring": {
+  "group": "ringpp",
+  "status": "same",
+  "bytes": 2048,
+  "detail": null
+ },
+ "D:\\GitHub\\ringpp\\bench\\cmpd_run.ring": {
+  "group": "ringpp",
+  "status": "same",
+  "bytes": 88,
+  "detail": null
+ },
+ "D:\\GitHub\\ringpp\\bench\\colon_roles.ring": {
+  "group": "ringpp",
+  "status": "same",
+  "bytes": 1472,
+  "detail": null
+ },
+ "D:\\GitHub\\ringpp\\bench\\copyprice.ring": {
+  "group": "ringpp",
+  "status": "same",
+  "bytes": 920,
+  "detail": null
+ },
+ "D:\\GitHub\\ringpp\\bench\\copyprice_ring.ring": {
+  "group": "ringpp",
+  "status": "same",
+  "bytes": 819,
+  "detail": null
+ },
+ "D:\\GitHub\\ringpp\\bench\\embedded_state_cost.ring": {
+  "group": "ringpp",
+  "status": "same",
+  "bytes": 1679,
+  "detail": null
+ },
+ "D:\\GitHub\\ringpp\\bench\\engine.ring": {
+  "group": "ringpp",
+  "status": "same",
+  "bytes": 1052,
+  "detail": null
+ },
+ "D:\\GitHub\\ringpp\\bench\\engine_run.ring": {
+  "group": "ringpp",
+  "status": "same",
+  "bytes": 61,
+  "detail": null
+ },
+ "D:\\GitHub\\ringpp\\bench\\error_model.ring": {
+  "group": "ringpp",
+  "status": "same",
+  "bytes": 1945,
+  "detail": null
+ },
+ "D:\\GitHub\\ringpp\\bench\\errs.ring": {
+  "group": "ringpp",
+  "status": "same",
+  "bytes": 1428,
+  "detail": null
+ },
+ "D:\\GitHub\\ringpp\\bench\\errs_run.ring": {
+  "group": "ringpp",
+  "status": "same",
+  "bytes": 96,
+  "detail": null
+ },
+ "D:\\GitHub\\ringpp\\bench\\even_or_odd.ring": {
+  "group": "ringpp",
+  "status": "same",
+  "bytes": 901,
+  "detail": null
+ },
+ "D:\\GitHub\\ringpp\\bench\\findcost.ring": {
+  "group": "ringpp",
+  "status": "same",
+  "bytes": 2550,
+  "detail": null
+ },
+ "D:\\GitHub\\ringpp\\bench\\fio.ring": {
+  "group": "ringpp",
+  "status": "same",
+  "bytes": 357,
+  "detail": null
+ },
+ "D:\\GitHub\\ringpp\\bench\\fio_run.ring": {
+  "group": "ringpp",
+  "status": "same",
+  "bytes": 44,
+  "detail": null
+ },
+ "D:\\GitHub\\ringpp\\bench\\fp.ring": {
+  "group": "ringpp",
+  "status": "same",
+  "bytes": 553,
+  "detail": null
+ },
+ "D:\\GitHub\\ringpp\\bench\\g3.ring": {
+  "group": "ringpp",
+  "status": "same",
+  "bytes": 671,
+  "detail": null
+ },
+ "D:\\GitHub\\ringpp\\bench\\g3_run.ring": {
+  "group": "ringpp",
+  "status": "same",
+  "bytes": 39,
+  "detail": null
+ },
+ "D:\\GitHub\\ringpp\\bench\\gl2.ring": {
+  "group": "ringpp",
+  "status": "same",
+  "bytes": 969,
+  "detail": null
+ },
+ "D:\\GitHub\\ringpp\\bench\\gl2_run.ring": {
+  "group": "ringpp",
+  "status": "same",
+  "bytes": 79,
+  "detail": null
+ },
+ "D:\\GitHub\\ringpp\\bench\\hashcost.ring": {
+  "group": "ringpp",
+  "status": "same",
+  "bytes": 1712,
+  "detail": null
+ },
+ "D:\\GitHub\\ringpp\\bench\\hd.ring": {
+  "group": "ringpp",
+  "status": "same",
+  "bytes": 73,
+  "detail": null
+ },
+ "D:\\GitHub\\ringpp\\bench\\hd_run.ring": {
+  "group": "ringpp",
+  "status": "same",
+  "bytes": 22,
+  "detail": null
+ },
+ "D:\\GitHub\\ringpp\\bench\\hs.ring": {
+  "group": "ringpp",
+  "status": "same",
+  "bytes": 594,
+  "detail": null
+ },
+ "D:\\GitHub\\ringpp\\bench\\hs_run.ring": {
+  "group": "ringpp",
+  "status": "same",
+  "bytes": 71,
+  "detail": null
+ },
+ "D:\\GitHub\\ringpp\\bench\\inh.ring": {
+  "group": "ringpp",
+  "status": "same",
+  "bytes": 1114,
+  "detail": null
+ },
+ "D:\\GitHub\\ringpp\\bench\\isglob.ring": {
+  "group": "ringpp",
+  "status": "same",
+  "bytes": 1199,
+  "detail": null
+ },
+ "D:\\GitHub\\ringpp\\bench\\isglob_run.ring": {
+  "group": "ringpp",
+  "status": "same",
+  "bytes": 68,
+  "detail": null
+ },
+ "D:\\GitHub\\ringpp\\bench\\kernels.ring": {
+  "group": "ringpp",
+  "status": "same",
+  "bytes": 3490,
+  "detail": null
+ },
+ "D:\\GitHub\\ringpp\\bench\\kernels_bench.ring": {
+  "group": "ringpp",
+  "status": "same",
+  "bytes": 1547,
+  "detail": null
+ },
+ "D:\\GitHub\\ringpp\\bench\\kernels_run.ring": {
+  "group": "ringpp",
+  "status": "same",
+  "bytes": 523,
+  "detail": null
+ },
+ "D:\\GitHub\\ringpp\\bench\\kernels_typed.ring": {
+  "group": "ringpp",
+  "status": "same",
+  "bytes": 3622,
+  "detail": null
+ },
+ "D:\\GitHub\\ringpp\\bench\\kernels_typed_run.ring": {
+  "group": "ringpp",
+  "status": "same",
+  "bytes": 269,
+  "detail": null
+ },
+ "D:\\GitHub\\ringpp\\bench\\lg.ring": {
+  "group": "ringpp",
+  "status": "same",
+  "bytes": 426,
+  "detail": null
+ },
+ "D:\\GitHub\\ringpp\\bench\\lg_run.ring": {
+  "group": "ringpp",
+  "status": "same",
+  "bytes": 102,
+  "detail": null
+ },
+ "D:\\GitHub\\ringpp\\bench\\li.ring": {
+  "group": "ringpp",
+  "status": "same",
+  "bytes": 432,
+  "detail": null
+ },
+ "D:\\GitHub\\ringpp\\bench\\li_run.ring": {
+  "group": "ringpp",
+  "status": "same",
+  "bytes": 71,
+  "detail": null
+ },
+ "D:\\GitHub\\ringpp\\bench\\loadorder.ring": {
+  "group": "ringpp",
+  "status": "same",
+  "bytes": 1068,
+  "detail": null
+ },
+ "D:\\GitHub\\ringpp\\bench\\loadorder_sub.ring": {
+  "group": "ringpp",
+  "status": "same",
+  "bytes": 15,
+  "detail": null
+ },
+ "D:\\GitHub\\ringpp\\bench\\loop_and_switch.ring": {
+  "group": "ringpp",
+  "status": "same",
+  "bytes": 1166,
+  "detail": null
+ },
+ "D:\\GitHub\\ringpp\\bench\\map.ring": {
+  "group": "ringpp",
+  "status": "same",
+  "bytes": 1955,
+  "detail": null
+ },
+ "D:\\GitHub\\ringpp\\bench\\map200k.ring": {
+  "group": "ringpp",
+  "status": "same",
+  "bytes": 1447,
+  "detail": null
+ },
+ "D:\\GitHub\\ringpp\\bench\\map200k_lk.ring": {
+  "group": "ringpp",
+  "status": "same",
+  "bytes": 795,
+  "detail": null
+ },
+ "D:\\GitHub\\ringpp\\bench\\map200k_mem.ring": {
+  "group": "ringpp",
+  "status": "same",
+  "bytes": 687,
+  "detail": null
+ },
+ "D:\\GitHub\\ringpp\\bench\\map_run.ring": {
+  "group": "ringpp",
+  "status": "same",
+  "bytes": 111,
+  "detail": null
+ },
+ "D:\\GitHub\\ringpp\\bench\\member.ring": {
+  "group": "ringpp",
+  "status": "same",
+  "bytes": 1067,
+  "detail": null
+ },
+ "D:\\GitHub\\ringpp\\bench\\member_run.ring": {
+  "group": "ringpp",
+  "status": "same",
+  "bytes": 117,
+  "detail": null
+ },
+ "D:\\GitHub\\ringpp\\bench\\memo.ring": {
+  "group": "ringpp",
+  "status": "same",
+  "bytes": 4674,
+  "detail": null
+ },
+ "D:\\GitHub\\ringpp\\bench\\mo.ring": {
+  "group": "ringpp",
+  "status": "same",
+  "bytes": 190,
+  "detail": null
+ },
+ "D:\\GitHub\\ringpp\\bench\\mo_run.ring": {
+  "group": "ringpp",
+  "status": "same",
+  "bytes": 50,
+  "detail": null
+ },
+ "D:\\GitHub\\ringpp\\bench\\mutable_constants.ring": {
+  "group": "ringpp",
+  "status": "same",
+  "bytes": 987,
+  "detail": null
+ },
+ "D:\\GitHub\\ringpp\\bench\\named_params_cost.ring": {
+  "group": "ringpp",
+  "status": "same",
+  "bytes": 2274,
+  "detail": null
+ },
+ "D:\\GitHub\\ringpp\\bench\\namere.ring": {
+  "group": "ringpp",
+  "status": "same",
+  "bytes": 1360,
+  "detail": null
+ },
+ "D:\\GitHub\\ringpp\\bench\\namere_run.ring": {
+  "group": "ringpp",
+  "status": "same",
+  "bytes": 54,
+  "detail": null
+ },
+ "D:\\GitHub\\ringpp\\bench\\nest2.ring": {
+  "group": "ringpp",
+  "status": "same",
+  "bytes": 324,
+  "detail": null
+ },
+ "D:\\GitHub\\ringpp\\bench\\nest2_run.ring": {
+  "group": "ringpp",
+  "status": "same",
+  "bytes": 53,
+  "detail": null
+ },
+ "D:\\GitHub\\ringpp\\bench\\nest3.ring": {
+  "group": "ringpp",
+  "status": "same",
+  "bytes": 718,
+  "detail": null
+ },
+ "D:\\GitHub\\ringpp\\bench\\nest3_run.ring": {
+  "group": "ringpp",
+  "status": "same",
+  "bytes": 60,
+  "detail": null
+ },
+ "D:\\GitHub\\ringpp\\bench\\nested.ring": {
+  "group": "ringpp",
+  "status": "same",
+  "bytes": 835,
+  "detail": null
+ },
+ "D:\\GitHub\\ringpp\\bench\\nested_run.ring": {
+  "group": "ringpp",
+  "status": "same",
+  "bytes": 100,
+  "detail": null
+ },
+ "D:\\GitHub\\ringpp\\bench\\number_precision.ring": {
+  "group": "ringpp",
+  "status": "same",
+  "bytes": 1398,
+  "detail": null
+ },
+ "D:\\GitHub\\ringpp\\bench\\number_precision_cost.ring": {
+  "group": "ringpp",
+  "status": "same",
+  "bytes": 801,
+  "detail": null
+ },
+ "D:\\GitHub\\ringpp\\bench\\odd.ring": {
+  "group": "ringpp",
+  "status": "same",
+  "bytes": 1381,
+  "detail": null
+ },
+ "D:\\GitHub\\ringpp\\bench\\odd_run.ring": {
+  "group": "ringpp",
+  "status": "same",
+  "bytes": 101,
+  "detail": null
+ },
+ "D:\\GitHub\\ringpp\\bench\\oo.ring": {
+  "group": "ringpp",
+  "status": "same",
+  "bytes": 948,
+  "detail": null
+ },
+ "D:\\GitHub\\ringpp\\bench\\oo_bench.ring": {
+  "group": "ringpp",
+  "status": "same",
+  "bytes": 488,
+  "detail": null
+ },
+ "D:\\GitHub\\ringpp\\bench\\oo_facts.ring": {
+  "group": "ringpp",
+  "status": "same",
+  "bytes": 1449,
+  "detail": null
+ },
+ "D:\\GitHub\\ringpp\\bench\\oo_run.ring": {
+  "group": "ringpp",
+  "status": "same",
+  "bytes": 186,
+  "detail": null
+ },
+ "D:\\GitHub\\ringpp\\bench\\ownm.ring": {
+  "group": "ringpp",
+  "status": "same",
+  "bytes": 457,
+  "detail": null
+ },
+ "D:\\GitHub\\ringpp\\bench\\ownm_run.ring": {
+  "group": "ringpp",
+  "status": "same",
+  "bytes": 38,
+  "detail": null
+ },
+ "D:\\GitHub\\ringpp\\bench\\parens.ring": {
+  "group": "ringpp",
+  "status": "same",
+  "bytes": 584,
+  "detail": null
+ },
+ "D:\\GitHub\\ringpp\\bench\\pl.ring": {
+  "group": "ringpp",
+  "status": "same",
+  "bytes": 401,
+  "detail": null
+ },
+ "D:\\GitHub\\ringpp\\bench\\pl_run.ring": {
+  "group": "ringpp",
+  "status": "same",
+  "bytes": 68,
+  "detail": null
+ },
+ "D:\\GitHub\\ringpp\\bench\\plus.ring": {
+  "group": "ringpp",
+  "status": "same",
+  "bytes": 3445,
+  "detail": null
+ },
+ "D:\\GitHub\\ringpp\\bench\\plus_run.ring": {
+  "group": "ringpp",
+  "status": "same",
+  "bytes": 168,
+  "detail": null
+ },
+ "D:\\GitHub\\ringpp\\bench\\qt_binding_ux.ring": {
+  "group": "ringpp",
+  "status": "same",
+  "bytes": 1835,
+  "detail": null
+ },
+ "D:\\GitHub\\ringpp\\bench\\qt_unwrapped.ring": {
+  "group": "ringpp",
+  "status": "same",
+  "bytes": 1200,
+  "detail": null
+ },
+ "D:\\GitHub\\ringpp\\bench\\receiver_collision.ring": {
+  "group": "ringpp",
+  "status": "same",
+  "bytes": 1806,
+  "detail": null
+ },
+ "D:\\GitHub\\ringpp\\bench\\recv.ring": {
+  "group": "ringpp",
+  "status": "same",
+  "bytes": 830,
+  "detail": null
+ },
+ "D:\\GitHub\\ringpp\\bench\\recv_run.ring": {
+  "group": "ringpp",
+  "status": "same",
+  "bytes": 68,
+  "detail": null
+ },
+ "D:\\GitHub\\ringpp\\bench\\refusal.ring": {
+  "group": "ringpp",
+  "status": "same",
+  "bytes": 1325,
+  "detail": null
+ },
+ "D:\\GitHub\\ringpp\\bench\\regex_check.ring": {
+  "group": "ringpp",
+  "status": "same",
+  "bytes": 1060,
+  "detail": null
+ },
+ "D:\\GitHub\\ringpp\\bench\\reports_2021.ring": {
+  "group": "ringpp",
+  "status": "same",
+  "bytes": 1671,
+  "detail": null
+ },
+ "D:\\GitHub\\ringpp\\bench\\reports_2021_comments.ring": {
+  "group": "ringpp",
+  "status": "error",
+  "bytes": 356,
+  "detail": "the parser reports an error"
+ },
+ "D:\\GitHub\\ringpp\\bench\\reports_2021_literal.ring": {
+  "group": "ringpp",
+  "status": "same",
+  "bytes": 300,
+  "detail": null
+ },
+ "D:\\GitHub\\ringpp\\bench\\reread.ring": {
+  "group": "ringpp",
+  "status": "same",
+  "bytes": 1095,
+  "detail": null
+ },
+ "D:\\GitHub\\ringpp\\bench\\reread_run.ring": {
+  "group": "ringpp",
+  "status": "same",
+  "bytes": 123,
+  "detail": null
+ },
+ "D:\\GitHub\\ringpp\\bench\\retn.ring": {
+  "group": "ringpp",
+  "status": "same",
+  "bytes": 1327,
+  "detail": null
+ },
+ "D:\\GitHub\\ringpp\\bench\\retn_run.ring": {
+  "group": "ringpp",
+  "status": "same",
+  "bytes": 52,
+  "detail": null
+ },
+ "D:\\GitHub\\ringpp\\bench\\rulea.ring": {
+  "group": "ringpp",
+  "status": "same",
+  "bytes": 590,
+  "detail": null
+ },
+ "D:\\GitHub\\ringpp\\bench\\rulea_run.ring": {
+  "group": "ringpp",
+  "status": "same",
+  "bytes": 39,
+  "detail": null
+ },
+ "D:\\GitHub\\ringpp\\bench\\sort_stability.ring": {
+  "group": "ringpp",
+  "status": "same",
+  "bytes": 711,
+  "detail": null
+ },
+ "D:\\GitHub\\ringpp\\bench\\spawn_race.ring": {
+  "group": "ringpp",
+  "status": "same",
+  "bytes": 1213,
+  "detail": null
+ },
+ "D:\\GitHub\\ringpp\\bench\\str.ring": {
+  "group": "ringpp",
+  "status": "same",
+  "bytes": 3963,
+  "detail": null
+ },
+ "D:\\GitHub\\ringpp\\bench\\string_order.ring": {
+  "group": "ringpp",
+  "status": "same",
+  "bytes": 1515,
+  "detail": null
+ },
+ "D:\\GitHub\\ringpp\\bench\\strings.ring": {
+  "group": "ringpp",
+  "status": "same",
+  "bytes": 2349,
+  "detail": null
+ },
+ "D:\\GitHub\\ringpp\\bench\\substr2.ring": {
+  "group": "ringpp",
+  "status": "same",
+  "bytes": 1709,
+  "detail": null
+ },
+ "D:\\GitHub\\ringpp\\bench\\substr2_run.ring": {
+  "group": "ringpp",
+  "status": "same",
+  "bytes": 76,
+  "detail": null
+ },
+ "D:\\GitHub\\ringpp\\bench\\sup.ring": {
+  "group": "ringpp",
+  "status": "same",
+  "bytes": 383,
+  "detail": null
+ },
+ "D:\\GitHub\\ringpp\\bench\\sup_run.ring": {
+  "group": "ringpp",
+  "status": "same",
+  "bytes": 37,
+  "detail": null
+ },
+ "D:\\GitHub\\ringpp\\bench\\sx.ring": {
+  "group": "ringpp",
+  "status": "same",
+  "bytes": 547,
+  "detail": null
+ },
+ "D:\\GitHub\\ringpp\\bench\\sx_run.ring": {
+  "group": "ringpp",
+  "status": "same",
+  "bytes": 69,
+  "detail": null
+ },
+ "D:\\GitHub\\ringpp\\bench\\sym.ring": {
+  "group": "ringpp",
+  "status": "same",
+  "bytes": 177,
+  "detail": null
+ },
+ "D:\\GitHub\\ringpp\\bench\\sym_run.ring": {
+  "group": "ringpp",
+  "status": "same",
+  "bytes": 49,
+  "detail": null
+ },
+ "D:\\GitHub\\ringpp\\bench\\th.ring": {
+  "group": "ringpp",
+  "status": "same",
+  "bytes": 366,
+  "detail": null
+ },
+ "D:\\GitHub\\ringpp\\bench\\th_run.ring": {
+  "group": "ringpp",
+  "status": "same",
+  "bytes": 36,
+  "detail": null
+ },
+ "D:\\GitHub\\ringpp\\bench\\tryc.ring": {
+  "group": "ringpp",
+  "status": "same",
+  "bytes": 987,
+  "detail": null
+ },
+ "D:\\GitHub\\ringpp\\bench\\tryc_run.ring": {
+  "group": "ringpp",
+  "status": "same",
+  "bytes": 52,
+  "detail": null
+ },
+ "D:\\GitHub\\ringpp\\bench\\tui.ring": {
+  "group": "ringpp",
+  "status": "same",
+  "bytes": 953,
+  "detail": null
+ },
+ "D:\\GitHub\\ringpp\\bench\\unary.ring": {
+  "group": "ringpp",
+  "status": "same",
+  "bytes": 91,
+  "detail": null
+ },
+ "D:\\GitHub\\ringpp\\bench\\unary_run.ring": {
+  "group": "ringpp",
+  "status": "same",
+  "bytes": 39,
+  "detail": null
+ },
+ "D:\\GitHub\\ringpp\\bench\\webloop.ring": {
+  "group": "ringpp",
+  "status": "same",
+  "bytes": 4585,
+  "detail": null
+ },
+ "D:\\GitHub\\stzlib\\libraries\\stzlib\\base\\agentic\\stzAgentDeclaration.ring": {
+  "group": "softanza",
+  "status": "same",
+  "bytes": 44834,
+  "detail": null
+ },
+ "D:\\GitHub\\stzlib\\libraries\\stzlib\\base\\archive\\test\\fastpro\\17_pr.ring": {
+  "group": "softanza",
+  "status": "same",
+  "bytes": 596,
+  "detail": null
+ },
+ "D:\\GitHub\\stzlib\\libraries\\stzlib\\base\\common\\stzRateLimiter.ring": {
+  "group": "softanza",
+  "status": "same",
+  "bytes": 5293,
+  "detail": null
+ },
+ "D:\\GitHub\\stzlib\\libraries\\stzlib\\base\\error\\stzHexNumberError.ring": {
+  "group": "softanza",
+  "status": "same",
+  "bytes": 514,
+  "detail": null
+ },
+ "D:\\GitHub\\stzlib\\libraries\\stzlib\\base\\file\\stzXml.ring": {
+  "group": "softanza",
+  "status": "same",
+  "bytes": 8345,
+  "detail": null
+ },
+ "D:\\GitHub\\stzlib\\libraries\\stzlib\\base\\graph\\stzRuleReport.ring": {
+  "group": "softanza",
+  "status": "same",
+  "bytes": 5823,
+  "detail": null
+ },
+ "D:\\GitHub\\stzlib\\libraries\\stzlib\\base\\learning\\stzKnn.ring": {
+  "group": "softanza",
+  "status": "same",
+  "bytes": 14048,
+  "detail": null
+ },
+ "D:\\GitHub\\stzlib\\libraries\\stzlib\\base\\list\\stzListNamedParams.ring": {
+  "group": "softanza",
+  "status": "same",
+  "bytes": 288279,
+  "detail": null
+ },
+ "D:\\GitHub\\stzlib\\libraries\\stzlib\\base\\meta\\stzRingCodeGraph.ring": {
+  "group": "softanza",
+  "status": "same",
+  "bytes": 11041,
+  "detail": null
+ },
+ "D:\\GitHub\\stzlib\\libraries\\stzlib\\base\\number\\stzListOfBytes.ring": {
+  "group": "softanza",
+  "status": "same",
+  "bytes": 19317,
+  "detail": null
+ },
+ "D:\\GitHub\\stzlib\\libraries\\stzlib\\base\\perf\\stzSla.ring": {
+  "group": "softanza",
+  "status": "same",
+  "bytes": 15670,
+  "detail": null
+ },
+ "D:\\GitHub\\stzlib\\libraries\\stzlib\\base\\reactive\\stzReactorPool.ring": {
+  "group": "softanza",
+  "status": "same",
+  "bytes": 2048,
+  "detail": null
+ },
+ "D:\\GitHub\\stzlib\\libraries\\stzlib\\base\\service\\stzDataPort.ring": {
+  "group": "softanza",
+  "status": "same",
+  "bytes": 5012,
+  "detail": null
+ },
+ "D:\\GitHub\\stzlib\\libraries\\stzlib\\base\\string\\stzStringBounder.ring": {
+  "group": "softanza",
+  "status": "same",
+  "bytes": 24001,
+  "detail": null
+ },
+ "D:\\GitHub\\stzlib\\libraries\\stzlib\\base\\string\\stzTextStream.ring": {
+  "group": "softanza",
+  "status": "same",
+  "bytes": 3309,
+  "detail": null
+ },
+ "D:\\GitHub\\stzlib\\libraries\\stzlib\\base\\table\\stzTableRowAccess.ring": {
+  "group": "softanza",
+  "status": "same",
+  "bytes": 982,
+  "detail": null
+ },
+ "D:\\GitHub\\stzlib\\libraries\\stzlib\\base\\test\\appserver\\50_appserver_smoke.ring": {
+  "group": "softanza",
+  "status": "same",
+  "bytes": 1141,
+  "detail": null
+ },
+ "D:\\GitHub\\stzlib\\libraries\\stzlib\\base\\test\\calendar\\18_getting_current_info.ring": {
+  "group": "softanza",
+  "status": "same",
+  "bytes": 597,
+  "detail": null
+ },
+ "D:\\GitHub\\stzlib\\libraries\\stzlib\\base\\test\\ccode\\05_findsubstringsboundedbyibzz.ring": {
+  "group": "softanza",
+  "status": "same",
+  "bytes": 682,
+  "detail": null
+ },
+ "D:\\GitHub\\stzlib\\libraries\\stzlib\\base\\test\\chainofvalue\\04_now_what_if_you_want_the_chain_to_execute_randomly.ring": {
+  "group": "softanza",
+  "status": "same",
+  "bytes": 393,
+  "detail": null
+ },
+ "D:\\GitHub\\stzlib\\libraries\\stzlib\\base\\test\\char\\115_content.ring": {
+  "group": "softanza",
+  "status": "same",
+  "bytes": 512,
+  "detail": null
+ },
+ "D:\\GitHub\\stzlib\\libraries\\stzlib\\base\\test\\char\\42_iswordnonletterchar.ring": {
+  "group": "softanza",
+  "status": "same",
+  "bytes": 407,
+  "detail": null
+ },
+ "D:\\GitHub\\stzlib\\libraries\\stzlib\\base\\test\\char\\80_languagesinscript.ring": {
+  "group": "softanza",
+  "status": "same",
+  "bytes": 1195,
+  "detail": null
+ },
+ "D:\\GitHub\\stzlib\\libraries\\stzlib\\base\\test\\char\\test_unicode.ring": {
+  "group": "softanza",
+  "status": "same",
+  "bytes": 7765,
+  "detail": null
+ },
+ "D:\\GitHub\\stzlib\\libraries\\stzlib\\base\\test\\coeffextractor\\07_expression_with_division.ring": {
+  "group": "softanza",
+  "status": "same",
+  "bytes": 279,
+  "detail": null
+ },
+ "D:\\GitHub\\stzlib\\libraries\\stzlib\\base\\test\\csv\\test_csv_regression.ring": {
+  "group": "softanza",
+  "status": "same",
+  "bytes": 5424,
+  "detail": null
+ },
+ "D:\\GitHub\\stzlib\\libraries\\stzlib\\base\\test\\dataset\\32_data_quality_tests.ring": {
+  "group": "softanza",
+  "status": "same",
+  "bytes": 642,
+  "detail": null
+ },
+ "D:\\GitHub\\stzlib\\libraries\\stzlib\\base\\test\\datawrangler\\16_testing_quick_operation_methods.ring": {
+  "group": "softanza",
+  "status": "same",
+  "bytes": 1657,
+  "detail": null
+ },
+ "D:\\GitHub\\stzlib\\libraries\\stzlib\\base\\test\\date\\27_date.ring": {
+  "group": "softanza",
+  "status": "same",
+  "bytes": 581,
+  "detail": null
+ },
+ "D:\\GitHub\\stzlib\\libraries\\stzlib\\base\\test\\datetime\\31_working_with_milliseconds.ring": {
+  "group": "softanza",
+  "status": "same",
+  "bytes": 551,
+  "detail": null
+ },
+ "D:\\GitHub\\stzlib\\libraries\\stzlib\\base\\test\\datetime\\70_example_9_from_epoch_hours.ring": {
+  "group": "softanza",
+  "status": "same",
+  "bytes": 399,
+  "detail": null
+ },
+ "D:\\GitHub\\stzlib\\libraries\\stzlib\\base\\test\\diagram\\19_saving_diagram_to_stzdiagram_file.ring": {
+  "group": "softanza",
+  "status": "same",
+  "bytes": 984,
+  "detail": null
+ },
+ "D:\\GitHub\\stzlib\\libraries\\stzlib\\base\\test\\diagram\\57_data_pipeline_health_with_visual_rules.ring": {
+  "group": "softanza",
+  "status": "same",
+  "bytes": 1952,
+  "detail": null
+ },
+ "D:\\GitHub\\stzlib\\libraries\\stzlib\\base\\test\\dotcode\\03_testing_multiple_edges_between_the_same_two_nodes_.ring": {
+  "group": "softanza",
+  "status": "same",
+  "bytes": 541,
+  "detail": null
+ },
+ "D:\\GitHub\\stzlib\\libraries\\stzlib\\base\\test\\duration\\09_task_timer.ring": {
+  "group": "softanza",
+  "status": "same",
+  "bytes": 475,
+  "detail": null
+ },
+ "D:\\GitHub\\stzlib\\libraries\\stzlib\\base\\test\\extercode\\14_data_analysis_with_na_handling.ring": {
+  "group": "softanza",
+  "status": "same",
+  "bytes": 887,
+  "detail": null
+ },
+ "D:\\GitHub\\stzlib\\libraries\\stzlib\\base\\test\\extinc\\05_pr.ring": {
+  "group": "softanza",
+  "status": "same",
+  "bytes": 474,
+  "detail": null
+ },
+ "D:\\GitHub\\stzlib\\libraries\\stzlib\\base\\test\\file\\xml_narrated.ring": {
+  "group": "softanza",
+  "status": "same",
+  "bytes": 7921,
+  "detail": null
+ },
+ "D:\\GitHub\\stzlib\\libraries\\stzlib\\base\\test\\func\\00_func_narrated.ring": {
+  "group": "softanza",
+  "status": "same",
+  "bytes": 5147,
+  "detail": null
+ },
+ "D:\\GitHub\\stzlib\\libraries\\stzlib\\base\\test\\global\\34_future.ring": {
+  "group": "softanza",
+  "status": "same",
+  "bytes": 356,
+  "detail": null
+ },
+ "D:\\GitHub\\stzlib\\libraries\\stzlib\\base\\test\\graph\\01_creating_simple_graph.ring": {
+  "group": "softanza",
+  "status": "same",
+  "bytes": 1003,
+  "detail": null
+ },
+ "D:\\GitHub\\stzlib\\libraries\\stzlib\\base\\test\\graph\\39_node_properties.ring": {
+  "group": "softanza",
+  "status": "same",
+  "bytes": 753,
+  "detail": null
+ },
+ "D:\\GitHub\\stzlib\\libraries\\stzlib\\base\\test\\graph\\77_business_scenario_relieving_bottleneck_by_adding_c.ring": {
+  "group": "softanza",
+  "status": "same",
+  "bytes": 4061,
+  "detail": null
+ },
+ "D:\\GitHub\\stzlib\\libraries\\stzlib\\base\\test\\graphex\\08_cache_stats_and_management.ring": {
+  "group": "softanza",
+  "status": "same",
+  "bytes": 570,
+  "detail": null
+ },
+ "D:\\GitHub\\stzlib\\libraries\\stzlib\\base\\test\\graphics\\gg_uml_cases.ring": {
+  "group": "softanza",
+  "status": "same",
+  "bytes": 5383,
+  "detail": null
+ },
+ "D:\\GitHub\\stzlib\\libraries\\stzlib\\base\\test\\graphplanner\\08_example_32_multi-stop_delivery.ring": {
+  "group": "softanza",
+  "status": "same",
+  "bytes": 1574,
+  "detail": null
+ },
+ "D:\\GitHub\\stzlib\\libraries\\stzlib\\base\\test\\graphquery\\05_match_edge_with_properties.ring": {
+  "group": "softanza",
+  "status": "same",
+  "bytes": 763,
+  "detail": null
+ },
+ "D:\\GitHub\\stzlib\\libraries\\stzlib\\base\\test\\grid\\13_testing_nextprevious_nth_node_methods.ring": {
+  "group": "softanza",
+  "status": "same",
+  "bytes": 932,
+  "detail": null
+ },
+ "D:\\GitHub\\stzlib\\libraries\\stzlib\\base\\test\\hashlist\\09_finding_items_inside_values_that_are_lists.ring": {
+  "group": "softanza",
+  "status": "same",
+  "bytes": 805,
+  "detail": null
+ },
+ "D:\\GitHub\\stzlib\\libraries\\stzlib\\base\\test\\html\\03_finding_and_querying_elements_natural_querying.ring": {
+  "group": "softanza",
+  "status": "same",
+  "bytes": 867,
+  "detail": null
+ },
+ "D:\\GitHub\\stzlib\\libraries\\stzlib\\base\\test\\json\\24_prepending_an_element_to_array.ring": {
+  "group": "softanza",
+  "status": "same",
+  "bytes": 291,
+  "detail": null
+ },
+ "D:\\GitHub\\stzlib\\libraries\\stzlib\\base\\test\\linearsolver\\08_transportation_problem_for_logistics_education.ring": {
+  "group": "softanza",
+  "status": "same",
+  "bytes": 2478,
+  "detail": null
+ },
+ "D:\\GitHub\\stzlib\\libraries\\stzlib\\base\\test\\list\\109_nlistified.ring": {
+  "group": "softanza",
+  "status": "same",
+  "bytes": 1078,
+  "detail": null
+ },
+ "D:\\GitHub\\stzlib\\libraries\\stzlib\\base\\test\\list\\157_extendxt.ring": {
+  "group": "softanza",
+  "status": "same",
+  "bytes": 904,
+  "detail": null
+ },
+ "D:\\GitHub\\stzlib\\libraries\\stzlib\\base\\test\\list\\206_firsthalf.ring": {
+  "group": "softanza",
+  "status": "same",
+  "bytes": 2647,
+  "detail": null
+ },
+ "D:\\GitHub\\stzlib\\libraries\\stzlib\\base\\test\\list\\245_itemsz.ring": {
+  "group": "softanza",
+  "status": "same",
+  "bytes": 1071,
+  "detail": null
+ },
+ "D:\\GitHub\\stzlib\\libraries\\stzlib\\base\\test\\list\\300_findlast.ring": {
+  "group": "softanza",
+  "status": "same",
+  "bytes": 239,
+  "detail": null
+ },
+ "D:\\GitHub\\stzlib\\libraries\\stzlib\\base\\test\\list\\34_find_and_antifind_in_stzlist.ring": {
+  "group": "softanza",
+  "status": "same",
+  "bytes": 433,
+  "detail": null
+ },
+ "D:\\GitHub\\stzlib\\libraries\\stzlib\\base\\test\\list\\38_replaceanyitemsatpositions.ring": {
+  "group": "softanza",
+  "status": "same",
+  "bytes": 450,
+  "detail": null
+ },
+ "D:\\GitHub\\stzlib\\libraries\\stzlib\\base\\test\\list\\432_listcontains.ring": {
+  "group": "softanza",
+  "status": "same",
+  "bytes": 861,
+  "detail": null
+ },
+ "D:\\GitHub\\stzlib\\libraries\\stzlib\\base\\test\\list\\467_findmany.ring": {
+  "group": "softanza",
+  "status": "same",
+  "bytes": 1007,
+  "detail": null
+ },
+ "D:\\GitHub\\stzlib\\libraries\\stzlib\\base\\test\\list\\501_hasleadingitems.ring": {
+  "group": "softanza",
+  "status": "same",
+  "bytes": 1163,
+  "detail": null
+ },
+ "D:\\GitHub\\stzlib\\libraries\\stzlib\\base\\test\\list\\534_replaceitematpositionsbymany.ring": {
+  "group": "softanza",
+  "status": "same",
+  "bytes": 300,
+  "detail": null
+ },
+ "D:\\GitHub\\stzlib\\libraries\\stzlib\\base\\test\\list\\569_insertaftermanypositions.ring": {
+  "group": "softanza",
+  "status": "same",
+  "bytes": 309,
+  "detail": null
+ },
+ "D:\\GitHub\\stzlib\\libraries\\stzlib\\base\\test\\list\\606_areequal.ring": {
+  "group": "softanza",
+  "status": "same",
+  "bytes": 343,
+  "detail": null
+ },
+ "D:\\GitHub\\stzlib\\libraries\\stzlib\\base\\test\\list\\641_isreverseof.ring": {
+  "group": "softanza",
+  "status": "same",
+  "bytes": 239,
+  "detail": null
+ },
+ "D:\\GitHub\\stzlib\\libraries\\stzlib\\base\\test\\list\\97_stringifyandreplacext.ring": {
+  "group": "softanza",
+  "status": "same",
+  "bytes": 1217,
+  "detail": null
+ },
+ "D:\\GitHub\\stzlib\\libraries\\stzlib\\base\\test\\list\\test_function_forms.ring": {
+  "group": "softanza",
+  "status": "same",
+  "bytes": 6147,
+  "detail": null
+ },
+ "D:\\GitHub\\stzlib\\libraries\\stzlib\\base\\test\\listofbytes\\16_numberofbytes.ring": {
+  "group": "softanza",
+  "status": "same",
+  "bytes": 868,
+  "detail": null
+ },
+ "D:\\GitHub\\stzlib\\libraries\\stzlib\\base\\test\\listoflists\\14_findmany.ring": {
+  "group": "softanza",
+  "status": "same",
+  "bytes": 551,
+  "detail": null
+ },
+ "D:\\GitHub\\stzlib\\libraries\\stzlib\\base\\test\\listoflists\\51_ishomolog.ring": {
+  "group": "softanza",
+  "status": "same",
+  "bytes": 637,
+  "detail": null
+ },
+ "D:\\GitHub\\stzlib\\libraries\\stzlib\\base\\test\\listofnumbers\\20_pr.ring": {
+  "group": "softanza",
+  "status": "same",
+  "bytes": 361,
+  "detail": null
+ },
+ "D:\\GitHub\\stzlib\\libraries\\stzlib\\base\\test\\listofnumbers\\59_content.ring": {
+  "group": "softanza",
+  "status": "same",
+  "bytes": 585,
+  "detail": null
+ },
+ "D:\\GitHub\\stzlib\\libraries\\stzlib\\base\\test\\listofstrings\\03_content.ring": {
+  "group": "softanza",
+  "status": "same",
+  "bytes": 377,
+  "detail": null
+ },
+ "D:\\GitHub\\stzlib\\libraries\\stzlib\\base\\test\\listofstrings\\23_o1_new_stzlistofstrings_a_b_c_d_e_f.ring": {
+  "group": "softanza",
+  "status": "same",
+  "bytes": 474,
+  "detail": null
+ },
+ "D:\\GitHub\\stzlib\\libraries\\stzlib\\base\\test\\listofstrings\\64_o1_new_stzlistofstrings.ring": {
+  "group": "softanza",
+  "status": "same",
+  "bytes": 556,
+  "detail": null
+ },
+ "D:\\GitHub\\stzlib\\libraries\\stzlib\\base\\test\\listofstrings\\from_list_363_pr.ring": {
+  "group": "softanza",
+  "status": "same",
+  "bytes": 432,
+  "detail": null
+ },
+ "D:\\GitHub\\stzlib\\libraries\\stzlib\\base\\test\\locale\\10_countryname.ring": {
+  "group": "softanza",
+  "status": "same",
+  "bytes": 355,
+  "detail": null
+ },
+ "D:\\GitHub\\stzlib\\libraries\\stzlib\\base\\test\\locale\\48_abbreviation.ring": {
+  "group": "softanza",
+  "status": "same",
+  "bytes": 431,
+  "detail": null
+ },
+ "D:\\GitHub\\stzlib\\libraries\\stzlib\\base\\test\\locale\\86_country.ring": {
+  "group": "softanza",
+  "status": "same",
+  "bytes": 178,
+  "detail": null
+ },
+ "D:\\GitHub\\stzlib\\libraries\\stzlib\\base\\test\\matrex\\32_combining_patterns_with_and.ring": {
+  "group": "softanza",
+  "status": "same",
+  "bytes": 477,
+  "detail": null
+ },
+ "D:\\GitHub\\stzlib\\libraries\\stzlib\\base\\test\\matrix\\21_diagonal2_example.ring": {
+  "group": "softanza",
+  "status": "same",
+  "bytes": 317,
+  "detail": null
+ },
+ "D:\\GitHub\\stzlib\\libraries\\stzlib\\base\\test\\meta\\coderule_project_narrated.ring": {
+  "group": "softanza",
+  "status": "same",
+  "bytes": 4982,
+  "detail": null
+ },
+ "D:\\GitHub\\stzlib\\libraries\\stzlib\\base\\test\\natural\\10_basic_transformations.ring": {
+  "group": "softanza",
+  "status": "same",
+  "bytes": 306,
+  "detail": null
+ },
+ "D:\\GitHub\\stzlib\\libraries\\stzlib\\base\\test\\naturalcode\\01_future.ring": {
+  "group": "softanza",
+  "status": "same",
+  "bytes": 542,
+  "detail": null
+ },
+ "D:\\GitHub\\stzlib\\libraries\\stzlib\\base\\test\\network\\59_resilience_narrated.ring": {
+  "group": "softanza",
+  "status": "same",
+  "bytes": 4122,
+  "detail": null
+ },
+ "D:\\GitHub\\stzlib\\libraries\\stzlib\\base\\test\\number\\06_wxt.ring": {
+  "group": "softanza",
+  "status": "same",
+  "bytes": 672,
+  "detail": null
+ },
+ "D:\\GitHub\\stzlib\\libraries\\stzlib\\base\\test\\number\\45_ici_error.ring": {
+  "group": "softanza",
+  "status": "same",
+  "bytes": 281,
+  "detail": null
+ },
+ "D:\\GitHub\\stzlib\\libraries\\stzlib\\base\\test\\number\\from_list_584_pr.ring": {
+  "group": "softanza",
+  "status": "same",
+  "bytes": 319,
+  "detail": null
+ },
+ "D:\\GitHub\\stzlib\\libraries\\stzlib\\base\\test\\number\\numeric_special_functions_narrated.ring": {
+  "group": "softanza",
+  "status": "same",
+  "bytes": 9001,
+  "detail": null
+ },
+ "D:\\GitHub\\stzlib\\libraries\\stzlib\\base\\test\\numbrex\\26_extracting_factor_list.ring": {
+  "group": "softanza",
+  "status": "same",
+  "bytes": 260,
+  "detail": null
+ },
+ "D:\\GitHub\\stzlib\\libraries\\stzlib\\base\\test\\object\\18_pluralofthisstztype.ring": {
+  "group": "softanza",
+  "status": "same",
+  "bytes": 308,
+  "detail": null
+ },
+ "D:\\GitHub\\stzlib\\libraries\\stzlib\\base\\test\\orgchart\\17_focus_on_vacant_positions.ring": {
+  "group": "softanza",
+  "status": "same",
+  "bytes": 434,
+  "detail": null
+ },
+ "D:\\GitHub\\stzlib\\libraries\\stzlib\\base\\test\\perf\\engine_senses_narrated.ring": {
+  "group": "softanza",
+  "status": "same",
+  "bytes": 8082,
+  "detail": null
+ },
+ "D:\\GitHub\\stzlib\\libraries\\stzlib\\base\\test\\plot\\18_multiple_bars_with_varying_values.ring": {
+  "group": "softanza",
+  "status": "same",
+  "bytes": 1007,
+  "detail": null
+ },
+ "D:\\GitHub\\stzlib\\libraries\\stzlib\\base\\test\\plot\\56_3-item_test_with_values_and_percentages.ring": {
+  "group": "softanza",
+  "status": "same",
+  "bytes": 1150,
+  "detail": null
+ },
+ "D:\\GitHub\\stzlib\\libraries\\stzlib\\base\\test\\random\\01_pr.ring": {
+  "group": "softanza",
+  "status": "same",
+  "bytes": 406,
+  "detail": null
+ },
+ "D:\\GitHub\\stzlib\\libraries\\stzlib\\base\\test\\randomdata\\01_word_data_helpers.ring": {
+  "group": "softanza",
+  "status": "same",
+  "bytes": 751,
+  "detail": null
+ },
+ "D:\\GitHub\\stzlib\\libraries\\stzlib\\base\\test\\reactivefunc\\02_running_multiple_functions_in_parallel.ring": {
+  "group": "softanza",
+  "status": "same",
+  "bytes": 2126,
+  "detail": null
+ },
+ "D:\\GitHub\\stzlib\\libraries\\stzlib\\base\\test\\reactivestream\\12_sensor-based_streams.ring": {
+  "group": "softanza",
+  "status": "same",
+  "bytes": 3001,
+  "detail": null
+ },
+ "D:\\GitHub\\stzlib\\libraries\\stzlib\\base\\test\\regex\\11_partial_match_url_validation.ring": {
+  "group": "softanza",
+  "status": "same",
+  "bytes": 564,
+  "detail": null
+ },
+ "D:\\GitHub\\stzlib\\libraries\\stzlib\\base\\test\\regex\\50_matching_html_content.ring": {
+  "group": "softanza",
+  "status": "same",
+  "bytes": 1145,
+  "detail": null
+ },
+ "D:\\GitHub\\stzlib\\libraries\\stzlib\\base\\test\\regexmaker\\22_example_6_multiple_independent_levels.ring": {
+  "group": "softanza",
+  "status": "same",
+  "bytes": 196,
+  "detail": null
+ },
+ "D:\\GitHub\\stzlib\\libraries\\stzlib\\base\\test\\regexuter\\09_example_3_code_analysis_pipeline.ring": {
+  "group": "softanza",
+  "status": "same",
+  "bytes": 1591,
+  "detail": null
+ },
+ "D:\\GitHub\\stzlib\\libraries\\stzlib\\base\\test\\ringqml\\38_sample_131_dialog_windows.ring": {
+  "group": "softanza",
+  "status": "same",
+  "bytes": 1090,
+  "detail": null
+ },
+ "D:\\GitHub\\stzlib\\libraries\\stzlib\\base\\test\\sound\\sound_mu0_narrated.ring": {
+  "group": "softanza",
+  "status": "same",
+  "bytes": 15120,
+  "detail": null
+ },
+ "D:\\GitHub\\stzlib\\libraries\\stzlib\\base\\test\\string\\02_content.ring": {
+  "group": "softanza",
+  "status": "same",
+  "bytes": 473,
+  "detail": null
+ },
+ "D:\\GitHub\\stzlib\\libraries\\stzlib\\base\\test\\string\\128_numberofsubstringscs.ring": {
+  "group": "softanza",
+  "status": "same",
+  "bytes": 337,
+  "detail": null
+ },
+ "D:\\GitHub\\stzlib\\libraries\\stzlib\\base\\test\\string\\162_findboundedbyassections.ring": {
+  "group": "softanza",
+  "status": "same",
+  "bytes": 827,
+  "detail": null
+ },
+ "D:\\GitHub\\stzlib\\libraries\\stzlib\\base\\test\\string\\198_replaceanyboundedby.ring": {
+  "group": "softanza",
+  "status": "same",
+  "bytes": 1097,
+  "detail": null
+ },
+ "D:\\GitHub\\stzlib\\libraries\\stzlib\\base\\test\\string\\239_testing_findlast_on_a_very_large_string_2m_chars.ring": {
+  "group": "softanza",
+  "status": "same",
+  "bytes": 601,
+  "detail": null
+ },
+ "D:\\GitHub\\stzlib\\libraries\\stzlib\\base\\test\\string\\273_tosections.ring": {
+  "group": "softanza",
+  "status": "same",
+  "bytes": 637,
+  "detail": null
+ },
+ "D:\\GitHub\\stzlib\\libraries\\stzlib\\base\\test\\string\\307_content.ring": {
+  "group": "softanza",
+  "status": "same",
+  "bytes": 618,
+  "detail": null
+ },
+ "D:\\GitHub\\stzlib\\libraries\\stzlib\\base\\test\\string\\335_findd.ring": {
+  "group": "softanza",
+  "status": "same",
+  "bytes": 1111,
+  "detail": null
+ },
+ "D:\\GitHub\\stzlib\\libraries\\stzlib\\base\\test\\string\\36_removethistrailingchar.ring": {
+  "group": "softanza",
+  "status": "same",
+  "bytes": 547,
+  "detail": null
+ },
+ "D:\\GitHub\\stzlib\\libraries\\stzlib\\base\\test\\string\\403_numberscomingafter.ring": {
+  "group": "softanza",
+  "status": "same",
+  "bytes": 956,
+  "detail": null
+ },
+ "D:\\GitHub\\stzlib\\libraries\\stzlib\\base\\test\\string\\438_split.ring": {
+  "group": "softanza",
+  "status": "same",
+  "bytes": 614,
+  "detail": null
+ },
+ "D:\\GitHub\\stzlib\\libraries\\stzlib\\base\\test\\string\\472_type.ring": {
+  "group": "softanza",
+  "status": "same",
+  "bytes": 536,
+  "detail": null
+ },
+ "D:\\GitHub\\stzlib\\libraries\\stzlib\\base\\test\\string\\509_findfirstnoccurrences.ring": {
+  "group": "softanza",
+  "status": "same",
+  "bytes": 616,
+  "detail": null
+ },
+ "D:\\GitHub\\stzlib\\libraries\\stzlib\\base\\test\\string\\544_removecharsw.ring": {
+  "group": "softanza",
+  "status": "same",
+  "bytes": 975,
+  "detail": null
+ },
+ "D:\\GitHub\\stzlib\\libraries\\stzlib\\base\\test\\string\\579_removebetween_removeat.ring": {
+  "group": "softanza",
+  "status": "same",
+  "bytes": 596,
+  "detail": null
+ },
+ "D:\\GitHub\\stzlib\\libraries\\stzlib\\base\\test\\string\\612_dealing_in_emptiness_in_softanza.ring": {
+  "group": "softanza",
+  "status": "same",
+  "bytes": 1618,
+  "detail": null
+ },
+ "D:\\GitHub\\stzlib\\libraries\\stzlib\\base\\test\\string\\647_content.ring": {
+  "group": "softanza",
+  "status": "same",
+  "bytes": 379,
+  "detail": null
+ },
+ "D:\\GitHub\\stzlib\\libraries\\stzlib\\base\\test\\string\\681_content.ring": {
+  "group": "softanza",
+  "status": "same",
+  "bytes": 353,
+  "detail": null
+ },
+ "D:\\GitHub\\stzlib\\libraries\\stzlib\\base\\test\\string\\718_isletter.ring": {
+  "group": "softanza",
+  "status": "same",
+  "bytes": 362,
+  "detail": null
+ },
+ "D:\\GitHub\\stzlib\\libraries\\stzlib\\base\\test\\string\\75_namedstring.ring": {
+  "group": "softanza",
+  "status": "same",
+  "bytes": 750,
+  "detail": null
+ },
+ "D:\\GitHub\\stzlib\\libraries\\stzlib\\base\\test\\string\\794_findallcs.ring": {
+  "group": "softanza",
+  "status": "same",
+  "bytes": 746,
+  "detail": null
+ },
+ "D:\\GitHub\\stzlib\\libraries\\stzlib\\base\\test\\string\\82_replaceallexcept_and.ring": {
+  "group": "softanza",
+  "status": "same",
+  "bytes": 447,
+  "detail": null
+ },
+ "D:\\GitHub\\stzlib\\libraries\\stzlib\\base\\test\\string\\868_content.ring": {
+  "group": "softanza",
+  "status": "same",
+  "bytes": 333,
+  "detail": null
+ },
+ "D:\\GitHub\\stzlib\\libraries\\stzlib\\base\\test\\string\\902_boxeachchar.ring": {
+  "group": "softanza",
+  "status": "same",
+  "bytes": 655,
+  "detail": null
+ },
+ "D:\\GitHub\\stzlib\\libraries\\stzlib\\base\\test\\string\\937_charsboxifiedxt.ring": {
+  "group": "softanza",
+  "status": "same",
+  "bytes": 332,
+  "detail": null
+ },
+ "D:\\GitHub\\stzlib\\libraries\\stzlib\\base\\test\\string\\971_vizfind.ring": {
+  "group": "softanza",
+  "status": "same",
+  "bytes": 468,
+  "detail": null
+ },
+ "D:\\GitHub\\stzlib\\libraries\\stzlib\\base\\test\\string\\_diagnostics\\test_domains3.ring": {
+  "group": "softanza",
+  "status": "same",
+  "bytes": 2643,
+  "detail": null
+ },
+ "D:\\GitHub\\stzlib\\libraries\\stzlib\\base\\test\\string\\from_ttext_is_this_arabic_word_diacriticized.ring": {
+  "group": "softanza",
+  "status": "same",
+  "bytes": 849,
+  "detail": null
+ },
+ "D:\\GitHub\\stzlib\\libraries\\stzlib\\base\\test\\substring\\09_substringin.ring": {
+  "group": "softanza",
+  "status": "same",
+  "bytes": 224,
+  "detail": null
+ },
+ "D:\\GitHub\\stzlib\\libraries\\stzlib\\base\\test\\system\\security_detection_narrated.ring": {
+  "group": "softanza",
+  "status": "same",
+  "bytes": 7999,
+  "detail": null
+ },
+ "D:\\GitHub\\stzlib\\libraries\\stzlib\\base\\test\\systemcall\\17_test_15_working_with_sys_commands.ring": {
+  "group": "softanza",
+  "status": "same",
+  "bytes": 367,
+  "detail": null
+ },
+ "D:\\GitHub\\stzlib\\libraries\\stzlib\\base\\test\\table\\00_table_narrated.ring": {
+  "group": "softanza",
+  "status": "same",
+  "bytes": 2961,
+  "detail": null
+ },
+ "D:\\GitHub\\stzlib\\libraries\\stzlib\\base\\test\\table\\127_findincols.ring": {
+  "group": "softanza",
+  "status": "same",
+  "bytes": 846,
+  "detail": null
+ },
+ "D:\\GitHub\\stzlib\\libraries\\stzlib\\base\\test\\table\\161_show.ring": {
+  "group": "softanza",
+  "status": "same",
+  "bytes": 952,
+  "detail": null
+ },
+ "D:\\GitHub\\stzlib\\libraries\\stzlib\\base\\test\\table\\197_write_a.ring": {
+  "group": "softanza",
+  "status": "same",
+  "bytes": 1719,
+  "detail": null
+ },
+ "D:\\GitHub\\stzlib\\libraries\\stzlib\\base\\test\\table\\25_colnames.ring": {
+  "group": "softanza",
+  "status": "same",
+  "bytes": 424,
+  "detail": null
+ },
+ "D:\\GitHub\\stzlib\\libraries\\stzlib\\base\\test\\table\\63_show.ring": {
+  "group": "softanza",
+  "status": "same",
+  "bytes": 793,
+  "detail": null
+ },
+ "D:\\GitHub\\stzlib\\libraries\\stzlib\\base\\test\\table\\calc_column_engine_narrated.ring": {
+  "group": "softanza",
+  "status": "same",
+  "bytes": 4653,
+  "detail": null
+ },
+ "D:\\GitHub\\stzlib\\libraries\\stzlib\\base\\test\\tablex\\20_validating_column_types.ring": {
+  "group": "softanza",
+  "status": "same",
+  "bytes": 544,
+  "detail": null
+ },
+ "D:\\GitHub\\stzlib\\libraries\\stzlib\\base\\test\\tile\\16_testing_path_management.ring": {
+  "group": "softanza",
+  "status": "same",
+  "bytes": 1961,
+  "detail": null
+ },
+ "D:\\GitHub\\stzlib\\libraries\\stzlib\\base\\test\\time\\32_chaining_operations_with_q_functions.ring": {
+  "group": "softanza",
+  "status": "same",
+  "bytes": 305,
+  "detail": null
+ },
+ "D:\\GitHub\\stzlib\\libraries\\stzlib\\base\\test\\timeline\\37_complex_timeline_with_overlapping_spans.ring": {
+  "group": "softanza",
+  "status": "same",
+  "bytes": 2719,
+  "detail": null
+ },
+ "D:\\GitHub\\stzlib\\libraries\\stzlib\\base\\test\\tree\\09_finding_and_getting_an_item.ring": {
+  "group": "softanza",
+  "status": "same",
+  "bytes": 2255,
+  "detail": null
+ },
+ "D:\\GitHub\\stzlib\\libraries\\stzlib\\base\\test\\ttext\\from_string_728_pr.ring": {
+  "group": "softanza",
+  "status": "same",
+  "bytes": 312,
+  "detail": null
+ }
+}

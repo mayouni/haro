@@ -77,6 +77,7 @@ expression language forged whole, judged by stz's 29 fixtures as stage 8, pinned
 | `spike/v16/GRAMMAR.md`, `spike/v16/fixtures.json`, `spike/v16/run_cases.json` | **Haro v0.16** (the sixteenth rung, below): NARRATE gains TELLS -- a template per event of a run or of a question; `narrate-run` and `narrate-ask`; the narration is a projection of the run itself; three runs and a question, and the same court under a voice that tells almost nothing, composed by hand before the court |
 | `spike/a_v16.haro`, `spike/z_v16.haro` | A with a voice that tells a run and Z with one that tells a question: `a_v09.haro` and `z_v10.haro` plus a NARRATE (the guard's `A_STZU` and `Z_STZU` since this rung; the 35 cases and 25 questions are unchanged) |
 | `spike/charter_scans.py` | **The v0.3 scans** (guard stage 21, 2026-10-04): no refusal text addresses or names a person (1,007 read: 23 letters, 30 sentences, 16 court libraries), and no letter outside the machine's spells a width (8,232 identifiers in 20 letters); each is made to fail first, its floors are pinned; the machine letters name `kernel` and `threads` and are the stated exception |
+| `haro/CODEGRAPH.md`, `study/codegraph/` | **The code graph beneath the faces** (a design memo, COMPASS-HARO-05, 2026-10-04; not a rung): four levels L0 to L3, a face as a parser and a printer under a round-trip court, comments as nodes, identity by name and hash; measured first -- 429 of 429 Ring files round-trip through a layout-free printer, layout is 5 to 10% of the bytes, comments 26.8% of the Softanza library and 8,306 `#-->` promises, 98.1% of statements keep identity across 56 real edits; `python haro/study/codegraph/corpus.py` |
 | `study/phase15/` | **The Phase 1.5 study** (ringua's exemplar extension study, run 2026-10-03; not a rung): `STUDY.md`, the experiments E1-E4, `nlq.ring` (stzNatural's architecture retargeted to closed queries), the judges, 74 hand-composed questions in English and French, the tontine's knowledge graph as a text artifact; `python haro/study/phase15/study_run.py` |
 | `spike/n_v17.haro`, `spike/n/tontine.n`, `spike/n_court.ring`, `spike/v17/` | **N** (drawn 2026-10-03, **built 2026-10-04 as Haro v0.17, the seventeenth rung**): the letter and its `UNDERSTAND`, the tontine's natural door in English and French, the court forged from the letter with `n_lib.ring` (the verbs and the 15 rules), `GRAMMAR.md` (the API, 18 decisions), 17 + 21 + 12 fixtures, `n_model.py` (the reference model), `n_check.py` (the judge; guard stage 20) |
 | `spike/world_lib.ring`, `spike/world_stub.ring` | the world's functions (SYMBOL resolution, the C1 rows), moved out of `court_lib.ring` and loaded only where a SYMBOL or PUBLISH is declared, and the stub that stands elsewhere |
@@ -1273,6 +1274,25 @@ built the day before, and found one.
 **Not ruled here, and said so:** the code graph beneath the faces (the Compass's T1 and T5), T2 (one executable or two) and
 T3 (the games letter): the author's items. **Owed by the adoptions:** capability types at the computing altitude, a `class`
 field in each fixtures file, a `secret` seat type, keyword lexica, a catalogue stage, a first tongue beyond Latin-1.
+
+## The code graph beneath the faces -- a design memo and what it measured -- 2026-10-04
+
+**On the author's "do the design memo for the code graph"** (COMPASS-HARO-05; the Compass's T1 and T5). Not a rung: nothing in
+the compiler or the guard changes. `haro/CODEGRAPH.md` is the memo (R1 to R12; Q1 to Q4 are the author's) and
+`haro/study/codegraph/` its first measurements, run on this machine and read-only on the estate's trees.
+
+    cst.py          a lossless concrete tree recovered from `rnxc dump` and the source; names what the dump hides
+    printer.py      the canonical printer of the Ring face: no layout in, none out (76 lines)
+    corpus.py       text -> tree -> canonical text -> tree over 430 files, two controls that must fail: 429 of 429 same
+    census_comments.py   26.8% of the Softanza library's bytes are comments; 8,306 `#-->` promises in 2,969 files
+    layout.py       layout is 5.3% to 9.6% of the bytes; 134 to 204 tokens and 204 to 304 nodes per KB
+    identity.py     98.1% of 49,933 statements keep identity under a name-and-hash matcher across 56 real edits
+    kinds.py        53 of the grammar's 59 node kinds occur in the corpora, ranked by use
+
+**What the study found that the Compass's page did not say** (HF-72): the loss to name is layout, not comments; `stzCodeGraph` is
+an index and cannot print a program; `rnxc dump` hides three kinds of token. **What it does not show**: the abstraction step from
+the concrete tree to the program graph (59 printing templates), the graph's build cost, and that a second face helps a model.
+The guard is untouched; the decisions are the author's.
 
 ## The names -- `.haro`, not `.stzu` -- corrected 2026-10-02
 

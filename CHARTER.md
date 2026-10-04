@@ -973,7 +973,9 @@ states principle 14.
   is a parser and printer pair judged by a round trip, and a Python-shaped face is a spelling, not Python. It is not an item
   of COMPASS-HARO-02 and wants a design memo of its own: the levels document's structure level extended to the computing
   altitude, and one round-trip court on the Ring++ face before any other face. Until then the public sentence about a
-  "running polyglot engine" stays "designed" (COMPASS-HARO-04, the Harobanda desk's).
+  "running polyglot engine" stays "designed" (COMPASS-HARO-04, the Harobanda desk's). **The design memo is written** (2026-10-04, COMPASS-HARO-05, on
+  the author's "do the design memo for the code graph"): `haro/CODEGRAPH.md`, recommendations R1 to R12 and four decisions, Q1 to
+  Q4, that are the author's; **nothing in it is ruled**.
 - **T2, one executable or two** (COMPASS-HARO-01): the author's. The facts were sent to the Compass on 2026-10-04: no `haro`
   command exists, the spike's verbs are `rnxc haro.ring`, `rnxc forge.ring` and `rnxc <lang>_court.ring <verb>`, D14 keeps
   the forge-as-verb ringpp's, and Q's and N's `ask` share a name and would dispatch on the sentence's extension.
