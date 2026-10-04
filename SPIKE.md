@@ -81,6 +81,7 @@ expression language forged whole, judged by stz's 29 fixtures as stage 8, pinned
 | `study/phase15/` | **The Phase 1.5 study** (ringua's exemplar extension study, run 2026-10-03; not a rung): `STUDY.md`, the experiments E1-E4, `nlq.ring` (stzNatural's architecture retargeted to closed queries), the judges, 74 hand-composed questions in English and French, the tontine's knowledge graph as a text artifact; `python haro/study/phase15/study_run.py` |
 | `spike/n_v17.haro`, `spike/n/tontine.n`, `spike/n_court.ring`, `spike/v17/` | **N** (drawn 2026-10-03, **built 2026-10-04 as Haro v0.17, the seventeenth rung**): the letter and its `UNDERSTAND`, the tontine's natural door in English and French, the court forged from the letter with `n_lib.ring` (the verbs and the 15 rules), `GRAMMAR.md` (the API, 18 decisions), 17 + 21 + 12 fixtures, `n_model.py` (the reference model), `n_check.py` (the judge; guard stage 20) |
 | `spike/v18/` | **The program graph of Ring** (Haro v0.18, the eighteenth rung, 2026-10-04): `l1.py` (49 kinds, the abstraction, the canonical printer), `fixtures.txt` (22 programs composed before the code), `l1_check.py` (the court: fixtures, two controls that fail, a 78-file corpus; guard stage 22), `GRAMMAR.md`; `probes/` holds the probes (`closers.py`, `fall.py`, `stress.py`) |
+| `spike/v19/` | **Node identity on the program graph** (Haro v0.19, the nineteenth rung, 2026-10-04): `ids.py` (ids on the items of rung 18's graph, the matcher that recovers them across an edit), `fixtures.txt` (23 edits written before the code), `ids_check.py` (the court: fixtures, controls, Haro's own history replayed; guard stage 23), `IDENTITY.md`; `probes/` holds `sweep.py` (what each pass and each threshold buys) and `near.py` (the claims nearest the threshold) |
 | `spike/world_lib.ring`, `spike/world_stub.ring` | the world's functions (SYMBOL resolution, the C1 rows), moved out of `court_lib.ring` and loaded only where a SYMBOL or PUBLISH is declared, and the stub that stands elsewhere |
 
 Nothing in `rnxc` or the VM changed. Nothing in a sibling repository changed.
@@ -1317,6 +1318,27 @@ tree, 6,068 Ring files, 5,958 exact in graph and compiled code, 52 as graphs onl
 refused by Ring itself, none failing. **Not claimed:** node identity (rung 2), `rnxc fmt` (rung 3), resolved edges (rung 4); that
 a second face helps a model (K4); long-line wrapping.
 
+## The nineteenth rung -- Haro v0.19, node identity on the program graph -- 2026-10-04
+
+**On the author's "rung 2"** (`haro/CODEGRAPH.md` section 7, rung 2). A refinement targets a node and the node must survive a change; the
+face is edited as text, so identity is recovered when the edited text is parsed again. Fixtures first: 23 edits, each the ids the new
+program must hold, composed before `ids.py` existed.
+
+    v19/ids.py        ids on the items of rung 18's graph, in pre-order; carry(old, new): what the edit keeps, what it makes, what it loses
+    v19/fixtures.txt  23 edits: old program, new program, the new items' ids in pre-order (an old id or `*`), the old ids that are gone
+    v19/ids_check.py  F: the 23 edits, ids unique, a graph carried onto itself moves none; C: 6 controls that must fail; H: Haro's history replayed
+    stage 23          the court in the guard: 38 pairs, 28,996 statements, floors 20 / 8,000 / 95 percent; 20 s; --plant FAIL
+    v19/IDENTITY.md   what has an id, the matcher, the court, the numbers, what it does not say
+    the pass          PASS, 23 stages in 367.5 s (stage 6: harb 5.2 ms, the forged court 88.9 ms against the pinned 100); --plant FAIL on stage 23
+
+**What building found** (HF-76, HF-77): on Haro's own history **98.3 percent of the statements a refinement could have targeted still
+resolve after the next human edit** (the memo's bar for option A was 95; K2, 90, does not fire) -- and nearly all of it is a name, a
+hash and one question, whether the same text is still in the same function: name and text alone keep 86.0, the function pool 95.6,
+similarity 98.3. The memo's 98.1 was measured with a function's statements flattened, which is that pool. Identity is a claim: at 0.6,
+395 items were kept by similarity alone, and the nearest are plausible rewrites in place, one a reader might refuse. **Measured on the
+memo's seven files too**: 56 pairs, 99.1 percent keep their id. **Not claimed:** that ids survive a lineage of edits (each pair is
+measured alone; the cache that holds the last graph with its ids is not built), an id inside an expression, a move across functions.
+
 ## The names -- `.haro`, not `.stzu` -- corrected 2026-10-02
 
 **At the author's word ("we agreed to use .haro instead of .stzu, no?").** D1 was ratified
@@ -1412,6 +1434,9 @@ whole guard re-run on the renamed tree: 28 + 30 + 27 + 23, 117 of 120, 32 of 32,
 19. ~~Rung 1 of the code-graph memo~~ -- built 2026-10-04 as Haro v0.18, the eighteenth rung above, on the
    author's "start rung 1 of the code graph memo": the program graph of Ring, its canonical printer and a
    round-trip court judged by compiled code; rung 2 (identity) is next in the memo.
+20. ~~Rung 2 of the code-graph memo~~ -- built 2026-10-04 as Haro v0.19, the nineteenth rung above, on the
+   author's "rung 2": node identity recovered by a matcher, 98.3 percent of history's statements still
+   resolve; rung 3 (`rnxc fmt` and the lossless export, ringpp's) is next in the memo.
 18. The forge as an `rnxc` verb (the ringpp session's `src/`, routed); the
    Softanza-resident timing the charter's 2.6 asks for; the court's run time on the
    oracle under paths and views (6.4x the image this pass, named at stage 6); the

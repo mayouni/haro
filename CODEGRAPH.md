@@ -154,6 +154,11 @@ targets still resolve after a human edit**, move to C. The measurement that woul
 Haro's files (the baseline is section 4.4). B is the end state only if refinement becomes the *only* write path, which the charter
 asks of the agent and not of the human.
 
+**Measured by rung 2 (2026-10-04, `haro/spike/v19/IDENTITY.md`): 98.3 percent of the statements a refinement could have targeted still
+resolve after the next human edit on Haro's own history (38 pairs, 28,996 statements) and 99.1 percent on the memo's seven files. The
+95 percent threshold holds, K2 does not fire, and A stands.** Most of it is a name, a hash and the same text anywhere in the same
+function: name and text alone keep 86.0 percent, the function pool takes it to 95.6, similarity to 98.3. Per edit, not per lineage.
+
 ---
 
 ## 4. What was measured
@@ -334,7 +339,7 @@ Each rung is fixtures first, prose second, and has a guard before it is called b
 |---|---|---|---|
 | **0, done here** | the round trip at the token level, the comment census, the layout and identity measurements, the kinds table | haro-charter | `haro/study/codegraph/*.py`; `results.json`, `identity.json`, `layout.json`, `census_comments.json` |
 | **1 -- the structure level of the computing altitude (Haro v0.18) -- BUILT 2026-10-04** | the L1 schema (RCP's node types, with Class, Method and Attribute settled with Refine); the 59 printing templates; comment attachment; hand-composed fixtures, one per trap in section 5, written first; the court in the guard (a sample of ~40 files, floors pinned, the two controls failing) | haro-charter, with stz for the IR.md row | guard stage 22 |
-| **2 -- identity** | node ids; the name-and-hash matcher; a stage that replays real history and pins the retention (baseline 98.1%) and the K2 threshold | haro-charter | guard stage 23 |
+| **2 -- identity -- BUILT 2026-10-04 (Haro v0.19)** | node ids; the name-and-hash matcher; a stage that replays real history and pins the retention (baseline 98.1%) and the K2 threshold | haro-charter | guard stage 23 |
 | **3 -- `rnxc fmt` and the lossless export** | `rnxc dump --json` (every node with its byte span; the three hidden tokens; full leaf text), then the printer as `fmt` | **ringpp** (outside `haro/`, as D14 for the forge) | the court's corpus run on the real binary |
 | **4 -- L2 and the projection** | the resolved graph from `rnxc`; the line protocol as its projection; stzRingCodeGraph answers compared and every difference named | ringpp, stzlib | agreement table, differences listed |
 | **5 -- refinement over L1** | a refinement as a sequence of RCP's twelve operations; the gate runs on L1; the diff is the printer's | haro-charter, Refine | the principle-10 fixture, at the computing altitude |
@@ -396,3 +401,6 @@ level of the computing altitude, in the guard. **R12** no second face as a parse
     haro/spike/v18/GRAMMAR.md                    rung 1: the schema, Ring's flow, the canonical text, the court, the numbers
     haro/spike/v18/l1.py, l1_check.py            rung 1: the graph, the abstraction, the printer; the court (guard stage 22)
     haro/spike/v18/fixtures.txt                  rung 1: 22 hand-composed programs, graph and canonical text
+    haro/spike/v19/IDENTITY.md                   rung 2: what has an id, the matcher, the court, the numbers
+    haro/spike/v19/ids.py, ids_check.py          rung 2: ids and the matcher; the court (guard stage 23)
+    haro/spike/v19/fixtures.txt                  rung 2: 23 hand-composed edits and the ids each must leave

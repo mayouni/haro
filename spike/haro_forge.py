@@ -2898,6 +2898,34 @@ def stage22():
         print('  FAIL the program graph -- PLANTED')
     return failures
 
+
+# ---- stage 23: node identity on the program graph (rung 19, Haro v0.19)
+
+IDS_CHECK = os.path.join(HERE, 'v19', 'ids_check.py')
+
+
+def stage23():
+    """The nineteenth rung: ids on the items of rung 18's graph, recovered when edited text is parsed again, by a matcher (v19/ids.py) that
+    knows nothing but the graph that was and the graph that is. Judged by 23 edits written before the matcher (each: the ids the new program
+    must hold and the ones that are gone), by controls that must fail (a matcher that pairs by position, one that keeps nothing, and each
+    pass of the real one switched off in turn), and by Haro's own history: every hand-written Ring file of haro/spike, consecutive revisions
+    read with `git show`, each old statement a refinement target that must still resolve. The floor is CODEGRAPH 3.7's 95 percent."""
+    print('stage 23 -- node identity: v19/ids_check.py (23 edits, controls, Haro\'s own history replayed: does an old target still resolve?)')
+    failures = 0
+    p = subprocess.run([sys.executable, IDS_CHECK], capture_output=True, cwd=ROOT, timeout=1800)
+    out = p.stdout.decode('utf-8', 'replace').replace('\r\n', '\n')
+    for line in out.splitlines():
+        if line.startswith('  ') or line.startswith('ids_check:'):
+            print(line)
+    if p.returncode != 0:
+        failures += 1
+        print(f'  FAIL ids_check.py exited {p.returncode}')
+    if PLANT:
+        failures += 1
+        print('  FAIL node identity -- PLANTED')
+    return failures
+
+
 def stage6(lang, court=None, n=15):
     court = court or f'{lang}_court.ring'
     print(f'stage 6 -- edit to verdict on makeen_box.machine, minima of {n}')
@@ -3001,5 +3029,7 @@ if __name__ == '__main__':
         failures += stage21()
     if stage in (None, 22) and os.path.exists(L1_CHECK):
         failures += stage22()
+    if stage in (None, 23) and os.path.exists(IDS_CHECK):
+        failures += stage23()
     print(f'haro_forge: {"FAIL" if failures else "PASS"} ({failures} failure(s), {time.perf_counter()-t0:.1f} s)')
     sys.exit(1 if failures else 0)

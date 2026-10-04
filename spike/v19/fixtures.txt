@@ -1,0 +1,393 @@
+~~~ The fixtures of rung 19 (Haro v0.19): node identity on the program graph of rung 18, for the Ring++ face.
+~~~
+~~~ Hand-composed BEFORE the matcher existed (the W discipline: fixtures first, code second). Each one is an edit: the Ring program as it
+~~~ was (`--- old`), as it became (`--- new`), and what a matcher must answer.
+~~~
+~~~ THE NUMBERING, which the expected answers are written in. The old program's graph is numbered 1, 2, 3... in PRE-ORDER over its items:
+~~~ an item (a statement, a definition, a comment, a parameter), then the items of its blocks in field order, and a block is a body
+~~~ (`func` holds its parameters first, then its statements; `if` its `then`, its `elif`s, its `else`). An expression holds no id, except
+~~~ the statements inside a lambda or a brace in it, which are items of that block.
+~~~
+~~~ `--- ids`   the NEW program's items in the same pre-order, each as the id it kept from the old one, or `*` for an item the edit made
+~~~ `--- lost`  the old ids the new program does not hold, or `-` for none
+~~~
+~~~ The rules every row below pins (v19/IDENTITY.md): a definition is matched by its name; a statement by the hash of its whole text; what
+~~~ is left in the same gap by a SIMILARITY of 0.6 on its tokens (an edit keeps its id, a replacement does not); a move inside one list or
+~~~ one function by identical text; a renamed definition by the share of its body that is unchanged.
+
+=== 01 nothing changed
+--- old
+x = 1
+y = 2
+--- new
+x = 1
+y = 2
+--- ids
+1 2
+--- lost
+-
+
+=== 02 layout and spelling are not edits
+~~~ the graph (rung 18) does not hold them, so the ids cannot move
+--- old
+def F(a)
+	? "x"
+end
+--- new
+func F(a)
+
+	? "x"
+
+--- ids
+1 2 3
+--- lost
+-
+
+=== 03 a statement inserted
+--- old
+a = 1
+c = 3
+--- new
+a = 1
+b = 2
+c = 3
+--- ids
+1 * 2
+--- lost
+-
+
+=== 04 a statement deleted
+--- old
+a = 1
+b = 2
+c = 3
+--- new
+a = 1
+c = 3
+--- ids
+1 3
+--- lost
+2
+
+=== 05 a statement edited in place keeps its id
+~~~ `b = 2` and `b = 20` share three tokens of four: the same statement, edited
+--- old
+a = 1
+b = 2
+c = 3
+--- new
+a = 1
+b = 20
+c = 3
+--- ids
+1 2 3
+--- lost
+-
+
+=== 06 a replaced statement is not an edit
+~~~ identity is a claim: `b = 2` and `foo(bar)` share one token of seven. A refinement aimed at the first must not land on the second.
+--- old
+a = 1
+b = 2
+c = 3
+--- new
+a = 1
+foo(bar)
+c = 3
+--- ids
+1 * 3
+--- lost
+2
+
+=== 07 a condition edited, its body kept
+--- old
+func F(a)
+	if a = 1
+		x = 1
+		y = 2
+	ok
+	return 0
+--- new
+func F(a)
+	if a = 2
+		x = 1
+		y = 2
+	ok
+	return 0
+--- ids
+1 2 3 4 5 6
+--- lost
+-
+
+=== 08 an edit inside a body keeps the statement around it
+--- old
+func F(a)
+	if a = 1
+		x = 1
+		y = 2
+	ok
+	return 0
+--- new
+func F(a)
+	if a = 1
+		x = 10
+		y = 2
+	ok
+	return 0
+--- ids
+1 2 3 4 5 6
+--- lost
+-
+
+=== 09 a statement wrapped in an if keeps its id
+~~~ `b = 2` is the same text before and after; what changed is what holds it. The `if` is new.
+--- old
+func F()
+	a = 1
+	b = 2
+	return b
+--- new
+func F()
+	a = 1
+	if a
+		b = 2
+	ok
+	return b
+--- ids
+1 2 * 3 4
+--- lost
+-
+
+=== 10 statements reordered within a function
+~~~ the longest common run (a, b) stays in place; c moved, and the same text in the same function is the same statement
+--- old
+func F()
+	a = 1
+	b = 2
+	c = 3
+--- new
+func F()
+	c = 3
+	a = 1
+	b = 2
+--- ids
+1 4 2 3
+--- lost
+-
+
+=== 11 functions reordered
+~~~ a definition is matched by its name, not by where it stands
+--- old
+func A()
+	x = 1
+
+func B()
+	y = 2
+--- new
+func B()
+	y = 2
+
+func A()
+	x = 1
+--- ids
+3 4 1 2
+--- lost
+-
+
+=== 12 a function renamed
+--- old
+func Foo()
+	a = 1
+	b = 2
+--- new
+func Bar()
+	a = 1
+	b = 2
+--- ids
+1 2 3
+--- lost
+-
+
+=== 13 a function renamed and lightly edited
+~~~ three statements of four are unchanged (0.75 of the body, over the 0.6 a rename needs); the edited one is paired inside
+--- old
+func Foo()
+	a = 1
+	b = 2
+	c = 3
+	d = 4
+--- new
+func Bar()
+	a = 1
+	b = 2
+	c = 3
+	d = 40
+--- ids
+1 2 3 4 5
+--- lost
+-
+
+=== 14 a function renamed and rewritten is a new function
+~~~ nothing of the body survives, so there is nothing to say the two are one
+--- old
+func Foo()
+	a = 1
+	b = 2
+	c = 3
+--- new
+func Bar()
+	p = 7
+	q = 8
+	r = 9
+--- ids
+* * * *
+--- lost
+1 2 3 4
+
+=== 15 a method added to a class
+--- old
+class A
+	x = 1
+	func M()
+		return 1
+--- new
+class A
+	x = 1
+	func M()
+		return 1
+	func N()
+		return 2
+--- ids
+1 2 3 4 * *
+--- lost
+-
+
+=== 16 a class renamed
+--- old
+class Foo
+	x = 1
+	func M()
+		return 1
+--- new
+class Bar
+	x = 1
+	func M()
+		return 1
+--- ids
+1 2 3 4
+--- lost
+-
+
+=== 17 parameters are matched by name
+--- old
+func F(a, b)
+	return a
+--- new
+func F(b, a, c)
+	return a
+--- ids
+1 3 2 * 4
+--- lost
+-
+
+=== 18 comments: an edited one keeps its id, a new one has none
+~~~ the comment that ends a line belongs to its statement and holds no id of its own
+--- old
+# one
+a = 1  # t
+# two
+--- new
+# zero
+# one
+a = 1  # t
+# two edited
+--- ids
+* 1 2 3
+--- lost
+-
+
+=== 19 two identical statements, one deleted
+~~~ an unavoidable ambiguity, settled the way the diff settles it: the longest run, here `x = 1` then `y = 2`, is the later pair
+--- old
+func F()
+	x = 1
+	x = 1
+	y = 2
+--- new
+func F()
+	x = 1
+	y = 2
+--- ids
+1 3 4
+--- lost
+2
+
+=== 20 a case added to a switch
+--- old
+switch x
+	on 1
+		a = 1
+	other
+		b = 2
+off
+--- new
+switch x
+	on 1
+		a = 1
+	on 2
+		c = 3
+	other
+		b = 2
+off
+--- ids
+1 2 * 3
+--- lost
+-
+
+=== 21 a lambda body inside an edited call
+~~~ the call is edited (an argument added) and the statements of the lambda inside it are found by where they stand in it
+--- old
+f(func(a) { return a })
+--- new
+f(func(a) { return a + 1 }, 2)
+--- ids
+1 2 3
+--- lost
+-
+
+=== 22 a statement moved to another function is lost, and said to be
+~~~ a move is claimed only inside one list or one function: the same text in another function may be a different statement that happens to
+~~~ read the same (`return 0` is everywhere)
+--- old
+func A()
+	x = 1
+	y = 2
+
+func B()
+	z = 3
+--- new
+func A()
+	x = 1
+
+func B()
+	y = 2
+	z = 3
+--- ids
+1 2 4 * 5
+--- lost
+3
+
+=== 23 statements reordered outside any function
+~~~ a move is claimed inside one list: here the top level of a program, where no function's pool reaches
+--- old
+a = 1
+b = 2
+c = 3
+--- new
+c = 3
+a = 1
+b = 2
+--- ids
+3 1 2
+--- lost
+-
