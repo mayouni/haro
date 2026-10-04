@@ -224,7 +224,10 @@ the *floor of what a name-and-hash matcher gives for free*.
 ### 4.5 What is not measured, and is owed
 
 1. **The abstraction step** (L0 to L1 to text): 59 printing templates and the comment-attachment rule. The recommended first rung
-   measures it on the same corpus, with floors.
+   measures it on the same corpus, with floors. **Measured by rung 1 (2026-10-04, `haro/spike/v18/GRAMMAR.md`):** 49 graph kinds
+   fold the grammar's node kinds; the abstraction is not a function of the tree alone, because the tree is wrong about structure
+   in nine ways Ring's own flow corrects (HF-73); the printer writes no `end`; the round trip holds on all of Softanza's 6,068
+   Ring files (5,958 exact in graph and compiled code, 52 as graphs only, 58 refused by Ring itself), judged by `rnxc dis`.
 2. **Resolution** (L2): how many call edges `rnxc` resolves that stzRingCodeGraph's name-based parse does not, and the reverse.
 3. **Graph build cost** against the 3.38 seconds `rnxc` spends in tree-sitter on the 613-file load unit [R, ringpp `CLAUDE.md`].
 4. **Whether a second face helps a model.** The hypothesis -- "an agent skilled in any of these languages writes Haro" -- has no
@@ -330,7 +333,7 @@ Each rung is fixtures first, prose second, and has a guard before it is called b
 | rung | what | owner | guard |
 |---|---|---|---|
 | **0, done here** | the round trip at the token level, the comment census, the layout and identity measurements, the kinds table | haro-charter | `haro/study/codegraph/*.py`; `results.json`, `identity.json`, `layout.json`, `census_comments.json` |
-| **1 -- the structure level of the computing altitude (Haro v0.18)** | the L1 schema (RCP's node types, with Class, Method and Attribute settled with Refine); the 59 printing templates; comment attachment; hand-composed fixtures, one per trap in section 5, written first; the court in the guard (a sample of ~40 files, floors pinned, the two controls failing) | haro-charter, with stz for the IR.md row | guard stage 22 |
+| **1 -- the structure level of the computing altitude (Haro v0.18) -- BUILT 2026-10-04** | the L1 schema (RCP's node types, with Class, Method and Attribute settled with Refine); the 59 printing templates; comment attachment; hand-composed fixtures, one per trap in section 5, written first; the court in the guard (a sample of ~40 files, floors pinned, the two controls failing) | haro-charter, with stz for the IR.md row | guard stage 22 |
 | **2 -- identity** | node ids; the name-and-hash matcher; a stage that replays real history and pins the retention (baseline 98.1%) and the K2 threshold | haro-charter | guard stage 23 |
 | **3 -- `rnxc fmt` and the lossless export** | `rnxc dump --json` (every node with its byte span; the three hidden tokens; full leaf text), then the printer as `fmt` | **ringpp** (outside `haro/`, as D14 for the forge) | the court's corpus run on the real binary |
 | **4 -- L2 and the projection** | the resolved graph from `rnxc`; the line protocol as its projection; stzRingCodeGraph answers compared and every difference named | ringpp, stzlib | agreement table, differences listed |
@@ -390,3 +393,6 @@ level of the computing altitude, in the guard. **R12** no second face as a parse
     haro/study/codegraph/layout.py               bytes, tokens, nodes per KB; layout.json
     haro/study/codegraph/identity.py             identity across real edits; identity.json
     haro/study/codegraph/kinds.py                the 59 kinds ranked by use; kinds.json
+    haro/spike/v18/GRAMMAR.md                    rung 1: the schema, Ring's flow, the canonical text, the court, the numbers
+    haro/spike/v18/l1.py, l1_check.py            rung 1: the graph, the abstraction, the printer; the court (guard stage 22)
+    haro/spike/v18/fixtures.txt                  rung 1: 22 hand-composed programs, graph and canonical text

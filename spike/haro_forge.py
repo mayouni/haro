@@ -2872,6 +2872,32 @@ def stage21():
     return failures
 
 
+# ---- stage 22: the structure level of the computing altitude, Ring++ face (rung 18, Haro v0.18)
+
+L1_CHECK = os.path.join(HERE, 'v18', 'l1_check.py')
+
+
+def stage22():
+    """The eighteenth rung: a program graph of Ring (v18/l1.py), a canonical printer, and a round-trip court (v18/l1_check.py) whose judge is
+    the compiled code, not the tool's own sense of itself: 22 hand-composed fixtures (one per Ring trap, written before the code), two
+    controls that must fail (an abstraction that drops a `for`'s step, caught only by `rnxc dis`; a printer that drops comments, caught by
+    the round trip) and a corpus of Ring files -- every graph prints a text that parses back to the same graph, prints the same text again,
+    and compiles to the same code. Where rnxc does not read Ring (`see`, `put`), the oracle judges."""
+    print('stage 22 -- the program graph and its canonical printer, judged by round trip and by compiled code: v18/l1_check.py (22 fixtures, 2 controls, a corpus of Ring files)')
+    failures = 0
+    p = subprocess.run([sys.executable, L1_CHECK], capture_output=True, cwd=ROOT, timeout=900)
+    out = p.stdout.decode('utf-8', 'replace').replace('\r\n', '\n')
+    for line in out.splitlines():
+        if line.startswith('  ') or line.startswith('l1_check:'):
+            print(line)
+    if p.returncode != 0:
+        failures += 1
+        print(f'  FAIL l1_check.py exited {p.returncode}')
+    if PLANT:
+        failures += 1
+        print('  FAIL the program graph -- PLANTED')
+    return failures
+
 def stage6(lang, court=None, n=15):
     court = court or f'{lang}_court.ring'
     print(f'stage 6 -- edit to verdict on makeen_box.machine, minima of {n}')
@@ -2973,5 +2999,7 @@ if __name__ == '__main__':
         failures += stage20()
     if stage in (None, 21) and os.path.exists(CHARTER_SCANS):
         failures += stage21()
+    if stage in (None, 22) and os.path.exists(L1_CHECK):
+        failures += stage22()
     print(f'haro_forge: {"FAIL" if failures else "PASS"} ({failures} failure(s), {time.perf_counter()-t0:.1f} s)')
     sys.exit(1 if failures else 0)

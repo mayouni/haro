@@ -80,6 +80,7 @@ expression language forged whole, judged by stz's 29 fixtures as stage 8, pinned
 | `haro/CODEGRAPH.md`, `study/codegraph/` | **The code graph beneath the faces** (a design memo, COMPASS-HARO-05, 2026-10-04; not a rung): four levels L0 to L3, a face as a parser and a printer under a round-trip court, comments as nodes, identity by name and hash; measured first -- 429 of 429 Ring files round-trip through a layout-free printer, layout is 5 to 10% of the bytes, comments 26.8% of the Softanza library and 8,306 `#-->` promises, 98.1% of statements keep identity across 56 real edits; `python haro/study/codegraph/corpus.py` |
 | `study/phase15/` | **The Phase 1.5 study** (ringua's exemplar extension study, run 2026-10-03; not a rung): `STUDY.md`, the experiments E1-E4, `nlq.ring` (stzNatural's architecture retargeted to closed queries), the judges, 74 hand-composed questions in English and French, the tontine's knowledge graph as a text artifact; `python haro/study/phase15/study_run.py` |
 | `spike/n_v17.haro`, `spike/n/tontine.n`, `spike/n_court.ring`, `spike/v17/` | **N** (drawn 2026-10-03, **built 2026-10-04 as Haro v0.17, the seventeenth rung**): the letter and its `UNDERSTAND`, the tontine's natural door in English and French, the court forged from the letter with `n_lib.ring` (the verbs and the 15 rules), `GRAMMAR.md` (the API, 18 decisions), 17 + 21 + 12 fixtures, `n_model.py` (the reference model), `n_check.py` (the judge; guard stage 20) |
+| `spike/v18/` | **The program graph of Ring** (Haro v0.18, the eighteenth rung, 2026-10-04): `l1.py` (49 kinds, the abstraction, the canonical printer), `fixtures.txt` (22 programs composed before the code), `l1_check.py` (the court: fixtures, two controls that fail, a 78-file corpus; guard stage 22), `GRAMMAR.md`; `probes/` holds the probes (`closers.py`, `fall.py`, `stress.py`) |
 | `spike/world_lib.ring`, `spike/world_stub.ring` | the world's functions (SYMBOL resolution, the C1 rows), moved out of `court_lib.ring` and loaded only where a SYMBOL or PUBLISH is declared, and the stub that stands elsewhere |
 
 Nothing in `rnxc` or the VM changed. Nothing in a sibling repository changed.
@@ -1294,6 +1295,28 @@ an index and cannot print a program; `rnxc dump` hides three kinds of token. **W
 the concrete tree to the program graph (59 printing templates), the graph's build cost, and that a second face helps a model.
 The guard is untouched; the decisions are the author's.
 
+## The eighteenth rung -- Haro v0.18, the structure level of the computing altitude -- 2026-10-04
+
+**On the author's "start rung 1 of the code graph memo"** (`haro/CODEGRAPH.md`, section 7, rung 1). The Ring++ face's graph, its
+abstraction from `rnxc dump`'s tree, its canonical printer, and a round-trip court in the guard whose judge is the compiled code.
+Fixtures first: 22 programs, one per Ring trap, hand-composed before `l1.py` existed.
+
+    v18/l1.py        49 kinds; the abstraction (the tree repaired by Ring's own flow); the printer (no `end`, ever)
+    v18/fixtures.txt 22 programs: Ring, graph, canonical text; seven changed after the court ran, each saying so
+    v18/l1_check.py  F: 22 fixtures x 5 checks; C: two controls that must fail; K: a corpus, floors 20 and 24
+    stage 22         the court in the guard: 22 fixtures, 2 controls, 78 files, ten seconds; --plant FAIL
+    v18/GRAMMAR.md   the schema, the nine rules of Ring's flow, the canonical text, the court, the numbers
+    the pass         PASS, 22 stages in 321.1 s (stage 6: harb 5.3 ms, the forged court 84.5 ms against the pinned 100);
+                     --plant FAIL on stage 22
+
+**What building found** (HF-73 to HF-75): `end` closes nothing on Ring, so the graph has no statement after a definition and
+the printer writes no `end`; the grammar's tree is wrong about structure in nine ways, each repaired by a rule measured on the
+oracle; rnxc reads `put`/`See` as `?` where Ring prints no line; and the court's first stress compared compiled code for
+268 of 2,847 files while saying "exact" -- fixed, and every number now says what was compared. **Measured:** Softanza's whole
+tree, 6,068 Ring files, 5,958 exact in graph and compiled code, 52 as graphs only (rnxc refuses part of the original), 58
+refused by Ring itself, none failing. **Not claimed:** node identity (rung 2), `rnxc fmt` (rung 3), resolved edges (rung 4); that
+a second face helps a model (K4); long-line wrapping.
+
 ## The names -- `.haro`, not `.stzu` -- corrected 2026-10-02
 
 **At the author's word ("we agreed to use .haro instead of .stzu, no?").** D1 was ratified
@@ -1386,6 +1409,9 @@ whole guard re-run on the renamed tree: 28 + 30 + 27 + 23, 117 of 120, 32 of 32,
    author's "narrate a run": `TELLS`, `narrate-run` and `narrate-ask`, a projection of the run
    itself, judged by laws read in Python (30 runs, 31 answers rebuilt, 22 questions), by
    narrations written by hand first, and by thirteen protections each switched off.
+19. ~~Rung 1 of the code-graph memo~~ -- built 2026-10-04 as Haro v0.18, the eighteenth rung above, on the
+   author's "start rung 1 of the code graph memo": the program graph of Ring, its canonical printer and a
+   round-trip court judged by compiled code; rung 2 (identity) is next in the memo.
 18. The forge as an `rnxc` verb (the ringpp session's `src/`, routed); the
    Softanza-resident timing the charter's 2.6 asks for; the court's run time on the
    oracle under paths and views (6.4x the image this pass, named at stage 6); the

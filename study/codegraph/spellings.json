@@ -1,0 +1,123 @@
+{
+ "files": 309,
+ "spellings": {
+  "function_definition": {
+   "func": 1342,
+   ")": 893,
+   "def": 74
+  },
+  "if_statement": {
+   "ok": 2166,
+   "if": 2166
+  },
+  "elseif_clause": {
+   "but": 245
+  },
+  "else_clause": {
+   "else": 144
+  },
+  "while_statement": {
+   "while": 112,
+   "end": 112
+  },
+  "for_statement": {
+   "next": 804,
+   "for": 804,
+   "to": 758,
+   "=": 758,
+   "in": 46,
+   "step": 10
+  },
+  "switch_statement": {
+   "switch": 12,
+   "off": 12
+  },
+  "case_clause": {
+   "on": 48
+  },
+  "other_clause": {
+   "other": 3
+  },
+  "try_statement": {
+   "try": 128,
+   "done": 128
+  },
+  "see_statement": {
+   "?": 980,
+   "see": 172
+  },
+  "exit_statement": {
+   "exit": 34
+  },
+  "loop_statement": {
+   "loop": 60,
+   "continue": 2
+  },
+  "class_definition": {
+   "class": 64
+  },
+  "class_parent": {
+   "from": 19
+  },
+  "binary_expression": {
+   "+": 4118,
+   "=": 1309,
+   "!=": 373,
+   "and": 318,
+   "or": 305,
+   "-": 245,
+   ">": 187,
+   "*": 170,
+   "<=": 148,
+   "<": 141,
+   ">=": 133,
+   "/": 118,
+   "%": 48,
+   ":": 15,
+   "&": 14,
+   "<<": 12,
+   "|": 6,
+   ">>": 5,
+   "^": 1
+  },
+  "unary_expression": {
+   "not": 334,
+   "-": 62,
+   "+": 16,
+   "!": 7,
+   "~": 1
+  },
+  "self": {
+   "this": 9,
+   "self": 5
+  },
+  "anonymous_function": {
+   "}": 9,
+   "{": 9,
+   "func": 9,
+   ")": 8,
+   "(": 8
+  },
+  "return_statement": {
+   "return": 2175,
+   "&": 1
+  },
+  "literals": {
+   "null:NULL": 418,
+   "null:null": 2,
+   "boolean:true": 11,
+   "boolean:false": 13,
+   "boolean:True": 3,
+   "self:self": 10,
+   "super:super": 22,
+   "boolean:False": 1,
+   "boolean:TRUE": 6,
+   "boolean:FALSE": 4,
+   "self:This": 9
+  }
+ },
+ "case": {
+  "differs from the lower-case keyword": 840,
+  "is the lower-case keyword": 12620
+ }
+}

@@ -1,0 +1,663 @@
+~~~ The fixtures of rung 18 (Haro v0.18): the structure level of the computing altitude, for the Ring++ face.
+~~~
+~~~ Hand-composed BEFORE the abstraction or the printer existed (the W discipline: fixtures first, code second). Each one
+~~~ is a Ring program, the L1 graph it must abstract to, and the canonical text the printer must print. Where a fixture
+~~~ turns on how the PARSER reads a shape (a comment between statements, a named parameter, a bare return), the shape was
+~~~ read off `rnxc dump` first, never off the implementation.
+~~~
+~~~ Format: `=== NN name`, then `~~~ ` notes (`trap:` names the Ring finding; `dis: yes` also compiles original and canonical
+~~~ and compares `rnxc dis`), then `--- ring` (the program; absent for a printer-only fixture), `--- l1` (the graph, as the
+~~~ s-expressions of v18/GRAMMAR.md), `--- out` (the canonical text).
+~~~
+
+=== 01 hello
+~~~ dis: yes
+--- ring
+? "hi"
+--- l1
+(file :items [(say :e (str "\"hi\""))])
+--- out
+? "hi"
+
+=== 02 spellings
+~~~ the grammar's alternative spellings print as one: FUNCTION/FUNC/DEF, IF..ENDIF/OK, ELSEIF/BUT, OTHER/ELSE, GET/GIVE,
+~~~ BREAK/EXIT, CONTINUE/LOOP, FOREACH/FOR, ENDFOR/NEXT, ENDWHILE, ENDSWITCH/OFF, ENDTRY/DONE, ENDFUNC, NOT; keywords in capitals.
+~~~ (Changed after the court ran: PUT and SEE are left out, because Ring prints no line for them and rnxc does -- fixture 22.)
+~~~ dis: yes
+--- ring
+FUNCTION Main
+	IF a = 1 AND b != 2 OR NOT c
+		? "x"
+	ELSEIF d
+		GET e
+	OTHER
+		BREAK
+	ENDIF
+	FOREACH i IN list
+		CONTINUE
+	ENDFOR
+	WHILE x ENDWHILE
+	SWITCH y CASE 1 ? 1 OTHER ? 2 ENDSWITCH
+	TRY f() CATCH g() ENDTRY
+ENDFUNC
+--- l1
+(file :items [
+  (func :name "Main" :items [
+    (if :cond (bin :op "or"
+                   :l (bin :op "and" :l (bin :op "=" :l (id "a") :r (num "1")) :r (bin :op "!=" :l (id "b") :r (num "2")))
+                   :r (un :op "not" :e (id "c")))
+        :then [(say :e (str "\"x\""))]
+        :elifs [(elif :cond (id "d") :items [(give :target (id "e"))])]
+        :else [(exit)])
+    (for :var "i" :kind "in" :a (id "list") :items [(loop)])
+    (while :cond (id "x"))
+    (switch :subject (id "y")
+            :cases [(case :values [(num "1")] :items [(say :e (num "1"))])]
+            :other [(say :e (num "2"))])
+    (try :items [(expr :e (call :callee (id "f")))]
+         :catch (catch :items [(expr :e (call :callee (id "g")))]))])])
+--- out
+func Main()
+	if a = 1 and b != 2 or not c
+		? "x"
+	but d
+		give e
+	else
+		exit
+	ok
+	for i in list
+		loop
+	next
+	while x
+	end
+	switch y
+		on 1
+			? 1
+		other
+			? 2
+	off
+	try
+		f()
+	catch
+		g()
+	done
+
+=== 03 functions
+~~~ every way to declare a parameter list prints as one: with parens, without, typed, none
+~~~ dis: yes
+--- ring
+func A
+	return 1
+func B()
+	return 2
+def C(x, int y)
+	return x
+function D x, y
+	return y
+--- l1
+(file :items [
+  (func :name "A" :items [(return :e (num "1"))])
+  (func :name "B" :items [(return :e (num "2"))])
+  (func :name "C" :params [(param :name "x") (param :name "y" :type "int")] :items [(return :e (id "x"))])
+  (func :name "D" :params [(param :name "x") (param :name "y")] :items [(return :e (id "y"))])])
+--- out
+func A()
+	return 1
+
+func B()
+	return 2
+
+func C(x, int y)
+	return x
+
+func D(x, y)
+	return y
+
+=== 04 classes
+~~~ the grammar nests a second class inside the first, and `private` swallows the rest of the file; the graph does not: classes are siblings
+~~~ and `private` is a marker among a class's members
+~~~ dis: yes
+--- ring
+class Point from Base
+	x = 1
+	private
+	y = 2
+	func Move(dx)
+		x += dx
+class Other : Base
+	z = 3
+--- l1
+(file :items [
+  (class :name "Point" :parent ["Base"] :items [
+    (expr :e (assign :op "=" :l (id "x") :r (num "1")))
+    (private)
+    (expr :e (assign :op "=" :l (id "y") :r (num "2")))
+    (func :name "Move" :params [(param :name "dx")] :items [(expr :e (assign :op "+=" :l (id "x") :r (id "dx")))])])
+  (class :name "Other" :parent ["Base"] :items [(expr :e (assign :op "=" :l (id "z") :r (num "3")))])])
+--- out
+class Point from Base
+	x = 1
+	private
+	y = 2
+
+	func Move(dx)
+		x += dx
+
+class Other from Base
+	z = 3
+
+=== 05 a function after a class belongs to the class
+~~~ trap: F-21 -- every `func` after the first `class` becomes a method; the printer shows the ownership by indenting it
+~~~ dis: yes
+--- ring
+class A
+	x = 1
+func F
+	return 1
+--- l1
+(file :items [
+  (class :name "A" :items [
+    (expr :e (assign :op "=" :l (id "x") :r (num "1")))
+    (func :name "F" :items [(return :e (num "1"))])])])
+--- out
+class A
+	x = 1
+
+	func F()
+		return 1
+
+=== 06 statements
+~~~ trap: F-74 -- `exit 2` leaves two loops; the level is an expression and is kept
+~~~ dis: yes
+--- ring
+func Main
+	if a = 1 ? "one" but a = 2 ? "two" else ? "many" ok
+	while i < 3 i++ end
+	for i = 1 to 10 step 2 loop next
+	for k in items exit 2 next
+	do i-- again i > 0
+	switch a on 1, 2 ? "ab" other ? "c" off
+	try risky() catch(e) ? e finally cleanup() done
+--- l1
+(file :items [
+  (func :name "Main" :items [
+    (if :cond (bin :op "=" :l (id "a") :r (num "1"))
+        :then [(say :e (str "\"one\""))]
+        :elifs [(elif :cond (bin :op "=" :l (id "a") :r (num "2")) :items [(say :e (str "\"two\""))])]
+        :else [(say :e (str "\"many\""))])
+    (while :cond (bin :op "<" :l (id "i") :r (num "3")) :items [(expr :e (post :op "++" :e (id "i")))])
+    (for :var "i" :kind "to" :a (num "1") :b (num "10") :step (num "2") :items [(loop)])
+    (for :var "k" :kind "in" :a (id "items") :items [(exit :e (num "2"))])
+    (dowhile :items [(expr :e (post :op "--" :e (id "i")))] :cond (bin :op ">" :l (id "i") :r (num "0")))
+    (switch :subject (id "a")
+            :cases [(case :values [(num "1") (num "2")] :items [(say :e (str "\"ab\""))])]
+            :other [(say :e (str "\"c\""))])
+    (try :items [(expr :e (call :callee (id "risky")))]
+         :catch (catch :binding "e" :items [(say :e (id "e"))])
+         :finally [(expr :e (call :callee (id "cleanup")))])])])
+--- out
+func Main()
+	if a = 1
+		? "one"
+	but a = 2
+		? "two"
+	else
+		? "many"
+	ok
+	while i < 3
+		i++
+	end
+	for i = 1 to 10 step 2
+		loop
+	next
+	for k in items
+		exit 2
+	next
+	do
+		i--
+	again i > 0
+	switch a
+		on 1, 2
+			? "ab"
+		other
+			? "c"
+	off
+	try
+		risky()
+	catch(e)
+		? e
+	finally
+		cleanup()
+	done
+
+=== 07 expressions
+~~~ the structure of an expression is kept as written, parentheses included: the graph does not re-associate
+~~~ the right side of an assignment cannot assign: in `q = a = b = c` the first `=` assigns and the others compare, left to right
+~~~ dis: yes
+--- ring
+x = a + b * c
+y = (a + b) * -c
+z = not a and b or c
+w = a.b(c)[d].e
+v = obj.method(1, "s")
+n += 1
+r = [1:5]
+i++
+q = a = b = c
+--- l1
+(file :items [
+  (expr :e (assign :op "=" :l (id "x") :r (bin :op "+" :l (id "a") :r (bin :op "*" :l (id "b") :r (id "c")))))
+  (expr :e (assign :op "=" :l (id "y") :r (bin :op "*" :l (paren :e (bin :op "+" :l (id "a") :r (id "b"))) :r (un :op "-" :e (id "c")))))
+  (expr :e (assign :op "=" :l (id "z") :r (bin :op "or" :l (bin :op "and" :l (un :op "not" :e (id "a")) :r (id "b")) :r (id "c"))))
+  (expr :e (assign :op "=" :l (id "w")
+                   :r (member :obj (index :obj (call :callee (member :obj (id "a") :prop (id "b")) :args [(id "c")]) :idx (id "d")) :prop (id "e"))))
+  (expr :e (assign :op "=" :l (id "v") :r (call :callee (member :obj (id "obj") :prop (id "method")) :args [(num "1") (str "\"s\"")])))
+  (expr :e (assign :op "+=" :l (id "n") :r (num "1")))
+  (expr :e (assign :op "=" :l (id "r") :r (list :items [(bin :op ":" :l (num "1") :r (num "5"))])))
+  (expr :e (post :op "++" :e (id "i")))
+  (expr :e (assign :op "=" :l (id "q") :r (bin :op "=" :l (bin :op "=" :l (id "a") :r (id "b")) :r (id "c"))))])
+--- out
+x = a + b * c
+y = (a + b) * -c
+z = not a and b or c
+w = a.b(c)[d].e
+v = obj.method(1, "s")
+n += 1
+r = [1:5]
+i++
+q = a = b = c
+
+=== 08 strings
+~~~ trap: F-55 -- Ring has no string escapes: `\n` is a backslash and an `n`; a string is its raw text, quotes included, and may span lines
+~~~ dis: yes
+--- ring
+a = "x\ny"
+b = 'single'
+c = `back`
+d = "has # hash"
+e = "interp #{x} here"
+s = "line1
+line2"
+--- l1
+(file :items [
+  (expr :e (assign :op "=" :l (id "a") :r (str "\"x\\ny\"")))
+  (expr :e (assign :op "=" :l (id "b") :r (str "'single'")))
+  (expr :e (assign :op "=" :l (id "c") :r (str "`back`")))
+  (expr :e (assign :op "=" :l (id "d") :r (str "\"has # hash\"")))
+  (expr :e (assign :op "=" :l (id "e") :r (str "\"interp #{x} here\"")))
+  (expr :e (assign :op "=" :l (id "s") :r (str "\"line1\nline2\"")))])
+--- out
+a = "x\ny"
+b = 'single'
+c = `back`
+d = "has # hash"
+e = "interp #{x} here"
+s = "line1
+line2"
+
+=== 09 construction, blocks, lambdas
+~~~ `new` with and without parentheses stay distinct; a brace block and a lambda print their statements on their own lines
+~~~ dis: yes
+--- ring
+o = new Point(1, 2)
+p = new Point
+q = new Point { x = 3 }
+f = func (a) { return a }
+g = call f(1)
+obj { ? "hooked" }
+--- l1
+(file :items [
+  (expr :e (assign :op "=" :l (id "o") :r (new :name ["Point"] :args [(num "1") (num "2")])))
+  (expr :e (assign :op "=" :l (id "p") :r (new :name ["Point"])))
+  (expr :e (assign :op "=" :l (id "q") :r (new :name ["Point"] :items [(expr :e (assign :op "=" :l (id "x") :r (num "3")))])))
+  (expr :e (assign :op "=" :l (id "f") :r (lambda :params [(param :name "a")] :items [(return :e (id "a"))])))
+  (expr :e (assign :op "=" :l (id "g") :r (callkw :e (call :callee (id "f") :args [(num "1")]))))
+  (expr :e (brace :obj (id "obj") :items [(say :e (str "\"hooked\""))]))])
+--- out
+o = new Point(1, 2)
+p = new Point
+q = new Point {
+	x = 3
+}
+f = func(a) {
+	return a
+}
+g = call f(1)
+obj {
+	? "hooked"
+}
+
+=== 10 lists, pairs, symbols, named arguments
+~~~ trap: F-59 -- `:name = value` in an argument list is a COMPARISON node whose left side is a symbol; the graph says so
+~~~ dis: yes
+--- ring
+l = [1, :two, "k" = 3, key = v]
+f(:name = 1, 2)
+e = []
+--- l1
+(file :items [
+  (expr :e (assign :op "=" :l (id "l")
+                   :r (list :items [(num "1") (sym ":two") (pair :key (str "\"k\"") :value (num "3")) (pair :key (id "key") :value (id "v"))])))
+  (expr :e (call :callee (id "f") :args [(bin :op "=" :l (sym ":name") :r (num "1")) (num "2")]))
+  (expr :e (assign :op "=" :l (id "e") :r (list)))])
+--- out
+l = [1, :two, "k" = 3, key = v]
+f(:name = 1, 2)
+e = []
+
+=== 11 comments
+~~~ a comment is a node, never layout: kept as an item where it stands, as the trailing comment of the statement on its line, and -- when it
+~~~ sat inside an expression -- as an item after that statement (changed after the court ran: a layout-free text has nowhere to keep it
+~~~ inside, so the first version of this fixture, with the comment as a field of the statement, could not survive the round trip). A
+~~~ comment after the last statement of a function that no `end` closes is the parser's, and belongs to the file: so is `# inner` here,
+~~~ the last thing the function holds once it is hoisted (changed after the court ran, again: the first expectation kept it inside)
+~~~ dis: yes
+--- ring
+# header
+func Main
+	x = 1  # trailing
+	# own line
+	y = 2
+	#--> a promise
+	if y = 2
+		# dangling in if
+	ok
+	/* block
+	   comment */
+	z = f(1, # inner
+	      2)
+	# dangling at end
+--- l1
+(file :items [
+  (comment "# header")
+  (func :name "Main" :items [
+    (expr :e (assign :op "=" :l (id "x") :r (num "1")) :trail (comment "# trailing"))
+    (comment "# own line")
+    (expr :e (assign :op "=" :l (id "y") :r (num "2")))
+    (comment "#--> a promise")
+    (if :cond (bin :op "=" :l (id "y") :r (num "2")) :then [(comment "# dangling in if")])
+    (comment "/* block\n\t   comment */")
+    (expr :e (assign :op "=" :l (id "z") :r (call :callee (id "f") :args [(num "1") (num "2")])))])
+  (comment "# inner")
+  (comment "# dangling at end")])
+--- out
+# header
+func Main()
+	x = 1  # trailing
+	# own line
+	y = 2
+	#--> a promise
+	if y = 2
+		# dangling in if
+	ok
+	/* block
+	   comment */
+	z = f(1, 2)
+
+# inner
+# dangling at end
+
+=== 12 a bare return
+~~~ the parser reads `return` and a statement, or `return x = 1`, depending on what surrounds it; the compiler reads the statement as the
+~~~ value of the return (R24 at run time) -- measured: rnxc compiles the two alike. The graph says what the compiler says, and the canonical
+~~~ text puts the value on the return's line. (Changed after the court ran: the first version expected the parser's other reading.)
+~~~ dis: yes
+--- ring
+func F
+	return
+	x = 1
+--- l1
+(file :items [
+  (func :name "F" :items [(return :e (bin :op "=" :l (id "x") :r (num "1")))])])
+--- out
+func F()
+	return x = 1
+
+=== 13 the colon is a range
+~~~ trap: F-65 -- `if x : y ok` is not a one-line if: the `:` is the range operator, and the condition is `x:y`
+~~~ dis: yes
+--- ring
+if x : y ok
+--- l1
+(file :items [(if :cond (bin :op ":" :l (id "x") :r (id "y")))])
+--- out
+if x:y
+ok
+
+=== 14 separators and the trailing period
+~~~ `;` and `,` between statements are separators; a period after a call statement is dropped, as Ring accepts and ignores it
+~~~ dis: yes
+--- ring
+a = 1; b = 2
+c = 3, d = 4
+Foo("x").
+--- l1
+(file :items [
+  (expr :e (assign :op "=" :l (id "a") :r (num "1")))
+  (expr :e (assign :op "=" :l (id "b") :r (num "2")))
+  (expr :e (assign :op "=" :l (id "c") :r (num "3")))
+  (expr :e (assign :op "=" :l (id "d") :r (num "4")))
+  (expr :e (call :callee (id "Foo") :args [(str "\"x\"")]))])
+--- out
+a = 1
+b = 2
+c = 3
+d = 4
+Foo("x")
+
+=== 15 numbers, names and the four literals
+~~~ trap: F-18 -- `N` and `n` are one variable on Ring; the graph keeps both spellings as written. A number is its text. `This`, `NULL`, `true`
+~~~ and `false` have one canonical spelling each, chosen by the corpus (NULL 418 times against null twice)
+~~~ dis: yes
+--- ring
+n = 0xFF + 1_000 + 2.5f
+N = n
+This.x = NULL
+y = TRUE and False
+--- l1
+(file :items [
+  (expr :e (assign :op "=" :l (id "n") :r (bin :op "+" :l (bin :op "+" :l (num "0xFF") :r (num "1_000")) :r (num "2.5f"))))
+  (expr :e (assign :op "=" :l (id "N") :r (id "n")))
+  (expr :e (assign :op "=" :l (member :obj (self) :prop (id "x")) :r (null)))
+  (expr :e (assign :op "=" :l (id "y") :r (bin :op "and" :l (bool true) :r (bool false))))])
+--- out
+n = 0xFF + 1_000 + 2.5f
+N = n
+This.x = NULL
+y = true and false
+
+=== 16 load, import, package
+~~~ a package holds its classes; `import` and `load` keep their form
+--- ring
+load "a.ring"
+load package "b.ring"
+load again "c.ring"
+import System.Web
+package My.Pack
+class K
+	x = 1
+--- l1
+(file :items [
+  (load :path (str "\"a.ring\""))
+  (load :mode "package" :path (str "\"b.ring\""))
+  (load :mode "again" :path (str "\"c.ring\""))
+  (import :name ["System" "Web"])
+  (package :name ["My" "Pack"] :items [(class :name "K" :items [(expr :e (assign :op "=" :l (id "x") :r (num "1")))])])])
+--- out
+load "a.ring"
+load package "b.ring"
+load again "c.ring"
+import System.Web
+
+package My.Pack
+	class K
+		x = 1
+
+=== 17 braces, as another spelling of a block
+~~~ the `{ }` bodies of a class, function, if and while are spellings of the keyword blocks. The braces close nothing as far as Ring's flow
+~~~ goes (measured: v18/probes/fall.py): the statements after the class run as part of the last method's flow, so the graph says so
+~~~ (changed after the court ran: the first version closed the class with `end`, which Ring ignores). Judged by running both texts on the
+~~~ oracle, not by `rnxc dis`: rnxc types a method whose `return 1` the parser split from its value as `ret=str` and the braced one as
+~~~ `ret=ref`, though both answer 1 (probed) -- a finding about rnxc, not about the graph
+~~~ run: yes
+--- ring
+o = new A
+? o.F()
+class A {
+	x = 1
+	func F() { return 1 }
+}
+if a { b = 1 }
+while c { d = 2 }
+--- l1
+(file :items [
+  (expr :e (assign :op "=" :l (id "o") :r (new :name ["A"])))
+  (say :e (call :callee (member :obj (id "o") :prop (id "F"))))
+  (class :name "A" :items [
+    (expr :e (assign :op "=" :l (id "x") :r (num "1")))
+    (func :name "F" :items [
+      (return :e (num "1"))
+      (if :cond (id "a") :then [(expr :e (assign :op "=" :l (id "b") :r (num "1")))])
+      (while :cond (id "c") :items [(expr :e (assign :op "=" :l (id "d") :r (num "2")))])])])])
+--- out
+o = new A
+? o.F()
+
+class A
+	x = 1
+
+	func F()
+		return 1
+		if a
+			b = 1
+		ok
+		while c
+			d = 2
+		end
+
+=== 18 layout is not kept
+~~~ extra blank lines, mixed indentation, several statements on a line and odd spacing all print the same
+~~~ dis: yes
+--- ring
+func   F( a ,b )
+
+
+  if   a     ? "x"   ok
+return b
+--- l1
+(file :items [
+  (func :name "F" :params [(param :name "a") (param :name "b")] :items [
+    (if :cond (id "a") :then [(say :e (str "\"x\""))])
+    (return :e (id "b"))])])
+--- out
+func F(a, b)
+	if a
+		? "x"
+	ok
+	return b
+
+=== 19 a printer-only fixture: parentheses by precedence
+~~~ a graph a refinement builds has no parenthesized nodes; the printer adds the parentheses the structure needs, and no others. Left
+~~~ association: `a - (b - c)` needs them, `(a - b) - c` does not. The statements are assignments because a bare expression that begins
+~~~ with `-` joins the line above as a subtraction -- Ring reads across lines, and the first version of this fixture, six bare
+~~~ expressions, said so (changed after the court ran; the hazard is in GRAMMAR.md's collision table)
+--- l1
+(file :items [
+  (expr :e (assign :op "=" :l (id "r") :r (bin :op "*" :l (bin :op "+" :l (id "a") :r (id "b")) :r (id "c"))))
+  (expr :e (assign :op "=" :l (id "r") :r (bin :op "-" :l (id "a") :r (bin :op "-" :l (id "b") :r (id "c")))))
+  (expr :e (assign :op "=" :l (id "r") :r (bin :op "-" :l (bin :op "-" :l (id "a") :r (id "b")) :r (id "c"))))
+  (expr :e (assign :op "=" :l (id "r") :r (un :op "-" :e (bin :op "+" :l (id "a") :r (id "b")))))
+  (expr :e (assign :op "=" :l (id "r") :r (bin :op "and" :l (bin :op "or" :l (id "a") :r (id "b")) :r (id "c"))))
+  (expr :e (assign :op "=" :l (id "r") :r (bin :op "+" :l (id "a") :r (bin :op "*" :l (id "b") :r (id "c")))))])
+--- out
+r = (a + b) * c
+r = a - (b - c)
+r = a - b - c
+r = -(a + b)
+r = (a or b) and c
+r = a + b * c
+
+=== 20 what follows a definition is its own
+~~~ trap: F-21 -- measured on the oracle and rnxc (v18/probes/closers.py, fall.py): `end`, `endfunc` and `}` after a function close nothing, and
+~~~ a statement written after a definition runs as part of the last function's flow until the next definition. So the graph never holds a
+~~~ statement after a definition, and the printer never writes an `end`: this fixture's first version had the printer closing a
+~~~ definition "exactly when something that is not its own follows", which Ring does not have (changed after the court ran)
+~~~ dis: yes
+--- ring
+func F()
+	return 1
+end
+x = 2
+class A
+	y = 3
+	func G()
+		return 4
+	end
+	z = 5
+--- l1
+(file :items [
+  (func :name "F" :items [
+    (return :e (num "1"))
+    (expr :e (assign :op "=" :l (id "x") :r (num "2")))])
+  (class :name "A" :items [
+    (expr :e (assign :op "=" :l (id "y") :r (num "3")))
+    (func :name "G" :items [
+      (return :e (num "4"))
+      (expr :e (assign :op "=" :l (id "z") :r (num "5")))])])])
+--- out
+func F()
+	return 1
+	x = 2
+
+class A
+	y = 3
+
+	func G()
+		return 4
+		z = 5
+
+=== 21 operators that keep their spelling
+~~~ `!` and `not` compile alike and print as `not`; `&&` and `||` do NOT compile like `and` and `or` (rnxc traps on them), so they keep
+~~~ their spelling: a spelling is normalized only where the compiler has been measured to read the two alike
+~~~ dis: yes
+--- ring
+x = a && b
+y = a || b
+z = !c
+w = a AND b OR NOT c
+--- l1
+(file :items [
+  (expr :e (assign :op "=" :l (id "x") :r (bin :op "&&" :l (id "a") :r (id "b"))))
+  (expr :e (assign :op "=" :l (id "y") :r (bin :op "||" :l (id "a") :r (id "b"))))
+  (expr :e (assign :op "=" :l (id "z") :r (un :op "not" :e (id "c"))))
+  (expr :e (assign :op "=" :l (id "w") :r (bin :op "or" :l (bin :op "and" :l (id "a") :r (id "b")) :r (un :op "not" :e (id "c")))))])
+--- out
+x = a && b
+y = a || b
+z = not c
+w = a and b or not c
+
+=== 22 see, put and ?
+~~~ measured on the oracle: `?` prints a line, `see` and `put` print without one, in any case of letters. rnxc reads `SEE` and `put` as `?`
+~~~ (a case-sensitive test on the first word), so `rnxc dis` cannot judge this pair; the court RUNS both texts on the oracle instead
+~~~ (Changed after the court ran: the first version expected `put` to print a line, as rnxc compiles it.)
+~~~ run: yes
+--- ring
+see "a"
+put "b"
+? "c"
+SEE "d"
+Put "e"
+--- l1
+(file :items [
+  (see :e (str "\"a\""))
+  (see :e (str "\"b\""))
+  (say :e (str "\"c\""))
+  (see :e (str "\"d\""))
+  (see :e (str "\"e\""))])
+--- out
+see "a"
+see "b"
+? "c"
+see "d"
+see "e"
