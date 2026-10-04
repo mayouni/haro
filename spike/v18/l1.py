@@ -226,6 +226,8 @@ def comment_kind(text):
 
 
 def comment(text):
+    if (text[:1] != '/' or text[:2] == '//') and text.endswith('\r'):
+        text = text[:-1]            # a line comment ends at the newline; on a CRLF file the carriage return is the line ending's, not the comment's
     return {'k': 'comment', 'kind': comment_kind(text), 'text': text}
 
 
@@ -374,6 +376,8 @@ class Abstract:
 
     # -- positions
     def _spans(self, root):
+        if root.exact:
+            return              # the export gives the parser's own spans, hidden tokens included
         order, stack = [], [root]
         while stack:
             n = stack.pop()
@@ -594,7 +598,7 @@ class Abstract:
         try:
             os.write(fd, text.encode('latin-1'))
             os.close(fd)
-            root, src, rep = cst.recover(path)
+            root, src, rep = cst.recover_any(path)
         finally:
             try:
                 os.remove(path)
@@ -958,7 +962,7 @@ def abstract_tree(root, src):
 
 def parse_ring(path):
     """A Ring file to its graph, or (None, why)."""
-    root, src, rep = cst.recover(path)
+    root, src, rep = cst.recover_any(path)
     if rep['error']:
         return None, 'the parser reports an error'
     if rep['bad']:

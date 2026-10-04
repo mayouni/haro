@@ -21,12 +21,13 @@ WORD = re.compile(r"[^\s;\"'`#+*/%.,()=<>!\[\]{}:&|~^?-]+")
 
 
 class Node:
-    __slots__ = ('kind', 'text', 'kids', 'parent', 'start', 'end', 'hidden_before')
+    __slots__ = ('kind', 'text', 'kids', 'parent', 'start', 'end', 'hidden_before', 'exact')
 
     def __init__(self, kind, text, parent):
         self.kind, self.text, self.kids, self.parent = kind, text, [], parent
         self.start = self.end = -1
         self.hidden_before = []          # hidden tokens (text) between the previous leaf and this one
+        self.exact = False               # True when start/end are the parser's own (the export), not derived from the leaves
 
     def leaves(self):
         if not self.kids:
@@ -127,6 +128,40 @@ def recover(path):
     if tail.strip(LAYOUT):
         rep['bad'].append(('text after the last leaf', tail.strip()[:30], '', pos))
     return root, src, rep
+
+
+def recover_export(path):
+    """-> (root, src, report), the same triple as recover(), read from `rnxc dump --json` (src/dumpjson.zig): every node's span is the
+    parser's own, a leaf's text is complete, and nothing is placed by walking the leaves against the source."""
+    import json
+    src = read_bytes(path)
+    r = subprocess.run([RNXC, 'dump', '--json', path], capture_output=True, timeout=300)
+    rep = {'error': False, 'bad': [], 'leaves': 0, 'hidden': {}}
+    if r.returncode != 0:
+        rep['bad'].append(('rnxc dump --json failed', r.returncode, '', 0))
+        return None, src, rep
+    doc = json.loads(r.stdout.decode('ascii'))
+    rep['error'] = bool(doc['error'])
+    objs = []
+    for n in doc['nodes']:
+        node = Node(n['k'], n.get('t'), objs[n['p']] if 'p' in n else None)
+        node.start, node.end, node.exact = n['s'], n['e'], True
+        if 'p' in n:
+            objs[n['p']].kids.append(node)
+        objs.append(node)
+    for node in objs:
+        if node.kids:
+            node.text = None
+        else:
+            rep['leaves'] += 1
+            if node.text is None:
+                node.text = ''
+    return (objs[0] if objs else None), src, rep
+
+
+def recover_any(path):
+    """The export when CST_EXPORT=1 (the real parse), else the heuristic recovery from the text dump."""
+    return (recover_export if os.environ.get('CST_EXPORT') == '1' else recover)(path)
 
 
 if __name__ == '__main__':
