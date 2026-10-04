@@ -398,20 +398,28 @@ func Main()
 # dangling at end
 
 === 12 a bare return
-~~~ the parser reads `return` and a statement, or `return x = 1`, depending on what surrounds it; the compiler reads the statement as the
-~~~ value of the return (R24 at run time) -- measured: rnxc compiles the two alike. The graph says what the compiler says, and the canonical
-~~~ text puts the value on the return's line. (Changed after the court ran: the first version expected the parser's other reading.)
+~~~ a `return` that ends its line is BARE: Ring's parser looks at the very next token, finds the end of the line, and returns NULL
+~~~ (vendor/ring-vm/src/stmt.c:931), so the expression on the next row is a statement of its own that never runs. Measured on the oracle
+~~~ and the official 1.27: F() answers the empty string. The grammar hangs that expression on the `return` anyway, and rnxc did the same
+~~~ until 2026-10-04, and the first version of this fixture said the compiler joins them, judged by `rnxc dis` alone. (Changed after the
+~~~ court ran, twice: from the parser's reading to rnxc's, and from rnxc's to Ring's.) The graph keeps the dead statement, because the text has it.
 ~~~ dis: yes
+~~~ run: yes
 --- ring
+? "[" + F() + "]"
 func F
 	return
 	x = 1
 --- l1
 (file :items [
-  (func :name "F" :items [(return :e (bin :op "=" :l (id "x") :r (num "1")))])])
+  (say :e (bin :op "+" :l (bin :op "+" :l (str "\"[\"") :r (call :callee (id "F"))) :r (str "\"]\"")))
+  (func :name "F" :items [(return) (expr :e (assign :op "=" :l (id "x") :r (num "1")))])])
 --- out
+? "[" + F() + "]"
+
 func F()
-	return x = 1
+	return
+	x = 1
 
 === 13 the colon is a range
 ~~~ trap: F-65 -- `if x : y ok` is not a one-line if: the `:` is the range operator, and the condition is `x:y`

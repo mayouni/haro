@@ -51,10 +51,12 @@ LIST_FIELDS = {'items', 'then', 'elifs', 'params', 'args', 'cases', 'values'}
 
 # ---- finish -------------------------------------------------------------------------------------------------------------------------
 # Ring's flow, measured on the oracle (v18/probes/closers.py, fall.py): `end`, `endfunc` and `}` after a function are inert -- a statement
-# written after a definition runs as part of the LAST FUNCTION's flow, up to the next definition -- and a `return` with nothing after it on
-# its line takes the next expression statement as its value. The parser's tree shows neither reliably (it closes a function at an `end`,
-# cuts a long expression at a `+`, and nests a stray statement in a class), so the graph is built from the tree and then settled by these
-# three rules, in this order.
+# written after a definition runs as part of the LAST FUNCTION's flow, up to the next definition -- and a `return` that ends its line is BARE
+# (vendor/ring-vm/src/stmt.c:931: Ring looks at the very next token, finds the end of the line, and returns NULL), so what stands on a
+# later row is a statement of its own that never runs. The parser's tree shows neither reliably (it closes a function at an `end`, hangs the
+# next row's expression on a `return`, cuts a long expression at a `+`, and nests a stray statement in a class), so the graph is built
+# from the tree and then settled by these rules, in this order. (The first version of this rung joined a bare `return` with the next
+# row's statement because rnxc did; rnxc was wrong, and the oracle says so -- HF-74.)
 
 STMT_LISTS = ('items', 'then', 'else', 'other', 'finally')
 
@@ -93,33 +95,6 @@ def absorb(items):
     return out
 
 
-def merge_returns(items):
-    """`return` and then, across the line, an expression statement: one return carrying the expression (rnxc and Ring compile the two alike)."""
-    out, i = [], 0
-    while i < len(items):
-        it = items[i]
-        i += 1
-        if it['k'] == 'return' and not it.get('e'):
-            j = i
-            while j < len(items) and items[j]['k'] == 'comment':
-                j += 1
-            if j < len(items) and items[j]['k'] == 'expr':
-                nxt = items[j]
-                e = nxt['e']
-                if e['k'] == 'assign' and e['op'] == '=':
-                    e = mk('bin', op='=', l=e['l'], r=e['r'])          # the value of a return is an expression: its `=` compares
-                merged = mk('return', e=e, amp=it.get('amp', False))
-                tr = it.get('trail') or nxt.get('trail')
-                if tr is not None:
-                    merged['trail'] = tr
-                out.append(merged)
-                out.extend(items[i:j])
-                i = j + 1
-                continue
-        out.append(it)
-    return out
-
-
 def pop_comments(items):
     """A comment after the last statement of a definition is the parser's: it belongs to what holds the definition. Bottom up."""
     out = []
@@ -148,19 +123,6 @@ def settle_absorb(x):
                 settle_absorb(v)
         if x.get('k') in ('file', 'package', 'class'):
             x['items'] = absorb(x.get('items', []))
-
-
-def settle_merge(x):
-    if isinstance(x, list):
-        for v in x:
-            settle_merge(v)
-    elif isinstance(x, dict):
-        for v in list(x.values()):
-            if isinstance(v, (list, dict)):
-                settle_merge(v)
-        for f in STMT_LISTS:
-            if isinstance(x.get(f), list):
-                x[f] = merge_returns(x[f])
 
 
 def lift_private(x):
@@ -213,7 +175,6 @@ def push_trails(items):
 def finish(g):
     lift_private(g)
     settle_absorb(g)
-    settle_merge(g)
     g['items'] = pop_comments(g['items'])
     push_trails(g['items'])
     return g
@@ -655,7 +616,14 @@ class Abstract:
             return subabs.stmts(found[0])
         if len(found) == 2 and found[0].kind == 'return_statement' and all(c.kind in ('return', '&') for c in found[0].kids) \
                 and found[1].kind == 'expression_statement' and found[1].end == want:
-            return subabs.stmts(found[0]) + subabs.stmts(found[1])
+            ret, stray = subabs.stmts(found[0]), subabs.stmts(found[1])
+            if subabs.line(found[1].start) != subabs.line(found[0].end - 1):
+                return ret + stray                 # a later row: Ring's bare return, then a statement of its own
+            e = stray[0]['e']
+            if e['k'] == 'assign' and e['op'] == '=':
+                e = mk('bin', op='=', l=e['l'], r=e['r'])          # the value of a return is an expression: its `=` compares
+            joined = mk('return', e=e, amp=ret[0].get('amp', False))
+            return [joined] + ret[1:] + stray[1:]
         return None
 
     def comment_into(self, out, ends, k):
@@ -712,7 +680,7 @@ class Abstract:
         saved, self.inner = self.inner, []
         item = getattr(self, 's_' + n.kind)(n)
         hoisted, self.inner = self.inner, saved
-        return [item] + hoisted
+        return (item if isinstance(item, list) else [item]) + hoisted
 
     def body(self, kids):
         return self.container(kids)[0]
@@ -741,6 +709,17 @@ class Abstract:
     def s_return_statement(self, n):
         amp = any(k.kind == '&' for k in n.kids)
         rest = [k for k in n.kids[1:] if k.kind != '&']
+        first = next((k for k in rest if k.kind != 'comment'), None)
+        if first is not None and self.line(first.start) > self.line(n.kids[0].end - 1):
+            # the grammar reads a newline as an extra and hangs the NEXT row's expression on the `return`; Ring's `return` that ends its
+            # line is bare, and that expression is a statement of its own, dead, which the graph keeps because the text has it
+            for k in rest:
+                if k.kind == 'comment':
+                    self.inner.append(comment(self.text(k)))
+            dead = self.parse_snippet(self.text(first))
+            if dead is None:
+                dead = [mk('expr', e=self.expr(first))]
+            return [mk('return', amp=amp)] + dead
         e = self.ex(rest, 0)[0] if rest else None
         return mk('return', e=e, amp=amp)
 

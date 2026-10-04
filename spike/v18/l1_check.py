@@ -4,7 +4,7 @@
   F  the fixtures (v18/fixtures.txt, composed before the code): each Ring program abstracts to the graph its fixture says; the printer,
      given that hand-written graph, prints the text its fixture says; the printed text parses back to the same graph; printing that graph
      again gives the same text (the formatter is idempotent); and original and canonical text compile to the same code (`rnxc dis`) --
-     or, where rnxc does not read Ring (`see`, `put`), print the same output on the oracle
+     or, where the answer is a printed line (`see`, `put`, a bare `return`), print the same output on the oracle
   C  two controls that must FAIL: an abstraction that drops a `for`'s step (both passes lose it, so only the compiled code can say so),
      and a printer that drops comments
   K  a corpus: Ring files of the spike, Ring++'s probes, Ring's standard library and a sample of Softanza (read-only), through the same
@@ -80,11 +80,11 @@ def dis(text, name):
     out = r.stdout.decode('latin-1')
     # a lambda is named after its source LINE (`@@lambda62`): layout leaks into a function's name, and a formatter moves it
     out = re.sub(r'@@lambda\d+', '@@lambdaN', out)
-    # two things rnxc does that Ring does not, measured (HF-73): it types a method's return from the parse (a `return x` the parser cut from
-    # its value reads `ret=str` beside `ret=ref` for the same program -- the answers are the same, probed), and it reads `put` and a
-    # capitalised `See`/`SEE` as `?` (the `say` flag), where Ring prints no line for them. F22 and the graph keep the second apart.
+    # one thing rnxc does that is not a result, measured (HF-74): it types a method's return from the parse (a `return x` the parser cut
+    # from its value reads `ret=str` beside `ret=ref` for the same program -- the answers are the same, probed). It also read `put` and a
+    # capitalised `See`/`SEE` as `?` until 2026-10-04, and this judge normalised the `say` flag to hide it; that is gone, so a regression
+    # shows here again
     out = re.sub(r' ret=\w+', '', out)
-    out = re.sub(r'(\bsay\s+a=\d+\s+b=\d+\s+c=)\d', r'\1_', out)
     # `vnew`'s d is the capacity the list is created with, counted off the tree's children (blank lines in a literal change it); the
     # elements are the `vpush` instructions after it, which stay compared
     out = re.sub(r'(\bvnew\s+a=\d+\s+b=\d+\s+c=\d+\s+d=)\d+', r'\1_', out)

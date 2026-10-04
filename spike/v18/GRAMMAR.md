@@ -89,9 +89,14 @@ of the oracle (`runtime/win64/ring.exe`), then of rnxc, then a repair that the c
 2. **A function or a statement after a class is the class's** -- every `func` after the first `class` is a method of the latest
    (F-21). The parser nests a class inside the one before it and hands the methods that follow *to the outer class*; the graph
    puts the classes side by side, in source order, and gives each the methods that follow it (`probes/nest.ring`).
-3. **A `return` with nothing after it on its line takes the next expression statement as its value.** The parser sometimes joins
-   them and sometimes does not, by context (`return x = 1` joined; the same two lines split in a class); rnxc compiles the two
-   alike, so the graph says one `return`. The value of a return is an expression: its `=` compares.
+3. **A `return` that ends its line is bare, and what stands on a later row is a statement of its own that never runs.** Ring's own
+   parser looks at the very next token after `return` and, finding the end of the line, returns NULL (`vendor/ring-vm/src/stmt.c:931`);
+   measured on the oracle and the official 1.27, `return` then `6` answers the empty string. This grammar reads a newline as an extra,
+   so it hangs the next row's expression on the `return` -- and in a class it does the opposite, cutting `return 7` into a bare
+   `return` and a `7` side by side on ONE row. The graph says what Ring says: an expression on the same row is the return's value
+   (its `=` compares), one on a later row is a dead statement after a bare return. **The first version of this rung joined them from
+   any row, because rnxc did, and judged the choice by `rnxc dis` alone -- which can only say that two texts compile alike to rnxc.
+   rnxc was wrong (HF-74; fixed 2026-10-04) and the oracle was never asked.**
 4. **A line is read greedily, and a line that begins with `+` or `-` after a finished term is a statement of its own.** The parser
    cuts `return a + f(x) + b` at a `+` on the same row (the cut lands at a different `+` from one line to the next), cuts a
    call chain at a dot, and joins nothing across a trailing dot. The statement and every tail it was cut from are read again
@@ -102,9 +107,9 @@ of the oracle (`runtime/win64/ring.exe`), then of rnxc, then a repair that the c
    marker, and what follows it is the class's.
 6. **A bare `end` or `endfunc` the parser read as a name is the inert closer of rule 1**, and is dropped.
 7. **`?` prints a line; `see` and `put` print without one, in any case of letters** (measured on the oracle: `SEE "a"`, `put "b"`,
-   `Put "c"`, `? "d"` print `abc` and `d` and a newline). rnxc reads the keyword case-sensitively and treats `put` as `?`
-   (`compile.zig:5899`), so Ring's own library, which writes `See vValue`, prints a newline under rnxc. The graph follows Ring.
-   (HF-74.)
+   `Put "c"`, `? "d"` print `abc` and `d` and a newline; Ring's parser has one branch for `see` and `put`, `stmt.c:382`, and another
+   for `?`, `:392`). rnxc read the keyword case-sensitively and treated `put` as `?` (`compile.zig:5899`), so Ring's own library,
+   which writes `See vValue`, printed a newline under rnxc. **Fixed 2026-10-04** (HF-74); the graph followed Ring all along.
 8. **A brace belongs to the value.** `o = F(x) { ... }` gives `o` the value and runs the brace on it; the parser sometimes hangs
    the brace on the whole assignment. An assignment's value is what it assigned, so the two do the same; the graph keeps the
    first, which also prints as a statement of its own, where `(o = F(x)) { }` would join the call on the line above.
@@ -163,11 +168,11 @@ the 2,570 others being tests that load the library; it said "exact" for all.) A 
 compiles where the original does not (a comment inside a lambda body is one). A file **Ring itself refuses** (`ring -norun`:
 an unclosed comment, a literal not closed) is not a program and is skipped by name.
 
-**`rnxc dis` is the judge, and it is normalized in four places, each measured** (`dis()` in `l1_check.py`): a lambda is named
+**`rnxc dis` is the judge, and it is normalized in three places, each measured** (`dis()` in `l1_check.py`): a lambda is named
 after its source line (`@@lambda62`); the `ret=` of a method whose `return` the parser split is `str` beside `ref` for the
-same program (the answers are the same, probed); `put` and `See` read as `?` (the `say` flag, rule 7); and `vnew`'s capacity is
-counted off the tree's children (blank lines in a literal change it) -- the elements are the `vpush` instructions after it,
-which stay compared.
+same program (the answers are the same, probed); and `vnew`'s capacity is counted off the tree's children (blank lines in a
+literal change it) -- the elements are the `vpush` instructions after it, which stay compared. A fourth, the `say` flag (rnxc read
+`put` and `See` as `?`), was normalized until 2026-10-04 and is gone: the compiler was fixed (HF-74), so the judge sees it again.
 
 ## 6. Measured
 
