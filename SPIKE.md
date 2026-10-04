@@ -76,6 +76,7 @@ expression language forged whole, judged by stz's 29 fixtures as stage 8, pinned
 | `spike/haro_mutate.py` | five operators that put a defect of a known kind into a sound declaration without moving a line, and the stage rule they are judged by: the union of single defects |
 | `spike/v16/GRAMMAR.md`, `spike/v16/fixtures.json`, `spike/v16/run_cases.json` | **Haro v0.16** (the sixteenth rung, below): NARRATE gains TELLS -- a template per event of a run or of a question; `narrate-run` and `narrate-ask`; the narration is a projection of the run itself; three runs and a question, and the same court under a voice that tells almost nothing, composed by hand before the court |
 | `spike/a_v16.haro`, `spike/z_v16.haro` | A with a voice that tells a run and Z with one that tells a question: `a_v09.haro` and `z_v10.haro` plus a NARRATE (the guard's `A_STZU` and `Z_STZU` since this rung; the 35 cases and 25 questions are unchanged) |
+| `spike/charter_scans.py` | **The v0.3 scans** (guard stage 21, 2026-10-04): no refusal text addresses or names a person (1,007 read: 23 letters, 30 sentences, 16 court libraries), and no letter outside the machine's spells a width (8,232 identifiers in 20 letters); each is made to fail first, its floors are pinned; the machine letters name `kernel` and `threads` and are the stated exception |
 | `study/phase15/` | **The Phase 1.5 study** (ringua's exemplar extension study, run 2026-10-03; not a rung): `STUDY.md`, the experiments E1-E4, `nlq.ring` (stzNatural's architecture retargeted to closed queries), the judges, 74 hand-composed questions in English and French, the tontine's knowledge graph as a text artifact; `python haro/study/phase15/study_run.py` |
 | `spike/n_v17.haro`, `spike/n/tontine.n`, `spike/n_court.ring`, `spike/v17/` | **N** (drawn 2026-10-03, **built 2026-10-04 as Haro v0.17, the seventeenth rung**): the letter and its `UNDERSTAND`, the tontine's natural door in English and French, the court forged from the letter with `n_lib.ring` (the verbs and the 15 rules), `GRAMMAR.md` (the API, 18 decisions), 17 + 21 + 12 fixtures, `n_model.py` (the reference model), `n_check.py` (the judge; guard stage 20) |
 | `spike/world_lib.ring`, `spike/world_stub.ring` | the world's functions (SYMBOL resolution, the C1 rows), moved out of `court_lib.ring` and loaded only where a SYMBOL or PUBLISH is declared, and the stub that stands elsewhere |
@@ -1246,6 +1247,32 @@ semantics became decisions D-N16; a tongue needs `JOINS`; a world that cannot be
 several answers is `ambiguous`; N cannot run a ledger (D-N17); `surfaces` is opt-in (D-N18). **Not claimed:** that N
 generalises -- one sentence (the tontine), two tongues; the study's 74 questions were its source. **Still reserved:**
 `propose`.
+
+## After the seventeenth rung -- a door closed, stage 21, and the v0.3 amendments -- 2026-10-04
+
+**On the author's "I would like you start COMPASS-HARO-02"**, with the rung's pending work finished first (the records, the
+filing, the answer to the Compass). The Compass's principle 12 -- no effect without a door -- was applied to the court
+built the day before, and found one.
+
+    N_SURFACE_COURT   the 16th code. `check <file> surfaces` ran whatever file a sentence's SURFACE named, path and all:
+                      measured on the committed version, a sentence naming sub/evil.ring ran it. A surface's court is a
+                      sibling now (a bare name ending in _court.ring) and nothing else is run. HF-70
+    stage 20, C''     a court named by a path is refused and NOT run, on both runtimes; the control -- the same program
+                      named as a court beside the court -- IS run, so the marker can show a run. 22 rule fixtures,
+                      16 codes each load-bearing, the guard stage 58 s
+    stage 21          charter_scans.py: 1,007 refusal texts address no person; no letter outside the machine's spells a
+                      width (8,232 identifiers); both made to fail first. HF-71
+    CHARTER s.15      the nineteen items, each with its verdict (twelve adopted in substance, one narrowed to a release
+                      criterion, one routed, one left to the author's own item), D16 to D22; PRINCIPLES 12 to 15 and
+                      amendments to 4 and 5
+
+    the pass          PASS, 21 stages in 298.6 s (stage 6: harb 5.0 ms, the forged court 84.5 ms against the pinned 100). A
+                      first pass read 426 s and failed stage 6 at 164 ms while other sessions were building (harb itself at 9.2 ms,
+                      1.8x its floor): not quoted; stage 6 alone, twice, quiet: 88.3 and 89.0 ms
+
+**Not ruled here, and said so:** the code graph beneath the faces (the Compass's T1 and T5), T2 (one executable or two) and
+T3 (the games letter): the author's items. **Owed by the adoptions:** capability types at the computing altitude, a `class`
+field in each fixtures file, a `secret` seat type, keyword lexica, a catalogue stage, a first tongue beyond Latin-1.
 
 ## The names -- `.haro`, not `.stzu` -- corrected 2026-10-02
 

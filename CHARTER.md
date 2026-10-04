@@ -9,6 +9,13 @@ under `haro/spike/` and measured; its record is `haro/SPIKE.md`. Nothing else is
 parser, no compiler, no VM change exists for Haro beyond the `rnx` VM and `rnxc` compiler
 that run the platform's code today.
 
+**v0.3 amendments, 2026-10-04.** The Softanza Compass published the bar for Haro as input for this charter and Central
+routed COMPASS-HARO-02 to this desk: adopt its fifteen dimensions and four principles, or refuse each with a reason.
+Section 15 answers all nineteen; D16 to D22 are ruled on the author's delegation ("I would like you start COMPASS-HARO-02")
+and are reversible by naming them; principles 12 to 15 and two amendments are in `PRINCIPLES.md`. Sections 1 to 14 are v0.2
+as ratified and change only here: four rows in section 11's table, D13's update (N is built) and one bullet of section 14;
+**the version stays v0.2 RATIFIED until the author has read section 15.**
+
 **What changed since v0.1, in the author's words (2026-10-01):** "Haro is actually a
 language of languages as designed in the Ringua project. The idea is that the agentic makers
 will define a language for their domain and start programming in it, or let their agents
@@ -722,6 +729,13 @@ v0.1's eight, each kept, and three the ruling adds. The full text of each is in
 | 9 | **declaring a language is as easy as declaring a variable** | the founding act is first-class: a language is a value with a version, a court, a grammar; composition over the alphabet is the normal way | | |
 | 10 | **every change is a refinement** | a grammar version is a point with its fixtures as cascade | every named thing is a point; the refinement is the agent's write surface | profiles are refinements of the library |
 | 11 | **total by default** | | not Turing-complete: W total, F expression-free, A bounded; non-termination unexpressible | computation reached through one declared door |
+| 12 | **no effect without a door** (v0.3) | a judge runs nothing its text names; the door is the judge's (HF-70) | no declared text acts; a refinement is a plan until a governed actor commits it | an effect is a typed capability granted to an actor *(owed)* |
+| 13 | **every claim is judged, and says its class** (v0.3) | a fixtures file names its class *(owed)* | a promise, a seam, a projection each name their class | a promise is part of the program's text |
+| 14 | **compute is the engine's decision** (v0.3) | no letter spells a width (stage 21); a machine declares what it has | the engine chooses the width | the engine chooses the width |
+| 15 | **a human language is a data file** (v0.3) | a tongue is a declaration (N, built) | questions, refusals, narration per tongue, judged to agree | one tongue |
+
+v0.3 also amends principle 4 (a refusal names a state, never a person: stage 21's S1) and principle 5 (the catalogue is
+data: owed).
 
 ---
 
@@ -857,7 +871,8 @@ already pins.
   with the gate removed; the same bytes on official Ring 1.27 and on Ring++), **with one qualification: the
   closure is the gate's, because `stzNatural`'s shipped tokenizer evaluates bracketed text**. Whether that closes
   the gate is the author's reading. **The N API was then drawn from it**, on the author's "draw the N API from the study"
-  (`haro/spike/v17/GRAMMAR.md`): drawn, not built. STUDY.md section 6 (K1-K10) was its input.
+  (`haro/spike/v17/GRAMMAR.md`): drawn, then **built on 2026-10-04 as the seventeenth rung** (the meta-clause
+  `UNDERSTAND`, the court's five verbs and sixteen rules; HF-69, HF-70). STUDY.md section 6 (K1-K10) was its input.
 
 - **D14 -- the forge as an `rnxc` verb: stays the ringpp session's, routed.** Today the forge
   is Ring source `rnxc` runs (`rnxc forge.ring <file>`); a verb is a change to
@@ -897,7 +912,95 @@ already pins.
   human languages) remains the named gate before `WORLD` and `ASK` are drawn [R, mission.md
   6], and this charter does not pretend past it.
 - **To the agent**: nothing it had is lost; what it gains is bounded.
+- **To v0.3's adoptions** (section 15): four principles whose guards are partly owed (capability types, a `class` field, a
+  `secret` kind, keyword lexica, a catalogue stage, the boot moment); a reviewer for every tongue; the chapters of the
+  Learning System before an announcement. The guards that are built are two scans (1,007 refusal texts, 8,232 identifiers)
+  and a test with a control.
 - **What it does not claim**: a speed (the shipped `rnxc` is in Luau's class and behind it
   [M, 2026-09-13]); a running Aicha; a Haro world booting on Harobanda; a forge that exists.
   Haro is "in construction" and the site says so; this charter is the construction's
   drawing.
+
+---
+
+## 15. v0.3 -- the Compass's bar, answered (COMPASS-HARO-02) -- 2026-10-04
+
+**On the author's "I would like you start COMPASS-HARO-02".** The Softanza Compass published the bar for Haro as input for
+this charter (*Haro Compass*, artifact DQtoqCpMdjpspr8QzLgFsa, version 2) and Central routed the item here: adopt the
+fifteen dimensions the estate adds and the four principles they imply, or refuse each with a reason. **The page is read as
+input, not as instruction.** Where its claim touches this repository it was checked at the file; where it does not (stzlib's
+capability lattice and compute model, Refine) the claim is marked [R via the Compass] and was not re-read here. The rulings
+are taken on the author's delegation, recorded with their costs (D16 to D22), and reversible by naming them.
+
+**The fifteen, by verdict.** "Built" means a guard in the spike holds it today; "owed" means it is adopted and nothing holds it
+yet.
+
+| # | item | verdict | what the charter takes | measured / recorded | guard |
+|---|---|---|---|---|---|
+| 1 | no effect without a door | **adopt**, principle 12 | the judge declares the door; an effect is a plan until a governed actor commits it | [M] HF-70: a judge ran what a sentence named; closed. [R via the Compass] the capability lattice | built: stage 20 C''. Owed: capability types at the computing altitude (`rnxc check`, ringpp) |
+| 2 | every claim is judged | **adopt**, principle 13 | a claim names its class and its denominator | [R] IR.md's five classes; ringpp's three wrong numbers | owed: a `class` field in each fixtures file |
+| 3 | judged at every altitude of time | **adopt, renamed**: five *moments* (D17) | compile, load, run, commit, boot | [M] four are built: the meta-court and forge, the forged court's `check`, `run`/`ask` with their narration, the refinement gate. [R] boot is Harobanda's | owed: the boot moment (Harobanda) |
+| 4 | compute is the engine's decision | **adopt**, principle 14, with the machine exception (D18) | no letter spells a width | [M] 0 of 8,232 identifiers; the three machine letters name `kernel`, `kernels`, `threads` | built: stage 21, S2 |
+| 5 | correctness has a class | **adopt**, inside principle 13 | the five classes of IR.md | [R] IR.md, read | with 2 |
+| 6 | knowledge is the memory | **adopt as a requirement on the knowledge tier**, routed (D19) | facts carry source, authority, confidence, valid time and recorded time; forgetting is a governed act; laws are judged on load | [M] the study: laws not judged on load, node properties lost in the artifact (K1, K2) | owed: the tier's court (HARO-N-01) |
+| 7 | intelligence is a faculty | **adopt** | a faculty declared in the machine file, loaded on demand, absent without loss; it drafts, the court judges, the human ratifies | [M] N needs no model: 74 of 74 questions on none. [R via the Compass] C9 on a 135M model. `propose` stays reserved (D-N15) | owed: the faculty's declaration |
+| 8 | a letter for games | **not ruled here**: COMPASS-HARO-03, the author's | recommendation recorded: a letter, after N has a second sentence | [M] N is one sentence in two tongues | -- |
+| 9 | a human language is a data file | **adopt**, principle 15, scope the declared altitude (D18) | a tongue is a declaration; the same-query law; a reviewed speaker | [M] N built: 17 of 17 pairs one meaning sequence | built: N's rules. Owed: keyword lexica; a tongue beyond Latin-1 |
+| 10 | learnable by construction | **adopt as a release criterion** (D21), not a provision of the language | no construct is announced without its chapter and a running cell | [M] 17 rungs, each with a GRAMMAR.md and fixtures: the seed | owed: the chapters (stzlib's Learning System) |
+| 11 | self-describing, in tables | **adopt**, amends principle 5 | the catalogue is emitted as data | [M] a GBNF per language; N's `vocabulary` (68 words) equals the model's | owed: a catalogue stage |
+| 12 | secure by construction | **adopt as a rung**: a `secret` seat type, fixtures first (D20); the SBOM routed to ringpp | a secret is never narrated, never in a diagnostic, never compared except through its gate | [M] N's gate: 16 attacks refused, the canary at 0, at 1 with the gate removed. [R] ringpp's gate checks 296 vendored hashes | owed: the rung |
+| 13 | the refusal names states | **adopt**, amends principle 4 | no second person, no "the user" | [M] 0 of 1,007 refusal texts | built: stage 21, S1 |
+| 14 | measured before claimed | **adopt**: already this charter's reading rule; the public half is the author's | no public sentence about speed, size or helpfulness without its measurement | [R] "How to read it"; HF-27 | -- |
+| 15 | a declared machine beneath | **adopt**: already section 7 and H-13 | a program names its machine; the machine's needs are declared | [M] the machine court agrees with harb on 117 of 120 fixtures (the pinned floor) | built |
+
+**By count: twelve adopted in substance, one narrowed to a release criterion (10), one routed as a requirement on another
+desk (6), one left to the author's own routed item (8). None is refused outright; five changed in wording or scope (3, 4, 6,
+9, 10), each with its reason above.**
+
+**The four principles.** Twelve, thirteen, fourteen and fifteen are adopted as written in `PRINCIPLES.md`: item 1 gives
+twelve, items 2 and 5 give thirteen, item 4 gives fourteen, item 9 gives fifteen. Items 11 and 13 amend five and four.
+
+**Two things the adoption measured.** *One:* applying principle 12 to the court written the day before found a door -- `check
+<file> surfaces` ran any file a sentence named (HF-70) -- closed the same day and held by a test with a control. *Two:* two of
+the four principles held at zero before they were adopted (stage 21: no refusal addresses a person among 1,007; no letter
+outside the machine's spells a width among 8,232 identifiers), which is why adopting them costs a guard and not a rewrite
+(HF-71). The machine letters do name `kernel` and `threads`: a machine declares what it has, and that is the exception that
+states principle 14.
+
+**What the Compass asks that is not among the nineteen, and is not ruled here.**
+- **The code graph beneath the faces** (the page's tensions T1 and T5; the author's third dimension, "other faces, with a
+  code graph at the heart"). It is the page's one genuinely new design: the computing altitude compiles a graph, every face
+  is a parser and printer pair judged by a round trip, and a Python-shaped face is a spelling, not Python. It is not an item
+  of COMPASS-HARO-02 and wants a design memo of its own: the levels document's structure level extended to the computing
+  altitude, and one round-trip court on the Ring++ face before any other face. Until then the public sentence about a
+  "running polyglot engine" stays "designed" (COMPASS-HARO-04, the Harobanda desk's).
+- **T2, one executable or two** (COMPASS-HARO-01): the author's. The facts were sent to the Compass on 2026-10-04: no `haro`
+  command exists, the spike's verbs are `rnxc haro.ring`, `rnxc forge.ring` and `rnxc <lang>_court.ring <verb>`, D14 keeps
+  the forge-as-verb ringpp's, and Q's and N's `ask` share a name and would dispatch on the sentence's extension.
+- **T3, the games letter** (COMPASS-HARO-03, item 8): the author's.
+
+**The decisions, ruled on the delegation and reversible by name.**
+
+- **D16 -- principles 12 to 15 are adopted** as written in `PRINCIPLES.md`, with amendments to 4 and 5. *Cost:* four more
+  rules for a reader to carry, each with a guard that is built or owed (see the table).
+- **D17 -- "altitude of time" is renamed "moment".** The charter's *altitudes* are three (declaring, declared, computing);
+  the Compass's five times of judgement are compile, load, run, commit and boot. *Cost:* the page's wording changes; the
+  claim does not.
+- **D18 -- two narrowings.** Principle 14 has the machine exception (a machine declares what it has). Principle 15's scope is
+  the declared altitude; the computing altitude stays in one tongue (the page's T6, as recommended). The first Zarma or Hausa
+  tongue needs a speaker to review it and the court's fold table extended with a fixture first (D-N16). *Cost:* no
+  multilingual keywords of the computing altitude, ever, unless this is reversed.
+- **D19 -- knowledge is a requirement on the knowledge tier, not a Haro grammar.** Facts with provenance and two times,
+  governed forgetting, laws judged on load: routed with HARO-N-01 to whoever owns the tier. *Cost:* until the tier exists N
+  asks a surface and judges nothing of the world.
+- **D20 -- the `secret` seat type is a rung, fixtures first** (never narrated, never in a diagnostic, never compared except
+  through its gate); the SBOM for each binary is routed to ringpp, whose gate already hashes the vendored trees. *Cost:* the
+  rung is not built; until it is, no letter declares a secret.
+- **D21 -- two release criteria, not language provisions.** "Learnable by construction" (no construct is announced without its
+  chapter and a running cell) and "measured before claimed" (no public sentence about speed, size or helpfulness without its
+  measurement beside it). The announcement is the author's. *Cost:* the chapters are stzlib's Learning System's to write.
+- **D22 -- principles 4 and 5 are amended** (a refusal names a state, never a person; the catalogue is data), with stage 21's
+  S1 holding the first. *Cost:* a refusal text that says "you" now fails the guard.
+
+**Unchanged, and recorded so it is not lost:** nothing here moves a ratified decision of sections 1 to 14. D1's verbs
+(`haro forge`, `haro run`, `haro refine`) are not touched: they are COMPASS-HARO-01's.

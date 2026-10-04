@@ -11,6 +11,11 @@ declared altitudes. Principle 8 is amended a second time, and principles 9, 10 a
 added, at the end of this file, on the author's ruling of 2026-10-01 that Haro is the
 language of languages and embraces refinement.
 
+**v0.3 note (2026-10-04).** Principles 12 to 15, and amendments to 4 and 5, are added at the end of this file on the
+Softanza Compass's bar for Haro (COMPASS-HARO-02; `haro/CHARTER.md` section 15 gives each of the nineteen items its
+verdict). They are ruled on the author's delegation and reversible by name. Where a lesson was read from another
+repository by the Compass and not re-read here, it is marked [R via the Compass].
+
 The principles are numbered as the launch prompt numbered them (1-8), preceded by the ten
 Haro inherits from the Ring++ design charter (P1-P10, `softanza/memos/2026-08-30-ringpp-
 design-charter.md` section 3), which are not restated here beyond the charter's table.
@@ -495,3 +500,143 @@ altitude and declares the door; the court names the door in the narration.
 
 **The guard.** A fixture where an `A` declaration attempts an unbounded iteration and is
 unparseable, and one where the declared door is named and the narration shows it.
+
+---
+
+## 12. No effect without a door
+
+**Verdict: ADDED (v0.3, COMPASS-HARO-02, item 1).**
+
+**The lesson, with its bill.**
+- The estate's capability lattice: an actor that can only infer holds no effect, and granting it one is refused at
+  construction; a commit is refused before any attempt [R via the Compass, from stzlib's capability lattice and safe
+  world; not re-read here].
+- Principle 11: the declared altitude cannot act, and computation beyond it passes one declared door.
+- **Measured here, the day the principle was adopted (HF-70).** The first N court's `check <file> surfaces` ran the
+  program a sentence named by a path: with the committed version, a sentence naming `sub/evil.ring` ran it and a marker
+  file appeared. A judge had an effect nobody declared, and the one who declared it was the sentence being judged. [M]
+
+**The rule [D].**
+1. A declared language's text cannot act (principle 11).
+2. A judge runs nothing the judged text names, except through a door the judge declared: its own folder, a bare name, a
+   court. The door is declared by the one who judges, never by the one judged.
+3. An effect is a plan until a governed actor commits it: a refinement is the plan, and the gate's governance and trust
+   stages are the commit (principle 10); an actor that can only infer cannot be granted an effect.
+4. At the computing altitude an effect is a typed capability granted to an actor and checked before the program runs.
+
+**What it costs.** A surface's court must sit beside the court (`N_SURFACE_COURT`); `check ... surfaces` is opt-in
+(D-N18); capability types at the computing altitude are an `rnxc check` rule (Ring++'s commitment 4), not a Haro file.
+
+**The guard.** Built: stage 20's C'' -- a court named by a path is refused and its program is not run, on both runtimes,
+with a control (the same program named as a court beside the court) that IS run, so the marker can show a run; and the
+refinement fixture of principle 10, refused at the trust stage as `:llm`. Owed: the capability rule for the computing
+altitude.
+
+---
+
+## 13. Every claim is judged, and says its class
+
+**Verdict: ADDED (v0.3, COMPASS-HARO-02, items 2 and 5).**
+
+**The lesson, with its bill.**
+- The estate's narrated guards carry their promises in the text: 16,169 `#-->` promises in 508 guards, and a run log
+  once said PASS over broken promises [R via the Compass].
+- Ring++'s own record: a parity headline counted Ring++'s passes including passes on assertions Ring fails, so it fell
+  from 99.9% to 99.8% when those closed with nothing lost; a timing was retracted because another build was running on the
+  same machine; a census printed 70,512 statements as if it were the whole library (one function had stopped it and 48,125
+  were lost) and the gate passed [R, ringpp/CLAUDE.md, 2026-09-20, 2026-09-23 and 2026-09-30]. Each was a number whose
+  denominator or build was not stated.
+- The levels document names five correctness classes: exact; exact except a named loss; near, tolerance written;
+  over-approximation, extra named; equivalent in effect, comparison named [R, stz/declarative/IR.md, "Correctness
+  classes", read here].
+- The spike already speaks in classes without naming them: the same bytes on two runtimes (exact), a court equal to a
+  model field for field (exact), laws read in Python out of the sentence (equivalent, the comparison written), a
+  GBNF as an over-approximation [M, the guard's stage text].
+
+**The rule [D].**
+1. A claim of sameness -- a seam, a fixture, a projection, a narration -- names its class from the five and states its
+   comparison. "Equal" without a class is not a sentence of Haro.
+2. A guard that measures reports what it counted, what it divided by, and the build it ran on.
+3. A promise that was never run says so; a log never says PASS over a promise it did not run.
+
+**What it costs.** One word per fixtures file; a denominator beside every headline number.
+
+**The guard.** Partly built: every stage of the spike prints its comparison. Owed: a `class` field in each fixtures file
+and a guard that refuses a fixtures file without one.
+
+---
+
+## 14. Compute is the engine's decision
+
+**Verdict: ADDED (v0.3, COMPASS-HARO-02, item 4), with the machine exception.**
+
+**The lesson, with its bill.**
+- The compute model: lanes, cores, GPU and machines under one dispatch, every path admitted only where a measurement says
+  it wins, "ration decisions, not crossings" at 7.6 ns a crossing [R via the Compass, from stzlib's compute model; not
+  re-read here].
+- Ring++'s record: three tests had a runtime's speed baked into them -- a fixed amount of work against a clock -- and each
+  failed on a runtime that had got better [R, ringpp/CLAUDE.md, 2026-09-13]. A width or a speed that leaks into a program
+  leaks into its tests.
+- **Measured here:** 20 letters outside the machine's, 8,232 identifiers, none spells a thread, core, lane, GPU, kernel or
+  parallelism [M, stage 21, S2]. The three machine letters do name `kernel`, `kernels` and `threads`: a kernel to boot, a
+  capability, a count of tasks.
+
+**The rule [D].**
+1. No declared language has a seat, a verb or a menu word that spells a width.
+2. The computing altitude asks the engine for the operation; the engine chooses the width from its calibration.
+3. A machine is the exception that states the rule: it declares what it HAS (a CPU share, a memory, a number of tasks)
+   and never how a computation uses it.
+4. A result does not depend on the width chosen, and its class (principle 13) says how: exact by partition, or the
+   reduction's justification written at the site.
+
+**What it costs.** No hand-picked width in a declared language; a program that wants one asks the engine, which may
+refuse.
+
+**The guard.** Built: stage 21's S2 (made to fail first, floors pinned). The engine's seam guards stay stzlib's.
+
+---
+
+## 15. A human language is a data file
+
+**Verdict: ADDED (v0.3, COMPASS-HARO-02, item 9), with its scope (D18).**
+
+**The lesson, with its bill.**
+- `stzNatural` holds a human language as a table: 24 words in English and 25 in French over the same 11 semantic ids, and
+  17 of 17 question pairs compile to one closed query [M, the Phase 1.5 study, HF-67].
+- N, built: a tongue is a declaration and a column of every meaning, so adding a language is adding pairs and never code;
+  five refusals and the word that joins several names are declared per tongue; the court proves the languages agree
+  (`N_EXAMPLE_DIVERGES`) and cover (`N_TONGUE_UNCOVERED`, `N_REFUSAL_UNCOVERED`) [M, stage 20, HF-69].
+- The gaps, named: the French was authored by a model and no speaker has reviewed it; no Hausa, Arabic or Zarma tongue
+  exists; the court folds case for ASCII and Latin-1 only (D-N16).
+
+**The rule [D].**
+1. A human language is a declaration of a Haro language, never code in a court.
+2. The languages of one world are judged against one closed query: the same-query law and the coverage rules.
+3. Scope: the declared altitude -- questions, refusals, narration, and later the keywords of a declared language. The
+   computing altitude stays in one tongue.
+4. A tongue is authored by a speaker and reviewed by one; a tongue a model wrote is marked unreviewed.
+5. A tongue whose letters lie beyond what the court folds must have its fold declared and fixtured, in the open, before it
+   is used; Hausa's hooked letters are the first case.
+
+**What it costs.** A tongue costs a reviewer; the court's fold table grows by fixtures.
+
+**The guard.** Built: N's rules and stage 20. Owed: the keywords of a declared language as lexicon files; a first tongue
+beyond Latin-1, with a fold fixture and a reviewer.
+
+---
+
+## 4, amended in v0.3. A refusal names a state, never a person
+
+**Verdict: AMENDED (COMPASS-HARO-02, item 13).** Added to the rule of principle 4: a refusal describes the artefact and
+the way out -- where, what, why, what next -- and never the person who made it: no second person, no "the user". The lesson
+is the estate's glossary rule ("words name states, never people" [R, ringpp/CLAUDE.md]) and Zui's non-accusatory
+pathfinding [R, CHARTER section 2]. **Measured:** 1,007 refusal texts (23 letters, 30 sentences, 16 court libraries), none
+addresses or names a person [M, stage 21, S1]. **The guard:** built, made to fail first, floor pinned.
+
+## 5, amended in v0.3. The catalogue is data
+
+**Verdict: AMENDED (COMPASS-HARO-02, item 11).** Added to the rule of principle 5: the forge emits with every court the
+catalogue of what its language can say -- kinds, seats, verbs, and for N the vocabulary of a tongue -- as data, so that an
+agent learns the language from the catalogue and `ask` cannot invent a method. **Measured seeds:** a GBNF per language, and
+N's `vocabulary` verb (68 words in two tongues, equal to the model's [M, stage 20]). **The guard:** owed -- a catalogue stage
+where every kind and verb of every letter appears in its GBNF and in its `explain`.
