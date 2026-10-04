@@ -106,7 +106,8 @@ comment is where the estate keeps meaning:
 gate reads; the intent clause of a method is the principle-5 channel. **A graph that dropped comments would drop the estate's
 claims.** So: a comment is a node of a **kind** (`promise`, `tag`, `intent`, `note`), attached to the node it describes by a fixed
 rule (a comment on its own lines attaches to the next statement or definition; a trailing comment to the statement on its line),
-printed by every face, and refinable like anything else. The only loss a face may name is **layout**, which the measurement prices
+printed by every face, and refinable like anything else (Refine's own graph model already makes `Comment` a structural node type
+[R, RCP 1.2]). The only loss a face may name is **layout**, which the measurement prices
 at 5 to 10 percent of the bytes (section 4.3).
 
 ### 3.4 Identity
