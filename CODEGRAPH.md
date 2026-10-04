@@ -239,25 +239,24 @@ the *floor of what a name-and-hash matcher gives for free*.
 The grammar has 59 kinds of node. Spelling them in another syntax is mostly notation. It is dangerous in exactly the places where
 Ring's meaning differs from what a reader of Python or JavaScript expects from the same shape. Ranked by how much code uses them:
 
-Counted over the 429 files of 4.1 that parse (`kinds.py`): **181,603 named nodes of 53 of the grammar's 59 kinds**. Six kinds never
+Counted over the 429 files of 4.1 that parse (`kinds.py`): **193,994 named nodes of 53 of the grammar's 59 kinds**. Six kinds never
 occur in these files -- `brace_block`, `give_statement`, `import_statement`, `interpolation`, `new_with_parens`, `package_definition`.
-The shares below omit the `arguments` nodes, which the first filter of `kinds.py` did not recognise as a named kind (the filter is
-fixed; the rerun is a follow-up).
 
 | kind | nodes | share | what a second face does with it |
 |---|---|---|---|
-| `identifier` | 51,910 | 28.6% | case-folded: `N` and `n` are one variable (F-18) |
-| `call_expression` | 16,415 | 9.0% | spelling |
-| `number` | 15,705 | 8.6% | doubles past 2^53 (F-75) |
-| `binary_expression` | 15,036 | 8.3% | `=` compares, and a numeric string equals its number (C-8) |
-| `string` | 13,441 | 7.4% | no escapes (F-55): every literal printed raw |
-| `expression_statement`, `assignment_expression` | 16,417 | 9.0% | spelling |
-| `member_expression` | 6,191 | 3.4% | a getter runs on every dot but `This`'s (F-73) |
-| `comment` | 5,235 | 2.9% | typed nodes (3.3) |
-| `subscript_expression` | 5,218 | 2.9% | **1-based**; a one-character string on a string (C-3) |
-| `self` | 4,918 | 2.7% | spelling (`This`) |
-| `if_statement` | 3,989 | 2.2% | spelling; the `:` is a range (F-65) |
-| `function_definition` | 3,894 | 2.1% | **order is semantic** (F-21) |
+| `identifier` | 51,910 | 26.8% | case-folded: `N` and `n` are one variable (F-18) |
+| `expression_statement`, `assignment_expression` | 16,417 | 8.5% | spelling |
+| `call_expression` | 16,415 | 8.5% | spelling |
+| `number` | 15,705 | 8.1% | doubles past 2^53 (F-75) |
+| `binary_expression` | 15,036 | 7.8% | `=` compares, and a numeric string equals its number (C-8) |
+| `string` | 13,441 | 6.9% | no escapes (F-55): every literal printed raw |
+| `arguments` | 12,391 | 6.4% | spelling |
+| `member_expression` | 6,191 | 3.2% | a getter runs on every dot but `This`'s (F-73) |
+| `comment` | 5,235 | 2.7% | typed nodes (3.3) |
+| `subscript_expression` | 5,218 | 2.7% | **1-based**; a one-character string on a string (C-3) |
+| `self` | 4,918 | 2.5% | spelling (`This`) |
+| `if_statement` | 3,989 | 2.1% | spelling; the `:` is a range (F-65) |
+| `function_definition` | 3,894 | 2.0% | **order is semantic** (F-21) |
 | `for_statement` | 935 | 0.5% | 889 `for i = a to b`, 46 `for x in list` (by reference), 10 with `step` |
 | `new_expression` | 357 | 0.2% | spelling |
 | `try_statement` | 136 | 0.1% | the caught message is process-wide (C-15) |
@@ -266,7 +265,7 @@ fixed; the rerun is a follow-up).
 | `anonymous_function` | 18 | 0.0% | spelling |
 | `eval(...)` calls | 11 | -- | a graph hole (3.5) |
 
-The constructs that need the most care are the **common** ones: strings, numbers, identifiers and subscripts are about 47 percent of the
+The constructs that need the most care are the **common** ones: strings, numbers, identifiers and subscripts are 44 percent of the
 nodes. The exotic ones (brace blocks, `eval`, getters) are rare and are also the ones with no spelling at all.
 
 Each collision below is a Ring finding already paid for (`docs/FINDINGS.md`, `docs/CORRECTIONS.md`); a Python-shaped face that prints
