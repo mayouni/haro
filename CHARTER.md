@@ -1009,6 +1009,16 @@ states principle 14.
   measurement beside it). The announcement is the author's. *Cost:* the chapters are stzlib's Learning System's to write.
 - **D22 -- principles 4 and 5 are amended** (a refusal names a state, never a person; the catalogue is data), with stage 21's
   S1 holding the first. *Cost:* a refusal text that says "you" now fails the guard.
+- **D23 -- `rnxc fmt` is a Ring++ feature, not held for Haro** (CODEGRAPH Q4, ruled on the author's delegation, 2026-10-05: "take
+  whatever decision you think is wiser on my behalf"). It is a verb of the one binary (commitment 5), depends on nothing of Haro's, is
+  judged against the oracle and refuses what Ring refuses (58 of 6,061 Softanza files, 57 of them Ring's own refusals). It ships inside
+  `rnxc` with the rest of `next` when the author announces, not separately and not early: the visibility rule stands. Limits: **it is
+  never run with `--write` on the author's tree except at his word** (it rewrites the layout of the estate: tabs, LF, blank lines, and a
+  statement written after a function's `end` moves into the function, which is where Ring runs it); the court stays in the gate, and a
+  shape on which the reference and the oracle part is a finding before it is a feature (HF-79); the canonical spelling is the one the
+  printer writes, with no option for width or style until a customer asks. *Cost:* a formatted file differs from its source in layout
+  everywhere; `--check` and a diff are how a person sees it first. The same delegation keeps the compiler's half of HF-79 as a recorded
+  divergence (C-23).
 
 **Unchanged, and recorded so it is not lost:** nothing here moves a ratified decision of sections 1 to 14. D1's verbs
 (`haro forge`, `haro run`, `haro refine`) are not touched: they are COMPASS-HARO-01's.

@@ -363,6 +363,8 @@ graph export are `stz` subcommands, and the faces are named by file extension.
 - **Q4 -- whether `fmt` ships before Haro.** The canonical printer is a Ring++ feature as much as a Haro one: one obvious spelling
   for the 5,728 files of Softanza, with a court that proves the formatter changes no meaning. *Recommendation:* ringpp's call; it is
   the cheapest visible product of this memo.
+  **RULED 2026-10-05, on the author's delegation: yes, `fmt` is a Ring++ feature and is not held for Haro** (CHARTER D23). Built as
+  rung 3 and judged against 6,061 Softanza files.
 
 ---
 
