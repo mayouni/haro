@@ -366,6 +366,23 @@ STATEMENT_KINDS = {'expression_statement', 'return_statement', 'see_statement', 
                    'bye_statement', 'load_statement', 'import_statement'}
 
 
+def lift_statement_unary(e):
+    """The grammar reads a statement that BEGINS with a unary `+` or `-` as that operator over the WHOLE rest whenever the rest holds a binary
+    `+` or `-` -- `-a * b - c` is unary(((a * b) - c)) -- and Ring reads the unary as binding tighter than any binary operator, `((-a) * b) - c`
+    (measured on the oracle and the official 1.27 with an object whose `operator` prints its name: v18/probes/unary_stmt.ring, fixture 23).
+    Everywhere else the grammar agrees with Ring (`x = -a - b`, `? -a - b`, an argument), and so it does for `-a * b`; only a statement is
+    cut this way, so only a statement is put right: the operator goes down the left spine of the binary chain to the leftmost operand.
+    `!a - b` stays what the grammar says -- `not` is below the arithmetic on Ring too. rnxc still compiles the grammar's tree (HF-79)."""
+    if e['k'] == 'un' and e.get('op') in ('+', '-') and e.get('e', {}).get('k') == 'bin':
+        chain, parent, cur = e['e'], None, e['e']
+        while cur['k'] == 'bin' and 'l' in cur:
+            parent, cur = cur, cur['l']
+        if parent is not None:
+            parent['l'] = mk('un', op=e['op'], e=cur)
+            return chain
+    return e
+
+
 class Abstract:
     def __init__(self, root, src):
         self.src = src
@@ -708,7 +725,7 @@ class Abstract:
         return head, clauses
 
     def s_expression_statement(self, n):
-        return mk('expr', e=self.ex(n.kids, 0)[0])
+        return mk('expr', e=lift_statement_unary(self.ex(n.kids, 0)[0]))
 
     def s_return_statement(self, n):
         amp = any(k.kind == '&' for k in n.kids)

@@ -669,3 +669,39 @@ see "b"
 ? "c"
 see "d"
 see "e"
+
+=== 23 a unary that begins a statement binds to its first operand
+~~~ the grammar reads a statement that BEGINS with a unary `+` or `-` as that operator over the whole rest when the rest holds a binary `+` or
+~~~ `-` (`-o - 3` is `-(o - 3)`), and Ring reads it as `(-o) - 3`: unary binds tighter than any binary operator. Measured on the oracle and
+~~~ the official 1.27, which agree, with an object whose `operator` prints its name: `-o - 3` calls neg and then `-`, `-o + 1 - 2` calls neg,
+~~~ `+` and `-`. rnxc follows the grammar and calls them in the other order, and so did the first printer of this rung, which wrote
+~~~ `-(o - 3)`: every judge that reads the tree (`rnxc dis`, the graph read back) agreed with it and Ring did not. The statement's value is
+~~~ discarded, so only an overloaded operator can tell -- which is why the court RUNS both texts on the oracle. (Added after the court's first
+~~~ run on `rnxc fmt`, HF-79; the first version of this fixture's graph was the grammar's, and the court said so.)
+~~~ run: yes
+--- ring
+o = new K
+-o - 3
+-o + 1 - 2
+class K
+	func operator cOp, v
+		? "op " + cOp
+		return This
+--- l1
+(file :items [
+  (expr :e (assign :op "=" :l (id "o") :r (new :name ["K"])))
+  (expr :e (bin :op "-" :l (un :op "-" :e (id "o")) :r (num "3")))
+  (expr :e (bin :op "-" :l (bin :op "+" :l (un :op "-" :e (id "o")) :r (num "1")) :r (num "2")))
+  (class :name "K" :items [
+    (func :name "operator" :params [(param :name "cOp") (param :name "v")] :items [
+      (say :e (bin :op "+" :l (str "\"op \"") :r (id "cOp")))
+      (return :e (self))])])])
+--- out
+o = new K
+-o - 3
+-o + 1 - 2
+
+class K
+	func operator(cOp, v)
+		? "op " + cOp
+		return This
