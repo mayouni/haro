@@ -82,6 +82,7 @@ expression language forged whole, judged by stz's 29 fixtures as stage 8, pinned
 | `spike/n_v17.haro`, `spike/n/tontine.n`, `spike/n_court.ring`, `spike/v17/` | **N** (drawn 2026-10-03, **built 2026-10-04 as Haro v0.17, the seventeenth rung**): the letter and its `UNDERSTAND`, the tontine's natural door in English and French, the court forged from the letter with `n_lib.ring` (the verbs and the 15 rules), `GRAMMAR.md` (the API, 18 decisions), 17 + 21 + 12 fixtures, `n_model.py` (the reference model), `n_check.py` (the judge; guard stage 20) |
 | `spike/v18/` | **The program graph of Ring** (Haro v0.18, the eighteenth rung, 2026-10-04): `l1.py` (49 kinds, the abstraction, the canonical printer), `fixtures.txt` (22 programs composed before the code), `l1_check.py` (the court: fixtures, two controls that fail, a 78-file corpus; guard stage 22), `GRAMMAR.md`; `probes/` holds the probes (`closers.py`, `fall.py`, `stress.py`) |
 | `spike/v19/` | **Node identity on the program graph** (Haro v0.19, the nineteenth rung, 2026-10-04): `ids.py` (ids on the items of rung 18's graph, the matcher that recovers them across an edit), `fixtures.txt` (23 edits written before the code), `ids_check.py` (the court: fixtures, controls, Haro's own history replayed; guard stage 23), `IDENTITY.md`; `probes/` holds `sweep.py` (what each pass and each threshold buys) and `near.py` (the claims nearest the threshold) |
+| `../src/fmt.zig`, `../src/dumpjson.zig`, `../bench/fmt.py`, `../bench/dumpjson.py` | **`rnxc fmt` and the lossless export** (rung 3 of the code-graph memo, 2026-10-05; ringpp's, outside `haro/`): the printer of rung 18 as a verb, `rnxc dump --json`, and the two courts, both gate steps; see the section after the nineteenth rung |
 | `spike/world_lib.ring`, `spike/world_stub.ring` | the world's functions (SYMBOL resolution, the C1 rows), moved out of `court_lib.ring` and loaded only where a SYMBOL or PUBLISH is declared, and the stub that stands elsewhere |
 
 Nothing in `rnxc` or the VM changed. Nothing in a sibling repository changed.
@@ -1339,6 +1340,27 @@ similarity 98.3. The memo's 98.1 was measured with a function's statements flatt
 memo's seven files too**: 56 pairs, 99.1 percent keep their id. **Not claimed:** that ids survive a lineage of edits (each pair is
 measured alone; the cache that holds the last graph with its ids is not built), an id inside an expression, a move across functions.
 
+## Rung 3 of the code-graph memo -- `rnxc dump --json` and `rnxc fmt` -- 2026-10-05
+
+**On the author's "rung 3"** (`haro/CODEGRAPH.md` section 7, rung 3: ringpp's, outside `haro/`, as D14 put the forge). Two verbs and the
+guards that judge them live in the ringpp repository (`CLAUDE.md` there has the full record); this section names what the spike gained.
+
+    src/dumpjson.zig, bench/dumpjson.py       the lossless export and its court (gate step `dump --json`): 384 files, 272,406 nodes, 17 hard cases
+    src/fmt.zig, bench/fmt.py                 rung 18's graph and printer as a verb, and its court (gate step `fmt`)
+    v18/cst.py                                recover_export: the parser's own tree; recover_any reads it by default (CST_EXPORT=0 asks for the heuristic)
+    v18/probes/export_vs_dump.py              the swap's one question: 481 of 483 files print the same either way
+    v18/probes/unary_stmt.ring, unary_shapes.py   the oracle's order of calls, and the grammar's shapes (HF-79)
+    v18/fixtures.txt                          fixture 23, added after the court's first run; `run: yes`, so the oracle judges it
+    the guard                                 stages 22 and 23 PASS on the export (22 fixtures + 1, 78 corpus files, 38 history pairs, 98.3 percent)
+
+**What building found** (HF-78 to HF-81): the heuristic recovery and the parser's own tree agree on 481 of 483 files -- the one difference was a
+carriage return; the parser refuses 58 of Softanza's 6,061 files and Ring itself refuses 57 of them; **a statement that begins with a unary `+`
+or `-` is read over the whole rest by the grammar and by rnxc and over the first operand by Ring, so the first `fmt` changed what such a
+statement does on Ring while every judge agreed it had not** -- found because the round-trip check had to be excused for one file, fixed in the
+graph and judged by the oracle, the compiler's own half left open. **Not claimed:** that `fmt` ships (Q4 is the author's); that the canonical
+text is the one a human would choose (it is the one spelling the graph prints); a CRLF-preserving mode (the code prints LF, a string's or a
+comment's bytes are kept).
+
 ## The names -- `.haro`, not `.stzu` -- corrected 2026-10-02
 
 **At the author's word ("we agreed to use .haro instead of .stzu, no?").** D1 was ratified
@@ -1436,7 +1458,11 @@ whole guard re-run on the renamed tree: 28 + 30 + 27 + 23, 117 of 120, 32 of 32,
    round-trip court judged by compiled code; rung 2 (identity) is next in the memo.
 20. ~~Rung 2 of the code-graph memo~~ -- built 2026-10-04 as Haro v0.19, the nineteenth rung above, on the
    author's "rung 2": node identity recovered by a matcher, 98.3 percent of history's statements still
-   resolve; rung 3 (`rnxc fmt` and the lossless export, ringpp's) is next in the memo.
+   resolve; rung 3 followed:
+21. ~~Rung 3 of the code-graph memo~~ -- built 2026-10-05, ringpp's: `rnxc dump --json` and `rnxc fmt`, on the
+   author's "rung 3", judged on the real binary against 6,061 Softanza files; rung 4 (L2, the resolved
+   graph, and the line protocol as its projection; stzlib's stzRingCodeGraph answers compared) is next in
+   the memo. The compiler's half of HF-79 (a statement-leading unary) is ringpp's and open.
 18. The forge as an `rnxc` verb (the ringpp session's `src/`, routed); the
    Softanza-resident timing the charter's 2.6 asks for; the court's run time on the
    oracle under paths and views (6.4x the image this pass, named at stage 6); the
