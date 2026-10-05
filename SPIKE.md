@@ -83,6 +83,7 @@ expression language forged whole, judged by stz's 29 fixtures as stage 8, pinned
 | `spike/v18/` | **The program graph of Ring** (Haro v0.18, the eighteenth rung, 2026-10-04): `l1.py` (49 kinds, the abstraction, the canonical printer), `fixtures.txt` (22 programs composed before the code), `l1_check.py` (the court: fixtures, two controls that fail, a 78-file corpus; guard stage 22), `GRAMMAR.md`; `probes/` holds the probes (`closers.py`, `fall.py`, `stress.py`) |
 | `spike/v19/` | **Node identity on the program graph** (Haro v0.19, the nineteenth rung, 2026-10-04): `ids.py` (ids on the items of rung 18's graph, the matcher that recovers them across an edit), `fixtures.txt` (23 edits written before the code), `ids_check.py` (the court: fixtures, controls, Haro's own history replayed; guard stage 23), `IDENTITY.md`; `probes/` holds `sweep.py` (what each pass and each threshold buys) and `near.py` (the claims nearest the threshold) |
 | `../src/fmt.zig`, `../src/dumpjson.zig`, `../bench/fmt.py`, `../bench/dumpjson.py` | **`rnxc fmt` and the lossless export** (rung 3 of the code-graph memo, 2026-10-05; ringpp's, outside `haro/`): the printer of rung 18 as a verb, `rnxc dump --json`, and the two courts, both gate steps; see the section after the nineteenth rung |
+| `../src/graph.zig`, `../bench/graph.py`, `../bench/graph/` | **`rnxc graph`, the resolved graph** (rung 4 of the code-graph memo, first slice, 2026-10-05; ringpp's, outside `haro/`): L2 as the code-graph line protocol, its court (a gate step) and the two comparisons, `--peer` and `--ingest`; see the section after rung 3 |
 | `spike/world_lib.ring`, `spike/world_stub.ring` | the world's functions (SYMBOL resolution, the C1 rows), moved out of `court_lib.ring` and loaded only where a SYMBOL or PUBLISH is declared, and the stub that stands elsewhere |
 
 Nothing in `rnxc` or the VM changed. Nothing in a sibling repository changed.
@@ -1361,6 +1362,23 @@ graph and judged by the oracle, the compiler's own half left open. **Not claimed
 text is the one a human would choose (it is the one spelling the graph prints); a CRLF-preserving mode (the code prints LF, a string's or a
 comment's bytes are kept).
 
+## Rung 4 of the code-graph memo -- `rnxc graph`, the resolved graph (L2), first slice -- 2026-10-05
+
+**On the author's "continue"** after rung 3 (`haro/CODEGRAPH.md` section 7, rung 4: ringpp's and stzlib's). The graph with its edges, read out of
+what the compiler bound, in the line protocol stzCodeGraph already ingests; the ringpp `CLAUDE.md` has the full record.
+
+    src/graph.zig, compile.zig `graphData`   the verb, and the read-out of the compiler's tables (additive: nothing it compiles changed)
+    bench/graph.py, bench/graph/             the court (a gate step): five fixtures written first, the unit's consistency, determinism; --peer, --ingest
+    bench/codegraph_peer.ring, _ingest.ring  stzRingCodeGraph and stzCodeGraph run on the Ring++ package over the same files / the same stream
+    the numbers                              597 classes, 34,672 methods, 9,764 functions, 58,507 static and 7,246 dynamic edges, 9.8 s;
+                                             the peer's edges 97.0 percent the compiler's, 1,556 differences all named, ingestion 13 s against 73
+
+**What building found** (HF-82 to HF-84): the commonest false edge of a name-based graph of Ring is a builtin's name (928 of 1,338); the scan reads
+seven classes out of comments, and one `class Person` inside a comment ends a 148-line method for it after twelve lines; **L2 is a graph of calls that can succeed,
+so a call with the wrong number of arguments is an edge that is not there** (four such calls in the library read), and a function the compiler
+cannot finish must be marked, because a missing edge and an absent one look alike; and the index takes the real parse unchanged. **Not
+built:** the edge of `new K(...)` to `K.init`, references, scope, `depends_on`, and stzRingCodeGraph reading the stream (stzlib's to wire).
+
 ## The names -- `.haro`, not `.stzu` -- corrected 2026-10-02
 
 **At the author's word ("we agreed to use .haro instead of .stzu, no?").** D1 was ratified
@@ -1463,6 +1481,10 @@ whole guard re-run on the renamed tree: 28 + 30 + 27 + 23, 117 of 120, 32 of 32,
    author's "rung 3", judged on the real binary against 6,061 Softanza files; rung 4 (L2, the resolved
    graph, and the line protocol as its projection; stzlib's stzRingCodeGraph answers compared) is next in
    the memo. The compiler's half of HF-79 (a statement-leading unary) is ringpp's and open.
+22. ~~Rung 4 of the code-graph memo, first slice~~ -- built 2026-10-05, ringpp's: `rnxc graph`, the resolved graph
+   (L2) in stzCodeGraph's protocol, judged against the compiler's own bindings and against stzRingCodeGraph's
+   scan (1,556 differences, none unexplained); not built: `new` edges, references, scope; rung 5 (refinement over
+   L1) is the haro-charter desk's and next in the memo.
 18. The forge as an `rnxc` verb (the ringpp session's `src/`, routed); the
    Softanza-resident timing the charter's 2.6 asks for; the court's run time on the
    oracle under paths and views (6.4x the image this pass, named at stage 6); the
