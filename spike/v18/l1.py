@@ -429,12 +429,56 @@ class Abstract:
                 return self.tail_node(k)
         return n
 
+    def fold_lambdas(self, kids):
+        """`return func t { ... }`, one parameter and no parentheses, at the head of a function's own statement list: the grammar reads a BARE
+        `return` and, on the same row, a FUNCTION DEFINITION named `t` (it cannot tell the two apart there; `return func(t) {`, `return func a, b {`
+        and the same line inside an `if` it reads right). Ring reads a lambda. The definition is folded back into the return as the lambda it is
+        (rnxc's compiler does the same, `Compiler.absorbed`), and what the grammar hung after its closing brace stays where the return is. The
+        return is either the last statement of the function before it or, after an `if`, a statement the grammar left beside it: both are met."""
+        out, i = [], 0
+        while i < len(kids):
+            cur = kids[i]
+            out.append(cur)
+            i += 1
+            if i >= len(kids):
+                break
+            ret, owner = None, None
+            if cur.kind == 'return_statement':
+                ret = cur
+            elif cur.kind == 'function_definition' and cur.kids and cur.kids[-1].kind == 'return_statement':
+                ret, owner = cur.kids[-1], cur
+            nxt = kids[i]
+            if ret is None or not all(c.kind in ('return', '&') for c in ret.kids) or nxt.kind != 'function_definition' or len(nxt.kids) < 3:
+                continue
+            ident = nxt.kids[1]
+            if ident.kind != 'identifier' or self.src[ident.end:].lstrip(' \t')[:1] != '{' or self.line(nxt.start) != self.line(max(ret.end - 1, 0)):
+                continue
+            close = max((n for n, c in enumerate(nxt.kids) if c.kind == '}'), default=None)
+            if close is None:
+                continue
+            params = cst.Node('param_list', None, nxt)
+            params.kids, params.start, params.end, params.exact = [ident], ident.start, ident.end, ident.exact
+            lam = cst.Node('anonymous_function', None, ret)
+            lam.kids = [nxt.kids[0], params] + nxt.kids[2:close + 1]
+            lam.start, lam.end, lam.exact = nxt.start, nxt.kids[close].end, nxt.exact
+            ret.kids = ret.kids + [lam]
+            ret.end = max(ret.end, lam.end)
+            rest = nxt.kids[close + 1:]
+            if owner is not None:
+                owner.kids = owner.kids + rest
+                owner.end = max(owner.end, nxt.end)
+            else:
+                out.extend(rest)
+            i += 1
+        return out
+
     def absorb_kids(self, kids):
         """Ring's flow, in the tree. A statement written after a function runs as part of that function, up to the next definition; a
         function or a statement written after a class is the class's -- every `func` after the first `class` is a method of the latest one
         (F-21) -- and `end` and `}` close nothing (v18/probes/fall.py, nest.ring). The parser leaves them beside the definition, or
         hands them to the OUTER class of a nested pair, so they are moved into the definition before anything is read: which is also what
         lets a `return` and the tail the parser cut off it meet again."""
+        kids = self.fold_lambdas(kids)
         out, i = [], 0
         while i < len(kids):
             k = kids[i]

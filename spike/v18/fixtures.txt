@@ -705,3 +705,31 @@ class K
 	func operator(cOp, v)
 		? "op " + cOp
 		return This
+
+=== 24 a lambda returned straight after `return`, one parameter and no parentheses
+~~~ the grammar cannot tell `return func t { ... }` at the head of a function's own statement list from a bare `return` and a definition named `t` on the
+~~~ same row (`return func(t) {`, `return func a, b {` and the same line inside an `if` it reads right), and so the first printer of rung 3 wrote `return`, a
+~~~ blank line and `func t()`: a function that returns nothing and a function nobody calls, which is not what Ring reads there. Found 2026-10-05 by the court of
+~~~ `rnxc fmt` the day bench/exec/lambda_return.ring was written (and the compiler had the same misreading: `rnxc dis` said `ret=str`). The graph holds a lambda
+~~~ returned, as Ring does; the court runs the original and the canonical text on the oracle.
+~~~ run: yes
+--- ring
+x = Mk()
+? call x(5)
+
+func Mk()
+	return func t { return t + 1 }
+--- l1
+(file :items [
+  (expr :e (assign :op "=" :l (id "x") :r (call :callee (id "Mk"))))
+  (say :e (callkw :e (call :callee (id "x") :args [(num "5")])))
+  (func :name "Mk" :items [
+    (return :e (lambda :params [(param :name "t")] :items [(return :e (bin :op "+" :l (id "t") :r (num "1")))]))])])
+--- out
+x = Mk()
+? call x(5)
+
+func Mk()
+	return func(t) {
+		return t + 1
+	}
