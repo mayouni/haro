@@ -76,7 +76,10 @@ def read_fixtures(path):
 
 def dis(text, name):
     p = write(name, text)
-    r = subprocess.run([cst.RNXC, 'dis', p], capture_output=True, timeout=300, env=dict(os.environ, RNXC_NOCACHE='1'))
+    # RNXC_LINES_STATIC: since F-110 (2026-10-12) rnxc puts a LINE into the code where Ring carries one past an `ok` -- and only when the
+    # `ok` stands on its own line -- so two layouts of one program compile to different code there; this judge compares no line
+    r = subprocess.run([cst.RNXC, 'dis', p], capture_output=True, timeout=300,
+                       env=dict(os.environ, RNXC_NOCACHE='1', RNXC_LINES_STATIC='1'))
     out = r.stdout.decode('latin-1')
     # a lambda is named after its source LINE (`@@lambda62`): layout leaks into a function's name, and a formatter moves it
     out = re.sub(r'@@lambda\d+', '@@lambdaN', out)
