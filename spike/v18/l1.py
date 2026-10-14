@@ -36,7 +36,7 @@ FIELDS = {
     'call': ['callee', 'args'], 'callkw': ['e', 'items'], 'member': ['obj', 'prop'], 'index': ['obj', 'idx'],
     'brace': ['obj', 'items'], 'new': ['from', 'name', 'args', 'items'], 'lambda': ['params', 'items'],
     'paren': ['e'], 'list': ['items'], 'pair': ['key', 'value'],
-    'id': ['text'], 'num': ['text'], 'str': ['text'], 'sym': ['text'], 'self': [], 'super': [], 'bool': ['value'], 'null': [],
+    'id': ['text'], 'num': ['text'], 'str': ['text'], 'sym': ['text'], 'self': ['kw'], 'super': [], 'bool': ['value'], 'null': [],
 }
 # statements and definitions carry the comment after them on their line (`trail`); a comment inside an expression has nowhere to
 # stay in a layout-free text, so the graph moves it to an item of its own after the statement it sat in
@@ -898,6 +898,10 @@ class Abstract:
         return mk('sym', text=self.text(n))
 
     def x_self(self, n):
+        # `self` is kept as written: inside a brace it is the brace object and `This` the method's (ringpp F-124), so the two are not
+        # one construct any more; `This` and `this` stay one spelling
+        if self.text(n).strip().lower() == 'self':
+            return mk('self', kw='self')
         return mk('self')
 
     def x_super(self, n):
@@ -1059,7 +1063,7 @@ class Printer:
         if k in ('id', 'num', 'str', 'sym'):
             return n['text']
         if k == 'self':
-            return 'This'
+            return 'self' if n.get('kw') else 'This'
         if k == 'super':
             return 'super'
         if k == 'null':

@@ -33,12 +33,14 @@ text (Ring has no escapes, F-55), every comment, every parenthesis the author wr
 **Dropped, because nothing reads it:** layout (blank lines, indentation, the column of anything), the `;` and `,` between
 statements, a call statement's trailing period, the alternative spellings of one construct *where rnxc was measured to read the
 two alike* (`func`/`def`/`function`; `ok`/`end`/`endif`; `but`/`elseif`; `else`/`other`; `?`...; `give`/`get`; `exit`/`break`;
-`loop`/`continue`; `for`/`foreach`; `next`/`endfor`/`end`; `on`/`case`; `done`/`endtry`/`end`; `not`/`!`; `This`/`self`/`this`;
+`loop`/`continue`; `for`/`foreach`; `next`/`endfor`/`end`; `on`/`case`; `done`/`endtry`/`end`; `not`/`!`; `This`/`this`;
 keyword case), and the byte-order mark.
 
 **Not dropped, because the compiler does not read them alike** (42 of 45 alternative spellings did; these are the other
 cases, `probes/synonyms.py`): `&&` and `||` keep their spelling (rnxc traps on them; `and`/`or` compile), and `see`, `put` and
-`?` are two kinds, not one (section 3, rule 7).
+`?` are two kinds, not one (section 3, rule 7). And `self` against `This` (2026-10-14): inside a brace Ring's `self` is the brace
+object and `This` the method's own (ringpp F-124), and rnxc reads them so since; the `self` node carries `kw "self"` when the
+source spells it that way, and prints it back. `fmt` had been rewriting `self` to `This` -- inside a brace, a different program.
 
 ## 2. The schema
 
