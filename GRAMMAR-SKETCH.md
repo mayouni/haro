@@ -16,7 +16,7 @@ choices for ratification; the rules behind them are the charter's.
 | block close | `end` | `ok`, `next`, `off`, `done` |
 | else-if | `but` | `elseif` |
 | logic | `and`, `or`, `not` | `&&`, `\|\|`, `!` |
-| print | `?` | `see`, `put` |
+| print | `?` -- a value in its EXPRESSIVE form: a list as `[ 12500, 13000, 46 ]`, nested lists and strings quoted inside it, as Softanza's `@@()` writes them today, so `@@()` is no longer needed to print *(author, 2026-10-15)* | `see`, `put`; Ring's one-item-per-line `?` of a list |
 | comment | `#` to end of line | `//`, `/* */` |
 | string | `"..."` with escapes `\n \t \r \" \\` | `'...'`, no escapes |
 | symbol | `:Name` keeps its text | lowercased atom |
@@ -235,7 +235,10 @@ sentence the decoder can produce.
 ## 9. Two things the sketch does not show, on purpose
 
 - **The class-body rules** (`from`, `super`, operators, `obj { }`) -- carried from Ring
-  as the charter says, and unchanged enough not to need a sketch.
+  as the charter says, and unchanged enough not to need a sketch. **The declarative brace
+  block is KEPT, as the basis of the style** *(author, 2026-10-15)*: `oObject { Method() ... }`
+  and `Q(value) { ... }`, a name inside resolving to the brace object first -- Ring's scope,
+  which Ring++ reproduces since F-124 (2026-10-14).
 - **The profile clause** (`profile softanza`) and the migration profile's `inferred`
   intents -- decision D3 and H-6; their spelling waits on the ruling.
 
