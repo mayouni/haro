@@ -2,7 +2,7 @@
    python haro/spike/v20/refine_check.py [--plant] [--quick] [--wide]      (exit 1 on any failure)
    python haro/spike/v20/refine_check.py --block                          the BLOCK kind's fixtures alone, in seconds
 
-  F  the fixtures (v20/fixtures.txt and v20/fixtures_block.txt, composed before the code): programs, proposals, and the verdict each must get -- the stage that refuses it,
+  F  the fixtures (v20/fixtures.txt and the four of the body kinds -- fixtures_block, fixtures_function, fixtures_allowlist, fixtures_method -- composed before the code): programs, proposals, and the verdict each must get -- the stage that refuses it,
      the words the refusal says, the RCP primitives a sentence lowers to, the canonical text that is left. For EVERY fixture, whatever it says:
      a refused proposal changes nothing; an admitted one changes exactly one line of text and no id -- a BODY refinement (the BLOCK kind) changes
      nothing outside its function, keeps the order of every id that stays, and loses no id but those it deletes; the inverses captured before each change land
@@ -18,9 +18,9 @@
      that one does not (the value parses, the sentence is well formed, the id is current) is counted apart, never folded in
   D  controls that must FAIL: a gate without its trust stage, its constraint stage, its governance stage, its derivation stage; one that edits the
      live program before it has judged; a cascade that sees nothing; an inverse that loses the ids; a revert that does not check what it restores;
-     and the BLOCK, FUNCTION and allowlist rules' ten taken out in turn: no calls or writes allowlist, no shape refusals, a lowering that keeps no
-     statement, a compiler that finds nothing, a lift that reads a BLOCK tag or a FUNCTION tag without checking it, a new function written
-     beside its tag instead of after the last function, a body never judged against its point's own rule, a widening of an allowlist counted
+     and the BLOCK, FUNCTION, METHOD and allowlist rules' twelve taken out in turn: no calls or writes allowlist, no shape refusals, a lowering that keeps no
+     statement, a compiler that finds nothing, a lift that reads a BLOCK, FUNCTION or METHOD tag without checking it, a new function written
+     beside its tag instead of after the last function, a new method written after its class's `private` marker, a name Ring refuses accepted as a name, a body never judged against its point's own rule, a widening of an allowlist counted
      as an ordinary change, a TO list never checked
   H  Haro's own history: a refinement drafted against a literal of one revision -- does it still land after the next human edit? Landed, refused as
      stale (the value changed), or aimed at a different variable (the hazard a name-checking gate catches): counted
@@ -47,7 +47,7 @@ from haro_forge import Gbnf
 
 PLANT = '--plant' in sys.argv
 QUICK = '--quick' in sys.argv
-BLOCK_ONLY = '--block' in sys.argv      # the BLOCK and FUNCTION kinds' fixtures alone (fixtures_block.txt, fixtures_function.txt): seconds, not the court
+BLOCK_ONLY = '--block' in sys.argv      # the body kinds' fixtures alone (block, function, allowlist, method): seconds, not the court
 WIDE = '--wide' in sys.argv
 ONLY_FX = '--fx' in sys.argv
 SCRATCH = os.path.join(HERE, 'scratch')
@@ -182,7 +182,11 @@ def block_locality(before, after, out):
         if out.point['kind'] == 'block':
             refine.find_item(g, ident)[0]['items'] = []         # the body goes; the signature stays the human's
         else:
-            g['items'] = [it for it in g['items'] if not (it['k'] == 'func' and ids.def_name(it) == name)]   # the function may appear or go
+            if out.point['kind'] == 'method':
+                cls = refine.find_item(g, out.point['carrier']['id'])[1]
+                cls['items'] = [it for it in cls['items'] if not (it['k'] == 'func' and ids.def_name(it) == name)]   # the method may appear or go
+            else:
+                g['items'] = [it for it in g['items'] if not (it['k'] == 'func' and ids.def_name(it) == name)]   # the function may appear or go
         return refine.text_of(g)
     if outside(before) != outside(after):
         bad.append('a body refinement changed text outside its function')
@@ -946,6 +950,8 @@ def lower_block_keeping_nothing(fn, new_items):
 
 def create_function_beside_tag(g, p, items):
     """a creation written right after the tag, among the top-level statements: it swallows every statement after it (HF-73)"""
+    if p['kind'] != 'function':
+        return _orig_create_function(g, p, items)
     head = refine.parse_text(('func %s(%s)' % (p['name'], ', '.join(refine.names_of(p['attrs'].get('params'))))) + chr(10))
     fn = ids.strip(head['items'][0])
     fn['items'] = [ids.strip(st) for st in items]
@@ -953,13 +959,30 @@ def create_function_beside_tag(g, p, items):
     return {'op': 'node.create', 'parent': None, 'block': 'items', 'index': idx, 'node': fn}
 
 
-def function_faults_unchecked(g, name, tag_attrs, lst, parent):
-    """a lift that reads a FUNCTION tag without checking it: whatever function is there is taken, whatever its signature"""
+def function_faults_unchecked(g, name, kind, tag_attrs, lst, parent):
+    """a lift that reads a FUNCTION or METHOD tag without checking it: whatever function is there is taken, whatever its signature"""
     existing = None
-    for it, par, *_ in refine.walk_items(g):
-        if par is None and it['k'] == 'func' and ids.def_name(it) == name:
-            existing = it
+    if kind == 'function':
+        for it, par, *_ in refine.walk_items(g):
+            if par is None and it['k'] == 'func' and ids.def_name(it) == name:
+                existing = it
+    elif parent is not None and parent.get('items') is not None:
+        for it in parent['items']:
+            if it['k'] == 'func' and ids.def_name(it) == name:
+                existing = it
     return [], False, existing
+
+
+_orig_create_function = refine.create_function
+
+
+def create_function_after_private(g, p, items):
+    """a new method put at the end of its class, after the `private` marker: the graph holds the marker flat, so the method would be private unasked"""
+    tx = _orig_create_function(g, p, items)
+    if p['kind'] == 'method':
+        cls = refine.find_item(g, p['carrier']['id'])[1]
+        tx['index'] = len(cls['items'])
+    return tx
 
 
 _orig_is_widening = refine.is_widening
@@ -1229,7 +1252,7 @@ def main():
     t0 = time.time()
     print('refine_check -- refinement over the program graph, Ring++ face (rung 20)')
     fb = (read_fixtures(os.path.join(HERE, 'fixtures_block.txt')) + read_fixtures(os.path.join(HERE, 'fixtures_function.txt'))
-          + read_fixtures(os.path.join(HERE, 'fixtures_allowlist.txt')))
+          + read_fixtures(os.path.join(HERE, 'fixtures_allowlist.txt')) + read_fixtures(os.path.join(HERE, 'fixtures_method.txt')))
     if BLOCK_ONLY:
         stats = new_stats()
         res = judge_fixtures(fb, stats)
@@ -1237,7 +1260,7 @@ def main():
         for fid, b in bad:
             for x in b[:4]:
                 print('  FAIL %s: %s' % (fid, x[:500]))
-        print('refine_check --block: %d of %d BLOCK, FUNCTION and allowlist fixtures pass, %d steps (%s), %d programs run on the oracle and on rnxc'
+        print('refine_check --block: %d of %d BLOCK, FUNCTION, METHOD and allowlist fixtures pass, %d steps (%s), %d programs run on the oracle and on rnxc'
               % (len(fb) - len(bad), len(fb), stats['steps'], ', '.join('%s %d' % (k, stats[k]) for k in ('admitted', 'rejected') if k in stats), stats['runs']))
         return 1 if bad else 0
     fx = read_fixtures(os.path.join(HERE, 'fixtures.txt')) + fb
@@ -1394,13 +1417,15 @@ def main():
             ('a derivation whose compiler finds nothing', {'rnxc_findings': lambda text: ([], [])}, 2),
             ('a lift that reads a BLOCK tag without checking it', {'block_decl_errors': lambda *a: []}, 3),
             ('a new function written beside the tag, among the statements', {'create_function': create_function_beside_tag}, 5),
-            ('a lift that reads a FUNCTION tag without checking it', {'function_faults': function_faults_unchecked}, 6),
+            ('a lift that reads a FUNCTION or METHOD tag without checking it', {'function_faults': function_faults_unchecked}, 6),
+            ('a new method written after the class\'s `private` marker', {'create_function': create_function_after_private}, 1),
+            ('a name Ring refuses accepted as a function or method name', {'not_a_name': lambda word: False}, 1),
             ('a body never judged against its own point\'s rule', {'body_own_error': lambda g, p: None}, 3),
             ('an allowlist widening counted as an ordinary change', {'is_widening': is_widening_blind_to_allowlists}, 1),
             ('a TO list for calls or writes that is never checked', {'allowlist_error': lambda g, p, attr, to: None}, 2)):
         with patched(**kw):
             nbad = n_failing(fb)
-        check(nbad >= floor, 'D the control, %s, fails %d BLOCK/FUNCTION fixture(s) (at least %d)' % (label, nbad, floor))
+        check(nbad >= floor, 'D the control, %s, fails %d BLOCK/FUNCTION/METHOD fixture(s) (at least %d)' % (label, nbad, floor))
     if w['engine']:
         wc = write_surface(fx, lambda m, ctx=None, posture=None: UNSCOPED, 10)
         nbad = len([b for b in wc['bad'] if 'but its scoped grammar accepts it' in b])

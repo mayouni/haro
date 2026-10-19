@@ -34,12 +34,13 @@ SCRATCH = os.path.join(HERE, 'scratch')
 
 POSTURES = {'trusted': 3, 'external': 2, 'sandboxed': 1, 'llm': 0}          # StzRefinableCodeQ()._PostureRank
 LEVELS = {'advisory': 1, 'delegated': 2, 'autonomous': 3, 'emergencyoverride': 4}   # StzGovernanceQ()._AuthLevel
-KINDS = ('param', 'algo', 'pipeline', 'rule', 'lib', 'block', 'function', 'type', 'custom')
-BUILT = ('param', 'algo', 'pipeline', 'block', 'function')  # the kinds this rung builds; the others are declared and refused when proposed against
+KINDS = ('param', 'algo', 'pipeline', 'rule', 'lib', 'block', 'function', 'method', 'type', 'custom')
+BUILT = ('param', 'algo', 'pipeline', 'block', 'function', 'method')  # the kinds this rung builds; the others are declared and refused when proposed against
 RULE_ATTRS = ('min', 'max', 'options', 'risk', 'floor', 'governed_by', 'calls', 'writes')   # calls, writes: a BLOCK or FUNCTION point's allowlists
 BLOCK_ATTRS = ('calls', 'writes', 'risk', 'floor', 'governed_by')   # what a BLOCK point declares besides its name
 FUNCTION_ATTRS = ('params',) + BLOCK_ATTRS                         # and a FUNCTION point: the signature is declared too
-BODY_KINDS = ('block', 'function')              # the kinds whose value is a function's body
+BODY_KINDS = ('block', 'function', 'method')    # the kinds whose value is a function's body
+DECLARING = ('function', 'method')              # ...and those that DECLARE the function, which may not be there yet
 MUTATORS = ('add', 'insert', 'del', 'swap')     # the builtins that write into their first argument
 ROOT = os.path.abspath(os.path.join(HERE, '..', '..', '..'))
 RNXC = os.environ.get('RNXC') or os.path.join(ROOT, 'zig-out', 'bin', 'rnxc.exe')
@@ -359,16 +360,16 @@ def lift(g):
                 continue
             rules.append({'name': name, 'expr': attrs['expr'], 'message': attrs.get('message', ''), 'carrier': carrier})
             continue
-        if kind == 'function':
-            # a FUNCTION point is attached to nothing: it DECLARES a function, which may not be there yet, so it is carried by its own comment
-            faults, fatal, existing = function_faults(g, name, t['attrs'], lst, parent)
+        if kind in DECLARING:
+            # a FUNCTION or METHOD point is attached to nothing: it DECLARES a function, which may not be there yet, so it is carried by its own comment
+            faults, fatal, existing = function_faults(g, name, kind, t['attrs'], lst, parent)
             for f in faults:
                 err(f)
             if fatal:
                 continue
-            points.append({'name': name, 'kind': 'function', 'id': carrier['id'], 'carrier': carrier,
+            points.append({'name': name, 'kind': kind, 'id': carrier['id'], 'carrier': carrier,
                            'attrs': {k: v for k, v in attrs.items() if k != 'name'}, 'order': [a['key'] for a in t['attrs'] if a['key'] != 'name'],
-                           'form': 'function', 'path': [],
+                           'form': kind, 'path': [],
                            'value': block_digest(body_text(existing.get('items', []))) if existing is not None else 'absent', 'built': True})
             continue
         # the statement a point is attached to
@@ -1008,48 +1009,114 @@ def _text(x):
     return x['text'] if isinstance(x, dict) else x
 
 
-def function_faults(g, name, tag_attrs, lst, parent):
-    """What is wrong with a FUNCTION tag, and the top-level function it stands for. -> (faults, fatal, that function or None). Fatal faults leave no
-    point to speak of: a tag that is not in the right place, a name that is no function's, a class or a look-alike in the way. The others are faults and
-    the point stays, so a refinement answers for the rest."""
-    faults, fatal = [], False
+# Names Ring's parser takes as identifiers. A keyword is a name only where ring_parser_processkeywords turns it into one: by context for TO IN FROM STEP BUT
+# OK ON CASE OFF CATCH DONE AGAIN ELSE OTHER (when no statement of theirs is open, which a definition's head never is), always for THIS SELF SUPER MAIN INIT
+# OPERATOR, the brace hooks and the RINGVM ones (vendor/ring-vm/src/parser.c:161-190). Every other keyword is refused (C6): GET, PUT, GIVE, SEE, NEXT, IF...
+# tree-sitter-ring, the compiler's parser, takes them all without a word, so the gate asks the vendored scanner and parser what Ring does (HF-101).
+NAME_KEYWORDS = {'to', 'in', 'from', 'step', 'but', 'ok', 'on', 'case', 'off', 'catch', 'done', 'again', 'else', 'other', 'this', 'self', 'super',
+                 'ringvm_see', 'ringvm_give', 'ringvm_errorhandler', 'main', 'init', 'operator', 'bracestart', 'braceend', 'braceexpreval',
+                 'braceerror', 'bracenewline'}
+# methods Ring calls itself (F-69, and the brace hooks of a brace block), whatever the class does with them
+CALLED_BY_RING = {'operator': 'the method Ring calls for every operator (F-69)', 'bracestart': 'a hook Ring calls on a brace block',
+                  'braceend': 'a hook Ring calls on a brace block', 'braceerror': 'a hook Ring calls on a brace block',
+                  'braceexpreval': 'a hook Ring calls on a brace block', 'bracenewline': 'a hook Ring calls on a brace block'}
+_KEYWORDS = []
+
+
+def ring_keywords():
+    """Ring's keywords, lower case, read from the vendored scanner (vendor/ring-vm/include/scanner.h)."""
+    if not _KEYWORDS:
+        src = open(os.path.join(ROOT, 'vendor', 'ring-vm', 'include', 'scanner.h'), encoding='utf-8', errors='replace').read()
+        block = src.split('RING_KEYWORDS[] = {', 1)[1].split('};', 1)[0]
+        _KEYWORDS.extend(w.lower() for w in re.findall(r'"([A-Za-z_]+)"', block))
+    return _KEYWORDS
+
+
+def not_a_name(word):
+    """Is `word` a keyword Ring's parser will not take as the name of a function, a method or a parameter?"""
+    w = word.lower()
+    return w in set(ring_keywords()) and w not in NAME_KEYWORDS
+
+
+def function_faults(g, name, kind, tag_attrs, lst, parent):
+    """What is wrong with a FUNCTION or METHOD tag, and the function it stands for. -> (faults, fatal, that function or None). Fatal faults leave no point to
+    speak of: a tag in the wrong place, a name that is no function's, a class or a look-alike in the way. The others are faults and the point stays, so a
+    refinement answers for the rest. A FUNCTION is declared at the top level and looked for there; a METHOD among the members of the class its tag stands in."""
+    faults = []
     attrs = {a['key']: a['val'] for a in tag_attrs}
     order = [a['key'] for a in tag_attrs if a['key'] != 'name']
+    word = 'function' if kind == 'function' else 'method'
     if lst is None:
-        return ["point '%s' is a trailing comment; a FUNCTION tag stands alone on its line" % name], True, None
-    if parent is not None:
+        return ["point '%s' is a trailing comment; a %s tag stands alone on its line" % (name, kind.upper())], True, None
+    if kind == 'function' and parent is not None:
         return ["point '%s' stands inside another definition; a function is declared at the top level, among the statements" % name], True, None
+    if kind == 'method':
+        if parent is None:
+            return ["point '%s' stands outside a class; a METHOD tag stands among its class's members, with a member below it (after the last member it leaves the class)" % name], True, None
+        if parent['k'] == 'func':
+            return ["point '%s' stands inside a function; a method is declared among its class's members" % name], True, None
+        if parent['k'] != 'class':
+            return ["point '%s' stands inside another definition; a method is declared among its class's members" % name], True, None
     if not IDENT_RE.match(name):
-        return ["point '%s' is not a function name" % name], True, None
-    if name.lower() in set(builtins()):
-        faults.append("'%s' is a Ring builtin" % name)
-    if name.lower() == 'main':
-        faults.append("'%s' is the function Ring calls after the top level (F-60)" % name)
+        return ["point '%s' is not a %s name" % (name, word)], True, None
+    if not_a_name(name):
+        faults.append("'%s' is a Ring keyword: Ring's parser does not take it as a name (C6)" % name)
+    if kind == 'function':
+        if name.lower() in set(builtins()):
+            faults.append("'%s' is a Ring builtin" % name)
+        if name.lower() == 'main':
+            faults.append("'%s' is the function Ring calls after the top level (F-60)" % name)
+    else:
+        low = name.lower()
+        if low in CALLED_BY_RING:
+            faults.append("'%s' is called by Ring itself: %s" % (name, CALLED_BY_RING[low]))
+        for it in parent['items']:
+            if it['k'] == 'expr' and it['e'].get('k') == 'assign' and it['e']['l'].get('k') == 'id':
+                attr = it['e']['l']['text']
+                if low in ('get' + attr.lower(), 'set' + attr.lower()):
+                    faults.append("'%s' is called by Ring itself: the %s of the attribute '%s' (F-73)" % (name, 'getter' if low.startswith('get') else 'setter', attr))
+                    break
+        if low in set(builtins()):
+            faults.append("'%s' shadows the builtin: inside the class's methods a bare call goes to the class's own method first" % name)
+        for it, par, *_ in walk_items(g):
+            if par is None and it['k'] == 'func' and ids.def_name(it).lower() == low:
+                faults.append("'%s' shadows the function '%s': inside the class's methods a bare call goes to the class's own method first" % (name, ids.def_name(it)))
+                break
     for key in order:
         if key not in FUNCTION_ATTRS:
-            faults.append("'%s' is not an attribute of a FUNCTION point" % key)
+            faults.append("'%s' is not an attribute of a %s point" % (key, kind.upper()))
     declared = names_of(attrs.get('params'))
     seen = set()
     for q in declared:
         if not IDENT_RE.match(q):
             faults.append("'%s' in params of '%s' is not a parameter name" % (q, name))
+        elif not_a_name(q):
+            faults.append("'%s' in params of '%s' is a Ring keyword: Ring's parser does not take it as a name" % (q, name))
         elif q.lower() in seen:
             faults.append("params of '%s' repeat '%s'" % (name, q))
         seen.add(q.lower())
     existing = None
-    for it, par, *_ in walk_items(g):
-        if par is not None or it['k'] not in ('func', 'class') or ids.def_name(it).lower() != name.lower():
-            continue
-        if it['k'] == 'class':
-            return faults + ["'%s' is declared as a class" % name], True, None
-        if ids.def_name(it) != name:
-            return faults + ["the function is declared '%s', the point names '%s' (names are exact, D24)" % (ids.def_name(it), name)], True, None
-        existing = it
+    if kind == 'function':
+        for it, par, *_ in walk_items(g):
+            if par is not None or it['k'] not in ('func', 'class') or ids.def_name(it).lower() != name.lower():
+                continue
+            if it['k'] == 'class':
+                return faults + ["'%s' is declared as a class" % name], True, None
+            if ids.def_name(it) != name:
+                return faults + ["the function is declared '%s', the point names '%s' (names are exact, D24)" % (ids.def_name(it), name)], True, None
+            existing = it
+    else:
+        for it in parent['items']:
+            if it['k'] != 'func' or ids.def_name(it).lower() != name.lower():
+                continue
+            if ids.def_name(it) != name:
+                return faults + ["the method is declared '%s', the point names '%s' (names are exact, D24)" % (ids.def_name(it), name)], True, None
+            existing = it
     if existing is not None:
         have = [q['name'] for q in existing.get('params', [])]
         if have != declared:
             faults.append("'%s' takes (%s), the point declares (%s)" % (name, ', '.join(have), ', '.join(declared)))
-    return faults, fatal, existing
+    return faults, False, existing
 
 
 def point_function(g, p):
@@ -1057,6 +1124,9 @@ def point_function(g, p):
     there."""
     if p['kind'] == 'block':
         return find_item(g, p['id'])[0]
+    if p['kind'] == 'method':
+        cls = find_item(g, p['carrier']['id'])[1]                   # the class the tag stands in
+        return next((m for m in cls['items'] if m['k'] == 'func' and ids.def_name(m) == p['name']), None)
     for it, par, *_ in walk_items(g):
         if par is None and it['k'] == 'func' and ids.def_name(it) == p['name']:
             return it
@@ -1070,6 +1140,12 @@ def create_function(g, p, items):
     head = parse_text('func %s(%s)\n' % (p['name'], ', '.join(names_of(p['attrs'].get('params')))))
     fn = ids.strip(head['items'][0])
     fn['items'] = [ids.strip(st) for st in items]
+    if p['kind'] == 'method':
+        # into the class the tag stands in, after its last member and BEFORE `private`: the marker is flat in the graph, and a method after it is private
+        cls = find_item(g, p['carrier']['id'])[1]
+        members = cls['items']
+        idx = next((i for i, it in enumerate(members) if it['k'] == 'private'), len(members))
+        return {'op': 'node.create', 'parent': cls['_id'], 'block': ['items'], 'index': idx, 'node': fn}
     top = g['items']
     idx = next((i for i, it in enumerate(top) if it['k'] == 'class'), len(top))
     return {'op': 'node.create', 'parent': None, 'block': 'items', 'index': idx, 'node': fn}
@@ -1091,7 +1167,7 @@ def name_list_errors(g, p, attr, names):
     params, owner = body_params(g, p)
     if attr == 'calls':
         fns = {ids.def_name(it) for it, *_ in walk_items(g) if it['k'] in ('func', 'class')}
-        if p['kind'] == 'function':
+        if p['kind'] in DECLARING:
             fns.add(p['name'])                                      # a function the point declares is a function, there or not
         bis = set(builtins())
         for nm in names:
@@ -1357,7 +1433,7 @@ def evaluate_block(model, s, ctx, out, p):
             return out.reject('structural', "conflict: '%s' is %s now, event %d left it at %s" % (p['name'], p['value'], s['reverts'], revert['value_to']))
         tx = copy.deepcopy(revert['inverse'])
     else:
-        if p['kind'] == 'function' and to.strip() == 'absent':
+        if p['kind'] in DECLARING and to.strip() == 'absent':
             return out.reject('structural', "a refinement does not delete a function: 'absent' is the state before one is made, and a revert of its creation is the way back")
         if DIGEST_RE.match(to):
             return out.reject('structural', "TO is a digest, which only a revert's TO is: a body is proposed as its statements")

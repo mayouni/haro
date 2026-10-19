@@ -17,6 +17,10 @@
 ~~~   a builtin, or a top-level function: inside the class's methods a bare call goes to the class's own method first, so the new one would SHADOW it
 ~~~ A human who wants one of these writes it; a BLOCK point still refines the body of one that exists.
 ~~~
+~~~ A PROGRAM, NOT A LIBRARY. The derivation asks `rnxc check`, whose absence rules are shut on a file with no top level and no Main ("nothing in this unit
+~~~ runs"), and the gate then fails closed (HF-96). So every program here has a top-level statement; a class alone is refused at derivation, and a library
+~~~ is refined through the program that loads it, which the engine does not read yet (named in GRAMMAR.md).
+~~~
 ~~~ NAMES RING'S PARSER DOES NOT TAKE, for a method, a function and a parameter alike (HF-101). tree-sitter-ring, the compiler's parser, reads `func Get()` and
 ~~~ `func Next()` without a word; Ring refuses them (C6, F-20), and a refined program must still be Ring's text. The rule is Ring's own and is read from the
 ~~~ vendored scanner (RING_KEYWORDS) and parser (ring_parser_processkeywords): a keyword is a name only where the parser turns it into an identifier --
@@ -86,6 +90,8 @@ oracle: 3 | 3
 === MT04 a new method goes before `private`, so it is as public as the human's own
 ~~~ `private` is a flat marker among the class's members; a method after it would be private without anyone having said so
 --- program
+? "start"
+
 class Box
 	@nCount = 3
 
@@ -100,6 +106,8 @@ class Box
 --- do
 DEFINE REFINE make_grow AS ( TARGET "Grow", KIND method, FROM "absent", TO "@nCount += n", AUTHOR "mansour", POSTURE trusted, REASON "a counter grows" ) => admitted tx=node.create
 --- text
+? "start"
+
 class Box
 	@nCount = 3
 
@@ -117,6 +125,8 @@ class Box
 
 === MT05 it goes into the class its tag stands in, and not the class after it
 --- program
+? "start"
+
 class Box
 	@nCount = 3
 
@@ -130,6 +140,8 @@ class Crate
 --- do
 DEFINE REFINE make_grow AS ( TARGET "Grow", KIND method, FROM "absent", TO "@nCount += n", AUTHOR "mansour", POSTURE trusted, REASON "a counter grows" ) => admitted tx=node.create
 --- text
+? "start"
+
 class Box
 	@nCount = 3
 
@@ -147,6 +159,8 @@ class Crate
 === MT06 a method body is held to what its point names -- a method it calls, an attribute it writes
 ~~~ `This.Size()` is a call of Size; `@nCount` is a write; builtins are named like everything else
 --- program
+? "start"
+
 class Box
 	@nCount = 3
 	@nOther = 0
@@ -160,6 +174,8 @@ DEFINE REFINE other_attr AS ( TARGET "Grow", KIND method, FROM "absent", TO "@nO
 DEFINE REFINE make AS ( TARGET "Grow", KIND method, FROM "absent", TO "@nCount += n", AUTHOR "mansour", POSTURE trusted, REASON "grow" ) => admitted tx=node.create
 DEFINE REFINE via_this AS ( TARGET "Grow", KIND method, FROM "sha:ef9ef3d39a9d", TO "@nCount += This.Size() + n", AUTHOR "mansour", POSTURE trusted, REASON "grow from the size" ) => admitted tx=node.delete,node.create
 --- text
+? "start"
+
 class Box
 	@nCount = 3
 	@nOther = 0
@@ -173,6 +189,8 @@ class Box
 
 === MT07 the way back from a creation is a revert, and it deletes the method with its ids
 --- program
+? "start"
+
 class Box
 	@nCount = 3
 
@@ -186,6 +204,8 @@ DEFINE REFINE undo AS ( TARGET "Grow", KIND method, FROM "sha:ef9ef3d39a9d", TO 
 
 === MT08 a BLOCK point already refines the body of a method that is there, and counts `This.x` as an attribute write
 --- program
+? "start"
+
 class Box
 	@nCount = 3
 	@nOther = 0
@@ -197,6 +217,8 @@ class Box
 DEFINE REFINE other AS ( TARGET "grow", KIND block, FROM "sha:ef9ef3d39a9d", TO "This.nOther = n", AUTHOR "aicha", POSTURE trusted, REASON "try" ) => rejected constraint writes
 DEFINE REFINE twice AS ( TARGET "grow", KIND block, FROM "sha:ef9ef3d39a9d", TO "@nCount += n * 2", AUTHOR "mansour", POSTURE trusted, REASON "grow twice as fast" ) => admitted tx=node.delete,node.create
 --- text
+? "start"
+
 class Box
 	@nCount = 3
 	@nOther = 0
@@ -261,6 +283,7 @@ func Tax(n)
 
 class Box
 	size = 1
+
 	# <R:METHOD name="operator" params="cOp|x">
 	# <R:METHOD name="BraceStart">
 	# <R:METHOD name="getsize">
