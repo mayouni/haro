@@ -322,7 +322,7 @@ func HeapSort(aList, nDepth)
 --- do
 DEFINE REFINE not_defined AS ( TARGET "sort", KIND algo, FROM "QuickSort", TO "RadixSort", AUTHOR "mansour", POSTURE trusted, REASON "try" ) => rejected structural no function 'RadixSort'
 DEFINE REFINE wrong_arity AS ( TARGET "sort", KIND algo, FROM "QuickSort", TO "HeapSort", AUTHOR "mansour", POSTURE trusted, REASON "try" ) => rejected structural takes 2
-DEFINE REFINE lowercase AS ( TARGET "sort", KIND algo, FROM "QuickSort", TO "mergesort", AUTHOR "mansour", POSTURE trusted, REASON "options are exact" ) => rejected constraint not in options
+DEFINE REFINE lowercase AS ( TARGET "sort", KIND algo, FROM "QuickSort", TO "mergesort", AUTHOR "mansour", POSTURE trusted, REASON "names are exact" ) => rejected structural names are exact
 DEFINE REFINE merge AS ( TARGET "sort", KIND algo, FROM "QuickSort", TO "MergeSort", AUTHOR "mansour", POSTURE trusted, REASON "stable" ) => admitted tx=edge.retarget
 --- text
 aData = [3, 1, 2]
@@ -573,7 +573,7 @@ DEFINE REFINE sort_gap AS ( TARGET "sort.options", KIND algo, FROM "quick|merge|
 DEFINE REFINE sort_twice AS ( TARGET "sort.options", KIND algo, FROM "quick|merge|heap", TO "quick|quick|heap", AUTHOR "mansour", POSTURE trusted, REASON "try" ) => rejected structural not a list of distinct options
 DEFINE REFINE vat_word AS ( TARGET "vat", KIND param, FROM "0.20", TO "lots", AUTHOR "mansour", POSTURE trusted, REASON "try" ) => rejected structural TO 'lots' is not a number
 DEFINE REFINE gov_name AS ( TARGET "cap.governed_by", KIND param, FROM "", TO "two words", AUTHOR "mansour", POSTURE trusted, REASON "try" ) => rejected structural not a governance name
-DEFINE REFINE not_governed AS ( TARGET "cap.governed_by", KIND param, FROM "", TO "", AUTHOR "mansour", POSTURE trusted, REASON "try" ) => rejected structural 'cap' is not governed
+DEFINE REFINE not_governed AS ( TARGET "cap.governed_by", KIND param, FROM "", TO "", AUTHOR "mansour", POSTURE trusted, REASON "try" ) => rejected structural nothing to refine
 DEFINE REFINE code_stale AS ( TARGET "code", KIND param, FROM "1.0", TO "2", AUTHOR "mansour", POSTURE trusted, REASON "a string is not a number" ) => rejected structural stale
 DEFINE REFINE vat_from_word AS ( TARGET "vat", KIND param, FROM "abc", TO "0.30", AUTHOR "mansour", POSTURE trusted, REASON "try" ) => rejected structural stale
 DEFINE REFINE vat_risk_ok AS ( TARGET "vat.risk", KIND param, FROM "", TO "2", AUTHOR "mansour", POSTURE trusted, REASON "a tier" ) => admitted
@@ -587,21 +587,23 @@ $cSort = "quick"  # <R:ALGO name="sort" options="quick|merge|heap">
 $nCap = 0.50  # <R:PARAM name="cap" min="0" max="0.8">
 $cCode = "1"  # <R:PARAM name="code">
 
-=== 37 a revert of a refused proposal, of another point, and of a rule; a revert names its target in any case
-~~~ the target of a revert is matched as Ring matches names, case folded; the TO of a revert of a rule's attribute must be the attribute's prior text
-~~~ exactly, as its inverse restores it byte for byte (mutation study: the revert checks no fixture reached)
+=== 37 a revert of a refused proposal, of another point, and of a rule; a name is exact
+~~~ a target names a point exactly as it is declared (D24): `Vat` is not `vat`, and the refusal says which is; the TO of a revert of a rule's attribute
+~~~ must be the attribute's prior text exactly, as its inverse restores it byte for byte
 --- program
 $nVat = 0.20  # <R:PARAM name="vat" min="0" max="0.9">
 $cSort = "quick"  # <R:ALGO name="sort" options="quick|merge|heap">
 --- do
-DEFINE REFINE up AS ( TARGET "Vat", KIND param, FROM "0.20", TO "0.30", AUTHOR "mansour", POSTURE trusted, REASON "up" ) => admitted
+DEFINE REFINE up AS ( TARGET "vat", KIND param, FROM "0.20", TO "0.30", AUTHOR "mansour", POSTURE trusted, REASON "up" ) => admitted
+DEFINE REFINE up_case AS ( TARGET "Vat", KIND param, FROM "0.30", TO "0.40", AUTHOR "mansour", POSTURE trusted, REASON "another spelling" ) => rejected structural names are exact: 'vat' is declared
 DEFINE REFINE too_high AS ( TARGET "vat", KIND param, FROM "0.30", TO "0.95", AUTHOR "mansour", POSTURE trusted, REASON "try" ) => rejected constraint above max
-DEFINE REFINE undo_refused AS ( TARGET "vat", KIND param, FROM "0.30", TO "0.20", AUTHOR "mansour", POSTURE trusted, REASON "back", REVERTS "2" ) => rejected structural was not admitted
-DEFINE REFINE undo_other AS ( TARGET "sort", KIND algo, FROM "quick", TO "merge", AUTHOR "mansour", POSTURE trusted, REASON "back", REVERTS "1" ) => rejected structural refined Vat, not sort
-DEFINE REFINE undo_up AS ( TARGET "VAT", KIND param, FROM "0.30", TO "0.20", AUTHOR "mansour", POSTURE trusted, REASON "back", REVERTS "1" ) => admitted
+DEFINE REFINE undo_refused AS ( TARGET "vat", KIND param, FROM "0.30", TO "0.20", AUTHOR "mansour", POSTURE trusted, REASON "back", REVERTS "3" ) => rejected structural was not admitted
+DEFINE REFINE undo_other AS ( TARGET "sort", KIND algo, FROM "quick", TO "merge", AUTHOR "mansour", POSTURE trusted, REASON "back", REVERTS "1" ) => rejected structural refined vat, not sort
+DEFINE REFINE undo_case AS ( TARGET "VAT", KIND param, FROM "0.30", TO "0.20", AUTHOR "mansour", POSTURE trusted, REASON "back", REVERTS "1" ) => rejected structural names are exact
+DEFINE REFINE undo_up AS ( TARGET "vat", KIND param, FROM "0.30", TO "0.20", AUTHOR "mansour", POSTURE trusted, REASON "back", REVERTS "1" ) => admitted
 DEFINE REFINE cap AS ( TARGET "vat.max", KIND param, FROM "0.9", TO "0.8", AUTHOR "mansour", POSTURE trusted, REASON "a cap" ) => admitted
-DEFINE REFINE undo_cap_respelled AS ( TARGET "vat.max", KIND param, FROM "0.8", TO "0.90", AUTHOR "mansour", POSTURE trusted, REASON "back", REVERTS "6" ) => rejected structural not the prior state
-DEFINE REFINE undo_cap AS ( TARGET "vat.max", KIND param, FROM "0.8", TO "0.9", AUTHOR "mansour", POSTURE trusted, REASON "back", REVERTS "6" ) => admitted
+DEFINE REFINE undo_cap_respelled AS ( TARGET "vat.max", KIND param, FROM "0.8", TO "0.90", AUTHOR "mansour", POSTURE trusted, REASON "back", REVERTS "8" ) => rejected structural not the prior state
+DEFINE REFINE undo_cap AS ( TARGET "vat.max", KIND param, FROM "0.8", TO "0.9", AUTHOR "mansour", POSTURE trusted, REASON "back", REVERTS "8" ) => admitted
 
 === 38 a revert is not held to the bounds as they were, but to the rules of the state it leaves
 ~~~ the constraint stage judges a proposal against the bounds it was drafted under; a revert restores a state that was once admitted, so it skips
@@ -666,25 +668,29 @@ DEFINE REFINE boss_moves AS ( TARGET "vat.governed_by", KIND param, FROM "ops", 
 --- text
 $nVat = 0.20  # <R:PARAM name="vat" min="0.10" max="0.8" risk="3" governed_by="audit" floor="trusted">
 
-=== 41 names are Ring's, case folded everywhere
-~~~ a tag's keys, a point's name, the KIND and POSTURE seats, a rule's two sides, a governance, an actor and the points it may refine are all
-~~~ matched as Ring matches names; a rule is checked whichever side the refined point stands on (mutation study: the case folds)
+=== 41 names and words are exact, one spelling each
+~~~ D24: Haro does not fold case. The KIND and POSTURE seats, a point's name, an actor, a governance are written as declared, and a refusal of a name in
+~~~ another case says which is declared; a rule is checked whichever side the refined point stands on
 --- program
-$nVat = 0.20  # <R:PARAM NAME="Vat" MIN="0" MAX="0.9" RISK="1" GOVERNED_BY="OPS">
+$nVat = 0.20  # <R:PARAM name="vat" min="0" max="0.9" risk="1" governed_by="ops">
 $nFloor = 0.10  # <R:PARAM name="floor" min="0" max="0.5">
-# <R:RULE name="vat-above-floor" expr="VAT >= Floor" message="vat must not drop below floor">
+# <R:RULE name="vat-above-floor" expr="vat >= floor" message="vat must not drop below floor">
 --- context
 governance ops
-	actor mansour autonomous may VAT floor
+	actor mansour autonomous may vat floor
 --- do
-DEFINE REFINE up AS ( TARGET "vat", KIND Param, FROM "0.20", TO "0.30", AUTHOR "Mansour", POSTURE Trusted, REASON "case" ) => admitted
-DEFINE REFINE down AS ( TARGET "VAT", KIND param, FROM "0.30", TO "0.05", AUTHOR "mansour", POSTURE trusted, REASON "under the floor" ) => rejected derivation vat-above-floor
+DEFINE REFINE kind_case AS ( TARGET "vat", KIND Param, FROM "0.20", TO "0.30", AUTHOR "mansour", POSTURE trusted, REASON "case" ) => rejected structural unknown kind 'Param'
+DEFINE REFINE posture_case AS ( TARGET "vat", KIND param, FROM "0.20", TO "0.30", AUTHOR "mansour", POSTURE Trusted, REASON "case" ) => rejected structural unknown posture 'Trusted'
+DEFINE REFINE target_case AS ( TARGET "VAT", KIND param, FROM "0.20", TO "0.30", AUTHOR "mansour", POSTURE trusted, REASON "case" ) => rejected structural names are exact: 'vat' is declared
+DEFINE REFINE actor_case AS ( TARGET "vat", KIND param, FROM "0.20", TO "0.30", AUTHOR "Mansour", POSTURE trusted, REASON "case" ) => rejected governance PERMISSION
+DEFINE REFINE gov_case AS ( TARGET "floor.governed_by", KIND param, FROM "", TO "Ops", AUTHOR "mansour", POSTURE trusted, REASON "case" ) => rejected structural no governance 'Ops'
+DEFINE REFINE up AS ( TARGET "vat", KIND param, FROM "0.20", TO "0.30", AUTHOR "mansour", POSTURE trusted, REASON "up" ) => admitted
+DEFINE REFINE down AS ( TARGET "vat", KIND param, FROM "0.30", TO "0.05", AUTHOR "mansour", POSTURE trusted, REASON "under the floor" ) => rejected derivation vat-above-floor
 DEFINE REFINE floor_up AS ( TARGET "floor", KIND param, FROM "0.10", TO "0.40", AUTHOR "mansour", POSTURE trusted, REASON "over vat" ) => rejected derivation vat-above-floor
-DEFINE REFINE gov_case AS ( TARGET "floor.governed_by", KIND param, FROM "", TO "Ops", AUTHOR "mansour", POSTURE Trusted, REASON "an owner, spelt otherwise" ) => admitted
 --- text
-$nVat = 0.30  # <R:PARAM NAME="Vat" MIN="0" MAX="0.9" RISK="1" GOVERNED_BY="OPS">
-$nFloor = 0.10  # <R:PARAM name="floor" min="0" max="0.5" governed_by="Ops">
-# <R:RULE name="vat-above-floor" expr="VAT >= Floor" message="vat must not drop below floor">
+$nVat = 0.30  # <R:PARAM name="vat" min="0" max="0.9" risk="1" governed_by="ops">
+$nFloor = 0.10  # <R:PARAM name="floor" min="0" max="0.5">
+# <R:RULE name="vat-above-floor" expr="vat >= floor" message="vat must not drop below floor">
 
 === 42 rules and bounds at their edges
 ~~~ `>=` and `<=` hold at equality, `>`, `<` and `!=` break there, `=` holds only there; a value may stand on its own min or max, and a min may meet
@@ -774,7 +780,8 @@ func MergeSort(aList)
 	? "merge"
 --- do
 DEFINE REFINE bad_name AS ( TARGET "sort", KIND algo, FROM "QuickSort", TO "Merge Sort", AUTHOR "mansour", POSTURE trusted, REASON "try" ) => rejected structural not a function name
-DEFINE REFINE lower_from AS ( TARGET "sort", KIND algo, FROM "quicksort", TO "MergeSort", AUTHOR "mansour", POSTURE trusted, REASON "a callee by any case" ) => admitted tx=edge.retarget
+DEFINE REFINE lower_from AS ( TARGET "sort", KIND algo, FROM "quicksort", TO "MergeSort", AUTHOR "mansour", POSTURE trusted, REASON "FROM is what is written" ) => rejected structural stale
+DEFINE REFINE merge AS ( TARGET "sort", KIND algo, FROM "QuickSort", TO "MergeSort", AUTHOR "mansour", POSTURE trusted, REASON "the callee as written" ) => admitted tx=edge.retarget
 --- text
 aData = [3, 1, 2]
 MergeSort(aData)  # <R:ALGO name="sort" options="QuickSort|MergeSort">
@@ -802,6 +809,19 @@ DEFINE REFINE junk AS ( TARGET "vat", KIND param, FROM "0.20", TO "0.30", AUTHOR
 aSteps = ["parse", "emit"]  # <R:PIPELINE name="steps" options="parse|check|emit">
 --- do
 DEFINE REFINE gap AS ( TARGET "steps", KIND pipeline, FROM "parse|emit", TO "parse||emit", AUTHOR "mansour", POSTURE trusted, REASON "try" ) => rejected structural empty stage name
+
+=== 47 a refinement is a change: a no-op is refused
+~~~ D25: TO the very text FROM found is nothing to refine, for a value and for a rule's attribute alike; the same number spelt otherwise is a change of
+~~~ one line, and is a refinement (A04 reads a human respelling the same way)
+--- program
+$nVat = 0.20  # <R:PARAM name="vat" min="0" max="0.9" risk="2">
+--- do
+DEFINE REFINE same AS ( TARGET "vat", KIND param, FROM "0.20", TO "0.20", AUTHOR "mansour", POSTURE trusted, REASON "try" ) => rejected structural nothing to refine
+DEFINE REFINE same_max AS ( TARGET "vat.max", KIND param, FROM "0.9", TO "0.9", AUTHOR "mansour", POSTURE trusted, REASON "try" ) => rejected structural nothing to refine
+DEFINE REFINE same_risk AS ( TARGET "vat.risk", KIND param, FROM "2", TO "2", AUTHOR "mansour", POSTURE trusted, REASON "try" ) => rejected structural nothing to refine
+DEFINE REFINE respelt AS ( TARGET "vat", KIND param, FROM "0.20", TO "0.2", AUTHOR "mansour", POSTURE trusted, REASON "the same number, written shorter" ) => admitted
+--- text
+$nVat = 0.2  # <R:PARAM name="vat" min="0" max="0.9" risk="2">
 
 === L01 declarations that do not lift: the gate fails closed
 ~~~ a program whose declarations cannot be read is not refined at all: every proposal is refused at the structural stage, naming the first fault.
@@ -895,16 +915,31 @@ $nW = 1  # <R:BLOCK name="w">
 --- do
 DEFINE REFINE try_block AS ( TARGET "w", KIND block, FROM "", TO "x", AUTHOR "mansour", POSTURE trusted, REASON "try" ) => rejected structural declared but not built
 
-=== L12 a tag's keys in any case, and two points whose names differ only in case are one name twice
+=== L12 two points whose names differ only in case are look-alikes, and the gate fails closed on them
+~~~ names are exact (D24), so `Vat` and `vat` are two names -- which a reader takes for one: refused, by name
 --- program
-$nVat = 0.20  # <R:PARAM NAME="Vat" MIN="0" MAX="0.9">
-$nVat2 = 0.30  # <R:PARAM name="VAT">
+$nVat = 0.20  # <R:PARAM name="Vat" min="0" max="0.9">
+$nVat2 = 0.30  # <R:PARAM name="vat">
 --- lift
 Vat param @1 = 0.20 min=0 max=0.9
-VAT param @2 = 0.30
-error duplicate point 'VAT'
+vat param @2 = 0.30
+error look-alike points 'Vat' and 'vat'
 --- do
-DEFINE REFINE blocked AS ( TARGET "vat", KIND param, FROM "0.20", TO "0.30", AUTHOR "mansour", POSTURE trusted, REASON "try" ) => rejected structural declarations do not lift
+DEFINE REFINE blocked AS ( TARGET "vat", KIND param, FROM "0.30", TO "0.40", AUTHOR "mansour", POSTURE trusted, REASON "try" ) => rejected structural declarations do not lift
+
+=== L15 a tag's key in another case, a kind in another case, a rule naming a point in another case
+~~~ one spelling each (D24): keys in lower case, kinds in upper case, a rule's sides as the points are declared -- the refusal names the declared one
+--- program
+$nA = 1  # <R:PARAM NAME="a">
+$nB = 2  # <R:param name="b">
+$nC = 3  # <R:PARAM name="c">
+# <R:RULE name="r" expr="C >= 0" message="m">
+--- lift
+c param @3 = 3
+rule r "C >= 0" -- m
+error malformed tag: key 'NAME'
+error malformed tag: kind 'param'
+error rule 'r' names unknown point 'C' (names are exact: 'c' is declared)
 
 === L13 a rule of the wrong shape, and one that orders a string
 --- program
@@ -1165,15 +1200,14 @@ DEFINE REFINE a AS ( TARGET "vat", KIND param, FROM "0.20", TO "0.30", AUTHOR "m
 DEFINE REFINE a AS ( TARGET "vat", KIND param, FROM "0.20", TO "0.30", AUTHOR "m", POSTURE trusted, REASON "r" ) ~ DEFINE REFINE b AS ( TARGET "vat", KIND param, FROM "0.20", TO "0.40", AUTHOR "m", POSTURE trusted, REASON "r" ) => conflict differs
 DEFINE REFINE a AS ( TARGET "vat.max", KIND param, FROM "0.9", TO "0.25", AUTHOR "m", POSTURE trusted, REASON "r" ) ~ DEFINE REFINE b AS ( TARGET "vat", KIND param, FROM "0.20", TO "0.30", AUTHOR "m", POSTURE trusted, REASON "r" ) => conflict differs
 
-=== C02 the footprint of a sentence is its point's name as Ring folds it
-~~~ the same point under two spellings, and a rule whose sides are spelt otherwise than the points (mutation study: the footprint's case folds)
+=== C02 two spellings are two names
+~~~ names are exact (D24): `VAT` names no point, so it is refused in either order and the two sentences commute
 --- program
 $nVat = 0.20  # <R:PARAM name="vat" min="0" max="0.9">
 $nFloor = 0.10  # <R:PARAM name="floor" min="0" max="0.5">
-# <R:RULE name="vat-above-floor" expr="VAT >= Floor" message="vat must not drop below floor">
+# <R:RULE name="vat-above-floor" expr="vat >= floor" message="vat must not drop below floor">
 --- commute
-DEFINE REFINE a AS ( TARGET "VAT", KIND param, FROM "0.20", TO "0.30", AUTHOR "m", POSTURE trusted, REASON "r" ) ~ DEFINE REFINE b AS ( TARGET "vat", KIND param, FROM "0.20", TO "0.40", AUTHOR "m", POSTURE trusted, REASON "r" ) => conflict differs
-DEFINE REFINE a AS ( TARGET "vat", KIND param, FROM "0.20", TO "0.05", AUTHOR "m", POSTURE trusted, REASON "r" ) ~ DEFINE REFINE b AS ( TARGET "floor", KIND param, FROM "0.10", TO "0.02", AUTHOR "m", POSTURE trusted, REASON "r" ) => conflict differs
+DEFINE REFINE a AS ( TARGET "VAT", KIND param, FROM "0.20", TO "0.30", AUTHOR "m", POSTURE trusted, REASON "r" ) ~ DEFINE REFINE b AS ( TARGET "vat", KIND param, FROM "0.20", TO "0.40", AUTHOR "m", POSTURE trusted, REASON "r" ) => commute
 
 === A01 a human edit of the text is audited as the refinements it amounts to
 ~~~ the gate sees a change made as TEXT too: the edit is read back as the refinements of points it makes (ids carried by rung 19), each is run through

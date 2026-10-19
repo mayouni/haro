@@ -154,7 +154,9 @@ def parse_tag(text):
         m2 = _ATTR_RE.match(text, pos)
         if not m2:
             break
-        key = m2.group(2).lower()
+        key = m2.group(2)
+        if key != key.lower():
+            return "malformed tag: key '%s' -- a key is written in lower case" % key
         if key in seen:
             return 'malformed tag: attribute %s twice' % key
         seen.add(key)
@@ -162,6 +164,8 @@ def parse_tag(text):
         pos = m2.end()
     if not _CLOSE_RE.match(text, pos):
         return 'malformed tag: not closed'
+    if m.group(1) != m.group(1).upper():
+        return "malformed tag: kind '%s' -- a kind is written in upper case" % m.group(1)
     return {'kind': m.group(1).lower(), 'attrs': attrs, 'attrs_end': pos}
 
 
@@ -368,12 +372,14 @@ def lift(g):
               'order': [a['key'] for a in t['attrs'] if a['key'] != 'name'], 'form': form, 'path': path, 'value': value, 'built': kind in BUILT}
         points.append(pt)
 
-    seen = {}
+    seen, folded = {}, {}
     for p in points:
-        low = p['name'].lower()
-        if low in seen:
+        if p['name'] in seen:
             err("duplicate point '%s'" % p['name'])
-        seen[low] = p
+        elif p['name'].lower() in folded:
+            err("look-alike points '%s' and '%s': names differ only in case" % (folded[p['name'].lower()], p['name']))
+        seen[p['name']] = p
+        folded.setdefault(p['name'].lower(), p['name'])
     per = {}
     for p in points:
         per.setdefault(p['id'], []).append(p)
@@ -401,7 +407,7 @@ def lift(g):
             e = own_rule_error(p)
             if e and not any(x['msg'].startswith("point '%s' bounds" % p['name']) for x in errors):
                 err(e, own=True)
-    names = {p['name'].lower(): p for p in points}
+    names = {p['name']: p for p in points}
     for r in rules:
         parts = r['expr'].split()
         if len(parts) != 3 or parts[1] not in ('>=', '<=', '!=', '>', '<', '='):
@@ -411,9 +417,9 @@ def lift(g):
         for side in (parts[0], parts[2]):
             if NUM_RE.match(side):
                 continue
-            q = names.get(side.lower())
+            q = names.get(side)
             if q is None:
-                err("rule '%s' names unknown point '%s'" % (r['name'], side))
+                err("rule '%s' names unknown point '%s'%s" % (r['name'], side, near(names, side)))
             elif r['op'] != '=' and r['op'] != '!=' and not (q['kind'] == 'param' and q['form'] in ('num', 'neg')):
                 err("rule '%s' orders the non-numeric point '%s'" % (r['name'], side))
     return {'points': points, 'rules': rules, 'errors': errors}
@@ -423,16 +429,20 @@ def same_value(p, a, b):
     """Two spellings of a point's value: numbers by value, a callee by Ring's case-folded name, everything else exactly."""
     if p['form'] in ('num', 'neg') and NUM_RE.match(a) and NUM_RE.match(b):
         return num(a) == num(b)
-    if p['form'] == 'call':
-        return a.lower() == b.lower()
     return a == b
 
 
 def point_named(L, name):
     for p in L['points']:
-        if p['name'].lower() == name.lower():
+        if p['name'] == name:
             return p
     return None
+
+
+def near(names, name):
+    """The hint a refusal of a name gives when the name is a declared one in another case: names are exact (D24), and saying which was meant is cheap."""
+    hit = [n for n in names if n.lower() == name.lower() and n != name]
+    return " (names are exact: '%s' is declared)" % hit[0] if hit else ''
 
 
 def show_lift(L):
@@ -514,9 +524,9 @@ def parse_sentence(text):
         for r in ('TARGET', 'AUTHOR', 'REASON'):
             if not seats[r].strip():
                 raise Bad('seat %s is empty' % r)
-        if seats['KIND'].lower() not in KINDS:
+        if seats['KIND'] not in KINDS:
             raise Bad("unknown kind '%s'" % seats['KIND'])
-        if seats['POSTURE'].lower() not in POSTURES:
+        if seats['POSTURE'] not in POSTURES:
             raise Bad("unknown posture '%s'" % seats['POSTURE'])
         for key in ('AT', 'REVERTS'):
             if key in seats and not re.match(r'^[0-9]+$', seats[key]):
@@ -525,8 +535,8 @@ def parse_sentence(text):
             raise Bad('seat CASCADE is not a list of ids')
     except Bad as e:
         return None, 'malformed sentence: %s' % e
-    out = {'id': m.group(1), 'target': seats['TARGET'], 'kind': seats['KIND'].lower(), 'from': seats['FROM'], 'to': seats['TO'], 'author': seats['AUTHOR'],
-           'posture': seats['POSTURE'].lower(), 'reason': seats['REASON'], 'text': text.strip()}
+    out = {'id': m.group(1), 'target': seats['TARGET'], 'kind': seats['KIND'], 'from': seats['FROM'], 'to': seats['TO'], 'author': seats['AUTHOR'],
+           'posture': seats['POSTURE'], 'reason': seats['REASON'], 'text': text.strip()}
     if 'AT' in seats:
         out['at'] = int(seats['AT'])
     if 'REVERTS' in seats:
@@ -567,12 +577,12 @@ def parse_context(text):
             parts = line.split()
             if len(parts) != 2 or parts[0] != 'governance':
                 raise ValueError('context line: ' + line)
-            cur = ctx.setdefault(parts[1].lower(), {})
+            cur = ctx.setdefault(parts[1], {})
         else:
             parts = line.split()
             if len(parts) < 4 or parts[0] != 'actor' or parts[3] != 'may' or parts[2] not in LEVELS or cur is None:
                 raise ValueError('context line: ' + line)
-            cur[parts[1].lower()] = {'level': LEVELS[parts[2]], 'name': parts[2], 'may': {x.lower() for x in parts[4:]}}
+            cur[parts[1]] = {'level': LEVELS[parts[2]], 'name': parts[2], 'may': set(parts[4:])}
     return ctx
 
 
@@ -716,7 +726,7 @@ def apply_prim(work, p):
         if node.get('k') != 'call' or node['callee']['k'] != 'id':
             raise TxError('the edge is not a call to a named function')
         old = node['callee']['text']
-        if old.lower() != p['from'].lower():
+        if old != p['from']:
             raise TxError("the call goes to '%s', not '%s'" % (old, p['from']))
         node['callee']['text'] = p['to']
         return {'op': op, 'edge': 'calls', 'src': p['src'], 'from': p['to'], 'to': old}
@@ -906,7 +916,7 @@ def rule_value(L, side):
 def rules_violated(L, only=None):
     """The first rule the state breaks; with `only`, the first of the rules that name that point (a refinement answers for the rules of what it touched)."""
     for r in L['rules']:
-        if only and only.lower() not in (r['left'].lower(), r['right'].lower()):
+        if only and only not in (r['left'], r['right']):
             continue
         a, b = rule_value(L, r['left']), rule_value(L, r['right'])
         both = NUM_RE.match(a) and NUM_RE.match(b)
@@ -965,7 +975,7 @@ def evaluate(model, s, ctx, readback=True):
         return out.reject('structural', 'declarations do not lift: ' + blocking[0]['msg'])
     p = point_named(L, s['base'])
     if p is None:
-        return out.reject('structural', "no refinement point '%s'" % s['base'])
+        return out.reject('structural', "no refinement point '%s'%s" % (s['base'], near([q['name'] for q in L['points']], s['base'])))
     out.point = p
     if s['kind'] != p['kind']:
         return out.reject('structural', "kind '%s' does not match point '%s', which is declared %s" % (s['kind'], p['name'], p['kind']))
@@ -986,7 +996,7 @@ def evaluate(model, s, ctx, readback=True):
             return out.reject('structural', 'event %d was not admitted' % s['reverts'])
         if revert.get('reverted_by'):
             return out.reject('structural', 'event %d is already reverted by event %d' % (s['reverts'], revert['reverted_by']))
-        if revert['target'].lower() != s['target'].lower():
+        if revert['target'] != s['target']:
             return out.reject('structural', 'event %d refined %s, not %s' % (s['reverts'], revert['target'], s['target']))
     cur = p['attrs'].get(attr, '') if attr else p['value']
     if attr in ('min', 'max'):
@@ -995,6 +1005,8 @@ def evaluate(model, s, ctx, readback=True):
         same = same_value(p, frm, cur) if attr is None else frm == cur
     if not same:
         return out.reject('structural', "stale: '%s' is %s now, not %s" % (s['target'], cur, frm))
+    if to == cur:
+        return out.reject('structural', "nothing to refine: '%s' is %s already" % (s['target'], cur if cur != '' else 'unset'))
     if revert is not None:
         if not (to == revert['value_from'] or (attr is None and same_value(p, to, revert['value_from']))):
             return out.reject('structural', "TO is not the prior state of event %d, which is '%s'" % (s['reverts'], revert['value_from']))
@@ -1012,9 +1024,11 @@ def evaluate(model, s, ctx, readback=True):
         elif form == 'call':
             if not IDENT_RE.match(to):
                 return out.reject('structural', "TO '%s' is not a function name" % to)
-            fn = [it for it, par, bp, lst, i, own in walk_items(g) if it['k'] == 'func' and par is None and ids.def_name(it).lower() == to.lower()]
+            fns = [it for it, par, bp, lst, i, own in walk_items(g) if it['k'] == 'func' and par is None]
+            fn = [it for it in fns if ids.def_name(it) == to]
             if not fn:
-                return out.reject('structural', "no function '%s' in this program" % to)
+                hint = [ids.def_name(it) for it in fns if ids.def_name(it).lower() == to.lower()]
+                return out.reject('structural', "no function '%s' in this program%s" % (to, " (names are exact: '%s' is declared)" % hint[0] if hint else ''))
             it = find_item(g, p['id'])[0]
             call = get_path(it, p['path'])
             want, have = len(fn[0].get('params', [])), len(call.get('args', []))
@@ -1044,10 +1058,8 @@ def evaluate(model, s, ctx, readback=True):
         if attr == 'governed_by' and to != '':
             if not NAME_RE.match(to):
                 return out.reject('structural', "TO '%s' is not a governance name" % to)
-            if to.lower() not in ctx:
+            if to not in ctx:
                 return out.reject('structural', "no governance '%s'" % to)
-        if attr == 'governed_by' and frm == '' and to == '':
-            return out.reject('structural', "'%s' is not governed" % p['name'])
     out.passed('structural')
     out.value_from, out.value_to = frm, to
     # ---------------------------------------------------------------- constraint: the point's bounds and options, on the value proposed
@@ -1167,16 +1179,16 @@ def constraint(p, attr, frm, to):
 
 def governance(ctx, gname, actor, p, tier):
     """stzGovernance.MayProceed over the action `refine-<point>`: a declared risk tier, a permission, an authority that covers the tier."""
-    gov = ctx.get(gname.lower())
-    action = 'refine-' + p['name'].lower()
+    gov = ctx.get(gname)
+    action = 'refine-' + p['name']
     if gov is None:
         return "governance '%s' is not configured" % gname
     risk = p['attrs'].get('risk')
     if not risk:
         return "refused: '%s' has NO declared risk tier (undeclared actions never proceed)" % action
     need = tier or int(risk)
-    who = gov.get(actor.lower())
-    if who is None or p['name'].lower() not in who['may']:
+    who = gov.get(actor)
+    if who is None or p['name'] not in who['may']:
         return "refused: '%s' lacks PERMISSION (can) for '%s'" % (actor, action)
     if who['level'] < need:
         return "refused: '%s' holds '%s' authority (level %d) but '%s' is risk tier %d (SHOULD does not cover it)" % (actor, who['name'], who['level'], action, need)
@@ -1281,10 +1293,10 @@ def footprint(model, s):
     """(reads, writes) of a sentence over the pieces of the model: the value of a point, its declaration (its rules), and -- because a derivation rule
     reads the post-state -- the value of every point that shares a rule with it."""
     L = model.lift()
-    base = s['base'].lower()
+    base = s['base']
     partners = set()
     for r in L['rules']:
-        sides = {x.lower() for x in (r['left'], r['right']) if not NUM_RE.match(x)}
+        sides = {x for x in (r['left'], r['right']) if not NUM_RE.match(x)}
         if base in sides:
             partners |= sides
     partners.discard(base)

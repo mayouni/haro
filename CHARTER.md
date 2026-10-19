@@ -1013,6 +1013,23 @@ states principle 14.
   measurement beside it). The announcement is the author's. *Cost:* the chapters are stzlib's Learning System's to write.
 - **D22 -- principles 4 and 5 are amended** (a refusal names a state, never a person; the catalogue is data), with stage 21's
   S1 holding the first. *Cost:* a refusal text that says "you" now fails the guard.
+- **D24 -- names are exact in the Haro layer; Ring's case folding is not inherited** (rung 5, ruled on the author's delegation, 2026-10-19:
+  "take any opportunity to not inherit bad Ring habits"). A point's name, a rule's sides, a governance, an actor, the points an actor may refine,
+  the KIND and POSTURE seats, a tag's keys (lower case) and kind (upper case), the callee a refined call names: one spelling each, matched
+  exactly. Two names that differ only in case are **look-alikes, refused** -- names are exact, and a reader would take them for one. A
+  near miss is refused with the declared spelling named (`no refinement point 'Vat' (names are exact: 'vat' is declared)`). Ring's
+  folding stays only where the gate *describes the Ring program*: which statements read or write a variable (F-18 is Ring's behaviour,
+  and the cascade must be right about it). *Cost:* a sentence written in another case is refused rather than understood; the court's
+  folding fixtures became refusal fixtures. `stzRefinableCode` already matches exactly, so the two gates now agree by construction (HF-88).
+- **D25 -- a refinement is a change; a no-op is refused** (same delegation). TO the very text FROM found is refused at the structural
+  stage, `nothing to refine`, for a value and for a rule's attribute alike, so every admitted refinement changes exactly one line --
+  what the court already required. The same number spelt otherwise (`0.20` to `0.2`) changes a line and stays a refinement, as A04
+  reads a human respelling. *Cost:* a no-op the live gate admits is refused here (85 of the court's 504 proposals, counted apart); the
+  branch `'x' is not governed` became unreachable and is gone.
+- **D26 -- the write surface is what a task may change** (same delegation; HF-87). `scoped.py` takes the points a task names
+  (`points=`), and the grammar holds their sentences and no others: least authority, and a grammar small enough for the engine's decoder
+  whatever the program's size -- so the decoder's 128-rule cap stays where it is. A task naming a point the program does not declare is
+  refused by name; a whole-program grammar the decoder cannot hold is refused by the engine by name (GBNF-M2), never silently.
 - **D23 -- `rnxc fmt` is a Ring++ feature, not held for Haro** (CODEGRAPH Q4, ruled on the author's delegation, 2026-10-05: "take
   whatever decision you think is wiser on my behalf"). It is a verb of the one binary (commitment 5), depends on nothing of Haro's, is
   judged against the oracle and refuses what Ring refuses (58 of 6,061 Softanza files, 57 of them Ring's own refusals). It ships inside

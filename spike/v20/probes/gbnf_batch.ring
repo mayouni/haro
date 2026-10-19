@@ -19,6 +19,12 @@ for i = 1 to nJobs
 		nBar = substr(cJob, "|")
 		cG = read(cDir + "/" + left(cJob, nBar - 1))
 		cS = read(cDir + "/" + right(cJob, len(cJob) - nBar))
-		? "J|" + i + "|" + StzGrammarRefusal(cG) + "|" + StzGrammarAccepts(cG, cS)
+		cRefusal = StzGrammarRefusal(cG)
+		# a refused grammar is answered as refused and the batch goes on: StzGrammarAccepts raises on one, and the batch used to stop there
+		if cRefusal = ""
+			? "J|" + i + "||" + StzGrammarAccepts(cG, cS)
+		else
+			? "J|" + i + "|" + cRefusal + "|0"
+		ok
 	ok
 next

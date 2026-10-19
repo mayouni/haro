@@ -30,19 +30,26 @@ def quoted(body):
 NUM = '("-")? [0-9]+ ("." [0-9]+)?'
 
 
-def scoped_gbnf(model, ctx=None, posture=None, author=None):
+def scoped_gbnf(model, ctx=None, posture=None, author=None, points=None):
     """The shapes TO takes are named rules SHARED by every point, and each point's sentence is a top-level alternative of `body`, not a group: the
     engine's decoder holds at most 128 rules (gbnf_machine.zig MAX_RULES) and makes every `( ... )` and every repeat a rule of its own, so the first
     form -- each point carrying its own copy of the number, the tier, the posture -- crossed the limit at five points (GBNF-M2, found by fixture 36,
-    2026-10-19). What a point still costs is its own rule, its two tails and the option list it names; the language is the same."""
+    2026-10-19). What a point still costs is its own rule, its two tails and the option list it names; the language is the same.
+
+    `points` (D26): the names of the points a TASK may refine -- the agent's write surface is what its task may change, nothing else; a name the program does
+    not declare is refused here, by name. Without it every built point is in the grammar, which the decoder holds up to 10 or 11 points (HF-87)."""
     ctx = model.ctx if ctx is None else ctx
     L = model.lift()
     post = lit(posture) if posture else alt(list(refine.POSTURES))
     who = lit('"%s"' % author) if author else 'word'
     govs = sorted(ctx)
     cases, tails = [], []
+    if points is not None:
+        unknown = [x for x in points if not any(p['name'] == x for p in L['points'])]
+        if unknown:
+            raise ValueError('the task names points the program does not declare: %s' % ', '.join(unknown))
     for n, p in enumerate(L['points']):
-        if not p['built']:
+        if not p['built'] or (points is not None and p['name'] not in points):
             continue
         a = p['attrs']
         opts = a['options'].split('|') if a.get('options') else None

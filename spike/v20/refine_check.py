@@ -490,12 +490,9 @@ def stz_case(i, m, ctx, sent):
             lines.append('o.TrustFloor("%s", "%s")' % (p['name'], p['attrs']['floor']))
     for r in L['rules']:
         lines.append('o.DeclareDerivation("%s", %s, "%s")' % (r['name'], ring_lambda(r, L), r['message']))
-    # the point by its DECLARED name: this gate folds a target's spelling as Ring folds names, stzRefinableCode matches the name exactly (HF-88), so a
-    # sentence spelling it otherwise is put to it under the declared name -- the verdicts are what is compared -- and counted (CASE_SPELT)
+    # both gates match a point's name exactly (D24, HF-88)
     pt = refine.point_named(L, s['base'])
     name = pt['name'] if pt else s['base']
-    if name != s['base']:
-        CASE_SPELT.add(i)
     lines.append('r = o.Refine("%s").As("%s").To("%s")' % (name, s['posture'], s['to']))
     lines.append('? "V|%d|" + r[:admitted] + "|" + r[:why] + "|" + o.ValueOf("%s")' % (i, name))
     return 'try\n' + '\n'.join(lines) + '\ncatch\n? "V|%d|ERR|" + cCatchError + "|"\ndone' % i
@@ -607,7 +604,6 @@ def run_live_gate(cases):
 
 
 RETRIED = []
-CASE_SPELT = set()       # cases whose target spells a point otherwise than its declaration (put to the live gate under the declared name)
 
 
 def is_stricter(out):
@@ -684,9 +680,18 @@ def calls_against_graph():
             s, _ = refine.parse_sentence(sent)
             out = refine.evaluate(m, s, {})
             mine = not (out.status == 'rejected' and out.stage == 'structural')
+            if cand == 'F1':                      # the callee already there: a no-op, refused before the graph is asked (D25)
+                if mine or 'nothing to refine' not in out.why:
+                    bad.append('%d argument(s) to F1, the callee already there: the gate says %s, not "nothing to refine"' % (nargs, out.why[:60]))
+                continue
             new, _ = refine.apply_tx(m.g, refine.lower(p, s), inplace=False)
             theirs = graph_has_call(refine.text_of(new))
             n += 1
+            if cand.lower() in ('f2', 'f4') and cand not in ('F2', 'F4') and theirs:
+                # a case variant: Ring would bind it, so the graph shows the edge; the gate refuses it and names the declared spelling (D24)
+                if mine or 'names are exact' not in out.why:
+                    bad.append('%d argument(s) to %s: a case variant, the gate says %s' % (nargs, cand, out.why[:60]))
+                continue
             if mine != theirs:
                 bad.append('%d argument(s) to %s: the gate says %s, rnxc graph says %s' % (nargs, cand, 'stands' if mine else 'refused', 'an edge' if theirs else 'no edge'))
     return n, bad
@@ -696,7 +701,8 @@ def calls_against_graph():
 
 GBNF_BATCH = os.path.join(HERE, 'probes', 'gbnf_batch.ring')
 SHAPE_WORDS = ('malformed sentence', 'no refinement point', "kind '", 'stale:', 'no governance')
-STRUCTURAL_OK_UNDER_GRAMMAR = ('no function', 'argument(s)', 'distinct options', 'is not governed')   # what no context-free grammar says
+STRUCTURAL_OK_UNDER_GRAMMAR = ('no function', 'argument(s)', 'distinct options', 'nothing to refine')   # what no context-free grammar says
+# ('nothing to refine', D25: a grammar would need a rule per point to say "any value but the one there"; 'is not governed' went with the branch D25 made dead)
 UNSCOPED = (
     'root ::= "DEFINE REFINE " id " AS ( TARGET " str ", KIND " kind ", FROM " str ", TO " str ", AUTHOR " str ", POSTURE " post ", REASON " str " )"\n'
     'id ::= [a-z] [a-z0-9_]*\n'
@@ -747,15 +753,13 @@ def collect_steps(fx, grammar_fn):
 
 def spelt_otherwise(m, s):
     """Is the sentence outside its program's scoped grammar BY DESIGN? The grammar writes the program's own spellings -- the point's declared name, the
-    text FROM finds there, the governance as configured -- and strings without a double quote; the gate takes any spelling Ring would (a name in another
-    case, a number spelt another way, `"1.0"` for `1`) and a value that needs another quote. It was two fixture ids, 07 and 09, until the fixtures written
-    from the mutation study (36, 37, 41) spelt names and numbers otherwise on purpose (2026-10-19)."""
+    text FROM finds there -- and strings without a double quote; the gate takes a number spelt another way (`"1.0"` for `1`) and a value that needs another
+    quote. Names have one spelling (D24), so a name in another case is refused, not outside the grammar. It was two fixture ids, 07 and 09."""
     p = refine.point_named(m.lift(), s['base'])
     if p is None:
         return False
     cur = p['attrs'].get(s['attr'], '') if s['attr'] else p['value']
-    return (p['name'] != s['base'] or s['from'] != cur or '"' in s['to']
-            or (s['attr'] == 'governed_by' and s['to'] != '' and s['to'] not in m.ctx))
+    return s['from'] != cur or '"' in s['to']
 
 
 def run_gbnf_jobs(pairs):
@@ -1241,9 +1245,6 @@ def main():
         if INCONSISTENT:
             print('  --   fixtures %s start from a program that already breaks a rule: this gate answers for the rules of the point a refinement touches, the live gate for the '
                   'whole program, so they are not put to it' % ', '.join(INCONSISTENT))
-        if CASE_SPELT:
-            print('  --   %d proposal(s) name a point in another case: this gate folds the name as Ring folds names, stzRefinableCode matches it exactly, so they were put to it '
-                  'under the declared name (HF-88)' % len(CASE_SPELT))
         if RETRIED:
             print('  --   %d proposal(s) raised in the live stack and were put again alone (cases %s)' % (len(RETRIED), RETRIED))
 
@@ -1251,8 +1252,9 @@ def main():
     for w in gbad[:6]:
         print('  FAIL G ' + w)
     fails.extend('graph: ' + w for w in gbad)
-    check(not gbad and n >= 20, 'G %d retargeted calls (0, 1 and 2 arguments x a function of each arity, one that does not exist, a case variant): the structural stage says the retarget '
-                                'stands exactly when `rnxc graph`, which reads what the compiler bound, shows a static call edge from the refined program (%d disagree)' % (n, len(gbad)))
+    check(not gbad and n >= 18, 'G %d retargeted calls (0, 1 and 2 arguments x a function of each arity, one that does not exist, a case variant): the structural stage says the retarget '
+                                'stands exactly when `rnxc graph`, which reads what the compiler bound, shows a static call edge from the refined program -- but for a case '
+                                'variant, which Ring binds and the gate refuses by name (D24); the callee already there is a no-op, refused (D25) (%d disagree)' % (n, len(gbad)))
 
     w = write_surface(fx, scoped.scoped_gbnf, 40 if QUICK else 150)
     if not w['engine']:
@@ -1265,11 +1267,24 @@ def main():
         stg = ', '.join('%s %d' % (k, v) for k, v in sorted(w['sample_stage'].items(), key=lambda kv: str(kv[0])) if k != 'all')
         check(not w['bad'] and w['sampled'] >= 100 and w['shape'] >= 8,
               'W the grammar scoped to each program (%d grammars, each held by the engine\'s decoder): all %d admitted proposals of the fixtures that its author could write '
-              'are sentences of it (%d of %d; %d are outside it by design: a revert is written by the harness; a name, a number or a governance spelt otherwise than the program declares it, or a value needing another quote); the decoder refuses every one of the '
+              'are sentences of it (%d of %d; %d are outside it by design: a revert is written by the harness; a number spelt otherwise than the program writes it, or a value needing another quote); the decoder refuses every one of the '
               '%d proposals the gate refuses for their shape (%d of %d); and %d sentences SAMPLED from the grammars are all accepted by the decoder and none is refused '
               'for its shape: the gate admits %s, and refuses the rest at %s' % (w['grammars'], w['admitted'], w['admitted_ok'], w['admitted'] - w['exceptions'], w['exceptions'],
                                                                                  w['shape'], w['shape_ok'], w['shape'], w['sampled'], adm, stg))
         print('  --   the shapes no context-free grammar says, refused structurally under it: %s' % w['structural'])
+        # D26: the write surface is what a TASK may change. A program of 15 points has no single grammar the decoder holds (HF-87); scoped to the three
+        # points a task names it is held and writes their sentences, and a task naming a point the program does not declare is refused by name
+        big = refine.Model(''.join('$nP%d = %d  # <R:PARAM name="p%d" min="0" max="100">\n' % (i, i, i) for i in range(15)), {})
+        sent = refine.sentence_text('s', 'p7', 'param', '7', '8', 'court', 'trusted', 'a task')
+        got = run_gbnf_jobs([(scoped.scoped_gbnf(big, points=['p0', 'p7', 'p14']), sent), (scoped.scoped_gbnf(big), sent)])
+        try:
+            scoped.scoped_gbnf(big, points=['p7', 'nowhere'])
+            named = False
+        except ValueError as e:
+            named = 'nowhere' in str(e)
+        ok = (got is not None and got[0] == ('', True) and got[1] is not None and 'GBNF-M2' in got[1][0] and named)
+        check(ok, 'W a grammar scoped to the points a task names (D26): of a 15-point program the decoder refuses whole (%s), the grammar of 3 points is held and '
+                  'writes their sentences, and a task naming a point the program does not declare is refused by name' % ((got[1][0][:40] if got and got[1] else 'no answer')))
 
     # controls
     for label, kw, floor in (

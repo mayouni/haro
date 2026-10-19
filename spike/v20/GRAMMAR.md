@@ -47,7 +47,7 @@ point's rules and nothing that the code already says, so a refinement edits the 
 comment belongs to the statement on its line, a comment on its own lines to the next statement in the same block; a tag with nothing below it is an orphan.
 
 **A fault is an error, and a gate that cannot read its own declarations refuses everything** (it fails closed): a tag with no name, an attribute twice, a name used twice
-(Ring folds case, so `Vat` and `vat` are one), an orphan, two points on one statement, bounds on something that is not a number, options missing, a rule over a name nobody
+(names are exact, D24, and two that differ only in case are refused as look-alikes), a key not in lower case or a kind not in upper case, an orphan, two points on one statement, bounds on something that is not a number, options missing, a rule over a name nobody
 declared or ordering something that is not a number. **A value outside its own bounds or options is not a fault: it is a state** (section 3, derivation), because a text edit
 can leave one and the way back must be a refinement.
 
@@ -67,7 +67,9 @@ so it survives a human edit -- section 5), `CASCADE` (the ids of the statements 
 `TARGET` is a point's name, or `name.attr` to refine the point's own rules: `min`, `max`, `options`, `risk`, `floor`, `governed_by` ("the rules themselves are refinable").
 Strings are written in `"`, `'` or a backtick, and have no escapes, as Ring's have none (F-55): a value holding all three cannot be proposed at all, nor one
 holding a line break (a refinement is one line out, one line in).
-`FROM` is a compare-and-swap: the value the proposer saw, compared as a number when it is one (`0.2` is `0.20`).
+`FROM` is a compare-and-swap: the value the proposer saw, compared as a number when it is one (`0.2` is `0.20`) and as written otherwise. **Names and words are
+exact** (D24): `KIND param`, `POSTURE trusted`, a point, an actor and a governance as declared; a near miss is refused with the declared spelling named. **A
+no-op is not a refinement** (D25): TO the text FROM found is refused, `nothing to refine`.
 
 `python haro/spike/v20/refine.py program.ring sentences.rfn [--ctx governance.txt] [--write]` runs the sentences in order against what the earlier ones left, prints each
 verdict, the primitives it lowered to and its diff, and exits 0 (all admitted), 1 (one refused) or 2. `--write` replaces the program with the canonical text of the result and
@@ -155,7 +157,9 @@ duplicate, a revert (the harness writes those).
 
 **The decoder holds a scoped grammar only up to a size** (HF-87). The engine's decoder takes at most 128 rules and 1024 elements in a rule, and makes every
 parenthesised group and every repeat a rule of its own, so the grammar names its shapes once (a number, a tier, a posture, a governance, a list of options)
-and gives each point one rule of its own: a point costs about seven rules, and a program of 10 or 11 points is held where one of 15 is not.
+and gives each point one rule of its own: a point costs about seven rules, and a program of 10 or 11 points is held where one of 15 is not. **So the grammar is
+scoped to the points a task names** (D26, `scoped_gbnf(model, points=[...])`): an agent can write only what its task may change, and the grammar stays small
+whatever the program; a task naming a point the program does not declare is refused by name.
 
 ## 7. The court
 
@@ -164,14 +168,14 @@ small checks in about ten seconds.
 
 | | what it judges | number |
 |---|---|---|
-| **F** | 89 fixtures through the gate (166 steps: 72 admitted, 2 flagged, 92 refused -- structural 45, constraint 10, governance 18, trust 5, derivation 14): the verdict, the stage, the words, the primitives. **For every fixture, whatever it says:** a refused proposal changes neither the text nor the ids; an admitted one changes exactly one line and no id; the inverses put the original back, byte for byte, with its ids; the log replayed from JSON through the gate, and the transactions with no gate, give the same text; the refined text is canonical on **the other printer** (`rnxc fmt --check`); and 4 programs run on the oracle and on rnxc before and after, printing what the refinement says they should | 0 fail |
+| **F** | 91 fixtures through the gate (177 steps: 72 admitted, 2 flagged, 103 refused): the verdict, the stage, the words, the primitives. **For every fixture, whatever it says:** a refused proposal changes neither the text nor the ids; an admitted one changes exactly one line and no id; the inverses put the original back, byte for byte, with its ids; the log replayed from JSON through the gate, and the transactions with no gate, give the same text; the refined text is canonical on **the other printer** (`rnxc fmt --check`); and 4 programs run on the oracle and on rnxc before and after, printing what the refinement says they should | 0 fail |
 | **T** | the twelve primitives (23 transactions), each applied, undone and applied again; a transaction that fails halfway leaves nothing; an inverse refuses a state that has moved on | 12 of 12 |
 | **L** | declarations that do not lift (14 fixtures): the gate fails closed | 0 fail |
 | **C** | the commutation predicate over every pair of a pool of 16 sentences, each in both orders | 60 commuting (and are), 11 conflicting and order-dependent, 49 conservative, **0 unsound** |
 | **A** | four text edits read back as refinements (a bound broken, a rule widened, a reformat, a respelling) | 0 fail |
-| **S** | **Softanza's own `stzRefinableCode`** on the Ring++ package, put 501 proposals (53 the fixtures', the rest a sweep of points x values x actors x postures over two programs): admitted-or-not, the refusing stage and the value left | **488 agree**; 12 the language itself refuses at a stage the live gate has none for; 1 carries a value its tag form cannot hold; 0 disagree (1 names a point in another case and is put under the declared name, HF-88) |
-| **G** | a retargeted call, 0/1/2 arguments x a function of each arity, one that does not exist, a case variant: the structural stage says it stands exactly when `rnxc graph` shows a static call edge from the refined program | 21 of 21 |
-| **W** | the grammar scoped to each program (82 grammars, each held by the engine's constrained decoder): every admitted fixture sentence its author could write is a sentence of it; the decoder refuses all 29 proposals the gate refuses for their shape; 600 sentences sampled from it are all accepted and **none is refused for its shape** | 0 fail |
+| **S** | **Softanza's own `stzRefinableCode`** on the Ring++ package, put 504 proposals (56 the fixtures', the rest a sweep of points x values x actors x postures over two programs): admitted-or-not, the refusing stage and the value left | **418 agree**; 85 the language itself refuses at a stage the live gate has none for (most of them no-ops, D25); 1 carries a value its tag form cannot hold; 0 disagree |
+| **G** | a retargeted call, 0/1/2 arguments x a function of each arity, one that does not exist, a case variant: the structural stage says it stands exactly when `rnxc graph` shows a static call edge from the refined program -- but for a case variant, which Ring binds and the gate refuses by name (D24) | 18 of 18 |
+| **W** | the grammar scoped to each program (83 grammars, each held by the engine's constrained decoder, and a task's grammar of 3 points of a 15-point program, D26): every admitted fixture sentence its author could write is a sentence of it; the decoder refuses all 35 proposals the gate refuses for their shape; 600 sentences sampled from it are all accepted and **none is refused for its shape** | 0 fail |
 | **D** | 9 controls that must FAIL (a gate that skips each of its four stages, one that edits the live program before judging, a cascade that sees nothing, an inverse that loses ids, a revert that does not check, a grammar that does not name the points) | each fails the court |
 | **H** | Haro's own history: a refinement drafted against a literal assignment at one revision, **does it still land at the next?** | 1,550 of 1,578 land (98.2%) |
 | **K** | a literal of each of 80 real Ring files made a point and refined | 165 literals, 0 fail |
@@ -203,10 +207,10 @@ Shared named rules and one rule per point bring a point to about seven rules: a 
 **A program with more points has no single scoped grammar**: a larger limit in the decoder, or a grammar scoped to the points a task names, is the next design
 question, and the first is an ask of the engine's owner.
 
-**HF-88 -- Names: this gate folds them as Ring does; `stzRefinableCode` matches them exactly.** `TARGET "Vat"` for a point declared `vat` is admitted here
-(section 1: Ring folds names, so `Vat` and `vat` are one) and refused at the structural stage by the live gate. Found by fixture 37, the first fixture to spell a
-target otherwise; the court puts such a proposal to the live gate under the declared name, so the verdicts are still compared, and counts it. Whether the live
-gate should fold is stzlib's to decide.
+**HF-88 -- Names: this gate folded them as Ring does; `stzRefinableCode` matched them exactly -- decided for exact (D24).** `TARGET "Vat"` for a point
+declared `vat` was admitted here and refused at the structural stage by the live gate. Found by fixture 37, the first fixture to spell a target otherwise.
+The author's delegation of 2026-10-19 decided it the Haro way: no folding in the Haro layer, look-alikes refused, a near miss refused with the declared
+name. The two gates now agree by construction, and `stzRefinableCode` needs no change.
 
 **HF-89 -- The court is load-bearing, and its mutation study said where it was not.** 519 one-token defects put into the engine: the fast court killed 376
 (72.4%) on 2026-10-05. The 143 survivors were read one by one -- about twenty refusals no fixture reached, the revert checks, widening at its edges, the case
@@ -238,6 +242,7 @@ now whether the package's compiler is older than the repository's, and on 2026-1
 ## 10. Decisions taken in the spike, for the author's reading
 
 Taken on the delegation of 2026-10-05 ("take whatever decision you think is wiser on my behalf then continue"), each with what it costs; none is in the charter until he reads it.
+7, 9 and 10 were decided on his delegation of 2026-10-19 and are in the charter as D24 to D26.
 
 1. **Points are declared by tags at this altitude.** The charter says a declaration is its own point; Ring has no such declaration, so the lift for foreign code is the tag. *Cost:* a point exists only where someone wrote a tag, which is
    the point of "declared" and the reason nothing in the estate is refinable today (7 tags in Softanza's base, all in strings).
@@ -246,6 +251,8 @@ Taken on the delegation of 2026-10-05 ("take whatever decision you think is wise
 4. **Rules are refinable, widening is tier 4, and a rule's refiner must be `trusted`.** *Cost:* an `llm` origin can never change a bound, an option or a floor -- which is the intent, and is more than `stzRefinableCode` says.
 5. **A revert is a refinement with REVERTS, gated by governance and trust, and a conflict is refused.** *Cost:* undoing a trusted change on a floored point needs a trusted origin.
 6. **`flagged` means the name is assigned again elsewhere.** *Cost:* a PARAM on a variable the program also reassigns is always flagged, which is the warning's meaning.
-7. **A no-op refinement (TO is FROM) is admitted and changes nothing**, as `stzRefinableCode`'s is. *Cost:* an event with no diff; and the court's one-line
-   property keeps a no-op out of every fixture, so the code admits it and no fixture pins it (HF-89).
+7. ~~A no-op refinement (TO is FROM) is admitted and changes nothing~~ -- **reversed by D25 (2026-10-19): a no-op is refused**, `nothing to refine`; every
+   admitted refinement changes one line, which the court required already (HF-89). *Cost:* the live gate admits a no-op, so the two differ there, counted apart.
+9. **Names are exact (D24)**, look-alikes refused, a near miss named; Ring's folding only where the gate describes the Ring program (the cascade).
+10. **The grammar is scoped to the points a task names (D26)**; the decoder's cap stays where it is.
 8. **`--write` refuses on a file that is not canonical.** *Cost:* the estate needs `fmt` first (D23) or the span-preserving writer of section 9.
