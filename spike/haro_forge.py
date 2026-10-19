@@ -2953,6 +2953,32 @@ def stage24():
     return failures
 
 
+# ---- stage 25: a second face of the program graph, in Python's shape (rung 21, Haro v0.21)
+
+FACE_CHECK = os.path.join(HERE, 'v21', 'face_check.py')
+
+
+def stage25():
+    """The twenty-first rung: rung 18's graph printed in Python's shape, one-way, one meaning -- Ring's. What reads the same is spelt plainly, what Ring
+    means differently is spelt with an explicit word (at, setat, eq, cat, plus, span, rng, G., return ""), and what has no spelling is refused by name
+    from a collision table that travels with the face as its banner. Judged by fixtures written before the printer (v21/face_check.py), by Python's own
+    parser on every text, by controls that must fail, and by Softanza's base through the face -- the measurement of kill criterion K3."""
+    print('stage 25 -- a second face, in Python\'s shape: v21/face_check.py (46 fixtures, the collision table, ast.parse, controls, a corpus, K3)')
+    failures = 0
+    p = subprocess.run([sys.executable, FACE_CHECK], capture_output=True, cwd=ROOT, timeout=3600)
+    out = p.stdout.decode('utf-8', 'replace').replace('\r\n', '\n')
+    for line in out.splitlines():
+        if line.startswith('  ') or line.startswith('face_check:'):
+            print(line)
+    if p.returncode != 0:
+        failures += 1
+        print(f'  FAIL face_check.py exited {p.returncode}')
+    if PLANT:
+        failures += 1
+        print('  FAIL a second face -- PLANTED')
+    return failures
+
+
 def stage6(lang, court=None, n=15):
     court = court or f'{lang}_court.ring'
     print(f'stage 6 -- edit to verdict on makeen_box.machine, minima of {n}')
@@ -3060,5 +3086,7 @@ if __name__ == '__main__':
         failures += stage23()
     if stage in (None, 24) and os.path.exists(REFINE_CHECK):
         failures += stage24()
+    if stage in (None, 25) and os.path.exists(FACE_CHECK):
+        failures += stage25()
     print(f'haro_forge: {"FAIL" if failures else "PASS"} ({failures} failure(s), {time.perf_counter()-t0:.1f} s)')
     sys.exit(1 if failures else 0)

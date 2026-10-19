@@ -1,0 +1,544 @@
+~~~ The fixtures of rung 21 (Haro v0.21): a second face of the program graph, in Python's shape -- rung 6 of the code-graph memo, as a PRINTER.
+~~~
+~~~ Hand-composed BEFORE face_py.py existed (fixtures first, prose second). A fixture is a Ring program and either the Python-shaped text the face
+~~~ prints for it (`--- py`, the banner line left out: the court checks the banner on its own) or the collision it is refused for (`--- refused`:
+~~~ the collision's id, then words its refusal must hold). The face's one rule: a Python reader must never take the program for something else --
+~~~ what reads the same is spelt plainly, what Ring means differently is spelt with an explicit word or refused by name (CODEGRAPH 3.2, 5).
+~~~ Four spaces a level, Python's own; names in the spelling of their first occurrence, since Ring folds case (F-18).
+
+=== 01 what reads the same is spelt the same
+--- ring
+nRate = 2
+cName = "vat"
+? nRate * 3
+--- py
+nRate = 2
+cName = "vat"
+say(nRate * 3)
+
+=== 02 a string is printed raw: Ring has no escapes (F-55)
+--- ring
+cPath = "C:\temp\new"
+cQuote = 'say "hi"'
+cEnd = "end\"
+--- py
+cPath = r"C:\temp\new"
+cQuote = 'say "hi"'
+cEnd = 'end\\'
+
+=== 03 one name, one spelling: Ring folds case (F-18), so the face writes every use as the first
+--- ring
+nCount = 1
+NCOUNT = NCOUNT + 1
+? ncount
+--- py
+nCount = 1
+nCount = nCount + 1
+say(nCount)
+
+=== 04 an index is 1-based: `at` and `setat`, never Python's brackets (C-3, F-54)
+--- ring
+aList = [10, 20, 30]
+? aList[1]
+aList[2] = 5
+--- py
+aList = [10, 20, 30]
+say(at(aList, 1))
+setat(aList, 2, 5)
+
+=== 05 Ring's `=` is not Python's `==` unless both sides are known to be of one kind (C-8)
+--- ring
+x = 1
+y = "1"
+? x = y
+? x = 2
+--- py
+x = 1
+y = "1"
+say(eq(x, y))
+say(x == 2)
+
+=== 06 Ring's `+` joins a string with anything, and adds anything else: `cat` and `plus` unless both sides are known
+--- ring
+n = 5
+? "n=" + n
+c = "a" + "b"
+--- py
+n = 5
+say(cat("n=", n))
+c = "a" + "b"
+
+=== 07 a global and a function: `$x` is `G.x`; a function that runs off its end returns NULL, written out (F-66)
+--- ring
+$nTotal = 0
+
+func Add(n)
+	$nTotal += n
+--- py
+G.nTotal = 0
+
+
+def Add(n):
+    G.nTotal = plus(G.nTotal, n)
+    return ""
+
+=== 08 a numeric loop is inclusive: `span`
+--- ring
+for i = 1 to 3
+	? i
+next
+--- py
+for i in span(1, 3):
+    say(i)
+
+=== 09 a loop variable read after its loop is the value that failed the test, not the last one: refused
+--- ring
+for i = 1 to 3
+	x = i
+next
+? i
+--- refused
+for-after read after its loop
+
+=== 10 a for-in that only reads its variable reads as Python's
+--- ring
+for x in [1, 2]
+	? x
+next
+--- py
+for x in [1, 2]:
+    say(x)
+
+=== 11 a for-in that writes its variable writes the list (by reference): refused
+--- ring
+aList = [1, 2]
+for x in aList
+	x = 0
+next
+--- refused
+for-in-write by reference
+
+=== 12 a brace block has no spelling: refused
+--- ring
+o = new Point
+o { x = 1 }
+
+class Point
+	x = 0
+--- refused
+brace no spelling
+
+=== 13 eval runs in its caller's scope (F-72), and its string is a hole in the graph: refused
+--- ring
+eval("x = 1")
+--- refused
+eval caller's scope
+
+=== 14 a class that overloads its operators with one `operator` method (F-69): refused
+--- ring
+class Money
+	func operator(cOp, x)
+		return 0
+--- refused
+operator one method
+
+=== 15 a dot on an attribute whose class defines a getter calls the getter (F-73): refused
+--- ring
+o = new Box
+? o.size
+
+class Box
+	size = 1
+	func getsize()
+		return 2
+--- refused
+getter calls
+
+=== 16 a caught error: `except RingError as e`, and cCatchError is the message inside the handler
+--- ring
+try
+	x = 1
+catch
+	? cCatchError
+done
+--- py
+try:
+    x = 1
+except RingError as e:
+    say(str(e))
+
+=== 17 cCatchError read outside a handler is process-wide (C-15): refused
+--- ring
+? cCatchError
+--- refused
+catch-error process-wide
+
+=== 18 a bare return, and a function with no return, return NULL: written out
+--- ring
+func F()
+	? 1
+
+func H(n)
+	return
+--- py
+def F():
+    say(1)
+    return ""
+
+
+def H(n):
+    return ""
+
+=== 19 Ring's `:` builds an inclusive list: `rng` (F-65)
+--- ring
+aL = 1:3
+--- py
+aL = rng(1, 3)
+
+=== 20 a number past 2^53 is a double on Ring (F-75): written as one
+--- ring
+n = 9007199254740993
+--- py
+n = 9007199254740993.0
+
+=== 21 a class: its region runs at `new`, before `init` (F-121) -- `__region__`; `This` is `self`; `x++` is `+= 1`
+--- ring
+o = new Counter(5)
+
+class Counter
+	nCount = 0
+
+	func init(n)
+		This.nCount = n
+
+	func Up()
+		This.nCount++
+--- py
+o = Counter(5)
+
+
+class Counter:
+    def __region__(self):
+        self.nCount = 0
+
+    def init(self, n):
+        self.nCount = n
+        return ""
+
+    def Up(self):
+        self.nCount += 1
+        return ""
+
+=== 22 `exit 2` leaves two loops, which Python's `break` cannot: refused
+--- ring
+for i = 1 to 2
+	for j = 1 to 2
+		exit 2
+	next
+next
+--- refused
+exit-levels two loops
+
+=== 23 comments are kept, every kind of them written with `#`
+--- ring
+# a note
+x = 1  // trailing
+--- py
+# a note
+x = 1  # trailing
+
+=== 24 `and` and `or` read as Python's in a condition; as a value they are Ring's 1 or 0: `both`, `either`
+--- ring
+a = 1
+b = 0
+if a and b
+	? 1
+ok
+c = a or b
+--- py
+a = 1
+b = 0
+if a and b:
+    say(1)
+c = either(a, b)
+
+=== 25 a switch compares as Ring's `=`: `eq` on the subject, read once
+--- ring
+x = 2
+switch x
+	on 1
+		? "one"
+	on 2
+		? "two"
+	other
+		? "many"
+off
+--- py
+x = 2
+_switch = x
+if eq(_switch, 1):
+    say("one")
+elif eq(_switch, 2):
+    say("two")
+else:
+    say("many")
+
+=== 26 `do ... again` runs its body first: `while True` with the test at the end
+--- ring
+i = 0
+do
+	i++
+again i < 3
+--- py
+i = 0
+while True:
+    i += 1
+    if not (i < 3):
+        break
+
+=== 27 `if`, `but` and `else`; a comparison of two numbers is Python's
+--- ring
+n = 5
+if n > 3
+	? "big"
+but n > 1
+	? "some"
+else
+	? "small"
+ok
+--- py
+n = 5
+if n > 3:
+    say("big")
+elif n > 1:
+    say("some")
+else:
+    say("small")
+
+=== 28 a symbol is its lower-case string; NULL is the empty string; true is 1
+--- ring
+c = :Name
+d = NULL
+b = true
+--- py
+c = "name"
+d = ""
+b = 1
+
+=== 29 a Ring name that is not a Python name is spelt as one
+~~~ a keyword takes a trailing `_` (Ring's `del` builtin), the `@` that begins a Softanza function's name is `at_`, a leading digit takes `_`
+--- ring
+aL = [1, 2]
+del(aL, 1)
+? @Twice(2)
+
+func @Twice(n)
+	return n * 2
+
+func 1Card()
+	return 1
+--- py
+aL = [1, 2]
+del_(aL, 1)
+say(at_Twice(2))
+
+
+def at_Twice(n):
+    return n * 2
+
+
+def _1Card():
+    return 1
+
+=== 30 `call f()` calls the function a string names, at run time: refused
+--- ring
+f = "Hello"
+call f()
+--- refused
+call-name by name
+
+=== 31 `n++` as a value is the new value (F-64): refused
+--- ring
+n = 1
+x = n++
+--- refused
+increment-value new value
+
+=== 32 a lambda: refused in this rung
+--- ring
+f = func x { return x }
+--- refused
+lambda not spelt
+
+=== 33 a package: refused (C-28)
+--- ring
+package app
+--- refused
+package not built
+
+=== 34 the scanner's commands change the language under the text (C-28): refused
+--- ring
+ChangeRingKeyword see print
+--- refused
+scanner change the language
+
+=== 35 an assignment to an attribute whose class defines a setter calls the setter (F-73): refused
+--- ring
+o = new Box
+o.size = 3
+
+class Box
+	size = 1
+	func setsize(v)
+		return
+--- refused
+setter calls the setter
+
+=== 36 a parameter spelt `$x` is the function's own local, not the global (F-91): refused
+--- ring
+func Set($cError)
+	return $cError
+--- refused
+dollar-param own local
+
+=== 37 a block of comments only is Ring's; Python's needs a statement: `pass`
+--- ring
+x = 1
+if x = 1
+	# nothing yet
+else
+	? x
+ok
+--- py
+x = 1
+if x == 1:
+    # nothing yet
+    pass
+else:
+    say(x)
+
+=== 38 `aL[i]++` and `aL[i] += v` write the item: `setat` over `at`, the target read once
+--- ring
+aL = [1, 2]
+i = 1
+aL[i]++
+aL[2] -= 1
+--- py
+aL = [1, 2]
+i = 1
+setat(aL, i, plus(at(aL, i), 1))
+setat(aL, 2, at(aL, 2) - 1)
+
+=== 39 a compound write whose target holds a call would run the call twice in `setat` over `at`: refused
+--- ring
+aL = [1, 2]
+aL[F()] += 1
+
+func F()
+	return 1
+--- refused
+index-twice twice
+
+=== 40 a loop variable written again before it is read prints: a second loop on it, an assignment, a function's own name
+--- ring
+for i = 1 to 2
+	? i
+next
+i = 0
+for i = 1 to 3
+	? i
+next
+
+func F(i)
+	return i
+--- py
+for i in span(1, 2):
+    say(i)
+i = 0
+for i in span(1, 3):
+    say(i)
+
+
+def F(i):
+    return i
+
+=== 41 a loop variable read after the block that holds its loop is still read after its loop: refused
+--- ring
+if 1
+	for i = 1 to 3
+		x = i
+	next
+ok
+? i
+--- refused
+for-after read after its loop
+
+=== 42 a loop variable read on the next turn of an enclosing loop, before its loop runs again: refused
+--- ring
+i = 0
+for j = 1 to 2
+	? i
+	for i = 1 to 3
+		x = i
+	next
+next
+--- refused
+for-after read after its loop
+
+=== 43 a loop variable read in the catch of the try that holds its loop: refused
+--- ring
+try
+	for i = 1 to 3
+		x = i
+	next
+	F()
+catch
+	? i
+done
+
+func F()
+	return 1
+--- refused
+for-after read after its loop
+
+=== 44 an `exit` that may jump past the write leaves the loop variable as its loop left it: refused
+--- ring
+for j = 1 to 2
+	for i = 1 to 3
+		x = i
+	next
+	if j = 2
+		exit
+	ok
+	i = 0
+next
+? i
+--- refused
+for-after read after its loop
+
+=== 45 a later statement holding a loop on the same variable is that loop's to judge: it prints
+--- ring
+for i = 1 to 2
+	? i
+next
+if 1
+	for i = 1 to 3
+		? i
+	next
+ok
+--- py
+for i in span(1, 2):
+    say(i)
+if 1:
+    for i in span(1, 3):
+        say(i)
+
+=== 46 `next i` names the loop's variable; the grammar keeps the name as a statement, a read whose value is dropped: it prints
+--- ring
+for i = 1 to 2
+	? i
+next i
+--- py
+for i in span(1, 2):
+    say(i)
+i

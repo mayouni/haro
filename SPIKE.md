@@ -84,6 +84,7 @@ expression language forged whole, judged by stz's 29 fixtures as stage 8, pinned
 | `spike/v19/` | **Node identity on the program graph** (Haro v0.19, the nineteenth rung, 2026-10-04): `ids.py` (ids on the items of rung 18's graph, the matcher that recovers them across an edit), `fixtures.txt` (23 edits written before the code), `ids_check.py` (the court: fixtures, controls, Haro's own history replayed; guard stage 23), `IDENTITY.md`; `probes/` holds `sweep.py` (what each pass and each threshold buys) and `near.py` (the claims nearest the threshold) |
 | `../src/fmt.zig`, `../src/dumpjson.zig`, `../bench/fmt.py`, `../bench/dumpjson.py` | **`rnxc fmt` and the lossless export** (rung 3 of the code-graph memo, 2026-10-05; ringpp's, outside `haro/`): the printer of rung 18 as a verb, `rnxc dump --json`, and the two courts, both gate steps; see the section after the nineteenth rung |
 | `../src/graph.zig`, `../bench/graph.py`, `../bench/graph/` | **`rnxc graph`, the resolved graph** (rung 4 of the code-graph memo, first slice, 2026-10-05; ringpp's, outside `haro/`): L2 as the code-graph line protocol, its court (a gate step) and the two comparisons, `--peer` and `--ingest`; see the section after rung 3 |
+| `spike/v21/` | **A second face of the program graph, in Python's shape, as a printer** (Haro v0.21, rung 6 of the code-graph memo, 2026-10-19): `face_py.py` (the printer and the collision table), `face_check.py` and `fixtures.txt` (the court, guard stage 25), `GRAMMAR.md`; see the section after rung 5 |
 | `spike/v20/` | **Refinement over the program graph** (Haro v0.20, rung 5 of the code-graph memo, 2026-10-05 and 2026-10-19): `refine.py` (the gate and RCP's twelve primitives), `scoped.py` (the write surface), `refine_check.py` and `fixtures.txt` (the court, guard stage 24), `probes/` (the live gate's limits, the decoder batch, the mutation study), `GRAMMAR.md`; see the section after rung 4 |
 | `spike/world_lib.ring`, `spike/world_stub.ring` | the world's functions (SYMBOL resolution, the C1 rows), moved out of `court_lib.ring` and loaded only where a SYMBOL or PUBLISH is declared, and the stub that stands elsewhere |
 
@@ -1397,6 +1398,22 @@ first grammar met the bound at five points (10 or 11 held now, 15 not); `stzRefi
 the court from 72.4% to 97.3%. **Not built:** the kinds `block`, `function`, `type`, `lib`, `custom`; `node.create`/`node.delete` as a sentence's lowering;
 a writer for a file that is not canonical; derivation rules that propose; a single scoped grammar for a program of more than about a dozen points.
 
+## Rung 6 of the code-graph memo -- a second face, in Python's shape, as a printer (Haro v0.21) -- 2026-10-19
+
+**On the author's "go ahead with rung 6"** (2026-10-19). Rung 18's graph printed in Python's shape with one meaning, Ring's: what reads the same is spelt
+plainly, what Ring means differently with an explicit word (`at`, `setat`, `eq`, `cat`, `plus`, `span`, `rng`, `G.`, `return ""`), and what has no spelling
+is refused by name from a table of sixteen collisions that travels with the face as its banner. One-way. `spike/v21/GRAMMAR.md` is the account.
+
+    v21/face_py.py                      the printer, the name rule, the flow rule for a loop variable, the collision table
+    v21/face_check.py, fixtures.txt     the court, guard stage 25 (about a minute): 46 fixtures (26 spelt, 20 refused), ast.parse on every text,
+                                        the table reached 16 of 16, five controls, 300 files of Softanza's base
+
+**What building found** (HF-91 to HF-94): a loop variable read after its loop is a question of flow -- the first rule refused 87 of 300 files and
+missed four silent shapes, the flow scan refuses 2; Ring's names are not Python's and the face's word for `+` was `add`, Ring's own list builtin
+(now `plus`); a `$x` parameter and a compound write whose target holds a call had a misreadable spelling; **K3 is not met** -- 76% of the sample
+prints whole, and the refusals are eval, `call` by name and lambdas. **Not built:** a reader (rung 7, open); K4 and the 20-task protocol; lambdas
+spelt; a runtime for the face's words.
+
 ## The names -- `.haro`, not `.stzu` -- corrected 2026-10-02
 
 **At the author's word ("we agreed to use .haro instead of .stzu, no?").** D1 was ratified
@@ -1506,6 +1523,8 @@ whole guard re-run on the renamed tree: 28 + 30 + 27 + 23, 117 of 120, 32 of 32,
 23. ~~Rung 5 of the code-graph memo~~ -- built 2026-10-05, finished 2026-10-19: refinement over L1 (Haro v0.20), guard
    stage 24; open: the kinds it declares but does not build (`block` first: `node.create` as a sentence's lowering), and a
    write surface for a program larger than the decoder holds (HF-87); rung 6 (a second face, as a printer) is next in the memo.
+24. ~~Rung 6 of the code-graph memo~~ -- built 2026-10-19: a second face, Python-shaped, as a printer (Haro v0.21), guard stage 25;
+   K3 measured and not met (HF-94), so rung 7 (a reader of the face) stays open; K4 and the 20-task protocol need that reader and a model run.
 18. The forge as an `rnxc` verb (the ringpp session's `src/`, routed); the
    Softanza-resident timing the charter's 2.6 asks for; the court's run time on the
    oracle under paths and views (6.4x the image this pass, named at stage 6); the
