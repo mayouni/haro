@@ -1,0 +1,298 @@
+~~~ The fixtures of the FUNCTION kind (rung 5 of the code-graph memo, Haro v0.20): an agent proposes a function that is not there yet, or the body of one
+~~~ that is. Hand-composed BEFORE the engine reads them (the W discipline: fixtures first, code second). Same sections as fixtures.txt.
+~~~
+~~~ THE POINT. `<R:FUNCTION name="Round" params="n|m" calls="floor" writes="$nTotal">` alone on a line at the top level, among the statements before the
+~~~ first function. Unlike BLOCK, the point is not attached to a function: it DECLARES one, and the function may not exist yet.
+~~~   name     the function's name, exact (D24) and an identifier. Not a Ring builtin, and not `Main`, which Ring calls after the top level (F-60)
+~~~   params   the parameter names, in order, `|` apart; absent, none. The signature is the human's: a function that exists must take exactly these
+~~~   calls, writes, risk, floor, governed_by   as for a BLOCK point; `options`, `min` and `max` are not attributes of this kind
+~~~ The tag is carried by its own comment, so the point's id is that comment's (AT), and it does not move when the function appears.
+~~~
+~~~ THE VALUE is `absent` while no top-level function has the name, and the digest of the body's canonical text (`sha:` and 12 hex) once one does. FROM
+~~~ is that, a compare-and-swap. TO is the body on one line, exactly as for BLOCK. TO `absent` is refused: a refinement does not delete a function (a
+~~~ REVERTS of its creation does, which is the way back).
+~~~
+~~~ THE GATE is BLOCK's, on the declared signature: the body defines nothing, loads nothing, holds no eval, no `call` by name, no brace, no comment, no
+~~~ bye (structural); every call and every write outside the frame is one the point names (constraint); governance and trust as for every point;
+~~~ `rnxc check` finds nothing new, and the gate refuses a program the checker cannot vouch for (derivation).
+~~~
+~~~ THE LOWERING. A function that is there: BLOCK's (statements matched on their canonical text). A function that is not: ONE node.create of the whole
+~~~ function, params and body, with fresh ids -- and WHERE matters: Ring ends a function at the next function or class and at nothing else, so a
+~~~ statement written after a function belongs to it (HF-73). The new function therefore goes AFTER the last function and BEFORE the first class (F-21:
+~~~ functions before classes), never beside the tag, which stands among the statements and would swallow the rest of them.
+
+=== FN01 a FUNCTION point in the lift: a function that is not there yet
+--- program
+# <R:FUNCTION name="Round" params="n" calls="floor">
+? "start"
+
+func Gross(nNet)
+	return nNet
+--- lift
+Round function @1 = absent params=n calls=floor
+
+=== FN02 and one that is: the value is its body's digest
+--- program
+# <R:FUNCTION name="Round" params="n" calls="floor">
+? Round(2.4)
+
+func Round(n)
+	return floor(n + 0.5)
+--- lift
+Round function @1 = sha:f20c399bc18c params=n calls=floor
+
+=== FN03 the first body of a function that does not exist: ONE node.create, after the last function
+~~~ the run pins the place: written beside the tag, the function would swallow `? "start"` and the program would print nothing
+--- program
+# <R:FUNCTION name="Round" params="n" calls="floor">
+? "start"
+
+func Gross(nNet)
+	return nNet
+--- do
+DEFINE REFINE make_round AS ( TARGET "Round", KIND function, FROM "absent", TO "return floor(n + 0.5)", AUTHOR "mansour", POSTURE trusted, REASON "tax is whole" ) RATIONALE "a function is a refinement" => admitted tx=node.create
+--- text
+# <R:FUNCTION name="Round" params="n" calls="floor">
+? "start"
+
+func Gross(nNet)
+	return nNet
+
+func Round(n)
+	return floor(n + 0.5)
+--- run
+oracle: start | start
+
+=== FN04 a new function goes before the first class, not after it: functions before classes (F-21)
+~~~ after the class it would be a method of it
+--- program
+# <R:FUNCTION name="Round" params="n" calls="floor">
+o = new Box
+? o.Get()
+
+func Gross(nNet)
+	return nNet
+
+class Box
+	nCount = 3
+
+	func Get()
+		return This.nCount
+--- do
+DEFINE REFINE make_round AS ( TARGET "Round", KIND function, FROM "absent", TO "return floor(n + 0.5)", AUTHOR "mansour", POSTURE trusted, REASON "tax is whole" ) => admitted tx=node.create
+--- text
+# <R:FUNCTION name="Round" params="n" calls="floor">
+o = new Box
+? o.Get()
+
+func Gross(nNet)
+	return nNet
+
+func Round(n)
+	return floor(n + 0.5)
+
+class Box
+	nCount = 3
+
+	func Get()
+		return This.nCount
+--- run
+oracle: 3 | 3
+
+=== FN05 the body of a function that is there: BLOCK's lowering, on a point that can also create it
+--- program
+# <R:FUNCTION name="Round" params="n" calls="floor|ceil">
+? Round(2.4)
+
+func Round(n)
+	return floor(n + 0.5)
+--- do
+DEFINE REFINE round_up AS ( TARGET "Round", KIND function, FROM "sha:f20c399bc18c", TO "return ceil(n)", AUTHOR "mansour", POSTURE trusted, REASON "round up" ) => admitted tx=node.delete,node.create
+--- text
+# <R:FUNCTION name="Round" params="n" calls="floor|ceil">
+? Round(2.4)
+
+func Round(n)
+	return ceil(n)
+--- run
+oracle: 2 | 3
+
+=== FN06 a new function is held to what its point names, builtins included
+~~~ `ceil` is a builtin and is refused because the point names only `floor`; a global is written only when the point says so
+--- program
+$nTotal = 0
+# <R:FUNCTION name="Round" params="n" calls="floor" writes="$nTotal">
+? "start"
+
+func Gross(nNet)
+	return nNet
+--- do
+DEFINE REFINE builtin AS ( TARGET "Round", KIND function, FROM "absent", TO "return ceil(n)", AUTHOR "aicha", POSTURE trusted, REASON "try" ) => rejected constraint 'ceil' is not a call 'Round' allows
+DEFINE REFINE other_global AS ( TARGET "Round", KIND function, FROM "absent", TO "$nOther = 1 return n", AUTHOR "aicha", POSTURE trusted, REASON "try" ) => rejected constraint writes $nOther, which 'Round' does not allow
+DEFINE REFINE total AS ( TARGET "Round", KIND function, FROM "absent", TO "$nTotal = floor(n) return $nTotal", AUTHOR "mansour", POSTURE trusted, REASON "keep the total" ) => admitted tx=node.create
+--- text
+$nTotal = 0
+# <R:FUNCTION name="Round" params="n" calls="floor" writes="$nTotal">
+? "start"
+
+func Gross(nNet)
+	return nNet
+
+func Round(n)
+	$nTotal = floor(n)
+	return $nTotal
+
+=== FN07 the structural stage on a function that is there
+--- program
+# <R:FUNCTION name="Round" params="n" calls="floor">
+? Round(2.4)
+
+func Round(n)
+	return floor(n + 0.5)
+--- do
+DEFINE REFINE stale AS ( TARGET "Round", KIND function, FROM "sha:000000000000", TO "return floor(n)", AUTHOR "aicha", POSTURE trusted, REASON "try" ) => rejected structural stale
+DEFINE REFINE says_absent AS ( TARGET "Round", KIND function, FROM "absent", TO "return floor(n)", AUTHOR "aicha", POSTURE trusted, REASON "try" ) => rejected structural stale
+DEFINE REFINE delete AS ( TARGET "Round", KIND function, FROM "sha:f20c399bc18c", TO "absent", AUTHOR "aicha", POSTURE trusted, REASON "try" ) => rejected structural does not delete
+DEFINE REFINE wrong_kind AS ( TARGET "Round", KIND block, FROM "sha:f20c399bc18c", TO "return floor(n)", AUTHOR "aicha", POSTURE trusted, REASON "try" ) => rejected structural kind
+DEFINE REFINE same AS ( TARGET "Round", KIND function, FROM "sha:f20c399bc18c", TO "return floor(n + 0.5)", AUTHOR "aicha", POSTURE trusted, REASON "try" ) => rejected structural nothing to refine
+DEFINE REFINE defines AS ( TARGET "Round", KIND function, FROM "sha:f20c399bc18c", TO "func Helper() return 1", AUTHOR "aicha", POSTURE trusted, REASON "try" ) => rejected structural defines
+
+=== FN08 the structural stage on a function that is not there
+--- program
+# <R:FUNCTION name="Round" params="n" calls="floor">
+? "start"
+
+func Gross(nNet)
+	return nNet
+--- do
+DEFINE REFINE says_digest AS ( TARGET "Round", KIND function, FROM "sha:e3b0c44298fc", TO "return floor(n)", AUTHOR "aicha", POSTURE trusted, REASON "try" ) => rejected structural stale
+DEFINE REFINE delete AS ( TARGET "Round", KIND function, FROM "absent", TO "absent", AUTHOR "aicha", POSTURE trusted, REASON "try" ) => rejected structural does not delete
+DEFINE REFINE evals AS ( TARGET "Round", KIND function, FROM "absent", TO "eval('x = 1') return n", AUTHOR "aicha", POSTURE trusted, REASON "try" ) => rejected structural eval
+DEFINE REFINE broken AS ( TARGET "Round", KIND function, FROM "absent", TO "return (", AUTHOR "aicha", POSTURE trusted, REASON "try" ) => rejected structural does not parse
+
+=== FN09 derivation asks the compiler about a function that is new
+~~~ `Tax` takes one argument; the program is clean before the proposal and is not after it, and the refusal quotes the compiler. A program holding an
+~~~ eval is one the checker's absence rules are shut on, and a new function is not written there at all
+--- program
+# <R:FUNCTION name="Round" params="n" calls="Tax">
+? "start"
+
+func Tax(n)
+	return n * 0.2
+--- do
+DEFINE REFINE arity AS ( TARGET "Round", KIND function, FROM "absent", TO "return Tax(n, 2)", AUTHOR "aicha", POSTURE trusted, REASON "try" ) => rejected derivation Tax() takes 1 argument(s), called with 2
+DEFINE REFINE unassigned AS ( TARGET "Round", KIND function, FROM "absent", TO "return n + nTax", AUTHOR "aicha", POSTURE trusted, REASON "try" ) => rejected derivation nTax is read here, and nothing anywhere assigns it
+
+=== FN10 derivation fails closed on a program the compiler cannot vouch for
+--- program
+eval("x = 1")
+# <R:FUNCTION name="Round" params="n">
+? "start"
+
+func Gross(nNet)
+	return nNet
+--- do
+DEFINE REFINE make_round AS ( TARGET "Round", KIND function, FROM "absent", TO "return n", AUTHOR "mansour", POSTURE trusted, REASON "try" ) => rejected derivation rnxc check does not check this program
+
+=== FN11 trust: a floor holds a lower origin back from writing a function
+--- program
+# <R:FUNCTION name="Round" params="n" calls="floor" floor="external">
+? "start"
+
+func Gross(nNet)
+	return nNet
+--- do
+DEFINE REFINE model AS ( TARGET "Round", KIND function, FROM "absent", TO "return floor(n)", AUTHOR "bot", POSTURE llm, REASON "try" ) => rejected trust below the required floor
+DEFINE REFINE vendor AS ( TARGET "Round", KIND function, FROM "absent", TO "return floor(n)", AUTHOR "acme", POSTURE external, REASON "whole numbers" ) => admitted tx=node.create
+--- text
+# <R:FUNCTION name="Round" params="n" calls="floor" floor="external">
+? "start"
+
+func Gross(nNet)
+	return nNet
+
+func Round(n)
+	return floor(n)
+
+=== FN12 the way back from a creation is a revert, and it deletes the function with its ids
+--- program
+# <R:FUNCTION name="Round" params="n" calls="floor">
+? "start"
+
+func Gross(nNet)
+	return nNet
+--- do
+DEFINE REFINE make_round AS ( TARGET "Round", KIND function, FROM "absent", TO "return floor(n + 0.5)", AUTHOR "mansour", POSTURE trusted, REASON "tax is whole" ) => admitted tx=node.create
+DEFINE REFINE undo AS ( TARGET "Round", KIND function, FROM "sha:f20c399bc18c", TO "absent", AUTHOR "mansour", POSTURE trusted, REASON "back", REVERTS "1" ) => admitted tx=node.delete
+DEFINE REFINE undo_again AS ( TARGET "Round", KIND function, FROM "absent", TO "sha:f20c399bc18c", AUTHOR "mansour", POSTURE trusted, REASON "twice", REVERTS "1" ) => rejected structural already reverted
+
+=== L19 a FUNCTION point stands at the top level, among the statements -- not inside another definition
+--- program
+func Gross(nNet)
+	# <R:FUNCTION name="Round" params="n">
+	return nNet
+--- lift
+error point 'Round' stands inside another definition
+
+=== L20 a FUNCTION tag stands alone on its line
+--- program
+x = 1  # <R:FUNCTION name="Round" params="n">
+--- lift
+error point 'Round' is a trailing comment
+
+=== L21 a function's name is an identifier, and not Ring's: no builtin, no Main
+--- program
+# <R:FUNCTION name="round-up" params="n">
+# <R:FUNCTION name="len" params="n">
+# <R:FUNCTION name="Main">
+? "start"
+--- lift
+error point 'round-up' is not a function name
+error 'len' is a Ring builtin
+error 'Main' is the function Ring calls
+
+=== L22 params are parameter names, once each
+--- program
+# <R:FUNCTION name="Round" params="n|n">
+# <R:FUNCTION name="Trunc" params="1x">
+? "start"
+--- lift
+error params of 'Round' repeat 'n'
+error '1x' in params of 'Trunc' is not a parameter name
+
+=== L23 a function that exists takes the parameters the point declares -- exactly
+--- program
+# <R:FUNCTION name="Round" params="n">
+? "start"
+
+func Round(a, b)
+	return a
+--- lift
+error 'Round' takes (a, b), the point declares (n)
+
+=== L24 names are exact: a function declared in another case is a look-alike
+--- program
+# <R:FUNCTION name="Round" params="n">
+? "start"
+
+func round(n)
+	return n
+--- lift
+error the function is declared 'round', the point names 'Round'
+
+=== L25 a class of that name is not a function
+--- program
+# <R:FUNCTION name="Round" params="n">
+? "start"
+
+class Round
+	nCount = 1
+--- lift
+error 'Round' is declared as a class
+
+=== L26 a FUNCTION takes calls, writes and params, not a parameter's bounds or an algorithm's options
+--- program
+# <R:FUNCTION name="Round" params="n" options="a|b">
+? "start"
+--- lift
+error 'options' is not an attribute of a FUNCTION point
