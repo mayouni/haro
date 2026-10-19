@@ -78,13 +78,13 @@ refinement did not make.
 
 ## 3. The gate
 
-Five stages, in the order `stzRefinableCode.To()` runs them; the first to fail ends the proposal, and **a proposal that fails anywhere changes nothing** (the gate works on a copy).
+Five stages, in the order `StzRefinableCodeQ().To()` runs them; the first to fail ends the proposal, and **a proposal that fails anywhere changes nothing** (the gate works on a copy).
 
 | stage | asks | refuses with |
 |---|---|---|
 | **structural** -- "delegated back to the language itself" (charter 6.4) | the sentence is a sentence; the declarations lift; the point exists; its KIND is the declared one and it is built; AT is the id it stands at; FROM is what it holds now; TO has the right shape (a number, a string Ring can write, a function the program defines and that takes as many arguments as the call passes, a governance that exists); for a revert, the event exists, was admitted, is not reverted, its prior state is TO and its post state is what is there; and, once the stages below have let it through the bounds, **the refined program is read back by the compiler's own parser and is the same graph** | `stale: 'floor' is at id 2, not 1`; `'HeapSort' takes 2 argument(s), the call passes 1`; `kind 'algo' does not match point 'vat', which is declared param` |
 | **constraint** | the point's bounds, options and shape: a number inside `min` and `max`, an algorithm among its `options`, a pipeline whose every stage is an option, appears once, and is not empty; a bound that does not pass the other | `0.95 above max 0.9`; `'radix' not in options quick|merge|heap` |
-| **governance** | `stzGovernance.MayProceed` over the action `refine-<point>`: a declared **risk tier** (undeclared never proceeds), the actor's **permission**, an **authority** that covers the tier -- only for a point that names its `governed_by`, and a governance that is not configured refuses | `refused: 'bot' holds 'delegated' authority (level 2) but 'refine-sort' is risk tier 3 (SHOULD does not cover it)` |
+| **governance** | `StzGovernanceQ().MayProceed` over the action `refine-<point>`: a declared **risk tier** (undeclared never proceeds), the actor's **permission**, an **authority** that covers the tier -- only for a point that names its `governed_by`, and a governance that is not configured refuses | `refused: 'bot' holds 'delegated' authority (level 2) but 'refine-sort' is risk tier 3 (SHOULD does not cover it)` |
 | **trust** | the posture of the origin (`trusted` 3, `external` 2, `sandboxed` 1, `llm` 0) clears the point's `floor` -- origin is not identity: the same actor, the same value | `posture :llm below the required floor for 'sort'` |
 | **derivation** | the state the change would leave: the point's **own** bounds and options hold, every `rule` that names the point holds, and a stated `CASCADE` is the readers' ids | `rule 'vat-above-floor' violated -- vat must not drop below floor` |
 

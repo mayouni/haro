@@ -12,7 +12,7 @@
 # and nothing in the question's TEXT reaches any of them except as a digit string. Names come from
 # the knowledge graph (the lexicon is generated from its facts), never from the question.
 #
-# Closed on purpose, in this order:  gate (characters) -> tokens (stzNaturalEngine.Analyze, which
+# Closed on purpose, in this order:  gate (characters) -> tokens (StzNaturalEngineQ().Analyze, which
 # does not generate or run code) -> frames (a table, data) -> templates (a table, data).
 
 $aNlqMembers = []     # ids from the graph, e.g. "aminata"

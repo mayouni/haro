@@ -32,8 +32,8 @@ import l1, ids
 
 SCRATCH = os.path.join(HERE, 'scratch')
 
-POSTURES = {'trusted': 3, 'external': 2, 'sandboxed': 1, 'llm': 0}          # stzRefinableCode._PostureRank
-LEVELS = {'advisory': 1, 'delegated': 2, 'autonomous': 3, 'emergencyoverride': 4}   # stzGovernance._AuthLevel
+POSTURES = {'trusted': 3, 'external': 2, 'sandboxed': 1, 'llm': 0}          # StzRefinableCodeQ()._PostureRank
+LEVELS = {'advisory': 1, 'delegated': 2, 'autonomous': 3, 'emergencyoverride': 4}   # StzGovernanceQ()._AuthLevel
 KINDS = ('param', 'algo', 'pipeline', 'rule', 'lib', 'block', 'function', 'type', 'custom')
 BUILT = ('param', 'algo', 'pipeline')           # the kinds this rung builds; the others are declared and refused when proposed against
 RULE_ATTRS = ('min', 'max', 'options', 'risk', 'floor', 'governed_by')
@@ -1178,7 +1178,7 @@ def constraint(p, attr, frm, to):
 
 
 def governance(ctx, gname, actor, p, tier):
-    """stzGovernance.MayProceed over the action `refine-<point>`: a declared risk tier, a permission, an authority that covers the tier."""
+    """StzGovernanceQ().MayProceed over the action `refine-<point>`: a declared risk tier, a permission, an authority that covers the tier."""
     gov = ctx.get(gname)
     action = 'refine-' + p['name']
     if gov is None:
