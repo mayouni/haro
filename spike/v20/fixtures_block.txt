@@ -1,0 +1,311 @@
+~~~ The fixtures of the BLOCK kind (rung 5 of the code-graph memo, Haro v0.20): an agent proposes the BODY of a function whose signature a human
+~~~ declared. Hand-composed BEFORE the engine reads them (the W discipline: fixtures first, code second); refine_check.py reads this file once the
+~~~ engine is built, and until then stage 24 does not, so the guard stays green on the commits that carry them. Same sections as fixtures.txt;
+~~~ `=== BNN` is a block fixture, `=== LNN` a fault in the lift.
+~~~
+~~~ THE POINT. `<R:BLOCK name="..." ...>` on a `func` line, or alone on the lines above it: the point is the function's BODY. The signature -- its
+~~~ name and parameters -- is the human's, and no block refinement changes it.
+~~~   calls="A|B"     every function and builtin the body may call, spelt as declared (D24); absent, the body may call nothing. A method call
+~~~                   `x.M()` counts as a call of M. Least authority: what is not named is refused.
+~~~   writes="$x|.."  every global, and every parameter whose CONTENTS it writes (`aL[1] = 0`, `add(aL, v)`: the caller holds those), the body may
+~~~                   write; absent, it writes its own locals only. Assigning a parameter itself is a local write (C-29).
+~~~   risk, floor, governed_by   as for every point.
+~~~
+~~~ THE VALUE. A block's value is its body's CANONICAL text (the printer's: each statement at the body's own level, a line each, every line
+~~~ ending in a newline). FROM is its digest -- `sha:` and the first 12 hex digits of its SHA-256; the empty body is `sha:e3b0c44298fc` --
+~~~ because a body can hold what a one-line string cannot (a comment, a line break), and FROM is a compare-and-swap of what the proposer saw. The
+~~~ lift prints it, so an agent copies it. TO is the new body on ONE line, as Ring reads statements without separators: the sentence has no line
+~~~ break and no escape (F-55). The compiler's parser reads it and the printer writes it out canonically; the refined program read back must be the
+~~~ same graph, or the proposal is refused. A respacing is not a refinement (D25): the value is the canonical text, and it does not move.
+~~~
+~~~ THE GATE, for a block:
+~~~   structural   the body is a statement list and nothing else: it defines nothing (`func`, `class`), loads nothing, packages nothing; no
+~~~                `eval`, no `call` by name, no brace block -- the gate could not say what they call; no comment -- the gate does not judge prose,
+~~~                and a model's comment can mislead the human reading the diff; FROM is the body's digest now; TO parses
+~~~   constraint   every call is one the point names in `calls`, by its declared spelling; every write outside the frame is one `writes` names
+~~~   governance, trust   as for every point
+~~~   derivation   the compiler is asked: every call to a user function passes the number of arguments it takes (rnxc graph binds it), and
+~~~                `rnxc check` reports nothing on the refined program that it did not report before. A program the compiler cannot vouch for
+~~~                (its absence rules are shut: an eval, a loadlib) is not refined by a body at all.
+~~~
+~~~ THE LOWERING. The old body and the new are matched statement by statement on their canonical text (a longest common subsequence): a statement
+~~~ that stays keeps its id and its comments, one that goes is `node.delete`, one that comes is `node.create` with a fresh id, deletes first. A
+~~~ comment attached to a statement (rung 18's rule, the memo's 3.3) goes and stays with it. The inverse restores every id.
+
+=== B01 a block point in the lift: the body's digest, and what it may call
+--- program
+$nVat = 0.20  # <R:PARAM name="vat" min="0" max="0.9">
+? Gross(100)
+
+func Gross(nNet)  # <R:BLOCK name="gross" calls="Tax">
+	return nNet + Tax(nNet)
+
+func Tax(n)
+	return n * $nVat
+--- lift
+vat param @1 = 0.20 min=0 max=0.9
+gross block @3 = sha:e50ec955b97f calls=Tax
+
+=== B02 the first body of a declared signature
+~~~ the human declares `func Gross(nNet)` and what it may call; the agent writes the body. One statement comes, so the lowering is one node.create
+--- program
+$nVat = 0.20  # <R:PARAM name="vat" min="0" max="0.9">
+? "[" + Gross(100) + "]"
+
+func Gross(nNet)  # <R:BLOCK name="gross" calls="Tax">
+
+func Tax(n)
+	return n * $nVat
+--- do
+DEFINE REFINE write_gross AS ( TARGET "gross", KIND block, FROM "sha:e3b0c44298fc", TO "return nNet + Tax(nNet)", AUTHOR "mansour", POSTURE trusted, REASON "gross is net plus tax" ) RATIONALE "a body is a refinement" => admitted tx=node.create
+--- text
+$nVat = 0.20  # <R:PARAM name="vat" min="0" max="0.9">
+? "[" + Gross(100) + "]"
+
+func Gross(nNet)  # <R:BLOCK name="gross" calls="Tax">
+	return nNet + Tax(nNet)
+
+func Tax(n)
+	return n * $nVat
+--- run
+oracle: [] | [120]
+
+=== B03 the statements that stay keep their ids: one statement inserted is one node.create
+~~~ the body's first and last statements are matched on their canonical text and kept; only the middle one is new
+--- program
+$nVat = 0.21  # <R:PARAM name="vat" min="0" max="0.9">
+? Gross(99)
+
+func Gross(nNet)  # <R:BLOCK name="gross" calls="Tax|Round">
+	nTax = Tax(nNet)
+	return nNet + nTax
+
+func Tax(n)
+	return n * $nVat
+
+func Round(n)
+	return floor(n + 0.5)
+--- do
+DEFINE REFINE round_tax AS ( TARGET "gross", KIND block, FROM "sha:3a4b390464d7", TO "nTax = Tax(nNet) nTax = Round(nTax) return nNet + nTax", AUTHOR "mansour", POSTURE trusted, REASON "tax is whole" ) => admitted tx=node.create
+--- text
+$nVat = 0.21  # <R:PARAM name="vat" min="0" max="0.9">
+? Gross(99)
+
+func Gross(nNet)  # <R:BLOCK name="gross" calls="Tax|Round">
+	nTax = Tax(nNet)
+	nTax = Round(nTax)
+	return nNet + nTax
+
+func Tax(n)
+	return n * $nVat
+
+func Round(n)
+	return floor(n + 0.5)
+--- run
+oracle: 119.79 | 120
+
+=== B04 a body calls only what its point names, spelt as declared -- builtins too
+~~~ least authority: `floor` is a builtin and is still refused, because the point does not name it; `tax` is refused with the declared spelling
+~~~ named (D24); a changed statement is one node.delete and one node.create
+--- program
+$nVat = 0.20  # <R:PARAM name="vat" min="0" max="0.9">
+? Gross(100)
+
+func Gross(nNet)  # <R:BLOCK name="gross" calls="Tax">
+	return nNet + Tax(nNet)
+
+func Tax(n)
+	return n * $nVat
+
+func Purge()
+	return 0
+--- do
+DEFINE REFINE purge AS ( TARGET "gross", KIND block, FROM "sha:e50ec955b97f", TO "Purge() return nNet + Tax(nNet)", AUTHOR "aicha", POSTURE trusted, REASON "try" ) => rejected constraint 'Purge' is not a call 'gross' allows
+DEFINE REFINE builtin AS ( TARGET "gross", KIND block, FROM "sha:e50ec955b97f", TO "return nNet + floor(Tax(nNet))", AUTHOR "aicha", POSTURE trusted, REASON "try" ) => rejected constraint 'floor' is not a call 'gross' allows
+DEFINE REFINE folded AS ( TARGET "gross", KIND block, FROM "sha:e50ec955b97f", TO "return nNet + tax(nNet)", AUTHOR "aicha", POSTURE trusted, REASON "try" ) => rejected constraint the declared spelling is 'Tax'
+DEFINE REFINE double_tax AS ( TARGET "gross", KIND block, FROM "sha:e50ec955b97f", TO "return nNet + Tax(nNet) * 2", AUTHOR "mansour", POSTURE trusted, REASON "two taxes" ) => admitted tx=node.delete,node.create
+--- text
+$nVat = 0.20  # <R:PARAM name="vat" min="0" max="0.9">
+? Gross(100)
+
+func Gross(nNet)  # <R:BLOCK name="gross" calls="Tax">
+	return nNet + Tax(nNet) * 2
+
+func Tax(n)
+	return n * $nVat
+
+func Purge()
+	return 0
+--- run
+oracle: 120 | 140
+
+=== B05 a block that names no calls may call nothing -- not even its own function
+--- program
+? Double(21)
+
+func Double(n)  # <R:BLOCK name="double">
+	return n * 2
+--- do
+DEFINE REFINE recurse AS ( TARGET "double", KIND block, FROM "sha:34be9794a5f0", TO "return Double(n - 1) + 2", AUTHOR "aicha", POSTURE trusted, REASON "try" ) => rejected constraint 'Double' is not a call 'double' allows
+DEFINE REFINE add_twice AS ( TARGET "double", KIND block, FROM "sha:34be9794a5f0", TO "return n + n", AUTHOR "mansour", POSTURE trusted, REASON "no multiply" ) => admitted tx=node.delete,node.create
+--- text
+? Double(21)
+
+func Double(n)  # <R:BLOCK name="double">
+	return n + n
+--- run
+oracle: 42 | 42
+
+=== B06 a body writes its own locals; a global, or what a parameter holds, only when its point names it
+~~~ assigning a parameter itself rebinds a local (C-29); writing INTO a list parameter writes the caller's list, so that is a write outside the frame
+--- program
+$nCount = 0
+? Double(21)
+
+func Double(n)  # <R:BLOCK name="double">
+	return n * 2
+
+func Count()  # <R:BLOCK name="count" writes="$nCount">
+	return $nCount
+
+func Head(aL)  # <R:BLOCK name="head">
+	return aL[1]
+--- do
+DEFINE REFINE global AS ( TARGET "double", KIND block, FROM "sha:34be9794a5f0", TO "$nCount = 1 return n * 2", AUTHOR "aicha", POSTURE trusted, REASON "try" ) => rejected constraint writes $nCount, which 'double' does not allow
+DEFINE REFINE into_param AS ( TARGET "head", KIND block, FROM "sha:e31a004cc47b", TO "aL[1] = 0 return aL[1]", AUTHOR "aicha", POSTURE trusted, REASON "try" ) => rejected constraint writes into 'aL', which the caller holds
+DEFINE REFINE local AS ( TARGET "double", KIND block, FROM "sha:34be9794a5f0", TO "nTwo = 2 return n * nTwo", AUTHOR "mansour", POSTURE trusted, REASON "named" ) => admitted tx=node.delete,node.create,node.create
+DEFINE REFINE counted AS ( TARGET "count", KIND block, FROM "sha:713635dcc9aa", TO "$nCount += 1 return $nCount", AUTHOR "mansour", POSTURE trusted, REASON "count calls" ) => admitted
+--- text
+$nCount = 0
+? Double(21)
+
+func Double(n)  # <R:BLOCK name="double">
+	nTwo = 2
+	return n * nTwo
+
+func Count()  # <R:BLOCK name="count" writes="$nCount">
+	$nCount += 1
+	return $nCount
+
+func Head(aL)  # <R:BLOCK name="head">
+	return aL[1]
+
+=== B07 the structural stage: a body is a statement list the gate can read, and nothing else
+~~~ the respaced body is the same canonical text, so it is nothing to refine (D25); everything else here is refused before any bound is asked
+--- program
+$nVat = 0.20  # <R:PARAM name="vat" min="0" max="0.9">
+? Gross(100)
+
+func Gross(nNet)  # <R:BLOCK name="gross" calls="Tax">
+	return nNet + Tax(nNet)
+
+func Tax(n)
+	return n * $nVat
+--- do
+DEFINE REFINE stale AS ( TARGET "gross", KIND block, FROM "sha:000000000000", TO "return nNet", AUTHOR "aicha", POSTURE trusted, REASON "try" ) => rejected structural stale
+DEFINE REFINE same AS ( TARGET "gross", KIND block, FROM "sha:e50ec955b97f", TO "return nNet + Tax(nNet)", AUTHOR "aicha", POSTURE trusted, REASON "try" ) => rejected structural nothing to refine
+DEFINE REFINE respaced AS ( TARGET "gross", KIND block, FROM "sha:e50ec955b97f", TO "return nNet+Tax( nNet )", AUTHOR "aicha", POSTURE trusted, REASON "try" ) => rejected structural nothing to refine
+DEFINE REFINE wrong_kind AS ( TARGET "gross", KIND param, FROM "sha:e50ec955b97f", TO "return nNet", AUTHOR "aicha", POSTURE trusted, REASON "try" ) => rejected structural kind
+DEFINE REFINE not_a_block AS ( TARGET "vat", KIND block, FROM "0.20", TO "return 1", AUTHOR "aicha", POSTURE trusted, REASON "try" ) => rejected structural kind
+DEFINE REFINE defines AS ( TARGET "gross", KIND block, FROM "sha:e50ec955b97f", TO "func Helper() return 1", AUTHOR "aicha", POSTURE trusted, REASON "try" ) => rejected structural defines
+DEFINE REFINE a_class AS ( TARGET "gross", KIND block, FROM "sha:e50ec955b97f", TO "class Spy", AUTHOR "aicha", POSTURE trusted, REASON "try" ) => rejected structural defines
+DEFINE REFINE loads AS ( TARGET "gross", KIND block, FROM "sha:e50ec955b97f", TO "load 'more.ring'", AUTHOR "aicha", POSTURE trusted, REASON "try" ) => rejected structural load
+DEFINE REFINE evals AS ( TARGET "gross", KIND block, FROM "sha:e50ec955b97f", TO "eval('x = 1') return nNet", AUTHOR "aicha", POSTURE trusted, REASON "try" ) => rejected structural eval
+DEFINE REFINE by_name AS ( TARGET "gross", KIND block, FROM "sha:e50ec955b97f", TO "cF = 'Tax' return call cF(nNet)", AUTHOR "aicha", POSTURE trusted, REASON "try" ) => rejected structural by name
+DEFINE REFINE brace AS ( TARGET "gross", KIND block, FROM "sha:e50ec955b97f", TO "o = new Spy o { x = 1 } return nNet", AUTHOR "aicha", POSTURE trusted, REASON "try" ) => rejected structural brace
+DEFINE REFINE comment AS ( TARGET "gross", KIND block, FROM "sha:e50ec955b97f", TO "return nNet /* reviewed */", AUTHOR "aicha", POSTURE trusted, REASON "try" ) => rejected structural comment
+DEFINE REFINE broken AS ( TARGET "gross", KIND block, FROM "sha:e50ec955b97f", TO "return (", AUTHOR "aicha", POSTURE trusted, REASON "try" ) => rejected structural does not parse
+
+=== B08 derivation asks the compiler
+~~~ `Tax` takes one argument (rnxc graph binds no edge for the call that passes two); `nGross` is assigned nowhere, which `rnxc check` reports
+~~~ and did not before. Both refinements change nothing
+--- program
+$nVat = 0.20  # <R:PARAM name="vat" min="0" max="0.9">
+? Gross(100)
+
+func Gross(nNet)  # <R:BLOCK name="gross" calls="Tax">
+	return nNet + Tax(nNet)
+
+func Tax(n)
+	return n * $nVat
+--- do
+DEFINE REFINE arity AS ( TARGET "gross", KIND block, FROM "sha:e50ec955b97f", TO "return nNet + Tax(nNet, 2)", AUTHOR "aicha", POSTURE trusted, REASON "try" ) => rejected derivation 'Tax' takes 1 argument(s), the call passes 2
+DEFINE REFINE unassigned AS ( TARGET "gross", KIND block, FROM "sha:e50ec955b97f", TO "return nNet + nGross", AUTHOR "aicha", POSTURE trusted, REASON "try" ) => rejected derivation ngross
+
+=== B09 a program the compiler cannot vouch for is not refined by a body
+~~~ an eval anywhere shuts `rnxc check`'s absence rules for the whole unit, so the derivation stage has no answer to give, and it fails closed
+--- program
+eval("x = 1")
+? Double(21)
+
+func Double(n)  # <R:BLOCK name="double">
+	return n * 2
+--- do
+DEFINE REFINE add_twice AS ( TARGET "double", KIND block, FROM "sha:34be9794a5f0", TO "return n + n", AUTHOR "mansour", POSTURE trusted, REASON "try" ) => rejected derivation rnxc check does not check this program
+
+=== B10 trust: a block's floor holds an origin below it back
+--- program
+? Double(21)
+
+func Double(n)  # <R:BLOCK name="double" floor="external">
+	return n * 2
+--- do
+DEFINE REFINE model AS ( TARGET "double", KIND block, FROM "sha:34be9794a5f0", TO "return n + n", AUTHOR "bot", POSTURE llm, REASON "try" ) => rejected trust below the required floor
+DEFINE REFINE vendor AS ( TARGET "double", KIND block, FROM "sha:34be9794a5f0", TO "return n + n", AUTHOR "acme", POSTURE external, REASON "no multiply" ) => admitted
+--- text
+? Double(21)
+
+func Double(n)  # <R:BLOCK name="double" floor="external">
+	return n + n
+
+=== B11 a revert restores the body with its ids, and is gated like any other
+--- program
+? Double(21)
+
+func Double(n)  # <R:BLOCK name="double">
+	return n * 2
+--- do
+DEFINE REFINE add_twice AS ( TARGET "double", KIND block, FROM "sha:34be9794a5f0", TO "return n + n", AUTHOR "mansour", POSTURE trusted, REASON "no multiply" ) => admitted tx=node.delete,node.create
+DEFINE REFINE undo AS ( TARGET "double", KIND block, FROM "sha:622d54efd309", TO "return n * 2", AUTHOR "mansour", POSTURE trusted, REASON "back", REVERTS "1" ) => admitted tx=node.delete,node.create
+DEFINE REFINE undo_again AS ( TARGET "double", KIND block, FROM "sha:34be9794a5f0", TO "return n + n", AUTHOR "mansour", POSTURE trusted, REASON "twice", REVERTS "1" ) => rejected structural already reverted
+--- text
+? Double(21)
+
+func Double(n)  # <R:BLOCK name="double">
+	return n * 2
+
+=== L15 a BLOCK point stands on a function
+--- program
+$nX = 1  # <R:BLOCK name="b">
+--- lift
+error BLOCK point 'b' is not on a function
+
+=== L16 what a block may call is a function the program defines, or a builtin
+--- program
+? Double(21)
+
+func Double(n)  # <R:BLOCK name="double" calls="Nope">
+	return n * 2
+--- lift
+error 'Nope' in calls of 'double' is no function and no builtin
+
+=== L17 calls are spelt as declared (D24)
+--- program
+? Gross(100)
+
+func Gross(nNet)  # <R:BLOCK name="gross" calls="tax">
+	return nNet + Tax(nNet)
+
+func Tax(n)
+	return n * 0.2
+--- lift
+error calls of 'gross' names 'tax'; the function is declared 'Tax'
+
+=== L18 a BLOCK takes calls and writes, not a parameter's bounds or an algorithm's options
+--- program
+? Double(21)
+
+func Double(n)  # <R:BLOCK name="double" options="a|b">
+	return n * 2
+--- lift
+error 'options' is not an attribute of a BLOCK point
