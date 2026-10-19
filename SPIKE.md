@@ -84,6 +84,7 @@ expression language forged whole, judged by stz's 29 fixtures as stage 8, pinned
 | `spike/v19/` | **Node identity on the program graph** (Haro v0.19, the nineteenth rung, 2026-10-04): `ids.py` (ids on the items of rung 18's graph, the matcher that recovers them across an edit), `fixtures.txt` (23 edits written before the code), `ids_check.py` (the court: fixtures, controls, Haro's own history replayed; guard stage 23), `IDENTITY.md`; `probes/` holds `sweep.py` (what each pass and each threshold buys) and `near.py` (the claims nearest the threshold) |
 | `../src/fmt.zig`, `../src/dumpjson.zig`, `../bench/fmt.py`, `../bench/dumpjson.py` | **`rnxc fmt` and the lossless export** (rung 3 of the code-graph memo, 2026-10-05; ringpp's, outside `haro/`): the printer of rung 18 as a verb, `rnxc dump --json`, and the two courts, both gate steps; see the section after the nineteenth rung |
 | `../src/graph.zig`, `../bench/graph.py`, `../bench/graph/` | **`rnxc graph`, the resolved graph** (rung 4 of the code-graph memo, first slice, 2026-10-05; ringpp's, outside `haro/`): L2 as the code-graph line protocol, its court (a gate step) and the two comparisons, `--peer` and `--ingest`; see the section after rung 3 |
+| `spike/v20/` | **Refinement over the program graph** (Haro v0.20, rung 5 of the code-graph memo, 2026-10-05 and 2026-10-19): `refine.py` (the gate and RCP's twelve primitives), `scoped.py` (the write surface), `refine_check.py` and `fixtures.txt` (the court, guard stage 24), `probes/` (the live gate's limits, the decoder batch, the mutation study), `GRAMMAR.md`; see the section after rung 4 |
 | `spike/world_lib.ring`, `spike/world_stub.ring` | the world's functions (SYMBOL resolution, the C1 rows), moved out of `court_lib.ring` and loaded only where a SYMBOL or PUBLISH is declared, and the stub that stands elsewhere |
 
 Nothing in `rnxc` or the VM changed. Nothing in a sibling repository changed.
@@ -1379,6 +1380,23 @@ so a call with the wrong number of arguments is an edge that is not there** (fou
 cannot finish must be marked, because a missing edge and an absent one look alike; and the index takes the real parse unchanged. **Not
 built:** the edge of `new K(...)` to `K.init`, references, scope, `depends_on`, and stzRingCodeGraph reading the stream (stzlib's to wire).
 
+## Rung 5 of the code-graph memo -- refinement over L1 (Haro v0.20) -- built 2026-10-05, finished 2026-10-19
+
+**On the author's "great! start Rung 5"** (2026-10-05), finished on "start rung 5" (2026-10-19) after the session that built it ended with it uncommitted.
+A refinement is a sentence in `rfn.haro`'s shape against a point a program declares in a `<R:KIND ...>` tag; five stages in `stzRefinableCode`'s order; RCP's
+twelve primitives over rung 18's graph with rung 19's ids; the diff is the printer's. `spike/v20/GRAMMAR.md` is the account.
+
+    v20/refine.py, scoped.py           the engine (lift, sentence, gate, primitives, events, revert, replay, commutation, the audit) and the write surface
+    v20/refine_check.py, fixtures.txt  the court, guard stage 24 (327 s): 89 fixtures, 166 steps; the live gate 488 of 501 agree, 0 disagree; rnxc graph
+                                       21/21; 82 scoped grammars held by the engine's decoder, 600 samples; 10 controls; history 98.2%; 165 corpus literals
+    v20/probes/                        the live gate's limits, nodesids, the decoder batch, the mutation study (505 of 519 killed)
+
+**What building found** (HF-85 to HF-90): the two gates give one verdict wherever both can judge, and the live gate's three limits are measured; a refinement
+is one line on real code and still lands after 98.2% of real edits; **the write surface is bounded by the decoder** -- 128 rules, every group a rule -- and the
+first grammar met the bound at five points (10 or 11 held now, 15 not); `stzRefinableCode` matches names exactly where Ring folds them; the mutation study took
+the court from 72.4% to 97.3%. **Not built:** the kinds `block`, `function`, `type`, `lib`, `custom`; `node.create`/`node.delete` as a sentence's lowering;
+a writer for a file that is not canonical; derivation rules that propose; a single scoped grammar for a program of more than about a dozen points.
+
 ## The names -- `.haro`, not `.stzu` -- corrected 2026-10-02
 
 **At the author's word ("we agreed to use .haro instead of .stzu, no?").** D1 was ratified
@@ -1485,6 +1503,9 @@ whole guard re-run on the renamed tree: 28 + 30 + 27 + 23, 117 of 120, 32 of 32,
    (L2) in stzCodeGraph's protocol, judged against the compiler's own bindings and against stzRingCodeGraph's
    scan (1,556 differences, none unexplained); not built: `new` edges, references, scope; rung 5 (refinement over
    L1) is the haro-charter desk's and next in the memo.
+23. ~~Rung 5 of the code-graph memo~~ -- built 2026-10-05, finished 2026-10-19: refinement over L1 (Haro v0.20), guard
+   stage 24; open: the kinds it declares but does not build (`block` first: `node.create` as a sentence's lowering), and a
+   write surface for a program larger than the decoder holds (HF-87); rung 6 (a second face, as a printer) is next in the memo.
 18. The forge as an `rnxc` verb (the ringpp session's `src/`, routed); the
    Softanza-resident timing the charter's 2.6 asks for; the court's run time on the
    oracle under paths and views (6.4x the image this pass, named at stage 6); the

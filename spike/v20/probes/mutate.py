@@ -88,8 +88,11 @@ def run_mutant(text, full=False):
     open(path, 'w', encoding='utf-8', newline='').write(text.replace("HERE = os.path.dirname(os.path.abspath(__file__))", "HERE = %r" % V20, 1))
     env = dict(os.environ, REFINE_SRC=path)
     cmd = [sys.executable, os.path.join(V20, 'refine_check.py')] + ([] if full else ['--fx'])
+    # --timeout S: a mutant that makes the court hang is killed at S seconds. The default, 90, is a dozen times the fast court's own time on a machine at
+    # full speed; on one whose CPU is capped (2026-10-19: the same fast court took 136 s) it would count every mutant as killed, so raise it there
+    limit = int(sys.argv[sys.argv.index('--timeout') + 1]) if '--timeout' in sys.argv else (600 if full else 90)
     try:
-        p = subprocess.run(cmd, capture_output=True, cwd=ROOT, env=env, timeout=600 if full else 90)
+        p = subprocess.run(cmd, capture_output=True, cwd=ROOT, env=env, timeout=limit)
     except subprocess.TimeoutExpired:
         return True, 'timed out'
     out = p.stdout.decode('utf-8', 'replace')

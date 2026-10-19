@@ -449,9 +449,19 @@ def stz_source(m):
     return '\n'.join(lines)
 
 
-def ring_lambda(r):
+def ring_lambda(r, L):
+    """The rule as a derivation of the live gate. A rule that names a point holding text (a string param, an algo) is compared as text, as this gate's
+    rules_violated compares it; the first translation put ring_number() on both sides, and a string side then RAISED R41 in the live gate on every proposal
+    (fixture 42's `label != a`), since the live gate evaluates every rule of the program each time."""
+    def is_text(side):
+        p = None if refine.NUM_RE.match(side) else refine.point_named(L, side)
+        return p is not None and p['form'] not in ('num', 'neg')
+    text = is_text(r['left']) or is_text(r['right'])
+
     def operand(side):
-        return 'ring_number("%s")' % side if refine.NUM_RE.match(side) else 'ring_number(oCode.ValueOf("%s"))' % side
+        if refine.NUM_RE.match(side):
+            return ('"%s"' if text else 'ring_number("%s")') % side
+        return ('oCode.ValueOf("%s")' if text else 'ring_number(oCode.ValueOf("%s"))') % side
     op = {'=': '=', '!=': '!='}.get(r['op'], r['op'])
     return 'func oCode { return %s %s %s }' % (operand(r['left']), op, operand(r['right']))
 
@@ -479,9 +489,15 @@ def stz_case(i, m, ctx, sent):
         if p['attrs'].get('floor'):
             lines.append('o.TrustFloor("%s", "%s")' % (p['name'], p['attrs']['floor']))
     for r in L['rules']:
-        lines.append('o.DeclareDerivation("%s", %s, "%s")' % (r['name'], ring_lambda(r), r['message']))
-    lines.append('r = o.Refine("%s").As("%s").To("%s")' % (s['base'], s['posture'], s['to']))
-    lines.append('? "V|%d|" + r[:admitted] + "|" + r[:why] + "|" + o.ValueOf("%s")' % (i, s['base']))
+        lines.append('o.DeclareDerivation("%s", %s, "%s")' % (r['name'], ring_lambda(r, L), r['message']))
+    # the point by its DECLARED name: this gate folds a target's spelling as Ring folds names, stzRefinableCode matches the name exactly (HF-88), so a
+    # sentence spelling it otherwise is put to it under the declared name -- the verdicts are what is compared -- and counted (CASE_SPELT)
+    pt = refine.point_named(L, s['base'])
+    name = pt['name'] if pt else s['base']
+    if name != s['base']:
+        CASE_SPELT.add(i)
+    lines.append('r = o.Refine("%s").As("%s").To("%s")' % (name, s['posture'], s['to']))
+    lines.append('? "V|%d|" + r[:admitted] + "|" + r[:why] + "|" + o.ValueOf("%s")' % (i, name))
     return 'try\n' + '\n'.join(lines) + '\ncatch\n? "V|%d|ERR|" + cCatchError + "|"\ndone' % i
 
 
@@ -591,6 +607,7 @@ def run_live_gate(cases):
 
 
 RETRIED = []
+CASE_SPELT = set()       # cases whose target spells a point otherwise than its declaration (put to the live gate under the declared name)
 
 
 def is_stricter(out):
@@ -720,10 +737,25 @@ def collect_steps(fx, grammar_fn):
                 continue
             sent = line.rpartition(' => ')[0]
             s, _ = refine.parse_sentence(sent)
+            if s is not None:
+                s = dict(s, _spelt=spelt_otherwise(m, s))
             g = grammar_fn(m)
             out = m.refine(sent)
             jobs.append((f['id'], n, g, canonical(s) if s else sent.strip(), out, s))
     return jobs
+
+
+def spelt_otherwise(m, s):
+    """Is the sentence outside its program's scoped grammar BY DESIGN? The grammar writes the program's own spellings -- the point's declared name, the
+    text FROM finds there, the governance as configured -- and strings without a double quote; the gate takes any spelling Ring would (a name in another
+    case, a number spelt another way, `"1.0"` for `1`) and a value that needs another quote. It was two fixture ids, 07 and 09, until the fixtures written
+    from the mutation study (36, 37, 41) spelt names and numbers otherwise on purpose (2026-10-19)."""
+    p = refine.point_named(m.lift(), s['base'])
+    if p is None:
+        return False
+    cur = p['attrs'].get(s['attr'], '') if s['attr'] else p['value']
+    return (p['name'] != s['base'] or s['from'] != cur or '"' in s['to']
+            or (s['attr'] == 'governed_by' and s['to'] != '' and s['to'] not in m.ctx))
 
 
 def run_gbnf_jobs(pairs):
@@ -793,7 +825,9 @@ def write_surface(fx, grammar_fn, per_program):
     for (g, s), res in zip(pairs, got):
         if res is None or res[0] != '':
             r['bad'].append('the engine does not hold a scoped grammar: %s' % (res[0] if res else 'no answer'))
-            break
+            # nothing below can be judged then: the first version went on, unpacked the missing answer, and the court's thread died with no word
+            # (2026-10-19, a grammar over the decoder's 128 rules: the batch stopped at that job and every later one had no answer)
+            return r
     nsteps = len(steps)
     for k, (fid, n, g, sent, out, s) in enumerate(steps):
         refusal, accepts = got[k]
@@ -802,7 +836,7 @@ def write_surface(fx, grammar_fn, per_program):
             r['admitted'] += 1
             if accepts:
                 r['admitted_ok'] += 1
-            elif s is not None and ('reverts' in s or fid in ('07', '09')):
+            elif s is not None and ('reverts' in s or s.get('_spelt')):
                 r['exceptions'] += 1
             else:
                 r['bad'].append('%s step %d was admitted by the gate but is not a sentence of its scoped grammar: %s' % (fid, n, sent[:140]))
@@ -1207,6 +1241,9 @@ def main():
         if INCONSISTENT:
             print('  --   fixtures %s start from a program that already breaks a rule: this gate answers for the rules of the point a refinement touches, the live gate for the '
                   'whole program, so they are not put to it' % ', '.join(INCONSISTENT))
+        if CASE_SPELT:
+            print('  --   %d proposal(s) name a point in another case: this gate folds the name as Ring folds names, stzRefinableCode matches it exactly, so they were put to it '
+                  'under the declared name (HF-88)' % len(CASE_SPELT))
         if RETRIED:
             print('  --   %d proposal(s) raised in the live stack and were put again alone (cases %s)' % (len(RETRIED), RETRIED))
 
@@ -1228,7 +1265,7 @@ def main():
         stg = ', '.join('%s %d' % (k, v) for k, v in sorted(w['sample_stage'].items(), key=lambda kv: str(kv[0])) if k != 'all')
         check(not w['bad'] and w['sampled'] >= 100 and w['shape'] >= 8,
               'W the grammar scoped to each program (%d grammars, each held by the engine\'s decoder): all %d admitted proposals of the fixtures that its author could write '
-              'are sentences of it (%d of %d; %d are outside it by design: a revert is written by the harness, a number spelled another way); the decoder refuses every one of the '
+              'are sentences of it (%d of %d; %d are outside it by design: a revert is written by the harness; a name, a number or a governance spelt otherwise than the program declares it, or a value needing another quote); the decoder refuses every one of the '
               '%d proposals the gate refuses for their shape (%d of %d); and %d sentences SAMPLED from the grammars are all accepted by the decoder and none is refused '
               'for its shape: the gate admits %s, and refuses the rest at %s' % (w['grammars'], w['admitted'], w['admitted_ok'], w['admitted'] - w['exceptions'], w['exceptions'],
                                                                                  w['shape'], w['shape_ok'], w['shape'], w['sampled'], adm, stg))

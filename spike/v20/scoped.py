@@ -31,6 +31,10 @@ NUM = '("-")? [0-9]+ ("." [0-9]+)?'
 
 
 def scoped_gbnf(model, ctx=None, posture=None, author=None):
+    """The shapes TO takes are named rules SHARED by every point, and each point's sentence is a top-level alternative of `body`, not a group: the
+    engine's decoder holds at most 128 rules (gbnf_machine.zig MAX_RULES) and makes every `( ... )` and every repeat a rule of its own, so the first
+    form -- each point carrying its own copy of the number, the tier, the posture -- crossed the limit at five points (GBNF-M2, found by fixture 36,
+    2026-10-19). What a point still costs is its own rule, its two tails and the option list it names; the language is the same."""
     ctx = model.ctx if ctx is None else ctx
     L = model.lift()
     post = lit(posture) if posture else alt(list(refine.POSTURES))
@@ -48,22 +52,27 @@ def scoped_gbnf(model, ctx=None, posture=None, author=None):
         tails.append('vtail%d ::= tail%d (", CASCADE " %s)?' % (n, n, lit('"%s"' % reads)))
         shapes = []                                   # (target text, the text FROM must be, the rule for TO, whether the sentence is about the value)
         if p['form'] in ('num', 'neg'):
-            shapes.append((p['name'], p['value'], quoted('(' + NUM + ')'), True))
+            shapes.append((p['name'], p['value'], 'qnum', True))
             for k in ('min', 'max'):
-                shapes.append((p['name'] + '.' + k, a.get(k, ''), quoted('(' + NUM + ')?'), False))
+                shapes.append((p['name'] + '.' + k, a.get(k, ''), 'qnumopt', False))
         elif p['form'] == 'str':
-            shapes.append((p['name'], p['value'], quoted(alt(opts) if opts else '[^"\\n|]*'), True))
+            shapes.append((p['name'], p['value'], quoted(alt(opts)) if opts else 'qtext', True))
         elif p['form'] == 'call':
-            shapes.append((p['name'], p['value'], quoted(alt(opts) if opts else '[A-Za-z_] [A-Za-z0-9_]*'), True))
+            shapes.append((p['name'], p['value'], quoted(alt(opts)) if opts else 'qname', True))
         else:
-            shapes.append((p['name'], p['value'], quoted('(' + alt(opts) + ' ("|" ' + alt(opts) + ')*)?'), True))
+            tails.append('stage%d ::= %s' % (n, alt(opts)))
+            shapes.append((p['name'], p['value'], quoted('(stage%d ("|" stage%d)*)?' % (n, n)), True))
         if p['kind'] in ('algo', 'pipeline'):
-            shapes.append((p['name'] + '.options', a.get('options', ''), quoted('[A-Za-z0-9_]+ ("|" [A-Za-z0-9_]+)*'), False))
-        shapes.append((p['name'] + '.risk', a.get('risk', ''), quoted('("1" | "2" | "3" | "4")?'), False))
-        shapes.append((p['name'] + '.floor', a.get('floor', ''), quoted('(' + ' | '.join(lit(x) for x in refine.POSTURES) + ')?'), False))
-        shapes.append((p['name'] + '.governed_by', a.get('governed_by', ''), quoted('(' + ' | '.join(lit(x) for x in govs) + ')?' if govs else ''), False))
-        for target, frm, to, is_value in shapes:
-            cases.append('(' + lit('TARGET "%s", KIND %s, FROM "%s", TO ' % (target, p['kind'], frm)) + ' ' + to + ' ' + ('vtail%d' if is_value else 'tail%d') % n + ')')
+            shapes.append((p['name'] + '.options', a.get('options', ''), 'qopts', False))
+        shapes.append((p['name'] + '.risk', a.get('risk', ''), 'qtier', False))
+        shapes.append((p['name'] + '.floor', a.get('floor', ''), 'qfloor', False))
+        shapes.append((p['name'] + '.governed_by', a.get('governed_by', ''), 'qgov', False))
+        # one rule per point: the decoder also holds at most 1024 elements in ONE rule (GBNF-M3), and every character of a literal is one, so the
+        # points' sentences inlined in `body` crossed that at five points as the groups had crossed the rule count
+        tails.append('point%d ::= ' % n + ' | '.join(
+            lit('TARGET "%s", KIND %s, FROM "%s", TO ' % (target, p['kind'], frm)) + ' ' + to + ' ' + ('vtail%d' if is_value else 'tail%d') % n
+            for target, frm, to, is_value in shapes))
+        cases.append('point%d' % n)
     body = ' | '.join(cases) if cases else lit('TARGET "-"')
     rules = [
         'root ::= "DEFINE REFINE " id " AS ( " body " )"',
@@ -71,5 +80,14 @@ def scoped_gbnf(model, ctx=None, posture=None, author=None):
         'word ::= ' + DQ + ' [^"\\n ] [^"\\n]* ' + DQ,
         'who ::= ' + who,
         'post ::= ' + post,
+        'num ::= "-"? [0-9]+ ("." [0-9]+)?',
+        'qnum ::= ' + quoted('num'),
+        'qnumopt ::= ' + quoted('num?'),
+        'qtext ::= ' + quoted('[^"\\n|]*'),
+        'qname ::= ' + quoted('[A-Za-z_] [A-Za-z0-9_]*'),
+        'qopts ::= ' + quoted('[A-Za-z0-9_]+ ("|" [A-Za-z0-9_]+)*'),
+        'qtier ::= ' + quoted('("1" | "2" | "3" | "4")?'),
+        'qfloor ::= ' + quoted('(' + ' | '.join(lit(x) for x in refine.POSTURES) + ')?'),
+        'qgov ::= ' + (quoted('(' + ' | '.join(lit(x) for x in govs) + ')?') if govs else quoted('')),
     ] + tails + ['body ::= ' + body]
     return '\n'.join(rules) + '\n'
