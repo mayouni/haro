@@ -36,7 +36,7 @@ POSTURES = {'trusted': 3, 'external': 2, 'sandboxed': 1, 'llm': 0}          # St
 LEVELS = {'advisory': 1, 'delegated': 2, 'autonomous': 3, 'emergencyoverride': 4}   # StzGovernanceQ()._AuthLevel
 KINDS = ('param', 'algo', 'pipeline', 'rule', 'lib', 'block', 'function', 'type', 'custom')
 BUILT = ('param', 'algo', 'pipeline', 'block', 'function')  # the kinds this rung builds; the others are declared and refused when proposed against
-RULE_ATTRS = ('min', 'max', 'options', 'risk', 'floor', 'governed_by')
+RULE_ATTRS = ('min', 'max', 'options', 'risk', 'floor', 'governed_by', 'calls', 'writes')   # calls, writes: a BLOCK or FUNCTION point's allowlists
 BLOCK_ATTRS = ('calls', 'writes', 'risk', 'floor', 'governed_by')   # what a BLOCK point declares besides its name
 FUNCTION_ATTRS = ('params',) + BLOCK_ATTRS                         # and a FUNCTION point: the signature is declared too
 BODY_KINDS = ('block', 'function')              # the kinds whose value is a function's body
@@ -428,6 +428,9 @@ def lift(g):
         if p['kind'] in BODY_KINDS:
             for e in block_decl_errors(g, p):
                 err(e)
+            why = body_own_error(g, p)
+            if why:
+                err("point '%s' body is outside its own rule: %s" % (p['name'], why), own=True)
         if p['built']:
             e = own_rule_error(p)
             if e and not any(x['msg'].startswith("point '%s' bounds" % p['name']) for x in errors):
@@ -930,6 +933,8 @@ def is_widening(p, attr, frm, to):
         return frm != '' and (to == '' or POSTURES[to] < POSTURES[frm])
     if attr == 'governed_by':
         return frm != ''
+    if attr in ('calls', 'writes'):
+        return bool(set(names_of(to)) - set(names_of(frm)))             # a name the list did not have: the body may do more than it could
     return False
 
 
@@ -1070,6 +1075,66 @@ def create_function(g, p, items):
     return {'op': 'node.create', 'parent': None, 'block': 'items', 'index': idx, 'node': fn}
 
 
+def body_params(g, p):
+    """The parameters of the function a BLOCK or FUNCTION point stands for, and its name: a BLOCK point's from the function under its tag, a FUNCTION
+    point's as the tag declares them (the lift has already checked that a function that exists takes exactly these)."""
+    if p['kind'] == 'block':
+        fn = find_item(g, p['id'])[0]
+        return [q['name'] for q in fn.get('params', [])], ids.def_name(fn)
+    return names_of(p['attrs'].get('params')), p['name']
+
+
+def name_list_errors(g, p, attr, names):
+    """What is wrong with a list of names as the `calls` or `writes` of a point: a call must be a function, class or builtin the program has, a write a
+    global, an attribute or a parameter of the function -- each spelt as declared (D24)."""
+    out = []
+    params, owner = body_params(g, p)
+    if attr == 'calls':
+        fns = {ids.def_name(it) for it, *_ in walk_items(g) if it['k'] in ('func', 'class')}
+        if p['kind'] == 'function':
+            fns.add(p['name'])                                      # a function the point declares is a function, there or not
+        bis = set(builtins())
+        for nm in names:
+            if nm in fns or nm in bis:
+                continue
+            hit = sorted(x for x in fns if x.lower() == nm.lower())
+            bhit = sorted(x for x in bis if x.lower() == nm.lower())
+            if hit:
+                out.append("calls of '%s' names '%s'; the function is declared '%s'" % (p['name'], nm, hit[0]))
+            elif bhit:
+                out.append("calls of '%s' names '%s'; the builtin is spelt '%s'" % (p['name'], nm, bhit[0]))
+            else:
+                out.append("'%s' in calls of '%s' is no function and no builtin" % (nm, p['name']))
+    else:
+        for nm in names:
+            if not (nm.startswith('$') or nm.startswith('@') or nm in params):
+                out.append("'%s' in writes of '%s' is no global, no attribute and no parameter of %s()" % (nm, p['name'], owner))
+    return out
+
+
+def allowlist_error(g, p, attr, to):
+    """Is TO a list the program can honour as the `calls` or `writes` of point p? None, or why not. "" is a list: the body then calls nothing, or writes
+    its own locals only."""
+    names, seen = names_of(to), set()
+    for nm in names:
+        if not nm:
+            return 'an empty name'
+        if nm in seen:
+            return "'%s' repeats" % nm
+        seen.add(nm)
+    errs = name_list_errors(g, p, attr, names)
+    return errs[0] if errs else None
+
+
+def body_own_error(g, p):
+    """Is the body that is there inside its own point's rule -- calls and writes only what the point names? None, or what it does that it may not. A
+    function that is not there yet has no body to judge."""
+    fn = point_function(g, p)
+    if fn is None or not fn.get('items'):
+        return None
+    return block_constraint(p, fn, fn['items'])
+
+
 def block_decl_errors(g, p):
     """What a BLOCK or FUNCTION point's tag may say about its body: calls of what the program defines or Ring builds in, spelt as declared (D24); writes
     of a global, an attribute or a parameter of its function."""
@@ -1078,28 +1143,8 @@ def block_decl_errors(g, p):
         for key in p['order']:
             if key not in BLOCK_ATTRS:
                 out.append("'%s' is not an attribute of a BLOCK point" % key)
-        fn = find_item(g, p['id'])[0]
-        params, owner = [q['name'] for q in fn.get('params', [])], ids.def_name(fn)
-    else:
-        params, owner = names_of(a.get('params')), p['name']       # the tag's attributes were read by function_faults
-    fns = {ids.def_name(it) for it, *_ in walk_items(g) if it['k'] in ('func', 'class')}
-    if p['kind'] == 'function':
-        fns.add(p['name'])                                          # a function the point declares is a function, there or not
-    bis = set(builtins())
-    for nm in names_of(a.get('calls')):
-        if nm in fns or nm in bis:
-            continue
-        hit = sorted(x for x in fns if x.lower() == nm.lower())
-        bhit = sorted(x for x in bis if x.lower() == nm.lower())
-        if hit:
-            out.append("calls of '%s' names '%s'; the function is declared '%s'" % (p['name'], nm, hit[0]))
-        elif bhit:
-            out.append("calls of '%s' names '%s'; the builtin is spelt '%s'" % (p['name'], nm, bhit[0]))
-        else:
-            out.append("'%s' in calls of '%s' is no function and no builtin" % (nm, p['name']))
-    for nm in names_of(a.get('writes')):
-        if not (nm.startswith('$') or nm.startswith('@') or nm in params):
-            out.append("'%s' in writes of '%s' is no global, no attribute and no parameter of %s()" % (nm, p['name'], owner))
+    for attr in ('calls', 'writes'):                                # a FUNCTION tag's other attributes were read by function_faults
+        out += name_list_errors(g, p, attr, names_of(a.get(attr)))
     return out
 
 
@@ -1510,6 +1555,12 @@ def evaluate(model, s, ctx, readback=True):
                 if to_literal(st) is None:
                     return out.reject('structural', "stage '%s' cannot be written as a Ring string" % st)
     else:
+        if attr in ('calls', 'writes'):
+            if p['kind'] not in BODY_KINDS:
+                return out.reject('structural', "%s apply to BLOCK and FUNCTION points only, and '%s' is a %s" % (attr, p['name'], p['kind']))
+            why = allowlist_error(g, p, attr, to)
+            if why:
+                return out.reject('structural', 'TO is not an allowlist of this program: ' + why)
         if attr in ('min', 'max') and not (p['kind'] == 'param' and form in ('num', 'neg')):
             return out.reject('structural', "bounds apply to numeric points only, and '%s' is not one" % p['name'])
         if attr == 'options' and p['kind'] not in ('algo', 'pipeline'):
@@ -1544,7 +1595,7 @@ def evaluate(model, s, ctx, readback=True):
     try:
         if revert is not None:
             tx = copy.deepcopy(revert['inverse'])
-        elif attr in ('min', 'max', 'risk', 'floor'):
+        elif attr in ('min', 'max', 'risk', 'floor', 'calls', 'writes'):
             tx = lower_attr(g, p, s)
         else:
             tx = lower(p, s)

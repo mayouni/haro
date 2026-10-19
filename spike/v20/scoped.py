@@ -76,6 +76,9 @@ def scoped_gbnf(model, ctx=None, posture=None, author=None, points=None):
             shapes.append((p['name'], p['value'], quoted('(stage%d ("|" stage%d)*)?' % (n, n)), True))
         if p['kind'] in ('algo', 'pipeline'):
             shapes.append((p['name'] + '.options', a.get('options', ''), 'qopts', False))
+        if p['form'] in refine.BODY_KINDS:
+            shapes.append((p['name'] + '.calls', a.get('calls', ''), 'qnames', False))     # the allowlists are rules, refinable like the others
+            shapes.append((p['name'] + '.writes', a.get('writes', ''), 'qnames', False))
         shapes.append((p['name'] + '.risk', a.get('risk', ''), 'qtier', False))
         shapes.append((p['name'] + '.floor', a.get('floor', ''), 'qfloor', False))
         shapes.append((p['name'] + '.governed_by', a.get('governed_by', ''), 'qgov', False))
@@ -98,6 +101,7 @@ def scoped_gbnf(model, ctx=None, posture=None, author=None, points=None):
         'qtext ::= ' + quoted('[^"\\n|]*'),
         'qname ::= ' + quoted('[A-Za-z_] [A-Za-z0-9_]*'),
         'qbody ::= ' + quoted('[^"\\n]*'),
+        'qnames ::= ' + quoted('([$@A-Za-z0-9_]+ ("|" [$@A-Za-z0-9_]+)*)?'),
         'qopts ::= ' + quoted('[A-Za-z0-9_]+ ("|" [A-Za-z0-9_]+)*'),
         'qtier ::= ' + quoted('("1" | "2" | "3" | "4")?'),
         'qfloor ::= ' + quoted('(' + ' | '.join(lit(x) for x in refine.POSTURES) + ')?'),

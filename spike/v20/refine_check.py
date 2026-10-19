@@ -18,9 +18,10 @@
      that one does not (the value parses, the sentence is well formed, the id is current) is counted apart, never folded in
   D  controls that must FAIL: a gate without its trust stage, its constraint stage, its governance stage, its derivation stage; one that edits the
      live program before it has judged; a cascade that sees nothing; an inverse that loses the ids; a revert that does not check what it restores;
-     and the BLOCK and FUNCTION kinds' seven rules taken out in turn: no calls or writes allowlist, no shape refusals, a lowering that keeps no
+     and the BLOCK, FUNCTION and allowlist rules' ten taken out in turn: no calls or writes allowlist, no shape refusals, a lowering that keeps no
      statement, a compiler that finds nothing, a lift that reads a BLOCK tag or a FUNCTION tag without checking it, a new function written
-     beside its tag instead of after the last function
+     beside its tag instead of after the last function, a body never judged against its point's own rule, a widening of an allowlist counted
+     as an ordinary change, a TO list never checked
   H  Haro's own history: a refinement drafted against a literal of one revision -- does it still land after the next human edit? Landed, refused as
      stale (the value changed), or aimed at a different variable (the hazard a name-checking gate catches): counted
   K  a corpus: a literal of each of many real Ring files made a point, refined, and judged by a second route (the line spliced by hand), by the
@@ -961,6 +962,14 @@ def function_faults_unchecked(g, name, tag_attrs, lst, parent):
     return [], False, existing
 
 
+_orig_is_widening = refine.is_widening
+
+
+def is_widening_blind_to_allowlists(p, attr, frm, to):
+    """an allowlist widening that is not counted as widening: a name added to `calls` or `writes` would then cost the point's own tier, not the heaviest"""
+    return False if attr in ('calls', 'writes') else _orig_is_widening(p, attr, frm, to)
+
+
 _orig_apply_prim = refine.apply_prim
 
 
@@ -1219,7 +1228,8 @@ def small_checks():
 def main():
     t0 = time.time()
     print('refine_check -- refinement over the program graph, Ring++ face (rung 20)')
-    fb = read_fixtures(os.path.join(HERE, 'fixtures_block.txt')) + read_fixtures(os.path.join(HERE, 'fixtures_function.txt'))
+    fb = (read_fixtures(os.path.join(HERE, 'fixtures_block.txt')) + read_fixtures(os.path.join(HERE, 'fixtures_function.txt'))
+          + read_fixtures(os.path.join(HERE, 'fixtures_allowlist.txt')))
     if BLOCK_ONLY:
         stats = new_stats()
         res = judge_fixtures(fb, stats)
@@ -1227,7 +1237,7 @@ def main():
         for fid, b in bad:
             for x in b[:4]:
                 print('  FAIL %s: %s' % (fid, x[:500]))
-        print('refine_check --block: %d of %d BLOCK and FUNCTION fixtures pass, %d steps (%s), %d programs run on the oracle and on rnxc'
+        print('refine_check --block: %d of %d BLOCK, FUNCTION and allowlist fixtures pass, %d steps (%s), %d programs run on the oracle and on rnxc'
               % (len(fb) - len(bad), len(fb), stats['steps'], ', '.join('%s %d' % (k, stats[k]) for k in ('admitted', 'rejected') if k in stats), stats['runs']))
         return 1 if bad else 0
     fx = read_fixtures(os.path.join(HERE, 'fixtures.txt')) + fb
@@ -1384,7 +1394,10 @@ def main():
             ('a derivation whose compiler finds nothing', {'rnxc_findings': lambda text: ([], [])}, 2),
             ('a lift that reads a BLOCK tag without checking it', {'block_decl_errors': lambda *a: []}, 3),
             ('a new function written beside the tag, among the statements', {'create_function': create_function_beside_tag}, 5),
-            ('a lift that reads a FUNCTION tag without checking it', {'function_faults': function_faults_unchecked}, 6)):
+            ('a lift that reads a FUNCTION tag without checking it', {'function_faults': function_faults_unchecked}, 6),
+            ('a body never judged against its own point\'s rule', {'body_own_error': lambda g, p: None}, 3),
+            ('an allowlist widening counted as an ordinary change', {'is_widening': is_widening_blind_to_allowlists}, 1),
+            ('a TO list for calls or writes that is never checked', {'allowlist_error': lambda g, p, attr, to: None}, 2)):
         with patched(**kw):
             nbad = n_failing(fb)
         check(nbad >= floor, 'D the control, %s, fails %d BLOCK/FUNCTION fixture(s) (at least %d)' % (label, nbad, floor))
