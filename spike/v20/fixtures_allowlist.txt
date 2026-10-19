@@ -1,0 +1,265 @@
+~~~ The fixtures of the ALLOWLIST rules (rung 5 of the code-graph memo, Haro v0.20): a BLOCK or FUNCTION point's own `calls` and `writes` are refinable, as
+~~~ a param's bounds and an algo's options are. Hand-composed BEFORE the engine reads them. Same sections as fixtures.txt.
+~~~
+~~~ WHY. Until now the only way to let a body call something its point did not name was the human editing the tag as text, outside the gate. An allowlist
+~~~ is the point's RULE for its body (charter 6.4: "the rules themselves are refinable"), so it goes through the same five stages as every rule:
+~~~   TARGET "gross.calls" (or `.writes`), KIND block (or function), FROM the list now (`|` apart, "" when the attribute is absent), TO the list wanted
+~~~   structural   the attribute belongs to a BLOCK or FUNCTION point; TO is a list of distinct names, none empty ("" clears it: the body then calls nothing,
+~~~                or writes its own locals only); every name is one the program has -- a call a function, class or builtin, a write a global, an attribute or
+~~~                a parameter of the function -- spelt as declared (D24); FROM is what is there; TO is not FROM
+~~~   governance   WIDENING is a tier-4 act whatever the point's risk (a name in TO that FROM did not have); NARROWING is the point's own tier
+~~~   trust        the origin must be :trusted whatever the point's floor says (a rule is not changed by a model-composed proposal)
+~~~   derivation   the body that is THERE must still satisfy the new list: narrowing below what it calls or writes leaves it outside its own rule, which is
+~~~                refused -- "own rule", as a bound below the value is. The lowering is node.update_property of the tag's text, so no id moves.
+~~~ A body found outside its own rule by the lift (a human wrote more than the point names) is a STATE, not a fault: it does not stop a refinement of any
+~~~ other point, and the allowlist can be widened to repair it. A text edit of an allowlist is read back as the refinement it amounts to (the audit).
+
+=== AL01 widening an allowlist is the heaviest act; narrowing it below the body is refused
+~~~ boss holds the highest authority, lead one below; the body calls Tax, so the list may not drop it
+--- program
+? Gross(100)
+
+# <R:BLOCK name="gross" calls="Tax" risk="1" governed_by="ops">
+func Gross(nNet)
+	return nNet + Tax(nNet)
+
+func Tax(n)
+	return n * 0.2
+
+func Round(n)
+	return floor(n + 0.5)
+--- context
+governance ops
+	actor lead autonomous may gross
+	actor boss emergencyoverride may gross
+--- do
+DEFINE REFINE llm_widens AS ( TARGET "gross.calls", KIND block, FROM "Tax", TO "Tax|Round", AUTHOR "boss", POSTURE llm, REASON "try" ) => rejected trust rule
+DEFINE REFINE lead_widens AS ( TARGET "gross.calls", KIND block, FROM "Tax", TO "Tax|Round", AUTHOR "lead", POSTURE trusted, REASON "rounding" ) => rejected governance tier 4
+DEFINE REFINE boss_widens AS ( TARGET "gross.calls", KIND block, FROM "Tax", TO "Tax|Round", AUTHOR "boss", POSTURE trusted, REASON "rounding" ) => admitted tx=node.update_property
+DEFINE REFINE below_body AS ( TARGET "gross.calls", KIND block, FROM "Tax|Round", TO "Round", AUTHOR "lead", POSTURE trusted, REASON "drop Tax" ) => rejected derivation own rule
+--- text
+? Gross(100)
+
+# <R:BLOCK name="gross" calls="Tax|Round" risk="1" governed_by="ops">
+func Gross(nNet)
+	return nNet + Tax(nNet)
+
+func Tax(n)
+	return n * 0.2
+
+func Round(n)
+	return floor(n + 0.5)
+
+=== AL02 narrowing to what the body uses is the point's own tier
+--- program
+? Gross(100)
+
+# <R:BLOCK name="gross" calls="Tax|Round" risk="1" governed_by="ops">
+func Gross(nNet)
+	return nNet + Tax(nNet)
+
+func Tax(n)
+	return n * 0.2
+
+func Round(n)
+	return floor(n + 0.5)
+--- context
+governance ops
+	actor lead autonomous may gross
+--- do
+DEFINE REFINE lead_narrows AS ( TARGET "gross.calls", KIND block, FROM "Tax|Round", TO "Tax", AUTHOR "lead", POSTURE trusted, REASON "Round is unused" ) => admitted tx=node.update_property
+--- text
+? Gross(100)
+
+# <R:BLOCK name="gross" calls="Tax" risk="1" governed_by="ops">
+func Gross(nNet)
+	return nNet + Tax(nNet)
+
+func Tax(n)
+	return n * 0.2
+
+func Round(n)
+	return floor(n + 0.5)
+
+=== AL03 writes: a global, an attribute or a parameter of the function -- and what the body writes may not be dropped
+~~~ `aL` is a parameter, so writing into it is writing the caller's list; a name that is none of the three is refused
+--- program
+$nTotal = 0
+$nOther = 0
+? Count()
+
+# <R:BLOCK name="count" writes="$nTotal">
+func Count()
+	$nTotal += 1
+	return $nTotal
+
+# <R:BLOCK name="head">
+func Head(aL)
+	return aL[1]
+--- do
+DEFINE REFINE add_other AS ( TARGET "count.writes", KIND block, FROM "$nTotal", TO "$nTotal|$nOther", AUTHOR "mansour", POSTURE trusted, REASON "count both" ) => admitted tx=node.update_property
+DEFINE REFINE drop_used AS ( TARGET "count.writes", KIND block, FROM "$nTotal|$nOther", TO "$nOther", AUTHOR "mansour", POSTURE trusted, REASON "try" ) => rejected derivation own rule
+DEFINE REFINE not_a_name AS ( TARGET "count.writes", KIND block, FROM "$nTotal|$nOther", TO "$nTotal|$nOther|total", AUTHOR "mansour", POSTURE trusted, REASON "try" ) => rejected structural no global
+DEFINE REFINE a_param AS ( TARGET "head.writes", KIND block, FROM "", TO "aL", AUTHOR "mansour", POSTURE trusted, REASON "head may fill its list" ) => admitted tx=node.update_property
+DEFINE REFINE not_a_param AS ( TARGET "head.writes", KIND block, FROM "aL", TO "aL|bL", AUTHOR "mansour", POSTURE trusted, REASON "try" ) => rejected structural no parameter
+--- text
+$nTotal = 0
+$nOther = 0
+? Count()
+
+# <R:BLOCK name="count" writes="$nTotal|$nOther">
+func Count()
+	$nTotal += 1
+	return $nTotal
+
+# <R:BLOCK name="head" writes="aL">
+func Head(aL)
+	return aL[1]
+
+=== AL04 the structural stage on an allowlist: what the list may name, and where the attribute belongs
+~~~ names are exact (D24): `tax` for Tax and `FLOOR` for floor are refused with the declared spelling; `Tax||floor` has an empty name; and `calls`
+~~~ is not an attribute of a param, nor `options` or bounds of a block
+--- program
+$nVat = 0.20  # <R:PARAM name="vat" min="0" max="0.9">
+? Gross(100)
+
+# <R:BLOCK name="gross" calls="Tax">
+func Gross(nNet)
+	return nNet + Tax(nNet)
+
+func Tax(n)
+	return n * $nVat
+--- do
+DEFINE REFINE stale AS ( TARGET "gross.calls", KIND block, FROM "Round", TO "Tax|Round", AUTHOR "aicha", POSTURE trusted, REASON "try" ) => rejected structural stale
+DEFINE REFINE same AS ( TARGET "gross.calls", KIND block, FROM "Tax", TO "Tax", AUTHOR "aicha", POSTURE trusted, REASON "try" ) => rejected structural nothing to refine
+DEFINE REFINE unknown AS ( TARGET "gross.calls", KIND block, FROM "Tax", TO "Tax|Nope", AUTHOR "aicha", POSTURE trusted, REASON "try" ) => rejected structural no function and no builtin
+DEFINE REFINE look_alike AS ( TARGET "gross.calls", KIND block, FROM "Tax", TO "tax", AUTHOR "aicha", POSTURE trusted, REASON "try" ) => rejected structural the function is declared 'Tax'
+DEFINE REFINE builtin_case AS ( TARGET "gross.calls", KIND block, FROM "Tax", TO "Tax|FLOOR", AUTHOR "aicha", POSTURE trusted, REASON "try" ) => rejected structural the builtin is spelt 'floor'
+DEFINE REFINE repeats AS ( TARGET "gross.calls", KIND block, FROM "Tax", TO "Tax|Tax", AUTHOR "aicha", POSTURE trusted, REASON "try" ) => rejected structural repeats
+DEFINE REFINE empty_name AS ( TARGET "gross.calls", KIND block, FROM "Tax", TO "Tax||floor", AUTHOR "aicha", POSTURE trusted, REASON "try" ) => rejected structural empty name
+DEFINE REFINE params AS ( TARGET "gross.params", KIND block, FROM "", TO "n", AUTHOR "aicha", POSTURE trusted, REASON "try" ) => rejected structural not an attribute
+DEFINE REFINE options AS ( TARGET "gross.options", KIND block, FROM "", TO "a|b", AUTHOR "aicha", POSTURE trusted, REASON "try" ) => rejected structural options apply to algo and pipeline
+DEFINE REFINE bounds AS ( TARGET "gross.min", KIND block, FROM "", TO "1", AUTHOR "aicha", POSTURE trusted, REASON "try" ) => rejected structural bounds apply to numeric points only
+DEFINE REFINE on_a_param AS ( TARGET "vat.calls", KIND param, FROM "", TO "floor", AUTHOR "aicha", POSTURE trusted, REASON "try" ) => rejected structural apply to BLOCK and FUNCTION points only
+DEFINE REFINE wrong_kind AS ( TARGET "gross.calls", KIND function, FROM "Tax", TO "Tax|floor", AUTHOR "aicha", POSTURE trusted, REASON "try" ) => rejected structural kind
+DEFINE REFINE builtin AS ( TARGET "gross.calls", KIND block, FROM "Tax", TO "Tax|floor", AUTHOR "mansour", POSTURE trusted, REASON "floor is a builtin, and builtins are named" ) => admitted tx=node.update_property
+--- text
+$nVat = 0.20  # <R:PARAM name="vat" min="0" max="0.9">
+? Gross(100)
+
+# <R:BLOCK name="gross" calls="Tax|floor">
+func Gross(nNet)
+	return nNet + Tax(nNet)
+
+func Tax(n)
+	return n * $nVat
+
+=== AL05 the loop closes: a FUNCTION point's allowlist is widened, and then the body it refused is admitted
+~~~ before, the only way past `ceil` was the human editing the tag as text; now the widening is a sentence, judged -- and narrowing it again is refused
+~~~ while the function that was made calls `ceil`
+--- program
+# <R:FUNCTION name="Round" params="n" calls="floor">
+? "start"
+
+func Gross(nNet)
+	return nNet
+--- do
+DEFINE REFINE too_wide AS ( TARGET "Round", KIND function, FROM "absent", TO "return ceil(n)", AUTHOR "aicha", POSTURE trusted, REASON "try" ) => rejected constraint 'ceil' is not a call 'Round' allows
+DEFINE REFINE widen AS ( TARGET "Round.calls", KIND function, FROM "floor", TO "floor|ceil", AUTHOR "mansour", POSTURE trusted, REASON "round up too" ) => admitted tx=node.update_property
+DEFINE REFINE make AS ( TARGET "Round", KIND function, FROM "absent", TO "return ceil(n)", AUTHOR "aicha", POSTURE trusted, REASON "round up" ) => admitted tx=node.create
+DEFINE REFINE drop_ceil AS ( TARGET "Round.calls", KIND function, FROM "floor|ceil", TO "floor", AUTHOR "mansour", POSTURE trusted, REASON "try" ) => rejected derivation own rule
+DEFINE REFINE drop_floor AS ( TARGET "Round.calls", KIND function, FROM "floor|ceil", TO "ceil", AUTHOR "mansour", POSTURE trusted, REASON "floor is unused" ) => admitted tx=node.update_property
+--- text
+# <R:FUNCTION name="Round" params="n" calls="ceil">
+? "start"
+
+func Gross(nNet)
+	return nNet
+
+func Round(n)
+	return ceil(n)
+--- run
+oracle: start | start
+
+=== AL06 a revert of an allowlist refinement restores the tag, and is gated like any other
+--- program
+? Gross(100)
+
+# <R:BLOCK name="gross" calls="Tax">
+func Gross(nNet)
+	return nNet + Tax(nNet)
+
+func Tax(n)
+	return n * 0.2
+
+func Round(n)
+	return floor(n + 0.5)
+--- do
+DEFINE REFINE widen AS ( TARGET "gross.calls", KIND block, FROM "Tax", TO "Tax|Round", AUTHOR "mansour", POSTURE trusted, REASON "rounding" ) => admitted tx=node.update_property
+DEFINE REFINE undo AS ( TARGET "gross.calls", KIND block, FROM "Tax|Round", TO "Tax", AUTHOR "mansour", POSTURE trusted, REASON "back", REVERTS "1" ) => admitted tx=node.update_property
+DEFINE REFINE undo_again AS ( TARGET "gross.calls", KIND block, FROM "Tax", TO "Tax|Round", AUTHOR "mansour", POSTURE trusted, REASON "twice", REVERTS "1" ) => rejected structural already reverted
+
+=== AL07 a text edit that widens an allowlist is read back as the refinement it is
+~~~ widened by hand from a model-composed origin: refused for the origin alone, the same as a bound (A02)
+--- program
+? Gross(100)
+
+# <R:BLOCK name="gross" calls="Tax" risk="1" governed_by="ops">
+func Gross(nNet)
+	return nNet + Tax(nNet)
+
+func Tax(n)
+	return n * 0.2
+
+func Round(n)
+	return floor(n + 0.5)
+--- context
+governance ops
+	actor lead autonomous may gross
+	actor boss emergencyoverride may gross
+--- edited
+? Gross(100)
+
+# <R:BLOCK name="gross" calls="Tax|Round" risk="1" governed_by="ops">
+func Gross(nNet)
+	return nNet + Tax(nNet)
+
+func Tax(n)
+	return n * 0.2
+
+func Round(n)
+	return floor(n + 0.5)
+--- audit
+as llm by boss
+refine gross.calls Tax Tax|Round => rejected trust rule
+raw 0
+
+=== L27 a body outside its own rule is a STATE: it does not stop another point, and the allowlist repairs it
+~~~ the human wrote a body that calls Tax and named no calls. The lift says so; `vat` is refined meanwhile; widening `calls` ends it
+--- program
+$nVat = 0.20  # <R:PARAM name="vat" min="0" max="0.9">
+? Gross(100)
+
+# <R:BLOCK name="gross">
+func Gross(nNet)
+	return nNet + Tax(nNet)
+
+func Tax(n)
+	return n * $nVat
+--- lift
+vat param @1 = 0.20 min=0 max=0.9
+gross block @4 = sha:e50ec955b97f
+error point 'gross' body is outside its own rule
+--- do
+DEFINE REFINE raise_vat AS ( TARGET "vat", KIND param, FROM "0.20", TO "0.30", AUTHOR "mansour", POSTURE trusted, REASON "the rate went up" ) => admitted tx=refinement.set_value
+DEFINE REFINE repair AS ( TARGET "gross.calls", KIND block, FROM "", TO "Tax", AUTHOR "mansour", POSTURE trusted, REASON "gross calls Tax" ) => admitted tx=node.update_property
+--- text
+$nVat = 0.30  # <R:PARAM name="vat" min="0" max="0.9">
+? Gross(100)
+
+# <R:BLOCK name="gross" calls="Tax">
+func Gross(nNet)
+	return nNet + Tax(nNet)
+
+func Tax(n)
+	return n * $nVat
