@@ -54,7 +54,7 @@ def scoped_gbnf(model, ctx=None, posture=None, author=None, points=None):
             continue
         a = p['attrs']
         opts = a['options'].split('|') if a.get('options') else None
-        c = refine.cascade(model.g, p) if p['form'] != 'block' else {'reads': []}
+        c = refine.cascade(model.g, p) if p['form'] not in refine.BODY_KINDS else {'reads': []}
         reads = ','.join(str(i) for i in sorted(set(i for i, _ in c['reads'])))
         tails.append('tail%d ::= ", AUTHOR " who ", POSTURE " post ", REASON " word (", AT " %s)?' % (n, lit('"%d"' % p['id'])))
         tails.append('vtail%d ::= tail%d (", CASCADE " %s)?' % (n, n, lit('"%s"' % reads)))
@@ -67,8 +67,8 @@ def scoped_gbnf(model, ctx=None, posture=None, author=None, points=None):
             shapes.append((p['name'], p['value'], quoted(alt(opts)) if opts else 'qtext', True))
         elif p['form'] == 'call':
             shapes.append((p['name'], p['value'], quoted(alt(opts)) if opts else 'qname', True))
-        elif p['form'] == 'block':
-            # FROM is the body's digest, exactly; TO a body on one line, which no context-free grammar can say is Ring: the gate reads it with the
+        elif p['form'] in refine.BODY_KINDS:
+            # FROM is the body's digest (or `absent`, for a function not there yet), exactly; TO a body on one line, which no context-free grammar can say is Ring: the gate reads it with the
             # compiler's parser and holds it to its calls and writes. A body has callers, not readers: no CASCADE seat
             shapes.append((p['name'], p['value'], 'qbody', False))
         else:

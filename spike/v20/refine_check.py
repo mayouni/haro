@@ -18,8 +18,9 @@
      that one does not (the value parses, the sentence is well formed, the id is current) is counted apart, never folded in
   D  controls that must FAIL: a gate without its trust stage, its constraint stage, its governance stage, its derivation stage; one that edits the
      live program before it has judged; a cascade that sees nothing; an inverse that loses the ids; a revert that does not check what it restores;
-     and the BLOCK kind's five rules taken out in turn: no calls or writes allowlist, no shape refusals, a lowering that keeps no statement, a
-     compiler that finds nothing, a lift that reads a BLOCK tag without checking it
+     and the BLOCK and FUNCTION kinds' seven rules taken out in turn: no calls or writes allowlist, no shape refusals, a lowering that keeps no
+     statement, a compiler that finds nothing, a lift that reads a BLOCK tag or a FUNCTION tag without checking it, a new function written
+     beside its tag instead of after the last function
   H  Haro's own history: a refinement drafted against a literal of one revision -- does it still land after the next human edit? Landed, refused as
      stale (the value changed), or aimed at a different variable (the hazard a name-checking gate catches): counted
   K  a corpus: a literal of each of many real Ring files made a point, refined, and judged by a second route (the line spliced by hand), by the
@@ -45,7 +46,7 @@ from haro_forge import Gbnf
 
 PLANT = '--plant' in sys.argv
 QUICK = '--quick' in sys.argv
-BLOCK_ONLY = '--block' in sys.argv      # the BLOCK kind's fixtures alone (fixtures_block.txt): seconds, not the whole court
+BLOCK_ONLY = '--block' in sys.argv      # the BLOCK and FUNCTION kinds' fixtures alone (fixtures_block.txt, fixtures_function.txt): seconds, not the court
 WIDE = '--wide' in sys.argv
 ONLY_FX = '--fx' in sys.argv
 SCRATCH = os.path.join(HERE, 'scratch')
@@ -173,11 +174,14 @@ def block_locality(before, after, out):
     """A body refinement's locality, the BLOCK kind's counterpart of 'one line out, one line in': nothing outside the function's body changes; every
     id that stays keeps its order; every id that goes is one the transaction deleted; every id that comes is new to the program."""
     bad = []
-    ident = out.point['id']
+    ident, name = out.point['id'], out.point['name']
 
     def outside(g):
         g = copy.deepcopy(g)
-        refine.find_item(g, ident)[0]['items'] = []
+        if out.point['kind'] == 'block':
+            refine.find_item(g, ident)[0]['items'] = []         # the body goes; the signature stays the human's
+        else:
+            g['items'] = [it for it in g['items'] if not (it['k'] == 'func' and ids.def_name(it) == name)]   # the function may appear or go
         return refine.text_of(g)
     if outside(before) != outside(after):
         bad.append('a body refinement changed text outside its function')
@@ -224,7 +228,7 @@ def run_steps(f, stats):
                 bad.append('step %d: a refused proposal changed the program' % n)
             if ids.ids_of(m.g) != before_ids:
                 bad.append('step %d: a refused proposal changed the ids' % n)
-        elif out.point is not None and out.point['kind'] == 'block' and out.point['form'] == 'block' and s_attr(sent) is None:
+        elif out.point is not None and out.point['kind'] in refine.BODY_KINDS and s_attr(sent) is None:
             for why in block_locality(before_g, m.g, out):
                 bad.append('step %d: %s' % (n, why))
         else:
@@ -939,6 +943,24 @@ def lower_block_keeping_nothing(fn, new_items):
     return tx + [{'op': 'node.create', 'parent': fn['_id'], 'block': ['items'], 'index': j, 'node': ids.strip(st)} for j, st in enumerate(new_items)]
 
 
+def create_function_beside_tag(g, p, items):
+    """a creation written right after the tag, among the top-level statements: it swallows every statement after it (HF-73)"""
+    head = refine.parse_text(('func %s(%s)' % (p['name'], ', '.join(refine.names_of(p['attrs'].get('params'))))) + chr(10))
+    fn = ids.strip(head['items'][0])
+    fn['items'] = [ids.strip(st) for st in items]
+    idx = next(i for i, it in enumerate(g['items']) if it.get('_id') == p['carrier']['id']) + 1
+    return {'op': 'node.create', 'parent': None, 'block': 'items', 'index': idx, 'node': fn}
+
+
+def function_faults_unchecked(g, name, tag_attrs, lst, parent):
+    """a lift that reads a FUNCTION tag without checking it: whatever function is there is taken, whatever its signature"""
+    existing = None
+    for it, par, *_ in refine.walk_items(g):
+        if par is None and it['k'] == 'func' and ids.def_name(it) == name:
+            existing = it
+    return [], False, existing
+
+
 _orig_apply_prim = refine.apply_prim
 
 
@@ -1197,7 +1219,7 @@ def small_checks():
 def main():
     t0 = time.time()
     print('refine_check -- refinement over the program graph, Ring++ face (rung 20)')
-    fb = read_fixtures(os.path.join(HERE, 'fixtures_block.txt'))
+    fb = read_fixtures(os.path.join(HERE, 'fixtures_block.txt')) + read_fixtures(os.path.join(HERE, 'fixtures_function.txt'))
     if BLOCK_ONLY:
         stats = new_stats()
         res = judge_fixtures(fb, stats)
@@ -1205,7 +1227,7 @@ def main():
         for fid, b in bad:
             for x in b[:4]:
                 print('  FAIL %s: %s' % (fid, x[:500]))
-        print('refine_check --block: %d of %d BLOCK fixtures pass, %d steps (%s), %d programs run on the oracle and on rnxc'
+        print('refine_check --block: %d of %d BLOCK and FUNCTION fixtures pass, %d steps (%s), %d programs run on the oracle and on rnxc'
               % (len(fb) - len(bad), len(fb), stats['steps'], ', '.join('%s %d' % (k, stats[k]) for k in ('admitted', 'rejected') if k in stats), stats['runs']))
         return 1 if bad else 0
     fx = read_fixtures(os.path.join(HERE, 'fixtures.txt')) + fb
@@ -1360,10 +1382,12 @@ def main():
             ('a body whose shape is never asked', {'body_shape_error': lambda *a: None}, 1),
             ('a body lowering that keeps no statement', {'lower_block': lower_block_keeping_nothing}, 2),
             ('a derivation whose compiler finds nothing', {'rnxc_findings': lambda text: ([], [])}, 2),
-            ('a lift that reads a BLOCK tag without checking it', {'block_decl_errors': lambda *a: []}, 3)):
+            ('a lift that reads a BLOCK tag without checking it', {'block_decl_errors': lambda *a: []}, 3),
+            ('a new function written beside the tag, among the statements', {'create_function': create_function_beside_tag}, 5),
+            ('a lift that reads a FUNCTION tag without checking it', {'function_faults': function_faults_unchecked}, 6)):
         with patched(**kw):
             nbad = n_failing(fb)
-        check(nbad >= floor, 'D the control, %s, fails %d BLOCK fixture(s) (at least %d)' % (label, nbad, floor))
+        check(nbad >= floor, 'D the control, %s, fails %d BLOCK/FUNCTION fixture(s) (at least %d)' % (label, nbad, floor))
     if w['engine']:
         wc = write_surface(fx, lambda m, ctx=None, posture=None: UNSCOPED, 10)
         nbad = len([b for b in wc['bad'] if 'but its scoped grammar accepts it' in b])

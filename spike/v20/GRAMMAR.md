@@ -23,7 +23,8 @@ surface is a sentence against a point, a grammar scoped to the program it is loo
 | the court: 11 families of check, 8 controls, a mutation study | **built**, `python haro/spike/v20/refine_check.py`, guard stage 24 | section 7 |
 | the kind `block`: an agent proposes the BODY of a function whose signature a human declared | **built** (2026-10-19) | section 11 |
 | `node.create` and `node.delete` as the lowering of a sentence | **built**, for a body | section 11 |
-| the kinds `function`, `type`, `lib`, `custom`: declared, refused when proposed against | **not built** | section 9 |
+| the kind `function`: an agent proposes a function that is not there yet, or the body of one that is | **built** (2026-10-19) | section 12 |
+| the kinds `type`, `lib`, `custom`: declared, refused when proposed against | **not built** | section 9 |
 | a writer that keeps the layout of a file that is not canonical (the estate's) | **not built**: `--write` refuses | section 9 |
 | derivation rules that PROPOSE (RCP's `derived_proposals`) | **not built**: they only judge | section 9 |
 
@@ -40,7 +41,8 @@ the statement's own line, or alone on the lines above it -- and the first tag in
 | `rule` | nothing: it is a declaration of the program | `expr`: `<operand> <op> <operand>`, over point names and numbers | `message` |
 | `lib` | `load "path"` | the path | declared, not built (section 9) |
 | `block` | a `func`, the tag alone on the line above it | the body's canonical text, named by its digest `sha:` + 12 hex | `calls`, `writes` (section 11) |
-| `function` `type` `custom` | -- | -- | declared, not built |
+| `function` | nothing: a comment alone at the top level | `absent`, or the body's digest | `params`, `calls`, `writes` (section 12) |
+| `type` `custom` | -- | -- | declared, not built |
 
 Every point also takes `risk` (a tier from 1 to 4), `floor` (the lowest posture that may refine it) and `governed_by` (the governance whose actors decide).
 
@@ -170,7 +172,7 @@ small checks in about ten seconds.
 
 | | what it judges | number |
 |---|---|---|
-| **F** | 106 fixtures through the gate, the BLOCK kind's 15 among them (210 steps: 81 admitted, 2 flagged, 127 refused): the verdict, the stage, the words, the primitives. **For every fixture, whatever it says:** a refused proposal changes neither the text nor the ids; an admitted one changes exactly one line and no id -- a BODY refinement changes nothing outside its function, keeps the order of every id that stays and loses none it did not delete; the inverses put the original back, byte for byte, with its ids; the log replayed from JSON through the gate, and the transactions with no gate, give the same text; the refined text is canonical on **the other printer** (`rnxc fmt --check`); and 8 programs run on the oracle and on rnxc before and after, printing what the refinement says they should | 0 fail |
+| **F** | 126 fixtures through the gate, the BLOCK and FUNCTION kinds' 35 among them (234 steps: 88 admitted, 2 flagged, 144 refused): the verdict, the stage, the words, the primitives. **For every fixture, whatever it says:** a refused proposal changes neither the text nor the ids; an admitted one changes exactly one line and no id -- a BODY refinement changes nothing outside its function, keeps the order of every id that stays and loses none it did not delete; the inverses put the original back, byte for byte, with its ids; the log replayed from JSON through the gate, and the transactions with no gate, give the same text; the refined text is canonical on **the other printer** (`rnxc fmt --check`); and 11 programs run on the oracle and on rnxc before and after, printing what the refinement says they should | 0 fail |
 | **T** | the twelve primitives (23 transactions), each applied, undone and applied again; a transaction that fails halfway leaves nothing; an inverse refuses a state that has moved on | 12 of 12 |
 | **L** | declarations that do not lift (14 fixtures): the gate fails closed | 0 fail |
 | **C** | the commutation predicate over every pair of a pool of 16 sentences, each in both orders | 60 commuting (and are), 11 conflicting and order-dependent, 49 conservative, **0 unsound** |
@@ -178,7 +180,7 @@ small checks in about ten seconds.
 | **S** | **Softanza's own `stzRefinableCode`** on the Ring++ package, put 504 proposals (56 the fixtures', the rest a sweep of points x values x actors x postures over two programs): admitted-or-not, the refusing stage and the value left | **418 agree**; 85 the language itself refuses at a stage the live gate has none for (most of them no-ops, D25); 1 carries a value its tag form cannot hold; 0 disagree |
 | **G** | a retargeted call, 0/1/2 arguments x a function of each arity, one that does not exist, a case variant: the structural stage says it stands exactly when `rnxc graph` shows a static call edge from the refined program -- but for a case variant, which Ring binds and the gate refuses by name (D24) | 18 of 18 |
 | **W** | the grammar scoped to each program (83 grammars, each held by the engine's constrained decoder, and a task's grammar of 3 points of a 15-point program, D26): every admitted fixture sentence its author could write is a sentence of it; the decoder refuses all 35 proposals the gate refuses for their shape; 600 sentences sampled from it are all accepted and **none is refused for its shape** | 0 fail |
-| **D** | 14 controls that must FAIL (a gate that skips each of its four stages, one that edits the live program before judging, a cascade that sees nothing, an inverse that loses ids, a revert that does not check, a grammar that does not name the points; and the BLOCK kind's five rules taken out in turn -- no calls or writes allowlist, no shape refusals, a lowering that keeps no statement, a compiler that finds nothing, a lift that reads a BLOCK tag without checking it) | each fails the court |
+| **D** | 16 controls that must FAIL (a gate that skips each of its four stages, one that edits the live program before judging, a cascade that sees nothing, an inverse that loses ids, a revert that does not check, a grammar that does not name the points; and the BLOCK and FUNCTION kinds' seven rules taken out in turn -- no calls or writes allowlist, no shape refusals, a lowering that keeps no statement, a compiler that finds nothing, a lift that reads a BLOCK tag or a FUNCTION tag without checking it, a new function written beside its tag) | each fails the court |
 | **H** | Haro's own history: a refinement drafted against a literal assignment at one revision, **does it still land at the next?** | 1,550 of 1,578 land (98.2%) |
 | **K** | a literal of each of 80 real Ring files made a point and refined | 165 literals, 0 fail |
 | mutation | 519 defects of one token each put into the engine (`probes/mutate.py`), the fast court asked | 505 killed (97.3%); the 14 left change nothing a sentence can reach (HF-89) |
@@ -229,7 +231,7 @@ now whether the package's compiler is older than the repository's, and on 2026-1
 
 ## 9. What it does not say
 
-- **The kinds `function`, `type`, `lib`, `custom`.** Declared and refused when proposed against, not built. `block` is built (section 11).
+- **The kinds `type`, `lib`, `custom`.** Declared and refused when proposed against, not built. `block` and `function` are built (sections 11, 12).
 - **A writer for a file that is not canonical.** The estate's files are not (rung 3: none of Softanza's 6,061 is `fmt`'s fixed point), and the refinement's text is the printer's. `--write` refuses; a span-preserving
   writer needs the byte span of the literal, which the lossless export (`rnxc dump --json`) has and the graph (L1) does not keep. Until then, a refinement on the estate is a diff to read or `fmt` first, with the
   author's word (D23).
@@ -299,4 +301,33 @@ say is Ring; and five controls, each rule taken out in turn and caught by at lea
 **Not built, named:** refining a BLOCK point's own `calls` and `writes` as rules (`gross.calls`: widening an allowlist would be a tier-4 act, as
 widening options is); a body proposed with a comment; a human's edit of a body read back by the audit as a block refinement (it is counted a raw
 edit: the gate governs proposals, the human writes the body); a per-call check that a callee in `calls` is called with the right arguments before
-the compiler is asked (the compiler answers it at derivation); the kinds `function`, `type`, `custom`.
+the compiler is asked (the compiler answers it at derivation); the kinds `type`, `custom`.
+
+## 12. The FUNCTION kind -- a function that may not be there yet (built 2026-10-19)
+
+**On the author's "continue"**, after the BLOCK kind. The fixtures came first, `fixtures_function.txt`, 20 of them (FN01-FN12, L19-L26), committed before
+the engine read them; its header is the design. `refine_check.py --block` runs them with the BLOCK kind's, in seconds.
+
+**The point declares; it does not attach.** `# <R:FUNCTION name="Round" params="n|m" calls="floor" writes="$nTotal">` alone on a line at the top level, among
+the statements. A BLOCK point is the body of a function a human wrote; a FUNCTION point is the function itself, signature declared and body to come, and
+the function may not exist. So the tag is carried by its own comment, as a rule's is, and the point's id (AT) is that comment's: it does not move when
+the function appears. `name` is the function's name, exact (D24), an identifier, and not a Ring builtin or `Main`, which Ring calls after the top level
+(F-60); `params` its parameter names, in order, none repeated; a function that exists must take exactly these (the signature is the human's), and a class
+or a function of another case in its way is a fault. `calls`, `writes`, `risk`, `floor` and `governed_by` are a BLOCK point's. A tag inside another
+definition or written as a trailing comment is a fault: the point stands alone, at the top level, in the statements before the first function.
+
+**The value** is `absent` while no top-level function has the name, and the digest of the body's canonical text once one does. FROM is that; TO is the
+body on one line, judged exactly as a BLOCK body is -- structural, constraint, governance, trust, derivation. **TO `absent` is refused**: a refinement
+does not delete a function, and a revert of its creation, which restores `absent` and deletes the function with its ids, is the way back.
+
+**The lowering.** A function that is there: BLOCK's. A function that is not: ONE `node.create` of the whole function, parameters and body, fresh ids.
+**Where it goes is the finding** (HF-98): after the last function and before the first class. Ring ends a function at the next function or class and at
+nothing else, so a function written beside its tag, among the top-level statements, would swallow every statement after it; and after a class it would
+be that class's method (F-21). The oracle pins it: FN03 prints `start` before and after, FN04 puts the function before a class and still prints 3.
+
+**The court.** 20 fixtures, 7 of them on the oracle and rnxc with those of the BLOCK kind; the body's locality counts a function that appears or goes as
+the one thing allowed to; the write surface gives a FUNCTION point the BLOCK shape (FROM exact, TO one line); and two controls added to the five:
+a new function written beside its tag is caught by 7 fixtures, a lift that checks no FUNCTION tag by 8.
+
+**Not built, named:** a FUNCTION point refined as a rule (`Round.params`, which would change a signature a human declared: a tier-4 act, if ever);
+a method (a function in a class); a function whose body is proposed with a comment; the kinds `type` and `custom`.

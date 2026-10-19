@@ -2937,7 +2937,7 @@ def stage24():
     fixtures written before the engine (v20/refine_check.py), by Softanza's own stzRefinableCode put the same proposals on the Ring++ package, by `rnxc graph`
     for a retargeted call, by the engine's constrained decoder for the grammar scoped to each program (the agent's write surface, charter 6.2), by controls
     that must fail, by Haro's own history (a drafted refinement still lands after the next human edit) and by a corpus of real Ring files refined at a literal."""
-    print('stage 24 -- refinement over the program graph: v20/refine_check.py (106 fixtures, the BLOCK kind among them, the live gate, rnxc graph, the scoped grammar, controls, history, a corpus)')
+    print('stage 24 -- refinement over the program graph: v20/refine_check.py (126 fixtures, the BLOCK and FUNCTION kinds among them, the live gate, rnxc graph, the scoped grammar, controls, history, a corpus)')
     failures = 0
     p = subprocess.run([sys.executable, REFINE_CHECK], capture_output=True, cwd=ROOT, timeout=3600)
     out = p.stdout.decode('utf-8', 'replace').replace('\r\n', '\n')

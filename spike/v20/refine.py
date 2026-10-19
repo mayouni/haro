@@ -35,9 +35,11 @@ SCRATCH = os.path.join(HERE, 'scratch')
 POSTURES = {'trusted': 3, 'external': 2, 'sandboxed': 1, 'llm': 0}          # StzRefinableCodeQ()._PostureRank
 LEVELS = {'advisory': 1, 'delegated': 2, 'autonomous': 3, 'emergencyoverride': 4}   # StzGovernanceQ()._AuthLevel
 KINDS = ('param', 'algo', 'pipeline', 'rule', 'lib', 'block', 'function', 'type', 'custom')
-BUILT = ('param', 'algo', 'pipeline', 'block')  # the kinds this rung builds; the others are declared and refused when proposed against
+BUILT = ('param', 'algo', 'pipeline', 'block', 'function')  # the kinds this rung builds; the others are declared and refused when proposed against
 RULE_ATTRS = ('min', 'max', 'options', 'risk', 'floor', 'governed_by')
 BLOCK_ATTRS = ('calls', 'writes', 'risk', 'floor', 'governed_by')   # what a BLOCK point declares besides its name
+FUNCTION_ATTRS = ('params',) + BLOCK_ATTRS                         # and a FUNCTION point: the signature is declared too
+BODY_KINDS = ('block', 'function')              # the kinds whose value is a function's body
 MUTATORS = ('add', 'insert', 'del', 'swap')     # the builtins that write into their first argument
 ROOT = os.path.abspath(os.path.join(HERE, '..', '..', '..'))
 RNXC = os.environ.get('RNXC') or os.path.join(ROOT, 'zig-out', 'bin', 'rnxc.exe')
@@ -333,11 +335,11 @@ def lift(g):
         for it, parent, bpath, lst, i, owner in walk_items(g):
             if it['k'] == 'comment':
                 if it.get('kind') == 'tag':
-                    yield it, {'id': it['_id'], 'path': []}, it['text'], lst, i
+                    yield it, {'id': it['_id'], 'path': []}, it['text'], lst, i, parent
             elif it.get('trail') and it['trail'].get('kind') == 'tag':
-                yield it, {'id': it['_id'], 'path': ['trail']}, it['trail']['text'], None, None
+                yield it, {'id': it['_id'], 'path': ['trail']}, it['trail']['text'], None, None, parent
 
-    for holder, carrier, text, lst, i in carriers():
+    for holder, carrier, text, lst, i, parent in carriers():
         t = parse_tag(text)
         if isinstance(t, str):
             err(t)
@@ -356,6 +358,18 @@ def lift(g):
                 err("rule '%s' has no expr" % name)
                 continue
             rules.append({'name': name, 'expr': attrs['expr'], 'message': attrs.get('message', ''), 'carrier': carrier})
+            continue
+        if kind == 'function':
+            # a FUNCTION point is attached to nothing: it DECLARES a function, which may not be there yet, so it is carried by its own comment
+            faults, fatal, existing = function_faults(g, name, t['attrs'], lst, parent)
+            for f in faults:
+                err(f)
+            if fatal:
+                continue
+            points.append({'name': name, 'kind': 'function', 'id': carrier['id'], 'carrier': carrier,
+                           'attrs': {k: v for k, v in attrs.items() if k != 'name'}, 'order': [a['key'] for a in t['attrs'] if a['key'] != 'name'],
+                           'form': 'function', 'path': [],
+                           'value': block_digest(body_text(existing.get('items', []))) if existing is not None else 'absent', 'built': True})
             continue
         # the statement a point is attached to
         if lst is None:
@@ -411,7 +425,7 @@ def lift(g):
             err("point '%s' risk '%s' is not a tier from 1 to 4" % (p['name'], a['risk']))
         if 'floor' in a and a['floor'] not in POSTURES:
             err("point '%s' floor '%s' is not a posture" % (p['name'], a['floor']))
-        if p['kind'] == 'block':
+        if p['kind'] in BODY_KINDS:
             for e in block_decl_errors(g, p):
                 err(e)
         if p['built']:
@@ -989,14 +1003,88 @@ def _text(x):
     return x['text'] if isinstance(x, dict) else x
 
 
+def function_faults(g, name, tag_attrs, lst, parent):
+    """What is wrong with a FUNCTION tag, and the top-level function it stands for. -> (faults, fatal, that function or None). Fatal faults leave no
+    point to speak of: a tag that is not in the right place, a name that is no function's, a class or a look-alike in the way. The others are faults and
+    the point stays, so a refinement answers for the rest."""
+    faults, fatal = [], False
+    attrs = {a['key']: a['val'] for a in tag_attrs}
+    order = [a['key'] for a in tag_attrs if a['key'] != 'name']
+    if lst is None:
+        return ["point '%s' is a trailing comment; a FUNCTION tag stands alone on its line" % name], True, None
+    if parent is not None:
+        return ["point '%s' stands inside another definition; a function is declared at the top level, among the statements" % name], True, None
+    if not IDENT_RE.match(name):
+        return ["point '%s' is not a function name" % name], True, None
+    if name.lower() in set(builtins()):
+        faults.append("'%s' is a Ring builtin" % name)
+    if name.lower() == 'main':
+        faults.append("'%s' is the function Ring calls after the top level (F-60)" % name)
+    for key in order:
+        if key not in FUNCTION_ATTRS:
+            faults.append("'%s' is not an attribute of a FUNCTION point" % key)
+    declared = names_of(attrs.get('params'))
+    seen = set()
+    for q in declared:
+        if not IDENT_RE.match(q):
+            faults.append("'%s' in params of '%s' is not a parameter name" % (q, name))
+        elif q.lower() in seen:
+            faults.append("params of '%s' repeat '%s'" % (name, q))
+        seen.add(q.lower())
+    existing = None
+    for it, par, *_ in walk_items(g):
+        if par is not None or it['k'] not in ('func', 'class') or ids.def_name(it).lower() != name.lower():
+            continue
+        if it['k'] == 'class':
+            return faults + ["'%s' is declared as a class" % name], True, None
+        if ids.def_name(it) != name:
+            return faults + ["the function is declared '%s', the point names '%s' (names are exact, D24)" % (ids.def_name(it), name)], True, None
+        existing = it
+    if existing is not None:
+        have = [q['name'] for q in existing.get('params', [])]
+        if have != declared:
+            faults.append("'%s' takes (%s), the point declares (%s)" % (name, ', '.join(have), ', '.join(declared)))
+    return faults, fatal, existing
+
+
+def point_function(g, p):
+    """The function a BLOCK or FUNCTION point stands for: the func under a BLOCK tag, the top-level func a FUNCTION point names -- None while it is not
+    there."""
+    if p['kind'] == 'block':
+        return find_item(g, p['id'])[0]
+    for it, par, *_ in walk_items(g):
+        if par is None and it['k'] == 'func' and ids.def_name(it) == p['name']:
+            return it
+    return None
+
+
+def create_function(g, p, items):
+    """The one node.create of a function that is not there: the signature the point declares, the body proposed. It goes AFTER the last function and
+    BEFORE the first class (F-21), never beside the tag: Ring ends a function at the next function or class and nowhere else, so a function written among
+    the top-level statements would swallow every statement after it (HF-73)."""
+    head = parse_text('func %s(%s)\n' % (p['name'], ', '.join(names_of(p['attrs'].get('params')))))
+    fn = ids.strip(head['items'][0])
+    fn['items'] = [ids.strip(st) for st in items]
+    top = g['items']
+    idx = next((i for i, it in enumerate(top) if it['k'] == 'class'), len(top))
+    return {'op': 'node.create', 'parent': None, 'block': 'items', 'index': idx, 'node': fn}
+
+
 def block_decl_errors(g, p):
-    """What a BLOCK point's tag may say: calls of what the program defines or Ring builds in, spelt as declared (D24); writes of a global, an
-    attribute or a parameter of its function."""
+    """What a BLOCK or FUNCTION point's tag may say about its body: calls of what the program defines or Ring builds in, spelt as declared (D24); writes
+    of a global, an attribute or a parameter of its function."""
     out, a = [], p['attrs']
-    for key in p['order']:
-        if key not in BLOCK_ATTRS:
-            out.append("'%s' is not an attribute of a BLOCK point" % key)
+    if p['kind'] == 'block':
+        for key in p['order']:
+            if key not in BLOCK_ATTRS:
+                out.append("'%s' is not an attribute of a BLOCK point" % key)
+        fn = find_item(g, p['id'])[0]
+        params, owner = [q['name'] for q in fn.get('params', [])], ids.def_name(fn)
+    else:
+        params, owner = names_of(a.get('params')), p['name']       # the tag's attributes were read by function_faults
     fns = {ids.def_name(it) for it, *_ in walk_items(g) if it['k'] in ('func', 'class')}
+    if p['kind'] == 'function':
+        fns.add(p['name'])                                          # a function the point declares is a function, there or not
     bis = set(builtins())
     for nm in names_of(a.get('calls')):
         if nm in fns or nm in bis:
@@ -1009,11 +1097,9 @@ def block_decl_errors(g, p):
             out.append("calls of '%s' names '%s'; the builtin is spelt '%s'" % (p['name'], nm, bhit[0]))
         else:
             out.append("'%s' in calls of '%s' is no function and no builtin" % (nm, p['name']))
-    fn = find_item(g, p['id'])[0]
-    params = [q['name'] for q in fn.get('params', [])]
     for nm in names_of(a.get('writes')):
         if not (nm.startswith('$') or nm.startswith('@') or nm in params):
-            out.append("'%s' in writes of '%s' is no global, no attribute and no parameter of %s()" % (nm, p['name'], ids.def_name(fn)))
+            out.append("'%s' in writes of '%s' is no global, no attribute and no parameter of %s()" % (nm, p['name'], owner))
     return out
 
 
@@ -1204,7 +1290,7 @@ def evaluate_block(model, s, ctx, out, p):
     """A sentence against a BLOCK point, through the same five stages."""
     g = model.g
     frm, to = s['from'], s['to']
-    fn = find_item(g, p['id'])[0]
+    fn = point_function(g, p)        # a BLOCK point's function is always there; a FUNCTION point's may not be
     revert = None
     if 'reverts' in s:
         revert = model.event(s['reverts'])
@@ -1226,6 +1312,8 @@ def evaluate_block(model, s, ctx, out, p):
             return out.reject('structural', "conflict: '%s' is %s now, event %d left it at %s" % (p['name'], p['value'], s['reverts'], revert['value_to']))
         tx = copy.deepcopy(revert['inverse'])
     else:
+        if p['kind'] == 'function' and to.strip() == 'absent':
+            return out.reject('structural', "a refinement does not delete a function: 'absent' is the state before one is made, and a revert of its creation is the way back")
         if DIGEST_RE.match(to):
             return out.reject('structural', "TO is a digest, which only a revert's TO is: a body is proposed as its statements")
         try:
@@ -1236,14 +1324,15 @@ def evaluate_block(model, s, ctx, out, p):
         if why:
             return out.reject('structural', why)
         items = body['items']
-        tx = lower_block(fn, items)
+        tx = [create_function(g, p, items)] if fn is None else lower_block(fn, items)
         if not tx:
             return out.reject('structural', "nothing to refine: '%s' is %s already" % (p['name'], p['value']))
     out.passed('structural')
     if revert is not None or 'constraint' in SKIP_STAGES:
         out.skipped('constraint')
     else:
-        why = block_constraint(p, fn, items)
+        sig = fn if fn is not None else {'params': [{'name': q} for q in names_of(p['attrs'].get('params'))]}
+        why = block_constraint(p, sig, items)
         if why:
             return out.reject('constraint', why)
         out.passed('constraint')
@@ -1259,7 +1348,8 @@ def evaluate_block(model, s, ctx, out, p):
         return out.reject('structural', 'the refined program does not read back as itself')
     out.tx, out.inverse = tx, inv
     out.value_from = p['value']
-    out.value_to = block_digest(body_text(find_item(new, p['id'])[0].get('items', [])))
+    after = point_named(lift(new), p['name'])
+    out.value_to = after['value'] if after else ''
     gname = p['attrs'].get('governed_by')
     if 'governance' in SKIP_STAGES or not gname:
         out.skipped('governance')
@@ -1363,7 +1453,7 @@ def evaluate(model, s, ctx, readback=True):
     attr = s['attr']
     if attr is not None and attr not in RULE_ATTRS:
         return out.reject('structural', "'%s' is not an attribute of a point's rule (%s)" % (attr, ', '.join(RULE_ATTRS)))
-    if p['kind'] == 'block' and attr is None:
+    if p['kind'] in BODY_KINDS and attr is None:
         return evaluate_block(model, s, ctx, out, p)
     frm, to = s['from'], s['to']
     revert = None
@@ -1708,7 +1798,7 @@ def audit(model, new_text, posture='trusted', author='text-edit'):
         q = by_id.get(p['id'])
         if q is None or q['kind'] != p['kind'] or q['name'] != p['name']:
             continue
-        if q['value'] != p['value'] and p['kind'] != 'block':     # a body edited by hand is the human's: a raw edit, not a sentence's
+        if q['value'] != p['value'] and p['kind'] not in BODY_KINDS:   # a body edited by hand is the human's: a raw edit, not a sentence's
             sentences.append((p['name'], p['kind'], p['value'], q['value']))
         for k in set(p['attrs']) | set(q['attrs']):
             if k in RULE_ATTRS and p['attrs'].get(k, '') != q['attrs'].get(k, ''):

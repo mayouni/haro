@@ -1405,6 +1405,12 @@ comments), and judged at derivation by `rnxc check`, which fails closed on a pro
 text; the lowering keeps every statement that stays, with its id, and is node.delete and node.create for the rest -- the first sentences that
 reach those two primitives. Fixtures first (`fixtures_block.txt`, 15), five controls; guard stage 24 PASS, 106 fixtures, 210 steps, 145 s.
 
+**The FUNCTION kind, built 2026-10-19** on the author's "continue" (`spike/v20/GRAMMAR.md` section 12, HF-98, HF-99): a point that DECLARES a function --
+its exact name, its parameters, what its body may call and write -- and the agent supplies the body; the function may not exist yet. The value is
+`absent`, or the body's digest; a new function is one node.create, placed after the last function and before the first class, because Ring ends a
+function at the next function or class and nowhere else; a refinement never deletes one (a revert of its creation does). Fixtures first
+(`fixtures_function.txt`, 20, one corrected by the oracle: `Get` is a Ring keyword, F-20); guard stage 24 PASS, 126 fixtures, 234 steps, 16 controls.
+
 ## Rung 6 of the code-graph memo -- a second face, in Python's shape, as a printer (Haro v0.21) -- 2026-10-19
 
 **On the author's "go ahead with rung 6"** (2026-10-19). Rung 18's graph printed in Python's shape with one meaning, Ring's: what reads the same is spelt
@@ -1528,9 +1534,9 @@ whole guard re-run on the renamed tree: 28 + 30 + 27 + 23, 117 of 120, 32 of 32,
    scan (1,556 differences, none unexplained); not built: `new` edges, references, scope; rung 5 (refinement over
    L1) is the haro-charter desk's and next in the memo.
 23. ~~Rung 5 of the code-graph memo~~ -- built 2026-10-05, finished 2026-10-19: refinement over L1 (Haro v0.20), guard
-   stage 24; the BLOCK kind built 2026-10-19 (an agent writes a function's body, HF-95 to HF-97); open: the kinds `function`,
-   `type`, `custom`, a BLOCK point's calls and writes refined as rules, and a write surface for a program larger than the decoder
-   holds (HF-87).
+   stage 24; the BLOCK and FUNCTION kinds built 2026-10-19 (an agent writes a function's body, then a whole function, HF-95 to
+   HF-99); open: the kinds `type` and `custom`, a point's calls and writes refined as rules, methods, and a write surface for a
+   program larger than the decoder holds (HF-87).
 24. ~~Rung 6 of the code-graph memo~~ -- built 2026-10-19: a second face, Python-shaped, as a printer (Haro v0.21), guard stage 25;
    K3 measured and not met (HF-94), so rung 7 (a reader of the face) stays open; K4 and the 20-task protocol need that reader and a model run.
 18. The forge as an `rnxc` verb (the ringpp session's `src/`, routed); the

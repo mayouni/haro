@@ -68,7 +68,7 @@ oracle: start | start
 --- program
 # <R:FUNCTION name="Round" params="n" calls="floor">
 o = new Box
-? o.Get()
+? o.Size()
 
 func Gross(nNet)
 	return nNet
@@ -76,14 +76,14 @@ func Gross(nNet)
 class Box
 	nCount = 3
 
-	func Get()
+	func Size()
 		return This.nCount
 --- do
 DEFINE REFINE make_round AS ( TARGET "Round", KIND function, FROM "absent", TO "return floor(n + 0.5)", AUTHOR "mansour", POSTURE trusted, REASON "tax is whole" ) => admitted tx=node.create
 --- text
 # <R:FUNCTION name="Round" params="n" calls="floor">
 o = new Box
-? o.Get()
+? o.Size()
 
 func Gross(nNet)
 	return nNet
@@ -94,7 +94,7 @@ func Round(n)
 class Box
 	nCount = 3
 
-	func Get()
+	func Size()
 		return This.nCount
 --- run
 oracle: 3 | 3
