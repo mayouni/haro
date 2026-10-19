@@ -1,0 +1,300 @@
+~~~ The fixtures of the METHOD kind (rung 5 of the code-graph memo, Haro v0.20): an agent creates a method a human declared inside its class, or fills in the
+~~~ body of one that is there. Hand-composed BEFORE the engine reads them. Same sections as fixtures.txt.
+~~~
+~~~ WHY A KIND OF ITS OWN. A method is not a function in a class: it has `This`, the class's attributes, dispatch by receiver and inheritance, and a few
+~~~ names Ring calls by itself. Softanza is 34,672 methods against 9,764 functions (rnxc graph), so without this kind FUNCTION reaches a fifth of the estate.
+~~~
+~~~ THE POINT. `<R:METHOD name="Grow" params="n" calls="Size" writes="@nCount">` stands INSIDE the class, among its members, with a member below it. The
+~~~ class is the one the tag stands in. Where a tag may stand is a finding (HF-100): before the first method, between two, among the attributes and after
+~~~ `private` all keep it in the class, but a tag after the LAST member ends the class and lands at the top level, where the printer moves it -- so that is
+~~~ a fault, by name. Everything else is the FUNCTION kind's: `name` exact and an identifier, `params` the signature (a method that exists takes exactly
+~~~ these; no `self`, Ring's `This` is implicit), `calls`, `writes`, `risk`, `floor`, `governed_by`; the value is `absent` or the body's digest; TO is the
+~~~ body on one line; TO `absent` is refused; a revert of the creation deletes the method; the allowlists are refinable.
+~~~
+~~~ NAMES A METHOD MAY NOT TAKE, as faults of the declaration: Ring calls these itself, so creating one changes what other code does without anyone naming it
+~~~   `operator` (F-69: one method for every operator)   BraceStart, BraceEnd, BraceError, BraceExprEval, BraceNewLine (called on a brace block)
+~~~   get<x> and set<x> where the class assigns an attribute <x> (F-73: `o.x` calls the getter, `o.x = v` the setter)
+~~~   a builtin, or a top-level function: inside the class's methods a bare call goes to the class's own method first, so the new one would SHADOW it
+~~~ A human who wants one of these writes it; a BLOCK point still refines the body of one that exists.
+~~~
+~~~ NAMES RING'S PARSER DOES NOT TAKE, for a method, a function and a parameter alike (HF-101). tree-sitter-ring, the compiler's parser, reads `func Get()` and
+~~~ `func Next()` without a word; Ring refuses them (C6, F-20), and a refined program must still be Ring's text. The rule is Ring's own and is read from the
+~~~ vendored scanner (RING_KEYWORDS) and parser (ring_parser_processkeywords): a keyword is a name only where the parser turns it into an identifier --
+~~~ TO IN FROM STEP BUT OK ON CASE OFF CATCH DONE AGAIN ELSE OTHER by context, THIS SELF SUPER MAIN INIT OPERATOR the brace hooks and the RINGVM ones always.
+~~~ GET, PUT, GIVE, SEE, NEXT, IF and the rest are not names.
+~~~
+~~~ THE LOWERING. A method that is there: BLOCK's. One that is not: ONE node.create of the whole method into the class's members, AFTER the last of them and
+~~~ BEFORE the `private` marker if there is one -- `private` is a flat marker in the graph, so a method placed after it would be private without anyone saying so.
+
+=== MT01 a METHOD point in the lift: a method that is not there yet
+--- program
+o = new Box
+? o.Size()
+
+class Box
+	@nCount = 3
+
+	# <R:METHOD name="Grow" params="n" calls="Size" writes="@nCount">
+	func Size()
+		return @nCount
+--- lift
+Grow method @5 = absent params=n calls=Size writes=@nCount
+
+=== MT02 and one that is: the value is its body's digest
+--- program
+class Box
+	@nCount = 3
+
+	# <R:METHOD name="Grow" params="n" writes="@nCount">
+	func Grow(n)
+		@nCount += n
+
+	func Size()
+		return @nCount
+--- lift
+Grow method @3 = sha:ef9ef3d39a9d params=n writes=@nCount
+
+=== MT03 the first body of a method that is not there: ONE node.create, after the last member
+--- program
+o = new Box
+? o.Size()
+
+class Box
+	@nCount = 3
+
+	# <R:METHOD name="Grow" params="n" writes="@nCount">
+	func Size()
+		return @nCount
+--- do
+DEFINE REFINE make_grow AS ( TARGET "Grow", KIND method, FROM "absent", TO "@nCount += n", AUTHOR "mansour", POSTURE trusted, REASON "a counter grows" ) => admitted tx=node.create
+--- text
+o = new Box
+? o.Size()
+
+class Box
+	@nCount = 3
+
+	# <R:METHOD name="Grow" params="n" writes="@nCount">
+	func Size()
+		return @nCount
+
+	func Grow(n)
+		@nCount += n
+--- run
+oracle: 3 | 3
+
+=== MT04 a new method goes before `private`, so it is as public as the human's own
+~~~ `private` is a flat marker among the class's members; a method after it would be private without anyone having said so
+--- program
+class Box
+	@nCount = 3
+
+	# <R:METHOD name="Grow" params="n" writes="@nCount">
+	func Size()
+		return @nCount
+
+	private
+
+	func Hidden()
+		return 1
+--- do
+DEFINE REFINE make_grow AS ( TARGET "Grow", KIND method, FROM "absent", TO "@nCount += n", AUTHOR "mansour", POSTURE trusted, REASON "a counter grows" ) => admitted tx=node.create
+--- text
+class Box
+	@nCount = 3
+
+	# <R:METHOD name="Grow" params="n" writes="@nCount">
+	func Size()
+		return @nCount
+
+	func Grow(n)
+		@nCount += n
+
+	private
+
+	func Hidden()
+		return 1
+
+=== MT05 it goes into the class its tag stands in, and not the class after it
+--- program
+class Box
+	@nCount = 3
+
+	# <R:METHOD name="Grow" params="n" writes="@nCount">
+	func Size()
+		return @nCount
+
+class Crate
+	func Weight()
+		return 7
+--- do
+DEFINE REFINE make_grow AS ( TARGET "Grow", KIND method, FROM "absent", TO "@nCount += n", AUTHOR "mansour", POSTURE trusted, REASON "a counter grows" ) => admitted tx=node.create
+--- text
+class Box
+	@nCount = 3
+
+	# <R:METHOD name="Grow" params="n" writes="@nCount">
+	func Size()
+		return @nCount
+
+	func Grow(n)
+		@nCount += n
+
+class Crate
+	func Weight()
+		return 7
+
+=== MT06 a method body is held to what its point names -- a method it calls, an attribute it writes
+~~~ `This.Size()` is a call of Size; `@nCount` is a write; builtins are named like everything else
+--- program
+class Box
+	@nCount = 3
+	@nOther = 0
+
+	# <R:METHOD name="Grow" params="n" calls="Size" writes="@nCount">
+	func Size()
+		return @nCount
+--- do
+DEFINE REFINE builtin AS ( TARGET "Grow", KIND method, FROM "absent", TO "@nCount += ceil(n)", AUTHOR "aicha", POSTURE trusted, REASON "try" ) => rejected constraint 'ceil' is not a call 'Grow' allows
+DEFINE REFINE other_attr AS ( TARGET "Grow", KIND method, FROM "absent", TO "@nOther = n", AUTHOR "aicha", POSTURE trusted, REASON "try" ) => rejected constraint writes @nOther, which 'Grow' does not allow
+DEFINE REFINE make AS ( TARGET "Grow", KIND method, FROM "absent", TO "@nCount += n", AUTHOR "mansour", POSTURE trusted, REASON "grow" ) => admitted tx=node.create
+DEFINE REFINE via_this AS ( TARGET "Grow", KIND method, FROM "sha:ef9ef3d39a9d", TO "@nCount += This.Size() + n", AUTHOR "mansour", POSTURE trusted, REASON "grow from the size" ) => admitted tx=node.delete,node.create
+--- text
+class Box
+	@nCount = 3
+	@nOther = 0
+
+	# <R:METHOD name="Grow" params="n" calls="Size" writes="@nCount">
+	func Size()
+		return @nCount
+
+	func Grow(n)
+		@nCount += This.Size() + n
+
+=== MT07 the way back from a creation is a revert, and it deletes the method with its ids
+--- program
+class Box
+	@nCount = 3
+
+	# <R:METHOD name="Grow" params="n" writes="@nCount">
+	func Size()
+		return @nCount
+--- do
+DEFINE REFINE make AS ( TARGET "Grow", KIND method, FROM "absent", TO "@nCount += n", AUTHOR "mansour", POSTURE trusted, REASON "grow" ) => admitted tx=node.create
+DEFINE REFINE delete AS ( TARGET "Grow", KIND method, FROM "sha:ef9ef3d39a9d", TO "absent", AUTHOR "aicha", POSTURE trusted, REASON "try" ) => rejected structural does not delete
+DEFINE REFINE undo AS ( TARGET "Grow", KIND method, FROM "sha:ef9ef3d39a9d", TO "absent", AUTHOR "mansour", POSTURE trusted, REASON "back", REVERTS "1" ) => admitted tx=node.delete
+
+=== MT08 a BLOCK point already refines the body of a method that is there, and counts `This.x` as an attribute write
+--- program
+class Box
+	@nCount = 3
+	@nOther = 0
+
+	# <R:BLOCK name="grow" writes="@nCount">
+	func Grow(n)
+		@nCount += n
+--- do
+DEFINE REFINE other AS ( TARGET "grow", KIND block, FROM "sha:ef9ef3d39a9d", TO "This.nOther = n", AUTHOR "aicha", POSTURE trusted, REASON "try" ) => rejected constraint writes
+DEFINE REFINE twice AS ( TARGET "grow", KIND block, FROM "sha:ef9ef3d39a9d", TO "@nCount += n * 2", AUTHOR "mansour", POSTURE trusted, REASON "grow twice as fast" ) => admitted tx=node.delete,node.create
+--- text
+class Box
+	@nCount = 3
+	@nOther = 0
+
+	# <R:BLOCK name="grow" writes="@nCount">
+	func Grow(n)
+		@nCount += n * 2
+
+=== L28 a METHOD tag stands inside a class, with a member below it
+~~~ after the last member the tag ends the class and lands at the top level, where the printer moves it -- so the lift names it
+--- program
+# <R:METHOD name="Grow" params="n">
+? "start"
+
+class Box
+	@nCount = 3
+
+	func Size()
+		return @nCount
+--- lift
+error point 'Grow' stands outside a class
+
+=== L29 a METHOD tag is not a FUNCTION tag, nor inside a function
+--- program
+class Box
+	# <R:FUNCTION name="Round" params="n">
+	func Size()
+		return 1
+
+	func Other()
+		# <R:METHOD name="Grow" params="n">
+		return 2
+--- lift
+error point 'Round' stands inside another definition
+error point 'Grow' stands inside a function
+
+=== L30 a method's signature and name: exact, once, and an identifier
+--- program
+class Box
+	# <R:METHOD name="Grow" params="n">
+	func Grow(a, b)
+		return a
+
+	# <R:METHOD name="grow2" params="n">
+	func Grow2(n)
+		return n
+
+	# <R:METHOD name="round-up" params="n">
+	# <R:METHOD name="Twice" params="n|n">
+	func Size()
+		return 1
+--- lift
+error 'Grow' takes (a, b), the point declares (n)
+error the method is declared 'Grow2', the point names 'grow2'
+error point 'round-up' is not a method name
+error params of 'Twice' repeat 'n'
+
+=== L31 names Ring calls by itself are not names an agent creates -- and a method must not shadow what the class's bare calls reach
+--- program
+func Tax(n)
+	return n * 0.2
+
+class Box
+	size = 1
+	# <R:METHOD name="operator" params="cOp|x">
+	# <R:METHOD name="BraceStart">
+	# <R:METHOD name="getsize">
+	# <R:METHOD name="setsize" params="v">
+	# <R:METHOD name="len" params="x">
+	# <R:METHOD name="Tax" params="n">
+	# <R:METHOD name="Grow" params="n">
+	func One()
+		return 1
+--- lift
+error 'operator' is called by Ring itself
+error 'BraceStart' is called by Ring itself
+error 'getsize' is called by Ring itself
+error 'setsize' is called by Ring itself
+error 'len' shadows the builtin
+error 'Tax' shadows the function
+
+=== L32 a name Ring's parser does not take as an identifier is not a name -- for a function, a method and a parameter
+~~~ `Ok` is a keyword the parser turns into an identifier here, so it is a name; `Get`, `Put` and `if` are not
+--- program
+# <R:FUNCTION name="Put" params="n">
+# <R:FUNCTION name="Trunc" params="if">
+? "start"
+
+class Box
+	# <R:METHOD name="Get">
+	# <R:METHOD name="Ok">
+	func Size()
+		return 1
+--- lift
+Put function @1 = absent params=n
+Trunc function @2 = absent params=if
+Get method @5 = absent
+Ok method @6 = absent
+error 'Put' is a Ring keyword
+error 'if' in params of 'Trunc' is a Ring keyword
+error 'Get' is a Ring keyword
