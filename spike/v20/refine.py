@@ -1,0 +1,1435 @@
+"""refine.py -- refinement over the program graph of rung 18 (Haro v0.20, the twentieth rung).
+
+    text --l1--> graph (rung 18) --ids--> graph with ids (rung 19)
+         --lift--> the refinement points the program declares (a `<R:KIND ...>` tag in a comment: the lift for foreign code, charter 6.1)
+    a SENTENCE (rfn's shape: TARGET KIND FROM TO AUTHOR POSTURE REASON, and the optional AT CASCADE REVERTS)
+         --gate--> structural, constraint, governance, trust, derivation (stzRefinableCode's order); the first stage to fail ends it
+         --lower--> a transaction of RCP's twelve primitives over the graph, each with the inverse captured BEFORE it lands
+         --apply--> a new graph, whose canonical text is the new program; the diff is the printer's: print(old) against print(new)
+
+The agent never edits text: its only write surface is a sentence against a point, and the only way a sentence changes a program is through
+the gate. A refinement answers for the rules of the point it touched -- its own bounds and options, and every RULE that names it -- and for
+nothing else, so a program a text edit left inconsistent can be repaired by a refinement, and refined elsewhere meanwhile. A human edit made as TEXT is read back (`audit`) as the refinements it amounts to and judged by the same gate.
+
+    Model(text, ctx)           a program, its ids, its event log
+    Model.refine(sentence)     one proposal through the gate; the outcome is also an event in the log
+    Model.edit(text)           a human edit as text: ids carried by rung 19's matcher, an event in the log
+    Model.revert(n, ...)       a refinement with REVERTS n, which is how a revert is written: its own event, gated like any other
+    lift(g)                    the points, the rules and the faults of a graph
+    apply_tx(g, tx)            atomic: all the primitives or none; -> (new graph, the inverse transaction)
+    audit(model, text, ...)    what a text edit amounts to, each refinement judged
+    replay(text, log, ctx)     the log run again from the base text: the same verdicts, the same final text
+    commutes(model, s1, s2)    RCP's predicate over the two sentences' footprints
+The ten pieces of the model that are not in the graph (governance tables, the posture ranks) are CONTEXT, passed in; what is in the text is the
+point, its bounds, its options, its risk tier, its trust floor and the governance it is under -- all of it refinable, and all of it versioned.
+"""
+import copy, difflib, hashlib, json, os, re, sys
+
+HERE = os.path.dirname(os.path.abspath(__file__))
+sys.path.insert(0, os.path.join(HERE, '..', 'v18'))
+sys.path.insert(0, os.path.join(HERE, '..', 'v19'))
+import l1, ids
+
+SCRATCH = os.path.join(HERE, 'scratch')
+
+POSTURES = {'trusted': 3, 'external': 2, 'sandboxed': 1, 'llm': 0}          # stzRefinableCode._PostureRank
+LEVELS = {'advisory': 1, 'delegated': 2, 'autonomous': 3, 'emergencyoverride': 4}   # stzGovernance._AuthLevel
+KINDS = ('param', 'algo', 'pipeline', 'rule', 'lib', 'block', 'function', 'type', 'custom')
+BUILT = ('param', 'algo', 'pipeline')           # the kinds this rung builds; the others are declared and refused when proposed against
+RULE_ATTRS = ('min', 'max', 'options', 'risk', 'floor', 'governed_by')
+STAGES = ('structural', 'constraint', 'governance', 'trust', 'derivation')
+RULE_FLOOR = 'trusted'                          # the posture a refinement of a point's own RULES must come from, whatever the point's floor says
+WIDEN_TIER = 4                                  # widening a rule is the heaviest act there is
+SEATS = ('TARGET', 'KIND', 'FROM', 'TO', 'AUTHOR', 'POSTURE', 'REASON', 'AT', 'CASCADE', 'REVERTS')
+REQUIRED = ('TARGET', 'KIND', 'FROM', 'TO', 'AUTHOR', 'POSTURE', 'REASON')
+NUM_RE = re.compile(r'^-?[0-9]+(\.[0-9]+)?$')
+IDENT_RE = re.compile(r'^[A-Za-z_][A-Za-z0-9_]*$')
+NAME_RE = re.compile(r'^[A-Za-z_][A-Za-z0-9_-]*$')
+
+# switches the controls of the court turn (a gate that skips a stage, an apply that edits in place), never the real thing
+SKIP_STAGES = set()
+INPLACE = False
+
+
+class TxError(Exception):
+    pass
+
+
+class Unreadable(Exception):
+    pass
+
+
+# ---- text and graph -------------------------------------------------------------------------------------------------------------------
+
+_n = [0]
+_READ = {}
+
+
+def parse_text(text):
+    """Ring text (latin-1: one char a byte) to its graph, through the compiler's own parser. Raises Unreadable."""
+    key = hashlib.sha256(text.encode('latin-1')).hexdigest()
+    if key in _READ:
+        return copy.deepcopy(_READ[key])
+    os.makedirs(SCRATCH, exist_ok=True)
+    _n[0] += 1
+    p = os.path.join(SCRATCH, 'r%d_%d.ring' % (os.getpid(), _n[0]))
+    open(p, 'wb').write(text.encode('latin-1'))
+    try:
+        g, why = l1.parse_ring(p)
+    finally:
+        try:
+            os.remove(p)
+        except OSError:
+            pass
+    if g is None:
+        raise Unreadable(why)
+    _READ[key] = copy.deepcopy(g)
+    return g
+
+
+def new_graph(text):
+    g = parse_text(text)
+    ids.number(g)
+    return g
+
+
+def text_of(g):
+    return l1.print_ring(g)
+
+
+def digest(text):
+    return hashlib.sha256(text.encode('latin-1')).hexdigest()[:16]
+
+
+def get_path(node, path):
+    for p in path:
+        node = node[p]
+    return node
+
+
+def walk_items(g):
+    """Every item with where it stands: (item, parent item or None, path of its block inside the parent, its list, its index, owner)."""
+    out = []
+
+    def go(lst, parent, bpath, owner, in_class):
+        for i, it in enumerate(lst):
+            out.append((it, parent, bpath, lst, i, owner))
+            o2, c2 = owner, in_class
+            k = it['k']
+            if k == 'class':
+                o2, c2 = ids.def_name(it), True
+            elif k == 'func':
+                o2 = (owner + '.' + ids.def_name(it)) if in_class else ids.def_name(it)
+            for path, b in ids.blocks(it):
+                go(b, it, path, o2, c2)
+    go(g['items'], None, ('items',), '<top>', False)
+    return out
+
+
+def find_item(g, ident):
+    for it, parent, bpath, lst, i, owner in walk_items(g):
+        if it.get('_id') == ident:
+            return it, parent, bpath, lst, i
+    raise TxError('no item %s' % ident)
+
+
+# ---- tags ---------------------------------------------------------------------------------------------------------------------------
+
+_KIND_RE = re.compile(r'<R:([A-Za-z]+)')
+_ATTR_RE = re.compile(r'(\s+)([A-Za-z_][A-Za-z0-9_]*)="([^"]*)"')
+_CLOSE_RE = re.compile(r'\s*>')
+
+
+def parse_tag(text):
+    """The first `<R:KIND key="value" ...>` in a comment: None when there is none, an error string when it is malformed, else a dict with the
+    spans of every attribute, so an edit changes those bytes and no others."""
+    i = text.find('<R:')
+    if i < 0:
+        return None
+    m = _KIND_RE.match(text, i)
+    if not m:
+        return 'malformed tag: no kind'
+    pos, attrs, seen = m.end(), [], set()
+    while True:
+        m2 = _ATTR_RE.match(text, pos)
+        if not m2:
+            break
+        key = m2.group(2).lower()
+        if key in seen:
+            return 'malformed tag: attribute %s twice' % key
+        seen.add(key)
+        attrs.append({'key': key, 'val': m2.group(3), 'start': m2.start(), 'end': m2.end(), 'vstart': m2.start(3), 'vend': m2.end(3)})
+        pos = m2.end()
+    if not _CLOSE_RE.match(text, pos):
+        return 'malformed tag: not closed'
+    return {'kind': m.group(1).lower(), 'attrs': attrs, 'attrs_end': pos}
+
+
+def tag_get(text, key):
+    t = parse_tag(text)
+    if not isinstance(t, dict):
+        return None
+    for a in t['attrs']:
+        if a['key'] == key:
+            return a['val']
+    return None
+
+
+def tag_set(text, key, val):
+    """The comment with `key` set to `val`: in place when it is there, before the closing `>` when it is not."""
+    t = parse_tag(text)
+    for a in t['attrs']:
+        if a['key'] == key:
+            return text[:a['vstart']] + val + text[a['vend']:]
+    return text[:t['attrs_end']] + ' %s="%s"' % (key, val) + text[t['attrs_end']:]
+
+
+def tag_del(text, key):
+    t = parse_tag(text)
+    for a in t['attrs']:
+        if a['key'] == key:
+            return text[:a['start']] + text[a['end']:]
+    return text
+
+
+def tag_index(text, key):
+    t = parse_tag(text)
+    for n, a in enumerate(t['attrs']):
+        if a['key'] == key:
+            return n
+    return None
+
+
+def tag_insert(text, key, val, index):
+    """`key="val"` placed as the index-th attribute (the end when index is None or too large): what a delete's inverse needs to restore the bytes."""
+    t = parse_tag(text)
+    attrs = t['attrs']
+    if index is None or index >= len(attrs):
+        return text[:t['attrs_end']] + ' %s="%s"' % (key, val) + text[t['attrs_end']:]
+    at = attrs[index]['start']
+    return text[:at] + ' %s="%s"' % (key, val) + text[at:]
+
+
+# ---- literals ---------------------------------------------------------------------------------------------------------------------------
+
+def to_literal(value):
+    """The text of a Ring string holding `value`, or None. Ring has no string escapes (F-55), so the quote must be one the value does not hold."""
+    if '\n' in value or '\r' in value:
+        return None
+    for q in ('"', "'", '`'):
+        if q not in value:
+            return q + value + q
+    return None
+
+
+def unquote(lit):
+    return lit[1:-1]
+
+
+def literal_node(text):
+    """A literal's text -- a number, a signed number or a quoted string -- as a graph node."""
+    if text[:1] in ('"', "'", '`'):
+        return {'k': 'str', 'text': text}
+    if text.startswith('-'):
+        return {'k': 'un', 'op': '-', 'e': {'k': 'num', 'text': text[1:]}}
+    return {'k': 'num', 'text': text}
+
+
+def literal_text(node):
+    if node['k'] == 'num':
+        return node['text']
+    if node['k'] == 'un' and node.get('op') == '-' and node['e']['k'] == 'num':
+        return '-' + node['e']['text']
+    if node['k'] == 'str':
+        return node['text']
+    return None
+
+
+def num(s):
+    return float(s)
+
+
+# ---- the lift -----------------------------------------------------------------------------------------------------------------------------
+
+def resolve_target(kind, it):
+    """What a point of this kind is attached to inside the statement it stands on: (form, path, value) or an error text."""
+    k = it['k']
+    if kind == 'lib':
+        if k == 'load' and it.get('path') and it['path']['k'] == 'str':
+            return 'load', ['path'], unquote(it['path']['text'])
+        return 'the statement is not a load'
+    if kind == 'pipeline':
+        if k == 'expr' and it['e']['k'] == 'assign' and it['e'].get('op') == '=' and it['e']['r']['k'] == 'list':
+            lst = it['e']['r']
+            if all(x['k'] == 'str' for x in lst.get('items', [])):
+                return 'list', ['e', 'r'], '|'.join(unquote(x['text']) for x in lst.get('items', []))
+            return 'a stage of the list is not a string literal'
+        return 'is not a list of string literals'
+    if kind in ('param', 'algo'):
+        if k == 'expr' and it['e']['k'] == 'assign' and it['e'].get('op') == '=':
+            r = it['e']['r']
+            lt = literal_text(r)
+            if lt is not None:
+                if r['k'] == 'str':
+                    return 'str', ['e', 'r'], unquote(lt)
+                if kind == 'param':
+                    return ('neg' if lt.startswith('-') else 'num'), ['e', 'r'], lt
+            if kind == 'algo' and r['k'] == 'call' and r['callee']['k'] == 'id':
+                return 'call', ['e', 'r'], r['callee']['text']
+        if kind == 'algo' and k == 'expr' and it['e']['k'] == 'call' and it['e']['callee']['k'] == 'id':
+            return 'call', ['e'], it['e']['callee']['text']
+        return 'target is not a literal' if kind == 'param' else 'target is neither a string literal nor a call'
+    return 'kind is not built'
+
+
+def own_rule_error(p):
+    """Does the point's value satisfy the point's own rules? None, or what is wrong."""
+    v, a = p['value'], p['attrs']
+    if p['kind'] == 'param' and p['form'] in ('num', 'neg'):
+        if any(k in a and not NUM_RE.match(a[k]) for k in ('min', 'max')):
+            return None             # reported on its own: the bounds are not numbers
+        if 'min' in a and num(v) < num(a['min']):
+            return "point '%s' value %s is below its own min %s" % (p['name'], v, a['min'])
+        if 'max' in a and num(v) > num(a['max']):
+            return "point '%s' value %s is above its own max %s" % (p['name'], v, a['max'])
+    if p['kind'] == 'algo' and 'options' in a:
+        if v not in a['options'].split('|'):
+            return "point '%s' value '%s' is not in its own options %s" % (p['name'], v, a['options'])
+    if p['kind'] == 'pipeline':
+        stages = v.split('|') if v else []
+        opts = a.get('options', '').split('|')
+        for s in stages:
+            if s not in opts:
+                return "point '%s' stage '%s' is not in its own options %s" % (p['name'], s, a['options'])
+        for s in set(stages):
+            if stages.count(s) > 1:
+                return "point '%s' stage '%s' appears twice" % (p['name'], s)
+    return None
+
+
+def lift(g):
+    """The refinement points a program declares: {'points': [...], 'rules': [...], 'errors': [...]}. A fault is an error. A declaration that cannot be read
+    (a tag with no name, a duplicate, an orphan, a rule over an unknown point) stops the gate: it fails closed. An error flagged `own` -- a value outside
+    its own bounds or options -- is a state, not a fault, and does not."""
+    points, rules, errors = [], [], []
+    by_item = {}
+
+    def err(msg, own=False):
+        errors.append({'msg': msg, 'own': own})
+
+    def carriers():
+        for it, parent, bpath, lst, i, owner in walk_items(g):
+            if it['k'] == 'comment':
+                if it.get('kind') == 'tag':
+                    yield it, {'id': it['_id'], 'path': []}, it['text'], lst, i
+            elif it.get('trail') and it['trail'].get('kind') == 'tag':
+                yield it, {'id': it['_id'], 'path': ['trail']}, it['trail']['text'], None, None
+
+    for holder, carrier, text, lst, i in carriers():
+        t = parse_tag(text)
+        if isinstance(t, str):
+            err(t)
+            continue
+        kind = t['kind']
+        attrs = {a['key']: a['val'] for a in t['attrs']}
+        if kind not in KINDS:
+            err("unknown kind '%s'" % kind)
+            continue
+        name = attrs.get('name')
+        if not name or not NAME_RE.match(name):
+            err('malformed tag: no name' if not name else "malformed tag: name '%s'" % name)
+            continue
+        if kind == 'rule':
+            if 'expr' not in attrs:
+                err("rule '%s' has no expr" % name)
+                continue
+            rules.append({'name': name, 'expr': attrs['expr'], 'message': attrs.get('message', ''), 'carrier': carrier})
+            continue
+        # the statement a point is attached to
+        if lst is None:
+            target = holder
+        else:
+            j = i + 1
+            while j < len(lst) and lst[j]['k'] == 'comment':
+                j += 1
+            if j >= len(lst):
+                err("orphan tag '%s'" % name)
+                continue
+            target = lst[j]
+        r = resolve_target(kind, target)
+        if isinstance(r, str):
+            if kind in BUILT or kind == 'lib':
+                err("point '%s' %s" % (name, r))
+                continue
+            form, path, value = kind, [], ''
+        else:
+            form, path, value = r
+        pt = {'name': name, 'kind': kind, 'id': target['_id'], 'carrier': carrier, 'attrs': {k: v for k, v in attrs.items() if k != 'name'},
+              'order': [a['key'] for a in t['attrs'] if a['key'] != 'name'], 'form': form, 'path': path, 'value': value, 'built': kind in BUILT}
+        points.append(pt)
+
+    seen = {}
+    for p in points:
+        low = p['name'].lower()
+        if low in seen:
+            err("duplicate point '%s'" % p['name'])
+        seen[low] = p
+    per = {}
+    for p in points:
+        per.setdefault(p['id'], []).append(p)
+    for ident, ps in per.items():
+        if len(ps) > 1:
+            err('statement @%d carries %d points' % (ident, len(ps)))
+    for p in points:
+        a = p['attrs']
+        if p['kind'] in ('algo', 'pipeline') and not a.get('options'):
+            err("point '%s' needs options" % p['name'])
+        for key in ('min', 'max'):
+            if key in a:
+                if p['kind'] != 'param' or p['form'] not in ('num', 'neg'):
+                    err("point '%s' bounds apply to numeric points only" % p['name'])
+                    break
+                if not NUM_RE.match(a[key]):
+                    err("point '%s' %s '%s' is not a number" % (p['name'], key, a[key]))
+        if 'min' in a and 'max' in a and NUM_RE.match(a['min']) and NUM_RE.match(a['max']) and num(a['min']) > num(a['max']):
+            err("point '%s' min %s is above its max %s" % (p['name'], a['min'], a['max']))
+        if 'risk' in a and a['risk'] not in ('1', '2', '3', '4'):
+            err("point '%s' risk '%s' is not a tier from 1 to 4" % (p['name'], a['risk']))
+        if 'floor' in a and a['floor'] not in POSTURES:
+            err("point '%s' floor '%s' is not a posture" % (p['name'], a['floor']))
+        if p['built']:
+            e = own_rule_error(p)
+            if e and not any(x['msg'].startswith("point '%s' bounds" % p['name']) for x in errors):
+                err(e, own=True)
+    names = {p['name'].lower(): p for p in points}
+    for r in rules:
+        parts = r['expr'].split()
+        if len(parts) != 3 or parts[1] not in ('>=', '<=', '!=', '>', '<', '='):
+            err("rule '%s' expr '%s' is not <operand> <op> <operand>" % (r['name'], r['expr']))
+            continue
+        r['left'], r['op'], r['right'] = parts
+        for side in (parts[0], parts[2]):
+            if NUM_RE.match(side):
+                continue
+            q = names.get(side.lower())
+            if q is None:
+                err("rule '%s' names unknown point '%s'" % (r['name'], side))
+            elif r['op'] != '=' and r['op'] != '!=' and not (q['kind'] == 'param' and q['form'] in ('num', 'neg')):
+                err("rule '%s' orders the non-numeric point '%s'" % (r['name'], side))
+    return {'points': points, 'rules': rules, 'errors': errors}
+
+
+def same_value(p, a, b):
+    """Two spellings of a point's value: numbers by value, a callee by Ring's case-folded name, everything else exactly."""
+    if p['form'] in ('num', 'neg') and NUM_RE.match(a) and NUM_RE.match(b):
+        return num(a) == num(b)
+    if p['form'] == 'call':
+        return a.lower() == b.lower()
+    return a == b
+
+
+def point_named(L, name):
+    for p in L['points']:
+        if p['name'].lower() == name.lower():
+            return p
+    return None
+
+
+def show_lift(L):
+    """The lift as the lines the fixtures spell it in."""
+    out = []
+    for p in L['points']:
+        extra = ''.join(' %s=%s' % (k, p['attrs'][k]) for k in p['order'])
+        out.append('%s %s @%d = %s%s' % (p['name'], p['kind'], p['id'], p['value'], extra))
+    for r in L['rules']:
+        out.append('rule %s "%s" -- %s' % (r['name'], r['expr'], r['message']))
+    for e in L['errors']:
+        out.append('error ' + e['msg'])
+    return out
+
+
+# ---- the sentence -----------------------------------------------------------------------------------------------------------------
+
+class Bad(Exception):
+    pass
+
+
+def _scan_string(s, i):
+    q = s[i]
+    j = s.find(q, i + 1)
+    if j < 0:
+        raise Bad('a string is not closed')
+    return s[i + 1:j], j + 1
+
+
+def parse_sentence(text):
+    """`DEFINE REFINE id AS ( SEAT value, ... ) [RATIONALE "..."]` -> (dict of its seats, None), or (None, why) for a sentence that is not one."""
+    try:
+        s = text.strip()
+        m = re.match(r'DEFINE\s+REFINE\s+([A-Za-z_][A-Za-z0-9_-]*)\s+AS\s*\(', s)
+        if not m:
+            raise Bad('not a DEFINE REFINE sentence')
+        i = m.end()
+        seats = {}
+        while True:
+            while i < len(s) and s[i].isspace():
+                i += 1
+            if i < len(s) and s[i] == ')':
+                i += 1
+                break
+            m2 = re.match(r'([A-Z]+)\s*', s[i:])
+            if not m2:
+                raise Bad('a seat name was expected')
+            name = m2.group(1)
+            if name not in SEATS:
+                raise Bad('unknown seat %s' % name)
+            if name in seats:
+                raise Bad('seat %s twice' % name)
+            i += m2.end()
+            if i >= len(s):
+                raise Bad('the sentence ends inside its seats')
+            if s[i] in ('"', "'", '`'):
+                val, i = _scan_string(s, i)
+            else:
+                m3 = re.match(r'[A-Za-z0-9_.-]+', s[i:])
+                if not m3:
+                    raise Bad('seat %s has no value' % name)
+                val, i = m3.group(0), i + m3.end()
+            seats[name] = val
+            while i < len(s) and s[i].isspace():
+                i += 1
+            if i < len(s) and s[i] == ',':
+                i += 1
+        rest = s[i:].strip()
+        if rest:
+            m4 = re.match(r'RATIONALE\s+', rest)
+            if not m4 or rest[m4.end():m4.end() + 1] not in ('"', "'", '`'):
+                raise Bad('only a RATIONALE may follow the seats')
+            _, j = _scan_string(rest, m4.end())
+            if rest[j:].strip():
+                raise Bad('text after the RATIONALE')
+        for r in REQUIRED:
+            if r not in seats:
+                raise Bad('missing seat %s' % r)
+        for r in ('TARGET', 'AUTHOR', 'REASON'):
+            if not seats[r].strip():
+                raise Bad('seat %s is empty' % r)
+        if seats['KIND'].lower() not in KINDS:
+            raise Bad("unknown kind '%s'" % seats['KIND'])
+        if seats['POSTURE'].lower() not in POSTURES:
+            raise Bad("unknown posture '%s'" % seats['POSTURE'])
+        for key in ('AT', 'REVERTS'):
+            if key in seats and not re.match(r'^[0-9]+$', seats[key]):
+                raise Bad('seat %s is not an id' % key)
+        if 'CASCADE' in seats and seats['CASCADE'].strip() and not re.match(r'^[0-9]+(\s*,\s*[0-9]+)*$', seats['CASCADE'].strip()):
+            raise Bad('seat CASCADE is not a list of ids')
+    except Bad as e:
+        return None, 'malformed sentence: %s' % e
+    out = {'id': m.group(1), 'target': seats['TARGET'], 'kind': seats['KIND'].lower(), 'from': seats['FROM'], 'to': seats['TO'], 'author': seats['AUTHOR'],
+           'posture': seats['POSTURE'].lower(), 'reason': seats['REASON'], 'text': text.strip()}
+    if 'AT' in seats:
+        out['at'] = int(seats['AT'])
+    if 'REVERTS' in seats:
+        out['reverts'] = int(seats['REVERTS'])
+    if 'CASCADE' in seats:
+        out['cascade'] = [int(x) for x in seats['CASCADE'].replace(' ', '').split(',') if x]
+    base, _, attr = out['target'].partition('.')
+    out['base'], out['attr'] = base, (attr or None)
+    return out, None
+
+
+def quote_seat(v):
+    for q in ('"', "'", '`'):
+        if q not in v:
+            return q + v + q
+    raise Bad('a seat value holds all three quotes')
+
+
+def sentence_text(sid, target, kind, frm, to, author, posture, reason, at=None, cascade=None, reverts=None):
+    seats = ['TARGET %s' % quote_seat(target), 'KIND %s' % kind, 'FROM %s' % quote_seat(frm), 'TO %s' % quote_seat(to),
+             'AUTHOR %s' % quote_seat(author), 'POSTURE %s' % posture, 'REASON %s' % quote_seat(reason)]
+    if at is not None:
+        seats.append('AT %s' % quote_seat(str(at)))
+    if cascade is not None:
+        seats.append('CASCADE %s' % quote_seat(','.join(str(c) for c in cascade)))
+    if reverts is not None:
+        seats.append('REVERTS %s' % quote_seat(str(reverts)))
+    return 'DEFINE REFINE %s AS ( %s )' % (sid, ', '.join(seats))
+
+
+def parse_context(text):
+    """The governance tables: `governance NAME` and, one tab in, `actor NAME LEVEL may POINT ...`. -> {governance: {actor: {'level', 'name', 'may'}}}"""
+    ctx, cur = {}, None
+    for line in text.replace('\r\n', '\n').split('\n'):
+        if not line.strip():
+            continue
+        if not line.startswith(('\t', ' ')):
+            parts = line.split()
+            if len(parts) != 2 or parts[0] != 'governance':
+                raise ValueError('context line: ' + line)
+            cur = ctx.setdefault(parts[1].lower(), {})
+        else:
+            parts = line.split()
+            if len(parts) < 4 or parts[0] != 'actor' or parts[3] != 'may' or parts[2] not in LEVELS or cur is None:
+                raise ValueError('context line: ' + line)
+            cur[parts[1].lower()] = {'level': LEVELS[parts[2]], 'name': parts[2], 'may': {x.lower() for x in parts[4:]}}
+    return ctx
+
+
+# ---- the cascade --------------------------------------------------------------------------------------------------------------------
+
+def _expr_ids(node, out):
+    """Every identifier an item's own expressions name, its nested blocks and its trailing comment left out (they are items, or text)."""
+    if isinstance(node, dict):
+        if node.get('k') == 'id':
+            out.append(node['text'].lower())
+        for f, v in node.items():
+            if f == 'trail' or f.startswith('_') or ids.is_block(node, f, v):
+                continue
+            if isinstance(v, (dict, list)):
+                _expr_ids(v, out)
+    elif isinstance(node, list):
+        for x in node:
+            _expr_ids(x, out)
+
+
+def cascade(g, p):
+    """What a change to a point's literal touches: the statements that read the name, and the other places that write it. The scan is by Ring's
+    case-folded name and sees the whole file, so it is an over-approximation across scopes, and says so by the owner it prints."""
+    items = walk_items(g)
+    tgt = next(it for it, *_ in items if it['_id'] == p['id'])
+    e = tgt.get('e') if tgt['k'] == 'expr' else None
+    if not e or e['k'] != 'assign' or e['l']['k'] != 'id':
+        return {'reads': [], 'writes': []}
+    name = e['l']['text'].lower()
+    reads, writes = [], []
+    for it, parent, bpath, lst, i, owner in items:
+        if it['_id'] == p['id']:
+            continue
+        used, wrote, k = [], False, it['k']
+        x = it.get('e') if k == 'expr' else None
+        if x is not None and x['k'] == 'assign' and x['l']['k'] == 'id' and x['l']['text'].lower() == name:
+            wrote = True
+            _expr_ids(x['r'], used)
+            if x.get('op') != '=':
+                used.append(name)
+        elif x is not None and x['k'] == 'post' and x['e']['k'] == 'id' and x['e']['text'].lower() == name:
+            wrote = True
+            used.append(name)
+        else:
+            _expr_ids({f: v for f, v in it.items() if f != 'trail' and not f.startswith('_')}, used)
+            if k == 'for' and str(it.get('var', '')).lower() == name:
+                wrote = True
+        if name in used:
+            reads.append((it['_id'], owner))
+        if wrote:
+            writes.append((it['_id'], owner))
+    return {'reads': reads, 'writes': writes}
+
+
+# ---- the primitives -----------------------------------------------------------------------------------------------------------------
+
+def _point(work, name):
+    L = lift(work)
+    p = point_named(L, name)
+    if p is None:
+        raise TxError("no refinement point '%s'" % name)
+    return p
+
+
+def _comment_node(work, p):
+    it = find_item(work, p['carrier']['id'])[0]
+    return get_path(it, p['carrier']['path'])
+
+
+def _block_list(work, parent, block):
+    if parent is None:
+        holder, path = work, ['items']
+    else:
+        holder = find_item(work, parent)[0]
+        path = [block] if isinstance(block, str) else list(block)
+    return get_path(holder, path[:-1])[path[-1]]
+
+
+def _renumber(work, node):
+    """Fresh ids for the items of a node that holds none; the ones it holds are kept (a delete's inverse restores them)."""
+    seen = set(it['_id'] for it, *_ in walk_items(work) if '_id' in it)
+    tmp = {'k': 'file', 'items': [node]}
+    for it in ids.preorder(tmp):
+        if '_id' in it:
+            if it['_id'] in seen:
+                raise TxError('id %s is already in use' % it['_id'])
+        else:
+            it['_id'] = work['_next']
+            work['_next'] += 1
+
+
+def apply_prim(work, p):
+    """One RCP primitive on `work`, in place; -> the inverse primitive, captured before the change landed."""
+    op = p['op']
+    if op == 'node.update_property':
+        it = find_item(work, p['target']['id'])[0]
+        node = get_path(it, p['target']['path'])
+        prop = p['prop']
+        if prop not in node:
+            raise TxError('the node has no property %s' % prop)
+        old = node[prop]
+        if 'expect' in p and old != p['expect']:
+            raise TxError('conflict: the property is now %r, the change this undoes left it at %r' % (old, p['expect']))
+        node[prop] = p['value']
+        return {'op': op, 'target': p['target'], 'prop': prop, 'value': old, 'expect': p['value']}
+    if op == 'node.create':
+        lst = _block_list(work, p['parent'], p['block'])
+        node = copy.deepcopy(p['node'])
+        _renumber(work, node)
+        idx = p['index'] if p.get('index') is not None else len(lst)
+        if idx < 0 or idx > len(lst):
+            raise TxError('index %s is outside the block' % idx)
+        lst.insert(idx, node)
+        return {'op': 'node.delete', 'id': node['_id']}
+    if op == 'node.delete':
+        it, parent, bpath, lst, i = find_item(work, p['id'])
+        lst.pop(i)
+        return {'op': 'node.create', 'parent': parent['_id'] if parent else None, 'block': list(bpath) if parent else 'items', 'index': i, 'node': it}
+    if op in ('edge.create', 'edge.delete', 'edge.retarget') and p['edge'] == 'governed_by':
+        pt = _point(work, p['src'])
+        node = _comment_node(work, pt)
+        cur = tag_get(node['text'], 'governed_by')
+        if op == 'edge.create':
+            if cur is not None:
+                raise TxError("'%s' is already governed by '%s'" % (p['src'], cur))
+            node['text'] = tag_insert(node['text'], 'governed_by', p['dst'], p.get('pos'))
+            return {'op': 'edge.delete', 'edge': 'governed_by', 'src': p['src'], 'dst': p['dst']}
+        if op == 'edge.delete':
+            if cur != p['dst']:
+                raise TxError("'%s' is governed by '%s', not '%s'" % (p['src'], cur, p['dst']))
+            pos = tag_index(node['text'], 'governed_by')
+            node['text'] = tag_del(node['text'], 'governed_by')
+            return {'op': 'edge.create', 'edge': 'governed_by', 'src': p['src'], 'dst': p['dst'], 'pos': pos}
+        if cur != p['from']:
+            raise TxError("'%s' is governed by '%s', not '%s'" % (p['src'], cur, p['from']))
+        node['text'] = tag_set(node['text'], 'governed_by', p['to'])
+        return {'op': op, 'edge': 'governed_by', 'src': p['src'], 'from': p['to'], 'to': p['from']}
+    if op == 'edge.retarget' and p['edge'] == 'calls':
+        it = find_item(work, p['src']['id'])[0]
+        node = get_path(it, p['src']['path'])
+        if node.get('k') != 'call' or node['callee']['k'] != 'id':
+            raise TxError('the edge is not a call to a named function')
+        old = node['callee']['text']
+        if old.lower() != p['from'].lower():
+            raise TxError("the call goes to '%s', not '%s'" % (old, p['from']))
+        node['callee']['text'] = p['to']
+        return {'op': op, 'edge': 'calls', 'src': p['src'], 'from': p['to'], 'to': old}
+    if op == 'refinement.set_value':
+        pt = _point(work, p['point'])
+        if pt['form'] not in ('num', 'neg', 'str'):
+            raise TxError("'%s' is not a literal point: use the primitive of its form" % p['point'])
+        it = find_item(work, pt['id'])[0]
+        holder = get_path(it, pt['path'][:-1])
+        old = holder[pt['path'][-1]]
+        if 'expect' in p and literal_text(old) != p['expect']:
+            raise TxError("conflict: '%s' is now %s, the change this undoes left it at %s" % (p['point'], literal_text(old), p['expect']))
+        lit = p.get('literal') or (to_literal(p['value']) if pt['form'] == 'str' else p['value'])
+        if lit is None:
+            raise TxError('the value cannot be written as a literal')
+        holder[pt['path'][-1]] = literal_node(lit)
+        return {'op': op, 'point': p['point'], 'value': pt['value'], 'literal': literal_text(old), 'expect': lit}
+    if op in ('refinement.add_option', 'refinement.remove_option'):
+        pt = _point(work, p['point'])
+        node = _comment_node(work, pt)
+        cur = tag_get(node['text'], 'options')
+        opts = cur.split('|') if cur else []
+        if op == 'refinement.add_option':
+            if p['option'] in opts:
+                raise TxError("'%s' is already an option" % p['option'])
+            idx = p.get('index')
+            idx = len(opts) if idx is None or idx > len(opts) else idx
+            opts.insert(idx, p['option'])
+            node['text'] = tag_set(node['text'], 'options', '|'.join(opts))
+            return {'op': 'refinement.remove_option', 'point': p['point'], 'option': p['option']}
+        if p['option'] not in opts:
+            raise TxError("'%s' is not an option" % p['option'])
+        idx = opts.index(p['option'])
+        opts.pop(idx)
+        node['text'] = tag_set(node['text'], 'options', '|'.join(opts))
+        return {'op': 'refinement.add_option', 'point': p['point'], 'option': p['option'], 'index': idx}
+    if op in ('pipeline.insert_stage', 'pipeline.remove_stage', 'pipeline.reorder_stages'):
+        pt = _point(work, p['point'])
+        if pt['form'] != 'list':
+            raise TxError("'%s' is not a pipeline" % p['point'])
+        it = find_item(work, pt['id'])[0]
+        lst = get_path(it, pt['path'])['items']
+        stages = [unquote(x['text']) for x in lst]
+        if op == 'pipeline.insert_stage':
+            lit = p.get('literal') or to_literal(p['stage'])
+            if lit is None:
+                raise TxError('the stage cannot be written as a string')
+            idx = p.get('index')
+            idx = len(lst) if idx is None or idx > len(lst) else idx
+            lst.insert(idx, {'k': 'str', 'text': lit})
+            return {'op': 'pipeline.remove_stage', 'point': p['point'], 'stage': p['stage'], 'index': idx}
+        if op == 'pipeline.remove_stage':
+            idx = p.get('index')
+            if idx is None:
+                if p['stage'] not in stages:
+                    raise TxError("'%s' is not a stage" % p['stage'])
+                idx = stages.index(p['stage'])
+            if idx >= len(lst) or stages[idx] != p['stage']:
+                raise TxError("stage %s is not '%s'" % (idx, p['stage']))
+            old = lst.pop(idx)
+            return {'op': 'pipeline.insert_stage', 'point': p['point'], 'stage': p['stage'], 'index': idx, 'literal': old['text']}
+        order = p['order']
+        if sorted(order) != sorted(stages):
+            raise TxError('the order is not a permutation of the stages')
+        pool = list(lst)
+        new = []
+        for s in order:
+            for n, x in enumerate(pool):
+                if unquote(x['text']) == s:
+                    new.append(pool.pop(n))
+                    break
+        lst[:] = new
+        return {'op': op, 'point': p['point'], 'order': stages}
+    raise TxError('unknown primitive %s' % op)
+
+
+def apply_tx(g, tx, inplace=None):
+    """All the primitives or none. -> (the new graph, the inverse transaction): the inverse undoes it, last primitive first."""
+    work = g if (INPLACE if inplace is None else inplace) else copy.deepcopy(g)
+    inv = []
+    try:
+        for p in tx:
+            inv.append(apply_prim(work, p))
+    except TxError:
+        if work is g:
+            for q in reversed(inv):
+                apply_prim(work, q)
+        raise
+    return work, list(reversed(inv))
+
+
+# ---- lowering: a sentence to primitives -------------------------------------------------------------------------------------------
+
+def lower_pipeline(cur, to):
+    """Remove what is not wanted; insert what is missing at its place in the new order; reorder what is left if it is still out of order."""
+    tx, now = [], list(cur)
+    for s in cur:
+        if s not in to:
+            tx.append({'op': 'pipeline.remove_stage', 'point': None, 'stage': s})
+            now.remove(s)
+    for n, s in enumerate(to):
+        if s not in now:
+            idx = min(n, len(now))
+            tx.append({'op': 'pipeline.insert_stage', 'point': None, 'stage': s, 'index': idx})
+            now.insert(idx, s)
+    if now != to:
+        tx.append({'op': 'pipeline.reorder_stages', 'point': None, 'order': list(to)})
+    return tx
+
+
+def lower(p, s):
+    """The transaction a sentence means against point p."""
+    attr = s['attr']
+    if attr is None:
+        if p['form'] in ('num', 'neg'):
+            return [{'op': 'refinement.set_value', 'point': p['name'], 'value': s['to']}]
+        if p['form'] == 'str':
+            return [{'op': 'refinement.set_value', 'point': p['name'], 'value': s['to'], 'literal': to_literal(s['to'])}]
+        if p['form'] == 'call':
+            return [{'op': 'edge.retarget', 'edge': 'calls', 'src': {'id': p['id'], 'path': p['path']}, 'from': p['value'], 'to': s['to']}]
+        cur = p['value'].split('|') if p['value'] else []
+        want = s['to'].split('|') if s['to'] else []
+        tx = lower_pipeline(cur, want)
+        for q in tx:
+            q['point'] = p['name']
+        return tx
+    cur = p['attrs'].get(attr, '')
+    to = s['to']
+    car = p['carrier']
+    if attr == 'options':
+        have = cur.split('|') if cur else []
+        want = to.split('|') if to else []
+        tx, now = [], list(have)
+        for o in have:
+            if o not in want:
+                tx.append({'op': 'refinement.remove_option', 'point': p['name'], 'option': o})
+                now.remove(o)
+        for n, o in enumerate(want):
+            if o not in now:
+                idx = min(n, len(now))
+                tx.append({'op': 'refinement.add_option', 'point': p['name'], 'option': o, 'index': idx})
+                now.insert(idx, o)
+        return tx
+    if attr == 'governed_by':
+        if cur and to:
+            return [{'op': 'edge.retarget', 'edge': 'governed_by', 'src': p['name'], 'from': cur, 'to': to}]
+        if cur:
+            return [{'op': 'edge.delete', 'edge': 'governed_by', 'src': p['name'], 'dst': cur}]
+        return [{'op': 'edge.create', 'edge': 'governed_by', 'src': p['name'], 'dst': to}]
+    return None   # min, max, risk, floor: the tag text changes (node.update_property), which needs the graph: see `lower_attr`
+
+
+def lower_attr(work, p, s):
+    node = _comment_node(work, p)
+    text = node['text']
+    to = s['to']
+    new = tag_del(text, s['attr']) if to == '' else tag_set(text, s['attr'], to)
+    return [{'op': 'node.update_property', 'target': dict(p['carrier']), 'prop': 'text', 'value': new}]
+
+
+def is_widening(p, attr, frm, to):
+    """Does the refinement of a rule loosen it? Widening is the heaviest act, whatever the point's own risk tier."""
+    if attr == 'max':
+        return frm != '' and (to == '' or num(to) > num(frm))
+    if attr == 'min':
+        return frm != '' and (to == '' or num(to) < num(frm))
+    if attr == 'options':
+        have = set(frm.split('|')) if frm else set()
+        return bool(set(to.split('|') if to else []) - have)
+    if attr == 'risk':
+        return frm != '' and (to == '' or int(to) < int(frm))
+    if attr == 'floor':
+        return frm != '' and (to == '' or POSTURES[to] < POSTURES[frm])
+    if attr == 'governed_by':
+        return frm != ''
+    return False
+
+
+# ---- the rules ----------------------------------------------------------------------------------------------------------------------------
+
+def rule_value(L, side):
+    if NUM_RE.match(side):
+        return side
+    return point_named(L, side)['value']
+
+
+def rules_violated(L, only=None):
+    """The first rule the state breaks; with `only`, the first of the rules that name that point (a refinement answers for the rules of what it touched)."""
+    for r in L['rules']:
+        if only and only.lower() not in (r['left'].lower(), r['right'].lower()):
+            continue
+        a, b = rule_value(L, r['left']), rule_value(L, r['right'])
+        both = NUM_RE.match(a) and NUM_RE.match(b)
+        x, y = (num(a), num(b)) if both else (a, b)
+        op = r['op']
+        ok = {'>=': lambda: x >= y, '<=': lambda: x <= y, '>': lambda: x > y, '<': lambda: x < y, '=': lambda: x == y, '!=': lambda: x != y}[op]()
+        if not ok:
+            return r
+    return None
+
+
+# ---- the gate ---------------------------------------------------------------------------------------------------------------------------
+
+class Outcome:
+    def __init__(self, sentence):
+        self.sentence = sentence
+        self.status = 'rejected'
+        self.stage = None
+        self.why = ''
+        self.stages = []        # (stage, 'pass' | 'fail' | 'skip')
+        self.tx = []
+        self.inverse = []
+        self.graph = None
+        self.cascade = None
+        self.warnings = []
+        self.diff = []
+        self.value_from = self.value_to = None
+        self.point = None
+
+    @property
+    def admitted(self):
+        return self.status in ('admitted', 'flagged')
+
+    def reject(self, stage, why):
+        self.status, self.stage, self.why = 'rejected', stage, why
+        self.stages.append((stage, 'fail'))
+        return self
+
+    def passed(self, stage):
+        self.stages.append((stage, 'pass'))
+
+    def skipped(self, stage):
+        self.stages.append((stage, 'skip'))
+
+
+def evaluate(model, s, ctx, readback=True):
+    """One sentence through the gate against a model. The model is not changed: the outcome carries the new graph for the caller to keep."""
+    out = Outcome(s)
+    if s is None:
+        return out
+    g = model.g
+    L = lift(g)
+    # ---------------------------------------------------------------- structural: the language itself is asked
+    blocking = [e for e in L['errors'] if not e['own']]
+    if blocking:        # a declaration that cannot be read stops everything; a value outside its own bounds does not (it can be repaired)
+        return out.reject('structural', 'declarations do not lift: ' + blocking[0]['msg'])
+    p = point_named(L, s['base'])
+    if p is None:
+        return out.reject('structural', "no refinement point '%s'" % s['base'])
+    out.point = p
+    if s['kind'] != p['kind']:
+        return out.reject('structural', "kind '%s' does not match point '%s', which is declared %s" % (s['kind'], p['name'], p['kind']))
+    if not p['built']:
+        return out.reject('structural', "kind '%s' is declared but not built at this rung" % p['kind'])
+    if 'at' in s and s['at'] != p['id']:
+        return out.reject('structural', "stale: '%s' is at id %d, not %d" % (p['name'], p['id'], s['at']))
+    attr = s['attr']
+    if attr is not None and attr not in RULE_ATTRS:
+        return out.reject('structural', "'%s' is not an attribute of a point's rule (%s)" % (attr, ', '.join(RULE_ATTRS)))
+    frm, to = s['from'], s['to']
+    revert = None
+    if 'reverts' in s:
+        revert = model.event(s['reverts'])
+        if revert is None:
+            return out.reject('structural', 'no event %d' % s['reverts'])
+        if not revert['admitted'] or revert['kind'] != 'refine':
+            return out.reject('structural', 'event %d was not admitted' % s['reverts'])
+        if revert.get('reverted_by'):
+            return out.reject('structural', 'event %d is already reverted by event %d' % (s['reverts'], revert['reverted_by']))
+        if revert['target'].lower() != s['target'].lower():
+            return out.reject('structural', 'event %d refined %s, not %s' % (s['reverts'], revert['target'], s['target']))
+    cur = p['attrs'].get(attr, '') if attr else p['value']
+    if attr in ('min', 'max'):
+        same = frm == cur or (frm and cur and NUM_RE.match(frm) and NUM_RE.match(cur) and num(frm) == num(cur))
+    else:
+        same = same_value(p, frm, cur) if attr is None else frm == cur
+    if not same:
+        return out.reject('structural', "stale: '%s' is %s now, not %s" % (s['target'], cur, frm))
+    if revert is not None:
+        if not (to == revert['value_from'] or (attr is None and same_value(p, to, revert['value_from']))):
+            return out.reject('structural', "TO is not the prior state of event %d, which is '%s'" % (s['reverts'], revert['value_from']))
+        if not (cur == revert['value_to'] or (attr is None and same_value(p, cur, revert['value_to']))):
+            return out.reject('structural', "conflict: '%s' is %s now, event %d left it at %s" % (s['target'], cur, s['reverts'], revert['value_to']))
+    # the shape of TO
+    form = p['form']
+    if attr is None:
+        if form in ('num', 'neg'):
+            if not NUM_RE.match(to):
+                return out.reject('structural', "TO '%s' is not a number" % to)
+        elif form == 'str':
+            if to_literal(to) is None:
+                return out.reject('structural', 'TO cannot be written as a Ring string')
+        elif form == 'call':
+            if not IDENT_RE.match(to):
+                return out.reject('structural', "TO '%s' is not a function name" % to)
+            fn = [it for it, par, bp, lst, i, own in walk_items(g) if it['k'] == 'func' and par is None and ids.def_name(it).lower() == to.lower()]
+            if not fn:
+                return out.reject('structural', "no function '%s' in this program" % to)
+            it = find_item(g, p['id'])[0]
+            call = get_path(it, p['path'])
+            want, have = len(fn[0].get('params', [])), len(call.get('args', []))
+            if want != have:
+                return out.reject('structural', "'%s' takes %d argument(s), the call passes %d" % (ids.def_name(fn[0]), want, have))
+        else:
+            for st in (to.split('|') if to else []):
+                if not st:
+                    return out.reject('structural', 'TO holds an empty stage name')
+                if to_literal(st) is None:
+                    return out.reject('structural', "stage '%s' cannot be written as a Ring string" % st)
+    else:
+        if attr in ('min', 'max') and not (p['kind'] == 'param' and form in ('num', 'neg')):
+            return out.reject('structural', "bounds apply to numeric points only, and '%s' is not one" % p['name'])
+        if attr == 'options' and p['kind'] == 'param':
+            return out.reject('structural', "options apply to algo and pipeline points, and '%s' is a param" % p['name'])
+        if attr in ('min', 'max') and to and not NUM_RE.match(to):
+            return out.reject('structural', "TO '%s' is not a number" % to)
+        if attr == 'risk' and to not in ('', '1', '2', '3', '4'):
+            return out.reject('structural', "TO '%s' is not a risk tier from 1 to 4" % to)
+        if attr == 'floor' and to != '' and to not in POSTURES:
+            return out.reject('structural', "TO '%s' is not a posture" % to)
+        if attr == 'options':
+            parts = to.split('|') if to else []
+            if not parts or any(not x for x in parts) or len(set(parts)) != len(parts):
+                return out.reject('structural', "TO '%s' is not a list of distinct options" % to)
+        if attr == 'governed_by' and to != '':
+            if not NAME_RE.match(to):
+                return out.reject('structural', "TO '%s' is not a governance name" % to)
+            if to.lower() not in ctx:
+                return out.reject('structural', "no governance '%s'" % to)
+        if attr == 'governed_by' and frm == '' and to == '':
+            return out.reject('structural', "'%s' is not governed" % p['name'])
+    out.passed('structural')
+    out.value_from, out.value_to = frm, to
+    # ---------------------------------------------------------------- constraint: the point's bounds and options, on the value proposed
+    if revert is not None or 'constraint' in SKIP_STAGES:
+        out.skipped('constraint')
+    else:
+        why = constraint(p, attr, frm, to)
+        if why:
+            return out.reject('constraint', why)
+        out.passed('constraint')
+    # the candidate: lower the sentence, apply it, and ask the language whether the result is still a program (a structural fact, asked once the
+    # proposal is within its bounds: a value outside them may not be a change that can be made at all)
+    try:
+        if revert is not None:
+            tx = copy.deepcopy(revert['inverse'])
+        elif attr in ('min', 'max', 'risk', 'floor'):
+            tx = lower_attr(g, p, s)
+        else:
+            tx = lower(p, s)
+        new, inv = apply_tx(g, tx)
+    except TxError as e:
+        return out.reject('structural', 'the change cannot be applied: %s' % e)
+    if readback:
+        text = text_of(new)
+        try:
+            back = parse_text(text)
+        except Unreadable as e:
+            return out.reject('structural', 'the refined program does not parse: %s' % e)
+        if l1.norm(ids.strip(back)) != l1.norm(ids.strip(new)):
+            return out.reject('structural', 'the refined program does not read back as itself')
+    out.tx, out.inverse = tx, inv
+    # ---------------------------------------------------------------- governance: before any change lands
+    gname = p['attrs'].get('governed_by')
+    if 'governance' in SKIP_STAGES or not gname:
+        out.skipped('governance')
+    else:
+        tier = WIDEN_TIER if (attr and is_widening(p, attr, frm, to) and revert is None) else None
+        why = governance(ctx, gname, s['author'], p, tier)
+        if why:
+            return out.reject('governance', why)
+        out.passed('governance')
+    # ---------------------------------------------------------------- trust: origin is not identity
+    floor = p['attrs'].get('floor')
+    need = POSTURES[floor] if floor else -1
+    if attr:
+        need = max(need, POSTURES[RULE_FLOOR])
+    if 'trust' in SKIP_STAGES:
+        out.skipped('trust')
+    elif need >= 0 and POSTURES[s['posture']] < need:
+        if attr:
+            return out.reject('trust', "posture :%s below the required floor (%s) for rule refinements of '%s'" % (s['posture'], RULE_FLOOR, p['name']))
+        return out.reject('trust', "posture :%s below the required floor for '%s'" % (s['posture'], p['name']))
+    else:
+        out.passed('trust')
+    # ---------------------------------------------------------------- derivation: the state the change would leave
+    if 'derivation' in SKIP_STAGES:
+        out.skipped('derivation')
+    else:
+        L2 = lift(new)
+        mine = "point '%s' " % p['name']
+        bad2 = [e for e in L2['errors'] if not e['own'] or e['msg'].startswith(mine)]
+        if bad2:
+            e = bad2[0]
+            return out.reject('derivation', ('own rule violated: ' if e['own'] else 'the declarations no longer lift: ') + e['msg'])
+        r = rules_violated(L2, p['name'])
+        if r:
+            return out.reject('derivation', "rule '%s' violated -- %s" % (r['name'], r['message']))
+        c = cascade(g, p) if attr is None and revert is None else {'reads': [], 'writes': []}
+        out.cascade = c
+        if 'cascade' in s:
+            got = sorted(set(i for i, _ in c['reads']))
+            if sorted(set(s['cascade'])) != got:
+                return out.reject('derivation', "cascade stated %s but '%s' is read by %s" % (sorted(set(s['cascade'])), p['name'], got))
+        out.passed('derivation')
+    out.warnings = ['also assigned at id %d (%s)' % (i, o) for i, o in (out.cascade or {'writes': []})['writes']]
+    out.status = 'flagged' if out.warnings else 'admitted'
+    out.stage = 'all'
+    out.graph = new
+    out.why = "admitted: '%s' %s -> %s [:%s]" % (s['target'], frm, to, s['posture'])
+    out.diff = diff_lines(text_of(g), text_of(new))
+    return out
+
+
+def constraint(p, attr, frm, to):
+    if attr is None:
+        if p['kind'] == 'param':
+            a = p['attrs']
+            if p['form'] in ('num', 'neg'):
+                if 'min' in a and num(to) < num(a['min']):
+                    return '%s below min %s' % (to, a['min'])
+                if 'max' in a and num(to) > num(a['max']):
+                    return '%s above max %s' % (to, a['max'])
+            return None
+        opts = p['attrs'].get('options', '')
+        if p['kind'] == 'algo':
+            if to not in opts.split('|'):
+                return "'%s' not in options %s" % (to, opts)
+            return None
+        stages = to.split('|') if to else []
+        if not stages:
+            return 'pipeline would be empty'
+        for st in stages:
+            if st not in opts.split('|'):
+                return "'%s' not in options %s" % (st, opts)
+        for st in stages:
+            if stages.count(st) > 1:
+                return "'%s' appears twice" % st
+        return None
+    if attr in ('min', 'max'):
+        other = p['attrs'].get('max' if attr == 'min' else 'min')
+        if to and other:
+            lo, hi = (to, other) if attr == 'min' else (other, to)
+            if num(lo) > num(hi):
+                return 'min %s would be above max %s' % (lo, hi)
+    return None
+
+
+def governance(ctx, gname, actor, p, tier):
+    """stzGovernance.MayProceed over the action `refine-<point>`: a declared risk tier, a permission, an authority that covers the tier."""
+    gov = ctx.get(gname.lower())
+    action = 'refine-' + p['name'].lower()
+    if gov is None:
+        return "governance '%s' is not configured" % gname
+    risk = p['attrs'].get('risk')
+    if not risk:
+        return "refused: '%s' has NO declared risk tier (undeclared actions never proceed)" % action
+    need = tier or int(risk)
+    who = gov.get(actor.lower())
+    if who is None or p['name'].lower() not in who['may']:
+        return "refused: '%s' lacks PERMISSION (can) for '%s'" % (actor, action)
+    if who['level'] < need:
+        return "refused: '%s' holds '%s' authority (level %d) but '%s' is risk tier %d (SHOULD does not cover it)" % (actor, who['name'], who['level'], action, need)
+    return None
+
+
+def diff_lines(a, b):
+    return list(difflib.unified_diff(a.split('\n'), b.split('\n'), lineterm='', n=0))[2:]
+
+
+# ---- the model: a program, its ids, its event log ------------------------------------------------------------------------------------
+
+class Model:
+    def __init__(self, text, ctx=None):
+        self.g = new_graph(text)
+        self.ctx = ctx or {}
+        self.log = []
+        self.base = text_of(self.g)
+
+    def text(self):
+        return text_of(self.g)
+
+    def hash(self):
+        return digest(self.text())
+
+    def lift(self):
+        return lift(self.g)
+
+    def event(self, seq):
+        return self.log[seq - 1] if 1 <= seq <= len(self.log) else None
+
+    def edit(self, text):
+        """A human edit, made as text: the new graph gets the ids it keeps (rung 19); the edit is an event."""
+        ng = parse_text(text)
+        old = text_of(self.g)
+        ids.carry(self.g, ng)
+        self.g = ng
+        self.log.append({'seq': len(self.log) + 1, 'kind': 'edit', 'admitted': True, 'text': text, 'pre': digest(old), 'post': self.hash()})
+
+    def refine(self, sentence, ctx=None):
+        s, why = parse_sentence(sentence) if isinstance(sentence, str) else (sentence, None)
+        pre = self.hash()
+        if s is None:
+            out = Outcome(None)
+            out.reject('structural', why)
+            self.log.append({'seq': len(self.log) + 1, 'kind': 'refine', 'admitted': False, 'sentence': sentence, 'status': 'rejected', 'stage': 'structural',
+                             'why': why, 'target': '', 'pre': pre, 'post': pre})
+            return out
+        out = evaluate(self, s, self.ctx if ctx is None else ctx)
+        ev = {'seq': len(self.log) + 1, 'kind': 'refine', 'admitted': out.admitted, 'sentence': s['text'], 'status': out.status, 'stage': out.stage,
+              'why': out.why, 'target': s['target'], 'author': s['author'], 'posture': s['posture'], 'pre': pre}
+        if out.admitted:
+            self.g = out.graph
+            ev.update({'tx': out.tx, 'inverse': out.inverse, 'value_from': out.value_from, 'value_to': out.value_to, 'point': s['base'], 'attr': s['attr']})
+            if 'reverts' in s:
+                ev['reverts'] = s['reverts']
+                self.log[s['reverts'] - 1]['reverted_by'] = ev['seq']
+        ev['post'] = self.hash()
+        self.log.append(ev)
+        out.event = ev
+        return out
+
+    def revert(self, n, author, posture='trusted', reason='a revert'):
+        ev = self.event(n)
+        s = sentence_text('revert_%d' % n, ev['target'], self.kind_of(ev), ev['value_to'], ev['value_from'], author, posture, reason, reverts=n)
+        return self.refine(s)
+
+    def kind_of(self, ev):
+        p = point_named(self.lift(), ev['point'])
+        return p['kind'] if p else 'param'
+
+    def admitted(self):
+        return [e for e in self.log if e['kind'] == 'refine' and e['admitted']]
+
+
+def replay(text, log, ctx):
+    """The log run again from the base text, through the gate: the same verdicts and the same final text. -> (model, list of differences)"""
+    m = Model(text, ctx)
+    bad = []
+    for ev in log:
+        if ev['kind'] == 'edit':
+            m.edit(ev['text'])
+            continue
+        out = m.refine(ev['sentence'])
+        if out.status != ev['status'] or out.stage != ev['stage'] or m.log[-1]['post'] != ev['post']:
+            bad.append((ev['seq'], ev['status'], out.status))
+    return m, bad
+
+
+def replay_tx(text, log):
+    """The same log without the gate: the transactions of the admitted events, applied in order. The engine alone is deterministic."""
+    g = new_graph(text)
+    for ev in log:
+        if ev['kind'] == 'refine' and ev['admitted']:
+            g, _ = apply_tx(g, ev['tx'], inplace=False)
+    return g
+
+
+# ---- commutation ------------------------------------------------------------------------------------------------------------------------
+
+def footprint(model, s):
+    """(reads, writes) of a sentence over the pieces of the model: the value of a point, its declaration (its rules), and -- because a derivation rule
+    reads the post-state -- the value of every point that shares a rule with it."""
+    L = model.lift()
+    base = s['base'].lower()
+    partners = set()
+    for r in L['rules']:
+        sides = {x.lower() for x in (r['left'], r['right']) if not NUM_RE.match(x)}
+        if base in sides:
+            partners |= sides
+    partners.discard(base)
+    if s['attr']:
+        return ({('value', base)}, {('decl', base)})
+    return ({('decl', base)} | {('value', q) for q in partners}, {('value', base)})
+
+
+def commutes(model, s1, s2):
+    r1, w1 = footprint(model, s1)
+    r2, w2 = footprint(model, s2)
+    return not (w1 & (r2 | w2) or w2 & r1)
+
+
+# ---- the audit of a human edit ------------------------------------------------------------------------------------------------------
+
+def audit(model, new_text, posture='trusted', author='text-edit'):
+    """What an edit made as text amounts to. Each point whose value or tag changed is read back as the sentence that would have made the same change
+    and judged by the gate on the OLD program; every other change is raw. -> (list of (sentence, outcome), the number of raw edits, the faults)"""
+    ng = parse_text(new_text)
+    og = copy.deepcopy(model.g)
+    ids.carry(og, ng)
+    L0, L1 = lift(model.g), lift(ng)
+    faults = [e['msg'] for e in L1['errors'] if not e['own']]
+    if faults:
+        return [], None, faults     # a value outside its own bounds is exactly what the audit exists to judge; a tag that does not lift is not
+    by_id = {p['id']: p for p in L1['points']}
+    sentences, undone = [], copy.deepcopy(ng)
+    for p in L0['points']:
+        q = by_id.get(p['id'])
+        if q is None or q['kind'] != p['kind'] or q['name'] != p['name']:
+            continue
+        if q['value'] != p['value']:
+            sentences.append((p['name'], p['kind'], p['value'], q['value']))
+        for k in set(p['attrs']) | set(q['attrs']):
+            if k in RULE_ATTRS and p['attrs'].get(k, '') != q['attrs'].get(k, ''):
+                sentences.append((p['name'] + '.' + k, p['kind'], p['attrs'].get(k, ''), q['attrs'].get(k, '')))
+    # the raw edits: an item of the new program that is not the old one once the point changes are undone
+    old_by_id = {it['_id']: it for it, *_ in walk_items(og)}
+    for p in L0['points']:
+        q = by_id.get(p['id'])
+        if q is None:
+            continue
+        item = find_item(undone, p['id'])[0]
+        if p['form'] in ('num', 'neg', 'str'):
+            holder = get_path(item, p['path'][:-1])
+            holder[p['path'][-1]] = copy.deepcopy(get_path(old_by_id[p['id']], p['path']))
+        elif p['form'] == 'list':
+            holder = get_path(item, p['path'][:-1])
+            holder[p['path'][-1]] = copy.deepcopy(get_path(old_by_id[p['id']], p['path']))
+        elif p['form'] == 'call':
+            get_path(item, p['path'])['callee'] = copy.deepcopy(get_path(old_by_id[p['id']], p['path'])['callee'])
+        car = p['carrier']
+        cn = get_path(find_item(undone, car['id'])[0], car['path'])
+        cn['text'] = get_path(old_by_id[car['id']], car['path'])['text']
+        cn['kind'] = get_path(old_by_id[car['id']], car['path']).get('kind', cn.get('kind'))
+    raw = 0
+    now = {it['_id']: it for it, *_ in walk_items(undone)}
+    for ident, it in old_by_id.items():
+        n = now.get(ident)
+        if n is None:
+            raw += 1
+        elif ids.strip(shallow(it)) != ids.strip(shallow(n)):
+            raw += 1
+    raw += sum(1 for ident in now if ident not in old_by_id)
+    results = []
+    for tgt, kind, frm, to in sentences:
+        sent = sentence_text('audit', tgt, kind, frm, to, author, posture, 'a text edit, read back')
+        s, why = parse_sentence(sent)
+        results.append((tgt, frm, to, evaluate(model, s, model.ctx) if s else None))
+    return results, raw, []
+
+
+def shallow(it):
+    """An item without the blocks inside it: the audit compares an item's own text; the items it holds are compared as items."""
+    d = copy.deepcopy(it)
+    for path, b in ids.blocks(d):
+        get_path(d, path[:-1])[path[-1]] = []
+    return d
+
+
+# ---- the command line: `haro refine` at this rung -----------------------------------------------------------------------------------------------
+
+def split_sentences(text):
+    """The sentences of a .rfn-shaped file: each begins with DEFINE REFINE at the start of a line and runs to the next; `--` lines are comments."""
+    out, cur = [], None
+    for line in text.replace('\r\n', '\n').split('\n'):
+        if line.startswith('--'):
+            continue
+        if line.startswith('DEFINE REFINE'):
+            if cur is not None:
+                out.append('\n'.join(cur))
+            cur = [line]
+        elif cur is not None:
+            cur.append(line)
+    if cur is not None:
+        out.append('\n'.join(cur))
+    return out
+
+
+def main(argv):
+    """python refine.py <program.ring> <sentences.rfn> [--ctx governance.txt] [--write]
+    Each sentence goes through the gate in order, against what the earlier ones left. Prints the verdict, the primitives and the diff of each; exit 0 when every
+    sentence was admitted, 1 when one was refused, 2 when the command could not run. `--write` replaces the program with the canonical text of the result --
+    and refuses to when the program is not already its own canonical text, because the diff would then carry layout the refinement did not make (rnxc fmt
+    --write first; never on a tree that is not yours to reformat)."""
+    args = [a for a in argv if not a.startswith('--')]
+    write = '--write' in argv
+    ctxfile = None
+    if '--ctx' in argv:
+        ctxfile = argv[argv.index('--ctx') + 1]
+        args = [a for a in args if a != ctxfile]
+    if len(args) != 2:
+        print(main.__doc__)
+        return 2
+    prog = open(args[0], 'rb').read().decode('latin-1')
+    try:
+        m = Model(prog, parse_context(open(ctxfile, 'rb').read().decode('latin-1')) if ctxfile else {})
+    except Unreadable as e:
+        print('the program does not parse: %s' % e)
+        return 2
+    if write and m.text() != prog.replace('\r\n', '\n'):
+        print('refused: %s is not its own canonical text, so a written result would carry layout changes no refinement made; run `rnxc fmt --write` on it first' % args[0])
+        return 2
+    sents = split_sentences(open(args[1], 'rb').read().decode('latin-1'))
+    if not sents:
+        print('no sentence in %s' % args[1])
+        return 2
+    rc = 0
+    for text in sents:
+        o = m.refine(text)
+        print('%s %s' % (o.status, ('' if o.status != 'rejected' else o.stage + ': ') + o.why))
+        if o.admitted:
+            print('  lowered to: ' + ', '.join(p['op'] for p in o.tx))
+            for w in o.warnings:
+                print('  warning: ' + w)
+            for ln in o.diff:
+                print('  ' + ln)
+        else:
+            rc = 1
+    if write and m.admitted():
+        open(args[0], 'wb').write(m.text().encode('latin-1'))
+        print('wrote %s (%d event(s))' % (args[0], len(m.admitted())))
+    return rc
+
+
+if __name__ == '__main__':
+    sys.exit(main(sys.argv[1:]))

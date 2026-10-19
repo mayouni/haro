@@ -2926,6 +2926,33 @@ def stage23():
     return failures
 
 
+# ---- stage 24: refinement over the program graph (rung 20, Haro v0.20)
+
+REFINE_CHECK = os.path.join(HERE, 'v20', 'refine_check.py')
+
+
+def stage24():
+    """The twentieth rung: a refinement is a sentence (rfn's shape) against a point a program declares in a `<R:KIND>` tag, put through five stages in
+    stzRefinableCode's order and lowered to RCP's twelve primitives over rung 18's graph, with ids from rung 19; the diff is the printer's. Judged by 89
+    fixtures written before the engine (v20/refine_check.py), by Softanza's own stzRefinableCode put the same proposals on the Ring++ package, by `rnxc graph`
+    for a retargeted call, by the engine's constrained decoder for the grammar scoped to each program (the agent's write surface, charter 6.2), by controls
+    that must fail, by Haro's own history (a drafted refinement still lands after the next human edit) and by a corpus of real Ring files refined at a literal."""
+    print('stage 24 -- refinement over the program graph: v20/refine_check.py (89 fixtures, the live gate, rnxc graph, the scoped grammar, controls, history, a corpus)')
+    failures = 0
+    p = subprocess.run([sys.executable, REFINE_CHECK], capture_output=True, cwd=ROOT, timeout=3600)
+    out = p.stdout.decode('utf-8', 'replace').replace('\r\n', '\n')
+    for line in out.splitlines():
+        if line.startswith('  ') or line.startswith('refine_check:'):
+            print(line)
+    if p.returncode != 0:
+        failures += 1
+        print(f'  FAIL refine_check.py exited {p.returncode}')
+    if PLANT:
+        failures += 1
+        print('  FAIL refinement over the program graph -- PLANTED')
+    return failures
+
+
 def stage6(lang, court=None, n=15):
     court = court or f'{lang}_court.ring'
     print(f'stage 6 -- edit to verdict on makeen_box.machine, minima of {n}')
@@ -3031,5 +3058,7 @@ if __name__ == '__main__':
         failures += stage22()
     if stage in (None, 23) and os.path.exists(IDS_CHECK):
         failures += stage23()
+    if stage in (None, 24) and os.path.exists(REFINE_CHECK):
+        failures += stage24()
     print(f'haro_forge: {"FAIL" if failures else "PASS"} ({failures} failure(s), {time.perf_counter()-t0:.1f} s)')
     sys.exit(1 if failures else 0)

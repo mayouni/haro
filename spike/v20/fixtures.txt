@@ -1,0 +1,1243 @@
+~~~ The fixtures of rung 20 (Haro v0.20): refinement over the program graph of rung 18, ids from rung 19, for the Ring++ face.
+~~~
+~~~ Hand-composed BEFORE refine.py existed (the W discipline: fixtures first, code second). A fixture is a Ring program and what happens to it
+~~~ when proposals are made against it. Every program is written in its canonical text (the court checks that it is: the diff a refinement
+~~~ shows is the printer's, so a program that is not its own canonical form would show layout changes the refinement did not make).
+~~~
+~~~ THE SECTIONS
+~~~   === NN name        a refinement fixture; === TNN name is a TRANSACTION fixture (raw RCP primitives); === LNN, === CNN, === AN as below
+~~~   --- program         the Ring text, canonical; ids are 1, 2, 3... in pre-order over its items (rung 19), the numbering the sentences use
+~~~   --- context        (optional) the governance tables the gate consults, one block per governance:
+~~~                         governance NAME
+~~~                         <TAB>actor NAME LEVEL may POINT POINT ...        LEVEL: advisory, delegated, autonomous, emergencyoverride
+~~~   --- edited         (optional) the program after a human edited it as text; ids are carried onto it by rung 19's matcher at an EDIT step
+~~~   --- do            the steps, one per line, in order:
+~~~                         DEFINE REFINE id AS ( ... ) RATIONALE "..." => VERDICT      a refinement sentence and the verdict it must get
+~~~                         EDIT                                                         the program becomes `edited`, with carried ids
+~~~                       VERDICT is `admitted`, `flagged` (admitted, with cascade warnings) or `rejected STAGE substring-of-why`; an optional
+~~~                       ` tx=op,op` after it pins the RCP primitives the sentence lowered to
+~~~   --- text          (optional) the canonical text after every step; default: the program's own
+~~~   --- run           (optional) `oracle: before | after` -- what the program prints on the oracle and on rnxc, before and after the steps
+~~~   --- tx            a transaction fixture: one JSON object per line, each an RCP primitive
+~~~ The sentence is the shape `rfn.haro` declares for the declared altitude -- DEFINE REFINE, TARGET, KIND, FROM, TO, AUTHOR, POSTURE, REASON --
+~~~ with the optional seats the charter names (AT for the id the proposal was drafted against, CASCADE, REVERTS) and the kinds of the computing
+~~~ altitude (param, algo, pipeline).
+~~~ THE GATE, in the order stzRefinableCode runs it: structural, constraint, governance, trust, derivation; the first stage that fails ends the
+~~~ proposal, and a proposal that fails anywhere changes nothing.
+
+=== 01 the points a program declares
+~~~ a tag in a comment is the lift for foreign code (charter 6.1): on the statement's own line, or alone on the line above it. A point's value is the
+~~~ literal in the code, so the tag carries no `value=` that could drift from it
+--- program
+$nVat = 0.20  # <R:PARAM name="vat" min="0" max="0.9">
+# <R:PARAM name="floor" min="0" max="0.5">
+$nFloor = 0.10
+# <R:RULE name="vat-above-floor" expr="vat >= floor" message="vat must not drop below floor">
+? Gross(100)
+
+func Gross(nNet)
+	return nNet * (1 + $nVat)
+--- lift
+vat param @1 = 0.20 min=0 max=0.9
+floor param @3 = 0.10 min=0 max=0.5
+rule vat-above-floor "vat >= floor" -- vat must not drop below floor
+
+=== 02 one refinement, one line of text
+~~~ the principle-10 fixture at the computing altitude: the agent proposes, the gate admits, the diff is the printer's -- one line out, one line in
+--- program
+$nVat = 0.20  # <R:PARAM name="vat" min="0" max="0.9">
+? Gross(100)
+
+func Gross(nNet)
+	return nNet * (1 + $nVat)
+--- do
+DEFINE REFINE raise_vat AS ( TARGET "vat", KIND param, FROM "0.20", TO "0.30", AUTHOR "mansour", POSTURE trusted, REASON "the rate went up" ) RATIONALE "a rate is a parameter" => admitted tx=refinement.set_value
+--- text
+$nVat = 0.30  # <R:PARAM name="vat" min="0" max="0.9">
+? Gross(100)
+
+func Gross(nNet)
+	return nNet * (1 + $nVat)
+--- run
+oracle: 120 | 130
+
+=== 03 above the maximum is refused at constraint, and nothing changes
+--- program
+$nVat = 0.20  # <R:PARAM name="vat" min="0" max="0.9">
+--- do
+DEFINE REFINE too_high AS ( TARGET "vat", KIND param, FROM "0.20", TO "0.95", AUTHOR "aicha", POSTURE trusted, REASON "try" ) => rejected constraint above max 0.9
+
+=== 04 below the minimum, a negative number
+~~~ `-0.1` is a unary minus over a number in the graph; the bound is on the number
+--- program
+$nVat = 0.20  # <R:PARAM name="vat" min="0" max="0.9">
+--- do
+DEFINE REFINE negative AS ( TARGET "vat", KIND param, FROM "0.20", TO "-0.1", AUTHOR "aicha", POSTURE trusted, REASON "try" ) => rejected constraint below min 0
+
+=== 05 a negative value that is inside its bounds replaces a plain one
+--- program
+$nTemp = 5  # <R:PARAM name="temp" min="-20" max="50">
+--- do
+DEFINE REFINE cold AS ( TARGET "temp", KIND param, FROM "5", TO "-10", AUTHOR "mansour", POSTURE trusted, REASON "winter" ) => admitted
+DEFINE REFINE warm AS ( TARGET "temp", KIND param, FROM "-10", TO "7", AUTHOR "mansour", POSTURE trusted, REASON "spring" ) => admitted
+--- text
+$nTemp = 7  # <R:PARAM name="temp" min="-20" max="50">
+
+=== 06 the structural stage: a point that is not there, a wrong kind, a stale view
+--- program
+$nVat = 0.20  # <R:PARAM name="vat" min="0" max="0.9">
+$cSort = "quick"  # <R:ALGO name="sort" options="quick|merge">
+--- do
+DEFINE REFINE ghost AS ( TARGET "ghost", KIND param, FROM "1", TO "2", AUTHOR "aicha", POSTURE trusted, REASON "try" ) => rejected structural no refinement point 'ghost'
+DEFINE REFINE wrong_kind AS ( TARGET "vat", KIND algo, FROM "0.20", TO "0.30", AUTHOR "aicha", POSTURE trusted, REASON "try" ) => rejected structural kind
+DEFINE REFINE stale AS ( TARGET "vat", KIND param, FROM "0.25", TO "0.30", AUTHOR "aicha", POSTURE trusted, REASON "try" ) => rejected structural stale
+DEFINE REFINE not_a_number AS ( TARGET "vat", KIND param, FROM "0.20", TO "abc", AUTHOR "aicha", POSTURE trusted, REASON "try" ) => rejected structural not a number
+DEFINE REFINE no_reason AS ( TARGET "vat", KIND param, FROM "0.20", TO "0.30", AUTHOR "aicha", POSTURE trusted ) => rejected structural malformed
+DEFINE REFINE bad_posture AS ( TARGET "vat", KIND param, FROM "0.20", TO "0.30", AUTHOR "aicha", POSTURE bold, REASON "try" ) => rejected structural posture
+DEFINE REFINE is_not_reason AS ( TARGET "vat", KIND param, FROM "0.20", TO "0.30", AUTHOR "aicha", POSTURE trusted, REASON "" ) => rejected structural reason
+
+=== 07 FROM is compared as a number, not as text
+--- program
+$nVat = 0.20  # <R:PARAM name="vat" min="0" max="0.9">
+--- do
+DEFINE REFINE same_number AS ( TARGET "vat", KIND param, FROM "0.2", TO "0.30", AUTHOR "mansour", POSTURE trusted, REASON "0.2 is 0.20" ) => admitted
+--- text
+$nVat = 0.30  # <R:PARAM name="vat" min="0" max="0.9">
+
+=== 08 a string parameter
+--- program
+$cLabel = "net"  # <R:PARAM name="label">
+--- do
+DEFINE REFINE plain AS ( TARGET "label", KIND param, FROM "net", TO "gross", AUTHOR "mansour", POSTURE trusted, REASON "label" ) => admitted
+--- text
+$cLabel = "gross"  # <R:PARAM name="label">
+
+=== 09 the quote a value needs
+~~~ Ring has no string escapes (F-55): a value that holds a double quote is written in single quotes, one that holds both in backticks. The sentence
+~~~ has no escapes either, so it writes such a value in the quote the value does not hold -- which is also why a value holding all three quotes cannot
+~~~ be proposed by a sentence at all; the court asserts that `to_literal` refuses it when asked directly
+--- program
+$cLabel = "net"  # <R:PARAM name="label">
+--- do
+DEFINE REFINE quoted AS ( TARGET "label", KIND param, FROM "net", TO 'say "hi"', AUTHOR "mansour", POSTURE trusted, REASON "label" ) => admitted
+DEFINE REFINE both AS ( TARGET "label", KIND param, FROM 'say "hi"', TO `it's "x"`, AUTHOR "mansour", POSTURE trusted, REASON "label" ) => admitted
+--- text
+$cLabel = `it's "x"`  # <R:PARAM name="label">
+
+=== 11 governance: the authority must cover the risk tier, the permission must be held
+--- program
+$nVat = 0.20  # <R:PARAM name="vat" min="0" max="0.9" risk="1" governed_by="ops">
+$cSort = "quick"  # <R:ALGO name="sort" options="quick|merge|heap" risk="3" governed_by="ops">
+--- context
+governance ops
+	actor bot delegated may vat sort
+	actor lead autonomous may vat sort
+	actor intern advisory may vat
+--- do
+DEFINE REFINE bot_vat AS ( TARGET "vat", KIND param, FROM "0.20", TO "0.25", AUTHOR "bot", POSTURE trusted, REASON "tier 1, level 2" ) => admitted
+DEFINE REFINE bot_sort AS ( TARGET "sort", KIND algo, FROM "quick", TO "merge", AUTHOR "bot", POSTURE trusted, REASON "tier 3, level 2" ) => rejected governance authority
+DEFINE REFINE intern_sort AS ( TARGET "sort", KIND algo, FROM "quick", TO "merge", AUTHOR "intern", POSTURE trusted, REASON "no permission" ) => rejected governance PERMISSION
+DEFINE REFINE stranger AS ( TARGET "sort", KIND algo, FROM "quick", TO "merge", AUTHOR "stranger", POSTURE trusted, REASON "unknown actor" ) => rejected governance PERMISSION
+DEFINE REFINE lead_sort AS ( TARGET "sort", KIND algo, FROM "quick", TO "merge", AUTHOR "lead", POSTURE trusted, REASON "tier 3, level 3" ) => admitted
+--- text
+$nVat = 0.25  # <R:PARAM name="vat" min="0" max="0.9" risk="1" governed_by="ops">
+$cSort = "merge"  # <R:ALGO name="sort" options="quick|merge|heap" risk="3" governed_by="ops">
+
+=== 12 a governed point whose risk was never declared is never refined
+--- program
+$nVat = 0.20  # <R:PARAM name="vat" min="0" max="0.9" governed_by="ops">
+$nCap = 0.50  # <R:PARAM name="cap" governed_by="nowhere" risk="1">
+--- context
+governance ops
+	actor lead autonomous may vat cap
+--- do
+DEFINE REFINE undeclared AS ( TARGET "vat", KIND param, FROM "0.20", TO "0.30", AUTHOR "lead", POSTURE trusted, REASON "try" ) => rejected governance NO declared risk tier
+DEFINE REFINE unconfigured AS ( TARGET "cap", KIND param, FROM "0.50", TO "0.60", AUTHOR "lead", POSTURE trusted, REASON "try" ) => rejected governance not configured
+
+=== 13 the trust floor: origin is not identity
+~~~ the same actor, the same value; the posture of where the proposal came from decides. A point with no floor takes any posture
+--- program
+$nVat = 0.20  # <R:PARAM name="vat" min="0" max="0.9" risk="1" governed_by="ops">
+$cSort = "quick"  # <R:ALGO name="sort" options="quick|merge|heap" risk="3" governed_by="ops" floor="trusted">
+--- context
+governance ops
+	actor lead autonomous may vat sort
+--- do
+DEFINE REFINE llm_vat AS ( TARGET "vat", KIND param, FROM "0.20", TO "0.30", AUTHOR "lead", POSTURE llm, REASON "no floor on vat" ) => admitted
+DEFINE REFINE llm_sort AS ( TARGET "sort", KIND algo, FROM "quick", TO "merge", AUTHOR "lead", POSTURE llm, REASON "floor is trusted" ) => rejected trust posture :llm below the required floor
+DEFINE REFINE ext_sort AS ( TARGET "sort", KIND algo, FROM "quick", TO "merge", AUTHOR "lead", POSTURE external, REASON "floor is trusted" ) => rejected trust external
+DEFINE REFINE sbx_sort AS ( TARGET "sort", KIND algo, FROM "quick", TO "merge", AUTHOR "lead", POSTURE sandboxed, REASON "floor is trusted" ) => rejected trust sandboxed
+DEFINE REFINE trusted_sort AS ( TARGET "sort", KIND algo, FROM "quick", TO "merge", AUTHOR "lead", POSTURE trusted, REASON "floor is met" ) => admitted
+--- text
+$nVat = 0.30  # <R:PARAM name="vat" min="0" max="0.9" risk="1" governed_by="ops">
+$cSort = "merge"  # <R:ALGO name="sort" options="quick|merge|heap" risk="3" governed_by="ops" floor="trusted">
+
+=== 14 the stages run in order, and the first to fail ends the proposal
+--- program
+$nVat = 0.20  # <R:PARAM name="vat" min="0" max="0.9" risk="1" governed_by="ops">
+$cSort = "quick"  # <R:ALGO name="sort" options="quick|merge|heap" risk="3" governed_by="ops" floor="trusted">
+--- context
+governance ops
+	actor bot delegated may vat sort
+	actor lead autonomous may vat sort
+--- do
+DEFINE REFINE c_and_t AS ( TARGET "sort", KIND algo, FROM "quick", TO "radix", AUTHOR "lead", POSTURE llm, REASON "constraint before trust" ) => rejected constraint not in options
+DEFINE REFINE g_and_t AS ( TARGET "sort", KIND algo, FROM "quick", TO "merge", AUTHOR "bot", POSTURE llm, REASON "governance before trust" ) => rejected governance authority
+DEFINE REFINE s_and_c AS ( TARGET "vat", KIND param, FROM "0.99", TO "0.95", AUTHOR "lead", POSTURE trusted, REASON "structural before constraint" ) => rejected structural stale
+
+=== 15 a derivation rule reads the state a change would leave
+~~~ the rule is a declaration in the text; it is evaluated on the post-change state, and a violation refuses the change (the program is never left inconsistent)
+--- program
+$nVat = 0.20  # <R:PARAM name="vat" min="0" max="0.9">
+$nFloor = 0.10  # <R:PARAM name="floor" min="0" max="0.5">
+# <R:RULE name="vat-above-floor" expr="vat >= floor" message="vat must not drop below floor">
+? Gross(100)
+
+func Gross(nNet)
+	return nNet * (1 + $nVat)
+--- do
+DEFINE REFINE vat_low AS ( TARGET "vat", KIND param, FROM "0.20", TO "0.05", AUTHOR "mansour", POSTURE trusted, REASON "try" ) => rejected derivation rule 'vat-above-floor' violated -- vat must not drop below floor
+DEFINE REFINE vat_ok AS ( TARGET "vat", KIND param, FROM "0.20", TO "0.30", AUTHOR "mansour", POSTURE trusted, REASON "try" ) => admitted
+DEFINE REFINE floor_high AS ( TARGET "floor", KIND param, FROM "0.10", TO "0.40", AUTHOR "mansour", POSTURE trusted, REASON "try" ) => rejected derivation vat-above-floor
+DEFINE REFINE floor_ok AS ( TARGET "floor", KIND param, FROM "0.10", TO "0.25", AUTHOR "mansour", POSTURE trusted, REASON "try" ) => admitted
+--- text
+$nVat = 0.30  # <R:PARAM name="vat" min="0" max="0.9">
+$nFloor = 0.25  # <R:PARAM name="floor" min="0" max="0.5">
+# <R:RULE name="vat-above-floor" expr="vat >= floor" message="vat must not drop below floor">
+? Gross(100)
+
+func Gross(nNet)
+	return nNet * (1 + $nVat)
+
+=== 16 a rule can compare a point with a number
+--- program
+$nVat = 0.20  # <R:PARAM name="vat" min="0" max="0.9">
+# <R:RULE name="vat-cap" expr="vat <= 0.5" message="policy caps vat at 0.5">
+--- do
+DEFINE REFINE over_cap AS ( TARGET "vat", KIND param, FROM "0.20", TO "0.60", AUTHOR "mansour", POSTURE trusted, REASON "try" ) => rejected derivation policy caps vat at 0.5
+DEFINE REFINE at_cap AS ( TARGET "vat", KIND param, FROM "0.20", TO "0.50", AUTHOR "mansour", POSTURE trusted, REASON "try" ) => admitted
+--- text
+$nVat = 0.50  # <R:PARAM name="vat" min="0" max="0.9">
+# <R:RULE name="vat-cap" expr="vat <= 0.5" message="policy caps vat at 0.5">
+
+=== 17 the cascade: the readers, and the other places the name is written
+~~~ a literal that is assigned again is not the only definition of its name: the refinement is admitted, FLAGGED, and the warning says where. The
+~~~ readers are named by the id of the statement and the function it stands in (`<top>` for the file's own level); names are Ring's, case folded
+--- program
+$nVat = 0.20  # <R:PARAM name="vat" min="0" max="0.9">
+$nVat = $NVAT + 0.05
+? Gross(100)
+
+func Gross(nNet)
+	return nNet * (1 + $nVat)
+--- do
+DEFINE REFINE flagged AS ( TARGET "vat", KIND param, FROM "0.20", TO "0.30", AUTHOR "mansour", POSTURE trusted, REASON "try" ) => flagged also assigned at id 2
+--- cascade
+vat reads @2 <top> | @6 Gross
+vat writes @2 <top>
+--- text
+$nVat = 0.30  # <R:PARAM name="vat" min="0" max="0.9">
+$nVat = $NVAT + 0.05
+? Gross(100)
+
+func Gross(nNet)
+	return nNet * (1 + $nVat)
+
+=== 18 a stated cascade is an assertion
+~~~ the sentence may say what it expects to touch (CASCADE: the ids of the statements that read the name); the gate checks it against the program
+--- program
+$nVat = 0.20  # <R:PARAM name="vat" min="0" max="0.9">
+? Gross(100)
+
+func Gross(nNet)
+	return nNet * (1 + $nVat)
+--- do
+DEFINE REFINE wrong AS ( TARGET "vat", KIND param, FROM "0.20", TO "0.30", AUTHOR "mansour", POSTURE trusted, REASON "try", CASCADE "2" ) => rejected derivation cascade
+DEFINE REFINE right AS ( TARGET "vat", KIND param, FROM "0.20", TO "0.30", AUTHOR "mansour", POSTURE trusted, REASON "try", CASCADE "5" ) => admitted
+--- text
+$nVat = 0.30  # <R:PARAM name="vat" min="0" max="0.9">
+? Gross(100)
+
+func Gross(nNet)
+	return nNet * (1 + $nVat)
+
+=== 19 a pipeline: an insert is one primitive
+--- program
+aSteps = ["parse", "check", "emit"]  # <R:PIPELINE name="steps" options="parse|check|optimize|emit">
+--- do
+DEFINE REFINE add_optimize AS ( TARGET "steps", KIND pipeline, FROM "parse|check|emit", TO "parse|check|optimize|emit", AUTHOR "mansour", POSTURE trusted, REASON "a stage" ) => admitted tx=pipeline.insert_stage
+--- text
+aSteps = ["parse", "check", "optimize", "emit"]  # <R:PIPELINE name="steps" options="parse|check|optimize|emit">
+
+=== 20 a pipeline: a remove, a reorder, and the three together
+--- program
+aSteps = ["parse", "check", "emit"]  # <R:PIPELINE name="steps" options="parse|check|optimize|emit">
+--- do
+DEFINE REFINE drop_check AS ( TARGET "steps", KIND pipeline, FROM "parse|check|emit", TO "parse|emit", AUTHOR "mansour", POSTURE trusted, REASON "a stage" ) => admitted tx=pipeline.remove_stage
+DEFINE REFINE swap AS ( TARGET "steps", KIND pipeline, FROM "parse|emit", TO "emit|parse", AUTHOR "mansour", POSTURE trusted, REASON "an order" ) => admitted tx=pipeline.reorder_stages
+--- text
+aSteps = ["emit", "parse"]  # <R:PIPELINE name="steps" options="parse|check|optimize|emit">
+
+=== 20b a pipeline: a remove, an insert and a reorder in one sentence
+~~~ the lowering: remove what is not wanted; insert what is missing at its place in the new order; reorder what is left if it is still out of order
+--- program
+aSteps = ["parse", "check", "emit"]  # <R:PIPELINE name="steps" options="parse|check|optimize|emit">
+--- do
+DEFINE REFINE all_three AS ( TARGET "steps", KIND pipeline, FROM "parse|check|emit", TO "emit|optimize|parse", AUTHOR "mansour", POSTURE trusted, REASON "all of it" ) => admitted tx=pipeline.remove_stage,pipeline.insert_stage,pipeline.reorder_stages
+--- text
+aSteps = ["emit", "optimize", "parse"]  # <R:PIPELINE name="steps" options="parse|check|optimize|emit">
+
+=== 21 a pipeline: the constraint stage
+--- program
+aSteps = ["parse", "check", "emit"]  # <R:PIPELINE name="steps" options="parse|check|optimize|emit">
+--- do
+DEFINE REFINE unknown_stage AS ( TARGET "steps", KIND pipeline, FROM "parse|check|emit", TO "parse|ship|emit", AUTHOR "mansour", POSTURE trusted, REASON "try" ) => rejected constraint 'ship' not in options
+DEFINE REFINE twice AS ( TARGET "steps", KIND pipeline, FROM "parse|check|emit", TO "parse|parse|emit", AUTHOR "mansour", POSTURE trusted, REASON "try" ) => rejected constraint twice
+DEFINE REFINE empty AS ( TARGET "steps", KIND pipeline, FROM "parse|check|emit", TO "", AUTHOR "mansour", POSTURE trusted, REASON "try" ) => rejected constraint empty
+
+=== 22 an algorithm named by a string
+--- program
+$cSort = "quick"  # <R:ALGO name="sort" options="quick|merge|heap">
+--- do
+DEFINE REFINE not_a_choice AS ( TARGET "sort", KIND algo, FROM "quick", TO "radix", AUTHOR "mansour", POSTURE trusted, REASON "try" ) => rejected constraint 'radix' not in options quick|merge|heap
+DEFINE REFINE choose_heap AS ( TARGET "sort", KIND algo, FROM "quick", TO "heap", AUTHOR "mansour", POSTURE trusted, REASON "try" ) => admitted tx=refinement.set_value
+--- text
+$cSort = "heap"  # <R:ALGO name="sort" options="quick|merge|heap">
+
+=== 23 an algorithm named by the function a call goes to
+~~~ the choice is an edge of the graph, not a value: the refinement retargets the call, and the structural stage -- the language itself -- asks
+~~~ whether the new callee is a function of the program that takes as many arguments as the call passes
+--- program
+aData = [3, 1, 2]
+aSorted = QuickSort(aData)  # <R:ALGO name="sort" options="QuickSort|MergeSort|HeapSort|RadixSort">
+
+func QuickSort(aList)
+	return aList
+
+func MergeSort(aList)
+	return aList
+
+func HeapSort(aList, nDepth)
+	return aList
+--- do
+DEFINE REFINE not_defined AS ( TARGET "sort", KIND algo, FROM "QuickSort", TO "RadixSort", AUTHOR "mansour", POSTURE trusted, REASON "try" ) => rejected structural no function 'RadixSort'
+DEFINE REFINE wrong_arity AS ( TARGET "sort", KIND algo, FROM "QuickSort", TO "HeapSort", AUTHOR "mansour", POSTURE trusted, REASON "try" ) => rejected structural takes 2
+DEFINE REFINE lowercase AS ( TARGET "sort", KIND algo, FROM "QuickSort", TO "mergesort", AUTHOR "mansour", POSTURE trusted, REASON "options are exact" ) => rejected constraint not in options
+DEFINE REFINE merge AS ( TARGET "sort", KIND algo, FROM "QuickSort", TO "MergeSort", AUTHOR "mansour", POSTURE trusted, REASON "stable" ) => admitted tx=edge.retarget
+--- text
+aData = [3, 1, 2]
+aSorted = MergeSort(aData)  # <R:ALGO name="sort" options="QuickSort|MergeSort|HeapSort|RadixSort">
+
+func QuickSort(aList)
+	return aList
+
+func MergeSort(aList)
+	return aList
+
+func HeapSort(aList, nDepth)
+	return aList
+
+=== 24 the rules are refinable too, and loosening one is the heaviest act
+~~~ a refinement of a point's own rule (`point.attr`) goes through the same gate; the origin must be :trusted whatever the point's floor says (the
+~~~ rules cannot be loosened, or tightened, by a lower-trust origin), and WIDENING a rule -- a larger maximum, a smaller minimum, a new option, a
+~~~ lower risk tier or floor, no governance -- is always a tier-4 act, which only the highest authority covers
+--- program
+$nVat = 0.20  # <R:PARAM name="vat" min="0" max="0.9" risk="1" governed_by="ops">
+$cSort = "quick"  # <R:ALGO name="sort" options="quick|merge|heap" risk="3" governed_by="ops">
+--- context
+governance ops
+	actor lead autonomous may vat sort
+	actor boss emergencyoverride may vat sort
+--- do
+DEFINE REFINE llm_tightens AS ( TARGET "vat.max", KIND param, FROM "0.9", TO "0.5", AUTHOR "boss", POSTURE llm, REASON "try" ) => rejected trust rule
+DEFINE REFINE lead_tightens AS ( TARGET "vat.max", KIND param, FROM "0.9", TO "0.5", AUTHOR "lead", POSTURE trusted, REASON "a cap" ) => admitted tx=node.update_property
+DEFINE REFINE lead_widens AS ( TARGET "vat.max", KIND param, FROM "0.5", TO "0.8", AUTHOR "lead", POSTURE trusted, REASON "a wider cap" ) => rejected governance tier 4
+DEFINE REFINE boss_widens AS ( TARGET "vat.max", KIND param, FROM "0.5", TO "0.8", AUTHOR "boss", POSTURE trusted, REASON "a wider cap" ) => admitted
+DEFINE REFINE below_value AS ( TARGET "vat.max", KIND param, FROM "0.8", TO "0.1", AUTHOR "lead", POSTURE trusted, REASON "under the value" ) => rejected derivation own rule
+DEFINE REFINE add_radix AS ( TARGET "sort.options", KIND algo, FROM "quick|merge|heap", TO "quick|merge|heap|radix", AUTHOR "lead", POSTURE trusted, REASON "a choice" ) => rejected governance tier 4
+DEFINE REFINE boss_adds AS ( TARGET "sort.options", KIND algo, FROM "quick|merge|heap", TO "quick|merge|heap|radix", AUTHOR "boss", POSTURE trusted, REASON "a choice" ) => admitted tx=refinement.add_option
+DEFINE REFINE lead_removes AS ( TARGET "sort.options", KIND algo, FROM "quick|merge|heap|radix", TO "quick|merge|radix", AUTHOR "lead", POSTURE trusted, REASON "no heap" ) => admitted tx=refinement.remove_option
+DEFINE REFINE remove_current AS ( TARGET "sort.options", KIND algo, FROM "quick|merge|radix", TO "merge|radix", AUTHOR "lead", POSTURE trusted, REASON "the current value" ) => rejected derivation own rule
+--- text
+$nVat = 0.20  # <R:PARAM name="vat" min="0" max="0.8" risk="1" governed_by="ops">
+$cSort = "quick"  # <R:ALGO name="sort" options="quick|merge|radix" risk="3" governed_by="ops">
+
+=== 25 governance itself is an edge, and edges can be created, deleted and retargeted
+--- program
+$nVat = 0.20  # <R:PARAM name="vat" min="0" max="0.9" risk="1" governed_by="ops">
+$nCap = 0.50  # <R:PARAM name="cap">
+--- context
+governance ops
+	actor boss emergencyoverride may vat cap
+governance audit
+	actor boss emergencyoverride may vat cap
+--- do
+DEFINE REFINE retarget_gov AS ( TARGET "vat.governed_by", KIND param, FROM "ops", TO "audit", AUTHOR "boss", POSTURE trusted, REASON "a new owner" ) => admitted tx=edge.retarget
+DEFINE REFINE ungovern AS ( TARGET "vat.governed_by", KIND param, FROM "audit", TO "", AUTHOR "boss", POSTURE trusted, REASON "no owner" ) => admitted tx=edge.delete
+DEFINE REFINE govern_cap AS ( TARGET "cap.governed_by", KIND param, FROM "", TO "ops", AUTHOR "mansour", POSTURE trusted, REASON "an owner" ) => admitted tx=edge.create
+DEFINE REFINE no_such_gov AS ( TARGET "cap.governed_by", KIND param, FROM "ops", TO "elsewhere", AUTHOR "boss", POSTURE trusted, REASON "try" ) => rejected structural no governance 'elsewhere'
+--- text
+$nVat = 0.20  # <R:PARAM name="vat" min="0" max="0.9" risk="1">
+$nCap = 0.50  # <R:PARAM name="cap" governed_by="ops">
+
+=== 26 a revert is a refinement with its own event, and it restores the program byte for byte
+--- program
+$nVat = 0.20  # <R:PARAM name="vat" min="0" max="0.9">
+$cSort = "quick"  # <R:ALGO name="sort" options="quick|merge|heap">
+--- do
+DEFINE REFINE a AS ( TARGET "vat", KIND param, FROM "0.20", TO "0.30", AUTHOR "mansour", POSTURE trusted, REASON "up" ) => admitted
+DEFINE REFINE b AS ( TARGET "sort", KIND algo, FROM "quick", TO "heap", AUTHOR "mansour", POSTURE trusted, REASON "stage" ) => admitted
+DEFINE REFINE undo_a AS ( TARGET "vat", KIND param, FROM "0.30", TO "0.20", AUTHOR "mansour", POSTURE trusted, REASON "back", REVERTS "1" ) => admitted
+DEFINE REFINE undo_a_again AS ( TARGET "vat", KIND param, FROM "0.20", TO "0.30", AUTHOR "mansour", POSTURE trusted, REASON "twice", REVERTS "1" ) => rejected structural already reverted
+DEFINE REFINE undo_wrong AS ( TARGET "sort", KIND algo, FROM "heap", TO "merge", AUTHOR "mansour", POSTURE trusted, REASON "not the prior state", REVERTS "2" ) => rejected structural prior state
+DEFINE REFINE undo_b AS ( TARGET "sort", KIND algo, FROM "heap", TO "quick", AUTHOR "mansour", POSTURE trusted, REASON "back", REVERTS "2" ) => admitted
+DEFINE REFINE undo_ghost AS ( TARGET "sort", KIND algo, FROM "quick", TO "heap", AUTHOR "mansour", POSTURE trusted, REASON "no such event", REVERTS "9" ) => rejected structural no event 9
+
+=== 27 a revert whose prior state has been changed since is a conflict
+--- program
+$nVat = 0.20  # <R:PARAM name="vat" min="0" max="0.9">
+--- do
+DEFINE REFINE one AS ( TARGET "vat", KIND param, FROM "0.20", TO "0.30", AUTHOR "mansour", POSTURE trusted, REASON "up" ) => admitted
+DEFINE REFINE two AS ( TARGET "vat", KIND param, FROM "0.30", TO "0.40", AUTHOR "mansour", POSTURE trusted, REASON "up" ) => admitted
+DEFINE REFINE undo_one AS ( TARGET "vat", KIND param, FROM "0.40", TO "0.20", AUTHOR "mansour", POSTURE trusted, REASON "back", REVERTS "1" ) => rejected structural conflict
+--- text
+$nVat = 0.40  # <R:PARAM name="vat" min="0" max="0.9">
+
+=== 28 a revert is gated like any change: by governance and by trust
+--- program
+$cSort = "quick"  # <R:ALGO name="sort" options="quick|merge|heap" risk="3" governed_by="ops" floor="trusted">
+--- context
+governance ops
+	actor lead autonomous may sort
+	actor bot delegated may sort
+--- do
+DEFINE REFINE up AS ( TARGET "sort", KIND algo, FROM "quick", TO "heap", AUTHOR "lead", POSTURE trusted, REASON "stage" ) => admitted
+DEFINE REFINE llm_undo AS ( TARGET "sort", KIND algo, FROM "heap", TO "quick", AUTHOR "lead", POSTURE llm, REASON "back", REVERTS "1" ) => rejected trust
+DEFINE REFINE bot_undo AS ( TARGET "sort", KIND algo, FROM "heap", TO "quick", AUTHOR "bot", POSTURE trusted, REASON "back", REVERTS "1" ) => rejected governance authority
+DEFINE REFINE lead_undo AS ( TARGET "sort", KIND algo, FROM "heap", TO "quick", AUTHOR "lead", POSTURE trusted, REASON "back", REVERTS "1" ) => admitted
+--- text
+$cSort = "quick"  # <R:ALGO name="sort" options="quick|merge|heap" risk="3" governed_by="ops" floor="trusted">
+
+=== 29 a proposal drafted against ids still lands after a human edit
+~~~ the agent proposes against ids taken from one parse; a human edits the text; rung 19's matcher carries the ids over; the proposal lands where
+~~~ it was aimed (AT), and is refused as stale -- not misapplied -- when the edit moved or changed what it was aimed at
+--- program
+$nVat = 0.20  # <R:PARAM name="vat" min="0" max="0.9">
+$nFloor = 0.10  # <R:PARAM name="floor" min="0" max="0.5">
+? Gross(100)
+
+func Gross(nNet)
+	return nNet * (1 + $nVat)
+--- edited
+$nShip = 5
+$nVat = 0.20  # <R:PARAM name="vat" min="0" max="0.9">
+$nFloor = 0.10  # <R:PARAM name="floor" min="0" max="0.5">
+? Gross(100)
+
+func Gross(nNet)
+	return nNet * (1 + $nVat)
+--- do
+DEFINE REFINE wrong_id AS ( TARGET "floor", KIND param, FROM "0.10", TO "0.15", AUTHOR "mansour", POSTURE trusted, REASON "drafted against the wrong id", AT "1" ) => rejected structural stale: 'floor' is at id 2
+EDIT
+DEFINE REFINE after_edit AS ( TARGET "floor", KIND param, FROM "0.10", TO "0.15", AUTHOR "mansour", POSTURE trusted, REASON "drafted against the old parse", AT "2" ) => admitted
+--- text
+$nShip = 5
+$nVat = 0.20  # <R:PARAM name="vat" min="0" max="0.9">
+$nFloor = 0.15  # <R:PARAM name="floor" min="0" max="0.5">
+? Gross(100)
+
+func Gross(nNet)
+	return nNet * (1 + $nVat)
+
+=== 30 an edit that changed the value the proposal expected makes it stale, not wrong
+--- program
+$nVat = 0.20  # <R:PARAM name="vat" min="0" max="0.9">
+$nFloor = 0.10  # <R:PARAM name="floor" min="0" max="0.5">
+--- edited
+$nVat = 0.20  # <R:PARAM name="vat" min="0" max="0.9">
+$nFloor = 0.12  # <R:PARAM name="floor" min="0" max="0.5">
+--- do
+EDIT
+DEFINE REFINE stale AS ( TARGET "floor", KIND param, FROM "0.10", TO "0.15", AUTHOR "mansour", POSTURE trusted, REASON "drafted before the edit", AT "2" ) => rejected structural stale: 'floor' is 0.12 now
+--- text
+$nVat = 0.20  # <R:PARAM name="vat" min="0" max="0.9">
+$nFloor = 0.12  # <R:PARAM name="floor" min="0" max="0.5">
+
+=== 31 an edit that removed the point
+--- program
+$nVat = 0.20  # <R:PARAM name="vat" min="0" max="0.9">
+$nFloor = 0.10  # <R:PARAM name="floor" min="0" max="0.5">
+--- edited
+$nVat = 0.20  # <R:PARAM name="vat" min="0" max="0.9">
+--- do
+EDIT
+DEFINE REFINE gone AS ( TARGET "floor", KIND param, FROM "0.10", TO "0.15", AUTHOR "mansour", POSTURE trusted, REASON "drafted before the edit", AT "2" ) => rejected structural no refinement point 'floor'
+--- text
+$nVat = 0.20  # <R:PARAM name="vat" min="0" max="0.9">
+
+=== 32 a point already outside its own bounds can be repaired, and other points refined meanwhile
+~~~ a text edit can leave a value outside its bounds (the audit, A01, judges exactly that). The program is then not clean, but it is not locked: what a
+~~~ refinement may not do is leave violated the rules of the point it touched, so a repair lands and a refinement elsewhere does too
+--- program
+$nVat = 0.95  # <R:PARAM name="vat" min="0" max="0.9">
+$nFloor = 0.10  # <R:PARAM name="floor" min="0" max="0.5">
+--- lift
+vat param @1 = 0.95 min=0 max=0.9
+floor param @2 = 0.10 min=0 max=0.5
+error point 'vat' value 0.95 is above its own max 0.9
+--- do
+DEFINE REFINE elsewhere AS ( TARGET "floor", KIND param, FROM "0.10", TO "0.15", AUTHOR "mansour", POSTURE trusted, REASON "another point" ) => admitted
+DEFINE REFINE same_again AS ( TARGET "vat", KIND param, FROM "0.95", TO "0.92", AUTHOR "mansour", POSTURE trusted, REASON "still above" ) => rejected constraint above max 0.9
+DEFINE REFINE repair AS ( TARGET "vat", KIND param, FROM "0.95", TO "0.50", AUTHOR "mansour", POSTURE trusted, REASON "back inside" ) => admitted
+DEFINE REFINE tighten_too_far AS ( TARGET "vat.max", KIND param, FROM "0.9", TO "0.3", AUTHOR "mansour", POSTURE trusted, REASON "under the value" ) => rejected derivation own rule
+--- text
+$nVat = 0.50  # <R:PARAM name="vat" min="0" max="0.9">
+$nFloor = 0.15  # <R:PARAM name="floor" min="0" max="0.5">
+
+=== 33 a rule already violated blocks the points it names, not the others
+--- program
+$nVat = 0.05  # <R:PARAM name="vat" min="0" max="0.9">
+$nFloor = 0.10  # <R:PARAM name="floor" min="0" max="0.5">
+$nCap = 1  # <R:PARAM name="cap" max="5">
+# <R:RULE name="vat-above-floor" expr="vat >= floor" message="vat must not drop below floor">
+--- do
+DEFINE REFINE elsewhere AS ( TARGET "cap", KIND param, FROM "1", TO "2", AUTHOR "mansour", POSTURE trusted, REASON "not in the rule" ) => admitted
+DEFINE REFINE worse AS ( TARGET "floor", KIND param, FROM "0.10", TO "0.20", AUTHOR "mansour", POSTURE trusted, REASON "touches the rule, leaves it violated" ) => rejected derivation vat-above-floor
+DEFINE REFINE repair AS ( TARGET "floor", KIND param, FROM "0.10", TO "0.04", AUTHOR "mansour", POSTURE trusted, REASON "satisfies it" ) => admitted
+--- text
+$nVat = 0.05  # <R:PARAM name="vat" min="0" max="0.9">
+$nFloor = 0.04  # <R:PARAM name="floor" min="0" max="0.5">
+$nCap = 2  # <R:PARAM name="cap" max="5">
+# <R:RULE name="vat-above-floor" expr="vat >= floor" message="vat must not drop below floor">
+
+=== 34 a pipeline refinement changes what the program does
+~~~ the loop reads the list the point is attached to: a stage inserted is a stage run, on the oracle and on rnxc
+--- program
+aSteps = ["a", "b"]  # <R:PIPELINE name="steps" options="a|b|c">
+for cStep in aSteps
+	? cStep
+next
+--- do
+DEFINE REFINE add_c AS ( TARGET "steps", KIND pipeline, FROM "a|b", TO "a|b|c", AUTHOR "mansour", POSTURE trusted, REASON "one more stage" ) => admitted tx=pipeline.insert_stage
+DEFINE REFINE reverse AS ( TARGET "steps", KIND pipeline, FROM "a|b|c", TO "c|b|a", AUTHOR "mansour", POSTURE trusted, REASON "backwards" ) => admitted tx=pipeline.reorder_stages
+--- text
+aSteps = ["c", "b", "a"]  # <R:PIPELINE name="steps" options="a|b|c">
+for cStep in aSteps
+	? cStep
+next
+--- run
+oracle: a\nb | c\nb\na
+
+=== 35 a retargeted call goes somewhere else
+--- program
+nOut = Double(21)  # <R:ALGO name="op" options="Double|Triple">
+? nOut
+
+func Double(n)
+	return n * 2
+
+func Triple(n)
+	return n * 3
+--- do
+DEFINE REFINE triple AS ( TARGET "op", KIND algo, FROM "Double", TO "Triple", AUTHOR "mansour", POSTURE trusted, REASON "three times" ) => admitted tx=edge.retarget
+--- text
+nOut = Triple(21)  # <R:ALGO name="op" options="Double|Triple">
+? nOut
+
+func Double(n)
+	return n * 2
+
+func Triple(n)
+	return n * 3
+--- run
+oracle: 42 | 63
+
+=== 36 every structural refusal names its own fault, and a rule's attributes are values of their own shape
+~~~ the structural stage asks the language: an attribute the rule does not have, a value of the wrong shape for its point, an attribute that does not
+~~~ apply to the point's kind. Each is refused there, before a bound is looked at; and the values of the right shape are admitted (mutation study:
+~~~ the refusals no fixture reached, and the checks between `0.9` and `1.0` as the same number and `"1"` and `"1.0"` as different strings)
+--- program
+$nVat = 0.20  # <R:PARAM name="vat" min="0" max="0.9">
+$cLabel = "net"  # <R:PARAM name="label">
+$cSort = "quick"  # <R:ALGO name="sort" options="quick|merge|heap">
+$nCap = 0.50  # <R:PARAM name="cap" min="0" max="1">
+$cCode = "1"  # <R:PARAM name="code">
+--- do
+DEFINE REFINE colour AS ( TARGET "vat.colour", KIND param, FROM "", TO "red", AUTHOR "mansour", POSTURE trusted, REASON "try" ) => rejected structural not an attribute
+DEFINE REFINE label_max AS ( TARGET "label.max", KIND param, FROM "", TO "5", AUTHOR "mansour", POSTURE trusted, REASON "try" ) => rejected structural bounds apply to numeric points only
+DEFINE REFINE vat_options AS ( TARGET "vat.options", KIND param, FROM "", TO "a|b", AUTHOR "mansour", POSTURE trusted, REASON "try" ) => rejected structural options apply to algo and pipeline points
+DEFINE REFINE cap_max_word AS ( TARGET "cap.max", KIND param, FROM "1", TO "lots", AUTHOR "mansour", POSTURE trusted, REASON "try" ) => rejected structural TO 'lots' is not a number
+DEFINE REFINE vat_risk AS ( TARGET "vat.risk", KIND param, FROM "", TO "5", AUTHOR "mansour", POSTURE trusted, REASON "try" ) => rejected structural not a risk tier
+DEFINE REFINE vat_floor AS ( TARGET "vat.floor", KIND param, FROM "", TO "nobody", AUTHOR "mansour", POSTURE trusted, REASON "try" ) => rejected structural not a posture
+DEFINE REFINE sort_gap AS ( TARGET "sort.options", KIND algo, FROM "quick|merge|heap", TO "quick||heap", AUTHOR "mansour", POSTURE trusted, REASON "try" ) => rejected structural not a list of distinct options
+DEFINE REFINE sort_twice AS ( TARGET "sort.options", KIND algo, FROM "quick|merge|heap", TO "quick|quick|heap", AUTHOR "mansour", POSTURE trusted, REASON "try" ) => rejected structural not a list of distinct options
+DEFINE REFINE vat_word AS ( TARGET "vat", KIND param, FROM "0.20", TO "lots", AUTHOR "mansour", POSTURE trusted, REASON "try" ) => rejected structural TO 'lots' is not a number
+DEFINE REFINE gov_name AS ( TARGET "cap.governed_by", KIND param, FROM "", TO "two words", AUTHOR "mansour", POSTURE trusted, REASON "try" ) => rejected structural not a governance name
+DEFINE REFINE not_governed AS ( TARGET "cap.governed_by", KIND param, FROM "", TO "", AUTHOR "mansour", POSTURE trusted, REASON "try" ) => rejected structural 'cap' is not governed
+DEFINE REFINE code_stale AS ( TARGET "code", KIND param, FROM "1.0", TO "2", AUTHOR "mansour", POSTURE trusted, REASON "a string is not a number" ) => rejected structural stale
+DEFINE REFINE vat_from_word AS ( TARGET "vat", KIND param, FROM "abc", TO "0.30", AUTHOR "mansour", POSTURE trusted, REASON "try" ) => rejected structural stale
+DEFINE REFINE vat_risk_ok AS ( TARGET "vat.risk", KIND param, FROM "", TO "2", AUTHOR "mansour", POSTURE trusted, REASON "a tier" ) => admitted
+DEFINE REFINE vat_floor_ok AS ( TARGET "vat.floor", KIND param, FROM "", TO "external", AUTHOR "mansour", POSTURE trusted, REASON "a floor" ) => admitted
+DEFINE REFINE cap_max_numeric AS ( TARGET "cap.max", KIND param, FROM "1.0", TO "0.8", AUTHOR "mansour", POSTURE trusted, REASON "1.0 is the 1 there" ) => admitted
+DEFINE REFINE cap_max_stale AS ( TARGET "cap.max", KIND param, FROM "0.7", TO "0.6", AUTHOR "mansour", POSTURE trusted, REASON "try" ) => rejected structural stale
+--- text
+$nVat = 0.20  # <R:PARAM name="vat" min="0" max="0.9" risk="2" floor="external">
+$cLabel = "net"  # <R:PARAM name="label">
+$cSort = "quick"  # <R:ALGO name="sort" options="quick|merge|heap">
+$nCap = 0.50  # <R:PARAM name="cap" min="0" max="0.8">
+$cCode = "1"  # <R:PARAM name="code">
+
+=== 37 a revert of a refused proposal, of another point, and of a rule; a revert names its target in any case
+~~~ the target of a revert is matched as Ring matches names, case folded; the TO of a revert of a rule's attribute must be the attribute's prior text
+~~~ exactly, as its inverse restores it byte for byte (mutation study: the revert checks no fixture reached)
+--- program
+$nVat = 0.20  # <R:PARAM name="vat" min="0" max="0.9">
+$cSort = "quick"  # <R:ALGO name="sort" options="quick|merge|heap">
+--- do
+DEFINE REFINE up AS ( TARGET "Vat", KIND param, FROM "0.20", TO "0.30", AUTHOR "mansour", POSTURE trusted, REASON "up" ) => admitted
+DEFINE REFINE too_high AS ( TARGET "vat", KIND param, FROM "0.30", TO "0.95", AUTHOR "mansour", POSTURE trusted, REASON "try" ) => rejected constraint above max
+DEFINE REFINE undo_refused AS ( TARGET "vat", KIND param, FROM "0.30", TO "0.20", AUTHOR "mansour", POSTURE trusted, REASON "back", REVERTS "2" ) => rejected structural was not admitted
+DEFINE REFINE undo_other AS ( TARGET "sort", KIND algo, FROM "quick", TO "merge", AUTHOR "mansour", POSTURE trusted, REASON "back", REVERTS "1" ) => rejected structural refined Vat, not sort
+DEFINE REFINE undo_up AS ( TARGET "VAT", KIND param, FROM "0.30", TO "0.20", AUTHOR "mansour", POSTURE trusted, REASON "back", REVERTS "1" ) => admitted
+DEFINE REFINE cap AS ( TARGET "vat.max", KIND param, FROM "0.9", TO "0.8", AUTHOR "mansour", POSTURE trusted, REASON "a cap" ) => admitted
+DEFINE REFINE undo_cap_respelled AS ( TARGET "vat.max", KIND param, FROM "0.8", TO "0.90", AUTHOR "mansour", POSTURE trusted, REASON "back", REVERTS "6" ) => rejected structural not the prior state
+DEFINE REFINE undo_cap AS ( TARGET "vat.max", KIND param, FROM "0.8", TO "0.9", AUTHOR "mansour", POSTURE trusted, REASON "back", REVERTS "6" ) => admitted
+
+=== 38 a revert is not held to the bounds as they were, but to the rules of the state it leaves
+~~~ the constraint stage judges a proposal against the bounds it was drafted under; a revert restores a state that was once admitted, so it skips
+~~~ that stage -- and the derivation stage still refuses it when a bound tightened since would be broken
+--- program
+$nVat = 0.20  # <R:PARAM name="vat" min="0" max="0.9">
+--- do
+DEFINE REFINE up AS ( TARGET "vat", KIND param, FROM "0.20", TO "0.30", AUTHOR "mansour", POSTURE trusted, REASON "up" ) => admitted
+DEFINE REFINE raise_min AS ( TARGET "vat.min", KIND param, FROM "0", TO "0.25", AUTHOR "mansour", POSTURE trusted, REASON "a floor under it" ) => admitted
+DEFINE REFINE undo_up AS ( TARGET "vat", KIND param, FROM "0.30", TO "0.20", AUTHOR "mansour", POSTURE trusted, REASON "back", REVERTS "1" ) => rejected derivation own rule
+--- text
+$nVat = 0.30  # <R:PARAM name="vat" min="0.25" max="0.9">
+
+=== 39 a revert after a human respelled what it would undo
+~~~ the value is the same number, so the revert is not stale; but the inverse restores BYTES, and the bytes moved: the change cannot be applied.
+~~~ A rule's attribute respelled is a conflict outright, since its prior text is what the revert must find
+--- program
+$nVat = 0.20  # <R:PARAM name="vat" min="0" max="0.9">
+$nCap = 0.50  # <R:PARAM name="cap" min="0" max="0.9">
+--- edited
+$nVat = 0.300  # <R:PARAM name="vat" min="0" max="0.9">
+$nCap = 0.50  # <R:PARAM name="cap" min="0" max="0.80">
+--- do
+DEFINE REFINE up AS ( TARGET "vat", KIND param, FROM "0.20", TO "0.30", AUTHOR "mansour", POSTURE trusted, REASON "up" ) => admitted
+DEFINE REFINE cap_max AS ( TARGET "cap.max", KIND param, FROM "0.9", TO "0.8", AUTHOR "mansour", POSTURE trusted, REASON "a cap" ) => admitted
+EDIT
+DEFINE REFINE undo_up AS ( TARGET "vat", KIND param, FROM "0.300", TO "0.20", AUTHOR "mansour", POSTURE trusted, REASON "back", REVERTS "1" ) => rejected structural cannot be applied
+DEFINE REFINE undo_cap AS ( TARGET "cap.max", KIND param, FROM "0.80", TO "0.9", AUTHOR "mansour", POSTURE trusted, REASON "back", REVERTS "2" ) => rejected structural conflict
+--- text
+$nVat = 0.300  # <R:PARAM name="vat" min="0" max="0.9">
+$nCap = 0.50  # <R:PARAM name="cap" min="0" max="0.80">
+
+=== 40 widening and tightening each attribute, at its edges
+~~~ widening a rule -- a larger maximum, a smaller minimum, a lower risk tier or floor, any of them dropped, another governance -- is a tier-4 act;
+~~~ tightening is judged at the point's own tier; the same number respelled is neither (mutation study: is_widening, 18 survivors)
+--- program
+$nVat = 0.20  # <R:PARAM name="vat" min="0" max="0.9" risk="2" governed_by="ops" floor="sandboxed">
+--- context
+governance ops
+	actor lead autonomous may vat
+	actor boss emergencyoverride may vat
+governance audit
+	actor lead autonomous may vat
+	actor boss emergencyoverride may vat
+--- do
+DEFINE REFINE max_respell AS ( TARGET "vat.max", KIND param, FROM "0.9", TO "0.90", AUTHOR "lead", POSTURE trusted, REASON "the same number" ) => admitted
+DEFINE REFINE max_tighten AS ( TARGET "vat.max", KIND param, FROM "0.90", TO "0.8", AUTHOR "lead", POSTURE trusted, REASON "tighter" ) => admitted
+DEFINE REFINE max_widen AS ( TARGET "vat.max", KIND param, FROM "0.8", TO "0.85", AUTHOR "lead", POSTURE trusted, REASON "wider" ) => rejected governance tier 4
+DEFINE REFINE max_drop AS ( TARGET "vat.max", KIND param, FROM "0.8", TO "", AUTHOR "lead", POSTURE trusted, REASON "none" ) => rejected governance tier 4
+DEFINE REFINE min_tighten AS ( TARGET "vat.min", KIND param, FROM "0", TO "0.1", AUTHOR "lead", POSTURE trusted, REASON "tighter" ) => admitted
+DEFINE REFINE min_respell AS ( TARGET "vat.min", KIND param, FROM "0.1", TO "0.10", AUTHOR "lead", POSTURE trusted, REASON "the same number" ) => admitted
+DEFINE REFINE min_widen AS ( TARGET "vat.min", KIND param, FROM "0.10", TO "0.05", AUTHOR "lead", POSTURE trusted, REASON "wider" ) => rejected governance tier 4
+DEFINE REFINE min_drop AS ( TARGET "vat.min", KIND param, FROM "0.10", TO "", AUTHOR "lead", POSTURE trusted, REASON "none" ) => rejected governance tier 4
+DEFINE REFINE risk_up AS ( TARGET "vat.risk", KIND param, FROM "2", TO "3", AUTHOR "lead", POSTURE trusted, REASON "riskier" ) => admitted
+DEFINE REFINE risk_down AS ( TARGET "vat.risk", KIND param, FROM "3", TO "1", AUTHOR "lead", POSTURE trusted, REASON "safer" ) => rejected governance tier 4
+DEFINE REFINE risk_drop AS ( TARGET "vat.risk", KIND param, FROM "3", TO "", AUTHOR "lead", POSTURE trusted, REASON "none" ) => rejected governance tier 4
+DEFINE REFINE floor_up AS ( TARGET "vat.floor", KIND param, FROM "sandboxed", TO "trusted", AUTHOR "lead", POSTURE trusted, REASON "higher" ) => admitted
+DEFINE REFINE floor_down AS ( TARGET "vat.floor", KIND param, FROM "trusted", TO "llm", AUTHOR "lead", POSTURE trusted, REASON "lower" ) => rejected governance tier 4
+DEFINE REFINE floor_drop AS ( TARGET "vat.floor", KIND param, FROM "trusted", TO "", AUTHOR "lead", POSTURE trusted, REASON "none" ) => rejected governance tier 4
+DEFINE REFINE move_gov AS ( TARGET "vat.governed_by", KIND param, FROM "ops", TO "audit", AUTHOR "lead", POSTURE trusted, REASON "another owner" ) => rejected governance tier 4
+DEFINE REFINE boss_moves AS ( TARGET "vat.governed_by", KIND param, FROM "ops", TO "audit", AUTHOR "boss", POSTURE trusted, REASON "another owner" ) => admitted
+--- text
+$nVat = 0.20  # <R:PARAM name="vat" min="0.10" max="0.8" risk="3" governed_by="audit" floor="trusted">
+
+=== 41 names are Ring's, case folded everywhere
+~~~ a tag's keys, a point's name, the KIND and POSTURE seats, a rule's two sides, a governance, an actor and the points it may refine are all
+~~~ matched as Ring matches names; a rule is checked whichever side the refined point stands on (mutation study: the case folds)
+--- program
+$nVat = 0.20  # <R:PARAM NAME="Vat" MIN="0" MAX="0.9" RISK="1" GOVERNED_BY="OPS">
+$nFloor = 0.10  # <R:PARAM name="floor" min="0" max="0.5">
+# <R:RULE name="vat-above-floor" expr="VAT >= Floor" message="vat must not drop below floor">
+--- context
+governance ops
+	actor mansour autonomous may VAT floor
+--- do
+DEFINE REFINE up AS ( TARGET "vat", KIND Param, FROM "0.20", TO "0.30", AUTHOR "Mansour", POSTURE Trusted, REASON "case" ) => admitted
+DEFINE REFINE down AS ( TARGET "VAT", KIND param, FROM "0.30", TO "0.05", AUTHOR "mansour", POSTURE trusted, REASON "under the floor" ) => rejected derivation vat-above-floor
+DEFINE REFINE floor_up AS ( TARGET "floor", KIND param, FROM "0.10", TO "0.40", AUTHOR "mansour", POSTURE trusted, REASON "over vat" ) => rejected derivation vat-above-floor
+DEFINE REFINE gov_case AS ( TARGET "floor.governed_by", KIND param, FROM "", TO "Ops", AUTHOR "mansour", POSTURE Trusted, REASON "an owner, spelt otherwise" ) => admitted
+--- text
+$nVat = 0.30  # <R:PARAM NAME="Vat" MIN="0" MAX="0.9" RISK="1" GOVERNED_BY="OPS">
+$nFloor = 0.10  # <R:PARAM name="floor" min="0" max="0.5" governed_by="Ops">
+# <R:RULE name="vat-above-floor" expr="VAT >= Floor" message="vat must not drop below floor">
+
+=== 42 rules and bounds at their edges
+~~~ `>=` and `<=` hold at equality, `>`, `<` and `!=` break there, `=` holds only there; a value may stand on its own min or max, and a min may meet
+~~~ its max; a rule between a number and a string compares the two as text (mutation study: the comparison boundaries)
+--- program
+$nA = 5  # <R:PARAM name="a" min="0" max="10">
+$nB = 3  # <R:PARAM name="b" min="0" max="10">
+$nC = 7  # <R:PARAM name="c" min="0" max="10">
+$nD = 4  # <R:PARAM name="d" min="0" max="10">
+$nE = 2  # <R:PARAM name="e" min="0" max="10">
+$nF = 6  # <R:PARAM name="f" min="0" max="10">
+$nG = 1  # <R:PARAM name="g" min="0" max="10">
+$nH = 1  # <R:PARAM name="h" min="0" max="10">
+$nK = 5  # <R:PARAM name="k" min="0" max="10">
+$nM = 5  # <R:PARAM name="m" min="0" max="10">
+$cLabel = "net"  # <R:PARAM name="label">
+# <R:RULE name="a-ge-b" expr="a >= b" message="a at least b">
+# <R:RULE name="c-gt-d" expr="c > d" message="c above d">
+# <R:RULE name="e-lt-f" expr="e < f" message="e under f">
+# <R:RULE name="g-eq-h" expr="g = h" message="g is h">
+# <R:RULE name="label-ne-a" expr="label != a" message="a label is not a number">
+--- do
+DEFINE REFINE a_eq AS ( TARGET "a", KIND param, FROM "5", TO "3", AUTHOR "mansour", POSTURE trusted, REASON "equal is enough" ) => admitted
+DEFINE REFINE c_eq AS ( TARGET "c", KIND param, FROM "7", TO "4", AUTHOR "mansour", POSTURE trusted, REASON "equal is not above" ) => rejected derivation c-gt-d
+DEFINE REFINE e_eq AS ( TARGET "e", KIND param, FROM "2", TO "6", AUTHOR "mansour", POSTURE trusted, REASON "equal is not under" ) => rejected derivation e-lt-f
+DEFINE REFINE g_off AS ( TARGET "g", KIND param, FROM "1", TO "2", AUTHOR "mansour", POSTURE trusted, REASON "not equal" ) => rejected derivation g-eq-h
+DEFINE REFINE k_max AS ( TARGET "k", KIND param, FROM "5", TO "10", AUTHOR "mansour", POSTURE trusted, REASON "on its max" ) => admitted
+DEFINE REFINE k_min AS ( TARGET "k", KIND param, FROM "10", TO "0", AUTHOR "mansour", POSTURE trusted, REASON "on its min" ) => admitted
+DEFINE REFINE m_min AS ( TARGET "m.min", KIND param, FROM "0", TO "5", AUTHOR "mansour", POSTURE trusted, REASON "a min at the value" ) => admitted
+DEFINE REFINE m_max AS ( TARGET "m.max", KIND param, FROM "10", TO "5", AUTHOR "mansour", POSTURE trusted, REASON "the max meets the min" ) => admitted
+--- text
+$nA = 3  # <R:PARAM name="a" min="0" max="10">
+$nB = 3  # <R:PARAM name="b" min="0" max="10">
+$nC = 7  # <R:PARAM name="c" min="0" max="10">
+$nD = 4  # <R:PARAM name="d" min="0" max="10">
+$nE = 2  # <R:PARAM name="e" min="0" max="10">
+$nF = 6  # <R:PARAM name="f" min="0" max="10">
+$nG = 1  # <R:PARAM name="g" min="0" max="10">
+$nH = 1  # <R:PARAM name="h" min="0" max="10">
+$nK = 0  # <R:PARAM name="k" min="0" max="10">
+$nM = 5  # <R:PARAM name="m" min="5" max="5">
+$cLabel = "net"  # <R:PARAM name="label">
+# <R:RULE name="a-ge-b" expr="a >= b" message="a at least b">
+# <R:RULE name="c-gt-d" expr="c > d" message="c above d">
+# <R:RULE name="e-lt-f" expr="e < f" message="e under f">
+# <R:RULE name="g-eq-h" expr="g = h" message="g is h">
+# <R:RULE name="label-ne-a" expr="label != a" message="a label is not a number">
+
+=== 43 the cascade: a compound assignment and an increment read and write the name; a loop over it writes it
+~~~ a refinement of the value is flagged by every other place the name is written; one of a rule, or a revert, has no cascade to show
+~~~ (mutation study: the cascade's writes, and when it is computed)
+--- program
+$nVat = 0.20  # <R:PARAM name="vat" min="0" max="0.9">
+$nVat = 0.25
+$nVat += 0.05
+$NVAT++
+for $nVat = 1 to 3
+	? $nVat
+next
+--- cascade
+vat reads @3 <top> | @4 <top> | @6 <top>
+vat writes @2 <top> | @3 <top> | @4 <top> | @5 <top>
+--- do
+DEFINE REFINE up AS ( TARGET "vat", KIND param, FROM "0.20", TO "0.30", AUTHOR "mansour", POSTURE trusted, REASON "up" ) => flagged also assigned at id 2
+DEFINE REFINE cap AS ( TARGET "vat.max", KIND param, FROM "0.9", TO "0.8", AUTHOR "mansour", POSTURE trusted, REASON "a rule has no cascade" ) => admitted
+DEFINE REFINE back AS ( TARGET "vat", KIND param, FROM "0.30", TO "0.20", AUTHOR "mansour", POSTURE trusted, REASON "a revert has none either", REVERTS "1" ) => admitted
+--- text
+$nVat = 0.20  # <R:PARAM name="vat" min="0" max="0.8">
+$nVat = 0.25
+$nVat += 0.05
+$NVAT++
+for $nVat = 1 to 3
+	? $nVat
+next
+
+=== 44 an algorithm chosen by the call a statement makes
+~~~ the point is the call itself, not an assignment of its result; its FROM is a callee's name, matched as Ring matches names
+~~~ (mutation study: the lift of a call statement, and the cascade of a point that assigns nothing)
+--- program
+aData = [3, 1, 2]
+QuickSort(aData)  # <R:ALGO name="sort" options="QuickSort|MergeSort">
+
+func QuickSort(aList)
+	? "quick"
+
+func MergeSort(aList)
+	? "merge"
+--- do
+DEFINE REFINE bad_name AS ( TARGET "sort", KIND algo, FROM "QuickSort", TO "Merge Sort", AUTHOR "mansour", POSTURE trusted, REASON "try" ) => rejected structural not a function name
+DEFINE REFINE lower_from AS ( TARGET "sort", KIND algo, FROM "quicksort", TO "MergeSort", AUTHOR "mansour", POSTURE trusted, REASON "a callee by any case" ) => admitted tx=edge.retarget
+--- text
+aData = [3, 1, 2]
+MergeSort(aData)  # <R:ALGO name="sort" options="QuickSort|MergeSort">
+
+func QuickSort(aList)
+	? "quick"
+
+func MergeSort(aList)
+	? "merge"
+--- run
+oracle: quick | merge
+
+=== 45 a sentence that is not one is refused, and says why
+~~~ a sentence cut short after a seat's name, cut short after a value, or followed by something that is not its RATIONALE (mutation study: the
+~~~ sentence reader's bounds)
+--- program
+$nVat = 0.20  # <R:PARAM name="vat" min="0" max="0.9">
+--- do
+DEFINE REFINE cut AS ( TARGET => rejected structural ends inside its seats
+DEFINE REFINE open AS ( TARGET "vat" => rejected structural a seat name was expected
+DEFINE REFINE junk AS ( TARGET "vat", KIND param, FROM "0.20", TO "0.30", AUTHOR "mansour", POSTURE trusted, REASON "r" ) THEN => rejected structural only a RATIONALE
+
+=== 46 a pipeline's stages are names
+--- program
+aSteps = ["parse", "emit"]  # <R:PIPELINE name="steps" options="parse|check|emit">
+--- do
+DEFINE REFINE gap AS ( TARGET "steps", KIND pipeline, FROM "parse|emit", TO "parse||emit", AUTHOR "mansour", POSTURE trusted, REASON "try" ) => rejected structural empty stage name
+
+=== L01 declarations that do not lift: the gate fails closed
+~~~ a program whose declarations cannot be read is not refined at all: every proposal is refused at the structural stage, naming the first fault.
+~~~ Each program below is one fault
+--- program
+$nVat = 0.20  # <R:PARAM name="vat" min="0" max="0.9">
+$nVat2 = 0.30  # <R:PARAM name="vat">
+--- lift
+error duplicate point 'vat'
+
+=== L02 an orphan tag
+--- program
+$nVat = 0.20  # <R:PARAM name="vat">
+# <R:PARAM name="ghost">
+--- lift
+error orphan tag 'ghost'
+
+=== L03 a malformed tag
+--- program
+$nVat = 0.20  # <R:PARAM min="0">
+--- lift
+error malformed tag: no name
+
+=== L04 a PARAM on something that is not a literal
+--- program
+$nVat = Rate()  # <R:PARAM name="vat">
+--- lift
+error point 'vat' target is not a literal
+
+=== L05 a rule that names a point nobody declared
+--- program
+$nVat = 0.20  # <R:PARAM name="vat">
+# <R:RULE name="r" expr="vat >= floor" message="m">
+--- lift
+error rule 'r' names unknown point 'floor'
+
+=== L06 an ALGO or a PIPELINE without options
+--- program
+$cSort = "quick"  # <R:ALGO name="sort">
+--- lift
+error point 'sort' needs options
+
+=== L07 a kind the rung does not build is declared, and refused when proposed against
+--- program
+# <R:LIB name="json" options="json_a|json_b">
+load "json_a.ring"
+--- lift
+json lib @2 = json_a.ring options=json_a|json_b
+--- do
+DEFINE REFINE swap_lib AS ( TARGET "json", KIND lib, FROM "json_a.ring", TO "json_b.ring", AUTHOR "mansour", POSTURE trusted, REASON "try" ) => rejected structural not built
+
+=== L08 bounds on a string, and a bound that is not a number
+--- program
+$cLabel = "net"  # <R:PARAM name="label" min="0">
+--- lift
+error point 'label' bounds
+
+=== L09 a tag that is not at the top of a comment
+~~~ the lift reads the first tag in a comment wherever it stands; a note before it and text after it are the author's
+--- program
+$nVat = 0.20  # keep this in step with the invoice -- <R:PARAM name="vat" min="0" max="0.9"> -- finance asked
+--- lift
+vat param @1 = 0.20 min=0 max=0.9
+
+=== L10 a tag on a statement it cannot attach to
+~~~ a PARAM on a call, a PIPELINE on a compound assignment, on a list holding a number or on a load, a LIB on an assignment, a PARAM on a compound
+~~~ assignment or on a minus that is not over a number (mutation study: the lift of each shape)
+--- program
+Foo(1)  # <R:PARAM name="p">
+$aSteps += ["parse"]  # <R:PIPELINE name="q" options="parse">
+$aMix = ["parse", 3]  # <R:PIPELINE name="r" options="parse">
+$nX = 1  # <R:LIB name="s">
+load "x.ring"  # <R:PIPELINE name="t" options="parse">
+$nY += 1  # <R:PARAM name="u">
+$nZ = -nX  # <R:PARAM name="v">
+
+func Foo(n)
+	return n
+--- lift
+error point 'p' target is not a literal
+error point 'q' is not a list of string literals
+error point 'r' a stage of the list is not a string literal
+error point 's' the statement is not a load
+error point 't' is not a list of string literals
+error point 'u' target is not a literal
+error point 'v' target is not a literal
+
+=== L11 a kind the rung does not build is declared whatever it stands on, and refused when proposed against
+--- program
+$nW = 1  # <R:BLOCK name="w">
+--- do
+DEFINE REFINE try_block AS ( TARGET "w", KIND block, FROM "", TO "x", AUTHOR "mansour", POSTURE trusted, REASON "try" ) => rejected structural declared but not built
+
+=== L12 a tag's keys in any case, and two points whose names differ only in case are one name twice
+--- program
+$nVat = 0.20  # <R:PARAM NAME="Vat" MIN="0" MAX="0.9">
+$nVat2 = 0.30  # <R:PARAM name="VAT">
+--- lift
+Vat param @1 = 0.20 min=0 max=0.9
+VAT param @2 = 0.30
+error duplicate point 'VAT'
+--- do
+DEFINE REFINE blocked AS ( TARGET "vat", KIND param, FROM "0.20", TO "0.30", AUTHOR "mansour", POSTURE trusted, REASON "try" ) => rejected structural declarations do not lift
+
+=== L13 a rule of the wrong shape, and one that orders a string
+--- program
+$nVat = 0.20  # <R:PARAM name="vat">
+$cLabel = "net"  # <R:PARAM name="label">
+# <R:RULE name="two" expr="vat >=" message="m">
+# <R:RULE name="badop" expr="vat => 0.1" message="m">
+# <R:RULE name="order" expr="label > vat" message="m">
+--- lift
+vat param @1 = 0.20
+label param @2 = net
+rule two "vat >=" -- m
+rule badop "vat => 0.1" -- m
+rule order "label > vat" -- m
+error rule 'two' expr 'vat >=' is not
+error rule 'badop' expr 'vat => 0.1' is not
+error rule 'order' orders the non-numeric point 'label'
+
+=== L14 a rule may say two choices are equal or differ
+--- program
+$cSort = "quick"  # <R:ALGO name="sort" options="quick|merge">
+$cBack = "merge"  # <R:ALGO name="back" options="quick|merge">
+# <R:RULE name="differ" expr="sort != back" message="two choices">
+# <R:RULE name="same" expr="sort = back" message="one choice">
+--- lift
+sort algo @1 = quick options=quick|merge
+back algo @2 = merge options=quick|merge
+rule differ "sort != back" -- two choices
+rule same "sort = back" -- one choice
+
+=== T01 node.update_property on the literal of a statement
+--- program
+$nVat = 0.20  # <R:PARAM name="vat" min="0" max="0.9">
+$cSort = "quick"  # <R:ALGO name="sort" options="quick|merge|heap">
+--- tx
+{"op":"node.update_property","target":{"id":1,"path":["e","r"]},"prop":"text","value":"0.35"}
+--- text
+$nVat = 0.35  # <R:PARAM name="vat" min="0" max="0.9">
+$cSort = "quick"  # <R:ALGO name="sort" options="quick|merge|heap">
+
+=== T02 node.update_property on a trailing comment
+--- program
+$nVat = 0.20  # <R:PARAM name="vat" min="0" max="0.9">
+--- tx
+{"op":"node.update_property","target":{"id":1,"path":["trail"]},"prop":"text","value":"# <R:PARAM name=\"vat\" min=\"0\" max=\"0.5\">"}
+--- text
+$nVat = 0.20  # <R:PARAM name="vat" min="0" max="0.5">
+
+=== T03 node.create inserts a statement, and the new node gets a fresh id
+--- program
+$nVat = 0.20  # <R:PARAM name="vat" min="0" max="0.9">
+$cSort = "quick"
+--- tx
+{"op":"node.create","parent":null,"block":"items","index":1,"node":{"k":"expr","e":{"k":"assign","op":"=","l":{"k":"id","text":"$nFloor"},"r":{"k":"num","text":"0.10"}}}}
+--- text
+$nVat = 0.20  # <R:PARAM name="vat" min="0" max="0.9">
+$nFloor = 0.10
+$cSort = "quick"
+--- ids
+1 3 2
+
+=== T04 node.delete removes a statement, and its inverse brings it back with the same id
+--- program
+$nVat = 0.20
+$cSort = "quick"
+$nFloor = 0.10
+--- tx
+{"op":"node.delete","id":2}
+--- text
+$nVat = 0.20
+$nFloor = 0.10
+--- ids
+1 3
+
+=== T05 edge.create puts a point under a governance
+--- program
+$cSort = "quick"  # <R:ALGO name="sort" options="quick|merge|heap">
+--- tx
+{"op":"edge.create","edge":"governed_by","src":"sort","dst":"ops"}
+--- text
+$cSort = "quick"  # <R:ALGO name="sort" options="quick|merge|heap" governed_by="ops">
+
+=== T06 edge.delete takes it out
+--- program
+$cSort = "quick"  # <R:ALGO name="sort" options="quick|merge|heap" governed_by="ops" risk="3">
+--- tx
+{"op":"edge.delete","edge":"governed_by","src":"sort","dst":"ops"}
+--- text
+$cSort = "quick"  # <R:ALGO name="sort" options="quick|merge|heap" risk="3">
+
+=== T07 edge.retarget moves a governed_by edge
+--- program
+$cSort = "quick"  # <R:ALGO name="sort" options="quick|merge|heap" governed_by="ops" risk="3">
+--- tx
+{"op":"edge.retarget","edge":"governed_by","src":"sort","from":"ops","to":"audit"}
+--- text
+$cSort = "quick"  # <R:ALGO name="sort" options="quick|merge|heap" governed_by="audit" risk="3">
+
+=== T08 edge.retarget moves a call edge
+--- program
+aSorted = QuickSort(aData)
+
+func QuickSort(aList)
+	return aList
+
+func MergeSort(aList)
+	return aList
+--- tx
+{"op":"edge.retarget","edge":"calls","src":{"id":1,"path":["e","r"]},"from":"QuickSort","to":"MergeSort"}
+--- text
+aSorted = MergeSort(aData)
+
+func QuickSort(aList)
+	return aList
+
+func MergeSort(aList)
+	return aList
+
+=== T09 refinement.set_value
+--- program
+$cSort = "quick"  # <R:ALGO name="sort" options="quick|merge|heap">
+--- tx
+{"op":"refinement.set_value","point":"sort","value":"merge"}
+--- text
+$cSort = "merge"  # <R:ALGO name="sort" options="quick|merge|heap">
+
+=== T10 refinement.add_option at a position
+--- program
+$cSort = "quick"  # <R:ALGO name="sort" options="quick|merge|heap">
+--- tx
+{"op":"refinement.add_option","point":"sort","option":"radix","index":1}
+--- text
+$cSort = "quick"  # <R:ALGO name="sort" options="quick|radix|merge|heap">
+
+=== T11 refinement.remove_option, and its inverse puts the option back where it was
+--- program
+$cSort = "quick"  # <R:ALGO name="sort" options="quick|merge|heap">
+--- tx
+{"op":"refinement.remove_option","point":"sort","option":"merge"}
+--- text
+$cSort = "quick"  # <R:ALGO name="sort" options="quick|heap">
+
+=== T12 pipeline.insert_stage
+--- program
+aSteps = ["parse", "emit"]  # <R:PIPELINE name="steps" options="parse|check|emit">
+--- tx
+{"op":"pipeline.insert_stage","point":"steps","stage":"check","index":1}
+--- text
+aSteps = ["parse", "check", "emit"]  # <R:PIPELINE name="steps" options="parse|check|emit">
+
+=== T13 pipeline.remove_stage
+--- program
+aSteps = ["parse", "check", "emit"]  # <R:PIPELINE name="steps" options="parse|check|emit">
+--- tx
+{"op":"pipeline.remove_stage","point":"steps","stage":"parse"}
+--- text
+aSteps = ["check", "emit"]  # <R:PIPELINE name="steps" options="parse|check|emit">
+
+=== T14 pipeline.reorder_stages
+--- program
+aSteps = ["parse", "check", "emit"]  # <R:PIPELINE name="steps" options="parse|check|emit">
+--- tx
+{"op":"pipeline.reorder_stages","point":"steps","order":["emit","parse","check"]}
+--- text
+aSteps = ["emit", "parse", "check"]  # <R:PIPELINE name="steps" options="parse|check|emit">
+
+=== T15 a transaction is atomic: one failing primitive undoes the others
+~~~ the second primitive names a statement that does not exist; the first, which would have applied, must not be left behind
+--- program
+$nVat = 0.20  # <R:PARAM name="vat" min="0" max="0.9">
+--- tx
+{"op":"node.update_property","target":{"id":1,"path":["e","r"]},"prop":"text","value":"0.35"}
+{"op":"node.delete","id":99}
+--- error
+no item 99
+
+=== T16 deleting a statement takes its trailing tag, and the point, with it
+~~~ the tag was the statement's own (it trails the line), so nothing is left behind: no orphan, and the other point is untouched
+--- program
+$nVat = 0.20  # <R:PARAM name="vat" min="0" max="0.9">
+$nFloor = 0.10
+--- tx
+{"op":"node.delete","id":1}
+--- text
+$nFloor = 0.10
+
+=== T17 node.create at the end of a block
+--- program
+$nVat = 0.20
+--- tx
+{"op":"node.create","parent":null,"block":"items","index":1,"node":{"k":"expr","e":{"k":"assign","op":"=","l":{"k":"id","text":"$nFloor"},"r":{"k":"num","text":"0.10"}}}}
+--- text
+$nVat = 0.20
+$nFloor = 0.10
+--- ids
+1 2
+
+=== T18 node.create past the end of a block fails
+--- program
+$nVat = 0.20
+--- tx
+{"op":"node.create","parent":null,"block":"items","index":3,"node":{"k":"expr","e":{"k":"assign","op":"=","l":{"k":"id","text":"$nFloor"},"r":{"k":"num","text":"0.10"}}}}
+--- error
+outside the block
+
+=== T19 refinement.add_option with no position appends
+--- program
+$cSort = "quick"  # <R:ALGO name="sort" options="quick|merge|heap">
+--- tx
+{"op":"refinement.add_option","point":"sort","option":"radix"}
+--- text
+$cSort = "quick"  # <R:ALGO name="sort" options="quick|merge|heap|radix">
+
+=== T20 pipeline.insert_stage with no position appends
+--- program
+aSteps = ["parse", "check"]  # <R:PIPELINE name="steps" options="parse|check|emit">
+--- tx
+{"op":"pipeline.insert_stage","point":"steps","stage":"emit"}
+--- text
+aSteps = ["parse", "check", "emit"]  # <R:PIPELINE name="steps" options="parse|check|emit">
+
+=== T21 pipeline.remove_stage at a position past the end fails
+--- program
+aSteps = ["parse", "emit"]  # <R:PIPELINE name="steps" options="parse|check|emit">
+--- tx
+{"op":"pipeline.remove_stage","point":"steps","stage":"emit","index":2}
+--- error
+stage 2 is not 'emit'
+
+=== T22 pipeline.remove_stage at a position holding another stage fails
+--- program
+aSteps = ["parse", "emit"]  # <R:PIPELINE name="steps" options="parse|check|emit">
+--- tx
+{"op":"pipeline.remove_stage","point":"steps","stage":"emit","index":0}
+--- error
+stage 0 is not 'emit'
+
+=== T23 edge.retarget of a call on something that is not a call fails
+--- program
+$nVat = 0.20
+--- tx
+{"op":"edge.retarget","edge":"calls","src":{"id":1,"path":["e","r"]},"from":"QuickSort","to":"MergeSort"}
+--- error
+not a call to a named function
+
+=== C01 a refinement does not commute with one that shares a rule
+~~~ commute: the two sentences are applied in both orders; `commute` says the result is the same in both and the predicate agrees, `conflict
+~~~ differs` that the orders give different results and the predicate says they do not commute, `conflict same` that the predicate is conservative
+--- program
+$nVat = 0.20  # <R:PARAM name="vat" min="0" max="0.9">
+$nFloor = 0.10  # <R:PARAM name="floor" min="0" max="0.5">
+$cSort = "quick"  # <R:ALGO name="sort" options="quick|merge|heap">
+# <R:RULE name="vat-above-floor" expr="vat >= floor" message="vat must not drop below floor">
+--- commute
+DEFINE REFINE a AS ( TARGET "vat", KIND param, FROM "0.20", TO "0.30", AUTHOR "m", POSTURE trusted, REASON "r" ) ~ DEFINE REFINE b AS ( TARGET "sort", KIND algo, FROM "quick", TO "heap", AUTHOR "m", POSTURE trusted, REASON "r" ) => commute
+DEFINE REFINE a AS ( TARGET "vat", KIND param, FROM "0.20", TO "0.05", AUTHOR "m", POSTURE trusted, REASON "r" ) ~ DEFINE REFINE b AS ( TARGET "floor", KIND param, FROM "0.10", TO "0.02", AUTHOR "m", POSTURE trusted, REASON "r" ) => conflict differs
+DEFINE REFINE a AS ( TARGET "vat", KIND param, FROM "0.20", TO "0.30", AUTHOR "m", POSTURE trusted, REASON "r" ) ~ DEFINE REFINE b AS ( TARGET "floor", KIND param, FROM "0.10", TO "0.15", AUTHOR "m", POSTURE trusted, REASON "r" ) => conflict same
+DEFINE REFINE a AS ( TARGET "vat", KIND param, FROM "0.20", TO "0.30", AUTHOR "m", POSTURE trusted, REASON "r" ) ~ DEFINE REFINE b AS ( TARGET "vat", KIND param, FROM "0.20", TO "0.40", AUTHOR "m", POSTURE trusted, REASON "r" ) => conflict differs
+DEFINE REFINE a AS ( TARGET "vat.max", KIND param, FROM "0.9", TO "0.25", AUTHOR "m", POSTURE trusted, REASON "r" ) ~ DEFINE REFINE b AS ( TARGET "vat", KIND param, FROM "0.20", TO "0.30", AUTHOR "m", POSTURE trusted, REASON "r" ) => conflict differs
+
+=== C02 the footprint of a sentence is its point's name as Ring folds it
+~~~ the same point under two spellings, and a rule whose sides are spelt otherwise than the points (mutation study: the footprint's case folds)
+--- program
+$nVat = 0.20  # <R:PARAM name="vat" min="0" max="0.9">
+$nFloor = 0.10  # <R:PARAM name="floor" min="0" max="0.5">
+# <R:RULE name="vat-above-floor" expr="VAT >= Floor" message="vat must not drop below floor">
+--- commute
+DEFINE REFINE a AS ( TARGET "VAT", KIND param, FROM "0.20", TO "0.30", AUTHOR "m", POSTURE trusted, REASON "r" ) ~ DEFINE REFINE b AS ( TARGET "vat", KIND param, FROM "0.20", TO "0.40", AUTHOR "m", POSTURE trusted, REASON "r" ) => conflict differs
+DEFINE REFINE a AS ( TARGET "vat", KIND param, FROM "0.20", TO "0.05", AUTHOR "m", POSTURE trusted, REASON "r" ) ~ DEFINE REFINE b AS ( TARGET "floor", KIND param, FROM "0.10", TO "0.02", AUTHOR "m", POSTURE trusted, REASON "r" ) => conflict differs
+
+=== A01 a human edit of the text is audited as the refinements it amounts to
+~~~ the gate sees a change made as TEXT too: the edit is read back as the refinements of points it makes (ids carried by rung 19), each is run through
+~~~ the gate on the old program as the stated author at the stated posture, and the rest of the edit is counted as raw
+--- program
+$nVat = 0.20  # <R:PARAM name="vat" min="0" max="0.9">
+$nFloor = 0.10  # <R:PARAM name="floor" min="0" max="0.5">
+$cSort = "quick"  # <R:ALGO name="sort" options="quick|merge|heap" floor="trusted">
+? Gross(100)
+
+func Gross(nNet)
+	return nNet * (1 + $nVat)
+--- edited
+$nVat = 0.95  # <R:PARAM name="vat" min="0" max="0.9">
+$nFloor = 0.15  # <R:PARAM name="floor" min="0" max="0.5">
+$cSort = "heap"  # <R:ALGO name="sort" options="quick|merge|heap" floor="trusted">
+? Gross(200)
+
+func Gross(nNet)
+	return nNet * (1 + $nVat)
+--- audit
+as llm
+refine vat 0.20 0.95 => rejected constraint
+refine floor 0.10 0.15 => admitted
+refine sort quick heap => rejected trust
+raw 1
+
+=== A02 a text edit of a point's own rule is read back as a refinement of the rule
+~~~ widening a bound by hand is the heaviest act a refinement can be, and the gate reads it as one: from an :llm origin it is refused for the origin alone
+--- program
+$nVat = 0.20  # <R:PARAM name="vat" min="0" max="0.9" risk="1" governed_by="ops">
+--- context
+governance ops
+	actor lead autonomous may vat
+	actor boss emergencyoverride may vat
+--- edited
+$nVat = 0.20  # <R:PARAM name="vat" min="0" max="0.95" risk="1" governed_by="ops">
+--- audit
+as llm by boss
+refine vat.max 0.9 0.95 => rejected trust rule
+raw 0
+
+=== A03 a text edit that changes nothing a refinement could change is not read back as one
+--- program
+$nVat = 0.20  # <R:PARAM name="vat" min="0" max="0.9">
+? Gross(100)
+
+func Gross(nNet)
+	return nNet * (1 + $nVat)
+--- edited
+$nVat   =   0.20  # <R:PARAM name="vat" min="0" max="0.9">
+? Gross(100)
+def Gross(nNet)
+	return nNet*(1+$nVat)
+--- audit
+as trusted
+raw 0
+
+=== A04 a point's literal respelled by hand is a refinement of the point, though its number is the same
+--- program
+$nVat = 0.20  # <R:PARAM name="vat" min="0" max="0.9">
+--- edited
+$nVat = 0.2000  # <R:PARAM name="vat" min="0" max="0.9">
+--- audit
+as trusted
+refine vat 0.20 0.2000 => admitted
+raw 0
