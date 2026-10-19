@@ -1,9 +1,11 @@
 """Judges rung 20, refinement over the program graph of rung 18, for the Ring++ face:
    python haro/spike/v20/refine_check.py [--plant] [--quick] [--wide]      (exit 1 on any failure)
+   python haro/spike/v20/refine_check.py --block                          the BLOCK kind's fixtures alone, in seconds
 
-  F  the fixtures (v20/fixtures.txt, composed before the code): programs, proposals, and the verdict each must get -- the stage that refuses it,
+  F  the fixtures (v20/fixtures.txt and v20/fixtures_block.txt, composed before the code): programs, proposals, and the verdict each must get -- the stage that refuses it,
      the words the refusal says, the RCP primitives a sentence lowers to, the canonical text that is left. For EVERY fixture, whatever it says:
-     a refused proposal changes nothing; an admitted one changes exactly one line of text and no id; the inverses captured before each change land
+     a refused proposal changes nothing; an admitted one changes exactly one line of text and no id -- a BODY refinement (the BLOCK kind) changes
+     nothing outside its function, keeps the order of every id that stays, and loses no id but those it deletes; the inverses captured before each change land
      put back the original text, byte for byte, with its ids; the log replayed from the base text through the gate gives the same verdicts and the
      same text, and the transactions alone (no gate) the same text; the refined text is its own canonical form on the OTHER printer, rnxc fmt
   T  the twelve primitives, one fixture each or more, and a transaction that fails halfway undoes what it did
@@ -15,7 +17,9 @@
      stzRefinableCode on the Ring++ package; the two gates must agree on admitted-or-not and on the stage that refuses. What this gate checks and
      that one does not (the value parses, the sentence is well formed, the id is current) is counted apart, never folded in
   D  controls that must FAIL: a gate without its trust stage, its constraint stage, its governance stage, its derivation stage; one that edits the
-     live program before it has judged; a cascade that sees nothing; an inverse that loses the ids; a revert that does not check what it restores
+     live program before it has judged; a cascade that sees nothing; an inverse that loses the ids; a revert that does not check what it restores;
+     and the BLOCK kind's five rules taken out in turn: no calls or writes allowlist, no shape refusals, a lowering that keeps no statement, a
+     compiler that finds nothing, a lift that reads a BLOCK tag without checking it
   H  Haro's own history: a refinement drafted against a literal of one revision -- does it still land after the next human edit? Landed, refused as
      stale (the value changed), or aimed at a different variable (the hazard a name-checking gate catches): counted
   K  a corpus: a literal of each of many real Ring files made a point, refined, and judged by a second route (the line spliced by hand), by the
@@ -41,6 +45,7 @@ from haro_forge import Gbnf
 
 PLANT = '--plant' in sys.argv
 QUICK = '--quick' in sys.argv
+BLOCK_ONLY = '--block' in sys.argv      # the BLOCK kind's fixtures alone (fixtures_block.txt): seconds, not the whole court
 WIDE = '--wide' in sys.argv
 ONLY_FX = '--fx' in sys.argv
 SCRATCH = os.path.join(HERE, 'scratch')
@@ -159,6 +164,36 @@ def run_program(exe, text, name):
     return out.strip()
 
 
+def s_attr(sent):
+    s, _ = refine.parse_sentence(sent)
+    return s['attr'] if s else None
+
+
+def block_locality(before, after, out):
+    """A body refinement's locality, the BLOCK kind's counterpart of 'one line out, one line in': nothing outside the function's body changes; every
+    id that stays keeps its order; every id that goes is one the transaction deleted; every id that comes is new to the program."""
+    bad = []
+    ident = out.point['id']
+
+    def outside(g):
+        g = copy.deepcopy(g)
+        refine.find_item(g, ident)[0]['items'] = []
+        return refine.text_of(g)
+    if outside(before) != outside(after):
+        bad.append('a body refinement changed text outside its function')
+    b, a = ids.ids_of(before), ids.ids_of(after)
+    sb, sa = set(b), set(a)
+    if [i for i in b if i in sa] != [i for i in a if i in sb]:
+        bad.append('a body refinement moved an id that stays')
+    deleted = set()
+    for p in out.tx:
+        if p['op'] == 'node.delete':
+            deleted |= {it.get('_id') for it in ids.preorder({'k': 'file', 'items': [refine.find_item(before, p['id'])[0]]})}
+    if not (sb - sa) <= deleted:
+        bad.append('ids %s went without a node.delete' % sorted((sb - sa) - deleted))
+    return bad
+
+
 def run_steps(f, stats):
     """The steps of a refinement fixture through the gate: -> (list of failures, the model)."""
     bad = []
@@ -176,6 +211,7 @@ def run_steps(f, stats):
         exp = parse_verdict(verdict)
         before_text, before_hash = m.text(), m.hash()
         before_ids = ids.ids_of(m.g)
+        before_g = copy.deepcopy(m.g)
         out = m.refine(sent)
         stats['steps'] += 1
         stats[out.status] = stats.get(out.status, 0) + 1
@@ -188,6 +224,9 @@ def run_steps(f, stats):
                 bad.append('step %d: a refused proposal changed the program' % n)
             if ids.ids_of(m.g) != before_ids:
                 bad.append('step %d: a refused proposal changed the ids' % n)
+        elif out.point is not None and out.point['kind'] == 'block' and out.point['form'] == 'block' and s_attr(sent) is None:
+            for why in block_locality(before_g, m.g, out):
+                bad.append('step %d: %s' % (n, why))
         else:
             ch = changed_lines(out.diff)
             if len([x for x in ch if x[0] == '-']) != 1 or len([x for x in ch if x[0] == '+']) != 1:
@@ -894,6 +933,12 @@ def n_failing(fx):
     return sum(1 for _, bad in judge_fixtures(fx, new_stats()) if bad)
 
 
+def lower_block_keeping_nothing(fn, new_items):
+    """a body lowering that deletes every old statement and creates every new one: right text, lost ids, and never `nothing to refine`"""
+    tx = [{'op': 'node.delete', 'id': it['_id']} for it in fn.get('items', [])]
+    return tx + [{'op': 'node.create', 'parent': fn['_id'], 'block': ['items'], 'index': j, 'node': ids.strip(st)} for j, st in enumerate(new_items)]
+
+
 _orig_apply_prim = refine.apply_prim
 
 
@@ -1152,7 +1197,18 @@ def small_checks():
 def main():
     t0 = time.time()
     print('refine_check -- refinement over the program graph, Ring++ face (rung 20)')
-    fx = read_fixtures(os.path.join(HERE, 'fixtures.txt'))
+    fb = read_fixtures(os.path.join(HERE, 'fixtures_block.txt'))
+    if BLOCK_ONLY:
+        stats = new_stats()
+        res = judge_fixtures(fb, stats)
+        bad = [(i, b) for i, b in res if b]
+        for fid, b in bad:
+            for x in b[:4]:
+                print('  FAIL %s: %s' % (fid, x[:500]))
+        print('refine_check --block: %d of %d BLOCK fixtures pass, %d steps (%s), %d programs run on the oracle and on rnxc'
+              % (len(fb) - len(bad), len(fb), stats['steps'], ', '.join('%s %d' % (k, stats[k]) for k in ('admitted', 'rejected') if k in stats), stats['runs']))
+        return 1 if bad else 0
+    fx = read_fixtures(os.path.join(HERE, 'fixtures.txt')) + fb
     check(len(fx) >= FIXTURE_FLOOR, 'F the fixtures hold %d, at or above the pinned floor of %d' % (len(fx), FIXTURE_FLOOR))
     stats = new_stats()
     res = judge_fixtures(fx, stats)
@@ -1299,6 +1355,15 @@ def main():
         with patched(**kw):
             nbad = n_failing(fx)
         check(nbad >= floor, 'D the control, %s, fails %d fixture(s) (at least %d)' % (label, nbad, floor))
+    for label, kw, floor in (       # the BLOCK kind's rules, each taken out in turn, over its own fixtures
+            ('a body held to no calls and no writes', {'block_constraint': lambda *a: None}, 3),
+            ('a body whose shape is never asked', {'body_shape_error': lambda *a: None}, 1),
+            ('a body lowering that keeps no statement', {'lower_block': lower_block_keeping_nothing}, 2),
+            ('a derivation whose compiler finds nothing', {'rnxc_findings': lambda text: ([], [])}, 2),
+            ('a lift that reads a BLOCK tag without checking it', {'block_decl_errors': lambda *a: []}, 3)):
+        with patched(**kw):
+            nbad = n_failing(fb)
+        check(nbad >= floor, 'D the control, %s, fails %d BLOCK fixture(s) (at least %d)' % (label, nbad, floor))
     if w['engine']:
         wc = write_surface(fx, lambda m, ctx=None, posture=None: UNSCOPED, 10)
         nbad = len([b for b in wc['bad'] if 'but its scoped grammar accepts it' in b])

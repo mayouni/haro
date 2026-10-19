@@ -1395,8 +1395,15 @@ twelve primitives over rung 18's graph with rung 19's ids; the diff is the print
 **What building found** (HF-85 to HF-90): the two gates give one verdict wherever both can judge, and the live gate's three limits are measured; a refinement
 is one line on real code and still lands after 98.2% of real edits; **the write surface is bounded by the decoder** -- 128 rules, every group a rule -- and the
 first grammar met the bound at five points (10 or 11 held now, 15 not); `stzRefinableCode` matches names exactly where Ring folds them; the mutation study took
-the court from 72.4% to 97.3%. **Not built:** the kinds `block`, `function`, `type`, `lib`, `custom`; `node.create`/`node.delete` as a sentence's lowering;
-a writer for a file that is not canonical; derivation rules that propose; a single scoped grammar for a program of more than about a dozen points.
+the court from 72.4% to 97.3%. **Not built:** the kinds `function`, `type`, `lib`, `custom`; a writer for a file that is not canonical; derivation rules that propose; a single
+scoped grammar for a program of more than about a dozen points.
+
+**The BLOCK kind, built 2026-10-19** on the author's "go" (`spike/v20/GRAMMAR.md` section 11, HF-95 to HF-97): an agent proposes the BODY of a
+function whose signature a human declared, held to the calls and writes its point names (least authority: what is not named is refused, builtins
+and the function's own name included), refused at structural for what the gate could not follow (definitions, loads, eval, `call` by name, braces,
+comments), and judged at derivation by `rnxc check`, which fails closed on a program it cannot check. FROM is the digest of the body's canonical
+text; the lowering keeps every statement that stays, with its id, and is node.delete and node.create for the rest -- the first sentences that
+reach those two primitives. Fixtures first (`fixtures_block.txt`, 15), five controls; guard stage 24 PASS, 106 fixtures, 210 steps, 145 s.
 
 ## Rung 6 of the code-graph memo -- a second face, in Python's shape, as a printer (Haro v0.21) -- 2026-10-19
 
@@ -1521,8 +1528,9 @@ whole guard re-run on the renamed tree: 28 + 30 + 27 + 23, 117 of 120, 32 of 32,
    scan (1,556 differences, none unexplained); not built: `new` edges, references, scope; rung 5 (refinement over
    L1) is the haro-charter desk's and next in the memo.
 23. ~~Rung 5 of the code-graph memo~~ -- built 2026-10-05, finished 2026-10-19: refinement over L1 (Haro v0.20), guard
-   stage 24; open: the kinds it declares but does not build (`block` first: `node.create` as a sentence's lowering), and a
-   write surface for a program larger than the decoder holds (HF-87); rung 6 (a second face, as a printer) is next in the memo.
+   stage 24; the BLOCK kind built 2026-10-19 (an agent writes a function's body, HF-95 to HF-97); open: the kinds `function`,
+   `type`, `custom`, a BLOCK point's calls and writes refined as rules, and a write surface for a program larger than the decoder
+   holds (HF-87).
 24. ~~Rung 6 of the code-graph memo~~ -- built 2026-10-19: a second face, Python-shaped, as a printer (Haro v0.21), guard stage 25;
    K3 measured and not met (HF-94), so rung 7 (a reader of the face) stays open; K4 and the 20-task protocol need that reader and a model run.
 18. The forge as an `rnxc` verb (the ringpp session's `src/`, routed); the

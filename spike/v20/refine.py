@@ -35,8 +35,12 @@ SCRATCH = os.path.join(HERE, 'scratch')
 POSTURES = {'trusted': 3, 'external': 2, 'sandboxed': 1, 'llm': 0}          # StzRefinableCodeQ()._PostureRank
 LEVELS = {'advisory': 1, 'delegated': 2, 'autonomous': 3, 'emergencyoverride': 4}   # StzGovernanceQ()._AuthLevel
 KINDS = ('param', 'algo', 'pipeline', 'rule', 'lib', 'block', 'function', 'type', 'custom')
-BUILT = ('param', 'algo', 'pipeline')           # the kinds this rung builds; the others are declared and refused when proposed against
+BUILT = ('param', 'algo', 'pipeline', 'block')  # the kinds this rung builds; the others are declared and refused when proposed against
 RULE_ATTRS = ('min', 'max', 'options', 'risk', 'floor', 'governed_by')
+BLOCK_ATTRS = ('calls', 'writes', 'risk', 'floor', 'governed_by')   # what a BLOCK point declares besides its name
+MUTATORS = ('add', 'insert', 'del', 'swap')     # the builtins that write into their first argument
+ROOT = os.path.abspath(os.path.join(HERE, '..', '..', '..'))
+RNXC = os.environ.get('RNXC') or os.path.join(ROOT, 'zig-out', 'bin', 'rnxc.exe')
 STAGES = ('structural', 'constraint', 'governance', 'trust', 'derivation')
 RULE_FLOOR = 'trusted'                          # the posture a refinement of a point's own RULES must come from, whatever the point's floor says
 WIDEN_TIER = 4                                  # widening a rule is the heaviest act there is
@@ -283,6 +287,10 @@ def resolve_target(kind, it):
         if kind == 'algo' and k == 'expr' and it['e']['k'] == 'call' and it['e']['callee']['k'] == 'id':
             return 'call', ['e'], it['e']['callee']['text']
         return 'target is not a literal' if kind == 'param' else 'target is neither a string literal nor a call'
+    if kind == 'block':
+        if k == 'func':
+            return 'block', ['items'], block_digest(body_text(it.get('items', [])))
+        return 'is not on a function'
     return 'kind is not built'
 
 
@@ -403,6 +411,9 @@ def lift(g):
             err("point '%s' risk '%s' is not a tier from 1 to 4" % (p['name'], a['risk']))
         if 'floor' in a and a['floor'] not in POSTURES:
             err("point '%s' floor '%s' is not a posture" % (p['name'], a['floor']))
+        if p['kind'] == 'block':
+            for e in block_decl_errors(g, p):
+                err(e)
         if p['built']:
             e = own_rule_error(p)
             if e and not any(x['msg'].startswith("point '%s' bounds" % p['name']) for x in errors):
@@ -658,7 +669,10 @@ def _block_list(work, parent, block):
     else:
         holder = find_item(work, parent)[0]
         path = [block] if isinstance(block, str) else list(block)
-    return get_path(holder, path[:-1])[path[-1]]
+    h = get_path(holder, path[:-1])
+    if path[-1] not in h and path[-1] in l1.FIELDS.get(h.get('k'), ()):
+        h[path[-1]] = []        # an empty body has no list in the graph until something goes in it (a function declared, its body to come)
+    return h[path[-1]]
 
 
 def _renumber(work, node):
@@ -928,6 +942,369 @@ def rules_violated(L, only=None):
     return None
 
 
+# ---- the BLOCK kind: the body of a function whose signature a human declared -------------------------------------------------------------
+# The point is a function's BODY; its value is the body's canonical text, named by its digest. The agent proposes a new body on one line; the gate
+# reads it with the compiler's parser, refuses what it could not follow (definitions, loads, eval, `call` by name, braces, comments), holds it to
+# the calls and writes its point names (least authority: what is not named is refused), and asks the compiler at derivation (`rnxc check`).
+# The lowering keeps every statement that stays, with its id and its comments; the rest is node.delete and node.create.
+
+_BUILTINS = []
+_CHECK = {}
+DIGEST_RE = re.compile(r'^sha:[0-9a-f]{12}$')
+
+
+def body_text(items):
+    """A body's canonical text: the printer's, each statement at the body's own level, a line each."""
+    return l1.print_ring({'k': 'file', 'items': ids.strip(items)}) if items else ''
+
+
+def block_digest(text):
+    return 'sha:' + hashlib.sha256(text.encode('latin-1')).hexdigest()[:12]
+
+
+def builtins():
+    """Ring's builtin names, as rnxc's checker has them (src/builtins.zig)."""
+    if not _BUILTINS:
+        src = open(os.path.join(ROOT, 'src', 'builtins.zig'), encoding='utf-8').read()
+        _BUILTINS.extend(re.findall(r'"([^"]+)"', src.split('pub const names', 1)[1].split('};', 1)[0]))
+    return _BUILTINS
+
+
+def names_of(v):
+    return v.split('|') if v else []
+
+
+def all_nodes(x):
+    if isinstance(x, dict):
+        yield x
+        for f, v in x.items():
+            if not f.startswith('_'):
+                yield from all_nodes(v)
+    elif isinstance(x, list):
+        for v in x:
+            yield from all_nodes(v)
+
+
+def _text(x):
+    return x['text'] if isinstance(x, dict) else x
+
+
+def block_decl_errors(g, p):
+    """What a BLOCK point's tag may say: calls of what the program defines or Ring builds in, spelt as declared (D24); writes of a global, an
+    attribute or a parameter of its function."""
+    out, a = [], p['attrs']
+    for key in p['order']:
+        if key not in BLOCK_ATTRS:
+            out.append("'%s' is not an attribute of a BLOCK point" % key)
+    fns = {ids.def_name(it) for it, *_ in walk_items(g) if it['k'] in ('func', 'class')}
+    bis = set(builtins())
+    for nm in names_of(a.get('calls')):
+        if nm in fns or nm in bis:
+            continue
+        hit = sorted(x for x in fns if x.lower() == nm.lower())
+        bhit = sorted(x for x in bis if x.lower() == nm.lower())
+        if hit:
+            out.append("calls of '%s' names '%s'; the function is declared '%s'" % (p['name'], nm, hit[0]))
+        elif bhit:
+            out.append("calls of '%s' names '%s'; the builtin is spelt '%s'" % (p['name'], nm, bhit[0]))
+        else:
+            out.append("'%s' in calls of '%s' is no function and no builtin" % (nm, p['name']))
+    fn = find_item(g, p['id'])[0]
+    params = [q['name'] for q in fn.get('params', [])]
+    for nm in names_of(a.get('writes')):
+        if not (nm.startswith('$') or nm.startswith('@') or nm in params):
+            out.append("'%s' in writes of '%s' is no global, no attribute and no parameter of %s()" % (nm, p['name'], ids.def_name(fn)))
+    return out
+
+
+def body_shape_error(body):
+    """A body is a statement list the gate can read, and nothing else."""
+    for it in body['items']:
+        k = it['k']
+        if k in ('func', 'class', 'package'):
+            return 'a body defines nothing, and TO holds a %s' % ('function' if k == 'func' else k)
+        if k in ('load', 'import'):
+            return 'a body loads nothing, and TO holds a %s' % k
+    for n in all_nodes(body['items']):
+        k = n.get('k')
+        if k == 'comment' or n.get('trail'):
+            return 'a comment in TO: the gate does not judge prose, and a comment can mislead the reader of the diff'
+        if k == 'call' and n['callee'].get('k') == 'id' and n['callee']['text'].lower() == 'eval':
+            return 'TO calls eval, which runs code the gate cannot read'
+        if k == 'callkw':
+            return 'TO calls a function by name (`call`), which the gate cannot follow'
+        if k == 'brace':
+            return 'TO holds a brace block, whose hooks and bare calls the gate cannot follow'
+        if k == 'scanner':
+            return 'TO changes the language under the text'
+        if k == 'bye':
+            return 'TO ends the program (bye): a body returns, it does not stop the program'
+    return None
+
+
+def body_calls(items):
+    """Every name a body calls: a function, a method (`x.M()` is a call of M), a class it makes (`new K`)."""
+    out = []
+    for n in all_nodes(items):
+        k = n.get('k')
+        if k == 'call':
+            c = n['callee']
+            if c.get('k') == 'id':
+                out.append(c['text'])
+            elif c.get('k') == 'member':
+                out.append(_text(c['prop']))
+        elif k == 'new':
+            nm = n.get('name')
+            out.append('.'.join(_text(x) for x in nm) if isinstance(nm, list) else _text(nm))
+    return out
+
+
+def body_writes(items, params):
+    """Every write a body makes outside its own frame: ('global', '$x'), ('attr', '@x'), ('param', name) -- writing INTO what a parameter holds,
+    since the caller holds it too; assigning the parameter itself only rebinds a local (C-29)."""
+    out = []
+
+    def into(r, chain=None):
+        if r.get('k') == 'id':
+            t = r['text']
+            if t.startswith('$'):
+                out.append(('global', t))
+            elif t.startswith('@'):
+                out.append(('attr', t))
+            elif t.lower() in params and chain is not None:
+                out.append(('param', params[t.lower()]))
+        elif r.get('k') == 'self' and chain is not None and chain.get('k') == 'member':
+            out.append(('attr', '@' + _text(chain['prop'])))
+
+    def target(l):
+        if l.get('k') in ('index', 'member'):
+            chain = l
+            while chain['obj'].get('k') in ('index', 'member'):
+                chain = chain['obj']
+            into(chain['obj'], chain)
+        else:
+            into(l)
+
+    for n in all_nodes(items):
+        k = n.get('k')
+        if k == 'assign':
+            target(n['l'])
+        elif k == 'post':
+            target(n['e'])
+        elif k == 'call' and n['callee'].get('k') == 'id' and n['callee']['text'].lower() in MUTATORS and n.get('args'):
+            a0 = n['args'][0]
+            if a0.get('k') == 'id':
+                into(a0, a0)
+            else:
+                target(a0)
+    return out
+
+
+def block_constraint(p, fn, items):
+    a = p['attrs']
+    allowed = names_of(a.get('calls'))
+    for nm in body_calls(items):
+        if nm in allowed:
+            continue
+        hit = [x for x in allowed if x.lower() == nm.lower()]
+        if hit:
+            return "'%s' is not a call '%s' allows (the declared spelling is '%s')" % (nm, p['name'], hit[0])
+        return "'%s' is not a call '%s' allows" % (nm, p['name'])
+    params = {q['name'].lower(): q['name'] for q in fn.get('params', [])}
+    may = names_of(a.get('writes'))
+    for what, nm in body_writes(items, params):
+        if nm in may:
+            continue
+        if what == 'param':
+            return "writes into '%s', which the caller holds, and '%s' does not allow it" % (nm, p['name'])
+        return "writes %s, which '%s' does not allow" % (nm, p['name'])
+    return None
+
+
+def _stmt_key(it):
+    one = ids.strip(it)
+    one.pop('trail', None)
+    return l1.print_ring({'k': 'file', 'items': [one]})
+
+
+def lower_block(fn, new_items):
+    """The transaction that makes fn's body new_items: statements matched on their canonical text (difflib's longest matching blocks); a statement
+    that stays keeps its id and the comments attached to it (rung 18: a comment belongs to the next statement); the rest is node.delete, deletes first,
+    then node.create at its place, a fresh id each."""
+    units, pending = [], []
+    for it in fn.get('items', []):
+        if it['k'] == 'comment':
+            pending.append(it)
+        else:
+            units.append((pending, it))
+            pending = []
+    tail = pending
+    old_keys = [_stmt_key(st) for _, st in units]
+    new_keys = [_stmt_key(st) for st in new_items]
+    kept_old, kept_new = {}, {}
+    for tag, i1, i2, j1, j2 in difflib.SequenceMatcher(None, old_keys, new_keys, autojunk=False).get_opcodes():
+        if tag == 'equal':
+            for d in range(i2 - i1):
+                kept_old[i1 + d] = j1 + d
+                kept_new[j1 + d] = i1 + d
+    tx = []
+    for i, (cmts, st) in enumerate(units):
+        if i not in kept_old:
+            for c in cmts:
+                tx.append({'op': 'node.delete', 'id': c['_id']})
+            tx.append({'op': 'node.delete', 'id': st['_id']})
+    sim = []
+    for i, (cmts, st) in enumerate(units):
+        if i in kept_old:
+            sim += [c['_id'] for c in cmts] + [st['_id']]
+    sim += [c['_id'] for c in tail]
+    pos = 0
+    for j, st in enumerate(new_items):
+        if j in kept_new:
+            pos = sim.index(units[kept_new[j]][1]['_id']) + 1
+            continue
+        tx.append({'op': 'node.create', 'parent': fn['_id'], 'block': ['items'], 'index': pos, 'node': ids.strip(st)})
+        sim.insert(pos, None)
+        pos += 1
+    return tx
+
+
+def rnxc_findings(text):
+    """What `rnxc check` says of a program: ([(severity, rule, message)], [the rules it says it did NOT check, and why])."""
+    key = hashlib.sha256(text.encode('latin-1')).hexdigest()
+    if key in _CHECK:
+        return _CHECK[key]
+    os.makedirs(SCRATCH, exist_ok=True)
+    _n[0] += 1
+    path = os.path.join(SCRATCH, 'chk%d_%d.ring' % (os.getpid(), _n[0]))
+    open(path, 'wb').write(text.encode('latin-1'))
+    import subprocess
+    try:
+        r = subprocess.run([RNXC, 'check', path], capture_output=True, timeout=120)
+        lines = (r.stdout + r.stderr).decode('utf-8', 'replace').replace('\r\n', '\n').split('\n')
+    except (OSError, subprocess.TimeoutExpired) as e:
+        lines = ['  NOT checked -- rnxc check did not run: %s' % e]
+    finally:
+        try:
+            os.remove(path)
+        except OSError:
+            pass
+    finds, shut = [], []
+    for i, line in enumerate(lines):
+        m = re.match(r'^\s+\d+:\d+\s+(error|warn|perf|note)\s+(\S+)\s*$', line)
+        if m:
+            finds.append((m.group(1), m.group(2), lines[i + 1].strip() if i + 1 < len(lines) else ''))
+        elif 'NOT checked --' in line:
+            shut.append(line.strip())
+    _CHECK[key] = (finds, shut)
+    return finds, shut
+
+
+def evaluate_block(model, s, ctx, out, p):
+    """A sentence against a BLOCK point, through the same five stages."""
+    g = model.g
+    frm, to = s['from'], s['to']
+    fn = find_item(g, p['id'])[0]
+    revert = None
+    if 'reverts' in s:
+        revert = model.event(s['reverts'])
+        if revert is None:
+            return out.reject('structural', 'no event %d' % s['reverts'])
+        if not revert['admitted'] or revert['kind'] != 'refine':
+            return out.reject('structural', 'event %d was not admitted' % s['reverts'])
+        if revert.get('reverted_by'):
+            return out.reject('structural', 'event %d is already reverted by event %d' % (s['reverts'], revert['reverted_by']))
+        if revert['target'] != s['target']:
+            return out.reject('structural', 'event %d refined %s, not %s' % (s['reverts'], revert['target'], s['target']))
+    if frm != p['value']:
+        return out.reject('structural', "stale: '%s' is %s now, not %s" % (p['name'], p['value'], frm))
+    items = None
+    if revert is not None:
+        if to != revert['value_from']:
+            return out.reject('structural', "TO is not the prior state of event %d, which is '%s'" % (s['reverts'], revert['value_from']))
+        if p['value'] != revert['value_to']:
+            return out.reject('structural', "conflict: '%s' is %s now, event %d left it at %s" % (p['name'], p['value'], s['reverts'], revert['value_to']))
+        tx = copy.deepcopy(revert['inverse'])
+    else:
+        if DIGEST_RE.match(to):
+            return out.reject('structural', "TO is a digest, which only a revert's TO is: a body is proposed as its statements")
+        try:
+            body = parse_text(to + '\n') if to.strip() else {'k': 'file', 'items': []}
+        except Unreadable as e:
+            return out.reject('structural', 'TO does not parse as a body: %s' % e)
+        why = body_shape_error(body)
+        if why:
+            return out.reject('structural', why)
+        items = body['items']
+        tx = lower_block(fn, items)
+        if not tx:
+            return out.reject('structural', "nothing to refine: '%s' is %s already" % (p['name'], p['value']))
+    out.passed('structural')
+    if revert is not None or 'constraint' in SKIP_STAGES:
+        out.skipped('constraint')
+    else:
+        why = block_constraint(p, fn, items)
+        if why:
+            return out.reject('constraint', why)
+        out.passed('constraint')
+    try:
+        new, inv = apply_tx(g, tx)
+    except TxError as e:
+        return out.reject('structural', 'the change cannot be applied: %s' % e)
+    try:
+        back = parse_text(text_of(new))
+    except Unreadable as e:
+        return out.reject('structural', 'the refined program does not parse: %s' % e)
+    if l1.norm(ids.strip(back)) != l1.norm(ids.strip(new)):
+        return out.reject('structural', 'the refined program does not read back as itself')
+    out.tx, out.inverse = tx, inv
+    out.value_from = p['value']
+    out.value_to = block_digest(body_text(find_item(new, p['id'])[0].get('items', [])))
+    gname = p['attrs'].get('governed_by')
+    if 'governance' in SKIP_STAGES or not gname:
+        out.skipped('governance')
+    else:
+        why = governance(ctx, gname, s['author'], p, None)
+        if why:
+            return out.reject('governance', why)
+        out.passed('governance')
+    floor = p['attrs'].get('floor')
+    if 'trust' in SKIP_STAGES:
+        out.skipped('trust')
+    elif floor and POSTURES[s['posture']] < POSTURES[floor]:
+        return out.reject('trust', "posture :%s below the required floor for '%s'" % (s['posture'], p['name']))
+    else:
+        out.passed('trust')
+    if 'derivation' in SKIP_STAGES:
+        out.skipped('derivation')
+    else:
+        bad = [e for e in lift(new)['errors'] if not e['own']]
+        if bad:
+            return out.reject('derivation', 'the declarations no longer lift: ' + bad[0]['msg'])
+        f0, _ = rnxc_findings(text_of(g))
+        f1, shut = rnxc_findings(text_of(new))
+        if shut:
+            return out.reject('derivation', 'rnxc check does not check this program: ' + shut[0])
+        seen = {}
+        for sev, rule, msg in f0:
+            k = (rule, re.sub(r'[0-9]+', '#', msg))
+            seen[k] = seen.get(k, 0) + 1
+        for sev, rule, msg in f1:
+            k = (rule, re.sub(r'[0-9]+', '#', msg))
+            if seen.get(k):
+                seen[k] -= 1
+            elif sev in ('error', 'warn'):
+                return out.reject('derivation', 'rnxc check: %s (%s)' % (msg, rule))
+        if 'cascade' in s and s['cascade']:
+            return out.reject('derivation', "cascade stated %s but a body has callers, not readers" % sorted(set(s['cascade'])))
+        out.passed('derivation')
+    out.cascade = {'reads': [], 'writes': []}
+    out.status, out.stage, out.graph = 'admitted', 'all', new
+    out.why = "admitted: '%s' %s -> %s [:%s]" % (s['target'], out.value_from, out.value_to, s['posture'])
+    out.diff = diff_lines(text_of(g), text_of(new))
+    return out
+
+
 # ---- the gate ---------------------------------------------------------------------------------------------------------------------------
 
 class Outcome:
@@ -986,6 +1363,8 @@ def evaluate(model, s, ctx, readback=True):
     attr = s['attr']
     if attr is not None and attr not in RULE_ATTRS:
         return out.reject('structural', "'%s' is not an attribute of a point's rule (%s)" % (attr, ', '.join(RULE_ATTRS)))
+    if p['kind'] == 'block' and attr is None:
+        return evaluate_block(model, s, ctx, out, p)
     frm, to = s['from'], s['to']
     revert = None
     if 'reverts' in s:
@@ -1043,8 +1422,8 @@ def evaluate(model, s, ctx, readback=True):
     else:
         if attr in ('min', 'max') and not (p['kind'] == 'param' and form in ('num', 'neg')):
             return out.reject('structural', "bounds apply to numeric points only, and '%s' is not one" % p['name'])
-        if attr == 'options' and p['kind'] == 'param':
-            return out.reject('structural', "options apply to algo and pipeline points, and '%s' is a param" % p['name'])
+        if attr == 'options' and p['kind'] not in ('algo', 'pipeline'):
+            return out.reject('structural', "options apply to algo and pipeline points, and '%s' is a %s" % (p['name'], p['kind']))
         if attr in ('min', 'max') and to and not NUM_RE.match(to):
             return out.reject('structural', "TO '%s' is not a number" % to)
         if attr == 'risk' and to not in ('', '1', '2', '3', '4'):
@@ -1329,7 +1708,7 @@ def audit(model, new_text, posture='trusted', author='text-edit'):
         q = by_id.get(p['id'])
         if q is None or q['kind'] != p['kind'] or q['name'] != p['name']:
             continue
-        if q['value'] != p['value']:
+        if q['value'] != p['value'] and p['kind'] != 'block':     # a body edited by hand is the human's: a raw edit, not a sentence's
             sentences.append((p['name'], p['kind'], p['value'], q['value']))
         for k in set(p['attrs']) | set(q['attrs']):
             if k in RULE_ATTRS and p['attrs'].get(k, '') != q['attrs'].get(k, ''):

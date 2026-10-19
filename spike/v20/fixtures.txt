@@ -911,9 +911,9 @@ error point 'v' target is not a literal
 
 === L11 a kind the rung does not build is declared whatever it stands on, and refused when proposed against
 --- program
-$nW = 1  # <R:BLOCK name="w">
+$nW = 1  # <R:FUNCTION name="w">
 --- do
-DEFINE REFINE try_block AS ( TARGET "w", KIND block, FROM "", TO "x", AUTHOR "mansour", POSTURE trusted, REASON "try" ) => rejected structural declared but not built
+DEFINE REFINE try_function AS ( TARGET "w", KIND function, FROM "", TO "x", AUTHOR "mansour", POSTURE trusted, REASON "try" ) => rejected structural declared but not built
 
 === L12 two points whose names differ only in case are look-alikes, and the gate fails closed on them
 ~~~ names are exact (D24), so `Vat` and `vat` are two names -- which a reader takes for one: refused, by name

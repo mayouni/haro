@@ -21,8 +21,9 @@ surface is a sentence against a point, a grammar scoped to the program it is loo
 | the event log, a revert as its own event, replay, commutation, the audit of a text edit | **built** | `Model`, `replay`, `commutes`, `audit`, section 5 |
 | the write surface: a GBNF scoped to the program, judged by the engine's decoder | **built** | `scoped.py`, section 6 |
 | the court: 11 families of check, 8 controls, a mutation study | **built**, `python haro/spike/v20/refine_check.py`, guard stage 24 | section 7 |
-| the kinds `block`, `function`, `type`, `lib`, `custom`: declared, refused when proposed against | **not built** | section 9 |
-| `node.create` and `node.delete` as the lowering of a sentence | **not built**: raw transactions only | section 9 |
+| the kind `block`: an agent proposes the BODY of a function whose signature a human declared | **built** (2026-10-19) | section 11 |
+| `node.create` and `node.delete` as the lowering of a sentence | **built**, for a body | section 11 |
+| the kinds `function`, `type`, `lib`, `custom`: declared, refused when proposed against | **not built** | section 9 |
 | a writer that keeps the layout of a file that is not canonical (the estate's) | **not built**: `--write` refuses | section 9 |
 | derivation rules that PROPOSE (RCP's `derived_proposals`) | **not built**: they only judge | section 9 |
 
@@ -38,7 +39,8 @@ the statement's own line, or alone on the lines above it -- and the first tag in
 | `pipeline` | `x = ["a", "b", ...]`, a list of string literals | the stages joined by `|` | `options` |
 | `rule` | nothing: it is a declaration of the program | `expr`: `<operand> <op> <operand>`, over point names and numbers | `message` |
 | `lib` | `load "path"` | the path | declared, not built (section 9) |
-| `block` `function` `type` `custom` | -- | -- | declared, not built |
+| `block` | a `func`, the tag alone on the line above it | the body's canonical text, named by its digest `sha:` + 12 hex | `calls`, `writes` (section 11) |
+| `function` `type` `custom` | -- | -- | declared, not built |
 
 Every point also takes `risk` (a tier from 1 to 4), `floor` (the lowest posture that may refine it) and `governed_by` (the governance whose actors decide).
 
@@ -110,8 +112,8 @@ The inverse of a change carries what it expects to find, so it refuses to run ov
 | primitive | what it does to the graph | inverse | reached by a sentence |
 |---|---|---|---|
 | `node.update_property` | a property of a node named by item id and path: the text of a trailing comment, of a literal | itself, with the old value | `vat.max`, `vat.min`, `.risk`, `.floor` |
-| `node.create` | a node in a block of a parent, at an index; ids kept if it holds them, fresh if not | `node.delete` | **no** -- transactions only |
-| `node.delete` | removes an item; its inverse restores it with the **same ids**, at the same index | `node.create` | **no** -- transactions only |
+| `node.create` | a node in a block of a parent, at an index; ids kept if it holds them, fresh if not | `node.delete` | a `block` body: a statement that comes |
+| `node.delete` | removes an item; its inverse restores it with the **same ids**, at the same index | `node.create` | a `block` body: a statement that goes |
 | `edge.create` | a `governed_by` edge: the attribute appended to the tag | `edge.delete` | `vat.governed_by` from nothing |
 | `edge.delete` | removes it; the inverse puts it back as the same attribute, in the same place | `edge.create` | `vat.governed_by` to nothing |
 | `edge.retarget` | a `governed_by` edge to another governance, or a `calls` edge: the callee a statement calls | itself, reversed | an `algo` point on a call; `vat.governed_by` |
@@ -168,7 +170,7 @@ small checks in about ten seconds.
 
 | | what it judges | number |
 |---|---|---|
-| **F** | 91 fixtures through the gate (177 steps: 72 admitted, 2 flagged, 103 refused): the verdict, the stage, the words, the primitives. **For every fixture, whatever it says:** a refused proposal changes neither the text nor the ids; an admitted one changes exactly one line and no id; the inverses put the original back, byte for byte, with its ids; the log replayed from JSON through the gate, and the transactions with no gate, give the same text; the refined text is canonical on **the other printer** (`rnxc fmt --check`); and 4 programs run on the oracle and on rnxc before and after, printing what the refinement says they should | 0 fail |
+| **F** | 106 fixtures through the gate, the BLOCK kind's 15 among them (210 steps: 81 admitted, 2 flagged, 127 refused): the verdict, the stage, the words, the primitives. **For every fixture, whatever it says:** a refused proposal changes neither the text nor the ids; an admitted one changes exactly one line and no id -- a BODY refinement changes nothing outside its function, keeps the order of every id that stays and loses none it did not delete; the inverses put the original back, byte for byte, with its ids; the log replayed from JSON through the gate, and the transactions with no gate, give the same text; the refined text is canonical on **the other printer** (`rnxc fmt --check`); and 8 programs run on the oracle and on rnxc before and after, printing what the refinement says they should | 0 fail |
 | **T** | the twelve primitives (23 transactions), each applied, undone and applied again; a transaction that fails halfway leaves nothing; an inverse refuses a state that has moved on | 12 of 12 |
 | **L** | declarations that do not lift (14 fixtures): the gate fails closed | 0 fail |
 | **C** | the commutation predicate over every pair of a pool of 16 sentences, each in both orders | 60 commuting (and are), 11 conflicting and order-dependent, 49 conservative, **0 unsound** |
@@ -176,7 +178,7 @@ small checks in about ten seconds.
 | **S** | **Softanza's own `stzRefinableCode`** on the Ring++ package, put 504 proposals (56 the fixtures', the rest a sweep of points x values x actors x postures over two programs): admitted-or-not, the refusing stage and the value left | **418 agree**; 85 the language itself refuses at a stage the live gate has none for (most of them no-ops, D25); 1 carries a value its tag form cannot hold; 0 disagree |
 | **G** | a retargeted call, 0/1/2 arguments x a function of each arity, one that does not exist, a case variant: the structural stage says it stands exactly when `rnxc graph` shows a static call edge from the refined program -- but for a case variant, which Ring binds and the gate refuses by name (D24) | 18 of 18 |
 | **W** | the grammar scoped to each program (83 grammars, each held by the engine's constrained decoder, and a task's grammar of 3 points of a 15-point program, D26): every admitted fixture sentence its author could write is a sentence of it; the decoder refuses all 35 proposals the gate refuses for their shape; 600 sentences sampled from it are all accepted and **none is refused for its shape** | 0 fail |
-| **D** | 9 controls that must FAIL (a gate that skips each of its four stages, one that edits the live program before judging, a cascade that sees nothing, an inverse that loses ids, a revert that does not check, a grammar that does not name the points) | each fails the court |
+| **D** | 14 controls that must FAIL (a gate that skips each of its four stages, one that edits the live program before judging, a cascade that sees nothing, an inverse that loses ids, a revert that does not check, a grammar that does not name the points; and the BLOCK kind's five rules taken out in turn -- no calls or writes allowlist, no shape refusals, a lowering that keeps no statement, a compiler that finds nothing, a lift that reads a BLOCK tag without checking it) | each fails the court |
 | **H** | Haro's own history: a refinement drafted against a literal assignment at one revision, **does it still land at the next?** | 1,550 of 1,578 land (98.2%) |
 | **K** | a literal of each of 80 real Ring files made a point and refined | 165 literals, 0 fail |
 | mutation | 519 defects of one token each put into the engine (`probes/mutate.py`), the fast court asked | 505 killed (97.3%); the 14 left change nothing a sentence can reach (HF-89) |
@@ -227,9 +229,7 @@ now whether the package's compiler is older than the repository's, and on 2026-1
 
 ## 9. What it does not say
 
-- **The kinds `block`, `function`, `type`, `lib`, `custom`.** Declared and refused when proposed against, not built. A `block` refinement -- an agent proposing the body of a function inside its signature
-  -- is where `node.create` and `node.delete` would be the lowering of a sentence, and the first thing to build next; it needs the parser of the face to read a proposed statement list, and a derivation stage
-  that can ask the compiler (`rnxc check`) what the body does to the program's calls.
+- **The kinds `function`, `type`, `lib`, `custom`.** Declared and refused when proposed against, not built. `block` is built (section 11).
 - **A writer for a file that is not canonical.** The estate's files are not (rung 3: none of Softanza's 6,061 is `fmt`'s fixed point), and the refinement's text is the printer's. `--write` refuses; a span-preserving
   writer needs the byte span of the literal, which the lossless export (`rnxc dump --json`) has and the graph (L1) does not keep. Until then, a refinement on the estate is a diff to read or `fmt` first, with the
   author's word (D23).
@@ -256,3 +256,47 @@ Taken on the delegation of 2026-10-05 ("take whatever decision you think is wise
 9. **Names are exact (D24)**, look-alikes refused, a near miss named; Ring's folding only where the gate describes the Ring program (the cascade).
 10. **The grammar is scoped to the points a task names (D26)**; the decoder's cap stays where it is.
 8. **`--write` refuses on a file that is not canonical.** *Cost:* the estate needs `fmt` first (D23) or the span-preserving writer of section 9.
+
+## 11. The BLOCK kind -- a function's body, proposed by an agent (built 2026-10-19)
+
+**On the author's "go"** (2026-10-19, after "what is next?"). The fixtures came first, `fixtures_block.txt`, 15 of them (B01-B11, L15-L18), committed
+before the engine read them; its header is the design. `python haro/spike/v20/refine_check.py --block` runs them alone in seconds, and the full court
+folds them in.
+
+**The point.** `# <R:BLOCK name="gross" calls="Tax|Round" writes="$nTotal">` alone on the line above a `func`. The point is the function's body; the
+signature -- its name and parameters -- is the human's, and no block refinement changes it. The tag cannot stand on the func line: the grammar reads a
+comment there as the body's first line (the printer moves it there), which would put the tag inside its own point -- found by the first probe, and the
+fixtures moved (HF-95). `calls` names every function, method, class (`new K`) and builtin the body may call, spelt as declared (D24); absent, nothing.
+`writes` names every global (`$x`), attribute (`@x`) and parameter whose CONTENTS the body may write -- a list parameter is the caller's list; absent,
+the body writes its own locals only, and rebinding a parameter is one (C-29). A name in either list that the program does not have is a fault; a near
+miss names the declared spelling.
+
+**The value** is the body's canonical text, named by its digest: `sha:` and the first 12 hex digits of its SHA-256 (the empty body is
+`sha:e3b0c44298fc`). FROM is that digest -- a compare-and-swap over what the proposer saw, comments included, which a one-line string cannot carry --
+and the lift prints it. TO is the new body on ONE line, as Ring reads statements without separators (`nTax = Tax(nNet) return nNet + nTax`); the
+compiler's parser reads it and the printer writes it out canonically. A respacing is not a refinement (D25). A revert's TO is the digest of the
+state it returns to: the event's inverse transaction carries the body, comments and ids included.
+
+**The gate.**
+
+| stage | for a body |
+|---|---|
+| structural | TO parses, and is a statement list and nothing else: it defines nothing (`func`, `class`, `package`), loads nothing, holds no `eval`, no `call` by name, no brace block, no comment (the gate does not judge prose, and a model's comment can mislead the reader of the diff), no `bye`; FROM is the digest now; the refined program reads back as itself |
+| constraint | every call is one `calls` names, by its declared spelling -- builtins too, and the function's own name; every write outside the frame is one `writes` names |
+| governance, trust | as for every point |
+| derivation | `rnxc check` on the refined program reports no error or warning it did not report on the program before -- a wrong argument count (`rpp/type-arity`), a name nothing assigns (`rpp/uninitialized-variable`) -- and the refusal quotes it; a program whose absence rules the checker shuts (an eval, a loadlib) is not refined by a body at all |
+
+**The lowering.** The old body and the new are matched statement by statement on their canonical text (difflib's longest matching blocks): a
+statement that stays keeps its id and the comments attached to it (rung 18's rule: a comment belongs to the next statement); one that goes is
+`node.delete`, one that comes `node.create` with a fresh id, deletes first. Inserting one statement between two that stay is one `node.create`.
+
+**The court.** The 15 fixtures, each run as every fixture is (refusals change nothing, the inverses restore every id, replay, `rnxc fmt`), four of
+them on the oracle and on rnxc before and after (`[]` then `[120]` for a body written into an empty signature); the body's locality in place of
+"one line out, one line in": nothing outside the function changes, every id that stays keeps its order, none goes without a `node.delete`; the
+write surface (section 6) fixes a block point's target and the digest FROM must be, and leaves TO one line of text, which no context-free grammar can
+say is Ring; and five controls, each rule taken out in turn and caught by at least one fixture (HF-97).
+
+**Not built, named:** refining a BLOCK point's own `calls` and `writes` as rules (`gross.calls`: widening an allowlist would be a tier-4 act, as
+widening options is); a body proposed with a comment; a human's edit of a body read back by the audit as a block refinement (it is counted a raw
+edit: the gate governs proposals, the human writes the body); a per-call check that a callee in `calls` is called with the right arguments before
+the compiler is asked (the compiler answers it at derivation); the kinds `function`, `type`, `custom`.

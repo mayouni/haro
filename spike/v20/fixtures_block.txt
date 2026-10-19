@@ -3,8 +3,9 @@
 ~~~ engine is built, and until then stage 24 does not, so the guard stays green on the commits that carry them. Same sections as fixtures.txt;
 ~~~ `=== BNN` is a block fixture, `=== LNN` a fault in the lift.
 ~~~
-~~~ THE POINT. `<R:BLOCK name="..." ...>` on a `func` line, or alone on the lines above it: the point is the function's BODY. The signature -- its
-~~~ name and parameters -- is the human's, and no block refinement changes it.
+~~~ THE POINT. `<R:BLOCK name="..." ...>` alone on the line above a `func`: the point is the function's BODY. Not on the func line: the grammar
+~~~ reads a comment there as the body's first line, which the agent writes -- the tag would sit inside its own point. The signature -- the
+~~~ function's name and parameters -- is the human's, and no block refinement changes it.
 ~~~   calls="A|B"     every function and builtin the body may call, spelt as declared (D24); absent, the body may call nothing. A method call
 ~~~                   `x.M()` counts as a call of M. Least authority: what is not named is refused.
 ~~~   writes="$x|.."  every global, and every parameter whose CONTENTS it writes (`aL[1] = 0`, `add(aL, v)`: the caller holds those), the body may
@@ -24,8 +25,8 @@
 ~~~                and a model's comment can mislead the human reading the diff; FROM is the body's digest now; TO parses
 ~~~   constraint   every call is one the point names in `calls`, by its declared spelling; every write outside the frame is one `writes` names
 ~~~   governance, trust   as for every point
-~~~   derivation   the compiler is asked: every call to a user function passes the number of arguments it takes (rnxc graph binds it), and
-~~~                `rnxc check` reports nothing on the refined program that it did not report before. A program the compiler cannot vouch for
+~~~   derivation   the compiler is asked: `rnxc check` reports no error or warning on the refined program that it did not report before --
+~~~                a call with the wrong number of arguments, a name nothing assigns -- and the refusal quotes the compiler. A program the compiler cannot vouch for
 ~~~                (its absence rules are shut: an eval, a loadlib) is not refined by a body at all.
 ~~~
 ~~~ THE LOWERING. The old body and the new are matched statement by statement on their canonical text (a longest common subsequence): a statement
@@ -37,14 +38,15 @@
 $nVat = 0.20  # <R:PARAM name="vat" min="0" max="0.9">
 ? Gross(100)
 
-func Gross(nNet)  # <R:BLOCK name="gross" calls="Tax">
+# <R:BLOCK name="gross" calls="Tax">
+func Gross(nNet)
 	return nNet + Tax(nNet)
 
 func Tax(n)
 	return n * $nVat
 --- lift
 vat param @1 = 0.20 min=0 max=0.9
-gross block @3 = sha:e50ec955b97f calls=Tax
+gross block @4 = sha:e50ec955b97f calls=Tax
 
 === B02 the first body of a declared signature
 ~~~ the human declares `func Gross(nNet)` and what it may call; the agent writes the body. One statement comes, so the lowering is one node.create
@@ -52,7 +54,8 @@ gross block @3 = sha:e50ec955b97f calls=Tax
 $nVat = 0.20  # <R:PARAM name="vat" min="0" max="0.9">
 ? "[" + Gross(100) + "]"
 
-func Gross(nNet)  # <R:BLOCK name="gross" calls="Tax">
+# <R:BLOCK name="gross" calls="Tax">
+func Gross(nNet)
 
 func Tax(n)
 	return n * $nVat
@@ -62,7 +65,8 @@ DEFINE REFINE write_gross AS ( TARGET "gross", KIND block, FROM "sha:e3b0c44298f
 $nVat = 0.20  # <R:PARAM name="vat" min="0" max="0.9">
 ? "[" + Gross(100) + "]"
 
-func Gross(nNet)  # <R:BLOCK name="gross" calls="Tax">
+# <R:BLOCK name="gross" calls="Tax">
+func Gross(nNet)
 	return nNet + Tax(nNet)
 
 func Tax(n)
@@ -76,7 +80,8 @@ oracle: [] | [120]
 $nVat = 0.21  # <R:PARAM name="vat" min="0" max="0.9">
 ? Gross(99)
 
-func Gross(nNet)  # <R:BLOCK name="gross" calls="Tax|Round">
+# <R:BLOCK name="gross" calls="Tax|Round">
+func Gross(nNet)
 	nTax = Tax(nNet)
 	return nNet + nTax
 
@@ -91,7 +96,8 @@ DEFINE REFINE round_tax AS ( TARGET "gross", KIND block, FROM "sha:3a4b390464d7"
 $nVat = 0.21  # <R:PARAM name="vat" min="0" max="0.9">
 ? Gross(99)
 
-func Gross(nNet)  # <R:BLOCK name="gross" calls="Tax|Round">
+# <R:BLOCK name="gross" calls="Tax|Round">
+func Gross(nNet)
 	nTax = Tax(nNet)
 	nTax = Round(nTax)
 	return nNet + nTax
@@ -111,7 +117,8 @@ oracle: 119.79 | 120
 $nVat = 0.20  # <R:PARAM name="vat" min="0" max="0.9">
 ? Gross(100)
 
-func Gross(nNet)  # <R:BLOCK name="gross" calls="Tax">
+# <R:BLOCK name="gross" calls="Tax">
+func Gross(nNet)
 	return nNet + Tax(nNet)
 
 func Tax(n)
@@ -128,7 +135,8 @@ DEFINE REFINE double_tax AS ( TARGET "gross", KIND block, FROM "sha:e50ec955b97f
 $nVat = 0.20  # <R:PARAM name="vat" min="0" max="0.9">
 ? Gross(100)
 
-func Gross(nNet)  # <R:BLOCK name="gross" calls="Tax">
+# <R:BLOCK name="gross" calls="Tax">
+func Gross(nNet)
 	return nNet + Tax(nNet) * 2
 
 func Tax(n)
@@ -143,7 +151,8 @@ oracle: 120 | 140
 --- program
 ? Double(21)
 
-func Double(n)  # <R:BLOCK name="double">
+# <R:BLOCK name="double">
+func Double(n)
 	return n * 2
 --- do
 DEFINE REFINE recurse AS ( TARGET "double", KIND block, FROM "sha:34be9794a5f0", TO "return Double(n - 1) + 2", AUTHOR "aicha", POSTURE trusted, REASON "try" ) => rejected constraint 'Double' is not a call 'double' allows
@@ -151,7 +160,8 @@ DEFINE REFINE add_twice AS ( TARGET "double", KIND block, FROM "sha:34be9794a5f0
 --- text
 ? Double(21)
 
-func Double(n)  # <R:BLOCK name="double">
+# <R:BLOCK name="double">
+func Double(n)
 	return n + n
 --- run
 oracle: 42 | 42
@@ -162,13 +172,16 @@ oracle: 42 | 42
 $nCount = 0
 ? Double(21)
 
-func Double(n)  # <R:BLOCK name="double">
+# <R:BLOCK name="double">
+func Double(n)
 	return n * 2
 
-func Count()  # <R:BLOCK name="count" writes="$nCount">
+# <R:BLOCK name="count" writes="$nCount">
+func Count()
 	return $nCount
 
-func Head(aL)  # <R:BLOCK name="head">
+# <R:BLOCK name="head">
+func Head(aL)
 	return aL[1]
 --- do
 DEFINE REFINE global AS ( TARGET "double", KIND block, FROM "sha:34be9794a5f0", TO "$nCount = 1 return n * 2", AUTHOR "aicha", POSTURE trusted, REASON "try" ) => rejected constraint writes $nCount, which 'double' does not allow
@@ -179,15 +192,18 @@ DEFINE REFINE counted AS ( TARGET "count", KIND block, FROM "sha:713635dcc9aa", 
 $nCount = 0
 ? Double(21)
 
-func Double(n)  # <R:BLOCK name="double">
+# <R:BLOCK name="double">
+func Double(n)
 	nTwo = 2
 	return n * nTwo
 
-func Count()  # <R:BLOCK name="count" writes="$nCount">
+# <R:BLOCK name="count" writes="$nCount">
+func Count()
 	$nCount += 1
 	return $nCount
 
-func Head(aL)  # <R:BLOCK name="head">
+# <R:BLOCK name="head">
+func Head(aL)
 	return aL[1]
 
 === B07 the structural stage: a body is a statement list the gate can read, and nothing else
@@ -196,7 +212,8 @@ func Head(aL)  # <R:BLOCK name="head">
 $nVat = 0.20  # <R:PARAM name="vat" min="0" max="0.9">
 ? Gross(100)
 
-func Gross(nNet)  # <R:BLOCK name="gross" calls="Tax">
+# <R:BLOCK name="gross" calls="Tax">
+func Gross(nNet)
 	return nNet + Tax(nNet)
 
 func Tax(n)
@@ -217,20 +234,21 @@ DEFINE REFINE comment AS ( TARGET "gross", KIND block, FROM "sha:e50ec955b97f", 
 DEFINE REFINE broken AS ( TARGET "gross", KIND block, FROM "sha:e50ec955b97f", TO "return (", AUTHOR "aicha", POSTURE trusted, REASON "try" ) => rejected structural does not parse
 
 === B08 derivation asks the compiler
-~~~ `Tax` takes one argument (rnxc graph binds no edge for the call that passes two); `nGross` is assigned nowhere, which `rnxc check` reports
-~~~ and did not before. Both refinements change nothing
+~~~ `Tax` takes one argument and `nGross` is assigned nowhere: `rnxc check` reports each on the refined program and did not on the program before
+~~~ (rpp/type-arity, rpp/uninitialized-variable), and the refusal quotes it. Both refinements change nothing
 --- program
 $nVat = 0.20  # <R:PARAM name="vat" min="0" max="0.9">
 ? Gross(100)
 
-func Gross(nNet)  # <R:BLOCK name="gross" calls="Tax">
+# <R:BLOCK name="gross" calls="Tax">
+func Gross(nNet)
 	return nNet + Tax(nNet)
 
 func Tax(n)
 	return n * $nVat
 --- do
-DEFINE REFINE arity AS ( TARGET "gross", KIND block, FROM "sha:e50ec955b97f", TO "return nNet + Tax(nNet, 2)", AUTHOR "aicha", POSTURE trusted, REASON "try" ) => rejected derivation 'Tax' takes 1 argument(s), the call passes 2
-DEFINE REFINE unassigned AS ( TARGET "gross", KIND block, FROM "sha:e50ec955b97f", TO "return nNet + nGross", AUTHOR "aicha", POSTURE trusted, REASON "try" ) => rejected derivation ngross
+DEFINE REFINE arity AS ( TARGET "gross", KIND block, FROM "sha:e50ec955b97f", TO "return nNet + Tax(nNet, 2)", AUTHOR "aicha", POSTURE trusted, REASON "try" ) => rejected derivation Tax() takes 1 argument(s), called with 2
+DEFINE REFINE unassigned AS ( TARGET "gross", KIND block, FROM "sha:e50ec955b97f", TO "return nNet + nGross", AUTHOR "aicha", POSTURE trusted, REASON "try" ) => rejected derivation nGross is read here, and nothing anywhere assigns it
 
 === B09 a program the compiler cannot vouch for is not refined by a body
 ~~~ an eval anywhere shuts `rnxc check`'s absence rules for the whole unit, so the derivation stage has no answer to give, and it fails closed
@@ -238,7 +256,8 @@ DEFINE REFINE unassigned AS ( TARGET "gross", KIND block, FROM "sha:e50ec955b97f
 eval("x = 1")
 ? Double(21)
 
-func Double(n)  # <R:BLOCK name="double">
+# <R:BLOCK name="double">
+func Double(n)
 	return n * 2
 --- do
 DEFINE REFINE add_twice AS ( TARGET "double", KIND block, FROM "sha:34be9794a5f0", TO "return n + n", AUTHOR "mansour", POSTURE trusted, REASON "try" ) => rejected derivation rnxc check does not check this program
@@ -247,7 +266,8 @@ DEFINE REFINE add_twice AS ( TARGET "double", KIND block, FROM "sha:34be9794a5f0
 --- program
 ? Double(21)
 
-func Double(n)  # <R:BLOCK name="double" floor="external">
+# <R:BLOCK name="double" floor="external">
+func Double(n)
 	return n * 2
 --- do
 DEFINE REFINE model AS ( TARGET "double", KIND block, FROM "sha:34be9794a5f0", TO "return n + n", AUTHOR "bot", POSTURE llm, REASON "try" ) => rejected trust below the required floor
@@ -255,36 +275,41 @@ DEFINE REFINE vendor AS ( TARGET "double", KIND block, FROM "sha:34be9794a5f0", 
 --- text
 ? Double(21)
 
-func Double(n)  # <R:BLOCK name="double" floor="external">
+# <R:BLOCK name="double" floor="external">
+func Double(n)
 	return n + n
 
 === B11 a revert restores the body with its ids, and is gated like any other
+~~~ a revert's TO is the digest of the state it returns to: the event's inverse transaction carries the body, comments and ids included
 --- program
 ? Double(21)
 
-func Double(n)  # <R:BLOCK name="double">
+# <R:BLOCK name="double">
+func Double(n)
 	return n * 2
 --- do
 DEFINE REFINE add_twice AS ( TARGET "double", KIND block, FROM "sha:34be9794a5f0", TO "return n + n", AUTHOR "mansour", POSTURE trusted, REASON "no multiply" ) => admitted tx=node.delete,node.create
-DEFINE REFINE undo AS ( TARGET "double", KIND block, FROM "sha:622d54efd309", TO "return n * 2", AUTHOR "mansour", POSTURE trusted, REASON "back", REVERTS "1" ) => admitted tx=node.delete,node.create
-DEFINE REFINE undo_again AS ( TARGET "double", KIND block, FROM "sha:34be9794a5f0", TO "return n + n", AUTHOR "mansour", POSTURE trusted, REASON "twice", REVERTS "1" ) => rejected structural already reverted
+DEFINE REFINE undo AS ( TARGET "double", KIND block, FROM "sha:622d54efd309", TO "sha:34be9794a5f0", AUTHOR "mansour", POSTURE trusted, REASON "back", REVERTS "1" ) => admitted tx=node.delete,node.create
+DEFINE REFINE undo_again AS ( TARGET "double", KIND block, FROM "sha:34be9794a5f0", TO "sha:622d54efd309", AUTHOR "mansour", POSTURE trusted, REASON "twice", REVERTS "1" ) => rejected structural already reverted
 --- text
 ? Double(21)
 
-func Double(n)  # <R:BLOCK name="double">
+# <R:BLOCK name="double">
+func Double(n)
 	return n * 2
 
 === L15 a BLOCK point stands on a function
 --- program
 $nX = 1  # <R:BLOCK name="b">
 --- lift
-error BLOCK point 'b' is not on a function
+error point 'b' is not on a function
 
 === L16 what a block may call is a function the program defines, or a builtin
 --- program
 ? Double(21)
 
-func Double(n)  # <R:BLOCK name="double" calls="Nope">
+# <R:BLOCK name="double" calls="Nope">
+func Double(n)
 	return n * 2
 --- lift
 error 'Nope' in calls of 'double' is no function and no builtin
@@ -293,7 +318,8 @@ error 'Nope' in calls of 'double' is no function and no builtin
 --- program
 ? Gross(100)
 
-func Gross(nNet)  # <R:BLOCK name="gross" calls="tax">
+# <R:BLOCK name="gross" calls="tax">
+func Gross(nNet)
 	return nNet + Tax(nNet)
 
 func Tax(n)
@@ -305,7 +331,8 @@ error calls of 'gross' names 'tax'; the function is declared 'Tax'
 --- program
 ? Double(21)
 
-func Double(n)  # <R:BLOCK name="double" options="a|b">
+# <R:BLOCK name="double" options="a|b">
+func Double(n)
 	return n * 2
 --- lift
 error 'options' is not an attribute of a BLOCK point

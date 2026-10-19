@@ -8,7 +8,8 @@ be written: the point's name, its kind, the id of its statement (AT), the value 
 readers of its name (CASCADE), the options TO may take where the point has them, a governance that exists, a number where a number is wanted.
 `posture` fixes the origin the harness stands for: an agent run under :llm cannot write :trusted; `author` the actor it acts as.
 What no context-free grammar says stays the gate's: a number inside its bounds, an actor's authority, a rule over two points, a callee that exists, a
-list of options without a duplicate, a revert (REVERTS names an event of the log, and the harness writes those: Model.revert).
+list of options without a duplicate, a revert (REVERTS names an event of the log, and the harness writes those: Model.revert), and a BLOCK point's body
+-- the grammar fixes its point and the digest FROM must be, and leaves TO one line of text for the compiler's parser and the gate's allowlists.
 """
 import refine
 
@@ -53,7 +54,7 @@ def scoped_gbnf(model, ctx=None, posture=None, author=None, points=None):
             continue
         a = p['attrs']
         opts = a['options'].split('|') if a.get('options') else None
-        c = refine.cascade(model.g, p)
+        c = refine.cascade(model.g, p) if p['form'] != 'block' else {'reads': []}
         reads = ','.join(str(i) for i in sorted(set(i for i, _ in c['reads'])))
         tails.append('tail%d ::= ", AUTHOR " who ", POSTURE " post ", REASON " word (", AT " %s)?' % (n, lit('"%d"' % p['id'])))
         tails.append('vtail%d ::= tail%d (", CASCADE " %s)?' % (n, n, lit('"%s"' % reads)))
@@ -66,6 +67,10 @@ def scoped_gbnf(model, ctx=None, posture=None, author=None, points=None):
             shapes.append((p['name'], p['value'], quoted(alt(opts)) if opts else 'qtext', True))
         elif p['form'] == 'call':
             shapes.append((p['name'], p['value'], quoted(alt(opts)) if opts else 'qname', True))
+        elif p['form'] == 'block':
+            # FROM is the body's digest, exactly; TO a body on one line, which no context-free grammar can say is Ring: the gate reads it with the
+            # compiler's parser and holds it to its calls and writes. A body has callers, not readers: no CASCADE seat
+            shapes.append((p['name'], p['value'], 'qbody', False))
         else:
             tails.append('stage%d ::= %s' % (n, alt(opts)))
             shapes.append((p['name'], p['value'], quoted('(stage%d ("|" stage%d)*)?' % (n, n)), True))
@@ -92,6 +97,7 @@ def scoped_gbnf(model, ctx=None, posture=None, author=None, points=None):
         'qnumopt ::= ' + quoted('num?'),
         'qtext ::= ' + quoted('[^"\\n|]*'),
         'qname ::= ' + quoted('[A-Za-z_] [A-Za-z0-9_]*'),
+        'qbody ::= ' + quoted('[^"\\n]*'),
         'qopts ::= ' + quoted('[A-Za-z0-9_]+ ("|" [A-Za-z0-9_]+)*'),
         'qtier ::= ' + quoted('("1" | "2" | "3" | "4")?'),
         'qfloor ::= ' + quoted('(' + ' | '.join(lit(x) for x in refine.POSTURES) + ')?'),
