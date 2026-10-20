@@ -48,15 +48,22 @@ COLLISIONS = {
     'name-clash':  ('two Ring names that print as one Python name', 'a reader of the face could not tell them apart: `del` is spelt `del_`, `@Foo` is `at_Foo`, and a name of Ring\'s that is already `del_` or `at_foo` is the same text'),
     'new-from':    ('new from name', 'makes an object of the class a string names, at run time: no spelling'),
     'param-type':  ('func f(string s)', 'a typed parameter would lose its type in the face'),
+    'call-target': ('F() = v', 'the call runs, then Ring writes through its result or raises R34 (F-81): Python cannot assign to a call'),
+    'not-precedence': ('not a = b', 'Ring binds `not` looser than a comparison or arithmetic (`not a = b` is `not (a = b)`, measured on the oracle), and the grammar\'s tree binds it '
+                                    'tighter: the tree and Ring disagree, so the face cannot spell it without choosing'),
 }
 
 FACE_WORDS = {'say', 'see', 'at', 'setat', 'eq', 'ne', 'lt', 'gt', 'le', 'ge', 'cat', 'plus', 'span', 'rng', 'mod', 'both', 'either', 'negate',
-              'give', 'load', 'bye', 'G', 'RingError', 'str', 'self', 'super', 'new'}
+              'give', 'load', 'bye', 'G', 'RingError', 'str', 'self', 'super', 'new', 'new_without_init'}
 PRIVATE_COMMENT = '# private: the methods below are private to the class'
 MAIN_COMMENT = '# Ring calls main() after the top level (F-60)'
 REGION = '__region__'
 
 
+# Python's precedence of what the face prints (higher binds tighter); a call form such as eq(a, b) is an atom
+PY_PREC = {'or': 1, '||': 1, 'and': 2, '&&': 2, '=': 4, '!=': 4, '<': 4, '>': 4, '<=': 4, '>=': 4,
+           '|': 5, '^': 6, '&': 7, '<<': 8, '>>': 8, '+': 9, '-': 9, '*': 10, '/': 10, '%': 10, '**': 12}
+NOT_PREC, UNARY_PREC, ATOM_PREC = 3, 11, 99
 PRINTED = {}                             # a printed name folded -> the Ring name folded it came from, for the program being printed
 
 
@@ -145,7 +152,7 @@ class Face:
         self.cond = False                    # printing a condition (and/or/not read as Python's there)
         self.kinds = {}
         self.region = set()                  # the attributes a class region assigns (bare names there are attributes)
-        self.atom = False                    # the last binary expression printed was a call
+        self.prec = ATOM_PREC                # the precedence of the expression printed last
 
     # -- names
     def name(self, t):
@@ -238,20 +245,50 @@ class Face:
     # -- expressions
     def e(self, n):
         """`and`, `or` and `not` are Python's only in the condition itself, through parentheses and each other; whatever else stands in a condition -- a call's
-        argument, an operand of a comparison, an item of a list -- is a value, and a value is Ring's 1 or 0 (rung 7 found the argument leaking)."""
+        argument, an operand of a comparison, an item of a list -- is a value, and a value is Ring's 1 or 0 (rung 7 found the argument leaking). Leaves in
+        `self.prec` the precedence of the text it returns."""
         k = n['k']
         keep = k == 'paren' or (k == 'bin' and n['op'] in ('and', '&&', 'or', '||')) or (k == 'un' and n['op'] == 'not')
         if self.cond and not keep:
             self.cond = False
             try:
-                return self.expression(n)
+                s = self.expression(n)
             finally:
                 self.cond = True
-        return self.expression(n)
+        else:
+            s = self.expression(n)
+        if k == 'un':
+            self.prec = NOT_PREC if s.startswith('not ') else UNARY_PREC if s[:1] in ('-', '+') else ATOM_PREC
+        elif k in ('post', 'assign'):
+            self.prec = 0
+        elif k not in ('bin', 'paren'):      # binary() leaves its own; a parenthesis is not printed, so the inner expression's stands
+            self.prec = ATOM_PREC
+        return s
 
-    def wrap(self, n, s):
-        """An operand that is not an atom, in parentheses: a graph a reader builds has no parenthesis nodes."""
-        return '(' + s + ')' if n['k'] in ('bin', 'un', 'assign', 'post') else s
+    def operand(self, n, parent, op=None, side='left'):
+        """An operand of an operator of precedence `parent`, in parentheses exactly where Python would otherwise read another tree: a looser operand; an equal one on
+        the side the operator does not associate to (`**` associates right, the others left); any comparison inside a comparison, which Python chains; but a unary
+        minus on the right of `**` (`a ** -b`) needs none."""
+        s = self.e(n)
+        p = self.prec
+        if p == ATOM_PREC:
+            return s
+        need = p < parent
+        if not need and p == parent:
+            if parent == 4:
+                need = True
+            elif op == '**':
+                need = side == 'left'
+            elif op is not None:
+                need = side == 'right'
+        if op == '**' and side == 'right' and p == UNARY_PREC:
+            need = False
+        return '(' + s + ')' if need else s
+
+    def atomic(self, n):
+        """An expression as the object of a dot or the callee of a call: parenthesized unless it is an atom."""
+        s = self.e(n)
+        return s if self.prec == ATOM_PREC else '(' + s + ')'
 
     def expression(self, n):
         k = n['k']
@@ -279,15 +316,22 @@ class Face:
         if k == 'super':
             return 'super()'
         if k == 'paren':
-            return '(' + (self.e(n['e']) if 'e' in n else '') + ')'
+            if 'e' in n:
+                return self.e(n['e'])        # not printed: Python's precedence decides where a parenthesis stands
+            self.prec = ATOM_PREC
+            return '()'
         if k == 'list':
             return '[' + ', '.join(self.e(x) for x in n.get('items', [])) + ']'
         if k == 'pair':
             return '[' + py_str(n['key']['text'][1:].lower() if n['key']['k'] == 'sym' else n['key'].get('text', '')) + ', ' + self.e(n['value']) + ']'
         if k == 'un':
             if n['op'] == 'not':
-                return ('not ' if self.cond else 'negate(') + self.e(n['e']) + ('' if self.cond else ')')
-            return n['op'] + self.wrap(n['e'], self.e(n['e'])) if n['e']['k'] in ('bin', 'assign', 'post') else n['op'] + self.e(n['e'])
+                if self.cond:
+                    return 'not ' + self.operand(n['e'], NOT_PREC)
+                return 'negate(' + self.e(n['e']) + ')'
+            if n['e']['k'] == 'un' and n['e']['op'] == 'not':
+                raise Refused('not-precedence', 'not ... under ' + n['op'])
+            return n['op'] + self.operand(n['e'], UNARY_PREC)
         if k == 'post':
             raise Refused('increment-value')
         if k == 'bin':
@@ -296,14 +340,14 @@ class Face:
             c = n['callee']
             if c['k'] == 'id' and c['text'].lower() == 'eval':
                 raise Refused('eval')
-            return (self.fname(c['text']) if c['k'] == 'id' else self.wrap(c, self.e(c))) + '(' + ', '.join(self.e(a) for a in n.get('args', [])) + ')'
+            return (self.fname(c['text']) if c['k'] == 'id' else self.atomic(c)) + '(' + ', '.join(self.e(a) for a in n.get('args', [])) + ')'
         if k == 'callkw':
             raise Refused('call-name')
         if k == 'member':
             prop = n['prop']['text'] if n['prop']['k'] == 'id' else None
             if prop and prop.lower() in self.getters:
                 raise Refused('getter', 'get' + prop)
-            return self.wrap(n['obj'], self.e(n['obj'])) + '.' + (ident(self.spell.get(prop.lower(), prop)) if prop else self.e(n['prop']))
+            return self.atomic(n['obj']) + '.' + (ident(self.spell.get(prop.lower(), prop)) if prop else self.e(n['prop']))
         if k == 'index':
             return 'at(%s, %s)' % (self.e(n['obj']), self.e(n['idx']))
         if k == 'brace':
@@ -313,7 +357,8 @@ class Face:
                 raise Refused('brace', 'new K { ... }')
             if n.get('from'):
                 raise Refused('new-from', 'new from ' + '.'.join(n['name']))
-            return 'new(' + ', '.join(['.'.join(ident(x) for x in n['name'])] + [self.e(a) for a in n.get('args', [])]) + ')'
+            word = 'new' if 'args' in n else 'new_without_init'          # `new K` does not call init; `new K()` does
+            return word + '(' + ', '.join(['.'.join(ident(x) for x in n['name'])] + [self.e(a) for a in n.get('args', [])]) + ')'
         if k == 'lambda':
             raise Refused('lambda')
         if k == 'assign':
@@ -321,54 +366,42 @@ class Face:
         raise ValueError('no spelling for an expression of kind ' + k)
 
     def binary(self, n):
-        """The text of a binary expression; `self.atom` says whether it is a call (`eq(a, b)`, `plus(a, b)`) and so needs no parentheses as an operand."""
+        """The text of a binary expression, and in `self.prec` its precedence: a call form (`eq(a, b)`, `plus(a, b)`) is an atom, an infix form Python's."""
         op, l, r = n['op'], n['l'], n['r']
+        if op not in ('and', '&&', 'or', '||'):
+            for side in (l, r):
+                if side['k'] == 'un' and side['op'] == 'not':
+                    raise Refused('not-precedence', 'not ... under ' + op)
         kl, kr = self.kind(l), self.kind(r)
         if op in ('and', '&&', 'or', '||'):
             word = 'and' if op in ('and', '&&') else 'or'
             if self.cond:
-                text, atom = self.operand(l) + ' ' + word + ' ' + self.operand(r), False
+                pp = PY_PREC[op]
+                text, prec = self.operand(l, pp, op, 'left') + ' ' + word + ' ' + self.operand(r, pp, op, 'right'), pp
             else:
-                text, atom = '%s(%s, %s)' % ('both' if word == 'and' else 'either', self.e(l), self.e(r)), True
-            self.atom = atom
+                text, prec = '%s(%s, %s)' % ('both' if word == 'and' else 'either', self.e(l), self.e(r)), ATOM_PREC
+            self.prec = prec
             return text
         inner, self.cond = self.cond, False
         try:
             if op == ':':
-                text, atom = 'rng(%s, %s)' % (self.e(l), self.e(r)), True
-            elif op == '+':
-                if kl == kr and kl in ('num', 'str'):
-                    text, atom = self.operand(l) + ' + ' + self.operand(r), False
-                else:
-                    text, atom = '%s(%s, %s)' % ('cat' if kl == 'str' else 'plus', self.e(l), self.e(r)), True
-            elif op in ('=', '!='):
-                if kl == kr and kl in ('num', 'str'):
-                    text, atom = self.operand(l) + (' == ' if op == '=' else ' != ') + self.operand(r), False
-                else:
-                    text, atom = '%s(%s, %s)' % ('eq' if op == '=' else 'ne', self.e(l), self.e(r)), True
-            elif op in ('<', '>', '<=', '>='):
-                if kl == 'num' and kr == 'num':
-                    text, atom = self.operand(l) + ' ' + op + ' ' + self.operand(r), False
-                else:
-                    text, atom = '%s(%s, %s)' % ({'<': 'lt', '>': 'gt', '<=': 'le', '>=': 'ge'}[op], self.e(l), self.e(r)), True
+                text, prec = 'rng(%s, %s)' % (self.e(l), self.e(r)), ATOM_PREC
+            elif op == '+' and not (kl == kr and kl in ('num', 'str')):
+                text, prec = '%s(%s, %s)' % ('cat' if kl == 'str' else 'plus', self.e(l), self.e(r)), ATOM_PREC
+            elif op in ('=', '!=') and not (kl == kr and kl in ('num', 'str')):
+                text, prec = '%s(%s, %s)' % ('eq' if op == '=' else 'ne', self.e(l), self.e(r)), ATOM_PREC
+            elif op in ('<', '>', '<=', '>=') and not (kl == 'num' and kr == 'num'):
+                text, prec = '%s(%s, %s)' % ({'<': 'lt', '>': 'gt', '<=': 'le', '>=': 'ge'}[op], self.e(l), self.e(r)), ATOM_PREC
             elif op == '%':
-                text, atom = 'mod(%s, %s)' % (self.e(l), self.e(r)), True
+                text, prec = 'mod(%s, %s)' % (self.e(l), self.e(r)), ATOM_PREC
             else:
-                text, atom = self.operand(l, power=op == '**') + ' ' + op + ' ' + self.operand(r), False
+                pp = PY_PREC.get(op, 9)
+                shown = {'=': '==', '!=': '!='}.get(op, op)
+                text, prec = self.operand(l, pp, op, 'left') + ' ' + shown + ' ' + self.operand(r, pp, op, 'right'), pp
         finally:
             self.cond = inner
-        self.atom = atom
+        self.prec = prec
         return text
-
-    def operand(self, n, power=False):
-        """An operand of an infix operator: a binary expression in parentheses unless it is a call; on the left of `**` a unary minus too (it binds tighter
-        on Ring and looser on Python)."""
-        s = self.e(n)
-        if n['k'] == 'bin':
-            return s if self.atom else '(' + s + ')'
-        if n['k'] in ('assign', 'post') or (power and n['k'] == 'un'):
-            return '(' + s + ')'
-        return s
 
     def condition(self, n):
         self.cond = True
@@ -496,6 +529,8 @@ class Face:
 
     def assign(self, a):
         op, l, r = a['op'], a['l'], a['r']
+        if l['k'] == 'call':
+            raise Refused('call-target', self.e(l))
         if l['k'] == 'index':
             obj, idx = self.e(l['obj']), self.e(l['idx'])
             if op == '=':
@@ -563,10 +598,19 @@ class Face:
 
     def s_if(self, it, ind, after):
         out = [ind + 'if ' + self.condition(it['cond']) + ':'] + self.block(it.get('then', []), ind)
-        for el in it.get('elifs', []):
-            out += [ind + 'elif ' + self.condition(el['cond']) + ':'] + self.block(el.get('items', []), ind)
-        if 'else' in it:
-            out += [ind + 'else:'] + self.block(it['else'], ind)
+        cur = it
+        while True:
+            for el in cur.get('elifs', []):
+                out += [ind + 'elif ' + self.condition(el['cond']) + ':'] + self.block(el.get('items', []), ind)
+            els = cur.get('else')
+            if els is not None and len(els) == 1 and els[0]['k'] == 'if' and 'trail' not in els[0]:
+                # an else holding only an if is an elif: Python's tree has no other reading (rung 7 found it)
+                cur = els[0]
+                out += [ind + 'elif ' + self.condition(cur['cond']) + ':'] + self.block(cur.get('then', []), ind)
+                continue
+            break
+        if cur.get('else') is not None:
+            out += [ind + 'else:'] + self.block(cur['else'], ind)
         return out
 
     def s_while(self, it, ind, after):
@@ -686,14 +730,14 @@ def py_str(v):
 
 def py_comment(text):
     """A comment of any of Ring's three kinds, written with `#`."""
-    t = text.rstrip('\r')
+    t = text.rstrip()
     if t.startswith('#'):
         return [t]
     if t.startswith('//'):
         return ['#' + t[2:]]
     if t.startswith('/*'):
         body = t[2:-2] if t.endswith('*/') else t[2:]
-        return ['#' + (' ' if line and not line.startswith(' ') else '') + line.rstrip() for line in body.split('\n')]
+        return [('#' + (' ' if line.strip() and not line.startswith(' ') else '') + line.rstrip()).rstrip() for line in body.split('\n')]
     return ['# ' + t]
 
 

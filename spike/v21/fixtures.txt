@@ -5,7 +5,7 @@
 ~~~ the collision's id, then words its refusal must hold). The face's one rule: a Python reader must never take the program for something else --
 ~~~ what reads the same is spelt plainly, what Ring means differently is spelt with an explicit word or refused by name (CODEGRAPH 3.2, 5).
 ~~~ Four spaces a level, Python's own; names in the spelling of their first occurrence, since Ring folds case (F-18).
-~~~ Fixtures 47 to 54 were written on 2026-10-20, before rung 7's reader, because a reader needs the face to be INJECTIVE -- one Python text, one Ring
+~~~ Fixtures 47 to 61 were written on 2026-10-20, before rung 7's reader, because a reader needs the face to be INJECTIVE -- one Python text, one Ring
 ~~~ meaning -- and the printer was not: `new K(x)` and a call of a function K(x) printed alike, `@x` and `This.x` both printed `self.x`, and `o.@x` printed
 ~~~ `o._x`, which is also a name Ring allows.
 
@@ -556,7 +556,7 @@ func Make(n)
 	return n
 --- py
 o = new(Point, 1)
-p = new(Point)
+p = new_without_init(Point)
 q = Make(3)
 
 
@@ -577,7 +577,7 @@ class Box
 		@nCount++
 		This.nPlain = @nCount
 --- py
-o = new(Box)
+o = new_without_init(Box)
 o.at_nCount = 5
 say(o.at_nCount)
 
@@ -652,3 +652,147 @@ func Twice(string s)
 	return s + s
 --- refused
 param-type string
+
+=== 55 parentheses are Python's precedence and not the author's: only where the tree needs them
+--- ring
+a = 2
+b = 3
+c = 4
+? (a * b) + c
+? a * (b + c)
+? (a)
+? a - (b - c)
+? (a - b) - c
+? a ** (b ** c)
+? (a ** b) ** c
+? -(a + b)
+? -(a ** b)
+? (-a) ** b
+--- py
+a = 2
+b = 3
+c = 4
+say(a * b + c)
+say(a * (b + c))
+say(a)
+say(a - (b - c))
+say(a - b - c)
+say(a ** b ** c)
+say((a ** b) ** c)
+say(-(a + b))
+say(-a ** b)
+say((-a) ** b)
+
+=== 56 and, or and not in a condition: parentheses only where Python's precedence needs them
+--- ring
+a = 1
+b = 0
+c = 1
+if (a and b) or c
+	? 1
+ok
+if a and (b or c)
+	? 2
+ok
+if not (a and b)
+	? 3
+ok
+if not a and b
+	? 4
+ok
+if a and b and c
+	? 5
+ok
+--- py
+a = 1
+b = 0
+c = 1
+if a and b or c:
+    say(1)
+if a and (b or c):
+    say(2)
+if not (a and b):
+    say(3)
+if not a and b:
+    say(4)
+if a and b and c:
+    say(5)
+
+=== 57 a comment loses its trailing space: the face is the formatter
+--- ring
+x = 1  # note
+# alone
+y = 2
+--- py
+x = 1  # note
+# alone
+y = 2
+
+=== 58 an else whose only statement is an if is an elif: Python's tree has no other reading
+--- ring
+x = 1
+if x = 1
+	? 1
+else
+	if x = 2
+		? 2
+	else
+		? 3
+	ok
+ok
+--- py
+x = 1
+if x == 1:
+    say(1)
+elif x == 2:
+    say(2)
+else:
+    say(3)
+
+=== 59 a line of a block comment that holds only a tab prints as a bare `#`
+--- ring
+/* first
+	
+second */
+x = 1
+--- py
+# first
+#
+# second
+x = 1
+
+=== 60 `new K` does not call init and `new K()` does: two words
+--- ring
+a = new Box
+b = new Box()
+c = new Box(1)
+
+class Box
+	func init(n)
+		return
+--- py
+a = new_without_init(Box)
+b = new(Box)
+c = new(Box, 1)
+
+
+class Box:
+    def init(self, n):
+        return ""
+
+=== 61 an assignment to a call is not Python: the call runs, and Ring writes through its result or raises R34 (F-81)
+--- ring
+Make() = 5
+
+func Make()
+	return 1
+--- refused
+call-target assign
+
+=== 62 Ring binds `not` looser than a comparison or arithmetic, and the grammar's tree binds it tighter: a tree of that shape is refused
+--- ring
+a = 0
+b = 5
+? not a = b
+--- refused
+not-precedence not

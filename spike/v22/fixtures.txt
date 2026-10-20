@@ -251,7 +251,7 @@ class Box:
         return ""
 --- ring
 ? @Twice(2)
-o = new Box
+o = new Box()
 o.@nCount = 5
 
 func @Twice(n)
@@ -384,7 +384,7 @@ c = 4
 ? (a + b) * c
 ? a - (b - 1)
 ? a * b + c
-? (-a) ** b
+? -a ** b
 
 === R23 a list, a call chain and `self` and `super`
 --- py
@@ -723,3 +723,38 @@ except RingError as e:
 say(str(e))
 --- refused
 word str
+
+=== R28 `new_without_init(K)` is `new K`, which does not call init; `new(K)` is `new K()`, which does
+--- py
+a = new_without_init(Box)
+b = new(Box)
+c = new(Box, 1)
+
+
+class Box:
+    def init(self, n):
+        return ""
+--- ring
+a = new Box
+b = new Box()
+c = new Box(1)
+
+class Box
+	func init(n)
+
+=== R29 a `not` that is the operand of a comparison is parenthesized in the Ring the reader writes: Ring's `not` is looser (the grammar's tree is not)
+--- py
+a = 0
+b = 5
+say(negate(a) == b)
+if not (a == b):
+    say(1)
+say(-negate(a))
+--- ring
+a = 0
+b = 5
+? (not a) = b
+if not (a = b)
+	? 1
+ok
+? -(not a)
