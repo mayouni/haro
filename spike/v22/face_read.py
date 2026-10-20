@@ -67,12 +67,13 @@ CONSTRUCTS = {
 
 def unident(t):
     """The Ring name a Python name spells (the inverse of face_py.ident): a trailing `_` after a keyword or a face word, `_` before a digit, `at_` for `@`."""
-    if t.endswith('_') and len(t) > 1 and (keyword.iskeyword(t[:-1]) or t[:-1] in FACE_WORDS):
+    if t.endswith('_') and len(t) > 1 and t != 'at_' and (keyword.iskeyword(t[:-1]) or t[:-1] in FACE_WORDS):
         return t[:-1]
     if t[:1] == '_' and t[1:2].isdigit():
         return t[1:]
-    if t.startswith('at_') and len(t) > 3:
-        return '@' + t[3:]
+    t = t.replace('__at__', '@')
+    if t.startswith('at_'):
+        t = '@' + t[3:]
     return t
 
 
@@ -480,8 +481,9 @@ class Reader:
                 refuse('construct', s, 'a method\'s first parameter is self')
             names = names[1:]
         last = s.body[-1] if s.body else None
-        if isinstance(last, ast.Return) and isinstance(last.value, ast.Constant) and last.value.value == '' and isinstance(last.value.value, str):
-            self.skip.add(id(last))         # the face writes the NULL a function returns when it returns nothing
+        if (isinstance(last, ast.Return) and isinstance(last.value, ast.Constant) and last.value.value == '' and isinstance(last.value.value, str)
+                and id(last) not in self.trails):
+            self.skip.add(id(last))         # the face writes the NULL a function returns when it returns nothing; a comment on it would go with it, so it stays
         items = self.block(s.body, 'func')
         return mk('func', name=unident(s.name), params=[mk('param', name=unident(n)) for n in names], items=items)
 
@@ -614,8 +616,8 @@ class Reader:
             return mk('id', text='$' + unident(attr))
         if isinstance(v, ast.Name) and v.id == 'self':
             if not call:
-                if attr.startswith('at_') and len(attr) > 3:
-                    return mk('id', text='@' + attr[3:])
+                if attr.startswith('at_'):
+                    return mk('id', text=unident(attr))
                 if self.region is not None and attr in self.region:
                     return mk('id', text=unident(attr))
             return mk('member', obj=mk('self'), prop=mk('id', text=unident(attr)))

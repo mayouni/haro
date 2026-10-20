@@ -11,12 +11,15 @@
   D  controls that must FAIL the fixtures: a reader that takes Python's meaning for `==`, one that reads an index 0-based, one that keeps a binding the handler
      does not use, one that does not insist on the face's spelling, one that forgets the sigil
   K  Softanza's corpus: every file the printer prints whole is read back
+  L  and it is read back to the SAME GRAPH, up to the named losses (losses.py: case, parentheses, strings, pairs, assignment, returns, comments, trails, else-if, classes,
+     catch, numbers): across faces, L1 to face to L1 is exact; and each loss is needed, shown by taking it out (a control that must fail on the sample)
 """
 import ast, collections, glob, os, re, subprocess, sys, tempfile, time
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, HERE)
 import face_read
+import losses
 from face_read import face_py, l1, ReadRefused
 
 PLANT = '--plant' in sys.argv
@@ -185,7 +188,7 @@ def corpus_files(n):
 
 def corpus(n):
     sample = corpus_files(n)
-    read, refused, unparsed, bad = 0, collections.Counter(), 0, []
+    read, refused, unparsed, bad, graphs = 0, collections.Counter(), 0, [], []
     t = time.time()
     for p in sample:
         g, why = l1.parse_ring(p)
@@ -197,9 +200,10 @@ def corpus(n):
             refused['printer refuses'] += 1
         elif r is None:
             read += 1
+            graphs.append((os.path.relpath(p, STZ), g, face_read.read_py(face_py.print_py(g))))
         else:
             bad.append((os.path.relpath(p, STZ), r))
-    return {'sample': len(sample), 'read': read, 'refused': refused, 'unparsed': unparsed, 'bad': bad, 'secs': time.time() - t}
+    return {'sample': len(sample), 'read': read, 'refused': refused, 'unparsed': unparsed, 'bad': bad, 'secs': time.time() - t, 'graphs': graphs}
 
 
 # ---- S: the oracle ------------------------------------------------------------------------------------------------------------------------------
@@ -332,6 +336,30 @@ def main():
             print('  FAIL K %s: %s' % (p, r))
         check(not c['bad'], 'K %d files of Softanza\'s base (%.0f s): %d print whole and are read back from their own text to the same text, %d are refused by the printer, '
                             '%d do not parse as Ring (%d fail)' % (c['sample'], c['secs'], c['read'], sum(c['refused'].values()), c['unparsed'], len(c['bad'])))
+        # L: the same graph, up to the declared losses
+        graphs = list(c['graphs'])
+        for text in ('x = 9007199254740993.0\n', 'try\n\tx = 1\ncatch(e)\n\t? cCatchError\ndone\n'):       # the two losses a sample of library files does not show
+            g = face_py.parse_text(text)
+            graphs.append(('synthetic: ' + text.split(chr(10))[0], g, face_read.read_py(face_py.print_py(g))))
+        lossy = []
+        for name, g, g2 in graphs:
+            a, b = losses.declared(g), losses.declared(g2)
+            if a != b:
+                lossy.append((name, losses.first_difference(a, b)))
+        for name, d in lossy[:8]:
+            print('  FAIL L %s: %s' % (name, d))
+        check(not lossy, 'L %d files and 2 synthetic: graph to face to graph is exact up to the %d declared losses (%d are not)' % (len(c['graphs']), len(losses.ALL), len(lossy)))
+        needed = []
+        for loss in losses.ALL:
+            losses.ON.discard(loss)
+            try:
+                nbad = sum(1 for name, g, g2 in graphs if losses.declared(g) != losses.declared(g2))
+            finally:
+                losses.ON.add(loss)
+            needed.append((loss, nbad))
+        missing = [l for l, k in needed if k == 0]
+        check(not missing, 'D the controls, each of the %d declared losses taken out in turn, fail on the sample (files that no longer compare equal): %s'
+              % (len(losses.ALL), ', '.join('%s %d' % lk for lk in needed)))
     else:
         print('  SKIP K the Softanza tree is not at %s' % STZ)
 

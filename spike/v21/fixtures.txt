@@ -796,3 +796,90 @@ b = 5
 ? not a = b
 --- refused
 not-precedence not
+
+=== 63 `:name = value` builds the list ["name", value] wherever a value is wanted (F-59): an argument is not a comparison
+--- ring
+? Show(:from = 3)
+x = [:to = 9, :step = 3]
+
+func Show(a)
+	return a
+--- py
+say(Show(["from", 3]))
+x = [["to", 9], ["step", 3]]
+
+
+def Show(a):
+    return a
+
+=== 64 a string or a name before `=` in a list is a comparison and not a pair (F-93): only `:symbol = value` pairs
+--- ring
+x = [ "name" = "Mansour", :age = 45 ]
+--- py
+x = ["name" == "Mansour", ["age", 45]]
+
+=== 65 `x += nl` is R41 on Ring and `x = x + nl` joins (vmexpr.c:27): the face writes both as one, so it refuses the first
+--- ring
+n = 5
+n += nl
+--- refused
+compound-nl nl
+
+=== 66 a region name assigned through This is an attribute too: a bare read of it is `self.x`
+--- ring
+class K
+	This.nCount = 1
+	nTwice = nCount * 2
+--- py
+class K:
+    def __region__(self):
+        self.nCount = 1
+        self.nTwice = self.nCount * 2
+
+=== 67 a Ring name with a `$` after its first character has no Python spelling: the face would write `_`, and no reader could tell
+--- ring
+? Foo$Bar(1)
+--- refused
+name-char foo$bar
+
+=== 68 a Ring name that is only `@` is spelt `at_`
+--- ring
+o = new @
+
+class @
+--- py
+o = new_without_init(at_)
+
+
+class at_:
+    pass
+
+=== 69 a Ring name already spelt like one of the face's escapes is refused even when it stands alone: `del_` would read back as `del`
+--- ring
+del_ = 1
+--- refused
+name-clash del_
+
+=== 70 an `@` after the first character of a name is `__at__`, a leading one `at_`: `@@` is both, and the escapes are invertible
+--- ring
+? @@(1)
+? SizeOfEach@Is(2)
+? @aInfo@
+--- py
+say(at___at__(1))
+say(SizeOfEach__at__Is(2))
+say(self.at_aInfo__at__)
+
+=== 71 a Ring name `at` would print `at_`, which is the name `@`: refused
+--- ring
+? at(1)
+--- refused
+name-clash at
+
+=== 72 `x += nl` on a string is a join either way: it prints
+--- ring
+s = "a"
+s += nl
+--- py
+s = "a"
+s += nl

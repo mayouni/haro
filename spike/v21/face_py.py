@@ -45,9 +45,11 @@ COLLISIONS = {
     'scanner':     ('ChangeRingKeyword and its kin', 'the scanner commands change the language under the text (C-28)'),
     'index-twice': ('aL[f()] += v', 'Ring evaluates the target once; setat(aL, f(), plus(at(aL, f()), v)) would run it twice'),
     'dollar-param': ('func f($x)', 'a parameter spelt $x is the function\'s own local, not the global $x (F-91): G.x would be the global'),
+    'name-char':   ('a Ring name with a character Python names lack', 'an `@` after the first character of a name would print as `_`, and no reader could tell it from one'),
     'name-clash':  ('two Ring names that print as one Python name', 'a reader of the face could not tell them apart: `del` is spelt `del_`, `@Foo` is `at_Foo`, and a name of Ring\'s that is already `del_` or `at_foo` is the same text'),
     'new-from':    ('new from name', 'makes an object of the class a string names, at run time: no spelling'),
     'param-type':  ('func f(string s)', 'a typed parameter would lose its type in the face'),
+    'compound-nl': ('n += nl', '`x += nl` is R41 on Ring while `x = x + nl` joins the text (vmexpr.c:27, F-98), and the face writes both as x = plus(x, nl)'),
     'call-target': ('F() = v', 'the call runs, then Ring writes through its result or raises R34 (F-81): Python cannot assign to a call'),
     'not-precedence': ('not a = b', 'Ring binds `not` looser than a comparison or arithmetic (`not a = b` is `not (a = b)`, measured on the oracle), and the grammar\'s tree binds it '
                                     'tighter: the tree and Ring disagree, so the face cannot spell it without choosing'),
@@ -71,13 +73,20 @@ def ident(t, function=False):
     """A Ring name as a Python name that reads as the same one. `@` is `at_` wherever it stands; a keyword or a face word takes a trailing `_`; a leading digit
     takes `_`. The map must be injective for a reader, so two Ring names that print as one are refused (name-clash)."""
     raw = t
+    low = raw.lower()
+    if low == 'at' or low.startswith('at_') or '__at__' in low or (raw[:1] == '_' and raw[1:2].isdigit()):
+        raise Refused('name-clash', '`%s` is already spelt like one of the face\'s escapes (at_, __at__, a leading _ before a digit)' % low)
     if t.startswith('@'):
         t = 'at_' + t[1:]
-    t = re.sub(r'[^A-Za-z0-9_]', '_', t)
+    t = t.replace('@', '__at__')                  # an @ inside a name; a leading one is the sigil
+    if re.search(r'[^A-Za-z0-9_]', t):
+        raise Refused('name-char', low)
     if t[:1].isdigit():
         t = '_' + t
     if keyword.iskeyword(t) or t in FACE_WORDS:
         t += '_'
+    elif not raw.startswith('@') and t.endswith('_') and (keyword.iskeyword(t.rstrip('_')) or t.rstrip('_') in FACE_WORDS):
+        raise Refused('name-clash', '`%s` is already spelt like the face\'s own escape for a keyword or a face word' % low)
     was = PRINTED.setdefault(t.lower(), raw.lower())
     if was != raw.lower():
         raise Refused('name-clash', '`%s` and `%s` both print as %s' % (was, raw.lower(), t))
@@ -181,7 +190,10 @@ class Face:
         if k == 'paren':
             return self.kind(n['e']) if 'e' in n else None
         if k == 'id':
-            return self.kinds.get(n['text'].lower())
+            t = n['text'].lower()
+            if t in self.kinds:
+                return self.kinds[t]
+            return 'str' if t in ('nl', 'cr', 'tab') else None       # Ring's predefined characters, unless the program assigned the name
         if k == 'un':
             return 'num'
         if k == 'bin':
@@ -261,7 +273,7 @@ class Face:
             self.prec = NOT_PREC if s.startswith('not ') else UNARY_PREC if s[:1] in ('-', '+') else ATOM_PREC
         elif k in ('post', 'assign'):
             self.prec = 0
-        elif k not in ('bin', 'paren'):      # binary() leaves its own; a parenthesis is not printed, so the inner expression's stands
+        elif k not in ('bin', 'paren', 'pair'):      # binary() leaves its own; a parenthesis is not printed, so the inner expression's stands
             self.prec = ATOM_PREC
         return s
 
@@ -323,7 +335,11 @@ class Face:
         if k == 'list':
             return '[' + ', '.join(self.e(x) for x in n.get('items', [])) + ']'
         if k == 'pair':
-            return '[' + py_str(n['key']['text'][1:].lower() if n['key']['k'] == 'sym' else n['key'].get('text', '')) + ', ' + self.e(n['value']) + ']'
+            if n['key']['k'] != 'sym':
+                # only `:symbol = value` builds a pair in a list literal (F-93); a string or a name before `=` is the comparison it looks like
+                return self.binary({'k': 'bin', 'op': '=', 'l': n['key'], 'r': n['value']})
+            self.prec = ATOM_PREC
+            return '[' + py_str(n['key']['text'][1:].strip().lower()) + ', ' + self.e(n['value']) + ']'
         if k == 'un':
             if n['op'] == 'not':
                 if self.cond:
@@ -368,6 +384,10 @@ class Face:
     def binary(self, n):
         """The text of a binary expression, and in `self.prec` its precedence: a call form (`eq(a, b)`, `plus(a, b)`) is an atom, an infix form Python's."""
         op, l, r = n['op'], n['l'], n['r']
+        if op == '=' and l['k'] == 'sym':
+            # `:name = value` builds the list ["name", value] wherever a value is wanted (F-59), not a comparison
+            self.prec = ATOM_PREC
+            return '[' + py_str(l['text'][1:].strip().lower()) + ', ' + self.e(r) + ']'
         if op not in ('and', '&&', 'or', '||'):
             for side in (l, r):
                 if side['k'] == 'un' and side['op'] == 'not':
@@ -531,6 +551,8 @@ class Face:
         op, l, r = a['op'], a['l'], a['r']
         if l['k'] == 'call':
             raise Refused('call-target', self.e(l))
+        if op == '+=' and r['k'] == 'id' and r['text'].lower() == 'nl' and self.kind(l) != 'str':
+            raise Refused('compound-nl', 'nl')
         if l['k'] == 'index':
             obj, idx = self.e(l['obj']), self.e(l['idx'])
             if op == '=':
@@ -689,7 +711,14 @@ class Face:
         head = 'class %s%s:' % (ident(it['name']), ('(' + '.'.join(ident(x) for x in it['parent']) + ')') if 'parent' in it else '')
         region = [x for x in it.get('items', []) if x['k'] not in ('func', 'private')]
         methods = [x for x in it.get('items', []) if x['k'] in ('func', 'private')]
-        assigned = {x['l']['text'].lower() for x in walk(region) if x.get('k') == 'assign' and x['l']['k'] == 'id'}
+        assigned = set()                     # a name the region assigns -- bare, or through This -- is an attribute, and a bare read of it is self.x
+        for x in walk(region):
+            if x.get('k') == 'assign':
+                lv = x['l']
+                if lv['k'] == 'id':
+                    assigned.add(lv['text'].lower())
+                elif lv['k'] == 'member' and lv['obj'].get('k') == 'self' and lv['prop'].get('k') == 'id':
+                    assigned.add(lv['prop']['text'].lower())
         out = [ind + head]
         saved_region, saved_ctx = self.region, self.ctx
         try:

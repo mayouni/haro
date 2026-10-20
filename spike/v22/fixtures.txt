@@ -758,3 +758,42 @@ if not (a = b)
 	? 1
 ok
 ? -(not a)
+
+=== R30 a pair is a list of two, and a comparison in a list is a comparison
+--- py
+x = ["name" == "Mansour", ["age", 45]]
+--- ring
+x = ["name" = "Mansour", ["age", 45]]
+
+=== R31 a region reads its own attributes as `self.x`, and they are bare names in the Ring the reader writes
+--- py
+class K:
+    def __region__(self):
+        self.nCount = 1
+        self.nTwice = self.nCount * 2
+--- ring
+class K
+	nCount = 1
+	nTwice = nCount * 2
+
+=== R32 `at_` alone is the Ring name `@`
+--- py
+o = new_without_init(at_)
+
+
+class at_:
+    pass
+--- ring
+o = new @
+
+class @
+
+=== R33 `__at__` inside a name is `@`, and `at_` in front is `@` too
+--- py
+say(at___at__(1))
+say(SizeOfEach__at__Is(2))
+say(self.at_aInfo__at__)
+--- ring
+? @@(1)
+? SizeOfEach@Is(2)
+? @aInfo@
