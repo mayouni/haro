@@ -1,0 +1,166 @@
+You write programs in Ring (version 1.27), a small dynamic language. Facts about it:
+- Print with `? expression` (prints the value, then a newline). Comments start with #.
+- Variables need no declaration; names are case-insensitive. Strings are "..." or '...' and have NO escape sequences. `+` joins a string with anything ("n=" + 5 is "n=5") and adds two
+  numbers; a string that looks like a number is equal to that number under `=`.
+- Lists are written [1, 2, 3]; items are numbered from 1: aList[1]; len(aList) is the length; add(aList, x) appends. A string is indexed the same way: cText[1] is its first character.
+- if cond ... else ... ok      while cond ... end      for i = 1 to n ... next (the bound is inclusive; for i = 10 to 1 step -1 counts down)      for x in aList ... next
+  Comparison: = != < > <= >=      logic: and or not      % is the remainder      floor(x) rounds down.
+- Functions: func Name(a, b) ... return x. Put function and class definitions AFTER the statements that use them (whatever follows a func belongs to that func).
+- Classes: class Name, attributes assigned in the class body (n = 0), methods func Method() ... ; This.n is an attribute; make an object with o = new Name; call o.Method().
+- Errors: try ... catch ... done ; the message is in cCatchError.
+- Do not load libraries.
+
+TASKS. For each task write one complete program in Ring. Every program must BEGIN with exactly the line(s) shown for its task (they hold its data; the checker will run your program on other values of the same shape, so compute the answer, never print it from the example). Nothing may be read from the keyboard or from a file. Reply with one block per task, in this exact form, and nothing else:
+
+### T01
+```
+<the program>
+```
+
+### T01
+Print the sum of the integers from 1 to n (inclusive) as `sum=<value>`.
+The program begins with:
+    n = 10
+For that data it prints:
+    sum=55
+
+### T02
+Print the third element of the list and its last element on one line, as `third=<x> last=<y>`.
+The program begins with:
+    aList = [10, 20, 30, 40]
+For that data it prints:
+    third=30 last=40
+
+### T03
+Print how many items of the list are numerically equal to 1, as `count=<n>`. A string item counts when its numeric value is 1 (so "01" and "1.0" count); a string that is not a number never counts.
+The program begins with:
+    aItems = ["1", "01", "1.0", "x", 2]
+For that data it prints:
+    count=3
+
+### T04
+Print the name and the number joined by a dash, as `<name>-<number>`.
+The program begins with:
+    cName = "item"
+    n = 5
+For that data it prints:
+    item-5
+
+### T05
+Print the integers from 1 to n on a single line, separated by single spaces, with no trailing space.
+The program begins with:
+    n = 5
+For that data it prints:
+    1 2 3 4 5
+
+### T06
+Count the vowels (the characters a, e, i, o, u) in the text and print `vowels=<n>`. The text is lower case.
+The program begins with:
+    cText = "ring plus plus"
+For that data it prints:
+    vowels=3
+
+### T07
+Print the elements of the list in reverse order on a single line, separated by single spaces.
+The program begins with:
+    aList = [1, 2, 3, 4, 5]
+For that data it prints:
+    5 4 3 2 1
+
+### T08
+Print the factorial of n as `fact=<value>`.
+The program begins with:
+    n = 6
+For that data it prints:
+    fact=720
+
+### T09
+Print the first n Fibonacci numbers (1 1 2 3 5 ...) on a single line, separated by single spaces.
+The program begins with:
+    n = 10
+For that data it prints:
+    1 1 2 3 5 8 13 21 34 55
+
+### T10
+Define a class Counter whose objects hold a count that starts at 0, with a method Add that adds 1 and a method Value that returns the count. Create one object, call Add nTimes times, and print `count=<n>`.
+The program begins with:
+    nTimes = 3
+For that data it prints:
+    count=3
+
+### T11
+Call a function named Missing, which is not defined anywhere, inside a protected block (try/catch). When it fails, print `caught-` followed by the tag; after the protected block, print `done`.
+The program begins with:
+    cTag = "x"
+For that data it prints:
+    caught-x
+    done
+
+### T12
+Print the largest element of the list as `max=<x>`. Do not use a built-in maximum function; the list may hold negative numbers.
+The program begins with:
+    aList = [3, 9, 2, 7]
+For that data it prints:
+    max=9
+
+### T13
+Count the words of the text -- maximal runs of characters other than a space -- and print `words=<n>`.
+The program begins with:
+    cText = "the quick brown fox"
+For that data it prints:
+    words=4
+
+### T14
+The list holds [name, age] pairs. Print the age of the person named cWho as `age=<n>`.
+The program begins with:
+    aPeople = [["ann", 31], ["bob", 27], ["cy", 45]]
+    cWho = "bob"
+For that data it prints:
+    age=27
+
+### T15
+Print a multiplication table with n rows: row i holds i*1, i*2, ... i*n, separated by single spaces.
+The program begins with:
+    n = 3
+For that data it prints:
+    1 2 3
+    2 4 6
+    3 6 9
+
+### T16
+Print the quotient of a divided by b, rounded down, and the remainder, as `q=<q> r=<r>`.
+The program begins with:
+    a = 7
+    b = 2
+For that data it prints:
+    q=3 r=1
+
+### T17
+Print the piece repeated n times, with nothing between the copies.
+The program begins with:
+    cPiece = "ab"
+    n = 3
+For that data it prints:
+    ababab
+
+### T18
+Print `out=1` if a is greater than b and b is not equal to 5, otherwise print `out=0`.
+The program begins with:
+    a = 3
+    b = 2
+For that data it prints:
+    out=1
+
+### T19
+Print the number of distinct values in the list as `distinct=<n>`.
+The program begins with:
+    aList = [1, 2, 2, 3, 3, 3]
+For that data it prints:
+    distinct=3
+
+### T20
+Print the sum of the digits of the string, as `sum=<n>`.
+The program begins with:
+    cDigits = "12345"
+For that data it prints:
+    sum=15
