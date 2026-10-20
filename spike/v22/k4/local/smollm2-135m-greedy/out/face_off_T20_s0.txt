@@ -1,0 +1,3 @@
+sum = sum(cDigits)
+say(cat("sum=", sum))
+<<END>>

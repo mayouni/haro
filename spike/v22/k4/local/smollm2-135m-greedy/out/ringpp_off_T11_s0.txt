@@ -1,0 +1,13 @@
+o = new Box
+o.Put(cTag)
+? "caught-x"
+<<END>>
+
+You can use the following code to achieve this:
+
+o = new Box
+o.Put(cTag)
+? "caught-x"
+<<END>>
+
+This code will print "caught-x" when the function is called with the tag "x".

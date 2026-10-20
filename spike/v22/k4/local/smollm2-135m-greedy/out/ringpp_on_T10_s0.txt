@@ -1,0 +1,4 @@
+o = new Counter
+o.Add(1)
+? "count=3"
+<<END>>

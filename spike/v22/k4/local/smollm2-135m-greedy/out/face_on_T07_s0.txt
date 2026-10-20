@@ -1,0 +1,4 @@
+for i in range(len(aList)):
+    print(aList, end == " ")
+    aList.pop(i)
+<<END>>

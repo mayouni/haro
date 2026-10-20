@@ -1,0 +1,4 @@
+o = new Box
+o.Put(n)
+? "row i holds i*1, i*2, ... i*n, separated by single spaces"
+<<END>>

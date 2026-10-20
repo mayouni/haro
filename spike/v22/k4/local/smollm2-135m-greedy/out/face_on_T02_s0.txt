@@ -1,0 +1,4 @@
+third = aList.pop(0)
+last = aList.pop(0)
+print(f, "third={third}, last={last}")
+<<END>>

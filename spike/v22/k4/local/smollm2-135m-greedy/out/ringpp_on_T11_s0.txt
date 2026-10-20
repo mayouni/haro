@@ -1,0 +1,4 @@
+o = new Box
+o.Put(cTag)
+? "caught-x"
+<<END>>

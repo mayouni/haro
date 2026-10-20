@@ -1,0 +1,6 @@
+out = 1
+say(cat("out=", out))
+
+
+
+<<END>>

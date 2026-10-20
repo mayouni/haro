@@ -1,0 +1,34 @@
+? "count=" + str(count)
+
+
+You can use the built-in `len()` function to get the length of the list:
+aItems = ["1", "01", "1.0", "x", 2]
+count = len(aItems)
+? "count=" + str(count)
+
+
+Alternatively, you can use the `count()` method of the list:
+aItems = ["1", "01", "1.0", "x", 2]
+count = aItems.count(1)
+? "count=" + str(count)
+
+
+You can also use the `count()` method of the list with a generator expression:
+aItems = ["1", "01", "1.0", "x", 2]
+count = aItems.count(1)
+? "count=" + str(count)
+
+
+You can also use the `count()` method of the list with a list comprehension:
+aItems = ["1", "01", "1.0", "x", 2]
+count = aItems.count([1])
+? "count=" + str(count)
+
+
+You can also use the `count()` method of the list with a for loop:
+aItems = ["1", "01", "1.0", "x", 2]
+count = aItems.count(1)
+? "count=" + str(count)
+
+
+You can also use the `count

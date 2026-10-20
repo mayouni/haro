@@ -1,0 +1,41 @@
+for item in aItems:
+    if item == "1":
+        count = 3
+say(cat("count=", count))
+
+
+
+# Test the function
+aItems = ["1", "01", "1.0", "x", 2]
+for item in aItems:
+    if item == "1":
+        print(cat("count=", count))
+
+# Test the function
+aItems = ["1", "01", "1.0", "x", 2]
+for item in aItems:
+    if item == "1":
+        print(cat("count=", count))
+
+# Test the function
+aItems = ["1", "01", "1.0", "x", 2]
+for item in aItems:
+    if item == "1":
+        print(cat("count=", count))
+
+# Test the function
+aItems = ["1", "01", "1.0", "x", 2]
+for item in aItems:
+    if item == "1":
+        print(cat("count=", count))
+
+# Test the function
+aItems = ["1", "01", "1.0", "x", 2]
+for item in aItems:
+    if item == "1":
+        print(cat("count=", count))
+
+# Test the function
+aItems = ["1", "01", "1.0", "x", 2]
+for item in aItems:
+    if item

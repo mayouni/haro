@@ -1,0 +1,3 @@
+nMax = max(aList)
+print(nMax)
+<<END>>

@@ -1,0 +1,65 @@
+for i in range(1, n + 1):
+    Fact = i * Fact
+say(cat("fact=", Fact))
+
+
+
+# Test the function
+n = 6
+for i in range(1, n + 1):
+    Fact = i * Fact
+print(cat("fact=", Fact))
+
+
+
+# Test the function
+n = 6
+for i in range(1, n + 1):
+    Fact = i * Fact
+print(cat("fact=", Fact))
+
+
+
+# Test the function
+n = 6
+for i in range(1, n + 1):
+    Fact = i * Fact
+print(cat("fact=", Fact))
+
+
+
+# Test the function
+n = 6
+for i in range(1, n + 1):
+    Fact = i * Fact
+print(cat("fact=", Fact))
+
+
+
+# Test the function
+n = 6
+for i in range(1, n + 1):
+    Fact = i * Fact
+print(cat("fact=", Fact))
+
+
+
+# Test the function
+n = 6
+for i in range(1, n + 1):
+    Fact = i * Fact
+print(cat("fact=", Fact))
+
+
+
+# Test the function
+n = 6
+for i in range(1, n + 1):
+    Fact = i * Fact
+print(cat("fact=", Fact))
+
+
+
+# Test the function
+n = 6
+for i in range(1, n

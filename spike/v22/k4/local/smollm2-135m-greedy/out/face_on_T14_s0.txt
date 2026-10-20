@@ -1,0 +1,4 @@
+for x in aPeople:
+    age = x.Get(cWho)
+    print(age)
+<<END>>

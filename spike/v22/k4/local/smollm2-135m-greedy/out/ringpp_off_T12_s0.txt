@@ -1,0 +1,6 @@
+? "max=" + max(aList)
+
+
+def max(lst):
+	return max(lst)
+<<END>>

@@ -1,0 +1,4 @@
+o = new String()
+o.vowels = cText.split()
+? "vowels=<n>"
+<<END>>

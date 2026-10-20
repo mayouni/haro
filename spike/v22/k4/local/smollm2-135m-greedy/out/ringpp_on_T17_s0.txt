@@ -1,0 +1,66 @@
+o = new Box
+o.Put(cPiece)
+? "o=" + o.Take()
+
+
+class Box
+	v = 0
+
+	o = new Box
+	o = new Box
+	o = new Box
+	o = new Box
+	o = new Box
+	o = new Box
+	o = new Box
+	o = new Box
+	o = new Box
+	o = new Box
+	o = new Box
+	o = new Box
+	o = new Box
+	o = new Box
+	o = new Box
+	o = new Box
+	o = new Box
+	o = new Box
+	o = new Box
+	o = new Box
+	o = new Box
+	o = new Box
+	o = new Box
+	o = new Box
+	o = new Box
+	o = new Box
+	o = new Box
+	o = new Box
+	o = new Box
+	o = new Box
+	o = new Box
+	o = new Box
+	o = new Box
+	o = new Box
+	o = new Box
+	o = new Box
+	o = new Box
+	o = new Box
+	o = new Box
+	o = new Box
+	o = new Box
+	o = new Box
+	o = new Box
+	o = new Box
+	o = new Box
+	o = new Box
+	o = new Box
+	o = new Box
+	o = new Box
+	o = new Box
+	o = new Box
+	o = new Box
+	o = new Box
+	o = new Box
+	o = new Box
+	o = new Box
+	o = new Box
+	o =

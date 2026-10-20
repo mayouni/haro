@@ -1,0 +1,49 @@
+distinct = aList.count(1)
+say(cat("distinct=", distinct))
+
+
+
+# Test the function
+aList = [1, 2, 2, 3, 3, 3]
+distinct = count_distinct(aList)
+print(distinct)
+
+
+
+# Test the function
+aList = [1, 2, 2, 3, 3, 3]
+distinct = count_distinct(aList)
+print(distinct)
+
+
+
+# Test the function
+aList = [1, 2, 2, 3, 3, 3]
+distinct = count_distinct(aList)
+print(distinct)
+
+
+
+# Test the function
+aList = [1, 2, 2, 3, 3, 3]
+distinct = count_distinct(aList)
+print(distinct)
+
+
+
+# Test the function
+aList = [1, 2, 2, 3, 3, 3]
+distinct = count_distinct(aList)
+print(distinct)
+
+
+
+# Test the function
+aList = [1, 2, 2, 3, 3, 3]
+distinct = count_distinct(aList)
+print(distinct)
+
+
+
+# Test the function
+aList = [1, 2, 2, 3, 3

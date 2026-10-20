@@ -1,0 +1,42 @@
+o = new String()
+o.vowels = cText.split()
+? "vowels=<n>".join(o.vowels)
+
+
+o = new String()
+o.vowels = cText.split()
+? "vowels=<n>".join(o.vowels)
+
+
+o = new String()
+o.vowels = cText.split()
+? "vowels=<n>".join(o.vowels)
+
+
+o = new String()
+o.vowels = cText.split()
+? "vowels=<n>".join(o.vowels)
+
+
+o = new String()
+o.vowels = cText.split()
+? "vowels=<n>".join(o.vowels)
+
+
+o = new String()
+o.vowels = cText.split()
+? "vowels=<n>".join(o.vowels)
+
+
+o = new String()
+o.vowels = cText.split()
+? "vowels=<n>".join(o.vowels)
+
+
+o = new String()
+o.vowels = cText.split()
+? "vowels=<n>".join(o.vowels)
+
+
+o = new String()
+o.vowels = cText.split

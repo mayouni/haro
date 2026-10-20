@@ -1,0 +1,49 @@
+? "distinct=" + aList.Distinct()
+
+
+def Distinct(n):
+	return n
+
+aList = [1, 2, 2, 3, 3, 3]
+? "distinct=" + aList.Distinct()
+
+
+def Distinct(n):
+	return n
+
+aList = [1, 2, 2, 3, 3, 3]
+? "distinct=" + aList.Distinct()
+
+
+def Distinct(n):
+	return n
+
+aList = [1, 2, 2, 3, 3, 3]
+? "distinct=" + aList.Distinct()
+
+
+def Distinct(n):
+	return n
+
+aList = [1, 2, 2, 3, 3, 3]
+? "distinct=" + aList.Distinct()
+
+
+def Distinct(n):
+	return n
+
+aList = [1, 2, 2, 3, 3, 3]
+? "distinct=" + aList.Distinct()
+
+
+def Distinct(n):
+	return n
+
+aList = [1, 2, 2, 3, 3, 3]
+? "distinct=" + aList.Distinct()
+
+
+def Distinct(n):
+	return n
+
+aList = [1,

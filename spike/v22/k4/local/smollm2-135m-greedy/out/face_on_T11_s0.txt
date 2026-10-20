@@ -1,0 +1,4 @@
+for x in cTag:
+    if x == "x":
+        print(cTag, "caught-x")
+<<END>>

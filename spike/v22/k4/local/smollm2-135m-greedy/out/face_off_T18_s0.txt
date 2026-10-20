@@ -1,0 +1,7 @@
+out=1
+say(cat("out=", out))
+
+
+
+# Output:
+# out=1

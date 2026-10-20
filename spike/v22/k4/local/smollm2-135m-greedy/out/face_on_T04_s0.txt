@@ -1,0 +1,2 @@
+say(cat("name=", cName))
+<<END>>

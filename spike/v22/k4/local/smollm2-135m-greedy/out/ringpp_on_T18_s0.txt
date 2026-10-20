@@ -1,0 +1,5 @@
+o = new Box
+o.Put(a)
+o.Take()
+? "out=1"
+<<END>>

@@ -1,0 +1,3 @@
+vowels = cText.lower().split()
+print(f"vowels={vowels}")
+<<END>>

@@ -1,0 +1,4 @@
+o = new String
+o.Count()
+? "words=4"
+<<END>>

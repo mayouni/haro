@@ -1,0 +1,9 @@
+? "distinct=" + aList.Distinct()
+
+
+def *= (x)
+for i in aList
+	x *= i
+
+next
+<<END>>

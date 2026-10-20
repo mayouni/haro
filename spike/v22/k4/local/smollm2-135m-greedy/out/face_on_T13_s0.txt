@@ -1,0 +1,73 @@
+n = 4
+for x in cText:
+    if x.isalpha():
+        words = max(words, len(x.lower()))
+say(cat("words=", words))
+
+
+
+Task -= 1
+
+Begin -= 1
+
+Task -= 2
+
+Begin -= 2
+
+Task -= 3
+
+Begin -= 3
+
+Task -= 4
+
+Begin -= 4
+
+Task -= 5
+
+Begin -= 5
+
+Task -= 6
+
+Begin -= 6
+
+Task -= 7
+
+Begin -= 7
+
+Task -= 8
+
+Begin -= 8
+
+Task -= 9
+
+Begin -= 9
+
+Task -= 10
+
+Begin -= 10
+
+Task -= 11
+
+Begin -= 11
+
+Task -= 12
+
+Begin -= 12
+
+Task -= 13
+
+Begin -= 13
+
+Task -= 14
+
+Begin -= 14
+
+Task -= 15
+
+Begin -= 15
+
+Task -= 16
+
+Begin -= 16
+
+Task -= 17

@@ -1,0 +1,8 @@
+o = new StringBuilder
+o.Insert(0, cDigits)
+? "sum=" + o.ToString()
+
+
+class StringBuilder
+	o = new StringBuilder
+<<END>>

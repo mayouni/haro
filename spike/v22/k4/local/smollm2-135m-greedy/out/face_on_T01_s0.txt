@@ -1,0 +1,5 @@
+say(cat("sum=", sum))
+
+
+
+<<END>>
