@@ -5,9 +5,9 @@
 
 THE EXPERIMENT. Twenty tasks (tasks.py), one attempt each, two conditions that differ only in the language and its primer: R, Ring, with a primer of Ring's facts; F, the
 Python-shaped face, with a primer of its words. A program is judged on TWO inputs -- the data the statement shows and data the checker substitutes -- so printing the shown
-answer fails. R: run on the oracle (runtime/win64/ring.exe, our own build of Ring 1.27's VM). F: read by the reader (face_read.py) STRICTLY -- only the face's own spelling --
-and the Ring that comes out is run on the oracle; read LENIENTLY too (a text that is not the face's spelling but means something), which is how often a model needed correcting.
-The build step proves the harness: every reference solution passes on the oracle on both inputs, and its printed face text is read back strictly to the same output.
+answer fails. R: a Ring++ program, run on rnxc (the product; the oracle -- runtime/win64/ring.exe, our build of Ring 1.27's VM, a retired language -- only guards that the references agree). F: read by the reader (face_read.py) STRICTLY -- only the face's own spelling --
+and the Ring++ that comes out is run on rnxc; read LENIENTLY too (a text that is not the face's spelling but means something), which is how often a model needed correcting.
+The build step proves the harness: every reference solution passes on rnxc (and says the same on the oracle) on both inputs, and its printed face text is read back strictly to the same output.
 """
 import glob, json, os, re, subprocess, sys, tempfile
 
@@ -19,7 +19,9 @@ from face_read import face_py, l1, ReadRefused
 from tasks import TASKS
 
 ROOT = os.path.abspath(os.path.join(HERE, '..', '..', '..', '..'))
-ORACLE = os.environ.get('RING') or os.path.join(ROOT, 'runtime', 'win64', 'ring.exe')
+ORACLE = os.environ.get('RING') or os.path.join(ROOT, 'runtime', 'win64', 'ring.exe')      # Ring 1.27's VM, our build: a retired language, kept as a compatibility guard
+RNXC = os.environ.get('RNXC') or os.path.join(ROOT, 'zig-out', 'bin', 'rnxc.exe')           # Ring++, the product: what a program is judged on
+EXEC = os.environ.get('K4_EXEC', 'rnxc')
 SCRATCH = tempfile.mkdtemp(prefix='k4_')
 
 RING_PRIMER = '''You write programs in Ring (version 1.27), a small dynamic language. Facts about it:
@@ -31,6 +33,20 @@ RING_PRIMER = '''You write programs in Ring (version 1.27), a small dynamic lang
   Comparison: = != < > <= >=      logic: and or not      % is the remainder      floor(x) rounds down.
 - Functions: func Name(a, b) ... return x. Put function and class definitions AFTER the statements that use them (whatever follows a func belongs to that func).
 - Classes: class Name, attributes assigned in the class body (n = 0), methods func Method() ... ; This.n is an attribute; make an object with o = new Name; call o.Method().
+- Errors: try ... catch ... done ; the message is in cCatchError.
+- Do not load libraries.'''
+
+RINGPP_PRIMER = '''You write programs in Ring++, the Ring language with explicit scope (it runs on a register VM built from Ring 1.27's, and is the first face of Haro). Facts about it:
+- Print with `? expression` (prints the value, then a newline). Comments start with #.
+- Variables need no declaration; names are case-insensitive. Strings are "..." or '...' and have NO escape sequences. `+` joins a string with anything ("n=" + 5 is "n=5") and adds two
+  numbers; a string that looks like a number is equal to that number under `=`.
+- Lists are written [1, 2, 3]; items are numbered from 1: aList[1]; len(aList) is the length; add(aList, x) appends. A string is indexed the same way: cText[1] is its first character (a one-character string).
+- if cond ... else ... ok      while cond ... end      for i = 1 to n ... next (the bound is inclusive; for i = 10 to 1 step -1 counts down)      for x in aList ... next
+  Comparison: = != < > <= >=      logic: and or not      % is the remainder      floor(x) rounds down.
+- Scope is explicit (Rule A): names at the top level are globals; inside a function a bare name is a local, `$name` is a global and `@name` an attribute of the object.
+- Functions: func Name(a, b) ... return x. Put function and class definitions AFTER the statements that use them (whatever follows a func belongs to that func).
+- Classes: class Name, attributes assigned in the class body (n = 0), methods func Method() ... ; This.n (or @n) is an attribute; `o = new Name` makes an object WITHOUT calling init, `new Name(args)` calls init;
+  call o.Method().
 - Errors: try ... catch ... done ; the message is in cCatchError.
 - Do not load libraries.'''
 
@@ -49,8 +65,9 @@ accepts only the face's own spelling. Rules:
 - There are no lambdas, comprehensions, dicts, tuples, a[i] subscripts, f-strings, imports, //, conditional expressions (x if c else y), `is` or `in`.'''
 
 
-def run(path):
-    p = subprocess.run([ORACLE, path], capture_output=True, cwd=os.path.dirname(path), timeout=30, stdin=subprocess.DEVNULL)
+def run(path, exe=None):
+    exe = exe or (RNXC if EXEC == 'rnxc' else ORACLE)
+    p = subprocess.run([exe, path], capture_output=True, cwd=os.path.dirname(path), timeout=30, stdin=subprocess.DEVNULL)
     return (p.stdout.decode('latin-1')).replace('\r\n', '\n')
 
 
@@ -63,16 +80,20 @@ def with_data(task, which):
     return '\n'.join(task[which]) + '\n' + task['ref']
 
 
-def ring_output(text):
+def ring_output(text, exe=None):
     p = os.path.join(SCRATCH, 'p.ring')
     open(p, 'wb').write(text.encode('latin-1'))
-    return norm(run(p))
+    return norm(run(p, exe))
 
 
 def expected():
+    """What each task prints on each input, on rnxc -- and the oracle must say the same, or the task has found a difference between Ring++ and Ring."""
     out = {}
     for t in TASKS:
-        out[t['id']] = {v: ring_output(with_data(t, v)) for v in ('a', 'b')}
+        out[t['id']] = {v: ring_output(with_data(t, v), RNXC) for v in ('a', 'b')}
+        for v in ('a', 'b'):
+            if ring_output(with_data(t, v), ORACLE) != out[t['id']][v]:
+                raise SystemExit('%s/%s: rnxc and the oracle disagree on the reference -- a finding, not a task' % (t['id'], v))
     return out
 
 
