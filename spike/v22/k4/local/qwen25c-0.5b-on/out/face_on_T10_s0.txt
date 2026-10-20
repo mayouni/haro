@@ -1,0 +1,21 @@
+o = new_without_init(Counter)
+o.Add(nTimes)
+say(cat("count=", o.Value()))
+
+
+class Counter:
+    def __region__(self):
+        self.ctr = 0
+
+    def Add(self, nTimes):
+        self.ctr = self.ctr + nTimes
+        return ""
+
+
+class Counter:
+    def __region__(self):
+        self.ctr = 0
+
+    def Value(self):
+        return self.ctr
+<<END>>

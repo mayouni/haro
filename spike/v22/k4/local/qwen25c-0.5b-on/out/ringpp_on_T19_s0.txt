@@ -1,0 +1,47 @@
+distinct = 3
+? "distinct=" + distinct
+
+func Distinct(aList)
+	uniqueValues = make(map[int]())
+	for x in aList
+		uniqueValues[x] = true
+		next = 0
+		for y in uniqueValues
+			if y != x
+				next += 1
+				next = 0
+				forz = 0
+				forz = 0
+				iforz = 0
+				forz = 0
+				Forz = 0
+				Forz = 0
+				Forz = 0
+				Forz = 0
+				Forz = 0
+				Forz = 0
+				Forz = 0
+				Forz = 0
+				Forz = 0
+				Forz = 0
+				Forz = 0
+				Forz = 0
+				Forz = 0
+				Forz = 0
+				Forz = 0
+				Forz = 0
+				Forz = 0
+				Forz = 0
+				Forz = 0
+				Forz = 0
+				Forz = 0
+				Forz = 0
+				Forz = 0
+				Forz = 0
+				Forz = 0
+				Forz = 0
+				Forz = 0
+				Forz = 0
+				Forz = 0
+				Forz = 0
+				Forz

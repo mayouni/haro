@@ -1,0 +1,9 @@
+nSum = 0
+for x in cDigits:
+    nSum = plus(nSum, int(x))
+say(plus(nSum, 0))
+
+
+def plus(x, y):
+    return x + y
+<<END>>

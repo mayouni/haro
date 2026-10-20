@@ -1,0 +1,11 @@
+max = 9
+say(cat("max=", max))
+
+
+def max(aList):
+    max = aList(0)
+    for x in aList:
+        if x > max:
+            max = x
+    return max
+<<END>>

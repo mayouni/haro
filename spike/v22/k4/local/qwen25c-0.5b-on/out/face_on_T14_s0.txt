@@ -1,0 +1,3 @@
+say(plus(27, aPeople.index([cWho])))
+
+<<END>>

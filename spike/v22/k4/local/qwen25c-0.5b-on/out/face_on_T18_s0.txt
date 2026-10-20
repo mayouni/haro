@@ -1,0 +1,67 @@
+if a > b and b != 5:
+    out = 1
+else:
+    out = 0
+say(cat("out=", out))
+
+
+if a > b and b != 5:
+    out = 1
+else:
+    out = 0
+say(cat("out=", out))
+
+
+if a > b and b != 5:
+    out = 1
+else:
+    out = 0
+say(cat("out=", out))
+
+
+if a > b and b != 5:
+    out = 1
+else:
+    out = 0
+say(cat("out=", out))
+
+
+if a > b and b != 5:
+    out = 1
+else:
+    out = 0
+say(cat("out=", out))
+
+
+if a > b and b != 5:
+    out = 1
+else:
+    out = 0
+say(cat("out=", out))
+
+
+if a > b and b != 5:
+    out = 1
+else:
+    out = 0
+say(cat("out=", out))
+
+
+if a > b and b != 5:
+    out = 1
+else:
+    out = 0
+say(cat("out=", out))
+
+
+if a > b and b != 5:
+    out = 1
+else:
+    out = 0
+say(cat("out=", out))
+
+
+if a > b and b != 5:
+    out = 1
+else:
+    out = 0

@@ -1,0 +1,49 @@
+? "<name>-<number>" + cName + "-" + n
+
+cName = "item"
+n = 5
+? "<name>-<number>" + cName + "-" + n
+
+cName = "item"
+n = 5
+? "<name>-<number>" + cName + "-" + n
+
+cName = "item"
+n = 5
+? "<name>-<number>" + cName + "-" + n
+
+cName = "item"
+n = 5
+? "<name>-<number>" + cName + "-" + n
+
+cName = "item"
+n = 5
+? "<name>-<number>" + cName + "-" + n
+
+cName = "item"
+n = 5
+? "<name>-<number>" + cName + "-" + n
+
+cName = "item"
+n = 5
+? "<name>-<number>" + cName + "-" + n
+
+cName = "item"
+n = 5
+? "<name>-<number>" + cName + "-" + n
+
+cName = "item"
+n = 5
+? "<name>-<number>" + cName + "-" + n
+
+cName = "item"
+n = 5
+? "<name>-<number>" + cName + "-" + n
+
+cName = "item"
+n = 5
+? "<name>-<number>" + cName + "-" + n
+
+cName = "item"
+n = 5
+? "<name>-<number>" +

@@ -1,0 +1,28 @@
+say(put(1, 2, 3, 4, 5, 6, 7, 8, 9))
+
+
+def put(i, j, k, l, m, n, o, p, q, r):
+    say(put(i, j, k, l, m, n, o, p, q, r))
+
+
+def put(i, j, k, l, m, n, o, p, q, r):
+    say(put(i, j, k, l, m, n, o, p, q, r))
+
+
+def put(i, j, k, l, m, n, o, p, q, r):
+    say(put(i, j, k, l, m, n, o, p, q, r))
+
+
+def put(i, j, k, l, m, n, o, p, q, r):
+    say(put(i, j, k, l, m, n, o, p, q, r))
+
+
+def put(i, j, k, l, m, n, o, p, q, r):
+    say(put(i, j, k, l, m, n, o, p, q, r))
+
+
+def put(i, j, k, l, m, n, o, p, q, r):
+    say(put(i, j, k, l, m, n, o, p, q, r))
+
+
+def put(i, j, k

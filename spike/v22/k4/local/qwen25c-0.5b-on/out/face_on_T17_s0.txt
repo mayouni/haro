@@ -1,0 +1,6 @@
+say(put(cPiece, n))
+
+
+def put(cPiece, n):
+    return cPiece * n
+<<END>>

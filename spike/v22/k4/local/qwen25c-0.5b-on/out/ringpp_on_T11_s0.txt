@@ -1,0 +1,8 @@
+try
+	? "caught-" + cTag
+	? "done"
+catch
+	? "caught-" + cTag
+	? "done"
+done
+<<END>>

@@ -1,0 +1,3 @@
+nWords = 0
+for i = 0 to len(cText) - 1
+	if cText[i] != ' ' and cText[i + 1] != ' ' and cText[i + 1] != ' ' and cText[i + 2] != ' ' and cText[i + 3] != ' ' and cText[i + 4] != ' ' and cText[i + 5] != ' ' and cText[i + 6] != ' ' and cText[i + 7] != ' ' and cText[i + 8] != ' ' and cText[i + 9] != ' ' and cText[i + 10] != ' ' and cText[i + 11] != ' ' and cText[i + 12] != ' ' and cText[i + 13] != ' ' and cText[i + 14] != ' ' and cText[i + 15] != ' ' and cText[i + 16] != ' ' and cText[i + 17] != ' ' and cText[i + 18] != ' ' and cText[i + 19] != ' ' and cText[i + 20] != ' ' and cText[i + 21] != ' ' and cText[i + 22] != ' ' and cText[i + 23] != ' ' and cText[i + 24] != ' ' and c

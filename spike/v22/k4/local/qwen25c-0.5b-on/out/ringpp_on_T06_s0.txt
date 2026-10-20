@@ -1,0 +1,55 @@
+vowels = 3
+? "vowels=" + vowels
+
+func CountVowels(cText)
+	vowels = 0
+	for i in range(len(cText))
+		if cText[i] >= 'a' and cText[i] <= 'z'
+			vowels += 1
+		else
+			continue = "vowels=" + vowels
+
+			return vowels
+			return "vowels=" + vowels
+
+			return "vowels=" + vowels
+
+			return "vowels=" + vowels
+
+			return "vowels=" + vowels
+
+			return "vowels=" + vowels
+
+			return "vowels=" + vowels
+
+			return "vowels=" + vowels
+
+			return "vowels=" + vowels
+
+			return "vowels=" + vowels
+
+			return "vowels=" + vowels
+
+			return "vowels=" + vowels
+
+			return "vowels=" + vowels
+
+			return "vowels=" + vowels
+
+			return "vowels=" + vowels
+
+			return "vowels=" + vowels
+
+			return "vowels=" + vowels
+
+			return "vowels=" + vowels
+
+			return "vowels=" + vowels
+
+			return "vowels=" + vowels
+
+			return "vowels=" + vowels
+
+			return "vowels=" + vowels
+
+			return

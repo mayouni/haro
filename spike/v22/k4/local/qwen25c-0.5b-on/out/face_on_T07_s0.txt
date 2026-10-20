@@ -1,0 +1,6 @@
+say(cat("5 ", aList, " "))
+
+
+def reverseList(lst):
+    return lst.reverse()
+<<END>>

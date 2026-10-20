@@ -1,0 +1,7 @@
+say(put(1, 5))
+
+
+def put(start, end):
+    for i in range(start, end + 1):
+        say(i)
+<<END>>

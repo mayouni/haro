@@ -1,0 +1,7 @@
+nDistinct = len(set(aList))
+say(cat("distinct=", nDistinct))
+
+
+def set(x):
+    return set(x)
+<<END>>

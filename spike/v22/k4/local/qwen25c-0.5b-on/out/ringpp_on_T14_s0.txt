@@ -1,0 +1,40 @@
+? "age=" + aPeople[cWho][1] + " years old" + "."
+
+func PrintAge(people, cWho)
+	age = 0
+	for x in people
+		if x[0] = cWho
+			age = x[1]
+			break = 1
+			end = 1
+			end = 1
+			end = 1
+			end = 1
+			end = 1
+			end = 1
+			end = 1
+			end = 1
+			end = 1
+			end = 1
+			end = 1
+			end = 1
+			end = 1
+			end = 1
+			end = 1
+			end = 1
+			end = 1
+			end = 1
+			end = 1
+			end = 1
+			end = 1
+			end = 1
+			end = 1
+			end = 1
+			end = 1
+			end = 1
+			end = 1
+			end = 1
+			end = 1
+			end = 1
+			end = 1
+			end = 

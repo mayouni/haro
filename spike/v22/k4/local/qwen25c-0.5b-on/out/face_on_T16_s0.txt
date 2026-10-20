@@ -1,0 +1,39 @@
+q = 3
+r = 1
+say(cat("q=", q, " r=", r))
+
+
+def divided(a, b):
+    return a / b
+    return int(divided(a, b))
+    return int(divided(a, b))
+    return int(divided(a, b))
+    return int(divided(a, b))
+    return int(divided(a, b))
+    return int(divided(a, b))
+    return int(divided(a, b))
+    return int(divided(a, b))
+    return int(divided(a, b))
+    return int(divided(a, b))
+    return int(divided(a, b))
+    return int(divided(a, b))
+    return int(divided(a, b))
+    return int(divided(a, b))
+    return int(divided(a, b))
+    return int(divided(a, b))
+    return int(divided(a, b))
+    return int(divided(a, b))
+    return int(divided(a, b))
+    return int(divided(a, b))
+    return int(divided(a, b))
+    return int(divided(a, b))
+    return int(divided(a, b))
+    return int(divided(a, b))
+    return int(divided(a, b))
+    return int(divided(a, b))
+    return int(divided(a, b))
+    return int(divided(a, b))
+    return int(divided(a, b))
+    return int(divided(a, b))
+    return int(divided(a, b))
+    return int(divided

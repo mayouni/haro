@@ -1,0 +1,57 @@
+nWords = 0
+for x in cText:
+    if x != " ":
+        nWords += 1
+say(cat("words=", nWords))
+
+
+cText = "the quick brown fox"
+nWords = 0
+for x in cText:
+    if x == " ":
+        nWords += 1
+say(cat("words=", nWords))
+
+
+cText = "the quick brown fox"
+nWords = 0
+for x in cText:
+    if x != " ":
+        nWords += 1
+say(cat("words=", nWords))
+
+
+cText = "the quick brown fox"
+nWords = 0
+for x in cText:
+    if x == " ":
+        nWords += 1
+say(cat("words=", nWords))
+
+
+cText = "the quick brown fox"
+nWords = 0
+for x in cText:
+    if x != " ":
+        nWords += 1
+say(cat("words=", nWords))
+
+
+cText = "the quick brown fox"
+nWords = 0
+for x in cText:
+    if x == " ":
+        nWords += 1
+say(cat("words=", nWords))
+
+
+cText = "the quick brown fox"
+nWords = 0
+for x in cText:
+    if x == " ":
+        nWords += 1
+say(cat("words=", nWords))
+
+
+cText = "the quick brown fox"
+nWords = 0

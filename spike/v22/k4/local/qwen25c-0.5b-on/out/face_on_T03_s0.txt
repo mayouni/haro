@@ -1,0 +1,5 @@
+nCount = 0
+for x in aItems:
+    if isinstance(x, int):
+        nCount += 1
+say(plus(plus(plus(plus(not not not not not not not not not not not not not not not not not not not not not not not not not not not not not not not not not not not not not not not not not not not not not not not not not not not not not not not not not not not not not not not not not not not not not not not not not not not not not not not not not not not not not not not not not not not not not not not not not not not not not not not not not not not not not not not not not not not not not not not not not not not not not not not not not not not not not not not not not not not not not not

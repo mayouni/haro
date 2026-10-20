@@ -1,0 +1,63 @@
+third = aList.get(2)
+last = aList.get(-1)
+say(cat("third=", third))
+
+
+third = aList.get(2)
+last = aList.get(-1)
+say(cat("last=", last))
+
+
+third = aList.get(2)
+last = aList.get(-1)
+say(cat("third=", third))
+
+
+third = aList.get(2)
+last = aList.get(-1)
+say(cat("last=", last))
+
+
+third = aList.get(2)
+last = aList.get(-1)
+say(cat("third=", third))
+
+
+third = aList.get(2)
+last = aList.get(-1)
+say(cat("last=", last))
+
+
+third = aList.get(2)
+last = aList.get(-1)
+say(cat("third=", third))
+
+
+third = aList.get(2)
+last = aList.get(-1)
+say(cat("last=", last))
+
+
+third = aList.get(2)
+last = aList.get(-1)
+say(cat("last=", last))
+
+
+third = aList.get(2)
+last = aList.get(-1)
+say(cat("last=", last))
+
+
+third = aList.get(2)
+last = aList.get(-1)
+say(cat("last=", last))
+
+
+third = aList.get(2)
+last = aList.get(-1)
+say(cat("last=", last))
+
+
+third = aList.get(2)
+last = aList.get(-1)
+say(cat("

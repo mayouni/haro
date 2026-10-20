@@ -3,6 +3,13 @@
 Twenty tasks, Ring++ and the Python-shaped face, the engine's constrained decoder on and off, a pinned gguf, greedy decoding unless the run says otherwise. `valid` = in the shape's grammar,
 `ended` = wrote its sentinel, `reads` = the face reader / rnxc accepts it, `runs` = no error on the shown data, `shown` = the right answer on the shown data, `pass` = right on the hidden data too.
 
+## qwen25c-0.5b-on -- qwen2.5-coder-0.5b-instruct-q8_0.gguf, seeds [['0', '0']], max tokens 320
+
+| shape / decoder | n | valid | ended | reads | runs | shown | pass | tokens/s |
+|---|---|---|---|---|---|---|---|---|
+| face, decoder on | 20 | 15 | 12 | 12 | 5 | 2 | 0 | 4.3 |
+| ringpp, decoder on | 20 | 10 | 9 | 18 | 8 | 5 | 1 | 0.7 |
+
 ## smollm2-135m-greedy -- smollm2-135m-instruct-q8_0.gguf, seeds [['0', '0']], max tokens 320
 
 | shape / decoder | n | valid | ended | reads | runs | shown | pass | tokens/s |

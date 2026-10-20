@@ -1,0 +1,10 @@
+vowels = 0
+for x in cText:
+    if x == "a" or x == "e" or x == "i" or x == "o" or x == "u":
+        vowels = vowels + 1
+say(plus(0, vowels))
+
+
+def plus(x, y):
+    return x + y
+<<END>>

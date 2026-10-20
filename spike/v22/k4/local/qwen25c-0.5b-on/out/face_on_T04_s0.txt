@@ -1,0 +1,64 @@
+say(cat("<name>-<number>", cName, n))
+
+
+cName = "item"
+n = 5
+say(plus(plus(cName, n), "item"))
+
+
+cName = "item"
+n = 5
+say(plus(plus(cName, n), "item"))
+
+
+cName = "item"
+n = 5
+say(plus(plus(cName, n), "item"))
+
+
+cName = "item"
+n = 5
+say(plus(plus(cName, n), "item"))
+
+
+cName = "item"
+n = 5
+say(plus(plus(cName, n), "item"))
+
+
+cName = "item"
+n = 5
+say(plus(plus(cName, n), "item"))
+
+
+cName = "item"
+n = 5
+say(plus(plus(cName, n), "item"))
+
+
+cName = "item"
+n = 5
+say(plus(plus(cName, n), "item"))
+
+
+cName = "item"
+n = 5
+say(plus(plus(cName, n), "item"))
+
+
+cName = "item"
+n = 5
+say(plus(plus(cName, n), "item"))
+
+
+cName = "item"
+n = 5
+say(plus(plus(cName, n), "item"))
+
+
+cName = "item"
+n = 5
+say(plus(plus(cName, n), "item"))
+
+
+cName = "item
