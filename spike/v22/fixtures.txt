@@ -742,7 +742,11 @@ c = new Box(1)
 class Box
 	func init(n)
 
-=== R29 a `not` that is the operand of a comparison is parenthesized in the Ring the reader writes: Ring's `not` is looser (the grammar's tree is not)
+=== R29 a `not` that is the operand of a comparison is parenthesized in the Ring the reader writes: Ring's `not` is looser than a comparison
+~~~ Changed 2026-10-20 (F-130, C-32), after the graph and the printer learned Ring's reading of `not`: the first version expected `if not (a = b)`, the printer's
+~~~ spelling while a `not` was parenthesized round any comparison under it. A `not` has its own precedence now, between `and` and the comparisons, so the
+~~~ operand of `not` needs no parenthesis (`not a = b` is `not (a = b)` on Ring) and the Ring that is written says `if not a = b`; the `not` that is the
+~~~ OPERAND of a comparison or of a unary sign still carries its parenthesis, which is the one the reader writes.
 --- py
 a = 0
 b = 5
@@ -754,7 +758,7 @@ say(-negate(a))
 a = 0
 b = 5
 ? (not a) = b
-if not (a = b)
+if not a = b
 	? 1
 ok
 ? -(not a)

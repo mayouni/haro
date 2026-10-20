@@ -51,8 +51,6 @@ COLLISIONS = {
     'param-type':  ('func f(string s)', 'a typed parameter would lose its type in the face'),
     'compound-nl': ('n += nl', '`x += nl` is R41 on Ring while `x = x + nl` joins the text (vmexpr.c:27, F-98), and the face writes both as x = plus(x, nl)'),
     'call-target': ('F() = v', 'the call runs, then Ring writes through its result or raises R34 (F-81): Python cannot assign to a call'),
-    'not-precedence': ('not a = b', 'Ring binds `not` looser than a comparison or arithmetic (`not a = b` is `not (a = b)`, measured on the oracle), and the grammar\'s tree binds it '
-                                    'tighter: the tree and Ring disagree, so the face cannot spell it without choosing'),
 }
 
 FACE_WORDS = {'say', 'see', 'at', 'setat', 'eq', 'ne', 'lt', 'gt', 'le', 'ge', 'cat', 'plus', 'span', 'rng', 'mod', 'both', 'either', 'negate',
@@ -345,8 +343,6 @@ class Face:
                 if self.cond:
                     return 'not ' + self.operand(n['e'], NOT_PREC)
                 return 'negate(' + self.e(n['e']) + ')'
-            if n['e']['k'] == 'un' and n['e']['op'] == 'not':
-                raise Refused('not-precedence', 'not ... under ' + n['op'])
             return n['op'] + self.operand(n['e'], UNARY_PREC)
         if k == 'post':
             raise Refused('increment-value')
@@ -388,10 +384,6 @@ class Face:
             # `:name = value` builds the list ["name", value] wherever a value is wanted (F-59), not a comparison
             self.prec = ATOM_PREC
             return '[' + py_str(l['text'][1:].strip().lower()) + ', ' + self.e(r) + ']'
-        if op not in ('and', '&&', 'or', '||'):
-            for side in (l, r):
-                if side['k'] == 'un' and side['op'] == 'not':
-                    raise Refused('not-precedence', 'not ... under ' + op)
         kl, kr = self.kind(l), self.kind(r)
         if op in ('and', '&&', 'or', '||'):
             word = 'and' if op in ('and', '&&') else 'or'

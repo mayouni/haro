@@ -2963,7 +2963,7 @@ def stage25():
     means differently is spelt with an explicit word (at, setat, eq, cat, plus, span, rng, G., return ""), and what has no spelling is refused by name
     from a collision table that travels with the face as its banner. Judged by fixtures written before the printer (v21/face_check.py), by Python's own
     parser on every text, by controls that must fail, and by Softanza's base through the face -- the measurement of kill criterion K3."""
-    print('stage 25 -- a second face, in Python\'s shape: v21/face_check.py (72 fixtures, 23 collisions, ast.parse, controls, a corpus, K3)')
+    print('stage 25 -- a second face, in Python\'s shape: v21/face_check.py (72 fixtures, 22 collisions, ast.parse, controls, a corpus, K3)')
     failures = 0
     p = subprocess.run([sys.executable, FACE_CHECK], capture_output=True, cwd=ROOT, timeout=3600)
     out = p.stdout.decode('utf-8', 'replace').replace('\r\n', '\n')

@@ -156,9 +156,9 @@ every one reached.
 | a comment | right-trimmed | |
 | a region name assigned through `This.x = v` | `self.x`, and a bare read of it `self.x` | the printer decided by how the region declared it |
 
-**New collisions** (16 to 23): `name-clash` (two Ring names that print as one, or one already spelt like an escape: `del` and `del_`, `at`, `at_x`, `_1x`), `name-char` (a `$` inside a name),
+**New collisions** (16 to 23; the last was retired on 2026-10-20, so 22 stand): `name-clash` (two Ring names that print as one, or one already spelt like an escape: `del` and `del_`, `at`, `at_x`, `_1x`), `name-char` (a `$` inside a name),
 `new-from`, `param-type` (a typed parameter would lose its type), `call-target` (`F() = v` is not Python), `compound-nl` (`x += nl` where the left is not known to be a string, HF-108) and
-`not-precedence` (a `not` under a comparison, arithmetic or a unary sign in the grammar's tree, which disagrees with Ring: HF-105).
+`not-precedence` (a `not` under a comparison, arithmetic or a unary sign in the grammar's tree, which disagrees with Ring: HF-105) -- **RETIRED 2026-10-20 with its fixture** (F-130, C-32): the graph reads a `not` as Ring does (`not a = b` is `not (a = b)`, `(not a) = b` keeps its parenthesis in the graph), so no tree of that shape is read from Ring text and a graph a refinement builds with a bare `not` operand is unambiguous structure. Fixture 62 prints now: `negate(a == b)`, `negate(a) == b`, `eq(x, y)` for names of no known kind.
 
 **K3 re-measured (HF-94 stands, not met).** 300 files of Softanza's base: **221 print whole (74%)**, 78 are refused -- call-name 20, eval 20, lambda 19, operator 6, not-precedence 4,
-name-clash 3, for-after 2, name-char 2 -- and 1 does not parse as Ring. It was 227 of 300 (76%) before the printer was made to refuse what it used to approximate.
+name-clash 3, for-after 2, name-char 2 -- and 1 does not parse as Ring. It was 227 of 300 (76%) before the printer was made to refuse what it used to approximate. **After `not-precedence` was retired (2026-10-20): 223 print whole (75%)**, 76 are refused -- eval 22, call-name 20, lambda 19, operator 6, name-clash 3, for-after 2, name-char 2, dollar-param 1 -- and 1 does not parse; K3 stays not met.

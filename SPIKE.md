@@ -1451,7 +1451,7 @@ parentheses aside) or the text is refused with the line the face writes. `spike/
 can spell print, after print, read and run on the oracle, what they printed before.** Building it made the printer injective and a formatter (v21 amended: 72 fixtures, 23
 collisions; 221 of 300 print whole where 227 did -- the cost of refusing what it used to approximate). **What building found** (HF-104 to HF-109): `new K` and `new K()` are two
 things; `:name = value` and a string key before `=` are shapes the graph reads the wrong way round; `x += nl` is not `x = x + nl`; and **Ring binds `not` looser than a
-comparison while rnxc, the formatter and the graph bind it tighter** -- a silent wrong answer in the compiler, reported and spawned, not fixed here. **Not built:** K4 and the
+comparison while rnxc, the formatter and the graph bind it tighter** -- a silent wrong answer in the compiler, reported and spawned (**fixed 2026-10-20**, ringpp C-32: 22 collisions stand and 223 of 300 print whole since). **Not built:** K4 and the
 20-task protocol (a model run; which model is the author's decision) and a GBNF for the face.
 
 ## The names -- `.haro`, not `.stzu` -- corrected 2026-10-02

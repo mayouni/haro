@@ -86,8 +86,9 @@ def ring_literal(node, value):
 
 def wrap(n):
     """A graph read from text has no parenthesis nodes, because Python's AST does not keep them and both printers parenthesize from the tree -- with one exception:
-    a `not` that is the operand of a comparison, of arithmetic or of a unary sign. Ring binds `not` looser than those and the grammar's tree binds it tighter, so the
-    graph says which was meant with a parenthesis, and the Ring that is written has it (`(not a) = b`)."""
+    a `not` that is the operand of a comparison, of arithmetic or of a unary sign. Ring binds `not` looser than those (HF-105), and a graph read from Ring text keeps the
+    parenthesis the text had -- `(not a) = b` is bin(=, paren(not a), b), where `not a = b` is not(bin(=, a, b)) -- so the reader writes it too, and the round trip
+    is exact: the Ring that is written has the parenthesis the file had."""
     return mk('paren', e=n) if n['k'] == 'un' and n['op'] == 'not' else n
 
 

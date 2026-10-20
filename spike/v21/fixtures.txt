@@ -789,13 +789,48 @@ func Make()
 --- refused
 call-target assign
 
-=== 62 Ring binds `not` looser than a comparison or arithmetic, and the grammar's tree binds it tighter: a tree of that shape is refused
+=== 62 Ring binds `not` looser than a comparison or arithmetic, and the graph holds Ring's reading: the face spells it
+~~~ This fixture was a refusal (`not-precedence`) until 2026-10-20: the grammar's tree bound `not` tighter than Ring does, so `not a = b` arrived as
+~~~ `(not a) = b` and the face could not spell it without choosing (HF-105). The graph reads a `not` as Ring does now (F-130, C-32): `not a = b` is
+~~~ `not (a = b)`, and `(not a) = b` keeps its parenthesis in the graph. Nothing is ambiguous any more, so the collision is retired with the
+~~~ refusal that proved it. Python's `not` is looser than `==` too, so the infix spellings need no parenthesis. A name the face knows for a number
+~~~ (a = 0) is compared and added infix; a parameter, of no known kind, is spelt eq(x, y) as everywhere. (Rewritten before the printer was changed;
+~~~ the first version spelt a and b as names of no known kind, and the court said the face knows them.)
 --- ring
 a = 0
 b = 5
 ? not a = b
---- refused
-not-precedence not
+? not a + b
+? (not a) = b
+? a = (not b)
+? 1 and not a < b
+if not a = b
+	? 1
+ok
+
+func Same(x, y)
+	return not x = y
+
+func Other(x, y)
+	return (not x) = y
+--- py
+a = 0
+b = 5
+say(negate(a == b))
+say(negate(a + b))
+say(negate(a) == b)
+say(a == negate(b))
+say(both(1, negate(a < b)))
+if not a == b:
+    say(1)
+
+
+def Same(x, y):
+    return negate(eq(x, y))
+
+
+def Other(x, y):
+    return eq(negate(x), y)
 
 === 63 `:name = value` builds the list ["name", value] wherever a value is wanted (F-59): an argument is not a comparison
 --- ring
