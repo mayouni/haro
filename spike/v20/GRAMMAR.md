@@ -3,7 +3,8 @@
 **Rung 5 of the code-graph memo** (`haro/CODEGRAPH.md`, section 7), built on the author's "great! start Rung 5" (2026-10-05). **Written after** the fixtures in
 `fixtures.txt` (89 of them: 65 composed by hand before `refine.py` existed -- the W discipline: fixtures first, prose second -- and 24 written after it from
 the survivors of a mutation study, HF-89), after the court that judges them (`refine_check.py`), and after `refine.py`, whose first run against them failed
-10 of the court's checks (section 8 is what building found).
+10 of the court's checks (section 8 is what building found). Four files of fixtures came after, each written before its engine: `fixtures_block.txt` (15),
+`fixtures_function.txt` (20), `fixtures_allowlist.txt` (8) and `fixtures_method.txt` (13) -- 147 with the 91 of `fixtures.txt` (sections 11 to 14).
 
 **What this is, in one line.** A refinement is a *sentence* in the shape `rfn.haro` declares for the declared altitude (TARGET, KIND, FROM, TO, AUTHOR, POSTURE, REASON),
 written against a *point* that a Ring program declares in a `<R:KIND ...>` comment tag; it goes through five stages in `stzRefinableCode`'s order, is lowered to RCP's twelve
@@ -20,10 +21,13 @@ surface is a sentence against a point, a grammar scoped to the program it is loo
 | RCP's twelve primitives, each with the inverse captured before it lands, atomic | **built** | `refine.py` (`apply_prim`, `apply_tx`), section 4 |
 | the event log, a revert as its own event, replay, commutation, the audit of a text edit | **built** | `Model`, `replay`, `commutes`, `audit`, section 5 |
 | the write surface: a GBNF scoped to the program, judged by the engine's decoder | **built** | `scoped.py`, section 6 |
-| the court: 11 families of check, 8 controls, a mutation study | **built**, `python haro/spike/v20/refine_check.py`, guard stage 24 | section 7 |
+| the court: 11 families of check, 21 controls, a mutation study | **built**, `python haro/spike/v20/refine_check.py`, guard stage 24 | section 7 |
 | the kind `block`: an agent proposes the BODY of a function whose signature a human declared | **built** (2026-10-19) | section 11 |
 | `node.create` and `node.delete` as the lowering of a sentence | **built**, for a body | section 11 |
 | the kind `function`: an agent proposes a function that is not there yet, or the body of one that is | **built** (2026-10-19) | section 12 |
+| a point's own `calls` and `writes` refined as rules: widening a tier-4 act, narrowing below the body refused | **built** (2026-10-20) | section 13 |
+| the kind `method`: an agent proposes a method of a class that is not there yet, or the body of one that is | **built** (2026-10-20) | section 14 |
+| a body kind on a library file (a class and no top level): the checker's absence rules are shut, so derivation fails closed | **not built** | sections 9, 14 |
 | the kinds `type`, `lib`, `custom`: declared, refused when proposed against | **not built** | section 9 |
 | a writer that keeps the layout of a file that is not canonical (the estate's) | **not built**: `--write` refuses | section 9 |
 | derivation rules that PROPOSE (RCP's `derived_proposals`) | **not built**: they only judge | section 9 |
@@ -42,6 +46,7 @@ the statement's own line, or alone on the lines above it -- and the first tag in
 | `lib` | `load "path"` | the path | declared, not built (section 9) |
 | `block` | a `func`, the tag alone on the line above it | the body's canonical text, named by its digest `sha:` + 12 hex | `calls`, `writes` (section 11) |
 | `function` | nothing: a comment alone at the top level | `absent`, or the body's digest | `params`, `calls`, `writes` (section 12) |
+| `method` | nothing: a comment among a class's members, with a member below it | `absent`, or the body's digest | `params`, `calls`, `writes` (section 14) |
 | `type` `custom` | -- | -- | declared, not built |
 
 Every point also takes `risk` (a tier from 1 to 4), `floor` (the lowest posture that may refine it) and `governed_by` (the governance whose actors decide).
@@ -231,10 +236,12 @@ now whether the package's compiler is older than the repository's, and on 2026-1
 
 ## 9. What it does not say
 
-- **The kinds `type`, `lib`, `custom`.** Declared and refused when proposed against, not built. `block` and `function` are built (sections 11, 12).
+- **The kinds `type`, `lib`, `custom`.** Declared and refused when proposed against, not built. `block`, `function` and `method` are built (sections 11, 12, 14).
 - **A writer for a file that is not canonical.** The estate's files are not (rung 3: none of Softanza's 6,061 is `fmt`'s fixed point), and the refinement's text is the printer's. `--write` refuses; a span-preserving
   writer needs the byte span of the literal, which the lossless export (`rnxc dump --json`) has and the graph (L1) does not keep. Until then, a refinement on the estate is a diff to read or `fmt` first, with the
   author's word (D23).
+- **A body kind on a library.** A class and no top level is not a program to `rnxc check`, whose absence rules are shut on it, so the derivation of a BLOCK, FUNCTION or METHOD
+  refinement fails closed (HF-103). Softanza's own files are libraries; refining them needs the derivation to ask about the unit through the program that loads them.
 - **Derivation rules that propose.** RCP's derivation stage can produce `derived_proposals`; here a rule only judges, as `stzRefinableCode`'s do.
 - **RCP's authority taxonomy.** The twelve authorities (`developer.direct`, `planner.graphplanner`, ...) and the policy authorities are the governance table's actors and levels here; the mapping is not drawn.
 - **Edges beyond `calls` and `governed_by`.** `references`, `depends_on` and the rest are L2 (`rnxc graph`), which has no `new K` edge yet and no references.
@@ -298,8 +305,7 @@ them on the oracle and on rnxc before and after (`[]` then `[120]` for a body wr
 write surface (section 6) fixes a block point's target and the digest FROM must be, and leaves TO one line of text, which no context-free grammar can
 say is Ring; and five controls, each rule taken out in turn and caught by at least one fixture (HF-97).
 
-**Not built, named:** refining a BLOCK point's own `calls` and `writes` as rules (`gross.calls`: widening an allowlist would be a tier-4 act, as
-widening options is); a body proposed with a comment; a human's edit of a body read back by the audit as a block refinement (it is counted a raw
+**Not built, named:** ~~refining a BLOCK point's own `calls` and `writes` as rules~~ (built 2026-10-20, section 13: widening is a tier-4 act, as widening options is); a body proposed with a comment; a human's edit of a body read back by the audit as a block refinement (it is counted a raw
 edit: the gate governs proposals, the human writes the body); a per-call check that a callee in `calls` is called with the right arguments before
 the compiler is asked (the compiler answers it at derivation); the kinds `type`, `custom`.
 
@@ -330,4 +336,76 @@ the one thing allowed to; the write surface gives a FUNCTION point the BLOCK sha
 a new function written beside its tag is caught by 7 fixtures, a lift that checks no FUNCTION tag by 8.
 
 **Not built, named:** a FUNCTION point refined as a rule (`Round.params`, which would change a signature a human declared: a tier-4 act, if ever);
-a method (a function in a class); a function whose body is proposed with a comment; the kinds `type` and `custom`.
+~~a method (a function in a class)~~ (built 2026-10-20, section 14); a function whose body is proposed with a comment; the kinds `type` and `custom`.
+
+## 13. The allowlist rules -- a point's calls and writes, refined (built 2026-10-20)
+
+**On the author's "ok proceed as you suggested"** (2026-10-20, after "should we close the not built points before the Python face?"). The fixtures came first,
+`fixtures_allowlist.txt`, 8 of them (AL01-AL07, L27), committed before the engine read them; its header is the design.
+
+**Why.** Until now the only way to let a body call something its point did not name was a human editing the tag as text, outside the gate. An allowlist is the
+point's RULE for its body (charter 6.4: "the rules themselves are refinable"), so it goes through the same five stages as every rule: TARGET `gross.calls` (or
+`.writes`), KIND `block` or `function`, FROM the list now (`|` apart, `""` when absent), TO the list wanted.
+
+| stage | for an allowlist |
+|---|---|
+| structural | the attribute belongs to a BLOCK, FUNCTION or METHOD point; TO is a list of distinct names, none empty (`""` clears it); every name is one the program has -- a call a function, class or builtin, a write a global, an attribute or a parameter of the function -- spelt as declared (D24), and a FUNCTION or METHOD point's own name is a call it may make; FROM is what is there; TO is not FROM |
+| constraint | nothing of its own: an allowlist has no bounds or options, and its names are judged at structural |
+| governance | WIDENING is a tier-4 act whatever the point's risk (a name in TO that FROM did not have); NARROWING is the point's own tier |
+| trust | the origin must be `:trusted` whatever the point's floor says: a rule is not changed by a model-composed proposal |
+| derivation | the body that is THERE must still satisfy the new list: narrowing below what it calls or writes leaves it outside its own rule, refused as `own rule`, as a bound below the value is |
+
+**The lowering** is one `node.update_property` of the tag's comment text, so no id moves. A text edit of an allowlist is read back by the audit as the
+refinement it amounts to (AL07: `as llm by boss`, then `refine gross.calls Tax Tax|Round => rejected trust rule`).
+
+**A body outside its own rule is a state, not a fault.** A human may write more than the point names; the lift reports `point 'gross' body is outside its own rule`
+(L27) and does not stop a refinement of any other point. The allowlist can be widened to repair it, which is the loop AL05 closes: a FUNCTION point's body is
+refused for a call the list lacks, the list is widened by a trusted tier-4 actor, and the same body is then admitted.
+
+**The write surface** gives `.calls` and `.writes` targets a shape of their own in the scoped grammar (`qnames`: names joined by `|`, or empty), so an agent that
+may write a body may also be shown, in advance, that it may not write a rule.
+
+**The court.** 8 fixtures; three controls: an allowlist widening counted as an ordinary change (caught by 1), a TO list that is never checked (2), a body never
+judged against its own point's rule (4, the last shared with the BODY kinds). Guard stage 24 PASS.
+
+**Not built, named:** a rule-like refinement of a METHOD or FUNCTION point's `params` (a tier-4 act, if ever: it changes a signature a human declared); the
+`calls` of a name that exists only in a loaded file the engine does not read (section 14, "A program, not a library").
+
+## 14. The METHOD kind -- a method of a class that may not be there yet (built 2026-10-20)
+
+**On the same word.** Softanza is 34,672 methods against 9,764 functions (`rnxc graph`), so without this kind FUNCTION reaches a fifth of the estate. A method is
+not a function in a class: it has `This`, the class's attributes, dispatch by receiver and inheritance, and a few names Ring calls by itself. The fixtures came
+first, `fixtures_method.txt`, 13 of them (MT01-MT08, L28-L32).
+
+**The point stands INSIDE the class.** `# <R:METHOD name="Grow" params="n" calls="Size" writes="@nCount">` among the class's members, with a member below it. The
+class is the one the tag stands in. `name` exact and an identifier, `params` the signature (no `self`; `This` is implicit), `calls`, `writes`, `risk`, `floor`,
+`governed_by` as a FUNCTION's; the value is `absent` or the body's digest; TO is the body on one line; TO `absent` is refused and a revert of a creation deletes
+the method with its ids. **Where a tag may stand is a finding (HF-100)**: before the first method, between two, among the attributes and after `private` all keep
+it in the class, but a tag after the LAST member ends the class and lands at the top level, where the printer moves it, so that is a fault, by name. A tag
+outside a class, inside a function or inside another definition is a fault too.
+
+**The lowering.** A method that is there: BLOCK's. One that is not: ONE `node.create` of the whole method into the class's members, after the last of them and
+**before the `private` marker** if there is one -- `private` is a flat marker in the graph, so a method placed after it would be private without anyone saying so
+(MT04, caught by the control that puts it there).
+
+**Names a method may not take**, as faults of the declaration, because Ring calls them itself and creating one changes what other code does without anyone naming it:
+
+- `operator` (F-69: one method for every operator) and the brace hooks `BraceStart`, `BraceEnd`, `BraceError`, `BraceExprEval`, `BraceNewLine`;
+- `get<x>` and `set<x>` where the class assigns an attribute `<x>` (F-73: `o.x` calls the getter, `o.x = v` the setter);
+- a builtin or a top-level function: inside the class's methods a bare call goes to the class's own method first, so the new one would SHADOW it;
+- **a keyword Ring will not take as a name** (HF-101), for a method, a function and a parameter alike: 47 of Ring's 75 keywords, read from the vendored scanner and parser
+  rather than listed here. `Get`, `Put`, `Give`, `See`, `Next` and `If` are refused; `To`, `In`, `From`, `Step`, `This`, `Main`, `Init` and the like are names.
+
+A human who wants one of these writes it; a BLOCK point still refines the body of one that exists (MT08, which also counts `This.x` as an attribute write).
+
+**A program, not a library (HF-103).** The derivation asks `rnxc check`, whose absence rules are shut on a file with no top level and no Main (`nothing in this unit
+runs`), and the gate fails closed (HF-96). So a class alone is refused at derivation: every program in the fixtures begins with a top-level statement. That is
+exact, not cautious -- and it means the body kinds refine **a program, and not Softanza's library files**, which are almost all classes. Reaching the estate
+needs a derivation that asks the checker about the unit through the program that loads the file; the engine does not read that yet.
+
+**The court.** 13 fixtures, MT03 on the oracle and rnxc before and after (`3` and `3`: the method is added and the program prints the same), the programs of MT04-MT08 each carrying a `? "start"` for the reason above. The
+body's locality counts a method that appears or goes as the one thing allowed to, outside the class's own members nothing moves. Two controls added to the
+body kinds': a new method written after the class's `private` marker is caught by 1 fixture (MT04), a name Ring refuses accepted as a name by 1 (L32); the
+lift that checks no FUNCTION or METHOD tag is now caught by 13. Guard stage 24 PASS: 147 fixtures, 21 controls, 471 s.
+
+**Not built, named:** a method whose body is proposed with a comment; a refinement of a METHOD point's `params` (the signature is the human's); a refinement of a library through its loading program; the kinds `type` and `custom`.

@@ -1411,6 +1411,15 @@ its exact name, its parameters, what its body may call and write -- and the agen
 function at the next function or class and nowhere else; a refinement never deletes one (a revert of its creation does). Fixtures first
 (`fixtures_function.txt`, 20, one corrected by the oracle: `Get` is a Ring keyword, F-20); guard stage 24 PASS, 126 fixtures, 234 steps, 16 controls.
 
+**The allowlist rules and the METHOD kind, built 2026-10-20** on the author's "ok proceed as you suggested", before the Python face (`spike/v20/GRAMMAR.md`
+sections 13 and 14, HF-100 to HF-103). A point's own `calls` and `writes` are refinable now: widening is a tier-4 act whatever the point's risk, narrowing
+the point's own tier, the origin must be trusted, and a body that is there must still satisfy the list; a body a human wrote outside its own rule is a state,
+which the allowlist repairs. And a METHOD point, inside its class, declares a method that may not exist: created before the class's `private` marker, never
+deleted, held off the names Ring calls itself (`operator`, the brace hooks, a getter or setter of an attribute the class assigns) and off the 47 keywords Ring's
+parser refuses as names, which tree-sitter-ring accepts. Fixtures first (`fixtures_allowlist.txt` 8, `fixtures_method.txt` 13); guard stage 24 PASS, 147
+fixtures, 21 controls. **The limit it found:** a body kind refines a program, not a library -- the checker shuts its absence rules on a class with no top level
+(HF-103), so Softanza's own files wait for a derivation through the loading program.
+
 ## Rung 6 of the code-graph memo -- a second face, in Python's shape, as a printer (Haro v0.21) -- 2026-10-19
 
 **On the author's "go ahead with rung 6"** (2026-10-19). Rung 18's graph printed in Python's shape with one meaning, Ring's: what reads the same is spelt
@@ -1535,8 +1544,8 @@ whole guard re-run on the renamed tree: 28 + 30 + 27 + 23, 117 of 120, 32 of 32,
    L1) is the haro-charter desk's and next in the memo.
 23. ~~Rung 5 of the code-graph memo~~ -- built 2026-10-05, finished 2026-10-19: refinement over L1 (Haro v0.20), guard
    stage 24; the BLOCK and FUNCTION kinds built 2026-10-19 (an agent writes a function's body, then a whole function, HF-95 to
-   HF-99); open: the kinds `type` and `custom`, a point's calls and writes refined as rules, methods, and a write surface for a
-   program larger than the decoder holds (HF-87).
+   HF-99), the allowlist rules and the METHOD kind 2026-10-20 (HF-100 to HF-103); open: the kinds `type` and `custom`, a body kind
+   on a library file (HF-103), and a write surface for a program larger than the decoder holds (HF-87).
 24. ~~Rung 6 of the code-graph memo~~ -- built 2026-10-19: a second face, Python-shaped, as a printer (Haro v0.21), guard stage 25;
    K3 measured and not met (HF-94), so rung 7 (a reader of the face) stays open; K4 and the 20-task protocol need that reader and a model run.
 18. The forge as an `rnxc` verb (the ringpp session's `src/`, routed); the
