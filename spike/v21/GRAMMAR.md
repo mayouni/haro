@@ -16,7 +16,7 @@ with **one meaning, Ring's** (CODEGRAPH 3.2). It was one-way until rung 7 (2026-
 | the court: fixtures, Python's parser on every text, the table reached, five controls, Softanza's corpus | **built**, `python haro/spike/v21/face_check.py`, guard stage 25 | section 4 |
 | K3 measured on the corpus | **built**, a line of the court | section 6 |
 | a reader of the face (text back to the graph) | **built** (rung 7, 2026-10-20) | `v22/GRAMMAR.md` |
-| K4 and the memo's 20-task protocol: a model writing in each face under its GBNF | **not built** | section 7 |
+| K4: a model writing in each face | **measured 2026-10-20: met for capable models** (`v22/k4/K4.md`) | section 7 |
 | a runtime for the face's words (`at`, `eq`, `say` ...) so the text runs under Python | **not built**, and not the point: the text is read, not run | section 7 |
 
 ## 1. Three treatments, one rule
@@ -127,9 +127,7 @@ runs (C-14), which `G.` already says.
 
 ## 7. Not built, named
 
-- **K4 and the 20-task protocol.** Whether a model writes a program better in this face than in Ring's, each under its GBNF, is the memo's other
-  kill criterion and the rung's named guard; it needs the reader (a face written by a model has to come back to the graph to be judged) and a model
-  run, so it waits for rung 7's decision.
+- **K4**: measured 2026-10-20 and met for capable models (`v22/k4/K4.md`, HF-110): the face is a reading aid and a respeller, not a write surface.
 - ~~**A reader** (rung 7)~~: built 2026-10-20, `v22/GRAMMAR.md`.
 - **Lambdas**, spelt (see section 6); **a runtime for the face's words** -- the text is for reading, and `say`, `at` and their kin are named by the
   banner, not shipped.

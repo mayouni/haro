@@ -19,8 +19,8 @@ reason the printer had to change first (section 7): a reader needs a face that i
 | the declared losses: what the face does not keep, as one function | **built** | `losses.py`, section 6 |
 | the court: fixtures, the printer's text read back, controls, the corpus to the same graph, the oracle | **built**, `python haro/spike/v22/face_read_check.py`, guard stage 26 | section 5 |
 | the lenient reading (a model's text that is not the face's spelling, read anyway, for K4 to count) | **built** | `read_py(text, strict=False)` |
-| a GBNF for the face (the write surface of a model that writes it) | **not built** | section 8 |
-| K4 and the 20-task protocol: a model writing in each face | **not built**: needs a model run, and which model is the author's decision | section 8 |
+| a GBNF for the face (the write surface of a model that writes it) | **drafted, not pursued**: `face_gbnf.py`, held by the decoder, 27 of 43 printed texts accepted | section 8 |
+| K4: a model writing in each face | **measured 2026-10-20: met for capable models** (Ring at ceiling, the face at best ties), `k4/K4.md`, HF-110, HF-111 | section 8 |
 | lambdas, brace blocks, `eval`, `call f()`, operator methods, getters, setters | **not spelt**: refused by the printer (v21), so never read | `v21/GRAMMAR.md` section 1 |
 
 ## 1. The rule: read, print, compare
@@ -136,7 +136,7 @@ shows it is needed:
 
 ## 8. Not built, named
 
-- **K4 and the 20-task protocol.** Whether a model writes a program better in this face than in Ring's, each under its GBNF, needs a model run and a GBNF for the face. The reader is what makes it possible (a face written by a model comes back to the graph to be judged, and `strict=False` counts how often a model needed correcting); which model to run, and whether to run it, is the author's decision. The only local chat model recorded is SmolLM2, 138 MB.
-- **A GBNF for the face.** The reader's strictness is the grammar's job in the other direction: a decoder constrained to the printer's image cannot write `a == b` over unknown kinds. Not written.
+- **K4 is measured, and met (2026-10-20).** Twenty tasks, shown and hidden data, Claude haiku and sonnet: Ring 19-20 of 20 with or without a primer, the face at best ties (20 of 20 read for its meaning, 20 of 20 again respelled by the printer, 2-5 of 20 under its strict spelling). `k4/K4.md` has the design, the table and the limits; HF-110 and HF-111 the findings. The face is a reading aid, a lint and a respeller, not a write surface for models. Not measured: a weak model under a decoder.
+- **A GBNF for the face: drafted, not pursued.** `face_gbnf.py` is held by the engine's decoder (42 named rules, about 53 of its 128) and accepts 27 of the 43 texts the printer prints; the rest fail on blank lines between definitions, comments and method bodies richer than the draft. K4 found no write-surface case for the face, so it was left there.
 - **The collisions' own spellings** (lambda is the one K3 named as spellable), and a face for the declared altitude.
 - **A reader for the corpus's tests**, which hold `load`, `eval` and braces the face does not spell: 95 of the 159 runnable probes, 221 of 300 library files.

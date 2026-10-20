@@ -1451,8 +1451,7 @@ parentheses aside) or the text is refused with the line the face writes. `spike/
 can spell print, after print, read and run on the oracle, what they printed before.** Building it made the printer injective and a formatter (v21 amended: 72 fixtures, 23
 collisions; 221 of 300 print whole where 227 did -- the cost of refusing what it used to approximate). **What building found** (HF-104 to HF-109): `new K` and `new K()` are two
 things; `:name = value` and a string key before `=` are shapes the graph reads the wrong way round; `x += nl` is not `x = x + nl`; and **Ring binds `not` looser than a
-comparison while rnxc, the formatter and the graph bind it tighter** -- a silent wrong answer in the compiler, reported and spawned (**fixed 2026-10-20**, ringpp C-32: 22 collisions stand and 223 of 300 print whole since). **Not built:** K4 and the
-20-task protocol (a model run; which model is the author's decision) and a GBNF for the face.
+comparison while rnxc, the formatter and the graph bind it tighter** -- a silent wrong answer in the compiler, reported and spawned (**fixed 2026-10-20**, ringpp C-32: 22 collisions stand and 223 of 300 print whole since). **K4, measured the same day** (`spike/v22/k4/K4.md`, HF-110, HF-111; on the author's delegation, with Claude haiku and sonnet as the models): twenty tasks, each run on shown and hidden data, Ring against the face. **Ring scores 19-20 of 20 with or without a primer; the face ties at best** -- 20 of 20 when read for its meaning and 20 of 20 again after the printer respells it, but 2-5 of 20 under its own strict spelling, because a model over-spells (`plus`, `eq`) where the kinds make plain operators. So **K4 is met: the face is a reading aid, a lint and a respeller, not a write surface for models**, and no grammar for it was pursued (drafted: the decoder holds it, 27 of 43 printed texts accepted). The face's primer had to be fixed twice (a Python reader's `str(x)`, a class before its use, `new(K)` calling `init`); Ring's never did. Untested: a weak model under a decoder.
 
 ## The names -- `.haro`, not `.stzu` -- corrected 2026-10-02
 
@@ -1565,8 +1564,8 @@ whole guard re-run on the renamed tree: 28 + 30 + 27 + 23, 117 of 120, 32 of 32,
    HF-99), the allowlist rules and the METHOD kind 2026-10-20 (HF-100 to HF-103); open: the kinds `type` and `custom`, a body kind
    on a library file (HF-103), and a write surface for a program larger than the decoder holds (HF-87).
 24. ~~Rung 6 of the code-graph memo~~ -- built 2026-10-19: a second face, Python-shaped, as a printer (Haro v0.21), guard stage 25;
-   K3 measured and not met (HF-94); rung 7 (the reader) built 2026-10-20, guard stage 26 (HF-104 to HF-109); K4 and the 20-task protocol need a model
-   run, the author's decision, and a GBNF for the face.
+   K3 measured and not met (HF-94); rung 7 (the reader) built 2026-10-20, guard stage 26 (HF-104 to HF-109); K4 measured 2026-10-20 and met (HF-110): the face is a reading
+   aid and a respeller, not a model write surface; no grammar for it.
 18. The forge as an `rnxc` verb (the ringpp session's `src/`, routed); the
    Softanza-resident timing the charter's 2.6 asks for; the court's run time on the
    oracle under paths and views (6.4x the image this pass, named at stage 6); the
