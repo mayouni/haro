@@ -5,17 +5,17 @@ fixtures in `fixtures.txt` (46: the first 28 composed before `face_py.py` existe
 asked -- section 5), after the court that judges them (`face_check.py`, guard stage 25), and after `face_py.py`.
 
 **What this is, in one line.** Rung 18's graph of a Ring program, printed in Python's shape so a Python reader -- a human or a model -- can read it,
-with **one meaning, Ring's** (CODEGRAPH 3.2). It is one-way: nothing reads the face back (that is rung 7, and K3 decides whether it is built).
+with **one meaning, Ring's** (CODEGRAPH 3.2). It was one-way until rung 7 (2026-10-20), whose reader accepts exactly this printer's image (`v22/GRAMMAR.md`); building it made the printer injective, and section 8 is what changed.
 
 ## 0. What exists, and what does not
 
 | | status | where |
 |---|---|---|
 | the printer: graph to Python-shaped text, or a refusal by name | **built** | `face_py.py` (`print_py`), sections 1-3 |
-| the collision table, sixteen entries, and the banner that travels with every text | **built** | `COLLISIONS`, `BANNER` |
+| the collision table, sixteen entries (23 since rung 7, section 8), and the banner that travels with every text | **built** | `COLLISIONS`, `BANNER` |
 | the court: fixtures, Python's parser on every text, the table reached, five controls, Softanza's corpus | **built**, `python haro/spike/v21/face_check.py`, guard stage 25 | section 4 |
 | K3 measured on the corpus | **built**, a line of the court | section 6 |
-| a reader of the face (text back to the graph) | **not built**: rung 7, open | section 7 |
+| a reader of the face (text back to the graph) | **built** (rung 7, 2026-10-20) | `v22/GRAMMAR.md` |
 | K4 and the memo's 20-task protocol: a model writing in each face under its GBNF | **not built** | section 7 |
 | a runtime for the face's words (`at`, `eq`, `say` ...) so the text runs under Python | **not built**, and not the point: the text is read, not run | section 7 |
 
@@ -92,9 +92,9 @@ cannot prove is unknown, and an unknown kind takes the explicit word. Nothing el
 
 ## 4. The court (`face_check.py`, guard stage 25, about a minute)
 
-    F  46 fixtures: 26 print exactly their text, 20 are refused for exactly their collision and words
+    F  46 fixtures (72 since rung 7: 42 print exactly their text, 30 are refused for exactly their collision and words)
     P  every printed text starts with the banner and is Python syntax (ast.parse); printing twice gives the same bytes
-    T  the collision table: 16 collisions, 16 reached by a fixture
+    T  the collision table: 16 collisions, 16 reached by a fixture (23 and 23 since rung 7)
     D  five controls that must FAIL the fixtures: Python's brackets for an index, `==` whatever the kinds, a backslash as an escape, comments
        dropped, a brace block printed
     K  300 files of Softanza's base through the face: every text that prints must be Python syntax; refusals ranked
@@ -130,6 +130,35 @@ runs (C-14), which `G.` already says.
 - **K4 and the 20-task protocol.** Whether a model writes a program better in this face than in Ring's, each under its GBNF, is the memo's other
   kill criterion and the rung's named guard; it needs the reader (a face written by a model has to come back to the graph to be judged) and a model
   run, so it waits for rung 7's decision.
-- **A reader** (rung 7): K3 allows it; not started.
+- ~~**A reader** (rung 7)~~: built 2026-10-20, `v22/GRAMMAR.md`.
 - **Lambdas**, spelt (see section 6); **a runtime for the face's words** -- the text is for reading, and `say`, `at` and their kin are named by the
   banner, not shipped.
+
+## 8. The printer after rung 7 (2026-10-20): injective, a formatter, 23 collisions
+
+A reader needs one Python text for one Ring meaning, and the printer above was not that. Rung 7 changed it, each change a fixture first (47-72, written before the code) and
+each found by a measurement -- the reader's court, the oracle step above all (`v22/GRAMMAR.md` section 7). The v21 court is 72 fixtures (42 print, 30 are refused) and 23 collisions,
+every one reached.
+
+**Spelling changes.**
+
+| Ring | the face | why |
+|---|---|---|
+| `new K(a)`, `new K()`, `new K` | `new(K, a)`, `new(K)`, `new_without_init(K)` | a class and a function that share a spelling must not print alike, and only `new K()` calls `init` |
+| `@Foo`, `@x`, `o.@x`, `Foo@Bar`, `@` | `at_Foo`, `self.at_x`, `o.at_x`, `Foo__at__Bar`, `at_` | one escape for the sigil wherever it stands (it was `at_` for a function, nothing for an attribute, `_` after a dot) |
+| `:name = value` as an argument | `["name", value]` | the grammar's tree is a comparison, Ring++ a pair (F-59) |
+| `[ "name" = v ]` in a list | `"name" == v` | a pair keyed by a string is a comparison (F-93) |
+| `else` holding only an `if` | `elif` | Python's tree has no other reading |
+| parentheses | Python's precedence, none of the author's | the printer is the formatter: print of a read text is that text |
+| `and`, `or`, `not` | Python's only in the condition itself | a call's argument inside a condition is a value, 1 or 0 (it leaked) |
+| `(-a) ** b` | parenthesized | unary minus binds tighter on Ring, looser on Python |
+| `nl`, `cr`, `tab` | known strings | so `s += nl` prints plainly |
+| a comment | right-trimmed | |
+| a region name assigned through `This.x = v` | `self.x`, and a bare read of it `self.x` | the printer decided by how the region declared it |
+
+**New collisions** (16 to 23): `name-clash` (two Ring names that print as one, or one already spelt like an escape: `del` and `del_`, `at`, `at_x`, `_1x`), `name-char` (a `$` inside a name),
+`new-from`, `param-type` (a typed parameter would lose its type), `call-target` (`F() = v` is not Python), `compound-nl` (`x += nl` where the left is not known to be a string, HF-108) and
+`not-precedence` (a `not` under a comparison, arithmetic or a unary sign in the grammar's tree, which disagrees with Ring: HF-105).
+
+**K3 re-measured (HF-94 stands, not met).** 300 files of Softanza's base: **221 print whole (74%)**, 78 are refused -- call-name 20, eval 20, lambda 19, operator 6, not-precedence 4,
+name-clash 3, for-after 2, name-char 2 -- and 1 does not parse as Ring. It was 227 of 300 (76%) before the printer was made to refuse what it used to approximate.

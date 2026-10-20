@@ -1436,6 +1436,24 @@ missed four silent shapes, the flow scan refuses 2; Ring's names are not Python'
 prints whole, and the refusals are eval, `call` by name and lambdas. **Not built:** a reader (rung 7, open); K4 and the 20-task protocol; lambdas
 spelt; a runtime for the face's words.
 
+## Rung 7 of the code-graph memo -- the reader of the Python-shaped face (Haro v0.22) -- 2026-10-20
+
+**On the author's "continue"** (2026-10-20), after the allowlist rules and the METHOD kind. A text in the face rung 6 prints, read back to the L1 graph and so to Ring, accepting
+exactly the printer's image: Python's own parser builds a tree, a graph is built from it, v21's printer writes it back, and the two must be one Python (layout, comments, quotes,
+parentheses aside) or the text is refused with the line the face writes. `spike/v22/GRAMMAR.md` is the account.
+
+    v22/face_read.py                    the reader: Python's tree to the graph, the refusals by name, the canonical comparison, strict and lenient
+    v22/losses.py                       what the face does not keep, as one function of twelve switchable entries
+    v22/face_read_check.py, fixtures.txt  the court, guard stage 26: 67 fixtures, the printer's text read back, 300 files read back to the same graph up to the
+                                        declared losses, controls, and the oracle on bench/exec
+
+**Results.** 221 of 300 Softanza files print whole and read back to the SAME GRAPH up to the twelve named losses, each shown needed by a control; **all 95 runnable probes the face
+can spell print, after print, read and run on the oracle, what they printed before.** Building it made the printer injective and a formatter (v21 amended: 72 fixtures, 23
+collisions; 221 of 300 print whole where 227 did -- the cost of refusing what it used to approximate). **What building found** (HF-104 to HF-109): `new K` and `new K()` are two
+things; `:name = value` and a string key before `=` are shapes the graph reads the wrong way round; `x += nl` is not `x = x + nl`; and **Ring binds `not` looser than a
+comparison while rnxc, the formatter and the graph bind it tighter** -- a silent wrong answer in the compiler, reported and spawned, not fixed here. **Not built:** K4 and the
+20-task protocol (a model run; which model is the author's decision) and a GBNF for the face.
+
 ## The names -- `.haro`, not `.stzu` -- corrected 2026-10-02
 
 **At the author's word ("we agreed to use .haro instead of .stzu, no?").** D1 was ratified
@@ -1547,7 +1565,8 @@ whole guard re-run on the renamed tree: 28 + 30 + 27 + 23, 117 of 120, 32 of 32,
    HF-99), the allowlist rules and the METHOD kind 2026-10-20 (HF-100 to HF-103); open: the kinds `type` and `custom`, a body kind
    on a library file (HF-103), and a write surface for a program larger than the decoder holds (HF-87).
 24. ~~Rung 6 of the code-graph memo~~ -- built 2026-10-19: a second face, Python-shaped, as a printer (Haro v0.21), guard stage 25;
-   K3 measured and not met (HF-94), so rung 7 (a reader of the face) stays open; K4 and the 20-task protocol need that reader and a model run.
+   K3 measured and not met (HF-94); rung 7 (the reader) built 2026-10-20, guard stage 26 (HF-104 to HF-109); K4 and the 20-task protocol need a model
+   run, the author's decision, and a GBNF for the face.
 18. The forge as an `rnxc` verb (the ringpp session's `src/`, routed); the
    Softanza-resident timing the charter's 2.6 asks for; the court's run time on the
    oracle under paths and views (6.4x the image this pass, named at stage 6); the
