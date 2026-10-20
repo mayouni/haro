@@ -45,21 +45,35 @@ COLLISIONS = {
     'scanner':     ('ChangeRingKeyword and its kin', 'the scanner commands change the language under the text (C-28)'),
     'index-twice': ('aL[f()] += v', 'Ring evaluates the target once; setat(aL, f(), plus(at(aL, f()), v)) would run it twice'),
     'dollar-param': ('func f($x)', 'a parameter spelt $x is the function\'s own local, not the global $x (F-91): G.x would be the global'),
+    'name-clash':  ('two Ring names that print as one Python name', 'a reader of the face could not tell them apart: `del` is spelt `del_`, `@Foo` is `at_Foo`, and a name of Ring\'s that is already `del_` or `at_foo` is the same text'),
+    'new-from':    ('new from name', 'makes an object of the class a string names, at run time: no spelling'),
+    'param-type':  ('func f(string s)', 'a typed parameter would lose its type in the face'),
 }
 
 FACE_WORDS = {'say', 'see', 'at', 'setat', 'eq', 'ne', 'lt', 'gt', 'le', 'ge', 'cat', 'plus', 'span', 'rng', 'mod', 'both', 'either', 'negate',
-              'give', 'load', 'bye', 'G', 'RingError', 'str', 'self', 'super'}
+              'give', 'load', 'bye', 'G', 'RingError', 'str', 'self', 'super', 'new'}
+PRIVATE_COMMENT = '# private: the methods below are private to the class'
+MAIN_COMMENT = '# Ring calls main() after the top level (F-60)'
+REGION = '__region__'
+
+
+PRINTED = {}                             # a printed name folded -> the Ring name folded it came from, for the program being printed
 
 
 def ident(t, function=False):
-    """A Ring name as a Python name that reads as the same one."""
-    if function and t.startswith('@'):
+    """A Ring name as a Python name that reads as the same one. `@` is `at_` wherever it stands; a keyword or a face word takes a trailing `_`; a leading digit
+    takes `_`. The map must be injective for a reader, so two Ring names that print as one are refused (name-clash)."""
+    raw = t
+    if t.startswith('@'):
         t = 'at_' + t[1:]
     t = re.sub(r'[^A-Za-z0-9_]', '_', t)
     if t[:1].isdigit():
         t = '_' + t
     if keyword.iskeyword(t) or t in FACE_WORDS:
         t += '_'
+    was = PRINTED.setdefault(t.lower(), raw.lower())
+    if was != raw.lower():
+        raise Refused('name-clash', '`%s` and `%s` both print as %s' % (was, raw.lower(), t))
     return t
 
 
@@ -116,6 +130,7 @@ class Face:
             k = x.get('k')
             for t in ([x['text']] if k == 'id' else [x['name']] if k in ('func', 'param') else [x['var']] if k == 'for' else []):
                 self.spell.setdefault(t.lower(), t)
+        PRINTED.clear()
         self.getters, self.setters = set(), set()
         for x in walk(g):
             if x.get('k') == 'class':
@@ -130,6 +145,7 @@ class Face:
         self.cond = False                    # printing a condition (and/or/not read as Python's there)
         self.kinds = {}
         self.region = set()                  # the attributes a class region assigns (bare names there are attributes)
+        self.atom = False                    # the last binary expression printed was a call
 
     # -- names
     def name(self, t):
@@ -137,7 +153,7 @@ class Face:
         if t.startswith('$'):
             return 'G.' + ident(t[1:])
         if t.startswith('@'):
-            return 'self.' + ident(t[1:])
+            return 'self.' + ident(t)
         if t.lower() in self.region:
             return 'self.' + ident(t)
         return ident(t)
@@ -221,6 +237,23 @@ class Face:
 
     # -- expressions
     def e(self, n):
+        """`and`, `or` and `not` are Python's only in the condition itself, through parentheses and each other; whatever else stands in a condition -- a call's
+        argument, an operand of a comparison, an item of a list -- is a value, and a value is Ring's 1 or 0 (rung 7 found the argument leaking)."""
+        k = n['k']
+        keep = k == 'paren' or (k == 'bin' and n['op'] in ('and', '&&', 'or', '||')) or (k == 'un' and n['op'] == 'not')
+        if self.cond and not keep:
+            self.cond = False
+            try:
+                return self.expression(n)
+            finally:
+                self.cond = True
+        return self.expression(n)
+
+    def wrap(self, n, s):
+        """An operand that is not an atom, in parentheses: a graph a reader builds has no parenthesis nodes."""
+        return '(' + s + ')' if n['k'] in ('bin', 'un', 'assign', 'post') else s
+
+    def expression(self, n):
         k = n['k']
         if k == 'num':
             t = n['text']
@@ -254,7 +287,7 @@ class Face:
         if k == 'un':
             if n['op'] == 'not':
                 return ('not ' if self.cond else 'negate(') + self.e(n['e']) + ('' if self.cond else ')')
-            return n['op'] + self.e(n['e'])
+            return n['op'] + self.wrap(n['e'], self.e(n['e'])) if n['e']['k'] in ('bin', 'assign', 'post') else n['op'] + self.e(n['e'])
         if k == 'post':
             raise Refused('increment-value')
         if k == 'bin':
@@ -263,14 +296,14 @@ class Face:
             c = n['callee']
             if c['k'] == 'id' and c['text'].lower() == 'eval':
                 raise Refused('eval')
-            return (self.fname(c['text']) if c['k'] == 'id' else self.e(c)) + '(' + ', '.join(self.e(a) for a in n.get('args', [])) + ')'
+            return (self.fname(c['text']) if c['k'] == 'id' else self.wrap(c, self.e(c))) + '(' + ', '.join(self.e(a) for a in n.get('args', [])) + ')'
         if k == 'callkw':
             raise Refused('call-name')
         if k == 'member':
             prop = n['prop']['text'] if n['prop']['k'] == 'id' else None
             if prop and prop.lower() in self.getters:
                 raise Refused('getter', 'get' + prop)
-            return self.e(n['obj']) + '.' + (ident(self.spell.get(prop.lower(), prop)) if prop else self.e(n['prop']))
+            return self.wrap(n['obj'], self.e(n['obj'])) + '.' + (ident(self.spell.get(prop.lower(), prop)) if prop else self.e(n['prop']))
         if k == 'index':
             return 'at(%s, %s)' % (self.e(n['obj']), self.e(n['idx']))
         if k == 'brace':
@@ -278,7 +311,9 @@ class Face:
         if k == 'new':
             if 'items' in n:
                 raise Refused('brace', 'new K { ... }')
-            return '.'.join(ident(x) for x in n['name']) + '(' + ', '.join(self.e(a) for a in n.get('args', [])) + ')'
+            if n.get('from'):
+                raise Refused('new-from', 'new from ' + '.'.join(n['name']))
+            return 'new(' + ', '.join(['.'.join(ident(x) for x in n['name'])] + [self.e(a) for a in n.get('args', [])]) + ')'
         if k == 'lambda':
             raise Refused('lambda')
         if k == 'assign':
@@ -286,38 +321,54 @@ class Face:
         raise ValueError('no spelling for an expression of kind ' + k)
 
     def binary(self, n):
+        """The text of a binary expression; `self.atom` says whether it is a call (`eq(a, b)`, `plus(a, b)`) and so needs no parentheses as an operand."""
         op, l, r = n['op'], n['l'], n['r']
         kl, kr = self.kind(l), self.kind(r)
         if op in ('and', '&&', 'or', '||'):
             word = 'and' if op in ('and', '&&') else 'or'
             if self.cond:
-                return self.e(l) + ' ' + word + ' ' + self.e(r)
-            return '%s(%s, %s)' % ('both' if word == 'and' else 'either', self.e(l), self.e(r))
+                text, atom = self.operand(l) + ' ' + word + ' ' + self.operand(r), False
+            else:
+                text, atom = '%s(%s, %s)' % ('both' if word == 'and' else 'either', self.e(l), self.e(r)), True
+            self.atom = atom
+            return text
         inner, self.cond = self.cond, False
         try:
             if op == ':':
-                return 'rng(%s, %s)' % (self.e(l), self.e(r))
-            if op == '+':
+                text, atom = 'rng(%s, %s)' % (self.e(l), self.e(r)), True
+            elif op == '+':
                 if kl == kr and kl in ('num', 'str'):
-                    return self.e(l) + ' + ' + self.operand(r)
-                return '%s(%s, %s)' % ('cat' if kl == 'str' else 'plus', self.e(l), self.e(r))
-            if op in ('=', '!='):
+                    text, atom = self.operand(l) + ' + ' + self.operand(r), False
+                else:
+                    text, atom = '%s(%s, %s)' % ('cat' if kl == 'str' else 'plus', self.e(l), self.e(r)), True
+            elif op in ('=', '!='):
                 if kl == kr and kl in ('num', 'str'):
-                    return self.operand(l) + (' == ' if op == '=' else ' != ') + self.operand(r)
-                return '%s(%s, %s)' % ('eq' if op == '=' else 'ne', self.e(l), self.e(r))
-            if op in ('<', '>', '<=', '>='):
+                    text, atom = self.operand(l) + (' == ' if op == '=' else ' != ') + self.operand(r), False
+                else:
+                    text, atom = '%s(%s, %s)' % ('eq' if op == '=' else 'ne', self.e(l), self.e(r)), True
+            elif op in ('<', '>', '<=', '>='):
                 if kl == 'num' and kr == 'num':
-                    return self.operand(l) + ' ' + op + ' ' + self.operand(r)
-                return '%s(%s, %s)' % ({'<': 'lt', '>': 'gt', '<=': 'le', '>=': 'ge'}[op], self.e(l), self.e(r))
-            if op == '%':
-                return 'mod(%s, %s)' % (self.e(l), self.e(r))
-            return self.operand(l) + ' ' + op + ' ' + self.operand(r)
+                    text, atom = self.operand(l) + ' ' + op + ' ' + self.operand(r), False
+                else:
+                    text, atom = '%s(%s, %s)' % ({'<': 'lt', '>': 'gt', '<=': 'le', '>=': 'ge'}[op], self.e(l), self.e(r)), True
+            elif op == '%':
+                text, atom = 'mod(%s, %s)' % (self.e(l), self.e(r)), True
+            else:
+                text, atom = self.operand(l, power=op == '**') + ' ' + op + ' ' + self.operand(r), False
         finally:
             self.cond = inner
+        self.atom = atom
+        return text
 
-    def operand(self, n):
+    def operand(self, n, power=False):
+        """An operand of an infix operator: a binary expression in parentheses unless it is a call; on the left of `**` a unary minus too (it binds tighter
+        on Ring and looser on Python)."""
         s = self.e(n)
-        return '(' + s + ')' if n['k'] == 'bin' and not s.endswith(')') else s
+        if n['k'] == 'bin':
+            return s if self.atom else '(' + s + ')'
+        if n['k'] in ('assign', 'post') or (power and n['k'] == 'un'):
+            return '(' + s + ')'
+        return s
 
     def condition(self, n):
         self.cond = True
@@ -508,7 +559,7 @@ class Face:
         raise Refused('scanner')
 
     def s_private(self, it, ind, after):
-        return [ind + '# private: the methods below are private to the class']
+        return [ind + PRIVATE_COMMENT]
 
     def s_if(self, it, ind, after):
         out = [ind + 'if ' + self.condition(it['cond']) + ':'] + self.block(it.get('then', []), ind)
@@ -556,7 +607,7 @@ class Face:
         handler = (it['catch'].get('items', []) if 'catch' in it else []) + it.get('finally', [])
         out = [ind + 'try:'] + self.block(it.get('items', []), ind, tail=handler)
         if 'catch' in it:
-            b = it['catch'].get('binding', 'e')
+            b = ident(it['catch'].get('binding', 'e'))
             out.append(ind + 'except RingError as %s:' % b)
             self.catch.append(b)
             try:
@@ -571,6 +622,9 @@ class Face:
         if it['name'].lower() == 'operator' and method:
             raise Refused('operator')
         params = [p['name'] for p in it.get('params', [])]
+        for p in it.get('params', []):
+            if 'type' in p:
+                raise Refused('param-type', p['type'] + ' ' + p['name'])
         for p in params:
             if p.startswith('$'):
                 raise Refused('dollar-param', p)
@@ -597,9 +651,9 @@ class Face:
         try:
             if region:
                 self.region, self.ctx = assigned, []
-                body = ([ind + IND + IND + 'super().__region__()'] if 'parent' in it else []) + self.items(region, ind + IND + IND)
+                body = ([ind + IND + IND + 'super().%s()' % REGION] if 'parent' in it else []) + self.items(region, ind + IND + IND)
                 self.ctx = saved_ctx
-                out += [ind + IND + 'def __region__(self):'] + body
+                out += [ind + IND + 'def %s(self):' % REGION] + body
             self.region = set()
             for m in methods:
                 if len(out) > 1:
@@ -650,7 +704,7 @@ def print_py(g):
     f.infer([x for x in items if x['k'] not in ('func', 'class')])
     lines = f.items(items, '', top=True)
     if any(x['k'] == 'func' and x['name'].lower() == 'main' for x in items):
-        lines += ['', '', 'main()  # Ring calls main() after the top level (F-60)']
+        lines += ['', '', 'main()  ' + MAIN_COMMENT]
     return BANNER + '\n' + '\n'.join(lines) + '\n'
 
 
