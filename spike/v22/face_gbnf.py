@@ -1,6 +1,6 @@
-"""DRAFT, NOT WIRED, NOT PURSUED. K4 (v22/k4/K4.md) found that capable models do no better writing the face than Ring, so no grammar for it was finished. Measured on the way: the engine's
+"""DRAFT, NOT WIRED, OWED. K4 (v22/k4/K4.md) found that capable cloud models do no better writing the face than Ring; the regime this grammar is for -- small local models under the decoder, Softanza's direction -- is unmeasured. Measured on the way: the engine's
 decoder HOLDS this grammar (no refusal, 42 named rules, about 53 by its count of 128) and accepts 27 of the 43 texts the printer prints for the v21 fixtures; the 16 it does not accept fail on
-blank lines between definitions, comments, and method bodies richer than the draft allows. Reopen with a decoder-constrained weak model in view (K4.md, limits).
+blank lines between definitions, comments, and method bodies richer than the draft allows. Finish it for that regime (K4.md, decision 4).
 
 face_gbnf.py -- the write surface of the Python-shaped face (rung 7 of the code-graph memo; Haro v0.22): a GBNF for the texts a model may write, in the dialect the forge
 emits and the engine's constrained decoder (gbnf_machine.zig, contract C9) reads.
