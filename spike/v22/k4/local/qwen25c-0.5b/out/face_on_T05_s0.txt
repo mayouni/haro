@@ -1,0 +1,7 @@
+say(plus(0, n))
+say(plus(1, n))
+say(plus(2, n))
+say(plus(3, n))
+say(plus(4, n))
+say(plus(5, n))
+<<END>>

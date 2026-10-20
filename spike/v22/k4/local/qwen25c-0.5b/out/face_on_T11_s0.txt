@@ -1,0 +1,6 @@
+try:
+    Missing()
+except RingError as e:
+    say(plus(0, cTag))
+    say("done")
+<<END>>

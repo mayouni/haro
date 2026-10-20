@@ -1,0 +1,6 @@
+vowels = 0
+for x in cText:
+     if x in "aeiou":
+         vowels = plus(vowels, 1)
+say(plus("vowels=", vowels))
+<<END>>

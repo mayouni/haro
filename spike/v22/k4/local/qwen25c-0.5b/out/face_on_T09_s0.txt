@@ -1,0 +1,67 @@
+say(cat("Fibonacci numbers:", "1 1 2 3 5 8 13 21 34 55"))
+
+
+say(plus(1, 1))
+
+
+say(plus(2, 3))
+
+
+say(plus(3, 5))
+
+
+say(plus(5, 8))
+
+
+say(plus(8, 13))
+
+
+say(plus(13, 21))
+
+
+say(plus(21, 34))
+
+
+say(plus(34, 55))
+
+
+say(plus(55, 89))
+
+
+say(plus(89, 144))
+
+
+say(plus(144, 233))
+
+
+say(plus(233, 377))
+
+
+say(plus(377, 610))
+
+
+say(plus(610, 987))
+
+
+say(plus(987, 1595))
+
+
+say(plus(1595, 2584))
+
+
+say(plus(2584, 4181))
+
+
+say(plus(4181, 6765))
+
+
+say(plus(6765, 10946))
+
+
+say(plus(10946, 16557))
+
+
+say(plus(16557, 26368))
+
+
+say(

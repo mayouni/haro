@@ -1,0 +1,6 @@
+nVowels = 3
+for x in cText:
+    if x.lower() == "vowels":
+        nVowels = nVowels + 1
+say(cat("vowels=", nVowels))
+<<END>>

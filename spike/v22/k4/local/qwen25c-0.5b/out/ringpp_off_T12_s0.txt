@@ -1,0 +1,4 @@
+max = 9
+next
+? "max=" + max
+<<END>>

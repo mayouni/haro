@@ -1,0 +1,6 @@
+maxElement = 0
+for x in aList:
+    if x > maxElement:
+        maxElement = x
+say(plus("max=", maxElement))
+<<END>>

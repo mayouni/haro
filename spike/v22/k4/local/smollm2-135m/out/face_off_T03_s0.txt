@@ -1,0 +1,3 @@
+nCount = sum(aItems)
+say(cat("count=", nCount))
+<<END>>

@@ -1,0 +1,3 @@
+age = at(1, 2)
+say(cat("age=", age))
+<<END>>

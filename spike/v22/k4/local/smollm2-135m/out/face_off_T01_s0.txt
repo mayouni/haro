@@ -1,0 +1,3 @@
+nSum = plus(nSum, n)
+print(cat("sum=", nSum))
+<<END>>

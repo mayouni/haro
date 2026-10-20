@@ -1,0 +1,3 @@
+fact = 720
+say(plus("fact=", fact))
+<<END>>

@@ -1,0 +1,4 @@
+n = len(aList)
+next = n
+? "elements in reverse order" + next
+<<END>>

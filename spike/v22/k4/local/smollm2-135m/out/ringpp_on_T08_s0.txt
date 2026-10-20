@@ -1,0 +1,5 @@
+nFactorial = 1
+nFactorial *= n
+next = nFactorial
+? "fact=" + nFactorial
+<<END>>

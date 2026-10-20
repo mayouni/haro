@@ -45,7 +45,24 @@ DEMOS = [
      'a': ['nIn = 8'],
      'ref': 'o = new Box\no.Put(nIn)\n? "box=" + o.Take()\n\nclass Box\n\tv = 0\n\n\tfunc Put(x)\n\t\tThis.v = x\n\n\tfunc Take()\n\t\treturn This.v\n'},
 ]
-SYSTEM_TAIL = ('\n\nReply with the program only: no explanation and no code fence. It must begin with the lines shown for the task and end with a line holding only %s.' % END)
+DEMO_IDS = ('D1',)     # the engine keeps only the last 512 tokens of a prompt (k4_gen.ring): primer + examples + task must fit, so one example
+SYSTEM_TAIL = ('\nReply with code only: the Start lines, then the rest, then a line holding only %s.' % END)
+
+RPP_COMPACT = '''You write Ring++ programs (Ring with explicit scope).
+- Print: ? expr    Join text and numbers with +    Strings "..." or '...', no escapes.
+- Lists [1, 2, 3]: aList[1] is the first item, len(aList), add(aList, x). cText[i] is the i-th character.
+- if c ... else ... ok    while c ... end    for i = 1 to n ... next    for x in aList ... next    % is the remainder, floor(x)
+- Compare = != < > <= >=    and or not.  In a function a bare name is local, $x is a global, @x an attribute.
+- After the statements: func Name(a) ... return x    class Name (n = 0) func Add() This.n = This.n + 1 ...; o = new Name; o.Add()
+- try ... catch ... done  (the message is cCatchError)'''
+
+FACE_COMPACT = '''You write programs in "the face": Python syntax standing for Ring++, with a fixed vocabulary.
+- say(x) prints; cat(text, x) joins; at(a, i) is item or character i (from 1); len(a).
+- Use == != < > <= >= and + only when both sides are plainly numbers or both plainly strings; else eq ne lt gt le ge and plus(a, b). "1" equals 1.
+- mod(a, b); for i in span(1, n): (inclusive); for x in aList:; if/elif/else; while; both(a, b) either(a, b) negate(a).
+- Order: statements, then def functions (return "" for nothing), then classes.
+- Class: class C: def __region__(self): self.n = 0   def Add(self): ...; o = new_without_init(C); o.Add().
+- try: ... except RingError as e: (str(e) is the message). No a[i], str(), int(), lambda, True/False, .get().'''
 
 
 def shape_text(shape, ring):
@@ -67,7 +84,7 @@ def with_data(t, which='a'):
 
 
 def task_block(t, exp):
-    return 'Task: %s\nBegin with:\n%s\nFor that data it prints:\n%s' % (t['text'], '\n'.join(t['a']), exp)
+    return 'Task: %s\nStart:\n%s\nOutput:\n%s' % (t['text'], '\n'.join(t['a']), exp)
 
 
 def run_full(text, exe=None, timeout=10):
@@ -84,7 +101,7 @@ def run_full(text, exe=None, timeout=10):
 def demo_turns(shape):
     """-> [(user, assistant)], validated: each demo's program runs on rnxc to the output it states, and a face text reads back strictly."""
     turns = []
-    for dm in DEMOS:
+    for dm in [x for x in DEMOS if x['id'] in DEMO_IDS]:
         ring = with_data(dm)
         out = k4.norm(run_full(ring)[0])
         text = shape_text(shape, ring)
@@ -100,7 +117,7 @@ def demo_turns(shape):
 
 
 def primer(shape):
-    return (k4.RINGPP_PRIMER if shape == 'ringpp' else round2.F3_PRIMER) + SYSTEM_TAIL
+    return (RPP_COMPACT if shape == 'ringpp' else FACE_COMPACT) + SYSTEM_TAIL
 
 
 def chat(shape, t, exp, demos):
@@ -129,7 +146,7 @@ def pairs(s):
     return [tuple(x.split(':')) for x in s.split(',')]
 
 
-def run(model, tag, only=None, shapes=('ringpp', 'face'), grammars=('on', 'off'), seeds=(('0', '0'),), max_tokens=320):
+def run(model, tag, only=None, shapes=('ringpp', 'face'), grammars=('on', 'off'), seeds=(('0', '0'),), max_tokens=320, count_only=False):
     exp = json.load(open(os.path.join(HERE, 'expected.json')))
     work = tempfile.mkdtemp(prefix='k4run_')
     open(os.path.join(work, 'ringpp.gbnf'), 'wb').write(ringpp_gbnf.ringpp_grammar().encode('latin-1'))
@@ -151,8 +168,15 @@ def run(model, tag, only=None, shapes=('ringpp', 'face'), grammars=('on', 'off')
     open(os.path.join(work, 'm.txt'), 'wb').write('\n'.join(man).encode('latin-1'))
     print('%d jobs on %s; working in %s' % (len(man), os.path.basename(model), work))
     t0 = time.time()
-    r = subprocess.run([PACKAGE, GEN, model, os.path.join(work, 'm.txt'), work], capture_output=True, cwd=ROOT, timeout=6 * 3600)
+    r = subprocess.run([PACKAGE, GEN, model, os.path.join(work, 'm.txt'), work] + (['count'] if count_only else []), capture_output=True, cwd=ROOT, timeout=6 * 3600)
     so = r.stdout.decode('latin-1').replace('\r\n', '\n')
+    toks = {ln.split('|')[1]: int(ln.split('|')[2]) for ln in so.split('\n') if ln.startswith('T|')}
+    if toks:
+        for sh in sorted({k.split('_')[0] for k in toks}):
+            v = {k: n for k, n in toks.items() if k.startswith(sh + '_')}
+            print('prompt tokens, %s: min %d, max %d (limit 510, %d prompts); longest: %s' % (sh, min(v.values()), max(v.values()), len(v), ', '.join('%s %d' % (k.split('_')[2], n) for k, n in sorted(v.items(), key=lambda kv: -kv[1])[:4])))
+    if count_only:
+        return
     if r.returncode != 0 or 'ERR|' in so:
         print(so[:600], r.stderr.decode('latin-1')[:600])
         raise SystemExit('the generator failed')
@@ -281,14 +305,14 @@ if __name__ == '__main__':
     a = sys.argv[1:]
     if not a or a[0] == 'report':
         report()
-    elif a[0] == 'run':
+    elif a[0] in ('run', 'count'):
         model, tag = a[1], a[2]
         opt = {}
         i = 3
         while i < len(a):
             opt[a[i]] = a[i + 1]
             i += 2
-        run(model, tag, only=opt['--tasks'].split(',') if '--tasks' in opt else None, shapes=tuple(opt.get('--shapes', 'ringpp,face').split(',')),
+        run(model, tag, only=opt['--tasks'].split(',') if '--tasks' in opt else None, count_only=(a[0] == 'count'), shapes=tuple(opt.get('--shapes', 'ringpp,face').split(',')),
             grammars=tuple(opt.get('--grammar', 'on,off').split(',')), seeds=tuple(pairs(opt.get('--seeds', '0:0'))), max_tokens=int(opt.get('--max-tokens', 320)))
     else:
         raise SystemExit(__doc__)

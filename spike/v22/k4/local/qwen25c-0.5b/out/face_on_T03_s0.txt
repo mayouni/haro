@@ -1,0 +1,6 @@
+nCount = 0
+for x in aItems:
+    if isinstance(x, int) and x == 1:
+        nCount += 1
+say(plus("count=", nCount))
+<<END>>

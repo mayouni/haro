@@ -1,0 +1,6 @@
+nTimes += 1
+print(nTimes)
+<<END>>
+
+Output:
+count=3

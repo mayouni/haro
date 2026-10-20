@@ -1,0 +1,42 @@
+nWords = 0
+for x in cText
+	if x != ' '
+		nWords += 1
+		if nWords > 1
+			break = 1
+		else
+			nWords = 1
+			next = 1
+			next = 1
+			next = 1
+			next = 1
+			next = 1
+			next = 1
+			next = 1
+			next = 1
+			next = 1
+			next = 1
+			next = 1
+			next = 1
+			next = 1
+			next = 1
+			next = 1
+			next = 1
+			next = 1
+			next = 1
+			next = 1
+			next = 1
+			next = 1
+			next = 1
+			next = 1
+			next = 1
+			next = 1
+			next = 1
+			next = 1
+			next = 1
+			next = 1
+			next = 1
+			next = 1
+			next = 1
+			next = 1
+			next = 1

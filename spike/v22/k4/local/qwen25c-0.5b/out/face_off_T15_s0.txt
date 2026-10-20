@@ -1,0 +1,4 @@
+for i in range(1, n + 1):
+     say(plus(i, 1), " ", plus(i, 2), " ", plus(i, 3))
+say(plus(n, 1), " ", plus(n, 2), " ", plus(n, 3))
+<<END>>

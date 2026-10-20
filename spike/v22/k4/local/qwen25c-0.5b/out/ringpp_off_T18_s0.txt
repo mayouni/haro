@@ -1,0 +1,6 @@
+out=0
+if a > b and b != 5
+	out=1
+else
+	out=0
+<<END>>

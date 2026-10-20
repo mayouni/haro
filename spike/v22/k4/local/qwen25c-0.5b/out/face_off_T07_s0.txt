@@ -1,0 +1,3 @@
+for x in reversed(aList):
+    say(cat(x, " "))
+say(cat("end"))

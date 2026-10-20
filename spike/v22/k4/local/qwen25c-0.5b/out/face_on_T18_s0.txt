@@ -1,0 +1,6 @@
+if b != 5:
+    out = 1
+else:
+    out = 0
+say(plus(1, out))
+<<END>>

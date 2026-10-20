@@ -1,0 +1,6 @@
+aFib = [1, 1]
+for i in range(2, n)
+	aFib.push_back(aFib[i - 1] + aFib[i - 2])
+next
+? "Fibonacci numbers: " + aFib.join(" ")
+<<END>>

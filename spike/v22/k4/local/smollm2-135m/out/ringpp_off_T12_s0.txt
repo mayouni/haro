@@ -1,0 +1,7 @@
+nMax = 0
+for x in aList
+	if x > nMax:
+		nMax = x
+next
+? "max=" + nMax
+<<END>>

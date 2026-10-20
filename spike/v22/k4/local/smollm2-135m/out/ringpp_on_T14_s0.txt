@@ -1,0 +1,6 @@
+nAge = 27
+for x in aPeople
+	nAge += x
+next
+? "age=" + nAge
+<<END>>

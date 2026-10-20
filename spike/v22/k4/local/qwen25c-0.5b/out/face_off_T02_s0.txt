@@ -1,0 +1,3 @@
+third = 30
+last = 40
+say(plus(third, last)) <<END>>

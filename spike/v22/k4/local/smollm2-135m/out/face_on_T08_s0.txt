@@ -1,0 +1,3 @@
+nFactorial = plus(nFactorial, n)
+print(cat("fact=", nFactorial))
+<<END>>

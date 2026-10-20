@@ -1,0 +1,4 @@
+nLast = aList.last
+next = nLast
+? "third=" + nLast
+<<END>>

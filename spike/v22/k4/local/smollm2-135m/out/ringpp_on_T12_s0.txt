@@ -1,0 +1,12 @@
+nMax = 0
+for x in aList
+	if x > nMax
+		nMax = x
+
+	else
+		nMax = x
+
+	ok
+
+next
+<<END>>

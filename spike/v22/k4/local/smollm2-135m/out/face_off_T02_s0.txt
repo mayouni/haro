@@ -1,0 +1,4 @@
+third = aList[-2]
+last = aList[-1]
+print(f"third={third}, last={last}")
+<<END>>

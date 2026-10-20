@@ -1,0 +1,6 @@
+nWords = 0
+for i in range(len(cText)):
+     if cText[i] != ' ':
+         nWords = plus(nWords, 1)
+say(plus("words=", nWords))
+<<END>>

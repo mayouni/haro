@@ -1,0 +1,4 @@
+nDistinct = 3
+next = aList.distinct
+? "distinct=" + nDistinct
+<<END>>

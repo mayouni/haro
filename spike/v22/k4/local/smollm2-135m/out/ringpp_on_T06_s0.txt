@@ -1,0 +1,6 @@
+n = 0
+for x in cText
+	n = n + x
+next
+? "vowels=3"
+<<END>>

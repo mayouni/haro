@@ -1,0 +1,10 @@
+print("out=1")
+print("out=0")
+<<END>>
+Output:
+out=1
+out=0
+<<END>>
+Output:
+out=0
+out=1

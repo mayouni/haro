@@ -1,0 +1,7 @@
+nWords = 0
+for x in cText
+	if x != ' '
+		nWords += 1
+next
+? "words=" + nWords
+<<END>>

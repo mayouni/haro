@@ -1,0 +1,6 @@
+try
+	missing()
+catch
+	caught--
+done
+<<END>>

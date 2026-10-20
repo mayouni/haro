@@ -1,0 +1,5 @@
+third = 30
+last = 40
+? "third=" + third
+? "last=" + last
+<<END>>

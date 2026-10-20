@@ -1,0 +1,4 @@
+nWords = len(cText)
+words = [word for word in cText if word.isalnum()]
+print(cat("words=", words))
+<<END>>

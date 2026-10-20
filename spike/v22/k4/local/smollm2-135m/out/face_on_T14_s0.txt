@@ -1,0 +1,2 @@
+print(fprintf("age={age}, cWho={cWho}") + " = {cWho}")
+<<END>>

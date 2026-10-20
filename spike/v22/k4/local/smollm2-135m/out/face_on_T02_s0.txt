@@ -1,0 +1,3 @@
+third = aList.last
+print(f, "third={third}")
+<<END>>

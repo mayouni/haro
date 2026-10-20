@@ -3,18 +3,20 @@
 Twenty tasks, Ring++ and the Python-shaped face, the engine's constrained decoder on and off, a pinned gguf, greedy decoding unless the run says otherwise. `valid` = in the shape's grammar,
 `ended` = wrote its sentinel, `reads` = the face reader / rnxc accepts it, `runs` = no error on the shown data, `shown` = the right answer on the shown data, `pass` = right on the hidden data too.
 
-## qwen25c-0.5b-on -- qwen2.5-coder-0.5b-instruct-q8_0.gguf, seeds [['0', '0']], max tokens 320
+## qwen25c-0.5b -- qwen2.5-coder-0.5b-instruct-q8_0.gguf, seeds [['0', '0']], max tokens 320
 
 | shape / decoder | n | valid | ended | reads | runs | shown | pass | tokens/s |
 |---|---|---|---|---|---|---|---|---|
-| face, decoder on | 20 | 15 | 12 | 12 | 5 | 2 | 0 | 4.3 |
-| ringpp, decoder on | 20 | 10 | 9 | 18 | 8 | 5 | 1 | 0.7 |
+| face, decoder off | 20 | 9 | 14 | 13 | 6 | 2 | 0 | 11.4 |
+| face, decoder on | 20 | 16 | 16 | 14 | 6 | 3 | 1 | 2.7 |
+| ringpp, decoder off | 20 | 10 | 20 | 15 | 10 | 6 | 0 | 22.3 |
+| ringpp, decoder on | 20 | 16 | 16 | 15 | 10 | 5 | 0 | 1.7 |
 
-## smollm2-135m-greedy -- smollm2-135m-instruct-q8_0.gguf, seeds [['0', '0']], max tokens 320
+## smollm2-135m -- smollm2-135m-instruct-q8_0.gguf, seeds [['0', '0']], max tokens 320
 
 | shape / decoder | n | valid | ended | reads | runs | shown | pass | tokens/s |
 |---|---|---|---|---|---|---|---|---|
-| face, decoder off | 20 | 5 | 13 | 9 | 2 | 1 | 0 | 21.1 |
-| face, decoder on | 20 | 16 | 15 | 15 | 2 | 1 | 0 | 5.3 |
-| ringpp, decoder off | 20 | 14 | 16 | 19 | 8 | 1 | 0 | 12.8 |
-| ringpp, decoder on | 20 | 17 | 16 | 19 | 8 | 0 | 0 | 7.6 |
+| face, decoder off | 20 | 11 | 16 | 11 | 2 | 0 | 0 | 29.1 |
+| face, decoder on | 20 | 18 | 16 | 18 | 4 | 0 | 0 | 9.7 |
+| ringpp, decoder off | 20 | 5 | 16 | 17 | 8 | 4 | 0 | 24.4 |
+| ringpp, decoder on | 20 | 17 | 16 | 18 | 9 | 1 | 0 | 7.1 |

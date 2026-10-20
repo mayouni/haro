@@ -1,0 +1,6 @@
+counter = Counter()
+for x in range(nTimes)
+	counter.Add()
+next
+? "count=" + counter.Value
+<<END>>

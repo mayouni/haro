@@ -1,0 +1,6 @@
+nReverse = ""
+for x in aList
+	nReverse += x + " "
+next
+? "nReverse=" + nReverse
+<<END>>

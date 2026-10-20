@@ -1,0 +1,3 @@
+distinctCount = len(set(aList))
+say(plus("distinct=", distinctCount))
+<<END>>

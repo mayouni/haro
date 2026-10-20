@@ -1,0 +1,4 @@
+nSum = 0
+for x in cDigits
+	? "sum=" + nSum + x
+<<END>>

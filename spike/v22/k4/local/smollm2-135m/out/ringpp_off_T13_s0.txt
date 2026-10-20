@@ -1,0 +1,7 @@
+nWords = 4
+for x in cText.split()
+        if x.isalpha() and x.isdigit() and x.isspace():
+            words = words + x.split()
+next
+? "words=4"
+<<END>>

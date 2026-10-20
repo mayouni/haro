@@ -1,0 +1,4 @@
+nSum = sum(cDigits)
+next
+? "sum=" + nSum
+<<END>>
