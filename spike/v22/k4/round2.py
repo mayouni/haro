@@ -1,4 +1,6 @@
-"""K4, round 2: the face primer amended for what round 1 showed was the PRIMER's fault, and a Ring baseline with no primer at all. Round 1's prompts (R.md, F.md) and answers stay as they were.
+"""K4, rounds 2 and 3. F3 is F2 plus the one fact round 2 found the primer lacked: new(Name) calls init, new_without_init(Name) does not.
+
+K4, round 2: the face primer amended for what round 1 showed was the PRIMER's fault, and a Ring baseline with no primer at all. Round 1's prompts (R.md, F.md) and answers stay as they were.
 
 Round 1 (haiku and sonnet, two repetitions each, the primers of k4.py): Ring 20/20 in all four runs; the face 1/20 and 1/20 strict and 3/20 and 3/20 lenient for haiku (it wrote Python's str(x)
 for a number, which the face refuses), 3/20 and 3/20 strict and 19/20 and 19/20 lenient for sonnet (the meaning right, the spelling over-explicit: plus(a, b) and eq(a, b) where the face
@@ -19,12 +21,14 @@ F2_EXTRA = '''- Order of a module: first the statements, then every `def` functi
 - If you are not sure that both sides of an operator are plainly numbers (or plainly strings), use the words -- eq, ne, lt, gt, le, ge, plus, cat. They are always right; a formatter respells them to the plain operator when the kinds allow.'''
 
 F2_PRIMER = k4.FACE_PRIMER + '\n' + F2_EXTRA
+F3_EXTRA = '''- new(Name, args...) calls the class's init method (an error if the class has none); new_without_init(Name) makes the object without calling init: use it for a class that has no init method.'''
+F3_PRIMER = F2_PRIMER + '\n' + F3_EXTRA
 R0_PRIMER = 'You write programs in Ring (version 1.27).'
 
 
 def emit():
     exp = __import__('json').load(open(os.path.join(HERE, 'expected.json')))
-    for cond, primer, lang in (('F2', F2_PRIMER, 'the face'), ('R0', R0_PRIMER, 'Ring')):
+    for cond, primer, lang in (('F2', F2_PRIMER, 'the face'), ('F3', F3_PRIMER, 'the face'), ('R0', R0_PRIMER, 'Ring')):
         lines = [primer, '', 'TASKS. For each task write one complete program in %s. Every program must BEGIN with exactly the line(s) shown for its task (they hold its data; the checker will '
                  'run your program on other values of the same shape, so compute the answer, never print it from the example). Nothing may be read from the keyboard or from a file. '
                  'Reply with one block per task, in this exact form, and nothing else:' % lang, '', '### T01', '```', '<the program>', '```', '']
@@ -32,7 +36,7 @@ def emit():
             lines += ['### %s' % t['id'], t['text'], 'The program begins with:'] + ['    ' + l for l in t['a']]
             lines += ['For that data it prints:'] + ['    ' + l for l in exp[t['id']]['a'].split('\n')] + ['']
         open(os.path.join(HERE, 'prompts', cond + '.md'), 'w', encoding='utf-8', newline='\n').write('\n'.join(lines))
-    print('round 2 prompts written: F2, R0')
+    print('prompts written: F2, F3, R0')
 
 
 if __name__ == '__main__':
