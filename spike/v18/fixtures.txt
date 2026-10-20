@@ -733,3 +733,130 @@ func Mk()
 	return func(t) {
 		return t + 1
 	}
+
+=== 25 a `not` is below a comparison and arithmetic, above `and` and `or`
+~~~ Ring binds `not` and `!` looser than every comparison and arithmetic operator and tighter than `and` and `or` (the oracle and the official
+~~~ 1.27 agree; Ring's own parser reads `LogicNot -> not EqualOrNot`, so what stands tighter than `=` is the `not`'s operand): `not a = b` is
+~~~ `not (a = b)`, `not a + b` is `not (a + b)`, `not a < b and c` is `(not (a < b)) and c`. The grammar binds a `not` like a unary minus, so
+~~~ every judge that reads its tree read `(not a) = b`: the compiler answered 0 where Ring answers 1 (HF-105, F-130). The values are chosen so
+~~~ the two readings print different lines, which is why the court RUNS both texts on the oracle. (Written before the abstraction was changed.)
+~~~ run: yes
+--- ring
+a = 0
+b = 5
+c = 2
+? not a = b
+? not a + b
+? not a < b and c
+? 1 and not a * b = c
+x = not a = b + 1
+? x
+if not len("ab") > c
+	? "t"
+else
+	? "f"
+ok
+y = !a < b
+? y
+--- l1
+(file :items [
+  (expr :e (assign :op "=" :l (id "a") :r (num "0")))
+  (expr :e (assign :op "=" :l (id "b") :r (num "5")))
+  (expr :e (assign :op "=" :l (id "c") :r (num "2")))
+  (say :e (un :op "not" :e (bin :op "=" :l (id "a") :r (id "b"))))
+  (say :e (un :op "not" :e (bin :op "+" :l (id "a") :r (id "b"))))
+  (say :e (bin :op "and" :l (un :op "not" :e (bin :op "<" :l (id "a") :r (id "b"))) :r (id "c")))
+  (say :e (bin :op "and" :l (num "1") :r (un :op "not" :e (bin :op "=" :l (bin :op "*" :l (id "a") :r (id "b")) :r (id "c")))))
+  (expr :e (assign :op "=" :l (id "x") :r (un :op "not" :e (bin :op "=" :l (id "a") :r (bin :op "+" :l (id "b") :r (num "1"))))))
+  (say :e (id "x"))
+  (if :cond (un :op "not" :e (bin :op ">" :l (call :callee (id "len") :args [(str "\"ab\"")]) :r (id "c")))
+      :then [(say :e (str "\"t\""))]
+      :else [(say :e (str "\"f\""))])
+  (expr :e (assign :op "=" :l (id "y") :r (un :op "not" :e (bin :op "<" :l (id "a") :r (id "b")))))
+  (say :e (id "y"))])
+--- out
+a = 0
+b = 5
+c = 2
+? not a = b
+? not a + b
+? not a < b and c
+? 1 and not a * b = c
+x = not a = b + 1
+? x
+if not len("ab") > c
+	? "t"
+else
+	? "f"
+ok
+y = not a < b
+? y
+
+=== 26 a `not` under parentheses is its own operand
+~~~ A parenthesized `not` is a value like any other: `(not a) = b` compares the negation, `a = (not b)` is the one way Ring lets a `not` stand
+~~~ as the right operand of a comparison (`a = not b` is its error C28), and `not (a = b)` spells the same graph as `not a = b` with a parenthesis
+~~~ the graph keeps. Each of these kept its meaning before the change and must keep it after. (Written before the abstraction was changed.)
+~~~ run: yes
+--- ring
+a = 0
+b = 5
+? (not a) = b
+? a = (not b)
+? (not a) + b
+? (not a) < b
+? not (a = b)
+? (not a = b)
+? not (a and b)
+--- l1
+(file :items [
+  (expr :e (assign :op "=" :l (id "a") :r (num "0")))
+  (expr :e (assign :op "=" :l (id "b") :r (num "5")))
+  (say :e (bin :op "=" :l (paren :e (un :op "not" :e (id "a"))) :r (id "b")))
+  (say :e (bin :op "=" :l (id "a") :r (paren :e (un :op "not" :e (id "b")))))
+  (say :e (bin :op "+" :l (paren :e (un :op "not" :e (id "a"))) :r (id "b")))
+  (say :e (bin :op "<" :l (paren :e (un :op "not" :e (id "a"))) :r (id "b")))
+  (say :e (un :op "not" :e (paren :e (bin :op "=" :l (id "a") :r (id "b")))))
+  (say :e (paren :e (un :op "not" :e (bin :op "=" :l (id "a") :r (id "b")))))
+  (say :e (un :op "not" :e (paren :e (bin :op "and" :l (id "a") :r (id "b")))))])
+--- out
+a = 0
+b = 5
+? (not a) = b
+? a = (not b)
+? (not a) + b
+? (not a) < b
+? not (a = b)
+? (not a = b)
+? not (a and b)
+
+=== 27 a printer-only fixture: a `not` by precedence
+~~~ a graph a refinement builds has no parenthesized nodes, so the printer says where a `not` needs them. `not` stands between `and` and the
+~~~ comparisons (NOT_PREC 4 in the printer's scale of binary operators, `and` 3 and `=` 5): its operand is parenthesized only when it is
+~~~ looser than a comparison -- an `and`, an `or`, another `not`, an assignment -- and the `not` itself is parenthesized as the operand of
+~~~ anything tighter, the right operand of a comparison included. `not (not a)` because Ring refuses `not not a` (C28). The statements are
+~~~ assignments for the reason fixture 19 gives. (Written before the printer was changed.)
+--- l1
+(file :items [
+  (expr :e (assign :op "=" :l (id "r") :r (un :op "not" :e (bin :op "=" :l (id "a") :r (id "b")))))
+  (expr :e (assign :op "=" :l (id "r") :r (bin :op "<" :l (un :op "not" :e (id "a")) :r (id "b"))))
+  (expr :e (assign :op "=" :l (id "r") :r (bin :op "<" :l (id "a") :r (un :op "not" :e (id "b")))))
+  (expr :e (assign :op "=" :l (id "r") :r (bin :op "+" :l (un :op "not" :e (id "a")) :r (id "b"))))
+  (expr :e (assign :op "=" :l (id "r") :r (un :op "not" :e (bin :op "and" :l (id "a") :r (id "b")))))
+  (expr :e (assign :op "=" :l (id "r") :r (un :op "not" :e (bin :op "or" :l (id "a") :r (id "b")))))
+  (expr :e (assign :op "=" :l (id "r") :r (bin :op "and" :l (un :op "not" :e (id "a")) :r (un :op "not" :e (id "b")))))
+  (expr :e (assign :op "=" :l (id "r") :r (bin :op "or" :l (un :op "not" :e (bin :op "<" :l (id "a") :r (id "b"))) :r (id "c"))))
+  (expr :e (assign :op "=" :l (id "r") :r (un :op "not" :e (un :op "not" :e (id "a")))))
+  (expr :e (assign :op "=" :l (id "r") :r (un :op "not" :e (bin :op "<" :l (bin :op "+" :l (id "a") :r (num "1")) :r (id "b")))))
+  (expr :e (assign :op "=" :l (id "r") :r (un :op "-" :e (un :op "not" :e (id "a")))))])
+--- out
+r = not a = b
+r = (not a) < b
+r = a < (not b)
+r = (not a) + b
+r = not (a and b)
+r = not (a or b)
+r = not a and not b
+r = not a < b or c
+r = not (not a)
+r = not a + 1 < b
+r = -(not a)

@@ -383,6 +383,21 @@ def lift_statement_unary(e):
     return e
 
 
+# Ring's parser reads `LogicNot -> not EqualOrNot` (vendor/ring-vm/src/expr.c): a `not` takes everything that binds as tightly as `=` or tighter,
+# so it stands BELOW these operators and above `and` and `or`. The grammar binds it like a unary minus, tighter than every binary operator.
+CHAIN_OPS = frozenset(['=', '!=', '<', '>', '<=', '>=', '|', '^', '&', '<<', '>>', '+', '-', '*', '/', '%', '**', '^^', ':'])
+
+
+def lift_not(op, l, r):
+    """A binary node, with Ring's reading of a `not` on its left: `not a = b` arrives as bin(=, un(not, a), b) and means un(not, bin(=, a, b)),
+    and `not a + b = c`, built from the inside out, goes the same way a second time. Only an unparenthesized `not` is lifted -- a parenthesized
+    one is a `paren` node and stays an operand -- and only below `and` and `or`, which end the chain. A `not` on the RIGHT of a tighter
+    operator is Ring's error C28 and is left as it is (HF-105)."""
+    if op in CHAIN_OPS and l.get('k') == 'un' and l.get('op') == 'not' and 'e' in l:
+        return mk('un', op='not', e=lift_not(op, l['e'], r))
+    return mk('bin', op=op, l=l, r=r)
+
+
 class Abstract:
     def __init__(self, root, src):
         self.src = src
@@ -686,7 +701,7 @@ class Abstract:
                 return ret + stray                 # a later row: Ring's bare return, then a statement of its own
             e = stray[0]['e']
             if e['k'] == 'assign' and e['op'] == '=':
-                e = mk('bin', op='=', l=e['l'], r=e['r'])          # the value of a return is an expression: its `=` compares
+                e = lift_not('=', e['l'], e['r'])          # the value of a return is an expression: its `=` compares
             joined = mk('return', e=e, amp=ret[0].get('amp', False))
             return [joined] + ret[1:] + stray[1:]
         return None
@@ -935,7 +950,7 @@ class Abstract:
         l, i = self.ex(n.kids, 0)
         op = KEYWORD_OPS.get(n.kids[i].kind, n.kids[i].kind)
         r, _ = self.ex(n.kids, i + 1)
-        return mk('bin', op=op, l=l, r=r)
+        return lift_not(op, l, r)
 
     def x_unary_expression(self, n):
         op = KEYWORD_OPS.get(n.kids[0].kind, n.kids[0].kind)
@@ -1040,6 +1055,7 @@ def parse_ring(path):
 BIN_PREC = {'or': 2, '||': 2, 'and': 3, '&&': 3, '=': 5, '!=': 5, '<': 6, '>': 6, '<=': 6, '>=': 6, '|': 7, '^': 7, '&': 9, '<<': 10, '>>': 10,
             '+': 11, '-': 11, '*': 12, '/': 12, '%': 12, '**': 12, '^^': 12, ':': 13}
 UNARY_PREC, POSTFIX_PREC, ATOM_PREC = 14, 15, 99
+NOT_PREC = 4          # between `and` (3) and `=` (5): its operand is parenthesized only when looser than a comparison
 TAB = '\t'
 
 
@@ -1050,7 +1066,7 @@ def prec_of(n):
     if k == 'assign':
         return 1
     if k == 'un':
-        return UNARY_PREC
+        return NOT_PREC if n.get('op') == 'not' else UNARY_PREC
     if k in ('post', 'call', 'member', 'index', 'brace', 'callkw'):
         return POSTFIX_PREC
     return ATOM_PREC
@@ -1080,7 +1096,7 @@ class Printer:
             r = self.operand(n['r'], p, True, ind)
             return l + ':' + r if n['op'] == ':' else l + ' ' + n['op'] + ' ' + r
         if k == 'un':
-            e = self.operand(n['e'], UNARY_PREC, False, ind)
+            e = self.operand(n['e'], NOT_PREC + 1 if n['op'] == 'not' else UNARY_PREC, False, ind)
             if n['op'] == 'not':
                 return 'not ' + e
             if e[:1] in ('-', '+') and e[:1] == n['op']:
