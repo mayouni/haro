@@ -5,6 +5,9 @@
 ~~~ the collision's id, then words its refusal must hold). The face's one rule: a Python reader must never take the program for something else --
 ~~~ what reads the same is spelt plainly, what Ring means differently is spelt with an explicit word or refused by name (CODEGRAPH 3.2, 5).
 ~~~ Four spaces a level, Python's own; names in the spelling of their first occurrence, since Ring folds case (F-18).
+~~~ Fixtures 47 to 54 were written on 2026-10-20, before rung 7's reader, because a reader needs the face to be INJECTIVE -- one Python text, one Ring
+~~~ meaning -- and the printer was not: `new K(x)` and a call of a function K(x) printed alike, `@x` and `This.x` both printed `self.x`, and `o.@x` printed
+~~~ `o._x`, which is also a name Ring allows.
 
 === 01 what reads the same is spelt the same
 --- ring
@@ -214,7 +217,7 @@ class Counter
 	func Up()
 		This.nCount++
 --- py
-o = Counter(5)
+o = new(Counter, 5)
 
 
 class Counter:
@@ -542,3 +545,110 @@ next i
 for i in span(1, 2):
     say(i)
 i
+
+=== 47 `new K(...)` is `new(K, ...)`: a class and a function that share a spelling must not print alike
+--- ring
+o = new Point(1)
+p = new Point
+q = Make(3)
+
+func Make(n)
+	return n
+--- py
+o = new(Point, 1)
+p = new(Point)
+q = Make(3)
+
+
+def Make(n):
+    return n
+
+=== 48 `@x` is the attribute with its sigil, `at_x`, on `self` and on any object; `This.x` has none and is `self.x`
+--- ring
+o = new Box
+o.@nCount = 5
+? o.@nCount
+
+class Box
+	@nCount = 0
+	nPlain = 1
+
+	func Up()
+		@nCount++
+		This.nPlain = @nCount
+--- py
+o = new(Box)
+o.at_nCount = 5
+say(o.at_nCount)
+
+
+class Box:
+    def __region__(self):
+        self.at_nCount = 0
+        self.nPlain = 1
+
+    def Up(self):
+        self.at_nCount += 1
+        self.nPlain = self.at_nCount
+        return ""
+
+=== 49 two Ring names that print as one Python name are refused: `del` is spelt `del_`, and `del_` is a name of its own
+--- ring
+del = 1
+del_ = 2
+? del + del_
+--- refused
+name-clash del_
+
+=== 50 `@Foo` is spelt `at_Foo`: a Ring name that already begins with `at_` would read back as an `@` name
+--- ring
+? @Foo(1)
+? at_foo(2)
+--- refused
+name-clash at_
+
+=== 51 `and` and `not` are Python's only in the condition itself: an argument of a call in a condition is a value, 1 or 0
+--- ring
+x = 1
+y = 0
+if Pick(x and y, not x) and x
+	? 1
+ok
+
+func Pick(a, b)
+	return a
+--- py
+x = 1
+y = 0
+if Pick(both(x, y), negate(x)) and x:
+    say(1)
+
+
+def Pick(a, b):
+    return a
+
+=== 52 a unary minus on the left of `**` binds tighter on Ring and looser on Python: parenthesized
+--- ring
+a = 2
+b = 3
+? -a ** b
+? a ** -b
+--- py
+a = 2
+b = 3
+say((-a) ** b)
+say(a ** -b)
+
+=== 53 `new from name` makes an object of the class a string names: no spelling
+--- ring
+c = "Box"
+o = new from c
+--- refused
+new-from new from
+
+=== 54 a typed parameter would lose its type in the face: refused
+--- ring
+func Twice(string s)
+	return s + s
+--- refused
+param-type string

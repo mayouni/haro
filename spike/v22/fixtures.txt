@@ -1,0 +1,725 @@
+~~~ The fixtures of rung 22 (Haro v0.22): the READER of the Python-shaped face -- rung 7 of the code-graph memo. Python-shaped text in, a Ring++ program out.
+~~~
+~~~ Hand-composed BEFORE face_read.py existed (fixtures first, prose second). A fixture is face text (`--- py`, the banner line left out: the court
+~~~ checks the banner on its own) and one verdict:
+~~~   `--- ring`      the canonical Ring text of the graph the reader builds (print_ring, which parenthesizes by Ring's precedence)
+~~~   `--- refused`   an id and words its refusal must hold. The reader's ids: syntax (not Python), construct (Python the face has no word for), word (a face word
+~~~                   used as the face does not use it), order (a definition's place is semantic on Ring), not-canonical (a spelling the face does not print for
+~~~                   that graph); and every collision of the printer (v21), because a text the printer would refuse to print is refused to read
+~~~   `--- lenient`   with `refused not-canonical`: the Ring the reader builds when it is told not to insist on the face's own spelling (K4 counts how
+~~~                   often a model needs this)
+~~~
+~~~ THE RULE. The reader accepts exactly the printer's image (v21): it builds the graph from the text, prints the graph back, and the two must be the same
+~~~ Python up to layout, comments, quotes and parentheses. So a text is read only when it is the face's own spelling of one Ring meaning (CODEGRAPH 3.2: one
+~~~ semantics, many spellings, and the reader never gives a spelling Python's meaning). What the printer cannot tell apart the reader fixes once, and says so:
+~~~ `x += 1` is `x++`; `x = plus(x, y)` stays `x = x + y`; `self.x` is `This.x` in a method and the bare region name in `__region__`; a catch has a binding
+~~~ only if the handler uses the name other than as `str(e)`; `return ""` is a bare return; the three kinds of comment are `#`.
+
+=== R01 what reads the same is read the same
+--- py
+nRate = 2
+cName = "vat"
+say(nRate * 3)
+--- ring
+nRate = 2
+cName = "vat"
+? nRate * 3
+
+=== R02 a string is its Python value, written back raw: Ring has no escapes (F-55)
+--- py
+cPath = r"C:\temp\new"
+cQuote = 'say "hi"'
+cEnd = 'end\\'
+cMulti = 'a\nb'
+--- ring
+cPath = "C:\temp\new"
+cQuote = 'say "hi"'
+cEnd = "end\"
+cMulti = "a
+b"
+
+=== R03 an index is 1-based: `at` and `setat`
+--- py
+aList = [10, 20, 30]
+say(at(aList, 1))
+setat(aList, 2, 5)
+--- ring
+aList = [10, 20, 30]
+? aList[1]
+aList[2] = 5
+
+=== R04 Ring's `=` is spelt `eq` unless both sides are known to be of one kind (C-8)
+--- py
+x = 1
+y = "1"
+say(eq(x, y))
+say(x == 2)
+--- ring
+x = 1
+y = "1"
+? x = y
+? x = 2
+
+=== R05 Ring's `+` is `cat` or `plus` unless both sides are known
+--- py
+n = 5
+say(cat("n=", n))
+c = "a" + "b"
+say(n + 1)
+--- ring
+n = 5
+? "n=" + n
+c = "a" + "b"
+? n + 1
+
+=== R06 a global is `G.x`; a function that runs off its end returns NULL, and the reader drops the `return ""` the face writes out (F-66)
+--- py
+G.nTotal = 0
+
+
+def Add(n):
+    G.nTotal = plus(G.nTotal, n)
+    return ""
+--- ring
+$nTotal = 0
+
+func Add(n)
+	$nTotal = $nTotal + n
+
+=== R07 a numeric loop is inclusive: `span`, with its step
+--- py
+for i in span(1, 3):
+    say(i)
+for j in span(10, 1, -3):
+    say(j)
+--- ring
+for i = 1 to 3
+	? i
+next
+for j = 10 to 1 step -3
+	? j
+next
+
+=== R08 a for-in reads as Python's
+--- py
+for x in [1, 2]:
+    say(x)
+--- ring
+for x in [1, 2]
+	? x
+next
+
+=== R09 if, elif, else and while
+--- py
+n = 0
+while n < 3:
+    n += 1
+    if n == 2:
+        say("two")
+    elif n == 3:
+        say("three")
+    else:
+        say("other")
+--- ring
+n = 0
+while n < 3
+	n++
+	if n = 2
+		? "two"
+	but n = 3
+		? "three"
+	else
+		? "other"
+	ok
+end
+
+=== R10 `and`, `or` and `not` are Python's in a condition; `both`, `either` and `negate` are Ring's 1 or 0 as values
+--- py
+a = 1
+b = 0
+c = 1
+x = both(a, b)
+y = either(a, negate(c))
+if a and (b or not c):
+    say(x)
+--- ring
+a = 1
+b = 0
+c = 1
+x = a and b
+y = a or not c
+if a and (b or not c)
+	? x
+ok
+
+=== R11 a switch is `_switch` and a chain of `eq`: the reader finds it again
+--- py
+n = 2
+_switch = n
+if eq(_switch, 1) or eq(_switch, 2):
+    say("low")
+elif eq(_switch, 3):
+    say("three")
+else:
+    say("other")
+--- ring
+n = 2
+switch n
+	on 1, 2
+		? "low"
+	on 3
+		? "three"
+	other
+		? "other"
+off
+
+=== R12 `do ... again c` is `while True` with the test at the end
+--- py
+n = 0
+while True:
+    n += 1
+    if not (n < 3):
+        break
+--- ring
+n = 0
+do
+	n++
+again n < 3
+
+=== R13 try, except RingError and finally: `str(e)` is cCatchError, and a handler that uses nothing else has no binding
+--- py
+try:
+    Risky()
+except RingError as e:
+    say(str(e))
+finally:
+    say("done")
+--- ring
+try
+	Risky()
+catch
+	? cCatchError
+finally
+	? "done"
+done
+
+=== R14 a class: the region is `__region__`, `self.x` in a method is `This.x`, the comment is Ring's `private`, and `x += 1` is `x++`
+--- py
+class Counter(Base):
+    def __region__(self):
+        super().__region__()
+        self.nCount = 0
+
+    def init(self, n):
+        self.nCount = n
+        return ""
+
+    # private: the methods below are private to the class
+
+    def Up(self):
+        self.nCount += 1
+        return ""
+--- ring
+class Counter from Base
+	nCount = 0
+
+	func init(n)
+		This.nCount = n
+
+	private
+
+	func Up()
+		This.nCount++
+
+=== R15 `at_` is Ring's `@`: a function, an attribute on self, an attribute on any object
+--- py
+say(at_Twice(2))
+o = new(Box)
+o.at_nCount = 5
+
+
+def at_Twice(n):
+    return n * 2
+
+
+class Box:
+    def __region__(self):
+        self.at_nCount = 0
+
+    def Up(self):
+        self.at_nCount += 1
+        return ""
+--- ring
+? @Twice(2)
+o = new Box
+o.@nCount = 5
+
+func @Twice(n)
+	return n * 2
+
+class Box
+	@nCount = 0
+
+	func Up()
+		@nCount++
+
+=== R16 a name Python cannot have is spelt as one, and read back: a trailing `_` after a keyword or a face word, a leading `_` before a digit
+--- py
+lambda_ = 1
+eq_ = 2
+say(lambda_ + eq_)
+
+
+def _1Card():
+    return 1
+--- ring
+lambda = 1
+eq = 2
+? lambda + eq
+
+func 1Card()
+	return 1
+
+=== R17 comments are kept: a note, a trailing note, a promise, a tag, and a block of comments with its `pass`
+--- py
+# a note
+x = 1  # trailing
+#--> 1
+y = 2
+# <R:PARAM name="rate" min="1" max="5">
+z = 3
+if x == 1:
+    # only a comment
+    pass
+--- ring
+# a note
+x = 1  # trailing
+#--> 1
+y = 2
+# <R:PARAM name="rate" min="1" max="5">
+z = 3
+if x = 1
+	# only a comment
+ok
+
+=== R18 Ring calls Main after the top level: the face calls main() itself, and the reader takes that call for Ring's
+--- py
+def main():
+    say("hi")
+    return ""
+
+
+main()  # Ring calls main() after the top level (F-60)
+--- ring
+func main()
+	? "hi"
+
+=== R19 break and continue, and a return in the middle
+--- py
+def First(n):
+    for x in span(1, n):
+        if x == 2:
+            continue
+        if x == 3:
+            break
+        if x == 4:
+            return ""
+        say(x)
+    return 7
+--- ring
+func First(n)
+	for x = 1 to n
+		if x = 2
+			loop
+		ok
+		if x = 3
+			exit
+		ok
+		if x = 4
+			return
+		ok
+		? x
+	next
+	return 7
+
+=== R20 a number is its text; one past 2^53 loses the `.0` the face wrote
+--- py
+x = 9007199254740993.0
+y = 1.50
+z = 1e3
+w = 0x1F
+--- ring
+x = 9007199254740993
+y = 1.50
+z = 1e3
+w = 0x1F
+
+=== R21 input, output, the end and a load
+--- py
+n = give()
+see(n)
+load("stdlib.ring")
+bye()
+--- ring
+give n
+see n
+load "stdlib.ring"
+bye
+
+=== R22 a unary minus and parentheses: Python's AST decides, Ring's printer parenthesizes by Ring's precedence
+--- py
+a = 2
+b = 3
+c = 4
+say(-(a + b))
+say((a + b) * c)
+say(a - (b - 1))
+say(a * b + c)
+say((-a) ** b)
+--- ring
+a = 2
+b = 3
+c = 4
+? -(a + b)
+? (a + b) * c
+? a - (b - 1)
+? a * b + c
+? (-a) ** b
+
+=== R23 a list, a call chain and `self` and `super`
+--- py
+say(Make().Show())
+
+
+class Row(Base):
+    def init(self, n):
+        super().init(n)
+        return self
+
+    def Show(self):
+        return [1, "two", [3]]
+--- ring
+? Make().Show()
+
+class Row from Base
+	func init(n)
+		super.init(n)
+		return This
+
+	func Show()
+		return [1, "two", [3]]
+
+=== R24 `mod` is Ring's `%` and `rng` its `:`
+--- py
+a = 7
+say(mod(a, 3))
+a = mod(a, 3)
+say(rng(1, 3))
+--- ring
+a = 7
+? a % 3
+a = a % 3
+? 1:3
+
+=== R25 a function and its parameters, a class with no methods and a pass
+--- py
+x = 1
+say(Add(x, 2))
+
+
+def Add(a, b):
+    return plus(a, b)
+
+
+class Empty:
+    pass
+--- ring
+x = 1
+? Add(x, 2)
+
+func Add(a, b)
+	return a + b
+
+class Empty
+
+=== R26 a block of comments ends where its indentation ends
+--- py
+def F(n):
+    if n:
+        say("one")
+        # end of the branch
+    # end of the function
+    return n
+# after the function
+--- ring
+func F(n)
+	if n
+		? "one"
+		# end of the branch
+	ok
+	# end of the function
+	return n
+
+# after the function
+
+=== R27 a function that returns nothing is also read when the face's trailing `return ""` is missing
+--- py
+def Show():
+    say(1)
+--- ring
+func Show()
+	? 1
+
+=== X01 a text that is not Python is refused
+--- py
+x = = 1
+--- refused
+syntax invalid
+
+=== X02 a lambda has no spelling: Ring's lambda is a value whose free names are read when it runs (C-14)
+--- py
+f = lambda x: x
+--- refused
+construct lambda
+
+=== X03 a comprehension, a tuple, a dict and a set are Python's and not the face's
+--- py
+a = [x for x in [1, 2]]
+--- refused
+construct comprehension
+
+=== X04 a tuple
+--- py
+a = (1, 2)
+--- refused
+construct tuple
+
+=== X05 a dict
+--- py
+a = {"k": 1}
+--- refused
+construct dict
+
+=== X06 True, False and None are not the face's words: it writes 1, 0 and ""
+--- py
+a = True
+--- refused
+construct True
+
+=== X07 a Python subscript is 0-based: the face writes `at`
+--- py
+aList = [1, 2]
+say(aList[0])
+--- refused
+construct subscript
+
+=== X08 an f-string
+--- py
+n = 1
+say(f"n={n}")
+--- refused
+construct f-string
+
+=== X09 an import
+--- py
+import os
+--- refused
+construct import
+
+=== X10 a keyword argument
+--- py
+Make(a=1)
+--- refused
+construct keyword
+
+=== X11 a chained comparison
+--- py
+a = 1
+b = 2
+c = 3
+say(a < b < c)
+--- refused
+construct chained
+
+=== X12 with, raise, assert, del and global are not the face's statements
+--- py
+raise Oops
+--- refused
+construct raise
+
+=== X13 a default parameter
+--- py
+def F(a=1):
+    return a
+--- refused
+construct default
+
+=== X14 `is`, `in` and `not in`
+--- py
+a = 1
+say(a is a)
+--- refused
+construct is
+
+=== X15 floor division and the other operators Ring has no spelling for
+--- py
+a = 7
+say(a // 2)
+--- refused
+construct //
+
+=== X16 a decorator, *args, a return annotation
+--- py
+def F(*args):
+    return 1
+--- refused
+construct *args
+
+=== X17 else on a loop
+--- py
+n = 0
+while n < 3:
+    n += 1
+else:
+    say(n)
+--- refused
+construct else
+
+=== X18 a conditional expression
+--- py
+a = 1
+b = 2 if a else 3
+--- refused
+construct conditional
+
+=== X19 a statement directly in a class body: the face has `__region__`
+--- py
+class K:
+    x = 1
+--- refused
+construct class body
+
+=== X20 a method without `self`
+--- py
+class K:
+    def F(n):
+        return n
+--- refused
+construct self
+
+=== X21 a face word with the wrong number of arguments
+--- py
+aList = [1]
+say(at(aList))
+--- refused
+word at
+
+=== X22 `span` is the bound of a numeric loop and is read nowhere else
+--- py
+aL = span(1, 3)
+--- refused
+word span
+
+=== X23 `say` is a statement, not a value
+--- py
+x = say(1)
+--- refused
+word say
+
+=== X24 `str` is the message of a handler's error and nothing else
+--- py
+x = str(1)
+--- refused
+word str
+
+=== X25 a statement after a definition belongs to that function on Ring (HF-73): the top level comes first
+--- py
+def F():
+    return 1
+
+
+say(1)
+--- refused
+order statement after
+
+=== X26 every function after a class is a method of it on Ring (F-21): functions come before classes
+--- py
+class K:
+    pass
+
+
+def F():
+    return 1
+--- refused
+order function after
+
+=== X27 a definition inside a function
+--- py
+def F():
+    def G():
+        return 1
+    return 1
+--- refused
+construct nested
+
+=== X28 an assignment with two targets is a comparison on Ring (F-59)
+--- py
+a = b = 1
+--- refused
+construct two targets
+
+=== C01 `==` on names of unknown kind is not the face: Ring's `=` is `eq` (C-8)
+--- py
+def Same(a, b):
+    return a == b
+--- refused
+not-canonical eq(a, b)
+--- lenient
+func Same(a, b)
+	return a = b
+
+=== C02 `+` on names of unknown kind is `plus`
+--- py
+def Add(a, b):
+    return a + b
+--- refused
+not-canonical plus(a, b)
+--- lenient
+func Add(a, b)
+	return a + b
+
+=== C03 Ring folds case, the face writes one spelling
+--- py
+nCount = 1
+ncount += 1
+--- refused
+not-canonical nCount
+--- lenient
+nCount = 1
+ncount++
+
+=== C04 `cat` where both sides are strings is `+`
+--- py
+c = cat("a", "b")
+--- refused
+not-canonical "a" + "b"
+--- lenient
+c = "a" + "b"
+
+=== C05 a text the printer would refuse is refused: a loop variable read after its loop (the value that failed the test)
+--- py
+for i in span(1, 3):
+    say(i)
+say(i)
+--- refused
+for-after read after its loop
+
+=== C06 `str(e)` outside a handler
+--- py
+try:
+    Risky()
+except RingError as e:
+    pass
+say(str(e))
+--- refused
+word str
