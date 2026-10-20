@@ -2963,7 +2963,7 @@ def stage25():
     means differently is spelt with an explicit word (at, setat, eq, cat, plus, span, rng, G., return ""), and what has no spelling is refused by name
     from a collision table that travels with the face as its banner. Judged by fixtures written before the printer (v21/face_check.py), by Python's own
     parser on every text, by controls that must fail, and by Softanza's base through the face -- the measurement of kill criterion K3."""
-    print('stage 25 -- a second face, in Python\'s shape: v21/face_check.py (46 fixtures, the collision table, ast.parse, controls, a corpus, K3)')
+    print('stage 25 -- a second face, in Python\'s shape: v21/face_check.py (72 fixtures, 23 collisions, ast.parse, controls, a corpus, K3)')
     failures = 0
     p = subprocess.run([sys.executable, FACE_CHECK], capture_output=True, cwd=ROOT, timeout=3600)
     out = p.stdout.decode('utf-8', 'replace').replace('\r\n', '\n')
@@ -2976,6 +2976,32 @@ def stage25():
     if PLANT:
         failures += 1
         print('  FAIL a second face -- PLANTED')
+    return failures
+
+
+# ---- stage 26: the reader of the Python-shaped face (rung 22, Haro v0.22)
+
+FACE_READ_CHECK = os.path.join(HERE, 'v22', 'face_read_check.py')
+
+
+def stage26():
+    """The twenty-second rung: a text in the Python-shaped face read back to rung 18's graph, accepting exactly the printer's image (v21), so that what is read has one
+    Ring meaning. Judged by fixtures written before the reader (v22/face_read_check.py), by the printer's own text read back to the same text, by the corpus read back
+    to the same graph up to twelve declared losses (each shown needed by a control), by controls that must fail, and by the oracle: every runnable probe of bench/exec
+    that the face can spell, printed, read back and run, prints what it printed before."""
+    print('stage 26 -- the reader of the face: v22/face_read_check.py (67 fixtures, the round trip, 12 declared losses, controls, a corpus, the oracle)')
+    failures = 0
+    p = subprocess.run([sys.executable, FACE_READ_CHECK], capture_output=True, cwd=ROOT, timeout=3600)
+    out = p.stdout.decode('utf-8', 'replace').replace(chr(13) + chr(10), chr(10))
+    for line in out.splitlines():
+        if line.startswith('  ') or line.startswith('face_read_check:'):
+            print(line)
+    if p.returncode != 0:
+        failures += 1
+        print(f'  FAIL face_read_check.py exited {p.returncode}')
+    if PLANT:
+        failures += 1
+        print('  FAIL the reader of the face -- PLANTED')
     return failures
 
 
@@ -3088,5 +3114,7 @@ if __name__ == '__main__':
         failures += stage24()
     if stage in (None, 25) and os.path.exists(FACE_CHECK):
         failures += stage25()
+    if stage in (None, 26) and os.path.exists(FACE_READ_CHECK):
+        failures += stage26()
     print(f'haro_forge: {"FAIL" if failures else "PASS"} ({failures} failure(s), {time.perf_counter()-t0:.1f} s)')
     sys.exit(1 if failures else 0)
