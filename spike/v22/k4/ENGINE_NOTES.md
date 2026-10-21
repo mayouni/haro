@@ -46,3 +46,12 @@ With it the 1.5B answers PINEAPPLE for the 40-token prompt and for the same prom
 proper fix is to size the pool from the graph (`ggml_graph_overhead` + the tensors it allocates) rather than from a formula.
 
 Not in his tree: this is a note, not a commit. The Ring++ package's DLL is a derived file and `bench/engine_copy.py` re-copies his source over the patch the next time it runs.
+
+## 3. The constrained decoder guarantees a valid shape, not an END -- and a small model loops inside the grammar
+
+Not a defect of `gbnf_machine.zig`: a grammar that may always take one more statement is always satisfied by one more statement. **Measured** (greedy, Qwen2.5-Coder-1.5B, decoder on, the Ring++ grammar): 8 of the 20
+programs never reached their end marker and ran to the 320-token cap, repeating a line (`endif = 0` forty times, `return "vowels=" + vowels` six times); the Python-shaped face, whose grammar counts indentation, looped in 2 of 20.
+The 0.5B did it in 11 of 40 runs. The decoder cannot tell a repeated line from a long program.
+
+The cheap remedies are the sampler's, not the grammar's: a repetition penalty (`StzGenerateXT` has temperature, top-p, top-k and a seed, and no penalty), a stop when the same line has been produced N times, or a bias
+toward the grammar's end token whenever the grammar is complete. K4 used none of them, so its Ring++ numbers are a floor for the shape, not a ceiling.
