@@ -143,3 +143,23 @@ if __name__ == '__main__':
     if not a or a[0] in ('build', 'selftest'):
         sys.exit(selftest(write=(not a or a[0] == 'build')))
     raise SystemExit(__doc__)
+
+
+def multiline_gold(t, sentinel='<<END>>'):
+    """The gold body as lines, read off the refined program (the printer's canonical text): the lines under the function's header, one tab level removed, then the sentinel."""
+    out, text = apply_body(t, t['gold'], 'a')
+    if not out.admitted:
+        raise SystemExit('%s: the gold body is refused' % t['id'])
+    lines = text.split('\n')
+    name = t['sig'].split('(')[0].replace('func ', '') if t['kind'] == 'block' else t['name']
+    i = next(k for k, l in enumerate(lines) if re.match(r'func\s+%s\s*\(' % re.escape(name), l, re.I))
+    body = []
+    for l in lines[i + 1:]:
+        if l.startswith('\t'):
+            body.append(l[1:])
+        elif not l.strip():
+            if body:
+                break
+        else:
+            break
+    return '\n'.join(body) + '\n' + sentinel + '\n'

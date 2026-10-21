@@ -30,6 +30,10 @@ SYSTEM = ('''You write the BODY of one Ring++ function. Reply with ONE line: sta
 Statements: x = e   x += e   x++   return e   if c ... else ... ok   for i = a to b ... next   for x in aList ... next   while c ... end   Name(args)
 Operators: + - * / % = != < > <= >= and or not. Lists: aL[1] is the first item, len(aL). Use only the calls the point allows.''')
 
+SYSTEM_LINES = ('''You write the BODY of one Ring++ function as lines of code: one statement a line, a nested block indented with a tab, then a last line holding only <<END>>. No double quotes (write text in 'single quotes'), no comments.
+Statements: x = e   x += e   x++   return e   if c / ok (with else)   for i = a to b / next   for x in aList / next   while c / end   Name(args)
+Operators: + - * / % = != < > <= >= and or not. Lists: aL[1] is the first item, len(aL). Use only the calls the point allows.''')
+
 DEMO = {'id': 'D1', 'kind': 'block', 'name': 'negs', 'sig': 'func Negs(aL)', 'calls': '', 'writes': '',
         'intent': 'return how many numbers in the list are below zero',
         'data': {'a': ['aL = [3, -1, -4, 2]'], 'b': ['aL = [5]']}, 'main': ['? Negs(aL)'],
@@ -42,9 +46,16 @@ def user_block(t, exp):
     return 'Program:\n%s\nPoint %s (%s). It %s.\nTask: %s.\nIt prints: %s' % (T.program(t, 'a').rstrip('\n'), t['name'], kind, pts, t['intent'], exp)
 
 
-def chat(t, exp, demo_exp):
-    return ('<|im_start|>system\n' + SYSTEM + '<|im_end|>\n'
-            + '<|im_start|>user\n' + user_block(DEMO, demo_exp) + '<|im_end|>\n<|im_start|>assistant\n' + DEMO['gold'] + '\n<|im_end|>\n'
+LINES_ARMS = ('lines', 'lines-scoped')
+
+
+def chat(t, exp, demo_exp, family='one'):
+    if family == 'lines':
+        system, demo = SYSTEM_LINES, A.multiline_gold(DEMO)
+    else:
+        system, demo = SYSTEM, DEMO['gold'] + '\n'
+    return ('<|im_start|>system\n' + system + '<|im_end|>\n'
+            + '<|im_start|>user\n' + user_block(DEMO, demo_exp) + '<|im_end|>\n<|im_start|>assistant\n' + demo + '<|im_end|>\n'
             + '<|im_start|>user\n' + user_block(t, exp) + '<|im_end|>\n<|im_start|>assistant\n')
 
 
@@ -60,6 +71,8 @@ def clean(out, arm):
     for stop in ('<|im_end|>', '<|endoftext|>'):
         out = out.split(stop)[0]
     lines = [l for l in out.split('\n') if l.strip() and not l.strip().startswith('```')]
+    if arm in LINES_ARMS:
+        return body_gbnf.flatten('\n'.join(lines))
     return lines[0].strip() if lines else ''
 
 
@@ -82,13 +95,17 @@ def run(model, tag, arms=('free', 'scoped'), only=None, max_tokens=100, judge_on
     for t in T.TASKS:
         if only and t['id'] not in only:
             continue
-        pf = 'p_%s.txt' % t['id']
-        put(os.path.join(work, pf), chat(t, exp[t['id']]['a'], demo_exp).encode('latin-1', 'replace'))
-        gf = 'g_%s.gbnf' % t['id']
-        put(os.path.join(work, gf), body_gbnf.body_grammar(t['calls'], t['writes']).encode('latin-1'))
         for arm in arms:
+            family = 'lines' if arm in LINES_ARMS else 'one'
+            pf = 'p_%s_%s.txt' % (t['id'], family)
+            put(os.path.join(work, pf), chat(t, exp[t['id']]['a'], demo_exp, family).encode('latin-1', 'replace'))
+            gf = 'g_%s_%s.gbnf' % (t['id'], arm)
+            if arm == 'scoped':
+                put(os.path.join(work, gf), body_gbnf.body_grammar(t['calls'], t['writes']).encode('latin-1'))
+            elif arm == 'lines-scoped':
+                put(os.path.join(work, gf), body_gbnf.lines_grammar(t['calls'], t['writes']).encode('latin-1'))
             jid = '%s_%s_s0' % (arm, t['id'])
-            man.append('%s|%s|%s|0|0|%d' % (jid, pf, gf if arm == 'scoped' else '-', max_tokens))
+            man.append('%s|%s|%s|0|0|%d' % (jid, pf, gf if arm in ('scoped', 'lines-scoped') else '-', max_tokens))
             meta[jid] = {'arm': arm, 'task': t['id']}
     put(os.path.join(work, 'm.txt'), '\n'.join(man).encode('latin-1'))
     h = hashlib.sha256(('%s|%d' % (os.path.basename(model), os.path.getsize(model))).encode())
