@@ -49,9 +49,8 @@ Not in his tree: this is a note, not a commit. The Ring++ package's DLL is a der
 
 ## 3. The constrained decoder guarantees a valid shape, not an END -- and a small model loops inside the grammar
 
-Not a defect of `gbnf_machine.zig`: a grammar that may always take one more statement is always satisfied by one more statement. **Measured** (greedy, Qwen2.5-Coder-1.5B, decoder on, the Ring++ grammar): 8 of the 20
-programs never reached their end marker and ran to the 320-token cap, repeating a line (`endif = 0` forty times, `return "vowels=" + vowels` six times); the Python-shaped face, whose grammar counts indentation, looped in 2 of 20.
-The 0.5B did it in 11 of 40 runs. The decoder cannot tell a repeated line from a long program.
+Not a defect of `gbnf_machine.zig`: a grammar that may always take one more statement is always satisfied by one more statement. **Measured** (greedy, the decoder on, 20 tasks a shape): Qwen2.5-Coder-1.5B left 8 of its 20 Ring++ programs without their end marker, running to the 320-token cap on one repeated line (`break = false` 48 times, `? "out=0"` 40, `endif = 0` 32 and 27 in two others, `shift = end` 32); the Python-shaped face, whose grammar counts indentation, did it in 2 of 20. The 0.5B did it in 4 of 20 for each shape, smollm2-135m in 4 of 20 for each shape and each decoder setting.
+The decoder cannot tell a repeated line from a long program.
 
 The cheap remedies are the sampler's, not the grammar's: a repetition penalty (`StzGenerateXT` has temperature, top-p, top-k and a seed, and no penalty), a stop when the same line has been produced N times, or a bias
 toward the grammar's end token whenever the grammar is complete. K4 used none of them, so its Ring++ numbers are a floor for the shape, not a ceiling.
