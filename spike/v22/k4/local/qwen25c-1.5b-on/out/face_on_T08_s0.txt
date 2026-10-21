@@ -1,0 +1,5 @@
+fact = 1
+for i in span(1, n + 1):
+    fact = times(fact, i)
+say(plus("fact=", fact))
+<<END>>

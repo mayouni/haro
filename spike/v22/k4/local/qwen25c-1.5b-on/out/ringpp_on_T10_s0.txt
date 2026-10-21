@@ -1,0 +1,68 @@
+class Counter
+	func Add()
+		This.n = This.n + 1
+		return This.n
+	func Value()
+		return This.n
+	func New()
+		This.n = 0
+		return This
+	func Get()
+		return This.n
+	func Set(n)
+		This.n = n
+		return This
+	func Add(n)
+		This.n = This.n + n
+		return This.n
+	func Value()
+		return This.n
+	func New()
+		This.n = 0
+		return This
+	func Get()
+		return This.n
+	func Set(n)
+		This.n = n
+		return This
+	func Add(n)
+		This.n = This.n + n
+		return This.n
+	func Value()
+		return This.n
+	func New()
+		This.n = 0
+		return This
+	func Get()
+		return This.n
+	func Set(n)
+		This.n = n
+		return This
+	func Add(n)
+		This.n = This.n + n
+		return This.n
+	func Value()
+		return This.n
+	func New()
+		This.n = 0
+		return This
+	func Get()
+		return This.n
+	func Set(n)
+		This.n = n
+		return This
+	func Add(n)
+		This.n = This.n + n
+		return This.n
+	func Value()
+		return This.n
+	func New()
+		This.n = 0
+		return This
+	func Get()
+		return This.n
+	func Set(n)
+		This.n = n
+		return This
+	func Add(n)
+		This.n

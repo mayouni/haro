@@ -1,0 +1,39 @@
+nWords = 0
+nSpace = 0
+for i = 1 to len(cText)
+	if cText[i] != ' '
+		nWords += 1
+	else
+		nSpace += 1
+		if nSpace > 1
+			nWords += 1
+			nSpace = 0
+		else
+			nSpace = 1
+			endif = 0
+			endif = 0
+			endif = 0
+			endif = 0
+			endif = 0
+			endif = 0
+			endif = 0
+			endif = 0
+			endif = 0
+			endif = 0
+			endif = 0
+			endif = 0
+			endif = 0
+			endif = 0
+			endif = 0
+			endif = 0
+			endif = 0
+			endif = 0
+			endif = 0
+			endif = 0
+			endif = 0
+			endif = 0
+			endif = 0
+			endif = 0
+			endif = 0
+			endif = 0
+			endif = 0

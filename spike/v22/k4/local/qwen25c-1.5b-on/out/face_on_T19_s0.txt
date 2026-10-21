@@ -1,0 +1,6 @@
+nDistinct = 0
+for x in aList:
+    if not eq(x, at(aList, nDistinct)):
+        nDistinct = plus(nDistinct, 1)
+say(plus("distinct=", nDistinct))
+<<END>>

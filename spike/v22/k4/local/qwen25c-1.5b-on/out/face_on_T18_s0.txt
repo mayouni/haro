@@ -1,0 +1,5 @@
+if gt(a, b) and ne(b, 5):
+    say("out=1")
+else:
+    say("out=0")
+<<END>>

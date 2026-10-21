@@ -1,0 +1,2 @@
+say(cat("third=", at(aList, 3), "last=", at(aList, len(aList))))
+<<END>>

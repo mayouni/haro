@@ -1,0 +1,6 @@
+maxVal = aList.at(1)
+for i in span(2, len(aList)):
+    if eq(maxVal, aList.at(i)):
+        maxVal = aList.at(i)
+say(cat("max=", maxVal))
+<<END>>

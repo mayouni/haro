@@ -1,0 +1,4 @@
+q = floor_divide(a, b)
+r = mod(a, b)
+say(cat("q=", q, " r=", r))
+<<END>>

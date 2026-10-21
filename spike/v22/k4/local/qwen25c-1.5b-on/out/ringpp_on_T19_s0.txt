@@ -1,0 +1,34 @@
+nDistinct = 0
+for x in aList
+	if not x = aList[0]
+		nDistinct += 1
+		break /= only = first
+		end /= only = first
+		end /= only = first
+		end /= only = first
+		end /= only = first
+		end /= only = first
+		end /= only = first
+		end /= only = first
+		end /= only = first
+		end /= only = first
+		end /= only = first
+		end /= only = first
+		end /= only = first
+		end /= only = first
+		end /= only = first
+		end /= only = first
+		end /= only = first
+		end /= only = first
+		end /= only = first
+		end /= only = first
+		end /= only = first
+		end /= only = first
+		end /= only = first
+		end /= only = first
+		end /= only = first
+		end /= only = first
+		end /= only = first
+		end /= only = first
+		end /= only = first
+		end

@@ -1,0 +1,6 @@
+nVowels = 0
+for x in cText:
+    if eq(x, "a") or eq(x, "e") or eq(x, "i") or eq(x, "o") or eq(x, "u"):
+        nVowels = plus(nVowels, 1)
+say(plus("vowels=", nVowels))
+<<END>>

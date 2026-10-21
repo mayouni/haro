@@ -1,0 +1,6 @@
+nAge = 0
+for x in aPeople:
+    if eq(x, [cWho, 0]):
+        nAge = x
+say(plus(cat("age=", nAge), 0))
+<<END>>

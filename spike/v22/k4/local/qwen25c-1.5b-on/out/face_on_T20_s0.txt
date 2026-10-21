@@ -1,0 +1,5 @@
+nSum = 0
+for x in cDigits:
+    nSum = plus(nSum, int(x))
+say(plus("sum=", nSum))
+<<END>>

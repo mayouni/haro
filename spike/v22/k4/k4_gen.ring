@@ -61,23 +61,31 @@ for i = 1 to nJobs
 	if len(cJob) > 0
 		aF = split(cJob, "|")
 		cId = aF[1]
-		cPrompt = read(cDir + "/" + aF[2])
-		cGrammar = ""
-		if aF[3] != "-"
-			cGrammar = read(cDir + "/" + aF[3])
+		cMeta = cDir + "/" + cId + ".meta"
+		# RESUMABLE: a job whose .meta exists is finished (the .meta is written after its .out), so a run that a power cut stopped goes on where it was.
+		if fexists(cMeta)
+			? read(cMeta)
+		else
+			cPrompt = read(cDir + "/" + aF[2])
+			cGrammar = ""
+			if aF[3] != "-"
+				cGrammar = read(cDir + "/" + aF[3])
+			ok
+			nSeed = 0 + aF[4]
+			nTemp = 0 + aF[5]
+			nMax = 0 + aF[6]
+			aOpt = [ [ :MaxTokens, nMax ], [ :Temperature, nTemp ], [ :Seed, nSeed ] ]
+			if cGrammar != ""
+				add(aOpt, [ :Grammar, cGrammar ])
+			ok
+			t0 = clock()
+			cOut = StzGenerateXT(cPrompt, aOpt)
+			nSec = (clock() - t0) / clockspersecond()
+			write(cDir + "/" + cId + ".out", cOut)
+			aRun = StzLastGrammarRun()
+			cLine = "J|" + cId + "|" + nSec + "|" + aRun[:steps] + "|" + aRun[:judged] + "|" + aRun[:masked] + "|" + aRun[:stalled] + "|" + aRun[:complete]
+			write(cMeta, cLine)
+			? cLine
 		ok
-		nSeed = 0 + aF[4]
-		nTemp = 0 + aF[5]
-		nMax = 0 + aF[6]
-		aOpt = [ [ :MaxTokens, nMax ], [ :Temperature, nTemp ], [ :Seed, nSeed ] ]
-		if cGrammar != ""
-			add(aOpt, [ :Grammar, cGrammar ])
-		ok
-		t0 = clock()
-		cOut = StzGenerateXT(cPrompt, aOpt)
-		nSec = (clock() - t0) / clockspersecond()
-		write(cDir + "/" + cId + ".out", cOut)
-		aRun = StzLastGrammarRun()
-		? "J|" + cId + "|" + nSec + "|" + aRun[:steps] + "|" + aRun[:judged] + "|" + aRun[:masked] + "|" + aRun[:stalled] + "|" + aRun[:complete]
 	ok
 next

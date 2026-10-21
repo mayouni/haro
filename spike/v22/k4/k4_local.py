@@ -142,34 +142,73 @@ def clean(out):
     return out.rstrip('\n') + '\n' if out.strip() else '', ended
 
 
+def put(path, data):
+    """Write a file only when its bytes differ: a generator already running reads these files job by job, and must never meet one half rewritten."""
+    if os.path.exists(path) and open(path, 'rb').read() == data:
+        return
+    open(path, 'wb').write(data)
+
+
 def pairs(s):
     return [tuple(x.split(':')) for x in s.split(',')]
 
 
-def run(model, tag, only=None, shapes=('ringpp', 'face'), grammars=('on', 'off'), seeds=(('0', '0'),), max_tokens=320, count_only=False):
+def run(model, tag, only=None, shapes=('ringpp', 'face'), grammars=('on', 'off'), seeds=(('0', '0'),), max_tokens=320, count_only=False, judge_only=False):
     exp = json.load(open(os.path.join(HERE, 'expected.json')))
-    work = tempfile.mkdtemp(prefix='k4run_')
-    open(os.path.join(work, 'ringpp.gbnf'), 'wb').write(ringpp_gbnf.ringpp_grammar().encode('latin-1'))
-    open(os.path.join(work, 'face.gbnf'), 'wb').write(face_gbnf.face_grammar().encode('latin-1'))
+    # a PERSISTENT work directory, so a run that a power cut stopped goes on where it was (k4_gen.ring skips a job whose .meta exists) -- but only when everything the
+    # jobs were made from is the same: the key below hashes the model, the prompts, the grammars and the manifest, and a different key clears the finished jobs.
+    work = os.path.join(ROOT, 'runtime', 'k4work', tag)
+    os.makedirs(work, exist_ok=True)
+    put(os.path.join(work, 'ringpp.gbnf'), ringpp_gbnf.ringpp_grammar().encode('latin-1'))
+    put(os.path.join(work, 'face.gbnf'), face_gbnf.face_grammar().encode('latin-1'))
     man, meta = [], {}
-    for shape in shapes:
-        demos = demo_turns(shape)
-        for t in TASKS:
-            if only and t['id'] not in only:
-                continue
-            prompt, prefill = chat(shape, t, exp[t['id']]['a'], demos)
+    demo_by_shape = {shape: demo_turns(shape) for shape in shapes}
+    for t in TASKS:                      # a task at a time, both shapes, so that a run stopped half way still compares the shapes on the tasks it reached
+        if only and t['id'] not in only:
+            continue
+        for shape in shapes:
+            prompt, prefill = chat(shape, t, exp[t['id']]['a'], demo_by_shape[shape])
             pf = 'p_%s_%s.txt' % (shape, t['id'])
-            open(os.path.join(work, pf), 'wb').write(prompt.encode('latin-1', 'replace'))
+            put(os.path.join(work, pf), prompt.encode('latin-1', 'replace'))
             for g in grammars:
                 for seed, temp in seeds:
                     jid = '%s_%s_%s_s%s' % (shape, g, t['id'], seed)
                     man.append('%s|%s|%s|%s|%s|%s' % (jid, pf, (shape + '.gbnf') if g == 'on' else '-', seed, temp, max_tokens))
                     meta[jid] = {'shape': shape, 'grammar': g, 'task': t['id'], 'seed': seed, 'temp': temp, 'prefill': prefill}
     open(os.path.join(work, 'm.txt'), 'wb').write('\n'.join(man).encode('latin-1'))
+    import hashlib
+    h = hashlib.sha256(('%s|%d' % (os.path.basename(model), os.path.getsize(model))).encode())
+    h.update('\n'.join(sorted(man)).encode())          # the jobs, not their order
+    for fn in sorted(os.listdir(work)):
+        if fn.startswith('p_') or fn.endswith('.gbnf'):
+            if any(('|' + fn + '|') in ln or ln.endswith('|' + fn) for ln in man) or fn.endswith('.gbnf'):
+                h.update(fn.encode())
+                h.update(open(os.path.join(work, fn), 'rb').read())
+    key = h.hexdigest()
+    kf = os.path.join(work, '_key.txt')
+    old = open(kf).read() if os.path.exists(kf) else None
+    if old is not None and old != key:
+        gone = [fn for fn in os.listdir(work) if fn.endswith('.out') or fn.endswith('.meta')]
+        for fn in gone:
+            os.remove(os.path.join(work, fn))
+        print('the inputs changed since the last run in %s: %d finished files cleared' % (work, len(gone)))
+    open(kf, 'w').write(key)
+    done = len([fn for fn in os.listdir(work) if fn.endswith('.meta')])
+    if done:
+        print('resuming: %d of %d jobs already finished in %s' % (done, len(man), work))
     print('%d jobs on %s; working in %s' % (len(man), os.path.basename(model), work))
     t0 = time.time()
-    r = subprocess.run([PACKAGE, GEN, model, os.path.join(work, 'm.txt'), work] + (['count'] if count_only else []), capture_output=True, cwd=ROOT, timeout=6 * 3600)
-    so = r.stdout.decode('latin-1').replace('\r\n', '\n')
+    if judge_only:
+        # judge what has finished so far, generate nothing: the .meta files are the generator's own result lines
+        for jid in list(meta):
+            if not os.path.exists(os.path.join(work, jid + '.meta')):
+                del meta[jid]
+        so = '\n'.join(open(os.path.join(work, jid + '.meta')).read().strip() for jid in meta)
+        print('judging %d of %d jobs (the rest have not finished)' % (len(meta), len(man)))
+        r = None
+    else:
+        r = subprocess.run([PACKAGE, GEN, model, os.path.join(work, 'm.txt'), work] + (['count'] if count_only else []), capture_output=True, cwd=ROOT, timeout=6 * 3600)
+        so = r.stdout.decode('latin-1').replace('\r\n', '\n')
     toks = {ln.split('|')[1]: int(ln.split('|')[2]) for ln in so.split('\n') if ln.startswith('T|')}
     if toks:
         for sh in sorted({k.split('_')[0] for k in toks}):
@@ -177,16 +216,18 @@ def run(model, tag, only=None, shapes=('ringpp', 'face'), grammars=('on', 'off')
             print('prompt tokens, %s: min %d, max %d (limit 510, %d prompts); longest: %s' % (sh, min(v.values()), max(v.values()), len(v), ', '.join('%s %d' % (k.split('_')[2], n) for k, n in sorted(v.items(), key=lambda kv: -kv[1])[:4])))
     if count_only:
         return
-    if r.returncode != 0 or 'ERR|' in so:
+    if r is not None and (r.returncode != 0 or 'ERR|' in so):
         print(so[:600], r.stderr.decode('latin-1')[:600])
         raise SystemExit('the generator failed')
     for ln in so.split('\n'):
         if ln.startswith('J|'):
             _, jid, sec, steps, judged, masked, stalled, complete = ln.split('|')
-            meta[jid].update({'seconds': float(sec), 'tokens': int(steps), 'complete': complete.strip() == '1', 'stalled': int(stalled)})
+            meta[jid].update({'seconds': float(sec), 'tokens': int(steps), 'complete': complete.strip() == '1', 'stalled': int(stalled.strip() or 0)})
         elif ln.startswith('MODEL|'):
             print(ln)
     print('generated in %.0f s' % (time.time() - t0))
+    if judge_only:
+        tag = tag + '-partial'      # never the name of a finished run: others wait for that file
     outdir = os.path.join(LOCAL, tag, 'out')
     os.makedirs(outdir, exist_ok=True)
     for jid in meta:
@@ -305,14 +346,14 @@ if __name__ == '__main__':
     a = sys.argv[1:]
     if not a or a[0] == 'report':
         report()
-    elif a[0] in ('run', 'count'):
+    elif a[0] in ('run', 'count', 'judge'):
         model, tag = a[1], a[2]
         opt = {}
         i = 3
         while i < len(a):
             opt[a[i]] = a[i + 1]
             i += 2
-        run(model, tag, only=opt['--tasks'].split(',') if '--tasks' in opt else None, count_only=(a[0] == 'count'), shapes=tuple(opt.get('--shapes', 'ringpp,face').split(',')),
+        run(model, tag, only=opt['--tasks'].split(',') if '--tasks' in opt else None, count_only=(a[0] == 'count'), judge_only=(a[0] == 'judge'), shapes=tuple(opt.get('--shapes', 'ringpp,face').split(',')),
             grammars=tuple(opt.get('--grammar', 'on,off').split(',')), seeds=tuple(pairs(opt.get('--seeds', '0:0'))), max_tokens=int(opt.get('--max-tokens', 320)))
     else:
         raise SystemExit(__doc__)

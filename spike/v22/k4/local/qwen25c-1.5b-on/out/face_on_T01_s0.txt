@@ -1,0 +1,5 @@
+nSum = 0
+for i in span(1, n + 1):
+    nSum = plus(nSum, i)
+say(plus("sum=", nSum))
+<<END>>
