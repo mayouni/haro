@@ -20,7 +20,7 @@ reason the printer had to change first (section 7): a reader needs a face that i
 | the court: fixtures, the printer's text read back, controls, the corpus to the same graph, the oracle | **built**, `python haro/spike/v22/face_read_check.py`, guard stage 26 | section 5 |
 | the lenient reading (a model's text that is not the face's spelling, read anyway, for K4 to count) | **built** | `read_py(text, strict=False)` |
 | a GBNF for the face (the write surface of a model that writes it) | **drafted, owed**: `face_gbnf.py`, held by the decoder, 27 of 43 printed texts accepted | section 8 |
-| K4: a model writing in each face | **measured 2026-10-20: met for capable models** (Ring at ceiling, the face at best ties), `k4/K4.md`, HF-110, HF-111 | section 8 |
+| K4: a model writing in each face | **measured 2026-10-20 and 2026-10-21: met for capable models and for small local ones** (`k4/K4.md`, HF-110 to HF-115) | section 8 |
 | lambdas, brace blocks, `eval`, `call f()`, operator methods, getters, setters | **not spelt**: refused by the printer (v21), so never read | `v21/GRAMMAR.md` section 1 |
 
 ## 1. The rule: read, print, compare
@@ -136,7 +136,7 @@ shows it is needed:
 
 ## 8. Not built, named
 
-- **K4 is measured, and met (2026-10-20).** Twenty tasks, shown and hidden data, Claude haiku and sonnet: Ring 19-20 of 20 with or without a primer, the face at best ties (20 of 20 read for its meaning, 20 of 20 again respelled by the printer, 2-5 of 20 under its strict spelling). `k4/K4.md` has the design, the table and the limits; HF-110 and HF-111 the findings. For them the face is a reading aid, a lint and a respeller, not a write surface. **Not measured, and the regime Softanza names: a small local model under the decoder** -- so that consequence is not applied.
-- **A GBNF for the face: drafted, OWED.** `face_gbnf.py` is held by the engine's decoder (42 named rules, about 53 of its 128) and accepts 27 of the 43 texts the printer prints; the rest fail on blank lines between definitions, comments and method bodies richer than the draft. It is owed because the regime that needs it -- small local models under the decoder -- is the one Softanza names (reopened 2026-10-20).
+- **K4 is measured, and met (2026-10-20).** Twenty tasks, shown and hidden data, Claude haiku and sonnet: Ring 19-20 of 20 with or without a primer, the face at best ties (20 of 20 read for its meaning, 20 of 20 again respelled by the printer, 2-5 of 20 under its strict spelling). `k4/K4.md` has the design, the table and the limits; HF-110 and HF-111 the findings. For them the face is a reading aid, a lint and a respeller, not a write surface. **The regime Softanza names, a small local model under the decoder, was measured on 2026-10-21** (SmolLM2-135M, Qwen2.5-Coder-0.5B and 1.5B; the face does not beat Ring++ at any size, and the decoder buys shape and not meaning; HF-114) -- so the consequence holds there too.
+- **A GBNF for the face: built 2026-10-21.** `face_gbnf.py` (about 93 of the decoder's 128 rules) accepts the twenty K4 programs and 39 of the 43 texts the printer prints for the v21 fixtures, rejects what the shape excludes, and is judged with its Ring++ counterpart (`ringpp_gbnf.py`) by `grammar_court.py`, guard stage 27, with no model loaded; the four it does not accept are trailing comments, `next i` and `new @`.
 - **The collisions' own spellings** (lambda is the one K3 named as spellable), and a face for the declared altitude.
 - **A reader for the corpus's tests**, which hold `load`, `eval` and braces the face does not spell: 95 of the 159 runnable probes, 221 of 300 library files.

@@ -1565,7 +1565,7 @@ whole guard re-run on the renamed tree: 28 + 30 + 27 + 23, 117 of 120, 32 of 32,
    on a library file (HF-103), and a write surface for a program larger than the decoder holds (HF-87).
 24. ~~Rung 6 of the code-graph memo~~ -- built 2026-10-19: a second face, Python-shaped, as a printer (Haro v0.21), guard stage 25;
    K3 measured and not met (HF-94); rung 7 (the reader) built 2026-10-20, guard stage 26 (HF-104 to HF-109); K4 measured 2026-10-20 for capable cloud models and met (HF-110); the
-   small-local-model regime Softanza names is unmeasured and its grammar is owed.
+   small-local-model regime was measured 2026-10-21 on three models and met as well (HF-112 to HF-115): size decides, the decoder buys shape and not meaning, the face does not beat Ring++; both grammars are built and held by guard stage 27.
 18. The forge as an `rnxc` verb (the ringpp session's `src/`, routed); the
    Softanza-resident timing the charter's 2.6 asks for; the court's run time on the
    oracle under paths and views (6.4x the image this pass, named at stage 6); the

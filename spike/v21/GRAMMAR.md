@@ -127,7 +127,7 @@ runs (C-14), which `G.` already says.
 
 ## 7. Not built, named
 
-- **K4**: measured 2026-10-20 and met for capable cloud models (`v22/k4/K4.md`, HF-110): for them the face is a reading aid and a respeller, not a write surface; small local models under a decoder are unmeasured.
+- **K4**: measured 2026-10-20 and met for capable cloud models (`v22/k4/K4.md`, HF-110): for them the face is a reading aid and a respeller, not a write surface; small local models under a decoder were measured 2026-10-21 and K4 is met there too (HF-112 to HF-115).
 - ~~**A reader** (rung 7)~~: built 2026-10-20, `v22/GRAMMAR.md`.
 - **Lambdas**, spelt (see section 6); **a runtime for the face's words** -- the text is for reading, and `say`, `at` and their kin are named by the
   banner, not shipped.
