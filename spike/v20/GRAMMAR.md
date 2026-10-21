@@ -27,6 +27,8 @@ surface is a sentence against a point, a grammar scoped to the program it is loo
 | the kind `function`: an agent proposes a function that is not there yet, or the body of one that is | **built** (2026-10-19) | section 12 |
 | a point's own `calls` and `writes` refined as rules: widening a tier-4 act, narrowing below the body refused | **built** (2026-10-20) | section 13 |
 | the kind `method`: an agent proposes a method of a class that is not there yet, or the body of one that is | **built** (2026-10-20) | section 14 |
+| **a local model as the agent**, on sixteen tasks (the body free or under its point's grammar, one line or lines) | **measured** (2026-10-21): 1.5B 3 of 16 on one line, **10 of 16 on lines under the grammar** (HF-116) | `agent/AGENT.md` |
+| the agent's write surface for a body: the lines grammar of the point, `scoped.body_lines_gbnf` | **built** (2026-10-21), guard stage 28 | `agent/body_gbnf.py` |
 | a body kind on a library file (a class and no top level): the checker's absence rules are shut, so derivation fails closed | **not built** | sections 9, 14 |
 | the kinds `type`, `lib`, `custom`: declared, refused when proposed against | **not built** | section 9 |
 | a writer that keeps the layout of a file that is not canonical (the estate's) | **not built**: `--write` refuses | section 9 |

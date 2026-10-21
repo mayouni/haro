@@ -1561,7 +1561,7 @@ whole guard re-run on the renamed tree: 28 + 30 + 27 + 23, 117 of 120, 32 of 32,
    L1) is the haro-charter desk's and next in the memo.
 23. ~~Rung 5 of the code-graph memo~~ -- built 2026-10-05, finished 2026-10-19: refinement over L1 (Haro v0.20), guard
    stage 24; the BLOCK and FUNCTION kinds built 2026-10-19 (an agent writes a function's body, then a whole function, HF-95 to
-   HF-99), the allowlist rules and the METHOD kind 2026-10-20 (HF-100 to HF-103); open: the kinds `type` and `custom`, a body kind
+   HF-99), the allowlist rules and the METHOD kind 2026-10-20 (HF-100 to HF-103); **a local model put in the loop as the agent 2026-10-21** (HF-116, HF-117: 10 of 16 tasks on lines under the point's grammar, 3 of 16 on the one-line body rung 5 leaves free; guard stage 28); open: the kinds `type` and `custom`, a body kind
    on a library file (HF-103), and a write surface for a program larger than the decoder holds (HF-87).
 24. ~~Rung 6 of the code-graph memo~~ -- built 2026-10-19: a second face, Python-shaped, as a printer (Haro v0.21), guard stage 25;
    K3 measured and not met (HF-94); rung 7 (the reader) built 2026-10-20, guard stage 26 (HF-104 to HF-109); K4 measured 2026-10-20 for capable cloud models and met (HF-110); the

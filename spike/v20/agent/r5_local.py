@@ -43,7 +43,8 @@ DEMO = {'id': 'D1', 'kind': 'block', 'name': 'negs', 'sig': 'func Negs(aL)', 'ca
 def user_block(t, exp):
     pts = ('may call: %s; may write: %s' % (t['calls'].replace('|', ', ') or 'nothing', t['writes'].replace('|', ', ') or 'its own locals only'))
     kind = 'a function that does not exist yet: write its body' if t['kind'] == 'function' else 'the body of the function below is empty: write it'
-    return 'Program:\n%s\nPoint %s (%s). It %s.\nTask: %s.\nIt prints: %s' % (T.program(t, 'a').rstrip('\n'), t['name'], kind, pts, t['intent'], exp)
+    params = (' Parameters: %s.' % t['params'].replace('|', ', ')) if t['kind'] == 'function' else ''
+    return 'Program:\n%s\nPoint %s (%s). It %s.%s\nTask: %s.\nIt prints: %s' % (T.program(t, 'a').rstrip('\n'), t['name'], kind, pts, params, t['intent'], exp)
 
 
 LINES_ARMS = ('lines', 'lines-scoped')
