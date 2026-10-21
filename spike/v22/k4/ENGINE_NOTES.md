@@ -40,9 +40,9 @@ which fits). The 0.5B and smollm2 are fine; the 1.5B never loads a single prompt
 **The copy's fix** (`runtime/engine-copy/src/neural_gen.zig`, stz_neural rebuilt in 29 s, installed in the Ring++ package; the original DLL kept beside it as `stz_neural.dll.orig-20261020`):
 
     const mem_size_est: usize = 128 * 1024 * 1024 + kv_len * n_new * n_head * n_layer * 24 + n_new * n_embd * n_layer * 64;
-    const mem_size: usize = mem_size_est + mem_size_est / 4;
+    const mem_size: usize = mem_size_est + mem_size_est / 4 + 1024 * 1024 * 1024;
 
-With it the 1.5B answers PINEAPPLE for the 40-token prompt and for the same prompt with 35 and 45 sentences of filler between the system message and the question (about 400 and 500 tokens). A quarter more of a pool that is not touched is address space, not memory (`no_alloc = false` commits what the graph uses); the
+With it the 1.5B answers PINEAPPLE for the 40-token prompt and for the same prompt with 35 and 45 sentences of filler between the system message and the question (about 400 and 500 tokens). **A quarter more was not enough, and the first version of this fix was wrong for short prompts:** a 368-token prompt on the 1.5B (the rung 5 agent tasks) failed with a quarter more by 1.1 MB (`needed 2800125616, available 2799001600`), because the estimate under-counts something that does not grow with the prompt, so a percentage margin only works for long ones; the copy carries a constant gigabyte as well. A pool that is not touched is address space, not memory (`no_alloc = false` commits what the graph uses); the
 proper fix is to size the pool from the graph (`ggml_graph_overhead` + the tensors it allocates) rather than from a formula.
 
 Not in his tree: this is a note, not a commit. The Ring++ package's DLL is a derived file and `bench/engine_copy.py` re-copies his source over the patch the next time it runs.
