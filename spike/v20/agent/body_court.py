@@ -95,6 +95,11 @@ def main():
             good = all(a == want for a in rows)
             print('  %s control, %s: %s' % (shape, what, 'ok' if good else 'FAIL -- the court has no teeth here'))
             bad += 0 if good else 1
+    # the grammar the harness uses is the one derived from the program's own point (scoped.body_lines_gbnf), not a copy built from the task's fields
+    import refine, scoped
+    same = sum(1 for t in T.TASKS if scoped.body_lines_gbnf(refine.Model(T.program(t, 'a'), {}), t['name']) == body_gbnf.lines_grammar(t['calls'], t['writes']))
+    print('  the lines grammar derived from each program\'s own point (scoped.body_lines_gbnf): %d of %d identical to the task-built one%s' % (same, len(T.TASKS), '' if same == len(T.TASKS) else '   MISSED'))
+    bad += 0 if same == len(T.TASKS) else 1
     print('BODY COURT %s' % ('PASSED' if not bad else 'FAILED (%d)' % bad))
     return 1 if bad else 0
 

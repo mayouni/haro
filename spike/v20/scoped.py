@@ -108,3 +108,21 @@ def scoped_gbnf(model, ctx=None, posture=None, author=None, points=None):
         'qgov ::= ' + (quoted('(' + ' | '.join(lit(x) for x in govs) + ')?') if govs else quoted('')),
     ] + tails + ['body ::= ' + body]
     return '\n'.join(rules) + '\n'
+
+
+def body_lines_gbnf(model, name, depth=3):
+    """The agent's write surface for a BODY point, as the agent writes it: the lines grammar of THIS point (agent/body_gbnf.py) -- a statement a line, only the point's `calls`,
+    writes only to the point's `writes` and its own locals, a closing sentinel line. The sentence around the body (TARGET, KIND, FROM, AUTHOR, POSTURE, REASON) is the harness's, and the
+    body is flattened into its one-line TO: `scoped_gbnf` leaves TO as free text (`qbody`) for a body kind, and measured with a real model that shape is the wrong thing to ask
+    (agent/AGENT.md: Qwen2.5-Coder-1.5B, 3 of 16 tasks right on a one-line body, 10 of 16 on lines under this grammar)."""
+    import os, sys
+    sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), 'agent'))
+    import body_gbnf
+    L = model.lift()
+    p = next((x for x in L['points'] if x['name'] == name), None)
+    if p is None:
+        raise ValueError('the program declares no point named %s' % name)
+    if p['form'] not in refine.BODY_KINDS:
+        raise ValueError('%s is not a body point (a block, function or method)' % name)
+    a = p['attrs']
+    return body_gbnf.lines_grammar(a.get('calls', ''), a.get('writes', ''), depth)
