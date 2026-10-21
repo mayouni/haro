@@ -1,0 +1,2 @@
+for i in span(1, n):
+     say(i)

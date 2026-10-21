@@ -1,0 +1,6 @@
+nSum = 0
+for i = 1 to n
+	nSum += i
+next
+? "sum=" + nSum
+<<END>>

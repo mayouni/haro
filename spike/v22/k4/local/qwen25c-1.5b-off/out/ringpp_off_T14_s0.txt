@@ -1,0 +1,6 @@
+for x in aPeople
+	if x[0] == cWho
+	? "age=" + x[1]
+		break
+next
+<<END>>

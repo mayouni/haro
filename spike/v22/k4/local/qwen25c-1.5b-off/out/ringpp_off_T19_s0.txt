@@ -1,0 +1,7 @@
+nDistinct = 0
+for x in aList
+	if not x in aList[nDistinct+1:]
+		nDistinct += 1
+next
+? "distinct=" + nDistinct
+<<END>>

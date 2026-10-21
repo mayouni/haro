@@ -1,0 +1,6 @@
+aFibs = [1, 1]
+for i = 2 to n
+	aFibs.append(aFibs[i-1] + aFibs[i-2])
+next
+? " ".join(map(str, aFibs))
+<<END>>

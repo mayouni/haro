@@ -1,0 +1,2 @@
+? "third=" + aList[2] + " last=" + aList[len(aList) - 1]
+<<END>>

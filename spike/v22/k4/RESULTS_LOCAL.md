@@ -12,6 +12,13 @@ Twenty tasks, Ring++ and the Python-shaped face, the engine's constrained decode
 | ringpp, decoder off | 20 | 10 | 20 | 15 | 10 | 6 | 0 | 22.3 |
 | ringpp, decoder on | 20 | 16 | 16 | 15 | 10 | 5 | 0 | 1.7 |
 
+## qwen25c-1.5b-off -- qwen2.5-coder-1.5b-instruct-q8_0.gguf, seeds [['0', '0']], max tokens 320
+
+| shape / decoder | n | valid | ended | reads | runs | shown | pass | tokens/s |
+|---|---|---|---|---|---|---|---|---|
+| face, decoder off | 20 | 3 | 8 | 12 | 8 | 3 | 3 | 0.0 |
+| ringpp, decoder off | 20 | 9 | 19 | 15 | 11 | 6 | 6 | 0.0 |
+
 ## qwen25c-1.5b-on -- qwen2.5-coder-1.5b-instruct-q8_0.gguf, seeds [['0', '0']], max tokens 320
 
 | shape / decoder | n | valid | ended | reads | runs | shown | pass | tokens/s |

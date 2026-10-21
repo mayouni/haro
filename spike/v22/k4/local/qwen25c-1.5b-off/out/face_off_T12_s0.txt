@@ -1,0 +1,5 @@
+maxVal = aList[0]
+for x in aList:
+     if x > maxVal:
+          maxVal = x
+say(cat("max=", maxVal))

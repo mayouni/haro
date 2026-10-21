@@ -1,0 +1,6 @@
+for i = 1 to n
+	for j = 1 to i
+		? j * i
+	end
+	next
+<<END>>

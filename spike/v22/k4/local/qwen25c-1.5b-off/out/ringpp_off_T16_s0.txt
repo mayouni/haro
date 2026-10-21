@@ -1,0 +1,4 @@
+q = floor(a / b)
+r = a % b
+? "q=" + q + " r=" + r
+<<END>>

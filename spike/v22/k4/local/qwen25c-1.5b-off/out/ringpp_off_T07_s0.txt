@@ -1,0 +1,4 @@
+for i = len(aList) to 1 step -1
+	? aList[i]
+next
+<<END>>

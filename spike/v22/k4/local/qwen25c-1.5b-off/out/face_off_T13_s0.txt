@@ -1,0 +1,10 @@
+nWords = 0
+nSpace = 0
+for x in cText:
+     if x == " ":
+          nWords = plus(nWords, nSpace)
+          nSpace = 0
+     else:
+          nSpace = plus(nSpace, 1)
+nWords = plus(nWords, nSpace)
+say( cat("words=", nWords))

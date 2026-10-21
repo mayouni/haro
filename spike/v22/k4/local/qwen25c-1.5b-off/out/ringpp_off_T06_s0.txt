@@ -1,0 +1,7 @@
+nVowels = 0
+for i in range(len(cText))
+	if cText[i] == 'a' or cText[i] == 'e' or cText[i] == 'i' or cText[i] == 'o' or cText[i] == 'u'
+		nVowels += 1
+	next
+? "vowels=" + nVowels
+<<END>>

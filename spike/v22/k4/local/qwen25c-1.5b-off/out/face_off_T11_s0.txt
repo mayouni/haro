@@ -1,0 +1,6 @@
+try:
+    Missing()
+except RingError as e:
+    say(cat("caught-", e))
+done
+<<END>>

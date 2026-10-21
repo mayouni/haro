@@ -1,0 +1,6 @@
+nCount = 0
+for x in aItems:
+     if eq(x, 1):
+          nCount = plus(nCount, 1)
+say( cat("count=", nCount)) 
+<<END>>

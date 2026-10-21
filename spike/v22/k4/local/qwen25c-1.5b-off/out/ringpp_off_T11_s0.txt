@@ -1,0 +1,7 @@
+try
+	missing()
+catch cCatchError
+	? "caught-" + cCatchError
+end
+done
+<<END>>

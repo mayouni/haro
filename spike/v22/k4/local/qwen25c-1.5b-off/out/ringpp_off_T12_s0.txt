@@ -1,0 +1,8 @@
+max = aList[0]
+for x in aList
+	if x > max
+		max = x
+	end
+next
+? "max=" + max
+<<END>>

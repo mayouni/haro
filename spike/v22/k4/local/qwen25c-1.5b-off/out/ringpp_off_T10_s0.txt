@@ -1,0 +1,14 @@
+class Counter
+    def Add()
+        This.n = This.n + 1
+    end
+    def Value()
+        return This.n
+    end
+end
+oCounter = new Counter
+for i = 1 to nTimes
+    oCounter.Add()
+next
+? "count=" + oCounter.Value()
+<<END>>

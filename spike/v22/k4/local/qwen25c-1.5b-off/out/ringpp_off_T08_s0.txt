@@ -1,0 +1,6 @@
+fact = 1
+for i = 1 to n
+	fact *= i
+next
+? "fact=" + fact
+<<END>>

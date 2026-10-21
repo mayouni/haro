@@ -1,0 +1,11 @@
+class Counter:
+    def __init__(self):
+        self.n = 0
+    def Add(self):
+        self.n = plus(self.n, 1)
+    def Value(self):
+        return self.n
+o = new_without_init(Counter)
+for i in range(nTimes):
+    o.Add()
+say(cat("count=", o.Value()))
