@@ -1,5 +1,6 @@
 {
  "tag": "qwen25c-1.5b",
+ "set": "",
  "model": "qwen2.5-coder-1.5b-instruct-q8_0.gguf",
  "summary": {
   "free": {
@@ -17,12 +18,13 @@
   "scoped": {
    "n": 16,
    "shape": 11,
-   "admitted": 11,
+   "admitted": 10,
    "runs": 4,
    "shown": 3,
    "both": 3,
    "stages": {
-    "structural": 5
+    "structural": 5,
+    "derivation": 1
    },
    "tok_per_s": 0.8
   },
@@ -617,9 +619,9 @@
    "raw": "if n % 3 = 0 print = fizz else print = n ok return nil\n",
    "body": "if n % 3 = 0 print = fizz else print = n ok return nil",
    "shape": true,
-   "admitted": true,
-   "stage": "all",
-   "why": "admitted: 'fizz' sha:e3b0c44298fc -> sha:4023130cf43a [:trusted]",
+   "admitted": false,
+   "stage": "derivation",
+   "why": "rnxc check: fizz is read here, and nothing anywhere assigns it -- Error (R24) the moment this line runs (rpp/uninitializ",
    "runs": false,
    "shown": false,
    "both": false

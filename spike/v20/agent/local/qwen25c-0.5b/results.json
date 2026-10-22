@@ -1,41 +1,45 @@
 {
  "tag": "qwen25c-0.5b",
+ "set": "",
  "model": "qwen2.5-coder-0.5b-instruct-q8_0.gguf",
  "summary": {
   "free": {
    "n": 16,
    "shape": 11,
-   "admitted": 9,
+   "admitted": 8,
    "runs": 1,
    "shown": 0,
    "both": 0,
    "stages": {
     "constraint": 2,
-    "structural": 5
+    "structural": 5,
+    "derivation": 1
    },
    "tok_per_s": 2.1
   },
   "scoped": {
    "n": 16,
    "shape": 14,
-   "admitted": 14,
+   "admitted": 12,
    "runs": 1,
    "shown": 0,
    "both": 0,
    "stages": {
-    "structural": 2
+    "structural": 2,
+    "derivation": 2
    },
    "tok_per_s": 0.6
   },
   "lines": {
    "n": 16,
    "shape": 10,
-   "admitted": 10,
+   "admitted": 9,
    "runs": 3,
    "shown": 2,
    "both": 2,
    "stages": {
-    "structural": 6
+    "structural": 6,
+    "derivation": 1
    },
    "tok_per_s": 2.2
   },
@@ -631,9 +635,9 @@
    "raw": "fizz\n<<END>>",
    "body": "fizz",
    "shape": true,
-   "admitted": true,
-   "stage": "all",
-   "why": "admitted: 'fizz' sha:e3b0c44298fc -> sha:b05b74c474c1 [:trusted]",
+   "admitted": false,
+   "stage": "derivation",
+   "why": "rnxc check: fizz is read here, and nothing anywhere assigns it -- Error (R24) the moment this line runs (rpp/uninitializ",
    "runs": false,
    "shown": false,
    "both": false
@@ -781,9 +785,9 @@
    "raw": "nN = 7 for x in aL if x < 0 nN++ ok next return nN * nN\nnN = 7 for x in aL if x < 0 nN++ ok next return nN * nN * nN\nnN = 7 for x in aL if x < 0 nN++ ok next return nN * nN * nN * nN\nnN = 7 for x in aL if x < 0 nN++ ok next return nN * nN * nN * nN * nN\nnN = 7 for x in aL if x < 0 nN++ ok next return nN * nN * nN * nN * n",
    "body": "nN = 7 for x in aL if x < 0 nN++ ok next return nN * nN",
    "shape": true,
-   "admitted": true,
-   "stage": "all",
-   "why": "admitted: 'Square' absent -> sha:a457bb65b160 [:trusted]",
+   "admitted": false,
+   "stage": "derivation",
+   "why": "rnxc check: aL is read here, and nothing anywhere assigns it -- Error (R24) the moment this line runs (rpp/uninitialized",
    "runs": false,
    "shown": false,
    "both": false
@@ -796,9 +800,9 @@
    "raw": "nN = 7 for x in aL if x < 0 nN++ ok next return nN * nN\n",
    "body": "nN = 7 for x in aL if x < 0 nN++ ok next return nN * nN",
    "shape": true,
-   "admitted": true,
-   "stage": "all",
-   "why": "admitted: 'Square' absent -> sha:a457bb65b160 [:trusted]",
+   "admitted": false,
+   "stage": "derivation",
+   "why": "rnxc check: aL is read here, and nothing anywhere assigns it -- Error (R24) the moment this line runs (rpp/uninitialized",
    "runs": false,
    "shown": false,
    "both": false
@@ -856,9 +860,9 @@
    "raw": "nC = 0 for x in aL if x != len nC++ ok next return aL[len - 1]\n",
    "body": "nC = 0 for x in aL if x != len nC++ ok next return aL[len - 1]",
    "shape": true,
-   "admitted": true,
-   "stage": "all",
-   "why": "admitted: 'Last' absent -> sha:18ada380912f [:trusted]",
+   "admitted": false,
+   "stage": "derivation",
+   "why": "rnxc check: len is read here, and nothing anywhere assigns it -- Error (R24) the moment this line runs (rpp/uninitialize",
    "runs": false,
    "shown": false,
    "both": false

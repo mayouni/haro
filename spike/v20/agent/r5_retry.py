@@ -3,6 +3,7 @@
     python r5_retry.py run <model-key> [--max-tokens 160]      for every first body the gate REFUSED (both task sets, all four arms): re-ask twice, judge the second body
     python r5_retry.py count <model-key>                       fit the prompts and stop
     python r5_retry.py report                                  the table of every run kept under local/retry-*
+    python r5_retry.py rejudge <model-key>                     judge the second bodies again under the gate as it stands (generates nothing)
 
 model-key: qwen25c-1.5b | qwen25c-0.5b | smollm2-135m  (the first bodies are read from local/<key>/ and local/adv-<key>/ results.json)
 
@@ -190,6 +191,25 @@ def judge(key, meta, work, dropped):
     print('wrote', outdir)
 
 
+def rejudge(key):
+    """Judge the second bodies again under the gate as it stands now, generating nothing; the conversation the model saw (first body, first reason) is kept as it was.
+    The judgement it replaces is kept as results.<date>.json beside it."""
+    fp = os.path.join(L.LOCAL, 'retry-' + key, 'results.json')
+    d = json.load(open(fp))
+    tk = {(sname, t['id']): t for sname, _, tasks, _ in SETS for t in tasks}
+    exps = {sname: json.load(open(os.path.join(HERE, expfile))) for sname, _, _, expfile in SETS}
+    keep = fp.replace('results.json', 'results.before-rejudge.json')
+    if not os.path.exists(keep):
+        json.dump(d, open(keep, 'w'), indent=1)
+    for row in d['jobs']:
+        t = tk[(row['set'], row['task'])]
+        row.update(A.judge_body(t, row['body2'], exps[row['set']][t['id']]))
+        if row['set'] == 'adv':
+            row['tried2'] = tasks_adv.tried(t, row['body2'])
+    json.dump(d, open(fp, 'w'), indent=1)
+    print('rejudged', fp)
+
+
 def cnt(rows, pred):
     return sum(1 for r in rows if pred(r))
 
@@ -223,6 +243,8 @@ if __name__ == '__main__':
     a = sys.argv[1:]
     if not a or a[0] == 'report':
         report()
+    elif a[0] == 'rejudge':
+        rejudge(a[1])
     elif a[0] in ('run', 'count'):
         mt = int(a[a.index('--max-tokens') + 1]) if '--max-tokens' in a else 160
         run(a[1], mt, count_only=(a[0] == 'count'))

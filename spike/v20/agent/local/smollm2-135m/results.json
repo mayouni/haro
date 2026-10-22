@@ -1,5 +1,6 @@
 {
  "tag": "smollm2-135m",
+ "set": "",
  "model": "smollm2-135m-instruct-q8_0.gguf",
  "summary": {
   "free": {
@@ -27,24 +28,26 @@
   "lines": {
    "n": 16,
    "shape": 12,
-   "admitted": 12,
+   "admitted": 11,
    "runs": 3,
    "shown": 0,
    "both": 0,
    "stages": {
-    "structural": 4
+    "structural": 4,
+    "derivation": 1
    },
    "tok_per_s": 0.9
   },
   "lines-scoped": {
    "n": 16,
    "shape": 14,
-   "admitted": 14,
+   "admitted": 12,
    "runs": 2,
    "shown": 0,
    "both": 0,
    "stages": {
-    "structural": 2
+    "structural": 2,
+    "derivation": 2
    },
    "tok_per_s": 0.6
   }
@@ -823,9 +826,9 @@
    "raw": "nN = 7\nfor x in aL\n\tif x < 0\n\t\tnN++\n\tok\nnext\nreturn nN\n<<END>>\n",
    "body": "nN = 7 for x in aL if x < 0 nN++ ok next return nN",
    "shape": true,
-   "admitted": true,
-   "stage": "all",
-   "why": "admitted: 'Square' absent -> sha:b9a4570b3bd6 [:trusted]",
+   "admitted": false,
+   "stage": "derivation",
+   "why": "rnxc check: aL is read here, and nothing anywhere assigns it -- Error (R24) the moment this line runs (rpp/uninitialized",
    "runs": false,
    "shown": false,
    "both": false
@@ -928,9 +931,9 @@
    "raw": "nC = 0\nfor x in aL\n\tif x < 0\n\t\tnC++\n\tok\nnext\nreturn nC\n<<END>>\n",
    "body": "nC = 0 for x in aL if x < 0 nC++ ok next return nC",
    "shape": true,
-   "admitted": true,
-   "stage": "all",
-   "why": "admitted: 'Dash' absent -> sha:fec2c267097b [:trusted]",
+   "admitted": false,
+   "stage": "derivation",
+   "why": "rnxc check: aL is read here, and nothing anywhere assigns it -- Error (R24) the moment this line runs (rpp/uninitialized",
    "runs": false,
    "shown": false,
    "both": false
@@ -943,9 +946,9 @@
    "raw": "nC = 0\nfor x in aL\n\tif x < 0\n\t\tnC++\n\tok\nnext\nreturn nC\n<<END>>\n",
    "body": "nC = 0 for x in aL if x < 0 nC++ ok next return nC",
    "shape": true,
-   "admitted": true,
-   "stage": "all",
-   "why": "admitted: 'Dash' absent -> sha:fec2c267097b [:trusted]",
+   "admitted": false,
+   "stage": "derivation",
+   "why": "rnxc check: aL is read here, and nothing anywhere assigns it -- Error (R24) the moment this line runs (rpp/uninitialized",
    "runs": false,
    "shown": false,
    "both": false

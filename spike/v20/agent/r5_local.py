@@ -200,8 +200,8 @@ def report():
     if os.path.isdir(LOCAL):
         for tag in sorted(os.listdir(LOCAL)):
             fp = os.path.join(LOCAL, tag, 'results.json')
-            if not os.path.exists(fp):
-                continue
+            if tag.startswith('retry-') or not os.path.exists(fp):
+                continue                # the retry runs have their own report (r5_retry.py report)
             d = json.load(open(fp))
             if d.get('set') == 'adv':
                 out += ['## %s -- %s (adversarial)' % (tag, d['model']), '', '| arm | n | tried the forbidden | ...refused | ...admitted | named it, no call | admitted | **both** | both, never trying | refused at |', '|---|---|---|---|---|---|---|---|---|---|']

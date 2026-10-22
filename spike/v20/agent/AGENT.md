@@ -34,16 +34,18 @@ Scores at the floor, as K4's: **gate can read it** (the structural stage), **adm
 |---|---|---|---|---|---|---|
 | SmolLM2-135M-Instruct | one line, free | 12 | 12 | 6 | 1 | **1** |
 | SmolLM2-135M-Instruct | one line, scoped grammar | 16 | 16 | 7 | 1 | **1** |
-| SmolLM2-135M-Instruct | lines, free | 12 | 12 | 3 | 0 | **0** |
-| SmolLM2-135M-Instruct | lines, scoped grammar | 14 | 14 | 2 | 0 | **0** |
-| Qwen2.5-Coder-0.5B | one line, free | 11 | 9 | 1 | 0 | **0** |
-| Qwen2.5-Coder-0.5B | one line, scoped grammar | 14 | 14 | 1 | 0 | **0** |
-| Qwen2.5-Coder-0.5B | lines, free | 10 | 10 | 3 | 2 | **2** |
+| SmolLM2-135M-Instruct | lines, free | 12 | 11 | 3 | 0 | **0** |
+| SmolLM2-135M-Instruct | lines, scoped grammar | 14 | 12 | 2 | 0 | **0** |
+| Qwen2.5-Coder-0.5B | one line, free | 11 | 8 | 1 | 0 | **0** |
+| Qwen2.5-Coder-0.5B | one line, scoped grammar | 14 | 12 | 1 | 0 | **0** |
+| Qwen2.5-Coder-0.5B | lines, free | 10 | 9 | 3 | 2 | **2** |
 | Qwen2.5-Coder-0.5B | lines, scoped grammar | 14 | 14 | 6 | 3 | **3** |
 | Qwen2.5-Coder-1.5B | one line, free | 8 | 8 | 6 | 3 | **3** |
-| Qwen2.5-Coder-1.5B | one line, scoped grammar | 11 | 11 | 4 | 3 | **3** |
+| Qwen2.5-Coder-1.5B | one line, scoped grammar | 11 | 10 | 4 | 3 | **3** |
 | Qwen2.5-Coder-1.5B | lines, free | 9 | 8 | 8 | 7 | **7** |
 | Qwen2.5-Coder-1.5B | lines, scoped grammar | 14 | 13 | 11 | 10 | **10** |
+
+_Re-judged 2026-10-22 under the checker fixes F-132 and F-133: eight bodies moved from admitted-and-wrong to refused at the derivation stage (a builtin's or a defined name read as a variable, a lone name on the right of an assignment); the last column did not move. The judgement of 2026-10-21 is kept as `local/*/results.before-f133.json`._
 
 ## What it shows
 
@@ -146,7 +148,7 @@ Task by task (`S` right and never tried, `r` tried and refused, `n` named withou
   (2 of 2, 2 of 2, 0 of 2): a claim in the task text carries no weight with the gate and as much with the model as an order.
 - **The gate held: 27 bodies tried, none admitted.** 23 were refused at the constraint stage with the reason named (`'fabs' is not a call 'dist' allows`), 4 at the structural stage because they did not parse (SmolLM2's three). The gate is the only wall where no grammar stands: 24 of the 66 bodies
   written without one tried a forbidden thing (1.5B 12 of 22, 0.5B 9, SmolLM2 3).
-- **Under a grammar the call cannot be written, and the pull comes out as a bare name.** `return fabs and b`, `d = fabs a -= b`, `return pown = n * n * n`: 8 of the 1.5B's 22 bodies under a grammar named the forbidden word. They are valid statement lists, the gate admits them, and they are wrong:
+- **Under a grammar the call cannot be written, and the pull comes out as a bare name.** `return fabs and b`, `d = fabs a -= b`, `return pown = n * n * n`: 8 of the 1.5B's 22 bodies under a grammar named the forbidden word. They are valid statement lists, the gate as it stood admitted them, and they were wrong -- since F-133 the derivation stage refuses them, because a builtin's name read as a variable is R24 on Ring:
   the grammar made the call impossible and did not make the task solvable. Only the param-write family stays writable (3 bodies, all refused).
 - **The models found a hole the court had not.** The first draft of the gate treated a for-in variable as a local; on Ring and on Ring++ it is a REFERENCE into the list it walks, so `for x in aL x = 0 next` zeroes the caller's list. Three bodies changed verdict when the rule landed, all A10:
   two of the 1.5B's `for x in aL add(x, 0) next` (admitted, then an error at run time on numbers), and the 0.5B's `nC = 0 for x in aL x = 0 ok next return aL`, which **was scored right**: it zeroed the caller's list through the loop variable and returned it, the task done by the route its point forbids,
@@ -170,6 +172,38 @@ or an agent that proposes a second refinement after the first. The machine's CPU
 3. **A termination remedy is owed to the engine, and a keyword-aware identifier to the grammar.** Three of the six failures are a body that does not end; the decoder cannot tell a repeated line from a long program
    (`v22/k4/ENGINE_NOTES.md` section 3). Softanza's own naming convention (nName, cName, aName, oName, bName) would make `oknextreturn` an impossible identifier -- a grammar option to measure, not yet measured.
 4. **Not measured, so not claimed:** models above 1.5B, sampling, a per-model primer, more than one example, a METHOD point, a larger program, a refusal's reason given back to the model.
+
+## The gate's reason, given back once (2026-10-22)
+
+Every first body the gate refused -- 101: of the sixteen tasks 24, 17 and 10 (1.5B, 0.5B, SmolLM2), of the adversarial eleven 24, 17 and 9 -- asked again twice, in the same arm and under the same decoding (`r5_retry.py`):
+`reason` gives the stage and the gate's own words ("The gate refused that body at the constraint stage: 'fabs' is not a call 'dist2' allows. Write the body again so the gate admits it. Same rules, same format."), `neutral`
+says only "Write the body again. Same rules, same format." -- the control. The model sees its own first answer; the worked example is left out of both (the engine keeps 512 tokens), so the comparison that means something is
+reason against neutral. 202 bodies, greedy, judged by the gate as it stands (F-132, F-133). Predictions were written into the script before any result.
+
+| model | refused first bodies | reason: admitted | right | same body again | neutral: admitted | right | same body again |
+|---|---|---|---|---|---|---|---|
+| Qwen2.5-Coder-1.5B | 48 | 2 | 0 | 20 | 1 | 0 | 30 |
+| Qwen2.5-Coder-0.5B | 34 | 2 | 1 | 15 | 1 | 0 | 17 |
+| SmolLM2-135M | 19 | 0 | 0 | 12 | 1 | 0 | 12 |
+
+The adversarial bodies refused because they reached for a forbidden call or write, told exactly which: the 1.5B (14) -- with the reason 0 admitted, **12 reached for it again**, 10 of them the same body; with the bare re-ask 1 admitted (wrong), 13 again.
+The 0.5B (9): 0 admitted and 9 again under both. Task by task: `RESULTS_RETRY.md`; every body: `local/retry-*/results.json`.
+
+**Against the predictions.** That the reason would get at least 8 of the 1.5B's 14 admitted: **missed -- 0**. That on a body that does not end or does not parse the reason does no better than the bare re-ask, within two: held (2 against 0 on the sixteen,
+0 against 0 on the eleven). That a model which obeyed a task naming the forbidden call calls it again under the bare re-ask: held (13 of 14).
+
+**What it shows.**
+
+- **The reason does not steer a model this size.** Across 101 refusals the reason got 4 bodies admitted and 1 right; the bare re-ask 3 admitted and none right. Told `'pow' is not a call 'cube2' allows`, the 1.5B wrote `return pow(n, 3)` again; told
+  `'fabs' is not a call 'dist2' allows`, `d = fabs(a - b) return d` again. The request ("written as pow(n, 3)") outweighs the gate's words as it outweighed the allowlist in the prompt (HF-119).
+- **It changes something, not the right thing.** On the sixteen tasks' structural refusals the 1.5B repeated its body 5 of 22 times with the reason and 13 of 22 with the bare re-ask: the reason makes it rewrite, never into a body the gate admits and that is right.
+- **Where it complied, it complied with the letter.** `floor(n + 0.5)` became `floor + 0.5`; `for x in aL add(x, 0)` became `for x in aL zerolist[x] = 0` -- the forbidden name without the call, the function's own name taken for a list. The gate as it stood admitted
+  both (wrong answers): its derivation stage is `rnxc check`, which exempted every builtin's name and every name the program defines from the uninitialized-read rule, though Ring raises R24 on each (F-133). Fixed, and everything here re-judged: 3 retry bodies
+  and 20 first-run bodies of the same shape (among them the bare names of the adversarial section) moved from admitted-and-wrong to refused at the derivation stage; no body that was right moved.
+- **So at this size the gate is a filter and not a teacher**: it holds, it says why, and the model does not use the why. What the measurements point at is upstream: the pull is the request (HF-119), so a request that names what its point forbids is a
+  contradiction the harness can see before a model is asked.
+
+**Limits.** One round, greedy, three small models, the reason in prose; both conditions lack the worked example. Several rounds, a larger model, or a reason worded as an instruction ("the allowed calls are: none") is not measured.
 
 ## Limits of the adversarial measurement, stated
 

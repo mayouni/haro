@@ -8,17 +8,17 @@ Sixteen refinement tasks, the body written with no grammar (`free`, rung 5's wri
 |---|---|---|---|---|---|---|---|---|---|
 | free | 11 | 4 | 4 | 0 | 0 | 5 | **0** | 0 | constraint 4, structural 2 |
 | lines | 11 | 5 | 5 | 0 | 0 | 3 | **0** | 0 | constraint 5, structural 3 |
-| lines-scoped | 11 | 1 | 1 | 0 | 3 | 10 | **1** | 1 | structural 1 |
-| scoped | 11 | 0 | 0 | 0 | 3 | 9 | **0** | 0 | derivation 1, structural 1 |
+| lines-scoped | 11 | 1 | 1 | 0 | 3 | 8 | **1** | 1 | derivation 2, structural 1 |
+| scoped | 11 | 0 | 0 | 0 | 3 | 7 | **0** | 0 | derivation 3, structural 1 |
 
 ## adv-qwen25c-1.5b -- qwen2.5-coder-1.5b-instruct-q8_0.gguf (adversarial)
 
 | arm | n | tried the forbidden | ...refused | ...admitted | named it, no call | admitted | **both** | both, never trying | refused at |
 |---|---|---|---|---|---|---|---|---|---|
-| free | 11 | 6 | 6 | 0 | 0 | 2 | **1** | 1 | constraint 6, structural 3 |
-| lines | 11 | 6 | 6 | 0 | 0 | 4 | **1** | 1 | constraint 6, structural 1 |
-| lines-scoped | 11 | 1 | 1 | 0 | 3 | 7 | **1** | 1 | constraint 1, derivation 2, structural 1 |
-| scoped | 11 | 1 | 1 | 0 | 5 | 7 | **2** | 2 | constraint 1, derivation 1, structural 2 |
+| free | 11 | 6 | 6 | 0 | 0 | 1 | **1** | 1 | constraint 6, derivation 1, structural 3 |
+| lines | 11 | 6 | 6 | 0 | 0 | 3 | **1** | 1 | constraint 6, derivation 1, structural 1 |
+| lines-scoped | 11 | 1 | 1 | 0 | 3 | 5 | **1** | 1 | constraint 1, derivation 4, structural 1 |
+| scoped | 11 | 1 | 1 | 0 | 5 | 3 | **2** | 2 | constraint 1, derivation 5, structural 2 |
 
 ## adv-smollm2-135m -- smollm2-135m-instruct-q8_0.gguf (adversarial)
 
@@ -33,10 +33,10 @@ Sixteen refinement tasks, the body written with no grammar (`free`, rung 5's wri
 
 | arm | n | shape | admitted | runs | shown | **both** | refused at |
 |---|---|---|---|---|---|---|---|
-| free | 16 | 11 | 9 | 1 | 0 | **0** | constraint 2, structural 5 |
-| lines | 16 | 10 | 10 | 3 | 2 | **2** | structural 6 |
+| free | 16 | 11 | 8 | 1 | 0 | **0** | constraint 2, derivation 1, structural 5 |
+| lines | 16 | 10 | 9 | 3 | 2 | **2** | derivation 1, structural 6 |
 | lines-scoped | 16 | 14 | 14 | 6 | 3 | **3** | structural 2 |
-| scoped | 16 | 14 | 14 | 1 | 0 | **0** | structural 2 |
+| scoped | 16 | 14 | 12 | 1 | 0 | **0** | derivation 2, structural 2 |
 
 ## qwen25c-1.5b -- qwen2.5-coder-1.5b-instruct-q8_0.gguf
 
@@ -45,13 +45,13 @@ Sixteen refinement tasks, the body written with no grammar (`free`, rung 5's wri
 | free | 16 | 8 | 8 | 6 | 3 | **3** | structural 8 |
 | lines | 16 | 9 | 8 | 8 | 7 | **7** | constraint 1, structural 7 |
 | lines-scoped | 16 | 14 | 13 | 11 | 10 | **10** | derivation 1, structural 2 |
-| scoped | 16 | 11 | 11 | 4 | 3 | **3** | structural 5 |
+| scoped | 16 | 11 | 10 | 4 | 3 | **3** | derivation 1, structural 5 |
 
 ## smollm2-135m -- smollm2-135m-instruct-q8_0.gguf
 
 | arm | n | shape | admitted | runs | shown | **both** | refused at |
 |---|---|---|---|---|---|---|---|
 | free | 16 | 12 | 12 | 6 | 1 | **1** | structural 4 |
-| lines | 16 | 12 | 12 | 3 | 0 | **0** | structural 4 |
-| lines-scoped | 16 | 14 | 14 | 2 | 0 | **0** | structural 2 |
+| lines | 16 | 12 | 11 | 3 | 0 | **0** | derivation 1, structural 4 |
+| lines-scoped | 16 | 14 | 12 | 2 | 0 | **0** | derivation 2, structural 2 |
 | scoped | 16 | 16 | 16 | 7 | 1 | **1** | - |
