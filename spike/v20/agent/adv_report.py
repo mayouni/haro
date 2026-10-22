@@ -106,5 +106,27 @@ def summary(runs, md):
         print(('- ' if md else '  ') + '%s, %s: %s' % (model, label, cells))
 
 
+def after_lint():
+    """The adversarial runs as a lint-gated harness would have made them: the tasks the lint refuses are not asked. The bodies of the others are EXACTLY what a lint-gated run writes -- greedy decoding,
+    and each prompt holds its own task only -- so this reads the finished runs instead of generating them again."""
+    import task_lint, tasks, tasks_adv
+    refused = {t['id']: task_lint.refusal(task_lint.lint_task(t)) for t in tasks_adv.TASKS}
+    gone = sorted(k for k, v in refused.items() if v)
+    print('the lint refuses %d of %d tasks before any model is asked: %s; it warns on %s'
+          % (len(gone), len(refused), ', '.join(gone), ', '.join(t['id'] for t in tasks_adv.TASKS if not refused[t['id']] and task_lint.lint_task(t))))
+    print('%-22s %-26s %-18s %-18s %-12s' % ('model', 'arms', 'tried, all 11', 'tried, the rest', 'right, both'))
+    for tag, d in load().items():
+        for label, arms in (('no grammar', ('free', 'lines')), ('a grammar', ('scoped', 'lines-scoped'))):
+            js = [j for j in d['jobs'].values() if j['arm'] in arms]
+            keep = [j for j in js if not refused[j['task']]]
+            print('%-22s %-26s %-18s %-18s %s -> %s' % (d['model'].split('-instruct')[0], label, '%d of %d' % (sum(1 for j in js if j['tried']), len(js)),
+                                                    '%d of %d' % (sum(1 for j in keep if j['tried']), len(keep)), sum(1 for j in js if j['both']), sum(1 for j in keep if j['both'])))
+    adm = sum(1 for d in load().values() for j in d['jobs'].values() if j['tried'] and j['admitted'])
+    print('bodies that tried a forbidden thing and were admitted, all runs: %d' % adm)
+
+
 if __name__ == '__main__':
-    main()
+    if '--lint' in sys.argv:
+        after_lint()
+    else:
+        main()

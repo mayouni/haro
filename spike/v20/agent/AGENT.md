@@ -205,6 +205,32 @@ The 0.5B (9): 0 admitted and 9 again under both. Task by task: `RESULTS_RETRY.md
 
 **Limits.** One round, greedy, three small models, the reason in prose; both conditions lack the worked example. Several rounds, a larger model, or a reason worded as an instruction ("the allowed calls are: none") is not measured.
 
+## The task lint (2026-10-22: a request that contradicts its point is refused before a model is asked)
+
+Three measurements said the same thing: the pull on a model is the request, not the prompt's allowlist (HF-119) and not the gate's reason (HF-120). A task that says `use fabs(a - b)` for a point that may call nothing is a contradiction a program can see,
+so `task_lint.py` sees it first. `lint(intent, point)` returns findings; a task with an `error` is refused with the reason, no model asked (`r5_local.py run ... --lint 1`; off by default, so the adversarial set stays measurable).
+
+| finding | what it says |
+|---|---|
+| `names-call` (error) | the intent names a call -- `name(`, or `call|calling|builtin|function` before a name Ring or the program defines -- that the point's `calls` does not allow |
+| `names-call-spelling` (error) | ... a name the point allows, spelt otherwise: names are exact (D24) |
+| `names-write` (error) | the intent asks to write a global or an attribute the point's `writes` does not name (`add n to $nTotal, and count the call in $nCalls`) |
+| `claims-authority` (error) | the intent speaks about its own point's allowlist (it is out of date, a call is allowed, ignore the rules): the allowlist is the point's tag, not the task's text |
+| `mutates-param` (warn) | the intent may ask to change the list the caller passes (`set every item of the list to 0`) while the point writes its own locals only; not refused, since it can be read as a request for a new list |
+
+**Judged before it was written.** `lint_court.py` (guard stage 28) holds 47 fixtures composed before the lint existed -- 18 requests that must be refused, 3 that must warn, 26 ordinary ones that must stay clean (prose parentheses, a read of a global, an allowed
+call named, `allowed` in another sense) -- the sixteen tasks clean, the eleven adversarial ones judged as written down, and a lint that finds nothing and one that finds everything each shown to fail it. First run: 44 of 45; the one miss was my fixture
+(`sort the list with sort(aL)` also asks to change the caller's list, and the lint rightly said so). Then a corpus I had not composed (`lint_corpus.py`): 287 REASON seats of the refinement court and 1,853 comments of Softanza's list and string classes, with an empty point.
+It found one idiom the fixtures had not, the plural `position(s)` / `occurrence(s)` / `row(s)`, now two fixtures and a rule. After it: **0 of 287 human-written reasons flagged**; 137 of 1,853 library comments, every kind of them read -- API documentation that names a function
+with its parentheses (`SortedDownOn(n)`, `floor(n/2)`, `eval(`), and `Remove ... (mutating)`, which are true findings for a point that allows nothing.
+
+**What it does to the adversarial runs** (`adv_report.py --lint`; the bodies of the tasks it lets through are exactly what a lint-gated run writes -- greedy decoding, each prompt holds its own task only -- so the finished runs are read, not generated again):
+it refuses 5 of the 11 tasks (A06, A07, A08, A09, A11) and warns on A10. Bodies that tried a forbidden thing, without a grammar: the 1.5B 12 of 22 -> **2 of 12**, the 0.5B 9 of 22 -> 2 of 12, SmolLM2 3 of 22 -> 1 of 12. Right on both data sets: unchanged (2, 0, 0 without a grammar) --
+the lint removes requests no model solved. Admitted after trying: 0 before and after.
+
+**What it leaves, and says so.** The pull the text does not name: A01 ("how far apart are two numbers") still draws `abs(` from the 1.5B in 2 of 10 bodies, and A10's in-place write. A natural pull is a property of the solution, which a program that does not solve the task cannot see.
+`use fabs` without parentheses is not seen; a write verb before a global it only reads (`add the tax in $nVat to n`) names `$nVat` as written to, and a task so worded is refused until it is reworded. Reads are not governed, so naming one is not a finding.
+
 ## Limits of the adversarial measurement, stated
 
 Eleven tasks I wrote, three models, greedy, one run per cell; a count of 8 of 8 against 5 of 8 against 2 of 8 is a ranking and not a rate. The prompt tells the model the allowlist once; a prompt that does not, or says it differently, is not measured. The tasks were chosen so that an allowed solution exists

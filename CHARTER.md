@@ -1043,6 +1043,10 @@ states principle 14.
   point allows, an operator applied to an object (an implicit call of `operator`), a read of a global, output, or termination -- each pinned by the bypass court as a limit, none a verdict. Not built here: a `reads` attribute, closed by default,
   is the next rung-5 item and closes the reads and, with them, the objects a body can reach but are not its own. Decided for Haro, not built: no implicit dispatch -- an operator on an object, an accessor and a constructor are calls that are
   written, so that an allowlist of calls is the whole of what a body can run. *Cost:* Haro programs written like Ring's overloaded classes need the call spelt out; the gate then needs no types to be exact.
+- **D29 -- a task whose text names what its point forbids is refused before any model is asked** (rung 5, ruled on the author's delegation, 2026-10-22: "go ahead with the task lint"; HF-119, HF-120, HF-121). The allowlist is the point's
+  tag, not the request's text: a task that names a call its point does not allow, asks to write a global its point does not name, or claims the allowlist is out of date is a contradiction, and the harness refuses it with the reason
+  (`task_lint.py`) rather than asking a model to resolve it -- a 1.5B model resolved it for the request in 8 of 8 bodies, and the gate's reason did not move it. A request that may ask to change the caller's list only warns. *Cost:* a task that names a
+  call it allows must spell it exactly (D24); a task is refused until it is reworded, including one that only reads a global after a write verb; and the harness that WANTS to measure the pull (the adversarial set) runs with the lint off, which is why `--lint` is opt-in.
 - **D23 -- `rnxc fmt` is a Ring++ feature, not held for Haro** (CODEGRAPH Q4, ruled on the author's delegation, 2026-10-05: "take
   whatever decision you think is wiser on my behalf"). It is a verb of the one binary (commitment 5), depends on nothing of Haro's, is
   judged against the oracle and refuses what Ring refuses (58 of 6,061 Softanza files, 57 of them Ring's own refusals). It ships inside

@@ -3035,6 +3035,7 @@ def stage27():
 BODY_COURT = os.path.join(HERE, 'v20', 'agent', 'body_court.py')
 AGENT_SELFTEST = os.path.join(HERE, 'v20', 'agent', 'r5_agent.py')
 BYPASS_COURT = os.path.join(HERE, 'v20', 'agent', 'bypass_court.py')
+LINT_COURT = os.path.join(HERE, 'v20', 'agent', 'lint_court.py')
 
 
 def stage28():
@@ -3043,15 +3044,20 @@ def stage28():
     lines grammar each held by the engine's decoder with every gold body accepted, what the gate would refuse for the shape rejected, a broken and a loosened grammar caught, and the grammar derived
     from a program's own point identical to the task-built one. And the bypass court (v20/agent/bypass_court.py): 50 bodies in two subjects written to reach what a point does not allow -- a forbidden call by
     nine routes, a forbidden write by sixteen, a for-in variable written through to a list, an accessor run by a member, a sentence closed from inside its TO -- judged by what the program DOES, each refused or inert except the named
-    limits (an allowed callee's effects, operators on objects, reads, output, termination), and a gate that admits everything shown to fail it. No model is loaded: the model runs
+    limits (an allowed callee's effects, operators on objects, reads, output, termination), and a gate that admits everything shown to fail it. And the task lint (v20/agent/lint_court.py, task_lint.py): 47 fixtures composed before the lint -- 18 requests that name a call, a write or an authority their point does not give
+    (refused), 3 that may ask to change the caller's list (warned), 26 ordinary ones (clean: prose parentheses, a read of a global, `position(s)`) -- the sixteen tasks clean and the eleven adversarial ones judged as
+    written down, a lint that finds nothing and one that finds everything shown to fail it. No model is loaded: the model runs
     (r5_local.py) are measurements, not guards."""
     print('stage 28 -- the body grammar of an agent: v20/agent/r5_agent.py selftest and v20/agent/body_court.py (no model loaded)')
     failures = 0
-    for label, script, args in (('selftest', AGENT_SELFTEST, ['selftest']), ('adversarial selftest', AGENT_SELFTEST, ['selftest', '--set', 'adv']), ('body court', BODY_COURT, []), ('bypass court', BYPASS_COURT, [])):
+    for label, script, args in (('selftest', AGENT_SELFTEST, ['selftest']), ('adversarial selftest', AGENT_SELFTEST, ['selftest', '--set', 'adv']), ('body court', BODY_COURT, []), ('bypass court', BYPASS_COURT, []), ('lint court', LINT_COURT, [])):
         p = subprocess.run([sys.executable, script] + args, capture_output=True, cwd=ROOT, timeout=3600)
         out = p.stdout.decode('utf-8', 'replace').replace(chr(13) + chr(10), chr(10))
         for line in out.splitlines():
-            if label == 'bypass court':
+            if label == 'lint court':
+                if 'FAIL' in line or 'fixtures:' in line or 'real tasks' in line or 'teeth' in line or line.startswith('LINT COURT'):
+                    print(line)
+            elif label == 'bypass court':
                 if 'FAIL' in line or 'by family' in line or 'body grammar of the point' in line or 'teeth' in line or line.startswith('BYPASS COURT'):
                     print(line)
             elif line.startswith('  ') or line.startswith('r5_agent selftest') or line.startswith('BODY COURT') or 'grammar:' in line:

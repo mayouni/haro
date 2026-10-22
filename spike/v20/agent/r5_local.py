@@ -1,6 +1,6 @@
 """r5_local.py -- a LOCAL model as the agent of rung 5: the sixteen refinement tasks (tasks.py), the body written two ways, judged by the gate and by running the program.
 
-    python r5_local.py run <model.gguf> <tag> [--arms free,scoped] [--tasks R01,R02] [--max-tokens 100] [--set adv]
+    python r5_local.py run <model.gguf> <tag> [--arms free,scoped] [--tasks R01,R02] [--max-tokens 100] [--set adv] [--lint 1]
     python r5_local.py judge <model.gguf> <tag> ...            judge what has finished, generate nothing (written under <tag>-partial)
     python r5_local.py report                                  the table of every run kept under local/
 
@@ -87,15 +87,26 @@ def demo_check():
     return ea
 
 
-def run(model, tag, arms=('free', 'scoped'), only=None, max_tokens=100, judge_only=False, count_only=False):
+LINT_REFUSED = {}      # task id -> the lint's reason, for a run with --lint (written into results.json)
+
+
+def run(model, tag, arms=('free', 'scoped'), only=None, max_tokens=100, judge_only=False, count_only=False, lint=False):
     exp = json.load(open(A.expected_path()))
     demo_exp = demo_check()
     work = os.path.join(ROOT, 'runtime', 'k4work', 'r5-' + tag)
     os.makedirs(work, exist_ok=True)
     man, meta = [], {}
+    LINT_REFUSED.clear()
     for t in T.TASKS:
         if only and t['id'] not in only:
             continue
+        if lint:
+            import task_lint
+            why = task_lint.refusal(task_lint.lint_task(t))
+            if why:                 # the task names what its point forbids: refused before any model is asked
+                LINT_REFUSED[t['id']] = why
+                print('lint refused %s: %s' % (t['id'], why))
+                continue
         for arm in arms:
             family = 'lines' if arm in LINES_ARMS else 'one'
             pf = 'p_%s_%s.txt' % (t['id'], family)
@@ -180,7 +191,7 @@ def judge_run(tag, meta, model, work, exp):
                         'tok_per_s': round(sum(x.get('tokens', 0) for x in ms) / max(1e-9, sum(x.get('seconds', 0) for x in ms)), 1)}
     outdir = os.path.join(LOCAL, tag)
     os.makedirs(outdir, exist_ok=True)
-    json.dump({'tag': tag, 'set': T.SET, 'model': os.path.basename(model), 'summary': summary, 'jobs': {k: {kk: vv for kk, vv in v.items()} for k, v in meta.items()}}, open(os.path.join(outdir, 'results.json'), 'w'), indent=1)
+    json.dump({'tag': tag, 'set': T.SET, 'lint_refused': dict(LINT_REFUSED), 'model': os.path.basename(model), 'summary': summary, 'jobs': {k: {kk: vv for kk, vv in v.items()} for k, v in meta.items()}}, open(os.path.join(outdir, 'results.json'), 'w'), indent=1)
     print('\n%s' % tag)
     print('  %-8s %3s %6s %9s %6s %6s %6s   refused at' % ('arm', 'n', 'shape', 'admitted', 'runs', 'shown', 'both'))
     for arm in sorted(summary):
@@ -233,6 +244,6 @@ if __name__ == '__main__':
             i += 2
         T.use(opt.get('--set', ''))
         run(model, tag, arms=tuple(opt.get('--arms', 'free,scoped').split(',')), only=opt['--tasks'].split(',') if '--tasks' in opt else None,
-            max_tokens=int(opt.get('--max-tokens', 100)), judge_only=(a[0] == 'judge'), count_only=(a[0] == 'count'))
+            max_tokens=int(opt.get('--max-tokens', 100)), judge_only=(a[0] == 'judge'), count_only=(a[0] == 'count'), lint=(opt.get('--lint', '0') == '1'))
     else:
         raise SystemExit(__doc__)
