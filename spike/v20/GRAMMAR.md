@@ -293,7 +293,7 @@ state it returns to: the event's inverse transaction carries the body, comments 
 | stage | for a body |
 |---|---|
 | structural | TO parses, and is a statement list and nothing else: it defines nothing (`func`, `class`, `package`), loads nothing, holds no `eval`, no `call` by name, no brace block, no comment (the gate does not judge prose, and a model's comment can mislead the reader of the diff), no `bye`; FROM is the digest now; the refined program reads back as itself |
-| constraint | every call is one `calls` names, by its declared spelling -- builtins too, and the function's own name; every write outside the frame is one `writes` names |
+| constraint | every call is one `calls` names, by its declared spelling -- builtins too, and the function's own name; every write outside the frame is one `writes` names, and a loop variable, a `give` target and a `catch` binding are writes like any other (2026-10-22, HF-118); a member read or assignment whose class declares `get<name>` / `set<name>` is a CALL of it -- Ring runs it by itself -- and must be named in `calls` (`This.x` and `self.x` are exempt, as on Ring) |
 | governance, trust | as for every point |
 | derivation | `rnxc check` on the refined program reports no error or warning it did not report on the program before -- a wrong argument count (`rpp/type-arity`), a name nothing assigns (`rpp/uninitialized-variable`) -- and the refusal quotes it; a program whose absence rules the checker shuts (an eval, a loadlib) is not refined by a body at all |
 
@@ -307,7 +307,7 @@ them on the oracle and on rnxc before and after (`[]` then `[120]` for a body wr
 write surface (section 6) fixes a block point's target and the digest FROM must be, and leaves TO one line of text, which no context-free grammar can
 say is Ring; and five controls, each rule taken out in turn and caught by at least one fixture (HF-97).
 
-**Not built, named:** ~~refining a BLOCK point's own `calls` and `writes` as rules~~ (built 2026-10-20, section 13: widening is a tier-4 act, as widening options is); a body proposed with a comment; a human's edit of a body read back by the audit as a block refinement (it is counted a raw
+**Not built, named:** a `reads` attribute, closed by default (a body reads any global today: the bypass court pins it as a limit with operators on objects, an allowed callee's effects, output and termination -- HF-118, D28); ~~refining a BLOCK point's own `calls` and `writes` as rules~~ (built 2026-10-20, section 13: widening is a tier-4 act, as widening options is); a body proposed with a comment; a human's edit of a body read back by the audit as a block refinement (it is counted a raw
 edit: the gate governs proposals, the human writes the body); a per-call check that a callee in `calls` is called with the right arguments before
 the compiler is asked (the compiler answers it at derivation); the kinds `type`, `custom`.
 

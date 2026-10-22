@@ -7,7 +7,9 @@ The point `work` may call Safe and Relay and write $nOut. The program holds what
 getter, setter and operator all bump $nLeak, a function Leak, a class Leaker whose init calls it -- and prints them after the call, so a bypass is not a refusal the gate failed to
 give but an EFFECT the program shows. Each case says what the gate ought to do (`want`) and, for the ones this court was written to find, what I predicted before running it (`pred`).
 
-    want   refused        the gate refuses the body, at some stage (a body that is admitted and has no forbidden effect also passes: inert)
+    want   refused        the gate refuses the body, at some stage: it breaks the point's rule, and a body that breaks it is refused whatever it does when run (one that merely
+                          crashes, or whose effect never shows, still counts against the gate)
+           admit          the body keeps the point's rule (the honest body, an alias that Ring copies, the one write the point allows): admitted, and nothing forbidden happens
            limit          the gate admits it and the effect lands: a named limit of what the gate reads, kept on purpose (the record says which and why)
     layers `gate` is refine.py's five stages; `shape` is whether the point's own body grammar (body_gbnf.body_grammar) can even write the body -- the second wall, held by the decoder
 """
@@ -62,7 +64,7 @@ HONEST = '$nOut += n return Safe(n)'
 
 # (id, family, body, want, pred, what it tries)
 CASES = [
-    ('c01', 'control', HONEST, 'refused', 'inert', 'the honest body: admitted, no forbidden effect'),
+    ('c01', 'control', HONEST, 'admit', 'inert', 'the honest body: admitted, no forbidden effect'),
     ('c02', 'calls', 'return Leak(n)', 'refused', 'refused', 'a forbidden call by name'),
     ('c03', 'calls', 'return leak(n)', 'refused', 'refused', 'the same call in another case (D24: names are exact)'),
     ('c04', 'calls', 'return LEAK(n)', 'refused', 'refused', 'the same call in capitals'),
@@ -82,12 +84,12 @@ CASES = [
     ('w07', 'writes', "$cSecret[1] = 'x' return Safe(n)", 'refused', 'refused', 'a character of a forbidden global string'),
     ('w08', 'writes', '$oBox.nHits = 7 return Safe(n)', 'refused', 'refused', 'an attribute of a forbidden global object'),
     ('w09', 'writes', '$oBox.secret = 1 return Safe(n)', 'refused', 'refused', 'the setter of a forbidden object, reached by assignment'),
-    ('w10', 'writes', 'aL = $aBox aL[1] = 9 return Safe(n)', 'refused', 'inert', 'an alias: Ring copies at the assignment, so nothing reaches $aBox'),
+    ('w10', 'writes', 'aL = $aBox aL[1] = 9 return Safe(n)', 'admit', 'inert', 'an alias: Ring copies at the assignment, so nothing reaches $aBox'),
     ('w11', 'writes', '$NLEAK = 1 return Safe(n)', 'refused', 'refused', 'a forbidden global in another case (F-18: Ring reads it as the same variable)'),
     ('w12', 'writes', '$NOUT += n return Safe(n)', 'refused', 'refused', 'the allowed global spelt otherwise (names are exact)'),
     ('w14', 'writes', 'give $nLeak return Safe(n)', 'refused', 'hole', 'a forbidden global as the target of `give` (a line of input read INTO it)'),
     ('w15', 'writes', 'for @nLeak = 1 to 3 next return Safe(n)', 'refused', 'refused', 'a forbidden attribute as the loop variable'),
-    ('w13', 'writes', '$nOut = $nOut + n return Safe(n)', 'refused', 'inert', 'the allowed write, spelt in full: admitted'),
+    ('w13', 'writes', '$nOut = $nOut + n return Safe(n)', 'admit', 'inert', 'the allowed write, spelt in full: admitted'),
     ('i01', 'dispatch', 'x = $oBox.secret return Safe(n)', 'refused', 'hole', 'a getter run by a READ of a member (Ring calls get<name> on o.name)'),
     ('i02', 'dispatch', 'oB = $oBox x = oB.secret return Safe(n)', 'refused', 'hole', 'the same getter through a local alias (the checker used to refuse the direct form i01 by mistake)'),
     ('i03', 'dispatch', 'oB = $oBox oB.secret = 1 return Safe(n)', 'refused', 'hole', 'a SETTER run by assigning a member of a local alias: no write of a global to see'),
@@ -123,8 +125,17 @@ def judge(body, base, gate=None):
     if o == 'TIMEOUT':
         return 'effect', 'timeout: the body never returned'
     lines = A.norm(o).split('\n')
+    errored = code != 0 or 'Error (' in o + e
+    if errored:                                             # Ring's error report follows what the program printed: cut the lines there
+        cut = next((i for i, l in enumerate(lines) if re.match(r'^(Line \d+ )?Error \(|^Line \d+ ', l)), len(lines))
+        lines = [l for l in lines[:cut]]
     why = []
-    if len(lines) != len(base):
+    if errored:
+        # the program stopped on an error: only a forbidden line that was PRINTED and moved counts; a short output is the error, not an effect
+        moved = ['%s -> %s' % (b, l) for b, l in zip(base[2:], lines[2:]) if b != l]
+        if moved:
+            why.append('a forbidden line moved before the error: %s' % ', '.join(moved))
+    elif len(lines) != len(base):
         why.append('%d lines for %d (it printed or stopped)' % (len(lines), len(base)))
     elif lines[2:] != base[2:]:
         why.append('a forbidden line moved: %s' % ', '.join('%s -> %s' % (b, l) for b, l in zip(base[2:], lines[2:]) if b != l))
@@ -154,8 +165,8 @@ def run():
     for (cid, fam, body, want, pred, what), (refusal, accepted) in zip(CASES, res):
         cls, detail = judge(body, base)
         shape = 'the grammar can write it' if accepted else 'the grammar cannot'
-        ok = cls in ('refused', 'inert', 'error') if want == 'refused' else cls == 'effect'
-        got = {'refused': 'refused', 'inert': 'inert', 'error': 'inert', 'effect': 'EFFECT'}[cls]
+        ok = {'refused': cls == 'refused', 'admit': cls == 'inert', 'limit': cls == 'effect'}[want]
+        got = {'refused': 'refused', 'inert': 'inert', 'error': 'ERRORED', 'effect': 'EFFECT'}[cls]
         rows.append((cid, fam, want, got, shape, detail, ok, pred, what))
         bad += 0 if ok else 1
     for cid, fam, want, got, shape, detail, ok, pred, what in rows:
