@@ -227,6 +227,37 @@ class Box
 	func Grow(n)
 		@nCount += n * 2
 
+=== MT09 a method body reads the attributes its point names, and what it may write
+~~~ `@nOther` is read through its sigil and `This.nOther` is the same attribute: both are reads, and the point names neither. `@nCount` is in writes, so it may be read
+--- program
+? "start"
+
+class Box
+	@nCount = 3
+	@nOther = 9
+
+	# <R:METHOD name="Peek" params="n" writes="@nCount" reads="@nOther">
+	func Size()
+		return @nCount
+--- do
+DEFINE REFINE attr AS ( TARGET "Peek", KIND method, FROM "absent", TO "return @nSecret + n", AUTHOR "aicha", POSTURE trusted, REASON "try" ) => rejected constraint reads @nSecret, which 'Peek' does not allow
+DEFINE REFINE via_this AS ( TARGET "Peek", KIND method, FROM "absent", TO "return This.nSecret + n", AUTHOR "aicha", POSTURE trusted, REASON "try" ) => rejected constraint reads @nSecret
+DEFINE REFINE named AS ( TARGET "Peek", KIND method, FROM "absent", TO "@nCount += @nOther + n return @nCount", AUTHOR "mansour", POSTURE trusted, REASON "peek" ) => admitted tx=node.create
+--- text
+? "start"
+
+class Box
+	@nCount = 3
+	@nOther = 9
+
+	# <R:METHOD name="Peek" params="n" writes="@nCount" reads="@nOther">
+	func Size()
+		return @nCount
+
+	func Peek(n)
+		@nCount += @nOther + n
+		return @nCount
+
 === L28 a METHOD tag stands inside a class, with a member below it
 ~~~ after the last member the tag ends the class and lands at the top level, where the printer moves it -- so the lift names it
 --- program

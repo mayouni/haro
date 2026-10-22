@@ -8,12 +8,13 @@ call nothing is a contradiction a program can see, so the harness sees it first:
     error  names-call            the intent names a call (`name(`, or `call|calling|builtin|function` before a name Ring or the program defines) that the point's `calls` does not allow
            names-call-spelling   ... a name the point allows, spelt otherwise (D24: names are exact, and a look-alike is refused)
            names-write           the intent asks to write a global or an attribute (`$x`, `@x`) that the point's `writes` does not name
+           names-read            the intent names a global or an attribute that the point's `reads` and `writes` do not (`reads` is closed by default, D30: a body reads only what it is given)
            claims-authority      the intent speaks about its own point's allowlist: it is out of date, a call is allowed, ignore the rules. The allowlist is the point's, not the task's
     warn   mutates-param         the intent may ask to change the list the caller passes (`set every item of the list to 0`) while the point writes its own locals only. Not refused: it can be read as a request
                                  for a new list, and the gate refuses the in-place body anyway
 
-What it does NOT see, and says so: a pull the text does not name (the natural body of "how far apart are two numbers" calls fabs); a read of a global (reads are not governed); prose that happens to hold a
-write verb before a global it only reads (`add the tax in $nVat to n` names $nVat as written to). Fixtures first, in lint_court.py.
+What it does NOT see, and says so: a pull the text does not name (the natural body of "how far apart are two numbers" calls fabs); prose that happens to hold a write verb before a global it only
+reads (`add the tax in $nVat to n` names $nVat as written to). Fixtures first, in lint_court.py.
 """
 import os, re, sys
 from dataclasses import dataclass
@@ -50,13 +51,14 @@ def _known(defined):
     return {b.lower() for b in refine.builtins()} | {d.lower() for d in defined}
 
 
-def lint(intent, calls='', writes='', own=(), params=(), defined=()):
+def lint(intent, calls='', writes='', own=(), params=(), defined=(), reads=''):
     """-> [Finding]. `own` the point's function name(s), `params` its parameters, `defined` the program's other functions (a name Ring or the program defines is a KNOWN callable)."""
     out = []
     text = ' '.join((intent or '').split())
     allowed = [c for c in (calls or '').split('|') if c]
     allowed_low = {c.lower() for c in allowed}
     writable = {w for w in (writes or '').split('|') if w}
+    readable = writable | {r for r in (reads or '').split('|') if r}          # what a body may write it may read
     own_low = {o.lower() for o in own} | {p.lower() for p in params}
     known = _known(defined)
     seen = set()
@@ -91,6 +93,15 @@ def lint(intent, calls='', writes='', own=(), params=(), defined=()):
                 hint = next((w for w in writable if w.lower() == tok.lower()), None)
                 out.append(Finding('error', 'names-write', clause, "the task asks to write %s, which the point does not allow (it may write: %s)%s"
                                    % (tok, ', '.join(sorted(writable)) or 'its own locals only', "; the declared spelling is %s" % hint if hint else '')))
+    # 3b. a read named: a global or an attribute in the intent that is neither readable nor already named as a write
+    for tm in re.finditer(r'[$@][A-Za-z_]\w*', text):
+        tok = tm.group(0)
+        if tok in readable or (tok, 'write') in seen or (tok, 'read') in seen:
+            continue
+        seen.add((tok, 'read'))
+        hint = next((r for r in readable if r.lower() == tok.lower()), None)
+        out.append(Finding('error', 'names-read', tok, "the task names %s, which the point does not let it read (it may read: %s)%s"
+                           % (tok, ', '.join(sorted(readable)) or 'no global and no attribute', "; the declared spelling is %s" % hint if hint else '')))
     # 4. a claim about the point's own allowlist
     claim = AUTHORITY.search(text)
     if not claim:
@@ -118,7 +129,7 @@ def refusal(findings):
 
 
 def task_point(t):
-    """(calls, writes, own names, params, the program's other functions) of a task of tasks.py / tasks_adv.py -- read from the task's program, as the gate reads it."""
+    """(calls, writes, own names, params, the program's other functions, reads) of a task of tasks.py / tasks_adv.py -- read from the task's program, as the gate reads it."""
     import refine, ids
     import tasks as T
     m = refine.Model(T.program(t, 'a'), {})
@@ -129,12 +140,12 @@ def task_point(t):
         sig = t['sig']
         own = (sig.split('(')[0].replace('func', '').strip(),)
         params = tuple(p.strip() for p in sig.split('(')[1].rstrip(') ').split(',') if p.strip())
-    return t['calls'], t['writes'], own, params, tuple(f for f in funcs if f.lower() not in {o.lower() for o in own})
+    return t['calls'], t['writes'], own, params, tuple(f for f in funcs if f.lower() not in {o.lower() for o in own}), t.get('reads', '')
 
 
 def lint_task(t):
-    calls, writes, own, params, defined = task_point(t)
-    return lint(t['intent'], calls=calls, writes=writes, own=own, params=params, defined=defined)
+    calls, writes, own, params, defined, reads = task_point(t)
+    return lint(t['intent'], calls=calls, writes=writes, own=own, params=params, defined=defined, reads=reads)
 
 
 if __name__ == '__main__':

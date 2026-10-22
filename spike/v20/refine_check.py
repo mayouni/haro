@@ -990,7 +990,7 @@ _orig_is_widening = refine.is_widening
 
 def is_widening_blind_to_allowlists(p, attr, frm, to):
     """an allowlist widening that is not counted as widening: a name added to `calls` or `writes` would then cost the point's own tier, not the heaviest"""
-    return False if attr in ('calls', 'writes') else _orig_is_widening(p, attr, frm, to)
+    return False if attr in ('calls', 'writes', 'reads') else _orig_is_widening(p, attr, frm, to)
 
 
 _orig_apply_prim = refine.apply_prim
@@ -1412,6 +1412,7 @@ def main():
         check(nbad >= floor, 'D the control, %s, fails %d fixture(s) (at least %d)' % (label, nbad, floor))
     for label, kw, floor in (       # the BLOCK kind's rules, each taken out in turn, over its own fixtures
             ('a body held to no calls and no writes', {'block_constraint': lambda *a: None}, 3),
+            ('a body that reads whatever globals it likes (reads, D30)', {'body_reads': lambda items: []}, 3),      # B12, AL09 and MT09: one fixture each carries `reads` (I wrote 4 before measuring; it is 3)
             ('a body whose shape is never asked', {'body_shape_error': lambda *a: None}, 1),
             ('a body lowering that keeps no statement', {'lower_block': lower_block_keeping_nothing}, 2),
             ('a derivation whose compiler finds nothing', {'rnxc_findings': lambda text: ([], [])}, 2),
@@ -1422,7 +1423,7 @@ def main():
             ('a name Ring refuses accepted as a function or method name', {'not_a_name': lambda word: False}, 1),
             ('a body never judged against its own point\'s rule', {'body_own_error': lambda g, p: None}, 3),
             ('an allowlist widening counted as an ordinary change', {'is_widening': is_widening_blind_to_allowlists}, 1),
-            ('a TO list for calls or writes that is never checked', {'allowlist_error': lambda g, p, attr, to: None}, 2)):
+            ('a TO list for calls, writes or reads that is never checked', {'allowlist_error': lambda g, p, attr, to: None}, 2)):
         with patched(**kw):
             nbad = n_failing(fb)
         check(nbad >= floor, 'D the control, %s, fails %d BLOCK/FUNCTION/METHOD fixture(s) (at least %d)' % (label, nbad, floor))

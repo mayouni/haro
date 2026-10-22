@@ -12,6 +12,7 @@ itself, and say it for THIS point:
     `while ... end`, a call -- no `func`, no `class`, no `load`, no brace, no `eval`, no `call` by name: none has a production
   - a call is one of the point's `calls`, spelt as declared (D24); with none declared the body has no call at all
   - a write outside the frame is one of the point's `writes`: an assignment target is a local name, an indexed element, or one of those global/attribute names
+  - a READ of a global or an attribute is one of the point's `reads` or `writes` (what a body may write it may read): a `$x` or `@x` that is neither has no production
 What no context-free grammar says stays the gate's: that a callee takes that many arguments, that a name is assigned before it is read, that the text is read by Ring as the
 statements it means (the gate reads it back through the compiler's parser and compares the graphs).
 
@@ -25,8 +26,9 @@ def lit(s):
     return '"' + s.replace('\\', '\\\\').replace('"', '\\"') + '"'
 
 
-def expr_rules(cl):
-    """The expression rules both shapes share: Ring's precedence, `not` over one comparison chain, the point's calls and nothing else that calls."""
+def expr_rules(cl, rl=()):
+    """The expression rules both shapes share: Ring's precedence, `not` over one comparison chain, the point's calls and nothing else that calls, and a global or an attribute only
+    when it is one of `rl` (the point's reads and writes)."""
     R = []
 
     def rule(name, body):
@@ -44,7 +46,11 @@ def expr_rules(cl):
     if cl:
         atoms.insert(2, 'call')
     rule('atom', ' | '.join(atoms))
-    rule('ref', '[$@]? id ("[" expr "]")*')
+    if rl:
+        rule('ref', 'gref | id ("[" expr "]")*')
+        rule('gref', '(' + ' | '.join(lit(r) for r in rl) + ') ("[" expr "]")*')
+    else:
+        rule('ref', 'id ("[" expr "]")*')
     if cl:
         rule('call', '(' + ' | '.join(lit(c) for c in cl) + ') "(" args? ")"')
     rule('args', 'expr (", " expr)*')
@@ -61,9 +67,19 @@ def targets(wl):
     return R
 
 
-def body_grammar(calls='', writes=''):
+def readable(writes='', reads=''):
+    """What a body may read of the world outside its frame: its `reads` and its `writes`, each once, in the order declared."""
+    out = []
+    for n in [x for x in (reads or '').split('|') if x] + [x for x in (writes or '').split('|') if x]:
+        if n[:1] in ('$', '@') and n not in out:
+            out.append(n)
+    return out
+
+
+def body_grammar(calls='', writes='', reads=''):
     cl = [c for c in (calls or '').split('|') if c]
     wl = [w for w in (writes or '').split('|') if w]
+    rl = readable(writes, reads)
     R = []
 
     def rule(name, body):
@@ -84,14 +100,15 @@ def body_grammar(calls='', writes=''):
     rule('forin', '"for " id " in " expr " " stmts " next"')
     rule('whl', '"while " expr " " stmts " end"')
     R.extend(targets(wl))
-    R.extend(expr_rules(cl))
+    R.extend(expr_rules(cl, rl))
     return '\n'.join(R) + '\n'
 
 
-def lines_grammar(calls='', writes='', depth=3, sentinel='<<END>>'):
+def lines_grammar(calls='', writes='', depth=3, sentinel='<<END>>', reads=''):
     """The same body as lines: a statement a line, a block indented a tab a level (counted by named rules, to `depth` levels below the top), then the sentinel line."""
     cl = [c for c in (calls or '').split('|') if c]
     wl = [w for w in (writes or '').split('|') if w]
+    rl = readable(writes, reads)
     R = []
 
     def rule(name, body):
@@ -119,7 +136,7 @@ def lines_grammar(calls='', writes='', depth=3, sentinel='<<END>>'):
         else:
             rule('s%d' % d, pre + 'simple ' + NL)
     R.extend(targets(wl))
-    R.extend(expr_rules(cl))
+    R.extend(expr_rules(cl, rl))
     return '\n'.join(R) + '\n'
 
 

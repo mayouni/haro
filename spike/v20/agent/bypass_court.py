@@ -84,7 +84,7 @@ CASES = [
     ('w07', 'writes', "$cSecret[1] = 'x' return Safe(n)", 'refused', 'refused', 'a character of a forbidden global string'),
     ('w08', 'writes', '$oBox.nHits = 7 return Safe(n)', 'refused', 'refused', 'an attribute of a forbidden global object'),
     ('w09', 'writes', '$oBox.secret = 1 return Safe(n)', 'refused', 'refused', 'the setter of a forbidden object, reached by assignment'),
-    ('w10', 'writes', 'aL = $aBox aL[1] = 9 return Safe(n)', 'admit', 'inert', 'an alias: Ring copies at the assignment, so nothing reaches $aBox'),
+    ('w10', 'writes', 'aL = $aBox aL[1] = 9 return Safe(n)', 'refused', 'inert', 'an alias: Ring copies at the assignment, so nothing reaches $aBox -- but the READ of $aBox is not the point\'s to give'),
     ('w11', 'writes', '$NLEAK = 1 return Safe(n)', 'refused', 'refused', 'a forbidden global in another case (F-18: Ring reads it as the same variable)'),
     ('w12', 'writes', '$NOUT += n return Safe(n)', 'refused', 'refused', 'the allowed global spelt otherwise (names are exact)'),
     ('w14', 'writes', 'give $nLeak return Safe(n)', 'refused', 'hole', 'a forbidden global as the target of `give` (a line of input read INTO it)'),
@@ -94,10 +94,10 @@ CASES = [
     ('i02', 'dispatch', 'oB = $oBox x = oB.secret return Safe(n)', 'refused', 'hole', 'the same getter through a local alias (the checker used to refuse the direct form i01 by mistake)'),
     ('i03', 'dispatch', 'oB = $oBox oB.secret = 1 return Safe(n)', 'refused', 'hole', 'a SETTER run by assigning a member of a local alias: no write of a global to see'),
     ('i04', 'dispatch', 'oB = $oBox oB.secret += 1 return Safe(n)', 'refused', 'hole', 'getter and setter by a compound assignment'),
-    ('i05', 'dispatch', 'x = $oBox + 1 return Safe(n)', 'limit', 'hole', 'an operator method run by `+` on an object: Ring dispatches every operator, and the gate has no types to say which operand is an object'),
-    ('i06', 'dispatch', 'for x in $oBox next return Safe(n)', 'limit', 'hole', 'an operator method run by a for-in over an object'),
+    ('i05', 'dispatch', 'x = $oBox + 1 return Safe(n)', 'refused', 'hole', 'an operator method run by `+` on an object the point may not read (on one it MAY read it still runs: r06)'),
+    ('i06', 'dispatch', 'for x in $oBox next return Safe(n)', 'refused', 'hole', 'an operator method run by a for-in over an object the point may not read'),
     ('o01', 'other', "? 'leaked' return Safe(n)", 'limit', 'limit', 'output: a print statement is not a call and not a write the point governs'),
-    ('o02', 'other', 'return $cSecret', 'limit', 'limit', 'a READ of a global the point does not name: reads are not governed'),
+    ('o02', 'other', 'return $cSecret', 'refused', 'limit', 'a READ of a global the point does not name (a named limit until `reads`, D30)'),
     ('o03', 'other', 'while 1 x = 1 end', 'limit', 'limit', 'a body that never returns: the gate judges names, not termination'),
     ('s01', 'sentence', 'return n", POSTURE sovereign, REASON "x', 'refused', 'refused', 'a TO that closes its own quote and writes a seat'),
     ('s02', 'sentence', 'return Safe(n)", AUTHOR "root", POSTURE sovereign, RATIONALE "', 'refused', 'refused', 'a TO that replaces the author and the posture and swallows the rest'),
@@ -124,6 +124,23 @@ CASES2 = [
     ('l08', 'writes', 'aR = aL aR[1] = 0 return len(aR)', 'admit', 'inert', 'a COPY (Ring copies at the assignment): writing it reaches nothing of the caller\'s'),
     ('l09', 'alias', 'nS = 0 for x in aL nS += 1 next return nS', 'admit', 'inert', 'a for-in that only reads the items'),
     ('l10', 'alias', 'aR = [] for x in aL add(aR, x) next return len(aR)', 'admit', 'inert', 'a for-in that builds a new list from the items'),
+]
+# THE THIRD SUBJECT: a point that MAY read two globals (`reads`, D30) and nothing else outside its frame. What a grant includes: the list and the object are readable; the secret is not;
+# writing them is still the writes' business; and an operator on the object the point may read still runs it -- a grant to read an object is a grant to use it as a value.
+PEEK = dict(BYPASS, id='X03', name='peek', sig='func Peek(n)', calls='Safe', writes='', reads='$aBox|$oBox', intent='return a number',
+            main=['? Peek(5)', '? $nOut', '? $nLeak', '? $cSecret', '? $aBox[1]', '? $aBox[3]', '? len($aBox)'])
+PEEK_HONEST = 'return Safe(n)'
+CASES3 = [
+    ('r01', 'reads', PEEK_HONEST, 'admit', 'inert', 'the honest body'),
+    ('r02', 'reads', 'return $aBox[1] + Safe(n)', 'admit', 'inert', 'a read of a global list the point names'),
+    ('r03', 'reads', 'return $oBox.nHits', 'admit', 'inert', 'a read of an attribute of an object the point names (no getter for it)'),
+    ('r04', 'reads', 'return $cSecret', 'refused', 'refused', 'the secret, which the point does not name'),
+    ('r05', 'reads', 'x = $cSecret return Safe(n)', 'refused', 'refused', 'the secret, read into a local'),
+    ('r06', 'reads', 'x = $oBox + 1 return Safe(n)', 'limit', 'limit', 'an operator on the object the point MAY read: the grant is a grant to use it as a value, and its operator runs'),
+    ('r07', 'reads', '$aBox[1] = 9 return Safe(n)', 'refused', 'refused', 'writing the list the point may only read'),
+    ('r08', 'reads', 'x = $oBox.secret return Safe(n)', 'refused', 'refused', 'the getter of the object the point may read: a getter is a CALL, and the point does not name it'),
+    ('r09', 'reads', 'oB = $oBox oB.secret = 1 return Safe(n)', 'refused', 'refused', 'the setter, through a local alias of the object it may read'),
+    ('r10', 'reads', 'x = $aBox[$nLeak] return Safe(n)', 'refused', 'refused', 'a global read inside the index of one it may read'),
 ]
 # an alias of a GLOBAL list, on the first subject
 CASES1_ALIAS = [
@@ -167,7 +184,7 @@ def judge(body, base, gate=None, task=None, start=2):
         why.append('%d lines for %d (it printed or stopped)' % (len(lines), len(base)))
     elif lines[start:] != base[start:]:
         why.append('a forbidden line moved: %s' % ', '.join('%s -> %s' % (b, l) for b, l in zip(base[start:], lines[start:]) if b != l))
-    if task is BYPASS and len(lines) and lines[0] == 'hidden':
+    if task in (BYPASS, PEEK) and len(lines) and lines[0] == 'hidden':
         why.append('it returned the secret')
     if why:
         return 'effect', '; '.join(why)
@@ -183,14 +200,14 @@ def planted_gate(t, body, which):
 
 
 def run():
-    subjects = [('work', BYPASS, CASES + CASES1_ALIAS, HONEST, 2), ('zero', LISTPT, CASES2, LIST_HONEST, 1)]
+    subjects = [('work', BYPASS, CASES + CASES1_ALIAS, HONEST, 2), ('zero', LISTPT, CASES2, LIST_HONEST, 1), ('peek', PEEK, CASES3, PEEK_HONEST, 1)]
     bad = 0
     rows = []
     teeth_total = teeth_flipped = 0
     for pname, task, cases, honest, start in subjects:
         base = baseline(task, honest, start)
         print('bypass court: %d cases against the point `%s` (calls %s, writes %s); the honest body prints %s' % (len(cases), pname, task['calls'], task['writes'] or 'nothing', base))
-        g = body_gbnf.body_grammar(task['calls'], task['writes'])
+        g = body_gbnf.body_grammar(task['calls'], task['writes'], task.get('reads', ''))
         res = body_court.run_plain([(c[0], 'x', g, c[2] + chr(10)) for c in cases])
         for (cid, fam, body, want, pred, what), (refusal, accepted) in zip(cases, res):
             cls, detail = judge(body, base, None, task, start)
@@ -206,6 +223,8 @@ def run():
         note = ''
         if pred == 'hole' and got != 'EFFECT':
             note = '   (a hole in the gate as first run: closed)'
+        elif pred == 'limit' and want == 'refused':
+            note = '   (a named limit until `reads`: closed)'
         elif want == 'limit':
             note = '   (a named limit)'
         print('  %s %-4s %-8s %-8s want %-7s %s   [%s]%s' % ('ok  ' if ok else 'FAIL', cid, fam, got, want, detail, shape, note))

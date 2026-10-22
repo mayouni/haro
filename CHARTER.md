@@ -1047,6 +1047,11 @@ states principle 14.
   tag, not the request's text: a task that names a call its point does not allow, asks to write a global its point does not name, or claims the allowlist is out of date is a contradiction, and the harness refuses it with the reason
   (`task_lint.py`) rather than asking a model to resolve it -- a 1.5B model resolved it for the request in 8 of 8 bodies, and the gate's reason did not move it. A request that may ask to change the caller's list only warns. *Cost:* a task that names a
   call it allows must spell it exactly (D24); a task is refused until it is reworded, including one that only reads a global after a write verb; and the harness that WANTS to measure the pull (the adversarial set) runs with the lint off, which is why `--lint` is opt-in.
+- **D30 -- a body reads only what its point names: `reads`, closed by default** (rung 5, ruled on the author's delegation, 2026-10-22: "go ahead with the reads attribute"; HF-118, HF-122). A BLOCK, FUNCTION or METHOD point carries
+  `reads="$x|@y"` beside `calls` and `writes`; absent, a body reads its parameters and locals and nothing outside its frame, and what it may write it may read. It is refined as the other allowlists are (widening a tier-4 act, narrowing refused
+  below what the body reads), enforced at the constraint stage, written into the body grammars and the task lint. Least authority had been stated for calls and writes and left open for reads, which is where a secret, a global object and its
+  operators were reachable. *Cost:* a body point written before this that reads a global it does not name is outside its own rule until its author names it; a grant to read an object includes using it as a value (its `operator` runs), which the
+  author sees in the tag and the court pins as a limit.
 - **D23 -- `rnxc fmt` is a Ring++ feature, not held for Haro** (CODEGRAPH Q4, ruled on the author's delegation, 2026-10-05: "take
   whatever decision you think is wiser on my behalf"). It is a verb of the one binary (commitment 5), depends on nothing of Haro's, is
   judged against the oracle and refuses what Ring refuses (58 of 6,061 Softanza files, 57 of them Ring's own refusals). It ships inside

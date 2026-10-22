@@ -298,6 +298,50 @@ DEFINE REFINE undo_again AS ( TARGET "double", KIND block, FROM "sha:34be9794a5f
 func Double(n)
 	return n * 2
 
+=== B12 a body reads the globals its point names, and what it may write -- and no other
+~~~ `reads` is closed by default, as `calls` and `writes` are: a body that names no `reads` reads its parameters and locals only. What a body may WRITE it may read (`$nCount += 1` reads $nCount);
+~~~ a plain write (`$nCount = 0`) reads nothing. Names are exact (D24), and a read inside an index or an argument is a read like any other
+--- program
+$nVat = 0.20
+$nOther = 5
+$nCount = 0
+? Gross(100)
+
+# <R:BLOCK name="gross">
+func Gross(nNet)
+
+# <R:BLOCK name="peek" reads="$nVat">
+func Peek()
+	return $nVat
+
+# <R:BLOCK name="count" writes="$nCount">
+func Count()
+--- do
+DEFINE REFINE taxed AS ( TARGET "gross", KIND block, FROM "sha:e3b0c44298fc", TO "return nNet + nNet * $nVat", AUTHOR "aicha", POSTURE trusted, REASON "try" ) => rejected constraint reads $nVat, which 'gross' does not allow
+DEFINE REFINE other AS ( TARGET "peek", KIND block, FROM "sha:1f40160bd0da", TO "return $nOther", AUTHOR "aicha", POSTURE trusted, REASON "try" ) => rejected constraint reads $nOther, which 'peek' does not allow
+DEFINE REFINE look_alike AS ( TARGET "peek", KIND block, FROM "sha:1f40160bd0da", TO "return $NVAT", AUTHOR "aicha", POSTURE trusted, REASON "try" ) => rejected constraint the declared spelling is '$nVat'
+DEFINE REFINE in_an_index AS ( TARGET "peek", KIND block, FROM "sha:1f40160bd0da", TO "aL = [1, 2, 3] return aL[$nOther]", AUTHOR "aicha", POSTURE trusted, REASON "try" ) => rejected constraint reads $nOther
+DEFINE REFINE named AS ( TARGET "peek", KIND block, FROM "sha:1f40160bd0da", TO "return $nVat * 2", AUTHOR "mansour", POSTURE trusted, REASON "doubled" ) => admitted tx=node.delete,node.create
+DEFINE REFINE only_written AS ( TARGET "count", KIND block, FROM "sha:e3b0c44298fc", TO "$nCount = 0", AUTHOR "mansour", POSTURE trusted, REASON "reset" ) => admitted tx=node.create
+DEFINE REFINE read_what_it_writes AS ( TARGET "count", KIND block, FROM "sha:8e71971bce20", TO "$nCount += 1 return $nCount", AUTHOR "mansour", POSTURE trusted, REASON "count" ) => admitted tx=node.delete,node.create,node.create
+--- text
+$nVat = 0.20
+$nOther = 5
+$nCount = 0
+? Gross(100)
+
+# <R:BLOCK name="gross">
+func Gross(nNet)
+
+# <R:BLOCK name="peek" reads="$nVat">
+func Peek()
+	return $nVat * 2
+
+# <R:BLOCK name="count" writes="$nCount">
+func Count()
+	$nCount += 1
+	return $nCount
+
 === L15 a BLOCK point stands on a function
 --- program
 $nX = 1  # <R:BLOCK name="b">

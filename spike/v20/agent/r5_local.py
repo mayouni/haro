@@ -42,6 +42,8 @@ DEMO = {'id': 'D1', 'kind': 'block', 'name': 'negs', 'sig': 'func Negs(aL)', 'ca
 
 def user_block(t, exp):
     pts = ('may call: %s; may write: %s' % (t['calls'].replace('|', ', ') or 'nothing', t['writes'].replace('|', ', ') or 'its own locals only'))
+    if t.get('reads'):                  # only a task that declares `reads` says so: the prompts of the tasks that do not are what they were (their resumable runs keep their keys)
+        pts += '; may read: %s' % t['reads'].replace('|', ', ')
     kind = 'a function that does not exist yet: write its body' if t['kind'] == 'function' else 'the body of the function below is empty: write it'
     params = (' Parameters: %s.' % t['params'].replace('|', ', ')) if t['kind'] == 'function' else ''
     return 'Program:\n%s\nPoint %s (%s). It %s.%s\nTask: %s.\nIt prints: %s' % (T.program(t, 'a').rstrip('\n'), t['name'], kind, pts, params, t['intent'], exp)

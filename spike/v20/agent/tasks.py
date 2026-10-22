@@ -106,9 +106,9 @@ def program(t, which='a'):
     data = '\n'.join(t['data'][which])
     main = '\n'.join(t['main'])
     if t['kind'] == 'function':
-        tag = '# <R:FUNCTION name="%s" params="%s" calls="%s"%s>' % (t['name'], t['params'], t['calls'], (' writes="%s"' % t['writes']) if t['writes'] else '')
+        tag = '# <R:FUNCTION name="%s" params="%s" calls="%s"%s%s>' % (t['name'], t['params'], t['calls'], (' writes="%s"' % t['writes']) if t['writes'] else '', (' reads="%s"' % t['reads']) if t.get('reads') else '')
         return tag + '\n' + data + '\n' + main + '\n'
-    tag = '# <R:BLOCK name="%s" calls="%s"%s>' % (t['name'], t['calls'], (' writes="%s"' % t['writes']) if t['writes'] else '')
+    tag = '# <R:BLOCK name="%s" calls="%s"%s%s>' % (t['name'], t['calls'], (' writes="%s"' % t['writes']) if t['writes'] else '', (' reads="%s"' % t['reads']) if t.get('reads') else '')
     text = data + '\n' + main + '\n\n' + tag + '\n' + t['sig'] + '\n'
     if t.get('helpers'):
         text += '\n' + t['helpers']

@@ -36,8 +36,8 @@ POSTURES = {'trusted': 3, 'external': 2, 'sandboxed': 1, 'llm': 0}          # St
 LEVELS = {'advisory': 1, 'delegated': 2, 'autonomous': 3, 'emergencyoverride': 4}   # StzGovernanceQ()._AuthLevel
 KINDS = ('param', 'algo', 'pipeline', 'rule', 'lib', 'block', 'function', 'method', 'type', 'custom')
 BUILT = ('param', 'algo', 'pipeline', 'block', 'function', 'method')  # the kinds this rung builds; the others are declared and refused when proposed against
-RULE_ATTRS = ('min', 'max', 'options', 'risk', 'floor', 'governed_by', 'calls', 'writes')   # calls, writes: a BLOCK or FUNCTION point's allowlists
-BLOCK_ATTRS = ('calls', 'writes', 'risk', 'floor', 'governed_by')   # what a BLOCK point declares besides its name
+RULE_ATTRS = ('min', 'max', 'options', 'risk', 'floor', 'governed_by', 'calls', 'writes', 'reads')   # calls, writes, reads: a body point's allowlists
+BLOCK_ATTRS = ('calls', 'writes', 'reads', 'risk', 'floor', 'governed_by')   # what a BLOCK point declares besides its name
 FUNCTION_ATTRS = ('params',) + BLOCK_ATTRS                         # and a FUNCTION point: the signature is declared too
 BODY_KINDS = ('block', 'function', 'method')    # the kinds whose value is a function's body
 DECLARING = ('function', 'method')              # ...and those that DECLARE the function, which may not be there yet
@@ -934,7 +934,7 @@ def is_widening(p, attr, frm, to):
         return frm != '' and (to == '' or POSTURES[to] < POSTURES[frm])
     if attr == 'governed_by':
         return frm != ''
-    if attr in ('calls', 'writes'):
+    if attr in ('calls', 'writes', 'reads'):
         return bool(set(names_of(to)) - set(names_of(frm)))             # a name the list did not have: the body may do more than it could
     return False
 
@@ -1181,6 +1181,10 @@ def name_list_errors(g, p, attr, names):
                 out.append("calls of '%s' names '%s'; the builtin is spelt '%s'" % (p['name'], nm, bhit[0]))
             else:
                 out.append("'%s' in calls of '%s' is no function and no builtin" % (nm, p['name']))
+    elif attr == 'reads':
+        for nm in names:                                            # a parameter is the function's own: reading it is not governed
+            if not (nm.startswith('$') or nm.startswith('@')):
+                out.append("'%s' in reads of '%s' is no global and no attribute (a parameter is the function's own)" % (nm, p['name']))
     else:
         for nm in names:
             if not (nm.startswith('$') or nm.startswith('@') or nm in params):
@@ -1219,7 +1223,7 @@ def block_decl_errors(g, p):
         for key in p['order']:
             if key not in BLOCK_ATTRS:
                 out.append("'%s' is not an attribute of a BLOCK point" % key)
-    for attr in ('calls', 'writes'):                                # a FUNCTION tag's other attributes were read by function_faults
+    for attr in ('calls', 'writes', 'reads'):                       # a FUNCTION tag's other attributes were read by function_faults
         out += name_list_errors(g, p, attr, names_of(a.get(attr)))
     return out
 
@@ -1340,6 +1344,28 @@ def body_writes(items, params):
     return out
 
 
+def body_reads(items):
+    """Every global and attribute a body READS: `$x`, `@x`, and `This.x` (an attribute of the object), wherever they stand -- except where a name is only WRITTEN, which is the writes' business:
+    the target of a plain `=`, a loop variable, a `give` target, a `catch` binding. A compound assignment, `x++` and the root of an indexed or member target read what they write.
+    -> [name]"""
+    nodes = list(all_nodes(items))
+    pure = {id(n['callee']) for n in nodes if n.get('k') == 'call' and isinstance(n.get('callee'), dict)}      # `This.Size()` is a call of Size, not a read of an attribute
+    for n in nodes:
+        k = n.get('k')
+        if k == 'assign' and n.get('op') == '=' and isinstance(n.get('l'), dict):
+            pure.add(id(n['l']))
+        elif k == 'give' and isinstance(n.get('target'), dict):
+            pure.add(id(n['target']))
+    out = []
+    for n in nodes:
+        k = n.get('k')
+        if k == 'id' and id(n) not in pure and str(n.get('text', ''))[:1] in ('$', '@'):
+            out.append(n['text'])
+        elif k == 'member' and id(n) not in pure and isinstance(n.get('obj'), dict) and n['obj'].get('k') in ('self', 'this'):
+            out.append('@' + _text(n['prop']))
+    return out
+
+
 def accessors(g):
     """The methods the program's classes declare that Ring runs by itself when code reads or assigns a member: get<name> and set<name> (F-73). -> {lower name: declared name}."""
     out = {}
@@ -1399,6 +1425,11 @@ def block_constraint(p, fn, items, g=None):
         if what == 'param':
             return "writes into '%s', which the caller holds, and '%s' does not allow it" % (nm, p['name'])
         return "writes %s, which '%s' does not allow" % (nm, p['name'])
+    readable = set(names_of(a.get('reads'))) | set(may)           # what a body may write it may read: `$n += 1` reads $n
+    for nm in body_reads(items):
+        if nm not in readable:
+            hit = [x for x in readable if x.lower() == nm.lower()]
+            return "reads %s, which '%s' does not allow%s" % (nm, p['name'], " (the declared spelling is '%s')" % hit[0] if hit else '')
     return None
 
 
@@ -1705,7 +1736,7 @@ def evaluate(model, s, ctx, readback=True):
                 if to_literal(st) is None:
                     return out.reject('structural', "stage '%s' cannot be written as a Ring string" % st)
     else:
-        if attr in ('calls', 'writes'):
+        if attr in ('calls', 'writes', 'reads'):
             if p['kind'] not in BODY_KINDS:
                 return out.reject('structural', "%s apply to BLOCK and FUNCTION points only, and '%s' is a %s" % (attr, p['name'], p['kind']))
             why = allowlist_error(g, p, attr, to)
@@ -1745,7 +1776,7 @@ def evaluate(model, s, ctx, readback=True):
     try:
         if revert is not None:
             tx = copy.deepcopy(revert['inverse'])
-        elif attr in ('min', 'max', 'risk', 'floor', 'calls', 'writes'):
+        elif attr in ('min', 'max', 'risk', 'floor', 'calls', 'writes', 'reads'):
             tx = lower_attr(g, p, s)
         else:
             tx = lower(p, s)

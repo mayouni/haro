@@ -234,6 +234,38 @@ as llm by boss
 refine gross.calls Tax Tax|Round => rejected trust rule
 raw 0
 
+=== AL09 reads: a global or an attribute -- widened by the heaviest act, never below what the body reads, and never a parameter
+~~~ `reads` is a rule like `calls` and `writes`: WIDENING (a name FROM did not have) is tier 4, NARROWING the point's own tier, the origin must be :trusted, and the body that is THERE
+~~~ must still satisfy the list. A parameter is not a name for `reads`: it is the function's own, and reading it is not governed
+--- program
+$nVat = 0.20
+$nOther = 5
+? Gross(100)
+
+# <R:BLOCK name="gross" reads="$nVat" risk="1" governed_by="ops">
+func Gross(nNet)
+	return nNet * $nVat
+--- context
+governance ops
+	actor lead autonomous may gross
+	actor boss emergencyoverride may gross
+--- do
+DEFINE REFINE llm_widens AS ( TARGET "gross.reads", KIND block, FROM "$nVat", TO "$nVat|$nOther", AUTHOR "boss", POSTURE llm, REASON "try" ) => rejected trust rule
+DEFINE REFINE lead_widens AS ( TARGET "gross.reads", KIND block, FROM "$nVat", TO "$nVat|$nOther", AUTHOR "lead", POSTURE trusted, REASON "other" ) => rejected governance tier 4
+DEFINE REFINE boss_widens AS ( TARGET "gross.reads", KIND block, FROM "$nVat", TO "$nVat|$nOther", AUTHOR "boss", POSTURE trusted, REASON "other" ) => admitted tx=node.update_property
+DEFINE REFINE below_body AS ( TARGET "gross.reads", KIND block, FROM "$nVat|$nOther", TO "$nOther", AUTHOR "lead", POSTURE trusted, REASON "drop vat" ) => rejected derivation own rule
+DEFINE REFINE not_a_name AS ( TARGET "gross.reads", KIND block, FROM "$nVat|$nOther", TO "$nVat|$nOther|vat", AUTHOR "lead", POSTURE trusted, REASON "try" ) => rejected structural no global
+DEFINE REFINE a_param AS ( TARGET "gross.reads", KIND block, FROM "$nVat|$nOther", TO "$nVat|$nOther|nNet", AUTHOR "lead", POSTURE trusted, REASON "try" ) => rejected structural no global
+DEFINE REFINE narrows AS ( TARGET "gross.reads", KIND block, FROM "$nVat|$nOther", TO "$nVat", AUTHOR "lead", POSTURE trusted, REASON "back" ) => admitted tx=node.update_property
+--- text
+$nVat = 0.20
+$nOther = 5
+? Gross(100)
+
+# <R:BLOCK name="gross" reads="$nVat" risk="1" governed_by="ops">
+func Gross(nNet)
+	return nNet * $nVat
+
 === L27 a body outside its own rule is a STATE: it does not stop another point, and the allowlist repairs it
 ~~~ the human wrote a body that calls Tax and named no calls. The lift says so; `vat` is refined meanwhile; widening `calls` ends it
 --- program

@@ -26,6 +26,7 @@ surface is a sentence against a point, a grammar scoped to the program it is loo
 | `node.create` and `node.delete` as the lowering of a sentence | **built**, for a body | section 11 |
 | the kind `function`: an agent proposes a function that is not there yet, or the body of one that is | **built** (2026-10-19) | section 12 |
 | a point's own `calls` and `writes` refined as rules: widening a tier-4 act, narrowing below the body refused | **built** (2026-10-20) | section 13 |
+| `reads`: the globals and attributes a body may read, closed by default | **built** (2026-10-22) | section 15 |
 | the kind `method`: an agent proposes a method of a class that is not there yet, or the body of one that is | **built** (2026-10-20) | section 14 |
 | **a local model as the agent**, on sixteen tasks (the body free or under its point's grammar, one line or lines) | **measured** (2026-10-21): 1.5B 3 of 16 on one line, **10 of 16 on lines under the grammar** (HF-116) | `agent/AGENT.md` |
 | the agent's write surface for a body: the lines grammar of the point, `scoped.body_lines_gbnf` | **built** (2026-10-21), guard stage 28 | `agent/body_gbnf.py` |
@@ -46,9 +47,9 @@ the statement's own line, or alone on the lines above it -- and the first tag in
 | `pipeline` | `x = ["a", "b", ...]`, a list of string literals | the stages joined by `|` | `options` |
 | `rule` | nothing: it is a declaration of the program | `expr`: `<operand> <op> <operand>`, over point names and numbers | `message` |
 | `lib` | `load "path"` | the path | declared, not built (section 9) |
-| `block` | a `func`, the tag alone on the line above it | the body's canonical text, named by its digest `sha:` + 12 hex | `calls`, `writes` (section 11) |
-| `function` | nothing: a comment alone at the top level | `absent`, or the body's digest | `params`, `calls`, `writes` (section 12) |
-| `method` | nothing: a comment among a class's members, with a member below it | `absent`, or the body's digest | `params`, `calls`, `writes` (section 14) |
+| `block` | a `func`, the tag alone on the line above it | the body's canonical text, named by its digest `sha:` + 12 hex | `calls`, `writes`, `reads` (sections 11, 15) |
+| `function` | nothing: a comment alone at the top level | `absent`, or the body's digest | `params`, `calls`, `writes`, `reads` (section 12) |
+| `method` | nothing: a comment among a class's members, with a member below it | `absent`, or the body's digest | `params`, `calls`, `writes`, `reads` (section 14) |
 | `type` `custom` | -- | -- | declared, not built |
 
 Every point also takes `risk` (a tier from 1 to 4), `floor` (the lowest posture that may refine it) and `governed_by` (the governance whose actors decide).
@@ -307,7 +308,7 @@ them on the oracle and on rnxc before and after (`[]` then `[120]` for a body wr
 write surface (section 6) fixes a block point's target and the digest FROM must be, and leaves TO one line of text, which no context-free grammar can
 say is Ring; and five controls, each rule taken out in turn and caught by at least one fixture (HF-97).
 
-**Not built, named:** a `reads` attribute, closed by default (a body reads any global today: the bypass court pins it as a limit with operators on objects, an allowed callee's effects, output and termination -- HF-118, D28); ~~refining a BLOCK point's own `calls` and `writes` as rules~~ (built 2026-10-20, section 13: widening is a tier-4 act, as widening options is); a body proposed with a comment; a human's edit of a body read back by the audit as a block refinement (it is counted a raw
+**Not built, named:** ~~a `reads` attribute, closed by default~~ (built 2026-10-22, section 15; what is left open: an operator on an object a caller passes, an allowed callee's effects, output and termination -- HF-118, D28); ~~refining a BLOCK point's own `calls` and `writes` as rules~~ (built 2026-10-20, section 13: widening is a tier-4 act, as widening options is); a body proposed with a comment; a human's edit of a body read back by the audit as a block refinement (it is counted a raw
 edit: the gate governs proposals, the human writes the body); a per-call check that a callee in `calls` is called with the right arguments before
 the compiler is asked (the compiler answers it at derivation); the kinds `type`, `custom`.
 
@@ -411,3 +412,28 @@ body kinds': a new method written after the class's `private` marker is caught b
 lift that checks no FUNCTION or METHOD tag is now caught by 13. Guard stage 24 PASS: 147 fixtures, 21 controls, 471 s.
 
 **Not built, named:** a method whose body is proposed with a comment; a refinement of a METHOD point's `params` (the signature is the human's); a refinement of a library through its loading program; the kinds `type` and `custom`.
+
+## 15. `reads` -- what a body may read of the world outside its frame (built 2026-10-22)
+
+**On the author's "go ahead with the reads attribute"**, after HF-118: the bypass court pinned five limits of the body gate, and three of them -- a read of a global the point does not name, an operator on a
+global object, a getter reached through one -- were one gap: a point named what a body may call and write and never what it may READ. `reads` closes it, as `calls` and `writes` close theirs: **closed by default**.
+
+**The attribute.** `# <R:BLOCK name="peek" calls="Safe" reads="$nVat|@nCount">` on a BLOCK, FUNCTION or METHOD point: the globals (`$x`) and attributes (`@x`) a body may read, spelt as declared (D24). Absent, a body reads its
+parameters and its own locals and nothing else. **What a body may write it may read** (`$nCount += 1` reads `$nCount`); a plain write (`$nCount = 0`) reads nothing. A parameter is not a name for `reads`: it is the function's own.
+
+| stage | for a body |
+|---|---|
+| constraint | every `$x`, `@x` and `This.x` the body reads is one `reads` or `writes` names -- in an expression, an index, an argument, the root of a member chain, a `for` bound; not where it is only written (the target of a plain `=`, a loop variable, a `give` target, a `catch` binding); `This.M()` is a call, not a read |
+| structural (the allowlist) | `reads` is refined as `calls` and `writes` are: TARGET `gross.reads`; every name a global or an attribute (a parameter is refused: `is no global and no attribute`); widening a tier-4 act, narrowing the point's own tier, below what the body reads refused as `own rule` |
+
+**The write surface.** The body grammars (`agent/body_gbnf.py`) give a `$x` or `@x` a production only for the names the point reads or writes -- one rule more (`gref`) and no more than 94 by the decoder's count; the scoped sentence grammar gets a `.reads`
+shape beside `.calls` and `.writes`. The task lint (`agent/task_lint.py`) refuses a request that names a global the point may not read (`names-read`), and the runner's prompt says `may read: ...` for a task that declares it (and nothing for one that does not: their prompts are what they were).
+
+**What it closes** (bypass court, three subjects, 60 cases): a read of a secret global, an operator or a for-in on a global object (`$oBox + 1`), a read of a global list copied into a local (`aL = $aBox`), a global read inside the index of one the point may read. **What a grant includes**, pinned as a named limit by
+the same court: a point that MAY read an object may use it as a value, so `x = $oBox + 1` runs the object's `operator`; its getters and setters stay the calls' business (`getsecret` is refused unless the point names it). **What is still open**: an operator on an object a CALLER passes
+as a parameter (the point has no say in what its caller hands it), an allowed callee's effects, output, termination.
+
+**The court.** Fixtures composed before the rule: B12 (a body reads the globals its point names, and what it may write, and no other), AL09 (the allowlist rule for `reads`), MT09 (a method and its attributes): all three passed as composed; the existing 56 pass unchanged but one,
+where my first reads collector took the call `This.Size()` for a read of an attribute `@Size` (MT06) -- fixed, and a body-held-to-no-reads control added (it fails the three fixtures that carry `reads`; I wrote "at least 4" before measuring). Guard stage 24 PASS, stage 28 PASS.
+
+**Cost.** The gate: one more walk of the body's nodes at the constraint stage, which is milliseconds beside `rnxc check`. The compatibility: a body point that reads a global it does not name, written before this, is now outside its own rule -- the lift says so and the allowlist can be widened (as `calls` and `writes` always could).

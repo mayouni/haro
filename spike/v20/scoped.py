@@ -79,6 +79,7 @@ def scoped_gbnf(model, ctx=None, posture=None, author=None, points=None):
         if p['form'] in refine.BODY_KINDS:
             shapes.append((p['name'] + '.calls', a.get('calls', ''), 'qnames', False))     # the allowlists are rules, refinable like the others
             shapes.append((p['name'] + '.writes', a.get('writes', ''), 'qnames', False))
+            shapes.append((p['name'] + '.reads', a.get('reads', ''), 'qnames', False))
         shapes.append((p['name'] + '.risk', a.get('risk', ''), 'qtier', False))
         shapes.append((p['name'] + '.floor', a.get('floor', ''), 'qfloor', False))
         shapes.append((p['name'] + '.governed_by', a.get('governed_by', ''), 'qgov', False))
@@ -112,7 +113,7 @@ def scoped_gbnf(model, ctx=None, posture=None, author=None, points=None):
 
 def body_lines_gbnf(model, name, depth=3):
     """The agent's write surface for a BODY point, as the agent writes it: the lines grammar of THIS point (agent/body_gbnf.py) -- a statement a line, only the point's `calls`,
-    writes only to the point's `writes` and its own locals, a closing sentinel line. The sentence around the body (TARGET, KIND, FROM, AUTHOR, POSTURE, REASON) is the harness's, and the
+    writes only to the point's `writes` and its own locals, reads of a global or an attribute only of its `reads` and `writes`, a closing sentinel line. The sentence around the body (TARGET, KIND, FROM, AUTHOR, POSTURE, REASON) is the harness's, and the
     body is flattened into its one-line TO: `scoped_gbnf` leaves TO as free text (`qbody`) for a body kind, and measured with a real model that shape is the wrong thing to ask
     (agent/AGENT.md: Qwen2.5-Coder-1.5B, 3 of 16 tasks right on a one-line body, 10 of 16 on lines under this grammar)."""
     import os, sys
@@ -125,4 +126,4 @@ def body_lines_gbnf(model, name, depth=3):
     if p['form'] not in refine.BODY_KINDS:
         raise ValueError('%s is not a body point (a block, function or method)' % name)
     a = p['attrs']
-    return body_gbnf.lines_grammar(a.get('calls', ''), a.get('writes', ''), depth)
+    return body_gbnf.lines_grammar(a.get('calls', ''), a.get('writes', ''), depth, reads=a.get('reads', ''))
