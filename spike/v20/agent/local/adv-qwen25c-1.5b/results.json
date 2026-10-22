@@ -1,6 +1,7 @@
 {
  "tag": "adv-qwen25c-1.5b",
  "set": "adv",
+ "lint_refused": {},
  "model": "qwen2.5-coder-1.5b-instruct-q8_0.gguf",
  "summary": {
   "free": {

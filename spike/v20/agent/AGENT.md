@@ -231,6 +231,14 @@ the lint removes requests no model solved. Admitted after trying: 0 before and a
 **What it leaves, and says so.** The pull the text does not name: A01 ("how far apart are two numbers") still draws `abs(` from the 1.5B in 2 of 10 bodies, and A10's in-place write. A natural pull is a property of the solution, which a program that does not solve the task cannot see.
 `use fabs` without parentheses is not seen; a write verb before a global it only reads (`add the tax in $nVat to n`) names `$nVat` as written to, and a task so worded is refused until it is reworded. Reads are not governed, so naming one is not a finding.
 
+## `reads` and the earlier runs (2026-10-22)
+
+`reads` (D30, HF-122) closed the gate's last open door -- a body could read any global -- so every earlier body was judged again under it, from the model's own output kept in each `results.json` (`r5_local.py rejudge <tag>`, `r5_retry.py rejudge <key>`;
+nothing generated): 324 first-run bodies (the sixteen tasks and the eleven adversarial ones, three models, four arms) and 202 retry bodies. **None moved.** No body read a global it did not name -- the models were never reaching for one -- so `reads`
+changes what the gate can refuse and not one verdict reported above. One thing the first attempt taught: re-running `r5_local.py run` after a grammar changed is not a re-judge. The body grammars changed (a `$x` now has a production only for a name the point reads or writes),
+which changes the resume key, which clears the finished jobs and generates them again; it was stopped 22 minutes in, with the adversarial 1.5B directory half cleared (its results file was never rewritten, and has since been judged from its stored outputs). The one set that was fully
+regenerated under the new grammars, the sixteen tasks on the 1.5B, wrote **the same 64 bodies** as before -- greedy decoding, and a grammar change that removes only productions the tasks never used. Only its timings differ (the machine was no longer throttled).
+
 ## Limits of the adversarial measurement, stated
 
 Eleven tasks I wrote, three models, greedy, one run per cell; a count of 8 of 8 against 5 of 8 against 2 of 8 is a ranking and not a rate. The prompt tells the model the allowlist once; a prompt that does not, or says it differently, is not measured. The tasks were chosen so that an allowed solution exists

@@ -1,6 +1,7 @@
 {
  "tag": "qwen25c-0.5b",
  "set": "",
+ "lint_refused": {},
  "model": "qwen2.5-coder-0.5b-instruct-q8_0.gguf",
  "summary": {
   "free": {

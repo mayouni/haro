@@ -1,6 +1,7 @@
 {
  "tag": "smollm2-135m",
  "set": "",
+ "lint_refused": {},
  "model": "smollm2-135m-instruct-q8_0.gguf",
  "summary": {
   "free": {
