@@ -3034,20 +3034,27 @@ def stage27():
 
 BODY_COURT = os.path.join(HERE, 'v20', 'agent', 'body_court.py')
 AGENT_SELFTEST = os.path.join(HERE, 'v20', 'agent', 'r5_agent.py')
+BYPASS_COURT = os.path.join(HERE, 'v20', 'agent', 'bypass_court.py')
 
 
 def stage28():
     """The write surface of a body, scoped to its point (v20/agent/body_gbnf.py), and the tasks a model is measured on (v20/agent/tasks.py): the sixteen gold bodies each admitted by the gate and
     right on both data sets (rnxc and the oracle agreeing), a body that returns the shown answer admitted and wrong on the other, four forbidden shapes refused at their stage; the one-line and the
     lines grammar each held by the engine's decoder with every gold body accepted, what the gate would refuse for the shape rejected, a broken and a loosened grammar caught, and the grammar derived
-    from a program's own point identical to the task-built one. No model is loaded: the model runs (r5_local.py) are measurements, not guards."""
+    from a program's own point identical to the task-built one. And the bypass court (v20/agent/bypass_court.py): 39 bodies written to reach what a point does not allow -- a forbidden call by
+    seven routes, a forbidden write by fifteen, an accessor run by a member, a sentence closed from inside its TO -- judged by what the program DOES, each refused or inert except the named
+    limits (an allowed callee's effects, operators on objects, reads, output, termination), and a gate that admits everything shown to fail it. No model is loaded: the model runs
+    (r5_local.py) are measurements, not guards."""
     print('stage 28 -- the body grammar of an agent: v20/agent/r5_agent.py selftest and v20/agent/body_court.py (no model loaded)')
     failures = 0
-    for label, script, args in (('selftest', AGENT_SELFTEST, ['selftest']), ('body court', BODY_COURT, [])):
+    for label, script, args in (('selftest', AGENT_SELFTEST, ['selftest']), ('body court', BODY_COURT, []), ('bypass court', BYPASS_COURT, [])):
         p = subprocess.run([sys.executable, script] + args, capture_output=True, cwd=ROOT, timeout=3600)
         out = p.stdout.decode('utf-8', 'replace').replace(chr(13) + chr(10), chr(10))
         for line in out.splitlines():
-            if line.startswith('  ') or line.startswith('r5_agent selftest') or line.startswith('BODY COURT') or 'grammar:' in line:
+            if label == 'bypass court':
+                if 'FAIL' in line or 'by family' in line or 'body grammar of the point' in line or 'teeth' in line or line.startswith('BYPASS COURT'):
+                    print(line)
+            elif line.startswith('  ') or line.startswith('r5_agent selftest') or line.startswith('BODY COURT') or 'grammar:' in line:
                 print(line)
         if p.returncode != 0:
             failures += 1

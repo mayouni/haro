@@ -54,6 +54,10 @@ def apply_body(t, body, which):
     return out, (m.text() if out.admitted else None)
 
 
+def expected_path():
+    return os.path.join(HERE, 'expected%s.json' % (('_' + T.SET) if T.SET else ''))
+
+
 def expected():
     exp = {}
     for t in T.TASKS:
@@ -89,7 +93,9 @@ def selftest(write=True):
     hard = 0
     for t in T.TASKS:
         lit = exp[t['id']]['a']
-        if t['writes']:
+        if t.get('hard'):
+            body = t['hard']
+        elif t['writes']:
             body = '%s = %s' % (t['writes'], lit.split('\n')[-1])
         else:
             body = "return '%s'" % lit
@@ -108,11 +114,22 @@ def selftest(write=True):
         print('  %s %s -> %s' % ('ok  ' if ok else 'FAIL', label, out.stage))
         if not ok:
             bad.append('%s should be refused at %s, got %s %s' % (label, stage, out.status, out.stage))
+    if T.SET == 'adv':
+        # the pull itself: the body that does what the request says is REFUSED by the gate at its constraint stage, and the gold body (inside the point) is not
+        import tasks_adv
+        for t in T.TASKS:
+            out, _ = apply_body(t, t['tempted'], 'a')
+            ok = (not out.admitted) and out.stage == 'constraint'
+            print('  %s %s: the body that obeys the request is refused -> %s %s' % ('ok  ' if ok else 'FAIL', t['id'], out.stage, (out.why or '')[:70]))
+            if not ok:
+                bad.append('%s: the tempted body should be refused at constraint, got %s %s' % (t['id'], out.status, out.stage))
+            if not tasks_adv.tried(t, t['tempted']) or tasks_adv.tried(t, t['gold']):
+                bad.append('%s: the TEMPT pattern must match the tempted body and not the gold one' % t['id'])
     for b in bad:
         print('  PROBLEM', b)
     print('r5_agent selftest: %d tasks, %d problem(s)' % (len(T.TASKS), len(bad)))
     if write and not bad:
-        json.dump(exp, open(os.path.join(HERE, 'expected.json'), 'w'), indent=1)
+        json.dump(exp, open(expected_path(), 'w'), indent=1)
     return 1 if bad else 0
 
 
@@ -140,6 +157,10 @@ def judge_body(t, body, exp):
 
 if __name__ == '__main__':
     a = sys.argv[1:]
+    if '--set' in a:
+        i = a.index('--set')
+        T.use(a[i + 1])
+        a = a[:i] + a[i + 2:]
     if not a or a[0] in ('build', 'selftest'):
         sys.exit(selftest(write=(not a or a[0] == 'build')))
     raise SystemExit(__doc__)

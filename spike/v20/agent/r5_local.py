@@ -1,6 +1,6 @@
 """r5_local.py -- a LOCAL model as the agent of rung 5: the sixteen refinement tasks (tasks.py), the body written two ways, judged by the gate and by running the program.
 
-    python r5_local.py run <model.gguf> <tag> [--arms free,scoped] [--tasks R01,R02] [--max-tokens 100]
+    python r5_local.py run <model.gguf> <tag> [--arms free,scoped] [--tasks R01,R02] [--max-tokens 100] [--set adv]
     python r5_local.py judge <model.gguf> <tag> ...            judge what has finished, generate nothing (written under <tag>-partial)
     python r5_local.py report                                  the table of every run kept under local/
 
@@ -88,7 +88,7 @@ def demo_check():
 
 
 def run(model, tag, arms=('free', 'scoped'), only=None, max_tokens=100, judge_only=False, count_only=False):
-    exp = json.load(open(os.path.join(A.HERE, 'expected.json')))
+    exp = json.load(open(A.expected_path()))
     demo_exp = demo_check()
     work = os.path.join(ROOT, 'runtime', 'k4work', 'r5-' + tag)
     os.makedirs(work, exist_ok=True)
@@ -162,6 +162,10 @@ def judge_run(tag, meta, model, work, exp):
         m['raw'] = raw
         m['body'] = clean(raw, m['arm'])
         m.update(A.judge_body(tk[m['task']], m['body'], exp[m['task']]))
+        if T.SET == 'adv':
+            import tasks_adv
+            m['family'] = tk[m['task']]['family']
+            m['tried'] = tasks_adv.tried(tk[m['task']], m['body'])       # a property of the text: scored whether or not the gate refused it
     rows = {}
     for jid, m in meta.items():
         rows.setdefault(m['arm'], []).append(m)
@@ -169,15 +173,22 @@ def judge_run(tag, meta, model, work, exp):
     for arm, ms in rows.items():
         summary[arm] = {'n': len(ms), **{k: sum(1 for x in ms if x[k]) for k in ('shape', 'admitted', 'runs', 'shown', 'both')},
                         'stages': dict(Counter(x['stage'] for x in ms if not x['admitted'])),
+                        **({'tried': sum(1 for x in ms if x['tried']), 'tried_refused': sum(1 for x in ms if x['tried'] and not x['admitted']),
+                            'tried_admitted': sum(1 for x in ms if x['tried'] and x['admitted']), 'clean_both': sum(1 for x in ms if x['both'] and not x['tried'])} if T.SET == 'adv' else {}),
                         'tok_per_s': round(sum(x.get('tokens', 0) for x in ms) / max(1e-9, sum(x.get('seconds', 0) for x in ms)), 1)}
     outdir = os.path.join(LOCAL, tag)
     os.makedirs(outdir, exist_ok=True)
-    json.dump({'tag': tag, 'model': os.path.basename(model), 'summary': summary, 'jobs': {k: {kk: vv for kk, vv in v.items()} for k, v in meta.items()}}, open(os.path.join(outdir, 'results.json'), 'w'), indent=1)
+    json.dump({'tag': tag, 'set': T.SET, 'model': os.path.basename(model), 'summary': summary, 'jobs': {k: {kk: vv for kk, vv in v.items()} for k, v in meta.items()}}, open(os.path.join(outdir, 'results.json'), 'w'), indent=1)
     print('\n%s' % tag)
     print('  %-8s %3s %6s %9s %6s %6s %6s   refused at' % ('arm', 'n', 'shape', 'admitted', 'runs', 'shown', 'both'))
     for arm in sorted(summary):
         s = summary[arm]
         print('  %-8s %3d %6d %9d %6d %6d %6d   %s' % (arm, s['n'], s['shape'], s['admitted'], s['runs'], s['shown'], s['both'], s['stages']))
+    if T.SET == 'adv':
+        print('  %-12s %3s %6s %14s %14s %6s %12s' % ('arm', 'n', 'tried', 'tried+refused', 'tried+admitted', 'both', 'both, untried'))
+        for arm in sorted(summary):
+            s = summary[arm]
+            print('  %-12s %3d %6d %14d %14d %6d %12d' % (arm, s['n'], s['tried'], s['tried_refused'], s['tried_admitted'], s['both'], s['clean_both']))
 
 
 def report():
@@ -190,6 +201,14 @@ def report():
             if not os.path.exists(fp):
                 continue
             d = json.load(open(fp))
+            if d.get('set') == 'adv':
+                out += ['## %s -- %s (adversarial)' % (tag, d['model']), '', '| arm | n | tried the forbidden | ...refused | ...admitted | admitted | **both** | both, never trying | refused at |', '|---|---|---|---|---|---|---|---|---|']
+                for arm in sorted(d['summary']):
+                    s = d['summary'][arm]
+                    out.append('| %s | %d | %d | %d | %d | %d | **%d** | %d | %s |' % (arm, s['n'], s['tried'], s['tried_refused'], s['tried_admitted'], s['admitted'], s['both'], s['clean_both'],
+                                                                                    ', '.join('%s %d' % kv for kv in sorted(s['stages'].items())) or '-'))
+                out.append('')
+                continue
             out += ['## %s -- %s' % (tag, d['model']), '', '| arm | n | shape | admitted | runs | shown | **both** | refused at |', '|---|---|---|---|---|---|---|---|']
             for arm in sorted(d['summary']):
                 s = d['summary'][arm]
@@ -210,6 +229,7 @@ if __name__ == '__main__':
         while i < len(a):
             opt[a[i]] = a[i + 1]
             i += 2
+        T.use(opt.get('--set', ''))
         run(model, tag, arms=tuple(opt.get('--arms', 'free,scoped').split(',')), only=opt['--tasks'].split(',') if '--tasks' in opt else None,
             max_tokens=int(opt.get('--max-tokens', 100)), judge_only=(a[0] == 'judge'), count_only=(a[0] == 'count'))
     else:

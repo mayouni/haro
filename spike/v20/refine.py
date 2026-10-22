@@ -1208,7 +1208,7 @@ def body_own_error(g, p):
     fn = point_function(g, p)
     if fn is None or not fn.get('items'):
         return None
-    return block_constraint(p, fn, fn['items'])
+    return block_constraint(p, fn, fn['items'], g)
 
 
 def block_decl_errors(g, p):
@@ -1298,6 +1298,12 @@ def body_writes(items, params):
             target(n['l'])
         elif k == 'post':
             target(n['e'])
+        elif k == 'for':                                            # `for $x = ...` and `for $x in ...` write the variable on every turn
+            into({'k': 'id', 'text': str(n.get('var') or '')})
+        elif k == 'give' and isinstance(n.get('target'), dict):     # `give $x` reads a line of input INTO the variable
+            target(n['target'])
+        elif k == 'catch' and n.get('binding'):                     # `catch($x)` binds the error to the variable
+            into({'k': 'id', 'text': str(n['binding'])})
         elif k == 'call' and n['callee'].get('k') == 'id' and n['callee']['text'].lower() in MUTATORS and n.get('args'):
             a0 = n['args'][0]
             if a0.get('k') == 'id':
@@ -1307,7 +1313,42 @@ def body_writes(items, params):
     return out
 
 
-def block_constraint(p, fn, items):
+def accessors(g):
+    """The methods the program's classes declare that Ring runs by itself when code reads or assigns a member: get<name> and set<name> (F-73). -> {lower name: declared name}."""
+    out = {}
+    for it, parent, bpath, lst, i, owner in walk_items(g):
+        if it.get('k') == 'func' and parent is not None and parent.get('k') == 'class':
+            nm = ids.def_name(it)
+            if nm.lower().startswith(('get', 'set')) and len(nm) > 3:
+                out.setdefault(nm.lower(), nm)
+    return out
+
+
+def body_accessors(items):
+    """Every get<name> / set<name> a body can run by touching a member: a member that is not the callee of a call is an attribute access, read (getter), assigned (setter)
+    or both (`+=`, `++`). `This.x` and `self.x` are exempt, as they are on Ring. -> [(accessor lower name, the member's name as written, 'reads' | 'assigns')]"""
+    nodes = list(all_nodes(items))
+    callee = {id(n['callee']) for n in nodes if n.get('k') == 'call' and isinstance(n.get('callee'), dict)}
+    role = {}
+    for n in nodes:
+        if n.get('k') == 'assign' and isinstance(n.get('l'), dict) and n['l'].get('k') == 'member':
+            role[id(n['l'])] = 'set' if n.get('op') == '=' else 'both'
+        elif n.get('k') == 'post' and isinstance(n.get('e'), dict) and n['e'].get('k') == 'member':
+            role[id(n['e'])] = 'both'
+    out = []
+    for n in nodes:
+        if n.get('k') != 'member' or id(n) in callee or n.get('obj', {}).get('k') in ('self', 'this'):
+            continue
+        prop = _text(n['prop'])
+        r = role.get(id(n))
+        if r in (None, 'both'):
+            out.append(('get' + prop.lower(), prop, 'reads'))
+        if r in ('set', 'both'):
+            out.append(('set' + prop.lower(), prop, 'assigns'))
+    return out
+
+
+def block_constraint(p, fn, items, g=None):
     a = p['attrs']
     allowed = names_of(a.get('calls'))
     for nm in body_calls(items):
@@ -1317,6 +1358,12 @@ def block_constraint(p, fn, items):
         if hit:
             return "'%s' is not a call '%s' allows (the declared spelling is '%s')" % (nm, p['name'], hit[0])
         return "'%s' is not a call '%s' allows" % (nm, p['name'])
+    if g is not None:                                       # a member read or assignment is a CALL when a class declares get<name> / set<name>
+        acc = accessors(g)
+        for low, prop, what in body_accessors(items):
+            decl = acc.get(low)
+            if decl and decl not in allowed:
+                return "%s .%s, which runs %s() (Ring calls a class's get<name> and set<name> by itself), and '%s' does not allow it" % (what, prop, decl, p['name'])
     params = {q['name'].lower(): q['name'] for q in fn.get('params', [])}
     may = names_of(a.get('writes'))
     for what, nm in body_writes(items, params):
@@ -1453,7 +1500,7 @@ def evaluate_block(model, s, ctx, out, p):
         out.skipped('constraint')
     else:
         sig = fn if fn is not None else {'params': [{'name': q} for q in names_of(p['attrs'].get('params'))]}
-        why = block_constraint(p, sig, items)
+        why = block_constraint(p, sig, items, g)
         if why:
             return out.reject('constraint', why)
         out.passed('constraint')

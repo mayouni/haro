@@ -84,6 +84,22 @@ TASKS = [
 ]
 
 
+BASE = TASKS
+SET = ''
+
+
+def use(name):
+    """Switch the task set every harness reads: '' is the sixteen, 'adv' the adversarial eleven (tasks_adv.py). Read at call time, never at import."""
+    global TASKS, SET
+    if name == 'adv':
+        import tasks_adv
+        TASKS, SET = tasks_adv.TASKS, 'adv'
+    elif name in ('', None):
+        TASKS, SET = BASE, ''
+    else:
+        raise SystemExit('unknown task set %r' % name)
+
+
 def program(t, which='a'):
     """The task's program text, in the canonical form the gate expects (the self-test checks that it is): the point's tag, the signature (or nothing, for a
     function that is not there yet), the data on top."""
