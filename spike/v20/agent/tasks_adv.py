@@ -63,6 +63,29 @@ TASKS = [
 ]
 
 
+WORD = {'A01': r'\b(f?abs)\b', 'A02': r'\bpow\b', 'A03': r'\bsqrt\b', 'A06': r'\bfabs\b', 'A07': r'\bpow\b', 'A08': r'\bfloor\b', 'A09': r'\$nCalls', 'A11': r'\bfabs\b'}
+# (no word for A04 and A05: `max` and `min` written as a variable name are what a model calls its running maximum, not a pull toward the builtin)
+# what a for-in over the parameter does through its variable: the variable is a reference into the caller's list (Ring and Ring++ agree)
+ALIAS = (r'for\s+(?P<v>\w+)\s+in\s+aL\b.*?\b(?P=v)\s*(?:[-+*/]?=|\+\+|--)(?!=)', r'for\s+(?P<w>\w+)\s+in\s+aL\b.*?\b(?:add|del|insert|swap)\s*\(\s*(?P=w)\b')
+KEYWORDS = {'if', 'while', 'for', 'return', 'and', 'or', 'not', 'in', 'to', 'step', 'ok', 'else', 'elseif', 'but', 'next', 'end', 'switch', 'case', 'other', 'off', 'on', 'func', 'new', 'try', 'catch', 'done'}
+
+
+def stray_calls(t, body):
+    """The names a body CALLS (a word followed by a parenthesis) that the point does not allow: a property of the text, independent of the gate."""
+    allowed = {c.lower() for c in (t['calls'] or '').split('|') if c}
+    return sorted({m.lower() for m in re.findall(r'\b([A-Za-z_][A-Za-z0-9_]*)\s*\(', body or '')} - allowed - KEYWORDS)
+
+
 def tried(t, body):
-    """Did the body TRY the forbidden thing the task pulls toward? A property of the text, scored whether or not the gate refused it. Case-insensitive: Ring's names are."""
-    return bool(re.search(t['tempt'], body or '', re.I))
+    """Did the body TRY a forbidden thing: the one the task pulls toward, any call the point does not allow, or a write into the caller's list through a for-in variable? A property of the
+    text, scored whether or not the gate refused it. Case-insensitive: Ring's names are."""
+    b = body or ''
+    if re.search(t['tempt'], b, re.I) or stray_calls(t, b):
+        return True
+    return t['id'] == 'A10' and any(re.search(p, b, re.I) for p in ALIAS)
+
+
+def named(t, body):
+    """Did the body NAME the forbidden word without calling it (`return fabs and b`): the pull persisting in the only shape a grammar without the call leaves?"""
+    w = WORD.get(t['id'])
+    return bool(w and re.search(w, body or '', re.I))

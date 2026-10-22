@@ -166,6 +166,8 @@ def judge_run(tag, meta, model, work, exp):
             import tasks_adv
             m['family'] = tk[m['task']]['family']
             m['tried'] = tasks_adv.tried(tk[m['task']], m['body'])       # a property of the text: scored whether or not the gate refused it
+            m['named'] = tasks_adv.named(tk[m['task']], m['body']) and not m['tried']   # the forbidden word written, but not called
+            m['stray'] = tasks_adv.stray_calls(tk[m['task']], m['body'])
     rows = {}
     for jid, m in meta.items():
         rows.setdefault(m['arm'], []).append(m)
@@ -174,7 +176,7 @@ def judge_run(tag, meta, model, work, exp):
         summary[arm] = {'n': len(ms), **{k: sum(1 for x in ms if x[k]) for k in ('shape', 'admitted', 'runs', 'shown', 'both')},
                         'stages': dict(Counter(x['stage'] for x in ms if not x['admitted'])),
                         **({'tried': sum(1 for x in ms if x['tried']), 'tried_refused': sum(1 for x in ms if x['tried'] and not x['admitted']),
-                            'tried_admitted': sum(1 for x in ms if x['tried'] and x['admitted']), 'clean_both': sum(1 for x in ms if x['both'] and not x['tried'])} if T.SET == 'adv' else {}),
+                            'tried_admitted': sum(1 for x in ms if x['tried'] and x['admitted']), 'named_only': sum(1 for x in ms if x['named']), 'clean_both': sum(1 for x in ms if x['both'] and not x['tried'])} if T.SET == 'adv' else {}),
                         'tok_per_s': round(sum(x.get('tokens', 0) for x in ms) / max(1e-9, sum(x.get('seconds', 0) for x in ms)), 1)}
     outdir = os.path.join(LOCAL, tag)
     os.makedirs(outdir, exist_ok=True)
@@ -185,10 +187,10 @@ def judge_run(tag, meta, model, work, exp):
         s = summary[arm]
         print('  %-8s %3d %6d %9d %6d %6d %6d   %s' % (arm, s['n'], s['shape'], s['admitted'], s['runs'], s['shown'], s['both'], s['stages']))
     if T.SET == 'adv':
-        print('  %-12s %3s %6s %14s %14s %6s %12s' % ('arm', 'n', 'tried', 'tried+refused', 'tried+admitted', 'both', 'both, untried'))
+        print('  %-12s %3s %6s %14s %14s %11s %6s %12s' % ('arm', 'n', 'tried', 'tried+refused', 'tried+admitted', 'named only', 'both', 'both, untried'))
         for arm in sorted(summary):
             s = summary[arm]
-            print('  %-12s %3d %6d %14d %14d %6d %12d' % (arm, s['n'], s['tried'], s['tried_refused'], s['tried_admitted'], s['both'], s['clean_both']))
+            print('  %-12s %3d %6d %14d %14d %11d %6d %12d' % (arm, s['n'], s['tried'], s['tried_refused'], s['tried_admitted'], s['named_only'], s['both'], s['clean_both']))
 
 
 def report():
@@ -202,10 +204,10 @@ def report():
                 continue
             d = json.load(open(fp))
             if d.get('set') == 'adv':
-                out += ['## %s -- %s (adversarial)' % (tag, d['model']), '', '| arm | n | tried the forbidden | ...refused | ...admitted | admitted | **both** | both, never trying | refused at |', '|---|---|---|---|---|---|---|---|---|']
+                out += ['## %s -- %s (adversarial)' % (tag, d['model']), '', '| arm | n | tried the forbidden | ...refused | ...admitted | named it, no call | admitted | **both** | both, never trying | refused at |', '|---|---|---|---|---|---|---|---|---|---|']
                 for arm in sorted(d['summary']):
                     s = d['summary'][arm]
-                    out.append('| %s | %d | %d | %d | %d | %d | **%d** | %d | %s |' % (arm, s['n'], s['tried'], s['tried_refused'], s['tried_admitted'], s['admitted'], s['both'], s['clean_both'],
+                    out.append('| %s | %d | %d | %d | %d | %d | %d | **%d** | %d | %s |' % (arm, s['n'], s['tried'], s['tried_refused'], s['tried_admitted'], s['named_only'], s['admitted'], s['both'], s['clean_both'],
                                                                                     ', '.join('%s %d' % kv for kv in sorted(s['stages'].items())) or '-'))
                 out.append('')
                 continue

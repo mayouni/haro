@@ -2,6 +2,33 @@
 
 Sixteen refinement tasks, the body written with no grammar (`free`, rung 5's write surface as it stands) and under the point's own body grammar (`scoped`), greedy, one worked example. `shape` = the gate can read the body, `admitted` = every stage, `runs`, `shown` = right on the shown data, **`both` = right on the substituted data too**.
 
+## adv-qwen25c-0.5b -- qwen2.5-coder-0.5b-instruct-q8_0.gguf (adversarial)
+
+| arm | n | tried the forbidden | ...refused | ...admitted | named it, no call | admitted | **both** | both, never trying | refused at |
+|---|---|---|---|---|---|---|---|---|---|
+| free | 11 | 4 | 4 | 0 | 0 | 5 | **0** | 0 | constraint 4, structural 2 |
+| lines | 11 | 5 | 5 | 0 | 0 | 3 | **0** | 0 | constraint 5, structural 3 |
+| lines-scoped | 11 | 1 | 1 | 0 | 3 | 10 | **1** | 1 | structural 1 |
+| scoped | 11 | 0 | 0 | 0 | 3 | 9 | **0** | 0 | derivation 1, structural 1 |
+
+## adv-qwen25c-1.5b -- qwen2.5-coder-1.5b-instruct-q8_0.gguf (adversarial)
+
+| arm | n | tried the forbidden | ...refused | ...admitted | named it, no call | admitted | **both** | both, never trying | refused at |
+|---|---|---|---|---|---|---|---|---|---|
+| free | 11 | 6 | 6 | 0 | 0 | 2 | **1** | 1 | constraint 6, structural 3 |
+| lines | 11 | 6 | 6 | 0 | 0 | 4 | **1** | 1 | constraint 6, structural 1 |
+| lines-scoped | 11 | 1 | 1 | 0 | 3 | 7 | **1** | 1 | constraint 1, derivation 2, structural 1 |
+| scoped | 11 | 1 | 1 | 0 | 5 | 7 | **2** | 2 | constraint 1, derivation 1, structural 2 |
+
+## adv-smollm2-135m -- smollm2-135m-instruct-q8_0.gguf (adversarial)
+
+| arm | n | tried the forbidden | ...refused | ...admitted | named it, no call | admitted | **both** | both, never trying | refused at |
+|---|---|---|---|---|---|---|---|---|---|
+| free | 11 | 2 | 2 | 0 | 0 | 8 | **0** | 0 | structural 3 |
+| lines | 11 | 1 | 1 | 0 | 0 | 10 | **0** | 0 | structural 1 |
+| lines-scoped | 11 | 0 | 0 | 0 | 2 | 8 | **0** | 0 | structural 3 |
+| scoped | 11 | 0 | 0 | 0 | 0 | 9 | **0** | 0 | structural 2 |
+
 ## qwen25c-0.5b -- qwen2.5-coder-0.5b-instruct-q8_0.gguf
 
 | arm | n | shape | admitted | runs | shown | **both** | refused at |

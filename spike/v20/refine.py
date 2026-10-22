@@ -1270,11 +1270,38 @@ def body_writes(items, params):
     """Every write a body makes outside its own frame: ('global', '$x'), ('attr', '@x'), ('param', name) -- writing INTO what a parameter holds,
     since the caller holds it too; assigning the parameter itself only rebinds a local (C-29)."""
     out = []
+    alias = {}      # a for-in variable is a REFERENCE into the list it walks (Ring and Ring++ agree): writing through it writes the list's owner's contents
+
+    def root(e):
+        while isinstance(e, dict) and e.get('k') in ('index', 'member', 'paren'):
+            e = e.get('e') if e.get('k') == 'paren' else e.get('obj')
+        return e.get('text') if isinstance(e, dict) and e.get('k') == 'id' else None
+
+    def owner(name):
+        if name is None:
+            return None
+        if name.startswith('$'):
+            return ('global', name)
+        if name.startswith('@'):
+            return ('attr', name)
+        if name.lower() in alias:
+            return alias[name.lower()]
+        if name.lower() in params:
+            return ('param', params[name.lower()])
+        return None
+
+    for n in all_nodes(items):                                      # source order, outer loops first
+        if n.get('k') == 'for' and n.get('kind') == 'in' and n.get('var'):
+            o = owner(root(n.get('a')))
+            if o:
+                alias[str(n['var']).lower()] = o
 
     def into(r, chain=None):
         if r.get('k') == 'id':
             t = r['text']
-            if t.startswith('$'):
+            if t.lower() in alias and t[:1] not in ('$', '@'):
+                out.append(alias[t.lower()])
+            elif t.startswith('$'):
                 out.append(('global', t))
             elif t.startswith('@'):
                 out.append(('attr', t))
@@ -1298,8 +1325,8 @@ def body_writes(items, params):
             target(n['l'])
         elif k == 'post':
             target(n['e'])
-        elif k == 'for':                                            # `for $x = ...` and `for $x in ...` write the variable on every turn
-            into({'k': 'id', 'text': str(n.get('var') or '')})
+        elif k == 'for' and str(n.get('var') or '')[:1] in ('$', '@'):   # `for $x = ...` and `for $x in ...` write the variable on every turn
+            into({'k': 'id', 'text': str(n['var'])})
         elif k == 'give' and isinstance(n.get('target'), dict):     # `give $x` reads a line of input INTO the variable
             target(n['target'])
         elif k == 'catch' and n.get('binding'):                     # `catch($x)` binds the error to the variable
