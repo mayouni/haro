@@ -65,6 +65,21 @@ without a restart.
 class's layout, a function's index are fixed after the freeze), so the first rung should admit new FUNCTIONS only, and new
 classes after; and every admission is a compile, so its time is the census's per-file time, not an eval's.
 
+**BUILT, the first rung, 2026-10-30 (83ce489), at the author's word.** `rnxc resident <file.ring>...` holds one program
+and admits files into it, each whole or not at all. The state between admissions is the compiler's as bytes, so a refused
+file costs its own arena and nothing else. A function an admitted file already calls is reached once a later file defines
+it. The four refusals are: a statement that does not compile, a function already defined, a class after the first file,
+and a new global an admitted function reads as an unassigned local. Measured on the test bed as promised, RingServ's 14
+files in its host's order:
+
+- as written, 5 are admitted and 9 refused for their bare globals (Rule A), the program unchanged after each;
+- migrated, 14 of 14 are admitted, its own load check passes, and its library prints what Ring prints;
+- Softanza's whole library admits as the first file, and a small file after it takes about 150 ms.
+
+The full record is in CLAUDE.md, "THE RESIDENT VM, FIRST RUNG". **Next on this road:** classes after the first file;
+replacing a running function (the refinement loop's real step); and an `admit` reachable from inside the running program,
+which is what HaroServer's host loop needs.
+
 **The alternative, if the author prefers the language side first:** the library derivation of rung 5 (body kinds refine a
 program, not a library, HF-103), or opening Z's route 3 (a runtime for a declared world, CHARTER section 3, HF-45). Both
 are recorded where they were found.
