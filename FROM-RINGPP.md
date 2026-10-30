@@ -101,9 +101,22 @@ running code's included, and its by-name lookups are pointed at the new one.
 - Cost: none measurable on a plain program. A resident program no longer types a caller from its callee's return, which
   costs 1 to 3%; without that rule a replacement answering another type is unsound.
 
-The record is in CLAUDE.md, "THE RESIDENT VM, RUNG 3". **Next on this road:** classes after the first file (a method
-replaced, instances laid out for the old class); then a host loop that admits per request, which wants the compiler kept
-alive between admissions.
+The record is in CLAUDE.md, "THE RESIDENT VM, RUNG 3".
+
+**BUILT, the fourth rung, 2026-10-31 (d539d05), at the author's word: classes after the first file.**
+- **New classes:** a class new to the program is admitted at any time, from a class admitted before it too.
+- **Replacing a class:** a class the program holds can be replaced by name. Its objects keep their class and answer with
+  the new methods, a `super.M()` included. New objects get the new initial values; old objects keep theirs.
+- **Refused:** a replacement that changes what the objects were made for (their attributes, parent, code at `new`, init,
+  a parameter count), and a class redefined without the replace verbs (C26).
+- **Ring's answer:** it agrees on every line before the first replacement.
+- **Cost:** nothing at run time; the VM is unchanged.
+- **Not built:** a `new K` compiled before K existed stays R11. A host reaches a later class through eval or a factory
+  function.
+
+The record is in CLAUDE.md, "THE RESIDENT VM, RUNG 4". **Next on this road:** a host loop that admits per request, which
+wants the compiler kept alive between admissions (~143 ms an admission at Softanza's size today); then objects migrated to
+a class's new layout, if an app needs to add an attribute while it runs.
 
 **The alternative, if the author prefers the language side first:** the library derivation of rung 5 (body kinds refine a
 program, not a library, HF-103), or opening Z's route 3 (a runtime for a declared world, CHARTER section 3, HF-45). Both
