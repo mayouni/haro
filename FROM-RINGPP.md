@@ -88,8 +88,22 @@ as eval's does. The second rung is the shape of HaroServer's host loop: one live
 - Cost: nothing at run time. An admission costs about 2 ms in a small program and about 143 ms with Softanza's
   library inside, so a host that admits per deployment pays it once and one that admits per request pays it each time.
 
-The record is in CLAUDE.md, "THE RESIDENT VM, RUNG 2". **Next on this road:** replacing a running function (the
-refinement loop's real step, and HaroServer's redeploy); classes after the first file.
+The record is in CLAUDE.md, "THE RESIDENT VM, RUNG 2".
+
+**BUILT, the third rung, 2026-10-30 (0f3eb0b), at the author's word: a running function replaced.** `replacefile(cPath)`,
+`replacecode(cName, cSource)` and `rnxc resident --replace <file>`. Every call from then on runs the new body, and the
+frames already in the old body finish it. The old body stays in the code, so a running frame is safe. Its call sites, the
+running code's included, and its by-name lookups are pointed at the new one.
+- Refused: a replacement that changes the parameter count, and one that replaces nothing.
+- Redeploy: a file the program holds can be replaced by its path.
+- Ring has no answer to compare with (a function defined twice is C22 there), so the transcripts are golden. Four plants
+  show each part is needed.
+- Cost: none measurable on a plain program. A resident program no longer types a caller from its callee's return, which
+  costs 1 to 3%; without that rule a replacement answering another type is unsound.
+
+The record is in CLAUDE.md, "THE RESIDENT VM, RUNG 3". **Next on this road:** classes after the first file (a method
+replaced, instances laid out for the old class); then a host loop that admits per request, which wants the compiler kept
+alive between admissions.
 
 **The alternative, if the author prefers the language side first:** the library derivation of rung 5 (body kinds refine a
 program, not a library, HF-103), or opening Z's route 3 (a runtime for a declared world, CHARTER section 3, HF-45). Both
