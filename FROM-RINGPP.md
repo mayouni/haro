@@ -138,6 +138,26 @@ rungs. Running it will show what is still missing rather than guessing:
 - whether code admitted per request must also be released (a program only grows today);
 - whether objects must move to a class's new layout when an app adds an attribute while it runs.
 
+**BUILT, HaroServer's first build, 2026-10-31 (bd38342), at the author's word: the host loop on the resident VM**
+(`haro/serv/`, with its README).
+- **What it is:** the loop is the program's own, under `rnxc resident`. It waits for a request, routes it to the
+  function an app registered, and answers. A deployment is a request too (`POST /admit/<app>`, `POST /replace/<app>`).
+  The socket under it is eight rnxc natives (`src/httpd.zig`), part of the one binary.
+- **Its court:** 22 checks (23 with Softanza's library loaded into the running server), on Windows and Linux; in the
+  gate.
+- **Measured:** about 5,000 to 7,800 requests a second, a new connection each, p50 0.12-0.18 ms. Code admitted with a
+  request costs 0.3 ms in a small program and 0.9 ms with Softanza inside.
+- **What running it answered:**
+  - Code admitted per request is never released: about 22 KB a function, for good.
+  - Every app shares one namespace: Softanza's `echo` refused an app's `Echo`.
+  - An attribute added to a live class is refused, and a real app wants it.
+  - A large deployment blocks the loop while it compiles (Softanza's library: 13.8 s).
+
+**Next on this road:** RELEASE -- an admission whose functions are dropped when the request that brought them is done,
+or a request's code compiled and run without being admitted. It is the one finding that grows without bound; the
+namespace question is Haro's language decision (packages), and moving objects to a new layout waits for an app that
+needs it.
+
 **The alternative, if the author prefers the language side first:** the library derivation of rung 5 (body kinds refine a
 program, not a library, HF-103), or opening Z's route 3 (a runtime for a declared world, CHARTER section 3, HF-45). Both
 are recorded where they were found.
