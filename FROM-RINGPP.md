@@ -128,7 +128,10 @@ The record is in CLAUDE.md, "THE RESIDENT VM, RUNG 4".
   - Eight plants show each part is needed.
 - **Cost:** nothing for a plain program (176 programs compile to the same bytes).
 - **Still paid per admission:** a new class (its tables rebuilt, about 90 ms at that size), a replacement (every earlier
-  call site walked), and about a millisecond per new global.
+  call site walked), and about a millisecond per new global. **Made cheap the same day** (4d533d7): the class tables grow
+  in place, about 1 ms a class and 2 ms a class replacement; a function replacement about 1.3 ms; such a global about
+  1 ms. A method `addmethod` attached at run time now survives later class admissions. The resident VM runs on Linux:
+  its guard passes 18 of 18 there. The install and both packages carry it (2f34bea).
 
 The record is in CLAUDE.md, "THE RESIDENT VM, RUNG 5". **Next on this road:** HaroServer's host loop itself, on these five
 rungs. Running it will show what is still missing rather than guessing:
