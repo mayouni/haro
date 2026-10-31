@@ -10,7 +10,7 @@ What it asks, in order, of ONE server process:
   deploy     an app admitted while the server runs, its route answering at once; the same app twice, refused; an app
              Rule A refuses, refused whole -- its route never appears
   state      an app holding an object; REPLACED while it runs -- the object and its tally kept, the new code answering;
-             replaced again with an attribute added -- refused, the running object was laid out without it
+             replaced again with an attribute added -- admitted, the running object takes it (rung 7); one dropped -- refused
   failure    a handler that raises answers 500 and the server goes on; a new class admitted after the first file
   load       sequential requests to one route: requests a second, and latency
   per request  code admitted with every request (RingServ's eval-per-request shape): what an admission costs while
@@ -175,9 +175,16 @@ def main():
     st2, body2, _ = req('GET', '/tally')
     say(body == '13' and body2 == 'tally 13 (v2)', 'redeploy: the handler v2 left alone still runs, on the kept object: %r, %r' % (body, body2))
     st, body, _ = req('POST', '/replace/tally', app('tally_v3.ring'))
-    say(st == 422 and 'attribute' in body, 'redeploy: an attribute added to a live class is refused (%d): %s' % (st, body[:100]))
+    say(st == 201, 'redeploy: an attribute added to the live class is admitted (%d)%s' % (st, '' if st == 201 else ': ' + body[:100]))
     st, body, _ = req('GET', '/tally')
-    say(body == 'tally 13 (v2)', 'redeploy: after the refusal the server answers as before: %r' % body)
+    say(body == 'tally 13 in 0 add(s)', 'redeploy: the running object takes it, starting as declared, its total kept: %r' % body)
+    st, body, _ = req('POST', '/tally', '2')
+    st2, body2, _ = req('GET', '/tally')
+    say(body == '15' and body2 == 'tally 15 in 1 add(s)', 'redeploy: and the new code counts in it: %r, %r' % (body, body2))
+    st, body, _ = req('POST', '/replace/tally', app('tally_v4.ring'))
+    say(st == 422 and 'keeps the attributes' in body, 'redeploy: an attribute dropped from the live class is refused (%d): %s' % (st, body[:100]))
+    st, body, _ = req('GET', '/tally')
+    say(body == 'tally 15 in 1 add(s)', 'redeploy: after the refusal the server answers as before: %r' % body)
 
     # ---- failure, and a class after the first file
     req('POST', '/admit/boom', app('boom.ring'))

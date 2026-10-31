@@ -1,5 +1,6 @@
 # the tally app redeployed with an attribute added: the running object was
-# laid out without it, so the resident VM refuses the replacement
+# laid out without it, and takes it at its first use, starting as declared
+# (the resident VM's rung 7) -- the tally it holds is kept
 Route("GET", "/tally", "TallyGet")
 
 func TallyGet cBody

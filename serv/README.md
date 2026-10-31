@@ -19,7 +19,8 @@ This first build is that design on the resident VM, with the host loop in the pr
     or released: code that defines a class or a lambda stays in the program, says so, and `/run` is then refused
     (Run is defined) until a `/replace/run`.
 - **apps/** -- the court's apps. One of each kind: a route, state in an object, a redeploy that keeps it, a redeploy
-  that adds an attribute (refused), a raising handler, a class admitted while serving, a Rule A refusal.
+  that adds an attribute (admitted: the running object takes it, rung 7) and one that drops one (refused), a raising
+  handler, a class admitted while serving, a Rule A refusal.
 - **court.py** -- boots the host on a free port and drives it over HTTP. Every answer is checked and the costs are
   measured.
   - `--softanza` adds an app that loads Softanza's library into the running server, run from the install's tree.
@@ -63,6 +64,9 @@ under a millisecond at this size. The court holds the second half's high-water m
   only the LAST admission (a stack).
 - **One namespace for every app.** Softanza's library defines `echo`, so an app defining `Echo` is refused (C22). Apps
   need names of their own: packages, which Ring has (C-28 keeps them refused in Ring++) and Haro must decide.
-- **Adding an attribute to a live class is refused, and a real app wants it** (`tally_v3.ring`). Objects moved to a
-  class's new layout are the other open rung.
+- **Adding an attribute to a live class was refused, and a real app wants it -- answered by rung 7.** `tally_v3.ring`
+  adds `nAdds`; the running tally keeps its 13 and counts from 0. Each object made before takes an added attribute at
+  its first access past its own slots, starting as declared (a constant; a list a list of its own); about 55 ns an
+  object, once, and nothing for the rest. Refused, with the reason: a dropped or reordered attribute, a starting value
+  that runs code, region code that uses it, and a class another class the program holds inherits from.
 - **A large deployment blocks the loop**: Softanza's library compiles for 13.8 s while no request is answered.
