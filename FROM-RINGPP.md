@@ -158,6 +158,22 @@ or a request's code compiled and run without being admitted. It is the one findi
 namespace question is Haro's language decision (packages), and moving objects to a new layout waits for an app that
 needs it.
 
+**BUILT, rung 6 of the resident VM, 2026-10-31 (71dd019), at the author's word ("go ahead with release"): RELEASE.**
+- **What it is:** `releasefile` / `releasecode` (and the driver's `--release`) undo the program's LAST admission -- its
+  functions, globals, constants, names and code -- leaving the program byte for byte as it was before it. A stack: only
+  the last. Refused: code that defined a class or a lambda, a replacement, a function a class reaches through
+  `addmethod`, and while a frame of it runs. What the host kept from it (a reply, a literal) outlives it.
+- **HaroServer's `POST /run`:** a request's code admitted, called and released before the reply. 3,000 runs each
+  answering with a 16 KB literal of its own released code: the program keeps its size, private memory stays between
+  36 and 53 MB, p50 0.6-0.7 ms a run. At Softanza's size a release costs at most 0.01 ms.
+- **Found on the way and fixed:** a global admitted after a release read the released one's value; an `addmethod` cell
+  for a released name answered for the next name at its index; the arena's 64 MB slack let a small server climb 64 MB
+  before compacting (now 16 MB).
+
+**Next on this road:** objects moved to a class's new layout -- an app that adds an attribute to a live class
+(`tally_v3.ring`) is the last refusal a running app meets in the court. The namespace question stays the author's
+language decision (packages), and a large deployment blocking the loop waits for a server that deploys at that size.
+
 **The alternative, if the author prefers the language side first:** the library derivation of rung 5 (body kinds refine a
 program, not a library, HF-103), or opening Z's route 3 (a runtime for a declared world, CHARTER section 3, HF-45). Both
 are recorded where they were found.
