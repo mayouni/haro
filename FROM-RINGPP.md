@@ -114,9 +114,26 @@ The record is in CLAUDE.md, "THE RESIDENT VM, RUNG 3".
 - **Not built:** a `new K` compiled before K existed stays R11. A host reaches a later class through eval or a factory
   function.
 
-The record is in CLAUDE.md, "THE RESIDENT VM, RUNG 4". **Next on this road:** a host loop that admits per request, which
-wants the compiler kept alive between admissions (~143 ms an admission at Softanza's size today); then objects migrated to
-a class's new layout, if an app needs to add an attribute while it runs.
+The record is in CLAUDE.md, "THE RESIDENT VM, RUNG 4".
+
+**BUILT, the fifth rung, 2026-10-31 (148557d), at the author's word: the compiler kept alive between admissions.**
+- **What changed:** the program stays in one compiler between admissions instead of being saved to bytes and restored. A
+  refused admission is undone in place. The VM's tables grow by what each admission adds instead of being rebuilt.
+- **Measured:** a small admission into Softanza's library (49,009 functions) takes 0.6 to 1.4 ms, against about 150 to
+  200 ms before, so a host can admit code per request.
+- **Proved two ways, on every transcript of the guard:**
+  - a refused admission leaves the program byte for byte as it was, and an admitted one leaves the VM the tables a whole
+    build gives;
+  - the old saved-bytes path prints the same.
+  - Eight plants show each part is needed.
+- **Cost:** nothing for a plain program (176 programs compile to the same bytes).
+- **Still paid per admission:** a new class (its tables rebuilt, about 90 ms at that size), a replacement (every earlier
+  call site walked), and about a millisecond per new global.
+
+The record is in CLAUDE.md, "THE RESIDENT VM, RUNG 5". **Next on this road:** HaroServer's host loop itself, on these five
+rungs. Running it will show what is still missing rather than guessing:
+- whether code admitted per request must also be released (a program only grows today);
+- whether objects must move to a class's new layout when an app adds an attribute while it runs.
 
 **The alternative, if the author prefers the language side first:** the library derivation of rung 5 (body kinds refine a
 program, not a library, HF-103), or opening Z's route 3 (a runtime for a declared world, CHARTER section 3, HF-45). Both
