@@ -1,5 +1,5 @@
 # HAROSERVER, THE HOST LOOP -- one live program that takes its apps and its
-# requests itself, on the resident VM (rnxc resident, rungs 1 to 5). RingServ's
+# requests itself, on the resident VM (rnxc resident, rungs 1 to 6). RingServ's
 # design, from its lesson (CLAUDE.md, "RINGSERV ON RING++"): one resident
 # program, apps arriving as code that defines functions and classes, every
 # request a call into the same live program -- here with the deployment a
@@ -12,7 +12,14 @@
 #   POST /replace/<app>    the body REPLACES what the app defined (replacecode):
 #                          every request after it runs the new code, and what the
 #                          app holds -- its objects -- is kept: 201, or 422
-#   GET  /stats            requests served, deployments admitted and refused, routes
+#   POST /run?<input>      the body is code that defines `func Run cInput`: admitted,
+#                          called with what followed `?`, and RELEASED (releasecode,
+#                          rung 6) -- the program after the request is the program
+#                          before it: 200 and what Run returned, 500 and its error,
+#                          422 when it could not be admitted -- or released: code
+#                          that defines a class or a lambda stays, and says so
+#   GET  /stats            requests served, deployments admitted and refused, runs
+#                          released, routes, the program's functions
 #   POST /stop             answers, then the loop ends
 #   anything else          the route an app registered for its method and path,
 #                          called by name with the request's body: 200 and what
@@ -25,6 +32,7 @@ $aRoutes = []
 $nServed = 0
 $nAdmitted = 0
 $nRefused = 0
+$nRuns = 0
 
 cPort = sysget("HAROSERV_PORT")
 nPort = 8642
@@ -48,6 +56,8 @@ func ServeLoop
 			Deploy(substr(cPath, 8), rpp_http_body(), false)
 		but cMethod = "POST" and left(cPath, 9) = "/replace/"
 			Deploy(substr(cPath, 10), rpp_http_body(), true)
+		but cMethod = "POST" and cPath = "/run"
+			RunOnce(rpp_http_body(), rpp_http_query())
 		but cMethod = "GET" and cPath = "/stats"
 			rpp_http_reply(200, "text/plain", Stats())
 		but cMethod = "POST" and cPath = "/stop"
@@ -74,6 +84,33 @@ func Deploy cApp, cSource, bReplace
 		rpp_http_reply(422, "text/plain", cCatchError)
 	done
 
+# code that comes with a request and leaves with it: admitted, run, released.
+# The release comes before the reply, so a refusal to release is the answer;
+# what Run returned outlives the code that made it (its constants included)
+func RunOnce cSource, cInput
+	try
+		admitcode("run", cSource)
+	catch
+		$nRefused++
+		rpp_http_reply(422, "text/plain", cCatchError)
+		return
+	done
+	nStatus = 200
+	try
+		cOut = "" + Run(cInput)
+	catch
+		nStatus = 500
+		cOut = cCatchError
+	done
+	try
+		releasecode("run")
+		$nRuns++
+	catch
+		nStatus = 422
+		cOut = cCatchError
+	done
+	rpp_http_reply(nStatus, "text/plain", cOut)
+
 func Route cMethod, cPath, cHandler
 	for i = 1 to len($aRoutes)
 		if $aRoutes[i][1] = cMethod and $aRoutes[i][2] = cPath
@@ -99,4 +136,4 @@ func Dispatch cMethod, cPath, cBody
 	rpp_http_reply(404, "text/plain", "no route for " + cMethod + " " + cPath)
 
 func Stats
-	return "served " + $nServed + nl + "admitted " + $nAdmitted + nl + "refused " + $nRefused + nl + "routes " + len($aRoutes)
+	return "served " + $nServed + nl + "admitted " + $nAdmitted + nl + "refused " + $nRefused + nl + "runs released " + $nRuns + nl + "routes " + len($aRoutes) + nl + "functions " + len(functions())

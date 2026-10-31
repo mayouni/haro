@@ -13,6 +13,11 @@ This first build is that design on the resident VM, with the host loop in the pr
   - `POST /admit/<app>` admits the body's code into the running program (`admitcode`);
   - `POST /replace/<app>` replaces what the app defined (`replacecode`). The app's objects are kept, and every request
     after it runs the new code. A refusal is 422 with the reason, and the program stays as it was.
+  - `POST /run?<input>` (2026-10-31, the resident VM's sixth rung): the body is code that defines `func Run cInput`. It
+    is admitted, called with what followed `?`, and RELEASED (`releasecode`) before the reply -- the program after the
+    request is the program before it. 200 and what Run returned, 500 and its error, 422 when it could not be admitted,
+    or released: code that defines a class or a lambda stays in the program, says so, and `/run` is then refused
+    (Run is defined) until a `/replace/run`.
 - **apps/** -- the court's apps. One of each kind: a route, state in an object, a redeploy that keeps it, a redeploy
   that adds an attribute (refused), a raising handler, a class admitted while serving, a Rule A refusal.
 - **court.py** -- boots the host on a free port and drives it over HTTP. Every answer is checked and the costs are
@@ -38,12 +43,24 @@ loop for at most 10 s.
 
 A Windows client through WSL's localhost relay reads ~2 ms a request against the Linux server; that is the relay.
 
+## Release -- measured, 2026-10-31 (the resident VM's sixth rung)
+
+| | Windows | Linux |
+|---|---|---|
+| a run over HTTP: admit, call, release, reply | p50 0.61-0.69 ms | 2.8 ms (a Windows client through WSL's relay) |
+| 3,000 runs, each answering with a 16 KB literal of its own released code | private memory 36-53 MB, bounded | not measured |
+| a release itself, in a program holding Softanza's library | at most 0.01 ms; a round is its admission, 0.4-0.9 ms | -- |
+
+Bounded, not flat: a released run's source and compile stay in the program's arena until it is compacted, which now
+happens once it has grown past twice its size plus 16 MB (it was 64 MB, and a small server climbed 64 MB first), in
+under a millisecond at this size. The court holds the second half's high-water mark to the first half's.
+
 ## What it showed -- the questions rung 5 left, answered by running
 
-- **Code admitted per request is never released.** Every admission stays: about 22 KB and its route, and the host routes
-  by a list. A HaroServer that admits code with requests (RingServ's eval-per-request shape) grows without bound. The
-  next rung of the resident VM is RELEASE: an admission's functions dropped when its request is done, or a request's code
-  compiled without being admitted at all.
+- **Code admitted per request was never released -- answered by rung 6.** `/run` admits, calls and releases; the
+  program keeps its size and the process its memory, bounded. What cannot be released: code that defines a class or a
+  lambda (an object or a closure could outlive it), a replacement, and code a class reaches through `addmethod`; and
+  only the LAST admission (a stack).
 - **One namespace for every app.** Softanza's library defines `echo`, so an app defining `Echo` is refused (C22). Apps
   need names of their own: packages, which Ring has (C-28 keeps them refused in Ring++) and Haro must decide.
 - **Adding an attribute to a live class is refused, and a real app wants it** (`tally_v3.ring`). Objects moved to a

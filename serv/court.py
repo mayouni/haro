@@ -16,6 +16,9 @@ What it asks, in order, of ONE server process:
   per request  code admitted with every request (RingServ's eval-per-request shape): what an admission costs while
              the server runs, and what the program and the process grow by -- the question the resident VM's fifth
              rung left open: must code admitted per request be RELEASED?
+  release    code that comes with a request and leaves with it (POST /run, rung 6): admitted, called, released; the
+             same code again; a raising run released too; thousands of runs, each answering with a literal of its own
+             released code, and the process's memory flat across them
   stop       the loop ends on request, the process exits 0, and wrote nothing to stderr
 
 A part that cannot run is named, never passed in silence."""
@@ -234,6 +237,54 @@ def main():
               % (mem0, mem1, mem2, len(adm), (mem2 - mem1) * 1024 / max(1, len(adm))))
     lat2 = [req('GET', '/hello')[2] for _ in range(300)]
     print('      GET /hello after them: p50 %.2f ms (the host routes by a list: %d routes now)' % (pct(lat2, 0.5), 5 + len(adm)))
+
+    # ---- release (rung 6): code that comes with a request and leaves with it
+    def stats():
+        return dict(l.rsplit(' ', 1) for l in req('GET', '/stats')[1].split('\n') if ' ' in l)
+    f0 = stats().get('functions')
+    run_src = 'func Run cInput\n\treturn "run on " + cInput\n'
+    st, body, _ = req('POST', '/run?ring', run_src)
+    st2, body2, _ = req('POST', '/run?again', run_src)
+    say(st == 200 and body == 'run on ring' and st2 == 200 and body2 == 'run on again',
+        'release: a run admitted, called and released, and the same code again -- Run is free once released: %r, %r' % (body, body2))
+    s1 = stats()
+    say(s1.get('functions') == f0 and s1.get('runs released') == '2', 'release: after them the program holds %s function(s), as before (%s)' % (s1.get('functions'), f0))
+    st, body, _ = req('POST', '/run', 'func Run cInput\n\traise("the run said no")\n')
+    st2, body2, _ = req('POST', '/run?after', run_src)
+    say(st == 500 and 'the run said no' in body and st2 == 200 and body2 == 'run on after',
+        'release: a run that raises answers 500, is released, and the next run works: %r' % body2)
+    st, body, _ = req('POST', '/run', 'zTop = 1\nfunc Run cInput\n\treturn zTop\n')
+    say(st == 422 and 'Rule A' in body, 'release: a run Rule A refuses is never admitted (%d): %s' % (st, body[:80]))
+    # what Run returns is the reply, sent AFTER the release: a literal of the released code outlives it
+    big = ''.join(chr(97 + (i * 7) % 26) for i in range(16000))
+    run_big = 'func Run cInput\n\treturn "%s"\n' % big
+    # The memory is BOUNDED, not flat: a released run's source and compile stay in the program's arena until the arena
+    # is compacted (past twice its size plus 16 MB, under a millisecond here), so it rises and falls. Measured 2026-10-31:
+    # 36-50 MB over 14,000 runs; without the release's compaction, +17 KB a run for good. So the high-water mark of the
+    # second half of the runs is held to the first half's -- each half spans more than one compaction
+    runs, lat_run = int(os.environ.get('HAROSERV_RUNS', '3000')), []
+    mem = []
+    for i in range(1, runs + 1):
+        st, body, ms = req('POST', '/run?%d' % i, run_big)
+        if st != 200 or body != big:
+            say(False, 'release: run %d answered %d, %d byte(s)%s' % (i, st, len(body), '' if body == big else ' -- not the literal'))
+            break
+        lat_run.append(ms)
+        if i % 50 == 0:
+            mem.append(private_mb(proc))
+    say(len(lat_run) == runs, 'release: %d runs, each returning a 16 KB literal of its own code, answered with it after its release' % runs)
+    say(stats().get('functions') == f0, 'release: and the program holds %s function(s), as before' % f0)
+    if lat_run:
+        print('      a run over HTTP (admit, call, release, reply): p50 %.2f ms, p95 %.2f' % (pct(lat_run, 0.5), pct(lat_run, 0.95)))
+    if runs < 3000:
+        print('      private memory: %d runs do not span a compaction in each half (it takes ~1,000) -- the bounded-memory check is NOT measured' % runs)
+    elif mem and None not in mem and len(mem) >= 8:
+        half = len(mem) // 2
+        hi1, hi2 = max(mem[2:half]), max(mem[half:])
+        say(hi2 - hi1 < 6, 'release: private memory bounded -- high-water %.1f MB over runs %d-%d, %.1f over %d-%d (low %.1f)'
+            % (hi1, 150, half * 50, hi2, half * 50, len(mem) * 50, min(mem[2:])))
+    else:
+        print('      private memory: not read on this platform -- the bounded-memory check is NOT measured here')
 
     if SOFTANZA:
         src = 'load "stzlib.ring"\nRoute("POST", "/upper", "UpperApp")\nfunc UpperApp cBody\n\treturn StzStringQ(cBody).Uppercased()\n'
