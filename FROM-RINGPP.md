@@ -174,6 +174,18 @@ needs it.
 (`tally_v3.ring`) is the last refusal a running app meets in the court. The namespace question stays the author's
 language decision (packages), and a large deployment blocking the loop waits for a server that deploys at that size.
 
+**BUILT, rung 7, 2026-10-31 (16920ec), at the author's word: a class gains attributes while its objects exist.**
+- **What it is:** a replacement may add attributes after the ones the class's objects hold. Each object made before
+  takes them at its first access past its own slots, starting as declared (a constant; a list a list of its own). The
+  replacement walks nothing; an object's first access costs about 55 ns more, once.
+- **Refused, with the reason:** an attribute dropped or reordered, a starting value that runs code, region code that
+  uses the added attribute, and a class another class the program holds inherits from.
+- **HaroServer:** `tally_v3.ring` is admitted now; the running tally keeps its total and counts the new attribute from 0.
+
+**Next on this road:** a `new K` compiled before K was admitted reaching K once it is -- the late link rung 1 gave
+functions, given to classes. Today a host can make an admitted class's objects only through a function the class's file
+defines, the one friction every HaroServer app still meets. The namespace question stays the author's language decision.
+
 **The alternative, if the author prefers the language side first:** the library derivation of rung 5 (body kinds refine a
 program, not a library, HF-103), or opening Z's route 3 (a runtime for a declared world, CHARTER section 3, HF-45). Both
 are recorded where they were found.
