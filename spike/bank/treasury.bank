@@ -1,0 +1,28 @@
+-- treasury.bank -- a sentence of bank_v24.haro: two accounts, one limit, two flows, two
+-- vaults each held by an organization and entered through a declared flow. Clean.
+
+DEFINE ACCOUNT main AS (
+  HOLDER "the treasury", CURRENCY xof, CEILING 5000000
+) RATIONALE "The bank's own account, where the day's cash lands"
+
+DEFINE ACCOUNT petty AS (
+  HOLDER "the branch", CURRENCY xof, CEILING 200000
+) RATIONALE "The branch's cash box"
+
+DEFINE LIMIT daily_cash AS (
+  ON main, DAILY 1000000,
+  RULE "amount <= daily",
+  MESSAGE "A posting above the day's limit waits for the treasurer"
+) RATIONALE "No single day empties the treasury"
+
+DEFINE FLOW nightly_posting AS () RATIONALE "The day's postings, walked at close"
+
+DEFINE FLOW settlement AS () RATIONALE "What the clearing house settles against the bank"
+
+DEFINE VAULT bank_vault AS (
+  HELD_BY the_bank, ENTERED_THROUGH nightly_posting
+) RATIONALE "The bank's own records, entered only by the nightly posting"
+
+DEFINE VAULT clearing_vault AS (
+  HELD_BY the_clearing_house, ENTERED_THROUGH settlement
+) RATIONALE "What the bank hands the clearing house, entered only by settlement"

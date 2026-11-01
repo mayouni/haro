@@ -1,0 +1,81 @@
+{
+  "name": "the bank under the whole constitution -- sentence-level cases for Haro v0.24 (ZC3)",
+  "comment": "Written BEFORE the court code (the W discipline). Each case runs the court forged from bank_v24.haro on rnxc AND on the oracle; the two must print the same bytes. 'first' is a fragment of the first output line; 'contains' fragments of the whole output; 'record' the C2 record on the second line of a refine refusal; 'diagnose' the first diagnostic of a diagnose run; a 'sequence' runs its steps on one copy of the sentence and joins their outputs. The proposals are ledger/ceiling_llm.rfn and ledger/ceiling_external.rfn, unchanged from v0.23 (the bank's main account has the same ceiling).",
+  "cases": [
+    {
+      "id": "W1",
+      "name": "the clean bank is a sentence: two accounts, one limit, two flows, two vaults",
+      "verb": "check",
+      "args": ["bank/treasury.bank"],
+      "first": "ok",
+      "counts": {"ACCOUNT": 2, "LIMIT": 1, "FLOW": 2, "VAULT": 2}
+    },
+    {
+      "id": "W2",
+      "name": "the meta-court reads the bank's declaration under all six articles, with its zone",
+      "verb": "meta",
+      "args": ["bank_v24.haro"],
+      "first": "ok",
+      "contains": ["constitution 1", "articles explainability,reversibility,visible_state,predictable_authority,organizational_sovereignty,trust_hierarchy", "zone vault", "points 5", "narrates 1"]
+    },
+    {
+      "id": "W3",
+      "name": "Art. 5 through the required seat: a vault held by nobody is refused, the article named",
+      "verb": "check",
+      "args": ["bank/treasury_no_holder.bank"],
+      "refused": true,
+      "contains": ["HELD_BY is required on VAULT orphan_vault", "[Art. 5 organizational_sovereignty]"]
+    },
+    {
+      "id": "W4",
+      "name": "Art. 5 through the envelope: the same refusal diagnosed carries the kind's code NO_HOLDER and cites article:5",
+      "verb": "diagnose",
+      "args": ["bank/treasury_no_holder.bank"],
+      "diagnose": {"code": "NO_HOLDER", "cites": ["rule:NO_HOLDER", "article:5"]}
+    },
+    {
+      "id": "W5",
+      "name": "Art. 5 through the reference: a vault entered through a flow nothing declares is refused in the kind's own words, the article named",
+      "verb": "check",
+      "args": ["bank/treasury_no_flow.bank"],
+      "refused": true,
+      "contains": ["VAULT ghost_vault is entered through 'nowhere', and no FLOW of that name is declared", "[Art. 5 organizational_sovereignty]"]
+    },
+    {
+      "id": "W6",
+      "name": "Art. 5 through the envelope: the dangling entry diagnosed carries NO_FLOW and cites article:5",
+      "verb": "diagnose",
+      "args": ["bank/treasury_no_flow.bank"],
+      "diagnose": {"code": "NO_FLOW", "cites": ["rule:NO_FLOW", "article:5"]}
+    },
+    {
+      "id": "W7",
+      "name": "Art. 3 through the voice: the vaults are told, holder and entry alike",
+      "verb": "narrate",
+      "args": ["bank/treasury.bank"],
+      "contains": ["bank_vault is held by the_bank, entered through nightly_posting.", "clearing_vault is held by the_clearing_house, entered through settlement."]
+    },
+    {
+      "id": "W8",
+      "name": "Art. 3 through the audit chain: an admitted and a refused proposal are two events, kept beside the sentence and answered as a query",
+      "verb": "sequence",
+      "steps": [["refine", "bank/treasury.bank", "ledger/ceiling_external.rfn"], ["refine", "bank/treasury.bank", "ledger/ceiling_llm.rfn"], ["audit", "bank/treasury.bank"]],
+      "contains": ["admitted: main.CEILING 5000000 -> 9000000 [external]", "[Art. 6 trust_hierarchy]", "{\"event\": 1, \"proposal\": \"raise_the_ceiling\", \"target\": \"main.CEILING\", \"from\": \"5000000\", \"to\": \"9000000\", \"author\": \"the-core-banking-system\", \"posture\": \"external\", \"verdict\": \"admitted\", \"stage\": \"\", \"code\": \"\"}", "{\"event\": 2, \"proposal\": \"raise_the_ceiling\", \"target\": \"main.CEILING\", \"from\": \"5000000\", \"to\": \"9000000\", \"author\": \"aicha\", \"posture\": \"llm\", \"verdict\": \"refused\", \"stage\": \"trust\", \"code\": \"TRUST_FLOOR\"}", "2 events"]
+    },
+    {
+      "id": "W9",
+      "name": "the audit chain before any event: the query says so, by name",
+      "verb": "sequence",
+      "steps": [["audit", "bank/treasury.bank"]],
+      "contains": ["no audit chain yet:", "treasury.bank.audit does not exist"]
+    },
+    {
+      "id": "W10",
+      "name": "the chain is article 3's: the v0.23 ledger, under no visible_state, keeps none and says so",
+      "verb": "sequence",
+      "court": "ledger_court.ring",
+      "steps": [["refine", "ledger/bank.ledger", "ledger/ceiling_external.rfn"], ["audit", "ledger/bank.ledger"]],
+      "contains": ["admitted: main.CEILING", "no audit chain: ledger is under no visible_state"]
+    }
+  ]
+}

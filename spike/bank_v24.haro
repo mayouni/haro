@@ -1,0 +1,109 @@
+-- bank_v24.haro -- a bank's ledger declared under the WHOLE constitution (Haro v0.24, the
+-- constitution plane's ZC3): ledger_v23.haro's world grown by what the two articles v0.23
+-- refused by name need. Visible state (3): every kind is told by the voice (an access path
+-- the governor reads), and the gate's events are kept as an audit chain the court answers
+-- as a query. Organizational sovereignty (5): the bank's records live in VAULTs, each held
+-- by an organization (a MENU of sectors, never a customer's name) and entered only through a
+-- declared FLOW; a vault without a holder, or entered through nothing, is refused with the
+-- article named. The sentences judged by `haro_forge.py --stage=30` are in bank/.
+
+DEFINE LANGUAGE bank AS (
+  VERSION "0.24",
+  GRAMMAR "0.24",
+  COURT "v24/court_cases.json",
+  EXTENSION ".bank"
+) RATIONALE "A bank's accounts, the daily limits on their postings, the flows postings walk and the vaults records land in -- declared under all six articles"
+
+-- ---- the menus -----------------------------------------------------------------------------
+
+DEFINE MENU currencies AS (
+  WORDS [xof, eur],
+  MESSAGE "CURRENCY is xof or eur, not '{value}'",
+  CODE "CURRENCY"
+) RATIONALE "The two currencies this ledger posts in"
+
+DEFINE MENU holders AS (
+  WORDS [the_bank, the_clearing_house, the_regulator],
+  MESSAGE "HELD_BY is the_bank, the_clearing_house or the_regulator, not '{value}'",
+  CODE "HOLDER"
+) RATIONALE "The organizations that may hold a vault: sectors and roles, never a customer's name"
+
+-- ---- the kinds -----------------------------------------------------------------------------
+
+DEFINE DECLARATION account AS (
+  VERB "ACCOUNT",
+  SEATS [holder: text, currency: currencies, ceiling: number]
+) RATIONALE "An account: who holds it, in which currency, and the ceiling its balance may not pass"
+
+DEFINE DECLARATION limit AS (
+  VERB "LIMIT",
+  SEATS [on: account, daily: number, rule: text, message: text],
+  MESSAGES [on: "LIMIT {name} stands on '{value}', and no ACCOUNT of that name is declared"],
+  CODES [on: "NO_ACCOUNT"]
+) RATIONALE "A daily limit on one account: the amount, the rule the postings are held to, and the words spoken when a posting breaks it"
+
+DEFINE DECLARATION flow AS (
+  VERB "FLOW",
+  SEATS []
+) RATIONALE "A named walk a posting takes before it lands; its steps are ZC5's, with the tontine's"
+
+DEFINE DECLARATION vault AS (
+  VERB "VAULT",
+  SEATS [held_by: holders, entered_through: flow],
+  MESSAGES [entered_through: "VAULT {name} is entered through '{value}', and no FLOW of that name is declared: a record enters a vault only through a declared flow"],
+  CODES [held_by: "NO_HOLDER", entered_through: "NO_FLOW"]
+) RATIONALE "Where the bank's records land: held by one organization, entered through one declared flow -- the zone of this world"
+
+-- ---- the constraints -----------------------------------------------------------------------
+
+DEFINE CONSTRAINT one_limit_per_account AS (
+  ON limit, WHEN "earlier limit where on = this.on",
+  MESSAGE "LIMIT {name} and LIMIT {other} both stand on {on}: one limit an account",
+  CODE "ONE_LIMIT",
+  CITES ["right:one-limit-per-account"]
+) RATIONALE "Two limits on one account would disagree"
+
+-- ---- the refusals --------------------------------------------------------------------------
+
+DEFINE REFUSAL unknown_verb AS (
+  MESSAGE "The bank's verb set is closed: ACCOUNT, LIMIT, FLOW and VAULT, nothing else.",
+  CODE "UNKNOWN_VERB"
+) RATIONALE "A verb the bank does not know is unparseable, not forbidden"
+
+DEFINE REFUSAL unknown_declaration AS (
+  MESSAGE "The bank's verb set is closed: ACCOUNT, LIMIT, FLOW and VAULT, nothing else.",
+  CODE "UNKNOWN_DECLARATION"
+) RATIONALE "DEFINE ANYTHING_ELSE is as unparseable as a verb the bank does not know"
+
+DEFINE REFUSAL dangling_reference AS (
+  MESSAGE "This name resolves to nothing in the bank.",
+  CODE "DANGLING"
+) RATIONALE "A limit's ON and a vault's ENTERED_THROUGH resolve at check time"
+
+-- ---- the refinement points: what may change, by whom ----------------------------------------
+
+DEFINE REFINE bank AS (
+  POINTS [account.ceiling: knob, limit.daily: knob, limit.rule: policy, limit.message: field, vault.held_by: policy],
+  FLOOR [account.ceiling: external, limit.daily: trusted, limit.rule: trusted, limit.message: llm, vault.held_by: trusted]
+) RATIONALE "A ceiling is a knob an external actor may turn; the daily amount, the rule and a vault's holder are the bank's, and only a trusted actor touches them; the words of a refusal a model may propose"
+
+-- ---- the voice: every kind told, which is visible state's first path -------------------------
+
+DEFINE NARRATE bank_voice AS (
+  OPENS "{file} is a bank of {count} declarations.",
+  SAYS [
+    account: "{name} is held by {holder} in {currency}, up to {ceiling}. {rationale}",
+    limit: "{name} holds {on} to {daily} a day under the rule {rule}; broken, it says: {message}. {rationale}",
+    flow: "{name} is a flow postings walk. {rationale}",
+    vault: "{name} is held by {held_by}, entered through {entered_through}. {rationale}"
+  ],
+  ENDS "That is the whole bank.",
+  REFUSES "Stopped at line {line}: {message} ({code}; {cites})"
+) RATIONALE "The bank read back as its treasurer would say it; every kind is told, so no state is hidden from the reader"
+
+-- ---- the constitution: all six -------------------------------------------------------------------
+
+DEFINE CONSTITUTION bank_charter AS (
+  ARTICLES [explainability, reversibility, visible_state, predictable_authority, organizational_sovereignty, trust_hierarchy],
+  ZONE vault, SOVEREIGN held_by, MOVEMENT entered_through
+) RATIONALE "The whole constitution: every refusal traceable and told (1), every change a refinement with its inverse first (2), every kind reachable by a declared path and every change kept in the chain (3), no model into a rule (4), every vault held by a named organization and entered through a declared flow (5), every point floored (6)"

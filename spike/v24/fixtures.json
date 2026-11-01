@@ -1,0 +1,167 @@
+{
+  "grammar": "haro",
+  "version": "0.24",
+  "comment": "The Haro v0.24 conformance floor, written BEFORE the court that passes it (the W discipline: fixtures first, prose second). v0.24 grows v0.23 by the two articles it refused by name (ZC3 of the constitution plane, on the author's 'Start ZC3', 2026-11-02): visible_state (3) is judged THROUGH the three access paths a language already declares -- every declaration kind is told by the NARRATE (SAYS), asked by the ASK (FROM) or published by the WORLD (PUBLISH), and a kind none reaches is hidden state; organizational_sovereignty (5) is judged THROUGH the zones a world declares -- the CONSTITUTION names the ZONE kind, its SOVEREIGN seat (who holds it: a word of a MENU of organizations, or a text, never optional) and its MOVEMENT seat (the declared kind, a flow, every record enters it through; never optional). The forged court cites article:5 where a zone's holder or entry is missing or dangling (the sentence cases), and keeps the gate's events as an audit chain it answers as a query (the `audit` verb) under article 3. Every v0.23 declaration still passes: v0.24 refuses nothing v0.23 accepted (A4 is v0.23's A1, unchanged); v0.23's R11 and R12, which pinned 'no mechanism yet', now pin the first refusal of each mechanism and were amended so, recorded in v24/GRAMMAR.md. Rejects carry the fragment the refusal must contain.",
+  "accepts": [
+    {
+      "id": "A1",
+      "name": "a world under all six articles: every kind told, a REFINE with floors, a zone with a holder and an entry",
+      "source": "DEFINE LANGUAGE bank AS (VERSION \"0.24\", GRAMMAR \"0.24\", COURT \"x\", EXTENSION \".bank\") RATIONALE \"x\"\nDEFINE MENU holders AS (WORDS [the_bank, the_clearing_house]) RATIONALE \"x\"\nDEFINE DECLARATION account AS (VERB \"ACCOUNT\", SEATS [holder: text, ceiling: number]) RATIONALE \"x\"\nDEFINE DECLARATION flow AS (VERB \"FLOW\", SEATS []) RATIONALE \"x\"\nDEFINE DECLARATION vault AS (VERB \"VAULT\", SEATS [held_by: holders, entered_through: flow]) RATIONALE \"x\"\nDEFINE REFUSAL unknown_verb AS (MESSAGE \"The verb set is closed\", CODE \"UNKNOWN_VERB\") RATIONALE \"x\"\nDEFINE REFINE bank AS (POINTS [account.ceiling: knob], FLOOR [account.ceiling: external]) RATIONALE \"x\"\nDEFINE NARRATE voice AS (SAYS [account: \"{name} is held by {holder} up to {ceiling}.\", flow: \"{name} is a flow.\", vault: \"{name} is held by {held_by}, entered through {entered_through}.\"], REFUSES \"Stopped at line {line}: {message} ({cites})\") RATIONALE \"x\"\nDEFINE CONSTITUTION charter AS (ARTICLES [explainability, reversibility, visible_state, predictable_authority, organizational_sovereignty, trust_hierarchy], ZONE vault, SOVEREIGN held_by, MOVEMENT entered_through) RATIONALE \"the whole constitution\"\n",
+      "expect": {
+        "language": "bank",
+        "counts": {
+          "declarations": 3,
+          "menus": 1,
+          "refusals": 1
+        },
+        "narrates": 1,
+        "points": 1,
+        "constitution": 1,
+        "articles": "explainability,reversibility,visible_state,predictable_authority,organizational_sovereignty,trust_hierarchy",
+        "zone": "vault"
+      }
+    },
+    {
+      "id": "A2",
+      "name": "Art. 3 through the ASK: a kind the voice does not tell is reached when a question is asked of it",
+      "source": "DEFINE LANGUAGE bank AS (VERSION \"0.24\", GRAMMAR \"0.24\", COURT \"x\", EXTENSION \".bank\") RATIONALE \"x\"\nDEFINE DECLARATION account AS (VERB \"ACCOUNT\", SEATS [holder: text, ceiling: number]) RATIONALE \"x\"\nDEFINE DECLARATION flow AS (VERB \"FLOW\", SEATS []) RATIONALE \"x\"\nDEFINE NARRATE voice AS (SAYS [account: \"{name} is held by {holder}.\"]) RATIONALE \"x\"\nDEFINE ASK questions AS (FROM [flow]) RATIONALE \"x\"\nDEFINE CONSTITUTION charter AS (ARTICLES [visible_state]) RATIONALE \"x\"\n",
+      "expect": {
+        "language": "bank",
+        "counts": {
+          "declarations": 2
+        },
+        "narrates": 1,
+        "asks": 1,
+        "constitution": 1,
+        "articles": "visible_state"
+      }
+    },
+    {
+      "id": "A3",
+      "name": "Art. 3 through the WORLD: a kind the voice does not tell is reached when the world publishes it",
+      "source": "DEFINE LANGUAGE bank AS (VERSION \"0.24\", GRAMMAR \"0.24\", COURT \"x\", EXTENSION \".bank\") RATIONALE \"x\"\nDEFINE DECLARATION account AS (VERB \"ACCOUNT\", SEATS [holder: text, ceiling: number]) RATIONALE \"x\"\nDEFINE DECLARATION flow AS (VERB \"FLOW\", SEATS []) RATIONALE \"x\"\nDEFINE NARRATE voice AS (SAYS [account: \"{name} is held by {holder}.\"]) RATIONALE \"x\"\nDEFINE WORLD w AS (PUBLISH [flow: flow]) RATIONALE \"x\"\nDEFINE CONSTITUTION charter AS (ARTICLES [visible_state]) RATIONALE \"x\"\n",
+      "expect": {
+        "language": "bank",
+        "counts": {
+          "declarations": 2
+        },
+        "narrates": 1,
+        "world": 1,
+        "constitution": 1,
+        "articles": "visible_state"
+      }
+    },
+    {
+      "id": "A4",
+      "name": "a v0.23 declaration is a v0.24 declaration: v0.23's A1, unchanged -- under four articles, an untold kind is nobody's concern",
+      "source": "DEFINE LANGUAGE bank AS (VERSION \"0.23\", GRAMMAR \"0.23\", COURT \"x\", EXTENSION \".bank\") RATIONALE \"x\"\nDEFINE DECLARATION account AS (VERB \"ACCOUNT\", SEATS [holder: text, ceiling: number]) RATIONALE \"x\"\nDEFINE DECLARATION limit AS (VERB \"LIMIT\", SEATS [on: account, daily: number, rule: text, message: text]) RATIONALE \"x\"\nDEFINE CONSTRAINT one_limit_per_account AS (ON limit, WHEN \"earlier limit where on = this.on\", MESSAGE \"LIMIT {name} and {other} both stand on {on}: one limit an account\", CODE \"ONE_LIMIT\") RATIONALE \"x\"\nDEFINE REFUSAL unknown_verb AS (MESSAGE \"The verb set is closed\", CODE \"UNKNOWN_VERB\") RATIONALE \"x\"\nDEFINE REFINE bank AS (POINTS [account.ceiling: knob, limit.daily: knob, limit.rule: policy, limit.message: field], FLOOR [account.ceiling: external, limit.daily: trusted, limit.rule: trusted, limit.message: llm]) RATIONALE \"x\"\nDEFINE NARRATE voice AS (SAYS [account: \"{name} is held by {holder} up to {ceiling}.\"], REFUSES \"Stopped at line {line}: {message} ({cites})\") RATIONALE \"x\"\nDEFINE CONSTITUTION charter AS (ARTICLES [explainability, reversibility, predictable_authority, trust_hierarchy]) RATIONALE \"the four articles Haro v0.23 judges, in Zin's order\"\n",
+      "expect": {
+        "language": "bank",
+        "counts": {
+          "declarations": 2,
+          "constraints": 1,
+          "refusals": 1
+        },
+        "narrates": 1,
+        "points": 4,
+        "constitution": 1,
+        "articles": "explainability,reversibility,predictable_authority,trust_hierarchy",
+        "zone": ""
+      }
+    },
+    {
+      "id": "A5",
+      "name": "Art. 5 with a text-typed holder: a zone held by a name written out is held",
+      "source": "DEFINE LANGUAGE bank AS (VERSION \"0.24\", GRAMMAR \"0.24\", COURT \"x\", EXTENSION \".bank\") RATIONALE \"x\"\nDEFINE DECLARATION flow AS (VERB \"FLOW\", SEATS []) RATIONALE \"x\"\nDEFINE DECLARATION vault AS (VERB \"VAULT\", SEATS [held_by: text, entered_through: flow]) RATIONALE \"x\"\nDEFINE CONSTITUTION charter AS (ARTICLES [organizational_sovereignty], ZONE vault, SOVEREIGN held_by, MOVEMENT entered_through) RATIONALE \"x\"\n",
+      "expect": {
+        "language": "bank",
+        "counts": {
+          "declarations": 2
+        },
+        "constitution": 1,
+        "articles": "organizational_sovereignty",
+        "zone": "vault"
+      }
+    }
+  ],
+  "rejects": [
+    {
+      "id": "R1",
+      "name": "Art. 3 visible_state: a kind no declared path reaches is hidden state",
+      "source": "DEFINE LANGUAGE bank AS (VERSION \"0.24\", GRAMMAR \"0.24\", COURT \"x\", EXTENSION \".bank\") RATIONALE \"x\"\nDEFINE DECLARATION account AS (VERB \"ACCOUNT\", SEATS [holder: text, ceiling: number]) RATIONALE \"x\"\nDEFINE DECLARATION flow AS (VERB \"FLOW\", SEATS []) RATIONALE \"x\"\nDEFINE NARRATE voice AS (SAYS [account: \"{name} is held by {holder}.\"]) RATIONALE \"x\"\nDEFINE CONSTITUTION charter AS (ARTICLES [visible_state]) RATIONALE \"x\"\n",
+      "refusal": "Art. 3 visible_state: kind 'flow' is reached by no declared path -- not told (NARRATE SAYS), not asked (ASK FROM), not published (WORLD PUBLISH): a state nothing can read is hidden"
+    },
+    {
+      "id": "R2",
+      "name": "Art. 3 visible_state: with no voice, no ask and no world, the first kind is the first hidden",
+      "source": "DEFINE LANGUAGE bank AS (VERSION \"0.24\", GRAMMAR \"0.24\", COURT \"x\", EXTENSION \".bank\") RATIONALE \"x\"\nDEFINE DECLARATION account AS (VERB \"ACCOUNT\", SEATS [holder: text]) RATIONALE \"x\"\nDEFINE DECLARATION flow AS (VERB \"FLOW\", SEATS []) RATIONALE \"x\"\nDEFINE CONSTITUTION charter AS (ARTICLES [visible_state]) RATIONALE \"x\"\n",
+      "refusal": "Art. 3 visible_state: kind 'account' is reached by no declared path"
+    },
+    {
+      "id": "R3",
+      "name": "Art. 5 organizational_sovereignty: a world under it names its zone kind",
+      "source": "DEFINE LANGUAGE bank AS (VERSION \"0.24\", GRAMMAR \"0.24\", COURT \"x\", EXTENSION \".bank\") RATIONALE \"x\"\nDEFINE DECLARATION flow AS (VERB \"FLOW\", SEATS []) RATIONALE \"x\"\nDEFINE DECLARATION vault AS (VERB \"VAULT\", SEATS [held_by: text, entered_through: flow]) RATIONALE \"x\"\nDEFINE CONSTITUTION charter AS (ARTICLES [organizational_sovereignty]) RATIONALE \"x\"\n",
+      "refusal": "Art. 5 organizational_sovereignty: 'bank' names no ZONE -- a world under sovereignty says which of its kinds holds its data (ZONE), who holds each (SOVEREIGN) and through which declared flow a record enters it (MOVEMENT)"
+    },
+    {
+      "id": "R4",
+      "name": "Art. 5: the ZONE is a declaration kind, not a menu",
+      "source": "DEFINE LANGUAGE bank AS (VERSION \"0.24\", GRAMMAR \"0.24\", COURT \"x\", EXTENSION \".bank\") RATIONALE \"x\"\nDEFINE MENU holders AS (WORDS [the_bank]) RATIONALE \"x\"\nDEFINE DECLARATION flow AS (VERB \"FLOW\", SEATS []) RATIONALE \"x\"\nDEFINE DECLARATION vault AS (VERB \"VAULT\", SEATS [held_by: holders, entered_through: flow]) RATIONALE \"x\"\nDEFINE CONSTITUTION charter AS (ARTICLES [organizational_sovereignty], ZONE holders, SOVEREIGN held_by, MOVEMENT entered_through) RATIONALE \"x\"\n",
+      "refusal": "Art. 5 organizational_sovereignty: ZONE 'holders' is not a declaration kind of 'bank'"
+    },
+    {
+      "id": "R5",
+      "name": "Art. 5: a zone is held by someone, never by silence -- SOVEREIGN is named",
+      "source": "DEFINE LANGUAGE bank AS (VERSION \"0.24\", GRAMMAR \"0.24\", COURT \"x\", EXTENSION \".bank\") RATIONALE \"x\"\nDEFINE DECLARATION flow AS (VERB \"FLOW\", SEATS []) RATIONALE \"x\"\nDEFINE DECLARATION vault AS (VERB \"VAULT\", SEATS [held_by: text, entered_through: flow]) RATIONALE \"x\"\nDEFINE CONSTITUTION charter AS (ARTICLES [organizational_sovereignty], ZONE vault, MOVEMENT entered_through) RATIONALE \"x\"\n",
+      "refusal": "Art. 5 organizational_sovereignty: ZONE 'vault' has no SOVEREIGN seat named -- a zone is held by someone, never by silence"
+    },
+    {
+      "id": "R6",
+      "name": "Art. 5: the SOVEREIGN seat is a seat of the zone kind",
+      "source": "DEFINE LANGUAGE bank AS (VERSION \"0.24\", GRAMMAR \"0.24\", COURT \"x\", EXTENSION \".bank\") RATIONALE \"x\"\nDEFINE DECLARATION flow AS (VERB \"FLOW\", SEATS []) RATIONALE \"x\"\nDEFINE DECLARATION vault AS (VERB \"VAULT\", SEATS [held_by: text, entered_through: flow]) RATIONALE \"x\"\nDEFINE CONSTITUTION charter AS (ARTICLES [organizational_sovereignty], ZONE vault, SOVEREIGN owner, MOVEMENT entered_through) RATIONALE \"x\"\n",
+      "refusal": "Art. 5 organizational_sovereignty: SOVEREIGN 'owner' is not a seat of 'vault'"
+    },
+    {
+      "id": "R7",
+      "name": "Art. 5: the holder is never optional",
+      "source": "DEFINE LANGUAGE bank AS (VERSION \"0.24\", GRAMMAR \"0.24\", COURT \"x\", EXTENSION \".bank\") RATIONALE \"x\"\nDEFINE DECLARATION flow AS (VERB \"FLOW\", SEATS []) RATIONALE \"x\"\nDEFINE DECLARATION vault AS (VERB \"VAULT\", SEATS [held_by: text?, entered_through: flow]) RATIONALE \"x\"\nDEFINE CONSTITUTION charter AS (ARTICLES [organizational_sovereignty], ZONE vault, SOVEREIGN held_by, MOVEMENT entered_through) RATIONALE \"x\"\n",
+      "refusal": "Art. 5 organizational_sovereignty: SOVEREIGN seat 'held_by' of 'vault' is optional -- a zone's holder is never silent"
+    },
+    {
+      "id": "R8",
+      "name": "Art. 5: a holder is a word of a MENU of organizations, or a text",
+      "source": "DEFINE LANGUAGE bank AS (VERSION \"0.24\", GRAMMAR \"0.24\", COURT \"x\", EXTENSION \".bank\") RATIONALE \"x\"\nDEFINE DECLARATION flow AS (VERB \"FLOW\", SEATS []) RATIONALE \"x\"\nDEFINE DECLARATION vault AS (VERB \"VAULT\", SEATS [held_by: number, entered_through: flow]) RATIONALE \"x\"\nDEFINE CONSTITUTION charter AS (ARTICLES [organizational_sovereignty], ZONE vault, SOVEREIGN held_by, MOVEMENT entered_through) RATIONALE \"x\"\n",
+      "refusal": "Art. 5 organizational_sovereignty: SOVEREIGN seat 'held_by' of 'vault' is typed 'number' -- a holder is a word of a MENU of organizations, or a text"
+    },
+    {
+      "id": "R9",
+      "name": "Art. 5: a record enters a zone through a declared flow, or not at all -- MOVEMENT is named",
+      "source": "DEFINE LANGUAGE bank AS (VERSION \"0.24\", GRAMMAR \"0.24\", COURT \"x\", EXTENSION \".bank\") RATIONALE \"x\"\nDEFINE DECLARATION flow AS (VERB \"FLOW\", SEATS []) RATIONALE \"x\"\nDEFINE DECLARATION vault AS (VERB \"VAULT\", SEATS [held_by: text, entered_through: flow]) RATIONALE \"x\"\nDEFINE CONSTITUTION charter AS (ARTICLES [organizational_sovereignty], ZONE vault, SOVEREIGN held_by) RATIONALE \"x\"\n",
+      "refusal": "Art. 5 organizational_sovereignty: ZONE 'vault' has no MOVEMENT seat named -- a record enters a zone through a declared flow, or not at all"
+    },
+    {
+      "id": "R10",
+      "name": "Art. 5: the entry is never optional -- an entry that may be silent is ungoverned",
+      "source": "DEFINE LANGUAGE bank AS (VERSION \"0.24\", GRAMMAR \"0.24\", COURT \"x\", EXTENSION \".bank\") RATIONALE \"x\"\nDEFINE DECLARATION flow AS (VERB \"FLOW\", SEATS []) RATIONALE \"x\"\nDEFINE DECLARATION vault AS (VERB \"VAULT\", SEATS [held_by: text, entered_through: flow?]) RATIONALE \"x\"\nDEFINE CONSTITUTION charter AS (ARTICLES [organizational_sovereignty], ZONE vault, SOVEREIGN held_by, MOVEMENT entered_through) RATIONALE \"x\"\n",
+      "refusal": "Art. 5 organizational_sovereignty: MOVEMENT seat 'entered_through' of 'vault' is optional -- an entry that may be silent is ungoverned"
+    },
+    {
+      "id": "R11",
+      "name": "Art. 5: the entry names a declared kind, the flow a record walks in, not a text",
+      "source": "DEFINE LANGUAGE bank AS (VERSION \"0.24\", GRAMMAR \"0.24\", COURT \"x\", EXTENSION \".bank\") RATIONALE \"x\"\nDEFINE DECLARATION flow AS (VERB \"FLOW\", SEATS []) RATIONALE \"x\"\nDEFINE DECLARATION vault AS (VERB \"VAULT\", SEATS [held_by: text, entered_through: text]) RATIONALE \"x\"\nDEFINE CONSTITUTION charter AS (ARTICLES [organizational_sovereignty], ZONE vault, SOVEREIGN held_by, MOVEMENT entered_through) RATIONALE \"x\"\n",
+      "refusal": "Art. 5 organizational_sovereignty: MOVEMENT seat 'entered_through' of 'vault' is typed 'text' -- it names a declared kind, the flow a record walks in"
+    },
+    {
+      "id": "R12",
+      "name": "the zone seats belong to the sovereignty article: a ZONE named without it is refused, not accepted by silence",
+      "source": "DEFINE LANGUAGE bank AS (VERSION \"0.24\", GRAMMAR \"0.24\", COURT \"x\", EXTENSION \".bank\") RATIONALE \"x\"\nDEFINE DECLARATION flow AS (VERB \"FLOW\", SEATS []) RATIONALE \"x\"\nDEFINE DECLARATION vault AS (VERB \"VAULT\", SEATS [held_by: text, entered_through: flow]) RATIONALE \"x\"\nDEFINE REFINE bank AS (POINTS [vault.held_by: field]) RATIONALE \"x\"\nDEFINE CONSTITUTION charter AS (ARTICLES [reversibility], ZONE vault, SOVEREIGN held_by, MOVEMENT entered_through) RATIONALE \"x\"\n",
+      "refusal": "ZONE is named and organizational_sovereignty is not among ARTICLES -- the zone seats are the sovereignty article's"
+    },
+    {
+      "id": "R13",
+      "name": "the first article refused is the first in ARTICLES' order: sovereignty before visible state when so written",
+      "source": "DEFINE LANGUAGE bank AS (VERSION \"0.24\", GRAMMAR \"0.24\", COURT \"x\", EXTENSION \".bank\") RATIONALE \"x\"\nDEFINE DECLARATION flow AS (VERB \"FLOW\", SEATS []) RATIONALE \"x\"\nDEFINE DECLARATION vault AS (VERB \"VAULT\", SEATS [held_by: text, entered_through: flow]) RATIONALE \"x\"\nDEFINE CONSTITUTION charter AS (ARTICLES [organizational_sovereignty, visible_state]) RATIONALE \"x\"\n",
+      "refusal": "Art. 5 organizational_sovereignty: 'bank' names no ZONE"
+    }
+  ]
+}

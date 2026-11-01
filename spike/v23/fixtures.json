@@ -141,15 +141,15 @@
     },
     {
       "id": "R11",
-      "name": "Art. 3 visible_state is refused by name as what Haro v0.23 does not judge yet: a state, not a fault (ZC3)",
+      "name": "Art. 3 visible_state: in v0.23 this pinned 'no mechanism judges it yet'; since v0.24 (ZC3) it pins the mechanism's first refusal -- a kind no declared path reaches is hidden state (amended 2026-11-02, recorded in v24/GRAMMAR.md)",
       "source": "DEFINE LANGUAGE bank AS (VERSION \"0.23\", GRAMMAR \"0.23\", COURT \"x\", EXTENSION \".bank\") RATIONALE \"x\"\nDEFINE DECLARATION account AS (VERB \"ACCOUNT\", SEATS [holder: text]) RATIONALE \"x\"\nDEFINE CONSTITUTION charter AS (ARTICLES [visible_state]) RATIONALE \"x\"\n",
-      "refusal": "Art. 3 visible_state: no mechanism judges it in Haro v0.23 -- ZC3 builds it on the narration and the audit chain, fixtures first"
+      "refusal": "Art. 3 visible_state: kind 'account' is reached by no declared path"
     },
     {
       "id": "R12",
-      "name": "Art. 5 organizational_sovereignty is refused by name as what Haro v0.23 does not judge yet (ZC3, on the zones Z declares)",
+      "name": "Art. 5 organizational_sovereignty: in v0.23 this pinned 'no mechanism judges it yet'; since v0.24 (ZC3) it pins the mechanism's first refusal -- a world under sovereignty names its zone (amended 2026-11-02, recorded in v24/GRAMMAR.md)",
       "source": "DEFINE LANGUAGE bank AS (VERSION \"0.23\", GRAMMAR \"0.23\", COURT \"x\", EXTENSION \".bank\") RATIONALE \"x\"\nDEFINE DECLARATION account AS (VERB \"ACCOUNT\", SEATS [holder: text]) RATIONALE \"x\"\nDEFINE CONSTITUTION charter AS (ARTICLES [organizational_sovereignty]) RATIONALE \"x\"\n",
-      "refusal": "Art. 5 organizational_sovereignty: no mechanism judges it in Haro v0.23 -- ZC3 builds it on the zones Z declares and W3's no ungoverned data movement, fixtures first"
+      "refusal": "Art. 5 organizational_sovereignty: 'bank' names no ZONE"
     },
     {
       "id": "R13",

@@ -1,0 +1,11 @@
+-- treasury_no_holder.bank -- a vault held by nobody: refused under Art. 5.
+
+DEFINE ACCOUNT main AS (
+  HOLDER "the treasury", CURRENCY xof, CEILING 5000000
+) RATIONALE "The bank's own account, where the day's cash lands"
+
+DEFINE FLOW nightly_posting AS () RATIONALE "The day's postings, walked at close"
+
+DEFINE VAULT orphan_vault AS (
+  ENTERED_THROUGH nightly_posting
+) RATIONALE "A vault nobody holds, which the bank refuses"
