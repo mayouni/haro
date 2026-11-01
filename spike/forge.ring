@@ -484,6 +484,8 @@ func ForgeCourt(aLang)
 	c += "$aCourtFormset = NULL" + nl + "$aCourtNarrate = NULL" + nl
 	c += "$aCourtUnderstand = NULL" + nl + "$bNSurfaces = 0" + nl
 	c += "$aCourtConstitution = []" + nl
+	# v0.24: the zone of organizational_sovereignty, and the audit chain of visible_state
+	c += "$aCourtZone = []" + nl + "$cCourtAuditFile = " + '""' + nl + "$aCourtAuditProposal = []" + nl
 	c += "$bCourtCollect = 0" + nl + "$aCourtFound = []" + nl + "$aCourtBroken = []" + nl
 	c += "$bRunTrace = 0" + nl + "$aRunTrace = []" + nl + "$nRunDepth = 0" + nl + "$bAskTrace = 0" + nl + "$aAskTrace = []" + nl
 	c += ExprGlobals()
@@ -502,6 +504,12 @@ func ForgeCourt(aLang)
 	aCst = LangGet(aLang, "constitution")
 	if not isNull(aCst)
 		c += "$aCourtConstitution = " + NamesSource(aCst[2]) + nl
+		# v0.24: the zone kind, its sovereign seat and its movement seat, read by the court's refusals
+		if len(aCst) >= 9
+			if aCst[7] != ""
+				c += "$aCourtZone = [" + RingStr(aCst[7]) + ", " + RingStr(aCst[8]) + ", " + RingStr(aCst[9]) + "]" + nl
+			ok
+		ok
 	ok
 	c += nl + "CtMain()" + nl
 	return c

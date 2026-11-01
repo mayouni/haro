@@ -174,9 +174,11 @@ and are never reimplemented: explainability through `RATIONALE` and the narratio
 `NARRATE`, principle 4's C2 envelope); reversibility through refinement (section 6, item 5: the
 inverse computed before anything lands); predictable authority through the gate's governance stage
 and the capability a door grants (section 6, item 4; principle 12); trust hierarchy through the
-trust posture and a point's floor (section 6, item 4). The two Haro lacks -- visible state and
-organizational sovereignty -- are rungs with fixtures first (ZC3), the second on the zones Z
-already declares. A refusal under an article names its number and the article, in the domain's
+trust posture and a point's floor (section 6, item 4). The two Haro lacked -- visible state and
+organizational sovereignty -- were built as rungs, fixtures first (ZC3, 2026-11-02, D34): the first
+through the access paths a language declares (told, asked, published) and the gate's events kept
+as an audit chain the court answers as a query; the second on the zones a world declares, each
+held by a named organization and entered through a declared flow. A refusal under an article names its number and the article, in the domain's
 words (COMPASS-KERN-06, adopted here, not copied). No letter: the alphabet Z W Q F A N is closed,
 and the sentence is a declaration like any other. Zin keeps its federation, its pillars, its
 foundry, its IDE and every customer's constitution text. The inventory behind this clause is
@@ -212,7 +214,7 @@ no expression position, no escape):
 | **`ASK`** (the pragmatics stratum) | absent | the language's own closed query grammar (the Q letter) and the human languages its natural door speaks; NL asks, never declares; the engine compiles to this grammar and never to host code [R, mission.md rules 1-2]. *The query grammar is built, v0.7 (the seventh rung); the natural door is not.* |
 | **`NARRATE`** | absent | how a run of the language is narrated back (stzn); the court's voice. *Built, v0.13 (the thirteenth rung): SAYS, OPENS, ENDS, REFUSES; `narrate <file>`; a projection, never stored, never parsed back.* |
 | **`REFINE`** | absent | which declared points of a sentence may be refined, by whom, within what bounds, at what trust floor (section 7) |
-| **`CONSTITUTION`** | absent | the articles a world declares itself under, judged through the seats above and the gate, never reimplemented (section 2; D33). *Built, v0.23 (ZC2, 2026-11-02): `ARTICLES` drawn from Zin's six by name and number, `WEAVES` and `REGIME` carried for ZC4; 22 fixtures and a bank's ledger judged on both runtimes* |
+| **`CONSTITUTION`** | absent | the articles a world declares itself under, judged through the seats above and the gate, never reimplemented (section 2; D33). *Built, v0.23 (ZC2, 2026-11-02): `ARTICLES` drawn from Zin's six by name and number, `WEAVES` and `REGIME` carried for ZC4; 22 fixtures and a bank's ledger judged on both runtimes. v0.24 (ZC3, the same day, D34): `ZONE`, `SOVEREIGN`, `MOVEMENT`; visible state through the access paths and the audit chain; 18 fixtures and the bank under all six* |
 | **`FORMS` inside a vocabulary** | absent | the function-name grammar of principle 7 declared as data for the computing altitude's families. *Built, v0.12 (the twelfth rung): FLUENT, PASSIVE, STATEMENT, PARAMS and FAMILY; the families generated, the shipped spellings judged live.* |
 
 **Built 2026-10-01, the first slice of two of these rows -- Haro v0.2, the spike's second
@@ -1120,6 +1122,18 @@ states principle 14.
   a future article that needs a mechanism of its own is a rung, never a reimplementation; `CITES` stands on `CONSTRAINT` too now (stzzui's S2, Central's ask of 2026-10-31 22:54, item 1: answered,
   built), and a `SEVERITY` seat is designed for ZC4 with the weaves, not built (item 2, S1): `error` or `warning` on `CONSTRAINT` and `REFUSAL`, a warning leaving the verdict `ok` and spoken after it
   as `NO_WORLD` is today, `"warning"` in the envelope.
+- **D34 -- visible state and organizational sovereignty get a mechanism each, judged through what exists** (ZC3, built on the author's "Start ZC3", 2026-11-02; `haro/spike/v24/GRAMMAR.md`).
+  **Visible state (3)** is judged through the three access paths a language already declares: every declaration kind is told by the `NARRATE` (a `SAYS` template), asked by the `ASK` (`FROM`) or
+  published by the `WORLD` (`PUBLISH`), and a kind none reaches is refused as hidden state, with the article; and the gate's events are kept as the audit chain -- under the article every refinement
+  proposal, admitted or refused, is one JSON line appended beside the sentence (`<file>.audit`: proposal, target, from, to, author, posture, verdict, stage, code; numbered, no clock, so both runtimes
+  write the same bytes), and `audit <file>` answers it as a query, which is what section 2 owes the governor. **Organizational sovereignty (5)** is judged through the zones a world declares: the
+  `CONSTITUTION` names the `ZONE` kind, its `SOVEREIGN` seat (who holds it: a word of a `MENU` of organizations, or a text; never optional) and its `MOVEMENT` seat (the declared kind a record enters
+  it through, a flow; never optional); the meta-court refuses what is missing with the article, and the forged court cites `article:5` where a zone's holder or entry is absent or dangling, in the
+  kind's own `MESSAGES`. The zone seats named without the article are refused, not accepted by silence. What it does not judge, named: a movement between two zones of different sovereigns -- no
+  declaration carries one yet; ZC4's field tags are the paths that will. *Cost:* a world under visible state tells, asks or publishes every kind, and a refinement writes an `.audit` file beside its
+  sentence; a world under sovereignty declares a zone kind with two required seats -- Z's `LANDING_ZONE` has `INTO` and no holder, so the tontine stands under Art. 5 once its zone says who holds it
+  (ZC5's second act, with the codes Art. 1 asks for); and a global the forge adds must be born in every generated court, because on Ring 1.27 a `$name` first assigned in a function is that function's
+  local, so every rung that grows the forge regenerates the committed courts (HF-127).
 - **D23 -- `rnxc fmt` is a Ring++ feature, not held for Haro** (CODEGRAPH Q4, ruled on the author's delegation, 2026-10-05: "take
   whatever decision you think is wiser on my behalf"). It is a verb of the one binary (commitment 5), depends on nothing of Haro's, is
   judged against the oracle and refuses what Ring refuses (58 of 6,061 Softanza files, 57 of them Ring's own refusals). It ships inside

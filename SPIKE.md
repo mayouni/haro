@@ -1474,6 +1474,27 @@ in a fresh worktree on a CRLF checkout, HF-126, and passes in the main checkout)
 against v0.13's NARRATE rule, corrected and recorded; HF-36 met again in the constraint pass; Art. 4 and Art. 6 are one gate stage split by what
 each forbids; Z pays explainability's cost only once its refusals are coded (ZC5's first act); CITES on CONSTRAINT built, SEVERITY designed for ZC4.
 
+## The twenty-fourth rung -- Haro v0.24, visible state and sovereignty: the two articles v0.23 refused by name -- 2026-11-02
+
+**On the author's "Start ZC3"** (2026-11-02 00:16), the constitution plane's third rung (D34). **Visible state (3)** through the three access paths a
+language already declares -- every declaration kind told by the NARRATE, asked by the ASK or published by the WORLD, a kind none reaches refused as
+hidden state -- and through the gate's events kept as an audit chain beside the sentence (`<file>.audit`, numbered, no clock) that `audit <file>`
+answers as a query. **Organizational sovereignty (5)** through the zones a world declares: the CONSTITUTION names the `ZONE` kind, its `SOVEREIGN`
+seat (a MENU of organizations or a text, never optional) and its `MOVEMENT` seat (the declared flow a record enters through, never optional); the
+forged court cites `article:5` where a zone's holder or entry is absent or dangling, in the kind's own words. `spike/v24/GRAMMAR.md` is the account.
+
+    v24/fixtures.json                   18 meta fixtures, written before the court (5 accepts, 13 rejects)
+    bank_v24.haro, bank/                the bank under all six articles: the language, three sentences; v0.23's proposals
+    v24/court_cases.json                10 sentence cases, among them a sequence (two refinements, then the chain as a query)
+    haro_lib.ring, forge.ring, court_lib.ring   the zone seats and the access-path check; the court's cites at the required and dangling sites; the chain; `audit`
+    haro_forge.py                       stage 1 grows by v0.24; stages 29 and 30 share one ledger stage
+
+**Results.** 18 of 18 and 10 of 10, rnxc and the oracle byte-identical; stages 1 to 5, 9 to 18, 21 and 29 unchanged; the nine committed courts
+regenerated. **What building found** (HF-127): a global the forge adds must be born in every generated court -- on Ring 1.27 a `$name` first assigned
+in a function is that function's local, and a court generated before the forge grew diverged from rnxc on the oracle until regenerated; v0.23's R11
+and R12 amended to pin each mechanism's first refusal; an ASK of a FROM alone is an access path; the chain is numbered, not dated; Z's zone has no
+holder yet (ZC5's second act).
+
 ## The names -- `.haro`, not `.stzu` -- corrected 2026-10-02
 
 **At the author's word ("we agreed to use .haro instead of .stzu, no?").** D1 was ratified
@@ -1594,8 +1615,10 @@ whole guard re-run on the renamed tree: 28 + 30 + 27 + 23, 117 of 120, 32 of 32,
    clause, proposed the same day in the charter's section 2 and RATIFIED by the author at 23:32 ("Ratified, start ZC2", section 0).
    **ZC2 BUILT 2026-11-02 as Haro v0.23** (the twenty-third rung below; `v23/GRAMMAR.md`, guard stage 29, D33, HF-125 and HF-126): the
    `CONSTITUTION` declaration, 22 meta fixtures and a bank's ledger's 10 cases written first, 32 of 32 on both runtimes, byte-identical.
-   Not begun: ZC3 (the two absent articles), ZC4 (W3 and W4 as field tags in stzlib and HaroBase; SEVERITY), ZC5 (the tontine under a
-   constitution, read by the author).
+   **ZC3 BUILT 2026-11-02 as Haro v0.24** (the twenty-fourth rung below; `v24/GRAMMAR.md`, guard stage 30, D34, HF-127): visible state
+   through the three access paths and the audit chain, sovereignty through a zone's holder and entry; 18 meta fixtures and the bank under
+   all six articles' 10 cases written first, 28 of 28 on both runtimes. Not begun: ZC4 (W3 and W4 as field tags in stzlib and HaroBase;
+   SEVERITY), ZC5 (the tontine under the whole constitution, read by the author: its refusals coded, its zone held).
 18. The forge as an `rnxc` verb (the ringpp session's `src/`, routed); the
    Softanza-resident timing the charter's 2.6 asks for; the court's run time on the
    oracle under paths and views (6.4x the image this pass, named at stage 6); the

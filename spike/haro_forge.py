@@ -71,6 +71,7 @@ STZU13_FIXTURES = os.path.join(HERE, 'v13', 'fixtures.json')
 STZU16_FIXTURES = os.path.join(HERE, 'v16', 'fixtures.json')
 STZU17_FIXTURES = os.path.join(HERE, 'v17', 'meta_fixtures.json')
 STZU23_FIXTURES = os.path.join(HERE, 'v23', 'fixtures.json')
+STZU24_FIXTURES = os.path.join(HERE, 'v24', 'fixtures.json')
 
 
 def judge_stzu(exe, label, fixtures=STZU_FIXTURES):
@@ -80,7 +81,7 @@ def judge_stzu(exe, label, fixtures=STZU_FIXTURES):
     counts), world and points."""
     doc = json.load(open(fixtures, encoding='utf-8'))
     # the pinned v0.1 judge is stzu's; everything since is Haro's (D1)
-    assert doc['grammar'] in ('stzu', 'haro') and doc['version'] in ('0.1', '0.2', '0.3', '0.4', '0.5', '0.6', '0.7', '0.8', '0.9', '0.10', '0.11', '0.12', '0.13', '0.16', '0.17', '0.23')
+    assert doc['grammar'] in ('stzu', 'haro') and doc['version'] in ('0.1', '0.2', '0.3', '0.4', '0.5', '0.6', '0.7', '0.8', '0.9', '0.10', '0.11', '0.12', '0.13', '0.16', '0.17', '0.23', '0.24')
     passed = failed = 0
     outputs = {}
     with tempfile.TemporaryDirectory() as td:
@@ -158,7 +159,8 @@ def stage1():
                             ('v0.13, NARRATE: the court\'s voice', STZU13_FIXTURES),
                             ('v0.16, NARRATE tells a run and a question', STZU16_FIXTURES),
                             ('v0.17, UNDERSTAND: what a human language reaches closed questions with', STZU17_FIXTURES),
-                            ('v0.23, CONSTITUTION: a world under Zin\'s articles, judged through the charter\'s mechanisms', STZU23_FIXTURES)):
+                            ('v0.23, CONSTITUTION: a world under Zin\'s articles, judged through the charter\'s mechanisms', STZU23_FIXTURES),
+                            ('v0.24, visible state through the access paths, sovereignty through the zones', STZU24_FIXTURES)):
         print(f'stage 1 -- the Haro meta-court in pure Ring, judged by its fixtures ({label})')
         f1, o1 = judge_stzu(RNXC, 'rnxc', fixtures)
         f2, o2 = judge_stzu(ORACLE, 'oracle ring.exe', fixtures)
@@ -3073,35 +3075,36 @@ def stage28():
     return failures
 
 
-# ---- stage 29: the constitution plane (ZC2) -- a world under Zin's articles, judged through the charter's mechanisms
+# ---- stages 29 and 30: the constitution plane -- a world under Zin's articles, judged through the charter's mechanisms
 
 LEDGER_STZU = os.path.join(HERE, 'ledger_v23.haro')
 LEDGER_CASES = os.path.join(HERE, 'v23', 'court_cases.json')
+BANK_STZU = os.path.join(HERE, 'bank_v24.haro')
+BANK_CASES = os.path.join(HERE, 'v24', 'court_cases.json')
 
 
-def stage29():
-    """The constitution plane's ZC2 (charter section 2, ratified 2026-11-01; haro/spike/v23/GRAMMAR.md).
-    ledger_v23.haro declares a bank's ledger under four of Zin's six articles; the forge emits its court and
-    grammar on both runtimes, byte-identical; v23/court_cases.json, written before the court, is judged on rnxc
-    and on the oracle: the clean ledger a sentence; the meta-court's reading of the constitution; a declaration
-    without RATIONALE refused with Art. 1 named, its diagnosis coded RATIONALE and citing article:1, its
-    narration carrying the cite; a maker's CONSTRAINT citing what it CITES (CITES on CONSTRAINT); a proposal
-    below a floor refused with Art. 6 named and cited; the admitted proposal reverted byte for byte (Art. 2
-    through refinement); the floor per point. No fixture adapted to pass."""
-    print('stage 29 -- the constitution plane (ZC2): ledger_v23.haro under four articles; v23/court_cases.json judged on rnxc and the oracle')
+def ledger_stage(n, stzu, cases_path, lang, plant_id):
+    """One world of the constitution plane: the forge emits its court and grammar on both runtimes,
+    byte-identical; its case file, written before the court, is judged on rnxc and on the oracle, the
+    two printing the same bytes. A case runs one verb (check, diagnose, narrate, meta, refine) or a
+    `sequence` of steps on one copy of the sentence (the court writes the refined text, the inverse
+    and the audit chain beside it); 'first' is a fragment of the first line, 'contains' fragments of
+    the whole output, 'counts' the verdict's counts, 'record' the C2 record of a refine refusal,
+    'diagnose' the first diagnostic, 'revert' that the inverse restores the bytes."""
+    print(f'stage {n} -- the constitution plane: {os.path.basename(stzu)} -> {lang}_court.ring; {os.path.relpath(cases_path, HERE)} judged on rnxc and the oracle')
     failures = 0
-    out_rnx = run_args(RNXC, ['forge.ring', LEDGER_STZU, '.'], HERE).strip()
+    out_rnx = run_args(RNXC, ['forge.ring', stzu, '.'], HERE).strip()
     print('  rnxc  :', out_rnx.splitlines()[0] if out_rnx else 'NO OUTPUT')
-    if not out_rnx.startswith('forged ledger'):
-        print('  FAIL the forge did not forge the ledger')
+    if not out_rnx.startswith('forged ' + lang):
+        print(f'  FAIL the forge did not forge {lang}')
         return 1
     td_or = os.path.join(ROOT, 'runtime', 'haro-forge-oracle')
     os.makedirs(td_or, exist_ok=True)
-    arts = ('ledger_court.ring', 'ledger.gbnf')
+    arts = (f'{lang}_court.ring', f'{lang}.gbnf')
     for art in arts:
         if os.path.exists(os.path.join(td_or, art)):
             os.remove(os.path.join(td_or, art))
-    out_or = run_args(ORACLE, ['forge.ring', LEDGER_STZU, '../../runtime/haro-forge-oracle'], HERE).strip()
+    out_or = run_args(ORACLE, ['forge.ring', stzu, '../../runtime/haro-forge-oracle'], HERE).strip()
     print('  oracle:', out_or.splitlines()[0] if out_or else 'NO OUTPUT')
     for art in arts:
         a = open(os.path.join(HERE, art), 'rb').read()
@@ -3111,35 +3114,46 @@ def stage29():
             print(f'  FAIL {art} differs between the two runtimes ({len(a)} vs {len(b)} bytes)')
         else:
             print(f'  ok   {art}: {len(a)} bytes, byte-identical on both runtimes')
-    doc = json.load(open(LEDGER_CASES, encoding='utf-8'))
+    doc = json.load(open(cases_path, encoding='utf-8'))
     passed = failed = 0
     ab_diff = []
     for case in doc['cases']:
         verb = case['verb']
-        args = case['args']
+        court = case.get('court', f'{lang}_court.ring')
+        steps = case['steps'] if verb == 'sequence' else [[verb] + case['args']]
         outs = {}
         with tempfile.TemporaryDirectory() as td:
             for label, exe in (('rnxc', RNXC), ('oracle', ORACLE)):
-                if verb == 'meta':
-                    out = run_args(exe, ['haro.ring'] + args, HERE)
-                elif verb == 'refine':
-                    # the court writes the refined text and its inverse beside the sentence: a copy per runtime
-                    cd = os.path.join(td, label)
-                    os.makedirs(cd, exist_ok=True)
-                    sent = os.path.join(cd, os.path.basename(args[0]))
-                    shutil.copyfile(os.path.join(HERE, args[0]), sent)
-                    out = run_args(exe, ['ledger_court.ring', 'refine', sent, os.path.join(HERE, args[1])], HERE)
-                    # the admitted line names the inverse's path, which is this copy's: one name for both runtimes
-                    out = out.replace(cd, '<copy>')
-                    if case.get('revert'):
-                        src = open(os.path.join(HERE, args[0]), 'rb').read()
-                        refined = sent + '.refined'
-                        rv = run_args(exe, ['ledger_court.ring', 'refine', refined, sent + '.revert.rfn'], HERE)
-                        back = open(refined + '.refined', 'rb').read() if os.path.exists(refined + '.refined') else b''
-                        out += '\n[revert] ' + ('restored byte for byte' if (rv.startswith('admitted:') and back == src) else 'NOT restored: ' + rv.strip()[:120])
-                else:
-                    out = run_args(exe, ['ledger_court.ring', verb] + args, HERE)
-                outs[label] = out
+                cd = os.path.join(td, label)
+                os.makedirs(cd, exist_ok=True)
+                copies = {}
+                parts = []
+                for step in steps:
+                    sverb, sargs = step[0], step[1:]
+                    if sverb == 'meta':
+                        out = run_args(exe, ['haro.ring'] + sargs, HERE)
+                    elif sverb in ('refine', 'audit'):
+                        # the court writes beside the sentence: a copy per runtime, shared by the steps of a sequence
+                        src_rel = sargs[0]
+                        if src_rel not in copies:
+                            sent = os.path.join(cd, os.path.basename(src_rel))
+                            shutil.copyfile(os.path.join(HERE, src_rel), sent)
+                            copies[src_rel] = sent
+                        sent = copies[src_rel]
+                        rest = [os.path.join(HERE, a) for a in sargs[1:]]
+                        out = run_args(exe, [court, sverb, sent] + rest, HERE)
+                        # the admitted line and the chain's path name this copy: one name for both runtimes
+                        out = out.replace(cd, '<copy>')
+                        if sverb == 'refine' and case.get('revert'):
+                            src = open(os.path.join(HERE, src_rel), 'rb').read()
+                            refined = sent + '.refined'
+                            rv = run_args(exe, [court, 'refine', refined, sent + '.revert.rfn'], HERE)
+                            back = open(refined + '.refined', 'rb').read() if os.path.exists(refined + '.refined') else b''
+                            out += '\n[revert] ' + ('restored byte for byte' if (rv.startswith('admitted:') and back == src) else 'NOT restored: ' + rv.strip()[:120])
+                    else:
+                        out = run_args(exe, [court, sverb] + sargs, HERE)
+                    parts.append(out)
+                outs[label] = '\n'.join(parts)
         r = outs['rnxc']
         if outs['rnxc'] != outs['oracle']:
             ab_diff.append(case['id'])
@@ -3158,7 +3172,7 @@ def stage29():
                     ok = False; why = f'count {k}: expected {want} got {fields.get("count " + k) if okv else r[:80]}'
         for frag in case.get('contains', []):
             if frag not in r:
-                ok = False; why = f"'{frag}' not in '{r.strip()[:200]}'"
+                ok = False; why = f"'{frag}' not in '{r.strip()[:240]}'"
         if 'record' in case:
             try:
                 rec = json.loads(lines[1]) if len(lines) > 1 else {}
@@ -3177,7 +3191,7 @@ def stage29():
                 ok = False; why = f'diagnostic {json.dumps(d)[:200]}'
         if case.get('revert') and '[revert] restored byte for byte' not in r:
             ok = False; why = r.strip().splitlines()[-1][:160] if r.strip() else 'no output'
-        if PLANT and case['id'] == 'L7':
+        if PLANT and case['id'] == plant_id:
             ok = False; why = 'PLANTED'
         if ok:
             passed += 1
@@ -3186,7 +3200,7 @@ def stage29():
             failed += 1
             print(f'  FAIL {case["id"]}: {case["name"][:90]} -- {why}')
     failures += failed
-    print(f'LEDGER-CONSTITUTION: {passed} of {len(doc["cases"])} cases hold')
+    print(f'{lang.upper()}-CONSTITUTION: {passed} of {len(doc["cases"])} cases hold')
     if ab_diff:
         failures += 1
         print(f'  FAIL rnxc and the oracle differ on {len(ab_diff)} case(s): {ab_diff}')
@@ -3194,6 +3208,22 @@ def stage29():
         print(f'  ok   rnxc and the oracle print the same bytes on all {len(doc["cases"])} cases')
     return failures
 
+
+def stage29():
+    """ZC2 (charter section 2, ratified 2026-11-01; v23/GRAMMAR.md): ledger_v23.haro, a bank's ledger under
+    four of Zin's six articles, and its ten cases -- Art. 1 through RATIONALE, the envelope and the voice;
+    a maker's CONSTRAINT citing what it CITES; Art. 6 through the floor, named and cited; Art. 2 through
+    refinement, the inverse restoring the bytes; the floor per point."""
+    return ledger_stage(29, LEDGER_STZU, LEDGER_CASES, 'ledger', 'L7')
+
+
+def stage30():
+    """ZC3 (v24/GRAMMAR.md): bank_v24.haro, the same bank under all six articles, and its ten cases --
+    Art. 5 through the required seat and the reference (a vault held by nobody, a vault entered through
+    nothing), named and cited, in the kind's own words; Art. 3 through the voice (the vaults told) and
+    through the audit chain (two events kept beside the sentence and answered as a query); the chain is
+    the article's, so the v0.23 ledger keeps none."""
+    return ledger_stage(30, BANK_STZU, BANK_CASES, 'bank', 'W3')
 
 def stage6(lang, court=None, n=15):
     court = court or f'{lang}_court.ring'
@@ -3312,5 +3342,7 @@ if __name__ == '__main__':
         failures += stage28()
     if stage in (None, 29) and os.path.exists(LEDGER_STZU) and os.path.exists(LEDGER_CASES):
         failures += stage29()
+    if stage in (None, 30) and os.path.exists(BANK_STZU) and os.path.exists(BANK_CASES):
+        failures += stage30()
     print(f'haro_forge: {"FAIL" if failures else "PASS"} ({failures} failure(s), {time.perf_counter()-t0:.1f} s)')
     sys.exit(1 if failures else 0)

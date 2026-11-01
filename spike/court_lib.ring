@@ -190,6 +190,32 @@ func CtUnderArticle(cName)
 	next
 	return 0
 
+# v0.24: whether a seat is the zone's sovereign or movement seat (organizational_sovereignty, 5):
+# the forged court carries [zone kind, sovereign seat, movement seat] in $aCourtZone, empty under none
+func CtZoneSeat(cKindName, cSeat)
+	if len($aCourtZone) < 3 return 0 ok
+	if cKindName != $aCourtZone[1] return 0 ok
+	return (cSeat = $aCourtZone[2] or cSeat = $aCourtZone[3])
+
+# v0.24: the audit chain of a sentence under visible_state (3): every refinement event, admitted
+# or refused, is one JSON line appended beside the sentence (<file>.audit), numbered in order --
+# no clock, so both runtimes write the same bytes; `audit <file>` answers the chain as a query.
+# Nothing is written under no visible_state: the chain is the article's mechanism, not a side effect.
+func CtAuditWrite(cVerdict, cStage, cCode)
+	if $cCourtAuditFile = "" return ok
+	cOld = ""
+	if fexists($cCourtAuditFile) cOld = read($cCourtAuditFile) ok
+	nEv = 0
+	for i = 1 to len(cOld)
+		if cOld[i] = char(10) nEv++ ok
+	next
+	aP = $aCourtAuditProposal
+	cLine = '{"event": ' + (nEv + 1) + ', "proposal": ' + CtJson(aP[1]) + ', "target": ' + CtJson(aP[2]) +
+	        ', "from": ' + CtJson(aP[3]) + ', "to": ' + CtJson(aP[4]) + ', "author": ' + CtJson(aP[5]) +
+	        ', "posture": ' + CtJson(aP[6]) + ', "verdict": ' + CtJson(cVerdict) + ', "stage": ' + CtJson(cStage) +
+	        ', "code": ' + CtJson(cCode) + '}'
+	write($cCourtAuditFile, cOld + cLine + char(10))
+
 # a REFUSAL category's code, codes per NAMED word and cites
 func CtRefusalRow(cCategory)
 	for i = 1 to len($aCourtRefusals)
@@ -1234,9 +1260,19 @@ func CtDeclare(cSrc)
 				cMsgR = CtMessageFor(aKind, aSeat[1])
 				cCodeR = CtCodeFor(aKind, aSeat[1])
 				aCC = CtElementCode(cCodeR, "REQUIRED", aKind[2] + "." + aSeat[1])
+				# v0.24: a zone without its holder or its entry is sovereignty's refusal (Art. 5)
+				cArt5 = ""
+				if CtUnderArticle("organizational_sovereignty")
+					if CtZoneSeat(aKind[2], aSeat[1])
+						aCites5 = aCC[2]
+						aCites5 + "article:5"
+						aCC[2] = aCites5
+						cArt5 = " [Art. 5 organizational_sovereignty]"
+					ok
+				ok
 				try
-					if cMsgR != "" CtFailC(aD[3], aCC[1], aCC[2], CtFill(cMsgR, aD, "")) ok
-					CtFailC(aD[3], aCC[1], aCC[2], upper(aSeat[1]) + " is required on " + aD[1] + " " + aD[2])
+					if cMsgR != "" CtFailC(aD[3], aCC[1], aCC[2], CtFill(cMsgR, aD, "") + cArt5) ok
+					CtFailC(aD[3], aCC[1], aCC[2], upper(aSeat[1]) + " is required on " + aD[1] + " " + aD[2] + cArt5)
 				catch
 					CtNote(cCatchError)
 				done
@@ -1496,16 +1532,26 @@ func CtCheckScalar(aDecl, aSeat, cValue)
 		# CODES give the envelope's code (v0.11)
 		aKd = CtKindByVerb(aDecl[1])
 		aCC = CtElementCode(CtCodeFor(aKd, aSeat[1]), "DANGLING", aKd[2] + "." + aSeat[1])
+		# v0.24: a zone entered through nothing is sovereignty's refusal (Art. 5)
+		cArt5 = ""
+		if CtUnderArticle("organizational_sovereignty")
+			if CtZoneSeat(aKd[2], aSeat[1])
+				aCites5 = aCC[2]
+				aCites5 + "article:5"
+				aCC[2] = aCites5
+				cArt5 = " [Art. 5 organizational_sovereignty]"
+			ok
+		ok
 		CtSetCode(aCC[1], aCC[2])
 		if len(aKd) >= 5
 			for i = 1 to len(aKd[5])
-				if aKd[5][i][1] = aSeat[1] return CtFill(aKd[5][i][2], aDecl, cValue) ok
+				if aKd[5][i][1] = aSeat[1] return CtFill(aKd[5][i][2], aDecl, cValue) + cArt5 ok
 			next
 		ok
 		cMsg = CtRefusalMessage("dangling_reference")
 		cOut = aDecl[2] + " " + cClause + " '" + cValue + "', which resolves to nothing: no such " + aK[1]
 		if cMsg != "" cOut += " -- " + cMsg ok
-		return cOut
+		return cOut + cArt5
 	ok
 	return ""
 
@@ -1722,6 +1768,7 @@ func CtClauseText(aDecl, cClause)
 func CtRefuse(cStage, cCode, cMsg, cFile, nLine, aCites, cWhy, cTodo)
 	? $cCourtLang + " (line " + nLine + "): " + cStage + ": " + cMsg
 	? CtRecord(cCode, cStage + ": " + cMsg, cFile, nLine, aCites, cWhy, cTodo)
+	CtAuditWrite("refused", cStage, cCode)
 
 func CtRefine(cFile, cRfnFile)
 	cSrc = read(cFile)
@@ -1753,6 +1800,12 @@ func CtRefine(cFile, cRfnFile)
 	cPosture = CtClauseText(aR, "POSTURE")
 	cReason = CtClauseText(aR, "REASON")
 	nRLine = aR[3]
+	# v0.24: under visible_state every event of this proposal joins the sentence's audit chain
+	$cCourtAuditFile = ""
+	if CtUnderArticle("visible_state")
+		$cCourtAuditFile = cFile + ".audit"
+		$aCourtAuditProposal = [aR[2], cTarget, cFrom, cTo, cAuthor, cPosture]
+	ok
 
 	# structural, on the ORIGINAL: the file must be a sentence before it is refined
 	aDecls = NULL
@@ -1931,6 +1984,7 @@ func CtRefine(cFile, cRfnFile)
 	          ') RATIONALE "A revert is its own event; nothing is erased"' + char(10)
 	write(cFile + ".revert.rfn", cRevert)
 	? "admitted: " + cTarget + " " + cFrom + " -> " + cTo + " [" + cPosture + "] (structural + constraint + derivation + governance + trust passed); inverse in " + cFile + ".revert.rfn"
+	CtAuditWrite("admitted", "", "")
 
 # ---- v0.6: a sentence's expressions evaluated, and a WALK run ---------------------
 # `<court>.ring eval <file> <decl> <seat> <json>`: the expression in SEAT of the
@@ -2067,7 +2121,7 @@ func CtWalk(aDecls, cName, aRecord)
 # the command: check <file> | refine <file> <file.rfn> | eval ... | walk ... | ask ...
 func CtMain()
 	if len(sysargv) < 4
-		? "usage: <court>.ring check <file" + $cCourtExt + "> | refine <file" + $cCourtExt + "> <file.rfn> | eval <file> <decl> <seat> <json> | walk <file> <name> <json> | ask <file> <question> <rows json>"
+		? "usage: <court>.ring check <file" + $cCourtExt + "> | refine <file" + $cCourtExt + "> <file.rfn> | eval <file> <decl> <seat> <json> | walk <file> <name> <json> | ask <file> <question> <rows json> | audit <file>"
 		return
 	ok
 	cVerb = sysargv[3]
@@ -2119,6 +2173,31 @@ func CtMain()
 			return
 		ok
 		CtRefine(sysargv[4], sysargv[5])
+	but cVerb = "audit"
+		# v0.24: the audit chain of a sentence under visible_state, answered as a query: every
+		# refinement event kept beside the sentence, in order, then their count
+		cAuditPath = sysargv[4] + ".audit"
+		if not CtUnderArticle("visible_state")
+			? "no audit chain: " + $cCourtLang + " is under no visible_state"
+		but not fexists(cAuditPath)
+			? "no audit chain yet: " + cAuditPath + " does not exist"
+		else
+			cAuditText = read(cAuditPath)
+			nAuditEvents = 0
+			cAuditLine = ""
+			for i = 1 to len(cAuditText)
+				if cAuditText[i] = char(10)
+					if cAuditLine != ""
+						? cAuditLine
+						nAuditEvents++
+					ok
+					cAuditLine = ""
+				else
+					cAuditLine += cAuditText[i]
+				ok
+			next
+			? "" + nAuditEvents + " events"
+		ok
 	but cVerb = "eval"
 		if len(sysargv) < 7
 			? "usage: <court>.ring eval <file" + $cCourtExt + "> <decl> <seat> <json>"
@@ -2246,5 +2325,5 @@ func CtMain()
 			? cCatchError
 		done
 	else
-		? "unknown verb '" + cVerb + "'; this court answers: check, refine, eval, walk, ask, run, world, diagnose, family, spellings, narrate, narrate-run, narrate-ask"
+		? "unknown verb '" + cVerb + "'; this court answers: check, refine, eval, walk, ask, run, world, diagnose, family, spellings, narrate, narrate-run, narrate-ask, audit"
 	ok

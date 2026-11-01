@@ -122,7 +122,7 @@ func StzuClauses(cKind)
 	but cKind = "REFINE"
 		return [["FLOOR", "pointlist"], ["POINTS", "pointlist"]]
 	but cKind = "CONSTITUTION"
-		return [["ARTICLES", "namelist"], ["REGIME", "ident"], ["WEAVES", "pairlist"]]
+		return [["ARTICLES", "namelist"], ["MOVEMENT", "ident"], ["REGIME", "ident"], ["SOVEREIGN", "ident"], ["WEAVES", "pairlist"], ["ZONE", "ident"]]
 	but cKind = "UNION"
 		return [["CODE", "string"], ["MESSAGE", "string"], ["OF", "typelist"]]
 	but cKind = "WALK"
@@ -1162,7 +1162,14 @@ func StzuDeclare(cSrc)
 				if HasClause(aClauses, "WEAVES") aCWeaves = ClauseValue(aClauses, "WEAVES") ok
 				cCRegime = ""
 				if HasClause(aClauses, "REGIME") cCRegime = ClauseValue(aClauses, "REGIME") ok
-				aConstitution = [cName, ClauseValue(aClauses, "ARTICLES"), aCWeaves, cCRegime, nLine, cRationale]
+				# v0.24: the zone seats of organizational_sovereignty (5): the zone kind, who holds it, what it is entered through
+				cCZone = ""
+				if HasClause(aClauses, "ZONE") cCZone = ClauseValue(aClauses, "ZONE") ok
+				cCSov = ""
+				if HasClause(aClauses, "SOVEREIGN") cCSov = ClauseValue(aClauses, "SOVEREIGN") ok
+				cCMov = ""
+				if HasClause(aClauses, "MOVEMENT") cCMov = ClauseValue(aClauses, "MOVEMENT") ok
+				aConstitution = [cName, ClauseValue(aClauses, "ARTICLES"), aCWeaves, cCRegime, nLine, cRationale, cCZone, cCSov, cCMov]
 			else
 				if DeclaredKind(aDeclared, cName) != ""
 					StzuFail(nLine, "'" + cName + "' is already declared -- one namespace, one name, one meaning")
@@ -2058,8 +2065,12 @@ func StzuDeclare(cSrc)
 	# NARRATE -- a NARRATE is declared and every REFUSAL and CONSTRAINT carries a CODE; reversibility
 	# (2) through refinement -- a REFINE is declared; predictable_authority (4) through the gate's
 	# governance stage -- no policy point is floored llm; trust_hierarchy (6) through the trust
-	# posture -- every point has a FLOOR. The two Haro v0.23 does not judge are refused by name as a
-	# state (ZC3); WEAVES and REGIME are carried, their words closed, and refused by name (ZC4).
+	# posture -- every point has a FLOOR. v0.24 (ZC3): visible_state (3) through the three access paths a
+	# language declares -- every declaration kind is told (NARRATE SAYS), asked (ASK FROM) or published
+	# (WORLD PUBLISH); organizational_sovereignty (5) through the zones a world declares -- the
+	# CONSTITUTION names the ZONE kind, its SOVEREIGN seat (a MENU word or a text, never optional) and its
+	# MOVEMENT seat (a declared kind, never optional). WEAVES and REGIME are carried, their words closed,
+	# and refused by name (ZC4).
 	if not isNull(aConstitution)
 		try
 			nCL = aConstitution[5]
@@ -2092,6 +2103,12 @@ func StzuDeclare(cSrc)
 			if aConstitution[4] != ""
 				StzuFail(nCL, "REGIME names '" + aConstitution[4] + "', and no weave reads a regime in Haro v0.23 -- ZC4 names the declared regime in every refusal of a weave, never a default")
 			ok
+			# v0.24: the zone seats are the sovereignty article's; named without it they are refused, not accepted by silence
+			if aConstitution[7] != "" or aConstitution[8] != "" or aConstitution[9] != ""
+				if not InStrList("organizational_sovereignty", aArts)
+					StzuFail(nCL, "ZONE is named and organizational_sovereignty is not among ARTICLES -- the zone seats are the sovereignty article's")
+				ok
+			ok
 			for i = 1 to len(aArts)
 				cArt = aArts[i]
 				if cArt = "explainability"
@@ -2113,7 +2130,29 @@ func StzuDeclare(cSrc)
 						StzuFail(nCL, "Art. 2 reversibility: '" + cLName + "' declares no REFINE -- a world under reversibility changes only by refinement, whose inverse is computed before it lands and whose revert is an event (charter 6.5)")
 					ok
 				but cArt = "visible_state"
-					StzuFail(nCL, "Art. 3 visible_state: no mechanism judges it in Haro v0.23 -- ZC3 builds it on the narration and the audit chain, fixtures first")
+					# v0.24: every declaration kind is reached by a declared path -- told, asked or published
+					for j = 1 to len(aDeclarations)
+						cVK = aDeclarations[j][1]
+						bReached = 0
+						if not isNull(aNarrate)
+							for k = 1 to len(aNarrate[5])
+								if aNarrate[5][k][1] = cVK bReached = 1 ok
+							next
+						ok
+						if not isNull(aAsk)
+							if InStrList(cVK, aAsk[2]) bReached = 1 ok
+						ok
+						if not isNull(aWorld)
+							if len(aWorld) >= 5
+								for k = 1 to len(aWorld[5])
+									if aWorld[5][k][1] = cVK bReached = 1 ok
+								next
+							ok
+						ok
+						if not bReached
+							StzuFail(aDeclarations[j][5], "Art. 3 visible_state: kind '" + cVK + "' is reached by no declared path -- not told (NARRATE SAYS), not asked (ASK FROM), not published (WORLD PUBLISH): a state nothing can read is hidden")
+						ok
+					next
 				but cArt = "predictable_authority"
 					if not isNull(aRefine)
 						aPts = aRefine[1]
@@ -2129,7 +2168,43 @@ func StzuDeclare(cSrc)
 						next
 					ok
 				but cArt = "organizational_sovereignty"
-					StzuFail(nCL, "Art. 5 organizational_sovereignty: no mechanism judges it in Haro v0.23 -- ZC3 builds it on the zones Z declares and W3's no ungoverned data movement, fixtures first")
+					# v0.24: the world names its zone kind, who holds a zone (never optional; a MENU word or a
+					# text) and what a zone is entered through (never optional; a declared kind, the flow)
+					cZ = aConstitution[7]
+					cSv = aConstitution[8]
+					cMv = aConstitution[9]
+					if cZ = ""
+						StzuFail(nCL, "Art. 5 organizational_sovereignty: '" + cLName + "' names no ZONE -- a world under sovereignty says which of its kinds holds its data (ZONE), who holds each (SOVEREIGN) and through which declared flow a record enters it (MOVEMENT)")
+					ok
+					if DeclaredKind(aDeclared, cZ) != "DECLARATION"
+						StzuFail(nCL, "Art. 5 organizational_sovereignty: ZONE '" + cZ + "' is not a declaration kind of '" + cLName + "'")
+					ok
+					if cSv = ""
+						StzuFail(nCL, "Art. 5 organizational_sovereignty: ZONE '" + cZ + "' has no SOVEREIGN seat named -- a zone is held by someone, never by silence")
+					ok
+					aSS = StzuSeatRec(aDeclarations, cZ, cSv)
+					if isNull(aSS)
+						StzuFail(nCL, "Art. 5 organizational_sovereignty: SOVEREIGN '" + cSv + "' is not a seat of '" + cZ + "'")
+					ok
+					if aSS[4]
+						StzuFail(aSS[5], "Art. 5 organizational_sovereignty: SOVEREIGN seat '" + cSv + "' of '" + cZ + "' is optional -- a zone's holder is never silent")
+					ok
+					if aSS[2] != "text" and DeclaredKind(aDeclared, aSS[2]) != "MENU"
+						StzuFail(aSS[5], "Art. 5 organizational_sovereignty: SOVEREIGN seat '" + cSv + "' of '" + cZ + "' is typed '" + aSS[2] + "' -- a holder is a word of a MENU of organizations, or a text")
+					ok
+					if cMv = ""
+						StzuFail(nCL, "Art. 5 organizational_sovereignty: ZONE '" + cZ + "' has no MOVEMENT seat named -- a record enters a zone through a declared flow, or not at all")
+					ok
+					aMS = StzuSeatRec(aDeclarations, cZ, cMv)
+					if isNull(aMS)
+						StzuFail(nCL, "Art. 5 organizational_sovereignty: MOVEMENT '" + cMv + "' is not a seat of '" + cZ + "'")
+					ok
+					if aMS[4]
+						StzuFail(aMS[5], "Art. 5 organizational_sovereignty: MOVEMENT seat '" + cMv + "' of '" + cZ + "' is optional -- an entry that may be silent is ungoverned")
+					ok
+					if DeclaredKind(aDeclared, aMS[2]) != "DECLARATION"
+						StzuFail(aMS[5], "Art. 5 organizational_sovereignty: MOVEMENT seat '" + cMv + "' of '" + cZ + "' is typed '" + aMS[2] + "' -- it names a declared kind, the flow a record walks in")
+					ok
 				but cArt = "trust_hierarchy"
 					if not isNull(aRefine)
 						aPts = aRefine[1]
@@ -2246,6 +2321,18 @@ func StzuHasSeat(aDeclarations, cDecl, cSeat)
 		ok
 	next
 	return 0
+
+# v0.24: the seat record [name, of, isList, optional, line] of a declaration's seat, or NULL
+func StzuSeatRec(aDeclarations, cDecl, cSeat)
+	for i = 1 to len(aDeclarations)
+		if aDeclarations[i][1] = cDecl
+			aS = aDeclarations[i][3]
+			for j = 1 to len(aS)
+				if aS[j][1] = cSeat return aS[j] ok
+			next
+		ok
+	next
+	return NULL
 
 func StzuCheckCondition(cCond, cOn, aOneDecls, nLine)
 	aAst = NULL
@@ -2373,6 +2460,12 @@ func StzuPrintLanguage(aLang)
 	ok
 	? "constitution " + nCs
 	? "articles " + cArts
+	# v0.24: the zone kind of organizational_sovereignty, empty under none
+	cZone = ""
+	if not isNull(aCs)
+		if len(aCs) >= 7 cZone = aCs[7] ok
+	ok
+	? "zone " + cZone
 	aD = LangGet(aLang, "declarations")
 	aV = []
 	for i = 1 to len(aD)

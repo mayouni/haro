@@ -100,3 +100,10 @@ regime); the constitution adds one list to the court and two comparisons to a re
 - Nothing of Zin's compiler ported; its articles were read (`constitutional.zig`, the CSP stage 4) and its
   numbering kept, so a refusal here and a diagnostic there name the same article.
 - The weaves judged by nothing are accepted by nothing: every weave named is refused until ZC4.
+
+**Amended 2026-11-02 (v0.24, ZC3).** R11 and R12 pinned "no mechanism judges it in Haro v0.23";
+v0.24 built both mechanisms (`v24/GRAMMAR.md`, D34), and a fixture that pinned the old state would
+have failed the court that closed it. Each now pins its mechanism's first refusal under the same
+v0.23 source (`Art. 3 visible_state: kind 'account' is reached by no declared path`; `Art. 5
+organizational_sovereignty: 'bank' names no ZONE`), and its name says so. Nothing else in this
+file changed.
