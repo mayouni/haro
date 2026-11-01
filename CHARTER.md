@@ -68,6 +68,15 @@ target.
   `stzlib/.../base/refine/stzRefinableCode.ring`.
 - v0.1's own list: Ring++'s record, *Ring, Judged by the Record*, the Ring++ design charter,
   the kernel, the traps, LAW 3 and LAW 6, C2 v1.2.0, C9, the forms document.
+- **For section 2's constitution clause (ZC1, 2026-11-01):** the author's ruling of 2026-11-01 on
+  Zin (COMPASS-KERN-09; `softanza/memos/2026-11-01-constitution-launch.md`, section 0);
+  `zin/doc/design/ZIN_CONSTITUTIONAL_WEAVES.md`, `ZIN_ZLM_CONSTITUTIONAL_LAYER.md`,
+  `ZIN_PRIVACY_WEAVE_DESIGN.md`, `zin/src/compiler/constitution.zig`, `constitutional.zig`,
+  `zin/src/csp/validators_stage4.zig` (cc98126, 2026-05-13), read against this charter's sections
+  2, 3 and 6, `haro/spike/v20`, `narrate_lib.ring`, `court_lib.ring`, `haro_lib.ring`,
+  `stzlib/base/refine/stzRefinableCode.ring` and `harobanda/declarative/machine/machine.stzu`:
+  `haro/spike/v23/ZIN-INVENTORY.md`, HF-124. The clause is PROPOSED, not ratified, until the
+  author writes his line here: **ratification of the constitution clause: __________**
 
 Where a source and this charter disagree, the source is right and the disagreement is in
 `haro/FINDINGS.md`.
@@ -152,6 +161,25 @@ decided this three years ago"); reversibility built into the data model, never l
 
 **The court** -- the forge's generated judge for each declared language, the compiler for the
 computing altitude, the gate for every refinement -- is owed determinism and the C2 envelope.
+
+**The constitution** (ZC1, PROPOSED 2026-11-01 by the constitution desk on the author's ruling of
+the same day, COMPASS-KERN-09; ratification pending in section 0). Zin's six immutable articles --
+explainability, reversibility, visible state, predictable authority, organizational sovereignty,
+trust hierarchy -- and its weaves enter Haro as a **declared governance sentence**: a declaration
+of the declaring altitude, written in Haro's own shape (seats typed, `RATIONALE` mandatory, the
+Commons' form), that a world declares itself under, and that the courts judge over any declared
+world. The four articles Haro already holds are judged THROUGH the mechanisms this charter names
+and are never reimplemented: explainability through `RATIONALE` and the narration (section 3's
+`NARRATE`, principle 4's C2 envelope); reversibility through refinement (section 6, item 5: the
+inverse computed before anything lands); predictable authority through the gate's governance stage
+and the capability a door grants (section 6, item 4; principle 12); trust hierarchy through the
+trust posture and a point's floor (section 6, item 4). The two Haro lacks -- visible state and
+organizational sovereignty -- are rungs with fixtures first (ZC3), the second on the zones Z
+already declares. A refusal under an article names its number and the article, in the domain's
+words (COMPASS-KERN-06, adopted here, not copied). No letter: the alphabet Z W Q F A N is closed,
+and the sentence is a declaration like any other. Zin keeps its federation, its pillars, its
+foundry, its IDE and every customer's constitution text. The inventory behind this clause is
+`haro/spike/v23/ZIN-INVENTORY.md` (HF-124): 4 articles mapped, 2 absent, 63 fixture candidates.
 
 ---
 
