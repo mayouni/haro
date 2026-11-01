@@ -53,6 +53,7 @@ $aCourtFormset = NULL
 $aCourtNarrate = NULL
 $aCourtUnderstand = NULL
 $bNSurfaces = 0
+$aCourtConstitution = []
 $bCourtCollect = 0
 $aCourtFound = []
 $aCourtBroken = []
@@ -122,22 +123,22 @@ $aCourtLangs = [
       ["step", [["invocation", 0, "decl"], ["task", 0, "decl"], ["event_wait", 0, "decl"], ["timer_wait", 0, "decl"], ["routing", 0, "decl"], ["compensation", 0, "decl"]], "C10: suspension {name} RESUMES_AT '{value}', which is not a declared step", "C10"]
     ],
     [
-      ["c3_neither", "invocation", "compensated_by absent and irreversible absent", "", "C3: step {name} invokes '{invokes}' without declaring COMPENSATED_BY or IRREVERSIBLE. An act that changes the world must say whether it can be taken back", "C3"],
-      ["c3_both", "invocation", "compensated_by present and irreversible present", "", "C3: step {name} declares both COMPENSATED_BY and IRREVERSIBLE; an act is one or the other", "C3"],
-      ["c6_invocation", "invocation", "not self reachable", "", "C6: step {name} is unreachable from the entry step. A step nothing can reach is a dead step", "C6"],
-      ["c6_task", "task", "not self reachable", "", "C6: step {name} is unreachable from the entry step. A step nothing can reach is a dead step", "C6"],
-      ["c6_event_wait", "event_wait", "not self reachable", "", "C6: step {name} is unreachable from the entry step. A step nothing can reach is a dead step", "C6"],
-      ["c6_timer_wait", "timer_wait", "not self reachable", "", "C6: step {name} is unreachable from the entry step. A step nothing can reach is a dead step", "C6"],
-      ["c6_routing", "routing", "not self reachable", "", "C6: step {name} is unreachable from the entry step. A step nothing can reach is a dead step", "C6"],
-      ["c6_compensation", "compensation", "not self reachable", "", "C6: step {name} is unreachable from the entry step. A step nothing can reach is a dead step", "C6"],
-      ["c7_an_ending", "workflow", "not exists terminal", "", "C7: workflow {name} declares no terminal. Every workflow must be able to end", "C7"],
-      ["c7_terminal", "terminal", "not self reachable", "", "C7: terminal {name} is unreachable. An ending nothing can reach is an ending that never happens", "C7"],
-      ["c7_suspended", "suspended", "not self reachable", "", "C7: suspension {name} is unreachable", "C7"],
-      ["c8_decisions_routed", "task", "not routes keyed_by decisions", "", "C8: step {name} declares the decision '{other}' and never routes it, or routes it without declaring it. Every declared decision is routed, and no arrow routes an undeclared one", "C8"],
-      ["c9_self_segregation", "actor", "segregated_from = self", "", "C9: actor {name} is SEGREGATED_FROM itself. Segregation separates two people, not one from a reflection", "C9"],
-      ["c15_guard", "guard", "not self referenced", "", "C15: guard {name} is declared and never used. Either it is a leftover, or an arrow somebody forgot to wire", "C15"],
-      ["c15_escalation", "escalation", "not self referenced", "", "C15: escalation {name} is declared and never used", "C15"],
-      ["c15_retry", "retry", "not self referenced", "", "C15: retry policy {name} is declared and never used", "C15"]
+      ["c3_neither", "invocation", "compensated_by absent and irreversible absent", "", "C3: step {name} invokes '{invokes}' without declaring COMPENSATED_BY or IRREVERSIBLE. An act that changes the world must say whether it can be taken back", "C3", []],
+      ["c3_both", "invocation", "compensated_by present and irreversible present", "", "C3: step {name} declares both COMPENSATED_BY and IRREVERSIBLE; an act is one or the other", "C3", []],
+      ["c6_invocation", "invocation", "not self reachable", "", "C6: step {name} is unreachable from the entry step. A step nothing can reach is a dead step", "C6", []],
+      ["c6_task", "task", "not self reachable", "", "C6: step {name} is unreachable from the entry step. A step nothing can reach is a dead step", "C6", []],
+      ["c6_event_wait", "event_wait", "not self reachable", "", "C6: step {name} is unreachable from the entry step. A step nothing can reach is a dead step", "C6", []],
+      ["c6_timer_wait", "timer_wait", "not self reachable", "", "C6: step {name} is unreachable from the entry step. A step nothing can reach is a dead step", "C6", []],
+      ["c6_routing", "routing", "not self reachable", "", "C6: step {name} is unreachable from the entry step. A step nothing can reach is a dead step", "C6", []],
+      ["c6_compensation", "compensation", "not self reachable", "", "C6: step {name} is unreachable from the entry step. A step nothing can reach is a dead step", "C6", []],
+      ["c7_an_ending", "workflow", "not exists terminal", "", "C7: workflow {name} declares no terminal. Every workflow must be able to end", "C7", []],
+      ["c7_terminal", "terminal", "not self reachable", "", "C7: terminal {name} is unreachable. An ending nothing can reach is an ending that never happens", "C7", []],
+      ["c7_suspended", "suspended", "not self reachable", "", "C7: suspension {name} is unreachable", "C7", []],
+      ["c8_decisions_routed", "task", "not routes keyed_by decisions", "", "C8: step {name} declares the decision '{other}' and never routes it, or routes it without declaring it. Every declared decision is routed, and no arrow routes an undeclared one", "C8", []],
+      ["c9_self_segregation", "actor", "segregated_from = self", "", "C9: actor {name} is SEGREGATED_FROM itself. Segregation separates two people, not one from a reflection", "C9", []],
+      ["c15_guard", "guard", "not self referenced", "", "C15: guard {name} is declared and never used. Either it is a leftover, or an arrow somebody forgot to wire", "C15", []],
+      ["c15_escalation", "escalation", "not self referenced", "", "C15: escalation {name} is declared and never used", "C15", []],
+      ["c15_retry", "retry", "not self referenced", "", "C15: retry policy {name} is declared and never used", "C15", []]
     ],
     [["workflow"], "workflow", ["invocation", "task", "event_wait", "timer_wait", "routing", "compensation"], [["workflow", "process"]]],
     [],

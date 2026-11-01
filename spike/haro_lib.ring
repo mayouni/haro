@@ -80,6 +80,18 @@ func StzuRefinementKinds()
 func StzuPostures()
 	return ["trusted", "external", "sandboxed", "llm"]
 
+# v0.23: Zin's six articles, in Zin's order and numbering (zin constitution.zig:35-40; charter 2),
+# its eight weaves (ZIN_CONSTITUTIONAL_WEAVES.md) and its three severities -- the closed words of a
+# CONSTITUTION; the weaves and severities are carried here and judged at ZC4
+func StzuArticles()
+	return ["explainability", "reversibility", "visible_state", "predictable_authority", "organizational_sovereignty", "trust_hierarchy"]
+
+func StzuWeaves()
+	return ["resilience", "observability", "sovereignty", "privacy", "temporal_integrity", "cost_awareness", "learnability", "structural_integrity"]
+
+func StzuSeverities()
+	return ["constitutional", "governance", "advisory"]
+
 # kind -> list of [clause, shape]; shapes: string namelist seatlist number ident pointlist
 # (sorted by clause name, as Luau's table.sort gives, for the allowed-list text)
 func StzuClauses(cKind)
@@ -104,11 +116,13 @@ func StzuClauses(cKind)
 	but cKind = "VIEW"
 		return [["NAMED", "string"], ["ON", "ident"], ["ONE", "string"], ["WHERE", "string"]]
 	but cKind = "CONSTRAINT"
-		return [["CODE", "string"], ["MESSAGE", "string"], ["ON", "ident"], ["THEN", "string"], ["WHEN", "string"]]
+		return [["CITES", "stringlist"], ["CODE", "string"], ["MESSAGE", "string"], ["ON", "ident"], ["THEN", "string"], ["WHEN", "string"]]
 	but cKind = "WORLD"
 		return [["ENTRY", "namelist"], ["FIRST", "ident"], ["ONE", "namelist"], ["PUBLISH", "pairlist"]]
 	but cKind = "REFINE"
 		return [["FLOOR", "pointlist"], ["POINTS", "pointlist"]]
+	but cKind = "CONSTITUTION"
+		return [["ARTICLES", "namelist"], ["REGIME", "ident"], ["WEAVES", "pairlist"]]
 	but cKind = "UNION"
 		return [["CODE", "string"], ["MESSAGE", "string"], ["OF", "typelist"]]
 	but cKind = "WALK"
@@ -147,6 +161,8 @@ func StzuRequired(cKind)
 		return ["SHAPE"]
 	but cKind = "CONSTRAINT"
 		return ["ON", "WHEN", "MESSAGE"]
+	but cKind = "CONSTITUTION"
+		return ["ARTICLES"]
 	but cKind = "WORLD"
 		return []
 	but cKind = "REFINE"
@@ -177,7 +193,7 @@ func StzuRequired(cKind)
 func StzuIsKind(cWord)
 	return InStrList(cWord, ["LANGUAGE", "DECLARATION", "FORM", "EXPRESSION", "REFUSAL",
 	                         "MENU", "RANGE", "FORMAT", "CONSTRAINT", "WORLD", "REFINE", "UNION",
-	                         "SENTENCE", "VIEW", "WALK", "ASK", "RUN", "SYMBOL", "FORMS", "NARRATE", "UNDERSTAND"])
+	                         "SENTENCE", "VIEW", "WALK", "ASK", "RUN", "SYMBOL", "FORMS", "NARRATE", "UNDERSTAND", "CONSTITUTION"])
 
 # C2 2.1: a code is ^[A-Z][A-Z0-9]*([_-][A-Z0-9]+)*$ ; C2 2.5: a cite is
 # kind:value, kind in rule|article|right|pattern, value [A-Za-z0-9_.-]+ (v0.11)
@@ -1084,6 +1100,7 @@ func StzuDeclare(cSrc)
 	aSymbols = []
 	aWorld = NULL
 	aRefine = NULL
+	aConstitution = NULL
 	aDeclared = []
 	aVerbs = []
 	nCount = 0
@@ -1135,6 +1152,17 @@ func StzuDeclare(cSrc)
 				aFloors = []
 				if HasClause(aClauses, "FLOOR") aFloors = ClauseValue(aClauses, "FLOOR") ok
 				aRefine = [ClauseValue(aClauses, "POINTS"), aFloors, nLine]
+			but cKind = "CONSTITUTION"
+				# v0.23: the constitution -- the articles a world declares itself under (charter 2,
+				# ratified 2026-11-01); judged once the whole file is read, below
+				if not isNull(aConstitution)
+					StzuFail(nLine, "a .haro file declares at most one CONSTITUTION")
+				ok
+				aCWeaves = []
+				if HasClause(aClauses, "WEAVES") aCWeaves = ClauseValue(aClauses, "WEAVES") ok
+				cCRegime = ""
+				if HasClause(aClauses, "REGIME") cCRegime = ClauseValue(aClauses, "REGIME") ok
+				aConstitution = [cName, ClauseValue(aClauses, "ARTICLES"), aCWeaves, cCRegime, nLine, cRationale]
 			else
 				if DeclaredKind(aDeclared, cName) != ""
 					StzuFail(nLine, "'" + cName + "' is already declared -- one namespace, one name, one meaning")
@@ -1436,7 +1464,8 @@ func StzuDeclare(cSrc)
 					# CONSTRAINT: resolved after the whole file is read
 					cThen = ""
 					if HasClause(aClauses, "THEN") cThen = ClauseValue(aClauses, "THEN") ok
-					aConstraints + [cName, ClauseValue(aClauses, "ON"), ClauseValue(aClauses, "WHEN"), cThen, ClauseValue(aClauses, "MESSAGE"), nLine, StzuCodeOf(aClauses, nLine, cName)]
+					# v0.23: CITES on a CONSTRAINT -- the pinned instruments the maker's own rule cites (stzzui's S2)
+					aConstraints + [cName, ClauseValue(aClauses, "ON"), ClauseValue(aClauses, "WHEN"), cThen, ClauseValue(aClauses, "MESSAGE"), nLine, StzuCodeOf(aClauses, nLine, cName), StzuCitesOf(aClauses, nLine, cName)]
 				ok
 			ok
 		catch
@@ -1726,7 +1755,8 @@ func StzuDeclare(cSrc)
 	         ["constraints", aConstraints], ["world", aWorld], ["refine", aRefine],
 	         ["unions", aUnions], ["sentences", aSentences], ["views", aViews],
 	         ["walks", aWalks], ["ask", aAsk], ["run", aRun], ["symbols", aSymbols],
-	         ["formset", aFormset], ["narrate", aNarrate], ["understand", aUnderstand] ]
+	         ["formset", aFormset], ["narrate", aNarrate], ["understand", aUnderstand],
+	         ["constitution", aConstitution] ]
 	$cCondLang = cLName
 	$aCondLangs = StzuCondLangs(aRec, [])
 	$aCondFormats = []
@@ -2022,6 +2052,105 @@ func StzuDeclare(cSrc)
 		done
 	ok
 
+	# v0.23: the CONSTITUTION (charter 2, ratified 2026-11-01). Each article is one of Zin's six,
+	# named once. The four Haro judges are judged THROUGH the mechanisms the charter names and never
+	# reimplemented, in ARTICLES' order: explainability (1) through RATIONALE, the C2 envelope and the
+	# NARRATE -- a NARRATE is declared and every REFUSAL and CONSTRAINT carries a CODE; reversibility
+	# (2) through refinement -- a REFINE is declared; predictable_authority (4) through the gate's
+	# governance stage -- no policy point is floored llm; trust_hierarchy (6) through the trust
+	# posture -- every point has a FLOOR. The two Haro v0.23 does not judge are refused by name as a
+	# state (ZC3); WEAVES and REGIME are carried, their words closed, and refused by name (ZC4).
+	if not isNull(aConstitution)
+		try
+			nCL = aConstitution[5]
+			aArts = aConstitution[2]
+			if len(aArts) = 0
+				StzuFail(nCL, "ARTICLES names no article: a constitution is under at least one")
+			ok
+			for i = 1 to len(aArts)
+				if not InStrList(aArts[i], StzuArticles())
+					StzuFail(nCL, "'" + aArts[i] + "' is not an article: explainability (1), reversibility (2), visible_state (3), predictable_authority (4), organizational_sovereignty (5) or trust_hierarchy (6)")
+				ok
+				for j = 1 to i - 1
+					if aArts[j] = aArts[i]
+						StzuFail(nCL, "'" + aArts[i] + "' is named twice in ARTICLES: a world is under an article once")
+					ok
+				next
+			next
+			aWv = aConstitution[3]
+			for i = 1 to len(aWv)
+				if not InStrList(aWv[i][1], StzuWeaves())
+					StzuFail(aWv[i][3], "'" + aWv[i][1] + "' is not a weave: resilience (W1), observability (W2), sovereignty (W3), privacy (W4), temporal_integrity (W5), cost_awareness (W6), learnability (W7) or structural_integrity (W8)")
+				ok
+				if not InStrList(aWv[i][2], StzuSeverities())
+					StzuFail(aWv[i][3], "'" + aWv[i][2] + "' is not a severity: constitutional, governance or advisory")
+				ok
+			next
+			if len(aWv) > 0
+				StzuFail(aWv[1][3], "WEAVES names '" + aWv[1][1] + "', and no weave is judged in Haro v0.23 -- ZC4 builds sovereignty (W3) and privacy (W4) as field tags, fixtures first")
+			ok
+			if aConstitution[4] != ""
+				StzuFail(nCL, "REGIME names '" + aConstitution[4] + "', and no weave reads a regime in Haro v0.23 -- ZC4 names the declared regime in every refusal of a weave, never a default")
+			ok
+			for i = 1 to len(aArts)
+				cArt = aArts[i]
+				if cArt = "explainability"
+					if isNull(aNarrate)
+						StzuFail(nCL, "Art. 1 explainability: '" + cLName + "' declares no NARRATE -- a world under explainability tells every run and every refusal in its own voice")
+					ok
+					for j = 1 to len(aRefusals)
+						if aRefusals[j][6] = ""
+							StzuFail(aRefusals[j][4], "Art. 1 explainability: REFUSAL '" + aRefusals[j][1] + "' carries no CODE -- a refusal under explainability is traceable by its stable identifier (C2 2.1)")
+						ok
+					next
+					for j = 1 to len(aConstraints)
+						if aConstraints[j][7] = ""
+							StzuFail(aConstraints[j][6], "Art. 1 explainability: CONSTRAINT '" + aConstraints[j][1] + "' carries no CODE -- a refusal under explainability is traceable by its stable identifier (C2 2.1)")
+						ok
+					next
+				but cArt = "reversibility"
+					if isNull(aRefine)
+						StzuFail(nCL, "Art. 2 reversibility: '" + cLName + "' declares no REFINE -- a world under reversibility changes only by refinement, whose inverse is computed before it lands and whose revert is an event (charter 6.5)")
+					ok
+				but cArt = "visible_state"
+					StzuFail(nCL, "Art. 3 visible_state: no mechanism judges it in Haro v0.23 -- ZC3 builds it on the narration and the audit chain, fixtures first")
+				but cArt = "predictable_authority"
+					if not isNull(aRefine)
+						aPts = aRefine[1]
+						aFls = aRefine[2]
+						for j = 1 to len(aPts)
+							if aPts[j][3] = "policy"
+								for k = 1 to len(aFls)
+									if aFls[k][1] = aPts[j][1] and aFls[k][2] = aPts[j][2] and aFls[k][3] = "llm"
+										StzuFail(aFls[k][4], "Art. 4 predictable_authority: policy point '" + aPts[j][1] + "." + aPts[j][2] + "' has FLOOR llm -- a rule is refined by no model-composed proposal, by construction (charter 6.4)")
+									ok
+								next
+							ok
+						next
+					ok
+				but cArt = "organizational_sovereignty"
+					StzuFail(nCL, "Art. 5 organizational_sovereignty: no mechanism judges it in Haro v0.23 -- ZC3 builds it on the zones Z declares and W3's no ungoverned data movement, fixtures first")
+				but cArt = "trust_hierarchy"
+					if not isNull(aRefine)
+						aPts = aRefine[1]
+						aFls = aRefine[2]
+						for j = 1 to len(aPts)
+							bFl = 0
+							for k = 1 to len(aFls)
+								if aFls[k][1] = aPts[j][1] and aFls[k][2] = aPts[j][2] bFl = 1 ok
+							next
+							if not bFl
+								StzuFail(aPts[j][4], "Art. 6 trust_hierarchy: point '" + aPts[j][1] + "." + aPts[j][2] + "' has no FLOOR -- a trust requirement is declared, never implied: silence refuses")
+							ok
+						next
+					ok
+				ok
+			next
+		catch
+			StzuNote(cCatchError)
+		done
+	ok
+
 	return aRec
 
 # the value shape of a UNION's alternative, or the refusal (v0.3)
@@ -2231,6 +2360,19 @@ func StzuPrintLanguage(aLang)
 	aR = LangGet(aLang, "refine")
 	if not isNull(aR) nPoints = len(aR[1]) ok
 	? "points " + nPoints
+	# v0.23: the constitution, and its articles in the declared order
+	aCs = LangGet(aLang, "constitution")
+	nCs = 0
+	cArts = ""
+	if not isNull(aCs)
+		nCs = 1
+		for i = 1 to len(aCs[2])
+			if i > 1 cArts += "," ok
+			cArts += aCs[2][i]
+		next
+	ok
+	? "constitution " + nCs
+	? "articles " + cArts
 	aD = LangGet(aLang, "declarations")
 	aV = []
 	for i = 1 to len(aD)

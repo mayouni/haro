@@ -1453,6 +1453,27 @@ collisions; 221 of 300 print whole where 227 did -- the cost of refusing what it
 things; `:name = value` and a string key before `=` are shapes the graph reads the wrong way round; `x += nl` is not `x = x + nl`; and **Ring binds `not` looser than a
 comparison while rnxc, the formatter and the graph bind it tighter** -- a silent wrong answer in the compiler, reported and spawned (**fixed 2026-10-20**, ringpp C-32: 22 collisions stand and 223 of 300 print whole since). **K4, measured the same day** (`spike/v22/k4/K4.md`, HF-110, HF-111; on the author's delegation, with Claude haiku and sonnet as the models): twenty tasks, each run on shown and hidden data, Ring against the face. **Ring scores 19-20 of 20 with or without a primer; the face ties at best** -- 20 of 20 when read for its meaning and 20 of 20 again after the printer respells it, but 2-5 of 20 under its own strict spelling, because a model over-spells (`plus`, `eq`) where the kinds make plain operators. So **K4 is met for capable cloud models: for them the face is a reading aid, a lint and a respeller, not a write surface** -- but Softanza's direction is small local models under the engine's decoder, which this does not measure, so the consequence is NOT applied and the grammar is OWED (drafted: the decoder holds it, 27 of 43 printed texts accepted). The face's primer had to be fixed twice (a Python reader's `str(x)`, a class before its use, `new(K)` calling `init`); Ring's never did. Untested: a weak model under a decoder.
 
+## The twenty-third rung -- Haro v0.23, the constitution: a world under Zin's articles -- 2026-11-02
+
+**On the author's "Ratified, start ZC2"** (2026-11-01 23:32), the constitution plane's second rung (charter section 2; D33; `v23/ZIN-INVENTORY.md`,
+HF-124). A `CONSTITUTION` declaration at the declaring altitude: `ARTICLES` drawn from Zin's six by name and number, each once; the four Haro holds
+judged THROUGH what exists, in the declared order -- a NARRATE and coded refusals and constraints under explainability (1), a REFINE under
+reversibility (2), no policy point floored llm under predictable authority (4), a FLOOR on every point under trust hierarchy (6); the two it lacks
+refused by name (ZC3); `WEAVES` and `REGIME` carried, their words closed, and refused by name (ZC4). The forged court names and cites the article in
+the refusal that enforces it: `[Art. 1 explainability]` with `article:1` on a missing RATIONALE, `[Art. 6 trust_hierarchy]` with `article:6` below a
+floor -- COMPASS-KERN-06's shape, consumed. `spike/v23/GRAMMAR.md` is the account.
+
+    v23/fixtures.json                   22 meta fixtures, written before the court (5 accepts, 17 rejects)
+    ledger_v23.haro, ledger/            a bank's ledger under four articles: the language, three sentences, four proposals
+    v23/court_cases.json                10 sentence cases judged on the forged court, both runtimes
+    haro_lib.ring, forge.ring, court_lib.ring   the kind and its checks, the court's cites; CITES on CONSTRAINT (stzzui's S2)
+    haro_forge.py                       stage 1 grows by v0.23; stage 29 is the ledger
+
+**Results.** 22 of 22 and 10 of 10, rnxc and the oracle byte-identical; stages 1 to 5, 9 to 18 and 21 unchanged after the change (stage 20 fails
+in a fresh worktree on a CRLF checkout, HF-126, and passes in the main checkout). **What building found** (HF-125, HF-126): three fixtures written
+against v0.13's NARRATE rule, corrected and recorded; HF-36 met again in the constraint pass; Art. 4 and Art. 6 are one gate stage split by what
+each forbids; Z pays explainability's cost only once its refusals are coded (ZC5's first act); CITES on CONSTRAINT built, SEVERITY designed for ZC4.
+
 ## The names -- `.haro`, not `.stzu` -- corrected 2026-10-02
 
 **At the author's word ("we agreed to use .haro instead of .stzu, no?").** D1 was ratified
@@ -1571,8 +1592,10 @@ whole guard re-run on the renamed tree: 28 + 30 + 27 + 23, 117 of 120, 32 of 32,
    (`haro/spike/v23/ZIN-INVENTORY.md`, HF-124): 4 articles mapped onto mechanisms that exist, 2 absent (visible state; organizational
    sovereignty as named), 63 fixture candidates among Zin's 4,824 tests, 0 for the weaves (eight in design, none in code). ZC1 the
    clause, proposed the same day in the charter's section 2 and RATIFIED by the author at 23:32 ("Ratified, start ZC2", section 0).
-   Not begun: ZC2 (the court, fixtures first), ZC3 (the two absent articles), ZC4 (W3 and W4 as field tags in stzlib and HaroBase), ZC5 (a declared
-   world under a constitution, read by the author).
+   **ZC2 BUILT 2026-11-02 as Haro v0.23** (the twenty-third rung below; `v23/GRAMMAR.md`, guard stage 29, D33, HF-125 and HF-126): the
+   `CONSTITUTION` declaration, 22 meta fixtures and a bank's ledger's 10 cases written first, 32 of 32 on both runtimes, byte-identical.
+   Not begun: ZC3 (the two absent articles), ZC4 (W3 and W4 as field tags in stzlib and HaroBase; SEVERITY), ZC5 (the tontine under a
+   constitution, read by the author).
 18. The forge as an `rnxc` verb (the ringpp session's `src/`, routed); the
    Softanza-resident timing the charter's 2.6 asks for; the court's run time on the
    oracle under paths and views (6.4x the image this pass, named at stage 6); the

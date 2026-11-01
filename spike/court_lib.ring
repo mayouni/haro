@@ -179,6 +179,17 @@ func CtElementCode(cOwn, cDefault, cName)
 	if cOwn != "" return [cOwn, ["rule:" + cOwn]] ok
 	return [cDefault, ["rule:" + cName]]
 
+# v0.23: whether the court's own language is under an article of its CONSTITUTION
+# (charter 2): the forged court carries ARTICLES in $aCourtConstitution, empty without one.
+# A refusal that enforces an article names it -- "[Art. N name]" -- and cites "article:N",
+# the number-and-article shape of COMPASS-KERN-06; a language under no constitution prints
+# what it printed before, to the byte.
+func CtUnderArticle(cName)
+	for i = 1 to len($aCourtConstitution)
+		if $aCourtConstitution[i] = cName return 1 ok
+	next
+	return 0
+
 # a REFUSAL category's code, codes per NAMED word and cites
 func CtRefusalRow(cCategory)
 	for i = 1 to len($aCourtRefusals)
@@ -1129,7 +1140,12 @@ func CtParseDecl()
 	end
 	tR = CtNext()
 	if not (tR[1] = "keyword" and tR[2] = "RATIONALE")
-		CtFail(tR[3], "RATIONALE is mandatory on every declaration (" + aKind[1] + " " + tName[2] + " has none)")
+		cMsgR = "RATIONALE is mandatory on every declaration (" + aKind[1] + " " + tName[2] + " has none)"
+		# v0.23: under explainability the refusal is traceable (code RATIONALE) and names its article
+		if CtUnderArticle("explainability")
+			CtFailC(tR[3], "RATIONALE", ["article:1"], cMsgR + " [Art. 1 explainability]")
+		ok
+		CtFail(tR[3], cMsgR)
 	ok
 	tRS = CtExpect("string", "the RATIONALE string")
 	return [aKind[1], tName[2], tName[3], aClauses, tRS[2]]
@@ -1299,6 +1315,13 @@ func CtDeclare(cSrc)
 					cCnC = ""
 					if len(aCn) >= 6 cCnC = aCn[6] ok
 					aCC = CtElementCode(cCnC, "CONSTRAINT", aCn[1])
+					# v0.23: a CONSTRAINT that CITES cites what it declares, as a REFUSAL does. The
+					# element is assigned, not the list rebuilt from its own element: on Ring 1.27
+					# `a = [a[1], b]` reads a[1] from a list already emptied (R2), rnxc reads it
+					# first -- HF-36, met again here (stage 29's L6 on the oracle, 2026-11-02)
+					if len(aCn) >= 7
+						if len(aCn[7]) > 0 aCC[2] = aCn[7] ok
+					ok
 					try
 						CtFailC(aD[3], aCC[1], aCC[2], CtFill(aCn[5], aD, ""))
 					catch
@@ -1885,8 +1908,15 @@ func CtRefine(cFile, cRfnFile)
 		if $aCourtFloors[i][1] = cPointName cFloor = $aCourtFloors[i][2] ok
 	next
 	if nRank < CtPostureRank(cFloor)
-		CtRefuse("trust", "TRUST_FLOOR", "posture :" + cPosture + " below the required floor :" + cFloor + " for '" + cTarget + "'", cRfnFile, nRLine,
-		         ["rule:trust-floor"], "the point's floor is declared by the language (REFINE's FLOOR; trusted when none is declared): a proposal below it is refused by construction, not by convention",
+		cMsgT = "posture :" + cPosture + " below the required floor :" + cFloor + " for '" + cTarget + "'"
+		aCitesT = ["rule:trust-floor"]
+		# v0.23: under trust_hierarchy the refusal names its article and cites it
+		if CtUnderArticle("trust_hierarchy")
+			cMsgT += " [Art. 6 trust_hierarchy]"
+			aCitesT + "article:6"
+		ok
+		CtRefuse("trust", "TRUST_FLOOR", cMsgT, cRfnFile, nRLine,
+		         aCitesT, "the point's floor is declared by the language (REFINE's FLOOR; trusted when none is declared): a proposal below it is refused by construction, not by convention",
 		         "an actor of posture :" + cFloor + " or above may propose the same change; or lower the point's floor in the language's REFINE")
 		return
 	ok

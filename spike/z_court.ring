@@ -54,6 +54,7 @@ $aCourtFormset = NULL
 $aCourtNarrate = NULL
 $aCourtUnderstand = NULL
 $bNSurfaces = 0
+$aCourtConstitution = []
 $bCourtCollect = 0
 $aCourtFound = []
 $aCourtBroken = []
@@ -107,9 +108,9 @@ $aCourtLangs = [
     [
     ],
     [
-      ["a_formula_names_its_field", "step", "formula present and compute absent", "", "STEP {name} has a FORMULA and no COMPUTE: a computed value is named", ""],
-      ["a_computed_field_has_a_formula", "step", "compute present and formula absent", "", "STEP {name} names COMPUTE {compute} and has no FORMULA", ""],
-      ["one_rank_per_flow", "step", "earlier step where flow = this.flow and order = this.order", "", "STEP {name} and STEP {other} both stand at ORDER {order} of {flow}: one rank, one step", ""]
+      ["a_formula_names_its_field", "step", "formula present and compute absent", "", "STEP {name} has a FORMULA and no COMPUTE: a computed value is named", "", []],
+      ["a_computed_field_has_a_formula", "step", "compute present and formula absent", "", "STEP {name} names COMPUTE {compute} and has no FORMULA", "", []],
+      ["one_rank_per_flow", "step", "earlier step where flow = this.flow and order = this.order", "", "STEP {name} and STEP {other} both stand at ORDER {order} of {flow}: one rank, one step", "", []]
     ],
     [[], "", [], [["flow", "flow"], ["entity", "entity"], ["norm", "norm"], ["landing_zone", "zone"]]],
     [],

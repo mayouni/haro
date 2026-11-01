@@ -54,6 +54,7 @@ $aCourtFormset = NULL
 $aCourtNarrate = NULL
 $aCourtUnderstand = NULL
 $bNSurfaces = 0
+$aCourtConstitution = []
 $bCourtCollect = 0
 $aCourtFound = []
 $aCourtBroken = []

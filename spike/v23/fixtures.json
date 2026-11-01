@@ -65,7 +65,7 @@
     {
       "id": "A5",
       "name": "the CONSTITUTION may stand anywhere after the LANGUAGE: its articles are judged once the whole file is read, so a NARRATE and a REFINE declared after it count",
-      "source": "DEFINE LANGUAGE bank AS (VERSION \"0.23\", GRAMMAR \"0.23\", COURT \"x\", EXTENSION \".bank\") RATIONALE \"x\"\nDEFINE CONSTITUTION charter AS (ARTICLES [trust_hierarchy, explainability, reversibility]) RATIONALE \"x\"\nDEFINE DECLARATION account AS (VERB \"ACCOUNT\", SEATS [holder: text, ceiling: number]) RATIONALE \"x\"\nDEFINE REFUSAL unknown_verb AS (MESSAGE \"The verb set is closed\", CODE \"UNKNOWN_VERB\") RATIONALE \"x\"\nDEFINE NARRATE voice AS (REFUSES \"Stopped at line {line}: {message} ({cites})\") RATIONALE \"x\"\nDEFINE REFINE bank AS (POINTS [account.ceiling: knob], FLOOR [account.ceiling: external]) RATIONALE \"x\"\n",
+      "source": "DEFINE LANGUAGE bank AS (VERSION \"0.23\", GRAMMAR \"0.23\", COURT \"x\", EXTENSION \".bank\") RATIONALE \"x\"\nDEFINE CONSTITUTION charter AS (ARTICLES [trust_hierarchy, explainability, reversibility]) RATIONALE \"x\"\nDEFINE DECLARATION account AS (VERB \"ACCOUNT\", SEATS [holder: text, ceiling: number]) RATIONALE \"x\"\nDEFINE REFUSAL unknown_verb AS (MESSAGE \"The verb set is closed\", CODE \"UNKNOWN_VERB\") RATIONALE \"x\"\nDEFINE NARRATE voice AS (SAYS [account: \"{name} is held by {holder}.\"], REFUSES \"Stopped at line {line}: {message} ({cites})\") RATIONALE \"x\"\nDEFINE REFINE bank AS (POINTS [account.ceiling: knob], FLOOR [account.ceiling: external]) RATIONALE \"x\"\n",
       "expect": {
         "language": "bank",
         "counts": {
@@ -112,13 +112,13 @@
     {
       "id": "R6",
       "name": "Art. 1 explainability: a refusal is traceable by a stable identifier, so every REFUSAL carries a CODE",
-      "source": "DEFINE LANGUAGE bank AS (VERSION \"0.23\", GRAMMAR \"0.23\", COURT \"x\", EXTENSION \".bank\") RATIONALE \"x\"\nDEFINE DECLARATION account AS (VERB \"ACCOUNT\", SEATS [holder: text]) RATIONALE \"x\"\nDEFINE REFUSAL unknown_verb AS (MESSAGE \"The verb set is closed\") RATIONALE \"x\"\nDEFINE NARRATE voice AS (REFUSES \"Stopped at line {line}: {message} ({cites})\") RATIONALE \"x\"\nDEFINE CONSTITUTION charter AS (ARTICLES [explainability]) RATIONALE \"x\"\n",
+      "source": "DEFINE LANGUAGE bank AS (VERSION \"0.23\", GRAMMAR \"0.23\", COURT \"x\", EXTENSION \".bank\") RATIONALE \"x\"\nDEFINE DECLARATION account AS (VERB \"ACCOUNT\", SEATS [holder: text]) RATIONALE \"x\"\nDEFINE REFUSAL unknown_verb AS (MESSAGE \"The verb set is closed\") RATIONALE \"x\"\nDEFINE NARRATE voice AS (SAYS [account: \"{name} is held by {holder}.\"], REFUSES \"Stopped at line {line}: {message} ({cites})\") RATIONALE \"x\"\nDEFINE CONSTITUTION charter AS (ARTICLES [explainability]) RATIONALE \"x\"\n",
       "refusal": "Art. 1 explainability: REFUSAL 'unknown_verb' carries no CODE -- a refusal under explainability is traceable by its stable identifier (C2 2.1)"
     },
     {
       "id": "R7",
       "name": "Art. 1 explainability: the same for a CONSTRAINT, the maker's own rule",
-      "source": "DEFINE LANGUAGE bank AS (VERSION \"0.23\", GRAMMAR \"0.23\", COURT \"x\", EXTENSION \".bank\") RATIONALE \"x\"\nDEFINE DECLARATION account AS (VERB \"ACCOUNT\", SEATS [holder: text]) RATIONALE \"x\"\nDEFINE DECLARATION limit AS (VERB \"LIMIT\", SEATS [on: account]) RATIONALE \"x\"\nDEFINE CONSTRAINT one_limit_per_account AS (ON limit, WHEN \"earlier limit where on = this.on\", MESSAGE \"LIMIT {name} and {other} both stand on {on}\") RATIONALE \"x\"\nDEFINE NARRATE voice AS (REFUSES \"Stopped at line {line}: {message} ({cites})\") RATIONALE \"x\"\nDEFINE CONSTITUTION charter AS (ARTICLES [explainability]) RATIONALE \"x\"\n",
+      "source": "DEFINE LANGUAGE bank AS (VERSION \"0.23\", GRAMMAR \"0.23\", COURT \"x\", EXTENSION \".bank\") RATIONALE \"x\"\nDEFINE DECLARATION account AS (VERB \"ACCOUNT\", SEATS [holder: text]) RATIONALE \"x\"\nDEFINE DECLARATION limit AS (VERB \"LIMIT\", SEATS [on: account]) RATIONALE \"x\"\nDEFINE CONSTRAINT one_limit_per_account AS (ON limit, WHEN \"earlier limit where on = this.on\", MESSAGE \"LIMIT {name} and {other} both stand on {on}\") RATIONALE \"x\"\nDEFINE NARRATE voice AS (SAYS [account: \"{name} is held by {holder}.\"], REFUSES \"Stopped at line {line}: {message} ({cites})\") RATIONALE \"x\"\nDEFINE CONSTITUTION charter AS (ARTICLES [explainability]) RATIONALE \"x\"\n",
       "refusal": "Art. 1 explainability: CONSTRAINT 'one_limit_per_account' carries no CODE -- a refusal under explainability is traceable by its stable identifier (C2 2.1)"
     },
     {

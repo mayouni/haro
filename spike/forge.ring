@@ -264,7 +264,10 @@ func LangSource(aLang)
 	for i = 1 to len(aC)
 		cCC = ""
 		if len(aC[i]) >= 7 cCC = aC[i][7] ok
-		aRows + ("[" + RingStr(aC[i][1]) + ", " + RingStr(aC[i][2]) + ", " + RingStr(aC[i][3]) + ", " + RingStr(aC[i][4]) + ", " + RingStr(aC[i][5]) + ", " + RingStr(cCC) + "]")
+		# v0.23: the CITES a CONSTRAINT declares ride into the court beside its CODE
+		aCCites = []
+		if len(aC[i]) >= 8 aCCites = aC[i][8] ok
+		aRows + ("[" + RingStr(aC[i][1]) + ", " + RingStr(aC[i][2]) + ", " + RingStr(aC[i][3]) + ", " + RingStr(aC[i][4]) + ", " + RingStr(aC[i][5]) + ", " + RingStr(cCC) + ", " + NamesSource(aCCites) + "]")
 	next
 	cConstraints = RowsSource(aRows, nl)
 	aW = LangGet(aLang, "world")
@@ -480,6 +483,7 @@ func ForgeCourt(aLang)
 	c += "$cCourtCode = " + RingStr("PARSE") + nl + "$aCourtCites = []" + nl
 	c += "$aCourtFormset = NULL" + nl + "$aCourtNarrate = NULL" + nl
 	c += "$aCourtUnderstand = NULL" + nl + "$bNSurfaces = 0" + nl
+	c += "$aCourtConstitution = []" + nl
 	c += "$bCourtCollect = 0" + nl + "$aCourtFound = []" + nl + "$aCourtBroken = []" + nl
 	c += "$bRunTrace = 0" + nl + "$aRunTrace = []" + nl + "$nRunDepth = 0" + nl + "$bAskTrace = 0" + nl + "$aAskTrace = []" + nl
 	c += ExprGlobals()
@@ -493,6 +497,12 @@ func ForgeCourt(aLang)
 	c += "]" + nl
 	c += "CtUseLanguage(" + RingStr(cForgeName) + ")" + nl
 	c += "CtBuildCondLangs()" + nl
+	# v0.23: the articles the language declares itself under (its CONSTITUTION), read by the
+	# court's refusals through CtUnderArticle; a language under none leaves the list empty
+	aCst = LangGet(aLang, "constitution")
+	if not isNull(aCst)
+		c += "$aCourtConstitution = " + NamesSource(aCst[2]) + nl
+	ok
 	c += nl + "CtMain()" + nl
 	return c
 

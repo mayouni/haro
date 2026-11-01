@@ -70,6 +70,7 @@ STZU12_FIXTURES = os.path.join(HERE, 'v12', 'fixtures.json')
 STZU13_FIXTURES = os.path.join(HERE, 'v13', 'fixtures.json')
 STZU16_FIXTURES = os.path.join(HERE, 'v16', 'fixtures.json')
 STZU17_FIXTURES = os.path.join(HERE, 'v17', 'meta_fixtures.json')
+STZU23_FIXTURES = os.path.join(HERE, 'v23', 'fixtures.json')
 
 
 def judge_stzu(exe, label, fixtures=STZU_FIXTURES):
@@ -79,7 +80,7 @@ def judge_stzu(exe, label, fixtures=STZU_FIXTURES):
     counts), world and points."""
     doc = json.load(open(fixtures, encoding='utf-8'))
     # the pinned v0.1 judge is stzu's; everything since is Haro's (D1)
-    assert doc['grammar'] in ('stzu', 'haro') and doc['version'] in ('0.1', '0.2', '0.3', '0.4', '0.5', '0.6', '0.7', '0.8', '0.9', '0.10', '0.11', '0.12', '0.13', '0.16', '0.17')
+    assert doc['grammar'] in ('stzu', 'haro') and doc['version'] in ('0.1', '0.2', '0.3', '0.4', '0.5', '0.6', '0.7', '0.8', '0.9', '0.10', '0.11', '0.12', '0.13', '0.16', '0.17', '0.23')
     passed = failed = 0
     outputs = {}
     with tempfile.TemporaryDirectory() as td:
@@ -156,7 +157,8 @@ def stage1():
                             ('v0.12, FORMS: the function-name grammar as data', STZU12_FIXTURES),
                             ('v0.13, NARRATE: the court\'s voice', STZU13_FIXTURES),
                             ('v0.16, NARRATE tells a run and a question', STZU16_FIXTURES),
-                            ('v0.17, UNDERSTAND: what a human language reaches closed questions with', STZU17_FIXTURES)):
+                            ('v0.17, UNDERSTAND: what a human language reaches closed questions with', STZU17_FIXTURES),
+                            ('v0.23, CONSTITUTION: a world under Zin\'s articles, judged through the charter\'s mechanisms', STZU23_FIXTURES)):
         print(f'stage 1 -- the Haro meta-court in pure Ring, judged by its fixtures ({label})')
         f1, o1 = judge_stzu(RNXC, 'rnxc', fixtures)
         f2, o2 = judge_stzu(ORACLE, 'oracle ring.exe', fixtures)
@@ -3071,6 +3073,128 @@ def stage28():
     return failures
 
 
+# ---- stage 29: the constitution plane (ZC2) -- a world under Zin's articles, judged through the charter's mechanisms
+
+LEDGER_STZU = os.path.join(HERE, 'ledger_v23.haro')
+LEDGER_CASES = os.path.join(HERE, 'v23', 'court_cases.json')
+
+
+def stage29():
+    """The constitution plane's ZC2 (charter section 2, ratified 2026-11-01; haro/spike/v23/GRAMMAR.md).
+    ledger_v23.haro declares a bank's ledger under four of Zin's six articles; the forge emits its court and
+    grammar on both runtimes, byte-identical; v23/court_cases.json, written before the court, is judged on rnxc
+    and on the oracle: the clean ledger a sentence; the meta-court's reading of the constitution; a declaration
+    without RATIONALE refused with Art. 1 named, its diagnosis coded RATIONALE and citing article:1, its
+    narration carrying the cite; a maker's CONSTRAINT citing what it CITES (CITES on CONSTRAINT); a proposal
+    below a floor refused with Art. 6 named and cited; the admitted proposal reverted byte for byte (Art. 2
+    through refinement); the floor per point. No fixture adapted to pass."""
+    print('stage 29 -- the constitution plane (ZC2): ledger_v23.haro under four articles; v23/court_cases.json judged on rnxc and the oracle')
+    failures = 0
+    out_rnx = run_args(RNXC, ['forge.ring', LEDGER_STZU, '.'], HERE).strip()
+    print('  rnxc  :', out_rnx.splitlines()[0] if out_rnx else 'NO OUTPUT')
+    if not out_rnx.startswith('forged ledger'):
+        print('  FAIL the forge did not forge the ledger')
+        return 1
+    td_or = os.path.join(ROOT, 'runtime', 'haro-forge-oracle')
+    os.makedirs(td_or, exist_ok=True)
+    arts = ('ledger_court.ring', 'ledger.gbnf')
+    for art in arts:
+        if os.path.exists(os.path.join(td_or, art)):
+            os.remove(os.path.join(td_or, art))
+    out_or = run_args(ORACLE, ['forge.ring', LEDGER_STZU, '../../runtime/haro-forge-oracle'], HERE).strip()
+    print('  oracle:', out_or.splitlines()[0] if out_or else 'NO OUTPUT')
+    for art in arts:
+        a = open(os.path.join(HERE, art), 'rb').read()
+        b = open(os.path.join(td_or, art), 'rb').read() if os.path.exists(os.path.join(td_or, art)) else b''
+        if a != b:
+            failures += 1
+            print(f'  FAIL {art} differs between the two runtimes ({len(a)} vs {len(b)} bytes)')
+        else:
+            print(f'  ok   {art}: {len(a)} bytes, byte-identical on both runtimes')
+    doc = json.load(open(LEDGER_CASES, encoding='utf-8'))
+    passed = failed = 0
+    ab_diff = []
+    for case in doc['cases']:
+        verb = case['verb']
+        args = case['args']
+        outs = {}
+        with tempfile.TemporaryDirectory() as td:
+            for label, exe in (('rnxc', RNXC), ('oracle', ORACLE)):
+                if verb == 'meta':
+                    out = run_args(exe, ['haro.ring'] + args, HERE)
+                elif verb == 'refine':
+                    # the court writes the refined text and its inverse beside the sentence: a copy per runtime
+                    cd = os.path.join(td, label)
+                    os.makedirs(cd, exist_ok=True)
+                    sent = os.path.join(cd, os.path.basename(args[0]))
+                    shutil.copyfile(os.path.join(HERE, args[0]), sent)
+                    out = run_args(exe, ['ledger_court.ring', 'refine', sent, os.path.join(HERE, args[1])], HERE)
+                    # the admitted line names the inverse's path, which is this copy's: one name for both runtimes
+                    out = out.replace(cd, '<copy>')
+                    if case.get('revert'):
+                        src = open(os.path.join(HERE, args[0]), 'rb').read()
+                        refined = sent + '.refined'
+                        rv = run_args(exe, ['ledger_court.ring', 'refine', refined, sent + '.revert.rfn'], HERE)
+                        back = open(refined + '.refined', 'rb').read() if os.path.exists(refined + '.refined') else b''
+                        out += '\n[revert] ' + ('restored byte for byte' if (rv.startswith('admitted:') and back == src) else 'NOT restored: ' + rv.strip()[:120])
+                else:
+                    out = run_args(exe, ['ledger_court.ring', verb] + args, HERE)
+                outs[label] = out
+        r = outs['rnxc']
+        if outs['rnxc'] != outs['oracle']:
+            ab_diff.append(case['id'])
+        lines = [l for l in r.split('\n') if l != '']
+        first = lines[0] if lines else ''
+        ok = True
+        why = ''
+        if 'first' in case and case['first'] not in first:
+            ok = False; why = f"first line '{first[:160]}'"
+        if case.get('refused') and first.startswith('ok'):
+            ok = False; why = 'ACCEPTED, must refuse'
+        if 'counts' in case:
+            okv, fields = parse_verdict(r)
+            for k, want in case['counts'].items():
+                if not okv or int(fields.get('count ' + k, '-1')) != want:
+                    ok = False; why = f'count {k}: expected {want} got {fields.get("count " + k) if okv else r[:80]}'
+        for frag in case.get('contains', []):
+            if frag not in r:
+                ok = False; why = f"'{frag}' not in '{r.strip()[:200]}'"
+        if 'record' in case:
+            try:
+                rec = json.loads(lines[1]) if len(lines) > 1 else {}
+            except json.JSONDecodeError:
+                rec = {}
+            want = case['record']
+            if rec.get('code') != want['code'] or any(c not in rec.get('cites', []) for c in want['cites']) or c2_valid(rec):
+                ok = False; why = f'record {lines[1][:200] if len(lines) > 1 else "(none)"}'
+        if 'diagnose' in case:
+            try:
+                d = json.loads(r)['diagnostics'][0]
+            except (json.JSONDecodeError, KeyError, IndexError, TypeError):
+                d = {}
+            want = case['diagnose']
+            if d.get('code') != want['code'] or d.get('cites') != want['cites']:
+                ok = False; why = f'diagnostic {json.dumps(d)[:200]}'
+        if case.get('revert') and '[revert] restored byte for byte' not in r:
+            ok = False; why = r.strip().splitlines()[-1][:160] if r.strip() else 'no output'
+        if PLANT and case['id'] == 'L7':
+            ok = False; why = 'PLANTED'
+        if ok:
+            passed += 1
+            print(f'  ok   {case["id"]}: {case["name"][:120]}')
+        else:
+            failed += 1
+            print(f'  FAIL {case["id"]}: {case["name"][:90]} -- {why}')
+    failures += failed
+    print(f'LEDGER-CONSTITUTION: {passed} of {len(doc["cases"])} cases hold')
+    if ab_diff:
+        failures += 1
+        print(f'  FAIL rnxc and the oracle differ on {len(ab_diff)} case(s): {ab_diff}')
+    else:
+        print(f'  ok   rnxc and the oracle print the same bytes on all {len(doc["cases"])} cases')
+    return failures
+
+
 def stage6(lang, court=None, n=15):
     court = court or f'{lang}_court.ring'
     print(f'stage 6 -- edit to verdict on makeen_box.machine, minima of {n}')
@@ -3186,5 +3310,7 @@ if __name__ == '__main__':
         failures += stage27()
     if stage in (None, 28) and os.path.exists(BODY_COURT):
         failures += stage28()
+    if stage in (None, 29) and os.path.exists(LEDGER_STZU) and os.path.exists(LEDGER_CASES):
+        failures += stage29()
     print(f'haro_forge: {"FAIL" if failures else "PASS"} ({failures} failure(s), {time.perf_counter()-t0:.1f} s)')
     sys.exit(1 if failures else 0)

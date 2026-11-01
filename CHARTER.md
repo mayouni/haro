@@ -212,6 +212,7 @@ no expression position, no escape):
 | **`ASK`** (the pragmatics stratum) | absent | the language's own closed query grammar (the Q letter) and the human languages its natural door speaks; NL asks, never declares; the engine compiles to this grammar and never to host code [R, mission.md rules 1-2]. *The query grammar is built, v0.7 (the seventh rung); the natural door is not.* |
 | **`NARRATE`** | absent | how a run of the language is narrated back (stzn); the court's voice. *Built, v0.13 (the thirteenth rung): SAYS, OPENS, ENDS, REFUSES; `narrate <file>`; a projection, never stored, never parsed back.* |
 | **`REFINE`** | absent | which declared points of a sentence may be refined, by whom, within what bounds, at what trust floor (section 7) |
+| **`CONSTITUTION`** | absent | the articles a world declares itself under, judged through the seats above and the gate, never reimplemented (section 2; D33). *Built, v0.23 (ZC2, 2026-11-02): `ARTICLES` drawn from Zin's six by name and number, `WEAVES` and `REGIME` carried for ZC4; 22 fixtures and a bank's ledger judged on both runtimes* |
 | **`FORMS` inside a vocabulary** | absent | the function-name grammar of principle 7 declared as data for the computing altitude's families. *Built, v0.12 (the twelfth rung): FLUENT, PASSIVE, STATEMENT, PARAMS and FAMILY; the families generated, the shipped spellings judged live.* |
 
 **Built 2026-10-01, the first slice of two of these rows -- Haro v0.2, the spike's second
@@ -1105,6 +1106,20 @@ states principle 14.
   checks the unit with the file's text replaced (`--subst`) -- the file is never written. *Cost:* each derivation checks the whole unit, about 14-16 s at Softanza's size (697 files; the first of a model about
   35-45 s, which also reads the unit's names); a body that calls a native needs the engine's list; an eval elsewhere in a program no longer stops a body's refinement (B09 and FN10 say the opposite of what they
   said), so what an opaque eval assigns is refused by name instead; and a closed check's findings are claims about what the unit defines, not Ring's run-time proof -- its words say so.
+- **D33 -- the constitution is a `CONSTITUTION` declaration of the declaring altitude, one per language, and its articles are judged through the mechanisms section 2 names** (ZC2, built on the author's
+  "Ratified, start ZC2", 2026-11-01 23:32; `haro/spike/v23/GRAMMAR.md`). `DEFINE CONSTITUTION <name> AS (ARTICLES [...], WEAVES [...], REGIME ...) RATIONALE "..."`: `ARTICLES` names, each at most once, the
+  articles the world declares itself under, drawn from Zin's six in Zin's order and numbering -- `explainability` (1), `reversibility` (2), `visible_state` (3), `predictable_authority` (4),
+  `organizational_sovereignty` (5), `trust_hierarchy` (6) -- and a seventh word is refused with the six named. The articles are a menu of the meta-language, not a text a maker writes: Zin's six are
+  immutable, and what a world chooses is which it stands under. The meta-court judges the language under each article it names, in `ARTICLES`' order, THROUGH what exists and nothing new: under 1 the
+  language declares a `NARRATE` and every `REFUSAL` and `CONSTRAINT` carries a `CODE` (the C2 identifier); under 2 it declares a `REFINE`; under 4 no `policy` point is floored `llm`; under 6 every point
+  has a `FLOOR`. The forged court carries the articles, and a refusal that enforces one names it and cites it -- `[Art. 1 explainability]` with `article:1` on a missing RATIONALE, `[Art. 6 trust_hierarchy]`
+  with `article:6` below a floor -- so a refusal carries its number and its article (COMPASS-KERN-06, consumed); a language under no constitution prints what it printed, to the byte. Articles 3 and 5
+  are refused by name as what v0.23 does not judge (a state, ZC3's); `WEAVES` (Zin's eight, by name and number, with Zin's three severities) and `REGIME` are carried, their words closed, and refused by name
+  until ZC4 -- the whole sentence's shape is declared now, and nothing it names is accepted by silence. *Cost:* a world under explainability gives its refusals codes and declares a voice, which Z's
+  declaration does not today (ZC5's first act, and the right one); Zin's Art. 4 and Art. 6 are one stage of the gate here, split by what each forbids (a model into a rule; an origin below a floor), and
+  a future article that needs a mechanism of its own is a rung, never a reimplementation; `CITES` stands on `CONSTRAINT` too now (stzzui's S2, Central's ask of 2026-10-31 22:54, item 1: answered,
+  built), and a `SEVERITY` seat is designed for ZC4 with the weaves, not built (item 2, S1): `error` or `warning` on `CONSTRAINT` and `REFUSAL`, a warning leaving the verdict `ok` and spoken after it
+  as `NO_WORLD` is today, `"warning"` in the envelope.
 - **D23 -- `rnxc fmt` is a Ring++ feature, not held for Haro** (CODEGRAPH Q4, ruled on the author's delegation, 2026-10-05: "take
   whatever decision you think is wiser on my behalf"). It is a verb of the one binary (commitment 5), depends on nothing of Haro's, is
   judged against the oracle and refuses what Ring refuses (58 of 6,061 Softanza files, 57 of them Ring's own refusals). It ships inside
