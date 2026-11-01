@@ -209,6 +209,14 @@ namespace of its own -- its names first, then the base, and another app only thr
 Limits named: an app's top level, lambdas and eval resolve a name given by string as the base does; an app's admission
 is not released.
 
+**BUILT 2026-11-01, rung 9 of the resident VM, at the author's word ("go ahead with the large deployment blocking the
+loop"): an admission compiled in the background.** `admitstart(cVerb, ...)` starts any of the six admission verbs'
+compile on a thread of its own and returns; `admitstate([nWaitMs])` says "compiling" or "compiled"; `admitfinish()`
+installs it where the call stands -- the same admission the verb makes, refused as it would refuse. HaroServer deploys
+everything that way: Softanza's library compiled while the loop answered 67,760 requests, the longest waiting 114 ms
+(the install and the library's top level, on the program's thread), where the whole 13.8 s compile was a pause before.
+One compiles at a time; HaroServer queues the rest and answers `/run` 503 meanwhile.
+
 **The alternative, if the author prefers the language side first:** the library derivation of rung 5 (body kinds refine a
 program, not a library, HF-103), or opening Z's route 3 (a runtime for a declared world, CHARTER section 3, HF-45). Both
 are recorded where they were found.
