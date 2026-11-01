@@ -46,6 +46,8 @@
 # An app registers its routes when its top level runs, by its handler's name in
 # the app -- the host keeps it as `app::Handler`, which only the host may call:
 #     Route("GET", "/hello", "HelloApp")
+# and a route whose answer is not plain text names its content type:
+#     RouteAs("GET", "/lab", "LabPage", "text/html; charset=utf-8")
 
 $aRoutes = []
 $cDeploying = ""
@@ -259,16 +261,21 @@ func RunOnce cSource, cInput
 	rpp_http_reply(nStatus, "text/plain", cOut)
 
 func Route cMethod, cPath, cHandler
+	RouteAs(cMethod, cPath, cHandler, "text/plain")
+
+# a route whose answer is not plain text: a page (text/html), data (application/json)
+func RouteAs cMethod, cPath, cHandler, cType
 	if $cDeploying != "" and substr(cHandler, "::") = 0
 		cHandler = $cDeploying + "::" + cHandler
 	ok
 	for i = 1 to len($aRoutes)
 		if $aRoutes[i][1] = cMethod and $aRoutes[i][2] = cPath
 			$aRoutes[i][3] = cHandler
+			$aRoutes[i][4] = cType
 			return
 		ok
 	next
-	add($aRoutes, [cMethod, cPath, cHandler])
+	add($aRoutes, [cMethod, cPath, cHandler, cType])
 
 func Dispatch cMethod, cPath, cBody
 	for i = 1 to len($aRoutes)
@@ -276,7 +283,7 @@ func Dispatch cMethod, cPath, cBody
 			cHandler = $aRoutes[i][3]
 			try
 				vOut = call cHandler(cBody)
-				rpp_http_reply(200, "text/plain", "" + vOut)
+				rpp_http_reply(200, $aRoutes[i][4], "" + vOut)
 			catch
 				rpp_http_reply(500, "text/plain", cCatchError)
 			done

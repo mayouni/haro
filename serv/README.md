@@ -51,6 +51,56 @@ The socket under the loop is rnxc's: `src/httpd.zig`, eight natives (`rpp_http_*
 the VM runs one program on one thread and the loop is the program. A client that connects and sends nothing holds the
 loop for at most 10 s.
 
+## The Softanza lab -- Softanza's own assertions, run live on the server (2026-11-01)
+
+    python haro/serv/lab/lab.py              then http://127.0.0.1:8642/lab ; Ctrl+C stops it
+
+A web tool on HaroServer that keeps testing Softanza. The lab is shared code in the server's base (`lab/lab.ring`), deployed
+first so the page answers at once; Softanza's library follows, compiled in the background while the page says so. The server
+runs from the installed library's folder (`D:\ringpp\ringpp-win64\libraries\stzlib`), where the library and its engine are found.
+
+- **Feature checks**: 1,100 assertions harvested from Softanza's narrated suites (`lab/harvest.py`, 1,469 files, 19,604 `Then`
+  lines): every `Then("...", actual, expected)` on one line whose expressions stand on their own -- no variable the scenario set
+  up, nothing that reads the clock, a file, the network or a device. Each runs as the suite runs it, judged by `=` and shown by
+  `@@`, admitted into the live program as `func Run`, called and released (`POST /run`), the helpers its file defines copied with
+  it. About 3-4 ms a check over HTTP; all 1,100 in about 5 s. The page keeps the last run in the browser and marks what changed.
+- **Ring's verdict on each check** (`lab/verdicts.py`): the same checks as ONE Ring program, on the oracle with main's engine built
+  Ring-flavoured, and on rnxc compiled whole. So a check that does not pass says whose it is: the suite's own (Ring answers the
+  same -- 69 fail on both with identical expected and got lines), different from Ring, or not measured (the oracle's engine is an
+  older build: 41 of its errors are engine functions it lacks). Nothing passes on Ring and fails on Ring++.
+- **Playground**: code typed in the page runs in the program that holds Softanza -- admitted, called, released.
+- **Comparison**: the figures `bench/webbench.py` measured, drawn and tabled (below).
+
+Routes the lab adds: `GET /lab` (the page), `/lab/checks`, `/lab/verdicts`, `/lab/results`, and the comparison's workloads
+`/bench/hello`, `/bench/text` (through Softanza), `/bench/textring` (plain Ring), `/bench/primes`. A route that answers HTML or
+JSON names its content type: `RouteAs(method, path, handler, type)` (host.ring; `Route` is `RouteAs` with `text/plain`).
+
+## The web comparison -- measured 2026-11-01
+
+    python haro/serv/bench/webbench.py [--quick] [--conc=1,8] [--only=node,java]
+
+Every server answers the same three paths with the same bytes, checked byte for byte before any timing: `hello` (five bytes),
+`text` (180 words upper-cased, counted and reversed: 1.8 KB), `primes` (the primes below 20,000 by a sieve). The servers carry their
+language's own library and nothing downloaded: node's `http`, `Bun.serve`, Python's `ThreadingHTTPServer`, the JDK's
+`com.sun.net.httpserver`. The client is `bench/loadgen.zig` (a connection a request, `Connection: close`, abortive close), each path
+loaded 2 s unrecorded first, then the best of three runs of 3 s. CPU at 217% of its rated speed; Intel Core 5 210H, 12 cores.
+
+| requests a second, one connection / eight at once | hello | text | primes |
+|---|---|---|---|
+| HaroServer + Softanza | 6,642 / 21,384 | 2,908 / 5,460 | 1,013 / 1,213 |
+| HaroServer, plain Ring | | 5,459 / 13,555 | |
+| Bun 1.3.4 | 4,974 / 15,604 | 4,874 / 14,520 | 2,991 / 6,747 |
+| Java 17 | 4,356 / 18,748 | 4,470 / 16,617 | 3,362 / 16,310 |
+| Node.js 22 | 3,887 / 12,590 | 3,658 / 8,500 | 2,214 / 4,097 |
+| Python 3.13 | 2,170 / 3,529 | 2,062 / 3,386 | 612 / 670 |
+
+**What it says, and what it hides.** On a request that does almost nothing, HaroServer is the fastest of the six -- one thread,
+no framework, one send a reply -- at both concurrencies. On `primes` it is interpreted bytecode against three JITs, and one thread
+against Java's pool: a third of Bun's rate on one connection, a thirteenth of Java's on eight. Softanza's layer costs about
+0.18 ms a `text` request (p50 0.34 against 0.16 ms in plain Ring). Every server was measured with a connection per request,
+HaroServer's only mode: the others serve more with keep-alive, which this does not show. Not measured, each needing a download:
+Express, Fastify, FastAPI with uvicorn, Flask, Spring Boot, ASP.NET Core, Go. One machine, loopback only.
+
 ## Measured, 2026-10-31 (4d533d7's VM, `src/httpd.zig`)
 
 | | Windows | Linux |
