@@ -1,0 +1,8 @@
+-- ceiling_llm.rfn -- a model-composed proposal against a knob floored external: refused at
+-- the trust stage, and the refusal names Art. 6.
+DEFINE REFINE raise_the_ceiling AS (
+  TARGET "main.CEILING", KIND knob,
+  FROM "5000000", TO "9000000",
+  AUTHOR "aicha", POSTURE llm,
+  REASON "the treasury's ceiling is reached every month end; raise it"
+) RATIONALE "A ceiling is a knob; a model may propose it and an external actor may commit it"

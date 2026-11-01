@@ -1,0 +1,88 @@
+-- ledger_v23.haro -- a bank's ledger, declared under a constitution (Haro v0.23, the
+-- constitution plane's ZC2): the first world of the estate that declares itself under
+-- Zin's articles. Four of the six are judged here THROUGH what the charter already names
+-- (section 2, ratified 2026-11-01): explainability through RATIONALE, the C2 envelope
+-- and the NARRATE; reversibility through refinement; predictable authority through the
+-- gate's governance stage; trust hierarchy through the trust posture and a point's
+-- FLOOR. A sector, never a customer: this is "a bank", the launch prompt's own word.
+-- The sentences judged by `haro_forge.py --stage=29` are in ledger/ beside the court.
+
+DEFINE LANGUAGE ledger AS (
+  VERSION "0.23",
+  GRAMMAR "0.23",
+  COURT "v23/court_cases.json",
+  EXTENSION ".ledger"
+) RATIONALE "A bank's accounts and the daily limits that govern their postings, declared under a constitution: what every refusal must name, who may change what, and that nothing is erased"
+
+-- ---- the menus -----------------------------------------------------------------------------
+
+DEFINE MENU currencies AS (
+  WORDS [xof, eur],
+  MESSAGE "CURRENCY is xof or eur, not '{value}'",
+  CODE "CURRENCY"
+) RATIONALE "The two currencies this ledger posts in; a third is a refinement of the menu, by a trusted actor"
+
+-- ---- the kinds -----------------------------------------------------------------------------
+
+DEFINE DECLARATION account AS (
+  VERB "ACCOUNT",
+  SEATS [holder: text, currency: currencies, ceiling: number]
+) RATIONALE "An account: who holds it, in which currency, and the ceiling its balance may not pass"
+
+DEFINE DECLARATION limit AS (
+  VERB "LIMIT",
+  SEATS [on: account, daily: number, rule: text, message: text],
+  MESSAGES [on: "LIMIT {name} stands on '{value}', and no ACCOUNT of that name is declared"],
+  CODES [on: "NO_ACCOUNT"]
+) RATIONALE "A daily limit on one account: the amount, the rule the postings are held to, and the words spoken when a posting breaks it"
+
+-- ---- the constraints -----------------------------------------------------------------------
+
+DEFINE CONSTRAINT one_limit_per_account AS (
+  ON limit, WHEN "earlier limit where on = this.on",
+  MESSAGE "LIMIT {name} and LIMIT {other} both stand on {on}: one limit an account",
+  CODE "ONE_LIMIT",
+  CITES ["right:one-limit-per-account"]
+) RATIONALE "Two limits on one account would disagree, and a posting would be held to whichever the walker met first"
+
+-- ---- the refusals --------------------------------------------------------------------------
+
+DEFINE REFUSAL unknown_verb AS (
+  MESSAGE "The ledger's verb set is closed: ACCOUNT and LIMIT, nothing else.",
+  CODE "UNKNOWN_VERB"
+) RATIONALE "A verb the ledger does not know is unparseable, not forbidden"
+
+DEFINE REFUSAL unknown_declaration AS (
+  MESSAGE "The ledger's verb set is closed: ACCOUNT and LIMIT, nothing else.",
+  CODE "UNKNOWN_DECLARATION"
+) RATIONALE "DEFINE ANYTHING_ELSE is as unparseable as a verb the ledger does not know"
+
+DEFINE REFUSAL dangling_reference AS (
+  MESSAGE "This name resolves to nothing in the ledger.",
+  CODE "DANGLING"
+) RATIONALE "A limit's ON resolves at check time"
+
+-- ---- the refinement points: what may change, by whom ----------------------------------------
+
+DEFINE REFINE ledger AS (
+  POINTS [account.ceiling: knob, limit.daily: knob, limit.rule: policy, limit.message: field],
+  FLOOR [account.ceiling: external, limit.daily: trusted, limit.rule: trusted, limit.message: llm]
+) RATIONALE "A ceiling is a knob an external actor may turn; the daily amount and the rule are the bank's and only a trusted actor touches them; the words of a refusal a model may propose, and the gate judges the proposal"
+
+-- ---- the voice ---------------------------------------------------------------------------------
+
+DEFINE NARRATE ledger_voice AS (
+  OPENS "{file} is a ledger of {count} declarations.",
+  SAYS [
+    account: "{name} is held by {holder} in {currency}, up to {ceiling}. {rationale}",
+    limit: "{name} holds {on} to {daily} a day under the rule {rule}; broken, it says: {message}. {rationale}"
+  ],
+  ENDS "That is the whole ledger.",
+  REFUSES "Stopped at line {line}: {message} ({code}; {cites})"
+) RATIONALE "The ledger read back as its treasurer would say it; a refusal names its line, its code and what it cites"
+
+-- ---- the constitution --------------------------------------------------------------------------
+
+DEFINE CONSTITUTION bank_charter AS (
+  ARTICLES [explainability, reversibility, predictable_authority, trust_hierarchy]
+) RATIONALE "The four articles Haro v0.23 judges: every refusal of this ledger is traceable and told (1), every change to it is a refinement whose inverse exists before it lands (2), no model rewrites a rule (4), and every point says what trust may change it (6); visible state (3) and organizational sovereignty (5) join at ZC3"

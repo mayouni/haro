@@ -1,0 +1,8 @@
+-- rule_external.rfn -- an external actor proposes a change to the RULE, a policy point
+-- floored trusted: refused at the trust stage, Art. 6 named -- the rule is the bank's.
+DEFINE REFINE loosen_the_rule AS (
+  TARGET "daily_cash.RULE", KIND policy,
+  FROM "amount <= daily", TO "amount <= daily * 2",
+  AUTHOR "the-core-banking-system", POSTURE external,
+  REASON "double the day's room"
+) RATIONALE "A rule is a policy point; only a trusted actor changes it"

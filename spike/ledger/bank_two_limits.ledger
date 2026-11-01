@@ -1,0 +1,18 @@
+-- bank_two_limits.ledger -- two limits on one account: the maker's own constraint
+-- refuses it, under its CODE and the right it CITES.
+
+DEFINE ACCOUNT main AS (
+  HOLDER "the treasury", CURRENCY xof, CEILING 5000000
+) RATIONALE "The bank's own account, where the day's cash lands"
+
+DEFINE LIMIT daily_cash AS (
+  ON main, DAILY 1000000,
+  RULE "amount <= daily",
+  MESSAGE "A posting above the day's limit waits for the treasurer"
+) RATIONALE "No single day empties the treasury"
+
+DEFINE LIMIT daily_cash_bis AS (
+  ON main, DAILY 2000000,
+  RULE "amount <= daily",
+  MESSAGE "A posting above the day's limit waits for the treasurer"
+) RATIONALE "A second limit on the same account, which the ledger refuses"

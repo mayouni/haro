@@ -1,0 +1,185 @@
+{
+  "grammar": "haro",
+  "version": "0.23",
+  "comment": "The Haro v0.23 conformance floor, written BEFORE the court that passes it (the W discipline: fixtures first, prose second). v0.23 grows v0.22 by the CONSTITUTION declaration -- the ruling of 2026-11-01 on Zin (COMPASS-KERN-09; charter section 2, ratified the same night): Zin's six articles enter Haro as a declared governance sentence that a world declares itself under, judged THROUGH the mechanisms the charter names and never reimplemented. ARTICLES names the articles the world is under, each a word of the six and each at most once; a language under explainability (1) declares a NARRATE and gives every REFUSAL and CONSTRAINT a CODE; under reversibility (2) it declares a REFINE; under predictable_authority (4) no policy point is floored llm; under trust_hierarchy (6) every point has a FLOOR. visible_state (3) and organizational_sovereignty (5) are refused by name as what Haro v0.23 does not judge yet (ZC3); WEAVES and REGIME are seats the grammar carries and v0.23 refuses by name (ZC4), so the sentence's whole shape is declared now. Every v0.22 declaration still passes: v0.23 refuses nothing v0.22 accepted (A3 is v0.13's A1, unchanged). Rejects carry the fragment the refusal must contain. The articles' numbers are Zin's (constitution.zig:35-40) and are stable.",
+  "accepts": [
+    {
+      "id": "A1",
+      "name": "a language under the four articles Haro v0.23 judges: a NARRATE, coded refusals and constraints, a REFINE with a floor on every point and no policy point floored llm",
+      "source": "DEFINE LANGUAGE bank AS (VERSION \"0.23\", GRAMMAR \"0.23\", COURT \"x\", EXTENSION \".bank\") RATIONALE \"x\"\nDEFINE DECLARATION account AS (VERB \"ACCOUNT\", SEATS [holder: text, ceiling: number]) RATIONALE \"x\"\nDEFINE DECLARATION limit AS (VERB \"LIMIT\", SEATS [on: account, daily: number, rule: text, message: text]) RATIONALE \"x\"\nDEFINE CONSTRAINT one_limit_per_account AS (ON limit, WHEN \"earlier limit where on = this.on\", MESSAGE \"LIMIT {name} and {other} both stand on {on}: one limit an account\", CODE \"ONE_LIMIT\") RATIONALE \"x\"\nDEFINE REFUSAL unknown_verb AS (MESSAGE \"The verb set is closed\", CODE \"UNKNOWN_VERB\") RATIONALE \"x\"\nDEFINE REFINE bank AS (POINTS [account.ceiling: knob, limit.daily: knob, limit.rule: policy, limit.message: field], FLOOR [account.ceiling: external, limit.daily: trusted, limit.rule: trusted, limit.message: llm]) RATIONALE \"x\"\nDEFINE NARRATE voice AS (SAYS [account: \"{name} is held by {holder} up to {ceiling}.\"], REFUSES \"Stopped at line {line}: {message} ({cites})\") RATIONALE \"x\"\nDEFINE CONSTITUTION charter AS (ARTICLES [explainability, reversibility, predictable_authority, trust_hierarchy]) RATIONALE \"the four articles Haro v0.23 judges, in Zin's order\"\n",
+      "expect": {
+        "language": "bank",
+        "counts": {
+          "declarations": 2,
+          "constraints": 1,
+          "refusals": 1
+        },
+        "narrates": 1,
+        "points": 4,
+        "constitution": 1,
+        "articles": "explainability,reversibility,predictable_authority,trust_hierarchy"
+      }
+    },
+    {
+      "id": "A2",
+      "name": "a language under one article only, reversibility: a REFINE is all it owes; no NARRATE, no CODE, no FLOOR is asked of it",
+      "source": "DEFINE LANGUAGE bank AS (VERSION \"0.23\", GRAMMAR \"0.23\", COURT \"x\", EXTENSION \".bank\") RATIONALE \"x\"\nDEFINE DECLARATION account AS (VERB \"ACCOUNT\", SEATS [holder: text, ceiling: number]) RATIONALE \"x\"\nDEFINE REFUSAL unknown_verb AS (MESSAGE \"The verb set is closed\") RATIONALE \"x\"\nDEFINE REFINE bank AS (POINTS [account.ceiling: knob]) RATIONALE \"x\"\nDEFINE CONSTITUTION charter AS (ARTICLES [reversibility]) RATIONALE \"x\"\n",
+      "expect": {
+        "language": "bank",
+        "counts": {
+          "declarations": 1
+        },
+        "points": 1,
+        "constitution": 1,
+        "articles": "reversibility"
+      }
+    },
+    {
+      "id": "A3",
+      "name": "a v0.22 declaration is a v0.23 declaration: v0.13's A1, unchanged -- no CONSTITUTION, nothing asked",
+      "source": "DEFINE LANGUAGE shop AS (VERSION \"0.13\", GRAMMAR \"0.13\", COURT \"x\", EXTENSION \".shop\") RATIONALE \"x\"\nDEFINE DECLARATION item AS (VERB \"ITEM\", SEATS [price: number, label: text]) RATIONALE \"x\"\nDEFINE DECLARATION till AS (VERB \"TILL\", SEATS [holds: name]) RATIONALE \"x\"\nDEFINE NARRATE voice AS (OPENS \"{file}: {count} things in {language}.\", SAYS [item: \"{name} costs {price} and is called {label}. {rationale}\", till: \"{verb} {name} holds {holds}, line {line}.\"], ENDS \"That is all.\", REFUSES \"Stopped at line {line} with {code}: {message} ({cites})\") RATIONALE \"x\"\n",
+      "expect": {
+        "language": "shop",
+        "counts": {
+          "declarations": 2
+        },
+        "narrates": 1,
+        "constitution": 0,
+        "articles": ""
+      }
+    },
+    {
+      "id": "A4",
+      "name": "under predictable_authority alone a point may lack a FLOOR (that is trust_hierarchy's rule); what it asks is that no policy point be floored llm, and external is not llm",
+      "source": "DEFINE LANGUAGE bank AS (VERSION \"0.23\", GRAMMAR \"0.23\", COURT \"x\", EXTENSION \".bank\") RATIONALE \"x\"\nDEFINE DECLARATION account AS (VERB \"ACCOUNT\", SEATS [holder: text, ceiling: number]) RATIONALE \"x\"\nDEFINE DECLARATION limit AS (VERB \"LIMIT\", SEATS [on: account, rule: text]) RATIONALE \"x\"\nDEFINE REFINE bank AS (POINTS [account.ceiling: knob, limit.rule: policy], FLOOR [limit.rule: external]) RATIONALE \"x\"\nDEFINE CONSTITUTION charter AS (ARTICLES [predictable_authority]) RATIONALE \"x\"\n",
+      "expect": {
+        "language": "bank",
+        "counts": {
+          "declarations": 2
+        },
+        "points": 2,
+        "constitution": 1,
+        "articles": "predictable_authority"
+      }
+    },
+    {
+      "id": "A5",
+      "name": "the CONSTITUTION may stand anywhere after the LANGUAGE: its articles are judged once the whole file is read, so a NARRATE and a REFINE declared after it count",
+      "source": "DEFINE LANGUAGE bank AS (VERSION \"0.23\", GRAMMAR \"0.23\", COURT \"x\", EXTENSION \".bank\") RATIONALE \"x\"\nDEFINE CONSTITUTION charter AS (ARTICLES [trust_hierarchy, explainability, reversibility]) RATIONALE \"x\"\nDEFINE DECLARATION account AS (VERB \"ACCOUNT\", SEATS [holder: text, ceiling: number]) RATIONALE \"x\"\nDEFINE REFUSAL unknown_verb AS (MESSAGE \"The verb set is closed\", CODE \"UNKNOWN_VERB\") RATIONALE \"x\"\nDEFINE NARRATE voice AS (REFUSES \"Stopped at line {line}: {message} ({cites})\") RATIONALE \"x\"\nDEFINE REFINE bank AS (POINTS [account.ceiling: knob], FLOOR [account.ceiling: external]) RATIONALE \"x\"\n",
+      "expect": {
+        "language": "bank",
+        "counts": {
+          "declarations": 1
+        },
+        "narrates": 1,
+        "points": 1,
+        "constitution": 1,
+        "articles": "trust_hierarchy,explainability,reversibility"
+      }
+    }
+  ],
+  "rejects": [
+    {
+      "id": "R1",
+      "name": "an article is one of the six, by Zin's name and number; 'privacy' is a weave, not an article",
+      "source": "DEFINE LANGUAGE bank AS (VERSION \"0.23\", GRAMMAR \"0.23\", COURT \"x\", EXTENSION \".bank\") RATIONALE \"x\"\nDEFINE DECLARATION account AS (VERB \"ACCOUNT\", SEATS [holder: text]) RATIONALE \"x\"\nDEFINE CONSTITUTION charter AS (ARTICLES [explainability, privacy]) RATIONALE \"x\"\n",
+      "refusal": "'privacy' is not an article: explainability (1), reversibility (2), visible_state (3), predictable_authority (4), organizational_sovereignty (5) or trust_hierarchy (6)"
+    },
+    {
+      "id": "R2",
+      "name": "an article is named once",
+      "source": "DEFINE LANGUAGE bank AS (VERSION \"0.23\", GRAMMAR \"0.23\", COURT \"x\", EXTENSION \".bank\") RATIONALE \"x\"\nDEFINE DECLARATION account AS (VERB \"ACCOUNT\", SEATS [holder: text]) RATIONALE \"x\"\nDEFINE REFINE bank AS (POINTS [account.holder: field]) RATIONALE \"x\"\nDEFINE CONSTITUTION charter AS (ARTICLES [reversibility, reversibility]) RATIONALE \"x\"\n",
+      "refusal": "'reversibility' is named twice in ARTICLES: a world is under an article once"
+    },
+    {
+      "id": "R3",
+      "name": "a world is under one constitution",
+      "source": "DEFINE LANGUAGE bank AS (VERSION \"0.23\", GRAMMAR \"0.23\", COURT \"x\", EXTENSION \".bank\") RATIONALE \"x\"\nDEFINE DECLARATION account AS (VERB \"ACCOUNT\", SEATS [holder: text]) RATIONALE \"x\"\nDEFINE REFINE bank AS (POINTS [account.holder: field]) RATIONALE \"x\"\nDEFINE CONSTITUTION charter AS (ARTICLES [reversibility]) RATIONALE \"x\"\nDEFINE CONSTITUTION bylaws AS (ARTICLES [reversibility]) RATIONALE \"x\"\n",
+      "refusal": "a .haro file declares at most one CONSTITUTION"
+    },
+    {
+      "id": "R4",
+      "name": "a constitution is under at least one article",
+      "source": "DEFINE LANGUAGE bank AS (VERSION \"0.23\", GRAMMAR \"0.23\", COURT \"x\", EXTENSION \".bank\") RATIONALE \"x\"\nDEFINE DECLARATION account AS (VERB \"ACCOUNT\", SEATS [holder: text]) RATIONALE \"x\"\nDEFINE CONSTITUTION charter AS (ARTICLES []) RATIONALE \"x\"\n",
+      "refusal": "ARTICLES names no article: a constitution is under at least one"
+    },
+    {
+      "id": "R5",
+      "name": "Art. 1 explainability: a world under it tells its runs and refusals, so its language declares a NARRATE",
+      "source": "DEFINE LANGUAGE bank AS (VERSION \"0.23\", GRAMMAR \"0.23\", COURT \"x\", EXTENSION \".bank\") RATIONALE \"x\"\nDEFINE DECLARATION account AS (VERB \"ACCOUNT\", SEATS [holder: text]) RATIONALE \"x\"\nDEFINE REFUSAL unknown_verb AS (MESSAGE \"The verb set is closed\", CODE \"UNKNOWN_VERB\") RATIONALE \"x\"\nDEFINE CONSTITUTION charter AS (ARTICLES [explainability]) RATIONALE \"x\"\n",
+      "refusal": "Art. 1 explainability: 'bank' declares no NARRATE -- a world under explainability tells every run and every refusal in its own voice"
+    },
+    {
+      "id": "R6",
+      "name": "Art. 1 explainability: a refusal is traceable by a stable identifier, so every REFUSAL carries a CODE",
+      "source": "DEFINE LANGUAGE bank AS (VERSION \"0.23\", GRAMMAR \"0.23\", COURT \"x\", EXTENSION \".bank\") RATIONALE \"x\"\nDEFINE DECLARATION account AS (VERB \"ACCOUNT\", SEATS [holder: text]) RATIONALE \"x\"\nDEFINE REFUSAL unknown_verb AS (MESSAGE \"The verb set is closed\") RATIONALE \"x\"\nDEFINE NARRATE voice AS (REFUSES \"Stopped at line {line}: {message} ({cites})\") RATIONALE \"x\"\nDEFINE CONSTITUTION charter AS (ARTICLES [explainability]) RATIONALE \"x\"\n",
+      "refusal": "Art. 1 explainability: REFUSAL 'unknown_verb' carries no CODE -- a refusal under explainability is traceable by its stable identifier (C2 2.1)"
+    },
+    {
+      "id": "R7",
+      "name": "Art. 1 explainability: the same for a CONSTRAINT, the maker's own rule",
+      "source": "DEFINE LANGUAGE bank AS (VERSION \"0.23\", GRAMMAR \"0.23\", COURT \"x\", EXTENSION \".bank\") RATIONALE \"x\"\nDEFINE DECLARATION account AS (VERB \"ACCOUNT\", SEATS [holder: text]) RATIONALE \"x\"\nDEFINE DECLARATION limit AS (VERB \"LIMIT\", SEATS [on: account]) RATIONALE \"x\"\nDEFINE CONSTRAINT one_limit_per_account AS (ON limit, WHEN \"earlier limit where on = this.on\", MESSAGE \"LIMIT {name} and {other} both stand on {on}\") RATIONALE \"x\"\nDEFINE NARRATE voice AS (REFUSES \"Stopped at line {line}: {message} ({cites})\") RATIONALE \"x\"\nDEFINE CONSTITUTION charter AS (ARTICLES [explainability]) RATIONALE \"x\"\n",
+      "refusal": "Art. 1 explainability: CONSTRAINT 'one_limit_per_account' carries no CODE -- a refusal under explainability is traceable by its stable identifier (C2 2.1)"
+    },
+    {
+      "id": "R8",
+      "name": "Art. 2 reversibility: a world under it changes only by refinement, so its language declares a REFINE",
+      "source": "DEFINE LANGUAGE bank AS (VERSION \"0.23\", GRAMMAR \"0.23\", COURT \"x\", EXTENSION \".bank\") RATIONALE \"x\"\nDEFINE DECLARATION account AS (VERB \"ACCOUNT\", SEATS [holder: text]) RATIONALE \"x\"\nDEFINE CONSTITUTION charter AS (ARTICLES [reversibility]) RATIONALE \"x\"\n",
+      "refusal": "Art. 2 reversibility: 'bank' declares no REFINE -- a world under reversibility changes only by refinement, whose inverse is computed before it lands and whose revert is an event (charter 6.5)"
+    },
+    {
+      "id": "R9",
+      "name": "Art. 6 trust_hierarchy: a trust requirement is declared, never implied, so every point has a FLOOR",
+      "source": "DEFINE LANGUAGE bank AS (VERSION \"0.23\", GRAMMAR \"0.23\", COURT \"x\", EXTENSION \".bank\") RATIONALE \"x\"\nDEFINE DECLARATION account AS (VERB \"ACCOUNT\", SEATS [holder: text, ceiling: number]) RATIONALE \"x\"\nDEFINE DECLARATION limit AS (VERB \"LIMIT\", SEATS [on: account, daily: number]) RATIONALE \"x\"\nDEFINE REFINE bank AS (POINTS [account.ceiling: knob, limit.daily: knob], FLOOR [account.ceiling: external]) RATIONALE \"x\"\nDEFINE CONSTITUTION charter AS (ARTICLES [trust_hierarchy]) RATIONALE \"x\"\n",
+      "refusal": "Art. 6 trust_hierarchy: point 'limit.daily' has no FLOOR -- a trust requirement is declared, never implied: silence refuses"
+    },
+    {
+      "id": "R10",
+      "name": "Art. 4 predictable_authority: a rule is refined by no model-composed proposal, so no policy point is floored llm",
+      "source": "DEFINE LANGUAGE bank AS (VERSION \"0.23\", GRAMMAR \"0.23\", COURT \"x\", EXTENSION \".bank\") RATIONALE \"x\"\nDEFINE DECLARATION account AS (VERB \"ACCOUNT\", SEATS [holder: text, ceiling: number]) RATIONALE \"x\"\nDEFINE DECLARATION limit AS (VERB \"LIMIT\", SEATS [on: account, rule: text]) RATIONALE \"x\"\nDEFINE REFINE bank AS (POINTS [account.ceiling: knob, limit.rule: policy], FLOOR [account.ceiling: external, limit.rule: llm]) RATIONALE \"x\"\nDEFINE CONSTITUTION charter AS (ARTICLES [predictable_authority]) RATIONALE \"x\"\n",
+      "refusal": "Art. 4 predictable_authority: policy point 'limit.rule' has FLOOR llm -- a rule is refined by no model-composed proposal, by construction (charter 6.4)"
+    },
+    {
+      "id": "R11",
+      "name": "Art. 3 visible_state is refused by name as what Haro v0.23 does not judge yet: a state, not a fault (ZC3)",
+      "source": "DEFINE LANGUAGE bank AS (VERSION \"0.23\", GRAMMAR \"0.23\", COURT \"x\", EXTENSION \".bank\") RATIONALE \"x\"\nDEFINE DECLARATION account AS (VERB \"ACCOUNT\", SEATS [holder: text]) RATIONALE \"x\"\nDEFINE CONSTITUTION charter AS (ARTICLES [visible_state]) RATIONALE \"x\"\n",
+      "refusal": "Art. 3 visible_state: no mechanism judges it in Haro v0.23 -- ZC3 builds it on the narration and the audit chain, fixtures first"
+    },
+    {
+      "id": "R12",
+      "name": "Art. 5 organizational_sovereignty is refused by name as what Haro v0.23 does not judge yet (ZC3, on the zones Z declares)",
+      "source": "DEFINE LANGUAGE bank AS (VERSION \"0.23\", GRAMMAR \"0.23\", COURT \"x\", EXTENSION \".bank\") RATIONALE \"x\"\nDEFINE DECLARATION account AS (VERB \"ACCOUNT\", SEATS [holder: text]) RATIONALE \"x\"\nDEFINE CONSTITUTION charter AS (ARTICLES [organizational_sovereignty]) RATIONALE \"x\"\n",
+      "refusal": "Art. 5 organizational_sovereignty: no mechanism judges it in Haro v0.23 -- ZC3 builds it on the zones Z declares and W3's no ungoverned data movement, fixtures first"
+    },
+    {
+      "id": "R13",
+      "name": "WEAVES is a seat the sentence carries and v0.23 judges by nothing: a weave named is refused as ZC4's, by name",
+      "source": "DEFINE LANGUAGE bank AS (VERSION \"0.23\", GRAMMAR \"0.23\", COURT \"x\", EXTENSION \".bank\") RATIONALE \"x\"\nDEFINE DECLARATION account AS (VERB \"ACCOUNT\", SEATS [holder: text]) RATIONALE \"x\"\nDEFINE REFINE bank AS (POINTS [account.holder: field]) RATIONALE \"x\"\nDEFINE CONSTITUTION charter AS (ARTICLES [reversibility], WEAVES [privacy: governance]) RATIONALE \"x\"\n",
+      "refusal": "WEAVES names 'privacy', and no weave is judged in Haro v0.23 -- ZC4 builds sovereignty (W3) and privacy (W4) as field tags, fixtures first"
+    },
+    {
+      "id": "R14",
+      "name": "a weave is one of Zin's eight, by name and number",
+      "source": "DEFINE LANGUAGE bank AS (VERSION \"0.23\", GRAMMAR \"0.23\", COURT \"x\", EXTENSION \".bank\") RATIONALE \"x\"\nDEFINE DECLARATION account AS (VERB \"ACCOUNT\", SEATS [holder: text]) RATIONALE \"x\"\nDEFINE REFINE bank AS (POINTS [account.holder: field]) RATIONALE \"x\"\nDEFINE CONSTITUTION charter AS (ARTICLES [reversibility], WEAVES [budget: advisory]) RATIONALE \"x\"\n",
+      "refusal": "'budget' is not a weave: resilience (W1), observability (W2), sovereignty (W3), privacy (W4), temporal_integrity (W5), cost_awareness (W6), learnability (W7) or structural_integrity (W8)"
+    },
+    {
+      "id": "R15",
+      "name": "a weave's severity is one of Zin's three",
+      "source": "DEFINE LANGUAGE bank AS (VERSION \"0.23\", GRAMMAR \"0.23\", COURT \"x\", EXTENSION \".bank\") RATIONALE \"x\"\nDEFINE DECLARATION account AS (VERB \"ACCOUNT\", SEATS [holder: text]) RATIONALE \"x\"\nDEFINE REFINE bank AS (POINTS [account.holder: field]) RATIONALE \"x\"\nDEFINE CONSTITUTION charter AS (ARTICLES [reversibility], WEAVES [privacy: loud]) RATIONALE \"x\"\n",
+      "refusal": "'loud' is not a severity: constitutional, governance or advisory"
+    },
+    {
+      "id": "R16",
+      "name": "REGIME is a seat the sentence carries and v0.23 reads by nothing: a regime named is refused as ZC4's, by name -- never a default",
+      "source": "DEFINE LANGUAGE bank AS (VERSION \"0.23\", GRAMMAR \"0.23\", COURT \"x\", EXTENSION \".bank\") RATIONALE \"x\"\nDEFINE DECLARATION account AS (VERB \"ACCOUNT\", SEATS [holder: text]) RATIONALE \"x\"\nDEFINE REFINE bank AS (POINTS [account.holder: field]) RATIONALE \"x\"\nDEFINE CONSTITUTION charter AS (ARTICLES [reversibility], REGIME gdpr) RATIONALE \"x\"\n",
+      "refusal": "REGIME names 'gdpr', and no weave reads a regime in Haro v0.23 -- ZC4 names the declared regime in every refusal of a weave, never a default"
+    },
+    {
+      "id": "R17",
+      "name": "the first article refused is the first in ARTICLES' order, so a refusal names one article at a time",
+      "source": "DEFINE LANGUAGE bank AS (VERSION \"0.23\", GRAMMAR \"0.23\", COURT \"x\", EXTENSION \".bank\") RATIONALE \"x\"\nDEFINE DECLARATION account AS (VERB \"ACCOUNT\", SEATS [holder: text]) RATIONALE \"x\"\nDEFINE CONSTITUTION charter AS (ARTICLES [reversibility, explainability]) RATIONALE \"x\"\n",
+      "refusal": "Art. 2 reversibility: 'bank' declares no REFINE"
+    }
+  ]
+}

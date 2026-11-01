@@ -1,0 +1,8 @@
+-- ceiling_external.rfn -- the same change proposed by an external actor, at the point's
+-- floor: admitted, its inverse written before it lands (Art. 2 through refinement).
+DEFINE REFINE raise_the_ceiling AS (
+  TARGET "main.CEILING", KIND knob,
+  FROM "5000000", TO "9000000",
+  AUTHOR "the-core-banking-system", POSTURE external,
+  REASON "the treasury's ceiling is reached every month end; raise it"
+) RATIONALE "A ceiling is a knob an external actor may turn"

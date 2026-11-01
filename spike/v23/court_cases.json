@@ -1,0 +1,85 @@
+{
+  "name": "the ledger under a constitution -- sentence-level cases for Haro v0.23 (ZC2)",
+  "comment": "Written BEFORE the court code (the W discipline). Each case runs the court forged from ledger_v23.haro on rnxc AND on the oracle; the two must print the same bytes. 'first' is a fragment of the first output line; 'contains' fragments of the whole output; 'record' is the C2 record on the second line of a refine refusal; 'diagnose' is the first diagnostic of a diagnose run. The articles' numbers are Zin's (constitution.zig:35-40).",
+  "cases": [
+    {
+      "id": "L1",
+      "name": "the clean ledger is a sentence: two accounts, one limit",
+      "verb": "check",
+      "args": ["ledger/bank.ledger"],
+      "first": "ok",
+      "counts": {"ACCOUNT": 2, "LIMIT": 1}
+    },
+    {
+      "id": "L2",
+      "name": "the meta-court reads the ledger's declaration under its four articles",
+      "verb": "meta",
+      "args": ["ledger_v23.haro"],
+      "first": "ok",
+      "contains": ["constitution 1", "articles explainability,reversibility,predictable_authority,trust_hierarchy", "points 4", "narrates 1"]
+    },
+    {
+      "id": "L3",
+      "name": "Art. 1 through RATIONALE: a declaration without one is refused, and the refusal names the article",
+      "verb": "check",
+      "args": ["ledger/bank_no_rationale.ledger"],
+      "refused": true,
+      "contains": ["RATIONALE is mandatory on every declaration (LIMIT daily_cash has none)", "[Art. 1 explainability]"]
+    },
+    {
+      "id": "L4",
+      "name": "Art. 1 through the C2 envelope: the same refusal diagnosed carries the code RATIONALE and cites article:1",
+      "verb": "diagnose",
+      "args": ["ledger/bank_no_rationale.ledger"],
+      "diagnose": {"code": "RATIONALE", "cites": ["article:1"]}
+    },
+    {
+      "id": "L5",
+      "name": "Art. 1 through the NARRATE: the refusal told in the ledger's voice names its line, its code and its cite",
+      "verb": "narrate",
+      "args": ["ledger/bank_no_rationale.ledger"],
+      "contains": ["Stopped at line 12:", "(RATIONALE; article:1)"]
+    },
+    {
+      "id": "L6",
+      "name": "a maker's own CONSTRAINT refuses under its CODE and cites what it CITES (CITES on CONSTRAINT, built here)",
+      "verb": "diagnose",
+      "args": ["ledger/bank_two_limits.ledger"],
+      "diagnose": {"code": "ONE_LIMIT", "cites": ["right:one-limit-per-account"]}
+    },
+    {
+      "id": "L7",
+      "name": "Art. 6 through the trust posture: a model-composed proposal below a knob's floor is refused, the article named, the record citing it",
+      "verb": "refine",
+      "args": ["ledger/bank.ledger", "ledger/ceiling_llm.rfn"],
+      "refused": true,
+      "first": "trust: posture :llm below the required floor :external for 'main.CEILING' [Art. 6 trust_hierarchy]",
+      "record": {"code": "TRUST_FLOOR", "cites": ["rule:trust-floor", "article:6"]}
+    },
+    {
+      "id": "L8",
+      "name": "Art. 6: a policy point floored trusted refuses an external actor too -- the floor is the point's",
+      "verb": "refine",
+      "args": ["ledger/bank.ledger", "ledger/rule_external.rfn"],
+      "refused": true,
+      "first": "trust: posture :external below the required floor :trusted for 'daily_cash.RULE' [Art. 6 trust_hierarchy]",
+      "record": {"code": "TRUST_FLOOR", "cites": ["rule:trust-floor", "article:6"]}
+    },
+    {
+      "id": "L9",
+      "name": "Art. 2 through refinement: the external actor's proposal at the floor is admitted, and the inverse written before it landed restores the ledger byte for byte",
+      "verb": "refine",
+      "args": ["ledger/bank.ledger", "ledger/ceiling_external.rfn"],
+      "first": "admitted: main.CEILING 5000000 -> 9000000 [external]",
+      "revert": true
+    },
+    {
+      "id": "L10",
+      "name": "the floor is per point: a field floored llm admits a model's words",
+      "verb": "refine",
+      "args": ["ledger/bank.ledger", "ledger/message_llm.rfn"],
+      "first": "admitted: daily_cash.MESSAGE",
+      "revert": true
+    }
+  ]
+}
