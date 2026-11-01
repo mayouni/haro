@@ -20,7 +20,8 @@ This first build is that design on the resident VM, with the host loop in the pr
     (Run is defined) until a `/replace/run`.
 - **apps/** -- the court's apps. One of each kind: a route, state in an object, a redeploy that keeps it, a redeploy
   that adds an attribute (admitted: the running object takes it, rung 7) and one that drops one (refused), a raising
-  handler, a class admitted while serving, a Rule A refusal.
+  handler, a class admitted while serving, a handler that makes objects of a class an app deployed after it brings
+  (`ledger.ring`, then `entry.ring`: rung 8), a Rule A refusal.
 - **court.py** -- boots the host on a free port and drives it over HTTP. Every answer is checked and the costs are
   measured.
   - `--softanza` adds an app that loads Softanza's library into the running server, run from the install's tree.
@@ -69,4 +70,8 @@ under a millisecond at this size. The court holds the second half's high-water m
   its first access past its own slots, starting as declared (a constant; a list a list of its own); about 55 ns an
   object, once, and nothing for the rest. Refused, with the reason: a dropped or reordered attribute, a starting value
   that runs code, region code that uses it, and a class another class the program holds inherits from.
+- **An app could make another app's objects only through a factory the other app defined -- answered by rung 8.** A
+  `new K` compiled before any app brought K finds K by name once one does, as Ring does: `apps/ledger.ring`'s handler
+  makes `new Entry(...)`, answers 500 and R11 until `apps/entry.ring` is deployed after it, and 200 from then on. In
+  `new K { ... }` of a class not yet held, a bare name the class lacks is R12, where Ring makes a variable.
 - **A large deployment blocks the loop**: Softanza's library compiles for 13.8 s while no request is answered.

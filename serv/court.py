@@ -11,7 +11,9 @@ What it asks, in order, of ONE server process:
              Rule A refuses, refused whole -- its route never appears
   state      an app holding an object; REPLACED while it runs -- the object and its tally kept, the new code answering;
              replaced again with an attribute added -- admitted, the running object takes it (rung 7); one dropped -- refused
-  failure    a handler that raises answers 500 and the server goes on; a new class admitted after the first file
+  failure    a handler that raises answers 500 and the server goes on; a new class admitted after the first file; a
+             handler that makes objects of a class an app deployed after it brings -- R11 until then, the class
+             found by name once it is (rung 8)
   load       sequential requests to one route: requests a second, and latency
   per request  code admitted with every request (RingServ's eval-per-request shape): what an admission costs while
              the server runs, and what the program and the process grow by -- the question the resident VM's fifth
@@ -208,6 +210,15 @@ def main():
     st, _, _ = req('POST', '/admit/echo', app('echo.ring'))
     st2, body, _ = req('POST', '/echo', 'abc')
     say(st == 201 and body == 'echo 3 byte(s): abc', 'class: an app with a class admitted while serving: %r' % body)
+    # rung 8: a handler that makes objects of a class an app deployed AFTER it brings
+    st, _, _ = req('POST', '/admit/ledger', app('ledger.ring'))
+    st2, body, _ = req('GET', '/ledger')
+    say(st == 201 and st2 == 500 and 'class not found: entry' in body,
+        'late new: a handler making a class no app has brought yet answers 500, R11 (%d): %s' % (st2, body.strip()[:70]))
+    st, _, _ = req('POST', '/admit/entry', app('entry.ring'))
+    st2, body, _ = req('GET', '/ledger')
+    say(st == 201 and st2 == 200 and body == 'rent: 40',
+        'late new: once the app bringing it is deployed, the same handler makes its objects: %r' % body)
 
     # ---- load: one route, sequential
     lat = []
