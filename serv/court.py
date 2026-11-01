@@ -21,6 +21,11 @@ What it asks, in order, of ONE server process:
   release    code that comes with a request and leaves with it (POST /run, rung 6): admitted, called, released; the
              same code again; a raising run released too; thousands of runs, each answering with a literal of its own
              released code, and the process's memory flat across them
+  background a deployment that takes a while (rung 9): answered 202 at once, compiling on a thread of its own while the
+             loop answers request after request; one deployed meanwhile queued behind it; /run answered 503 meanwhile;
+             then both admitted and their routes answering -- and one that is refused, its reason at GET /deploy/<name>.
+             With --softanza, Softanza's library itself deployed that way: the requests answered while it compiles, and
+             the longest any of them waited -- the install and the library's top level, between two requests
   stop       the loop ends on request, the process exits 0, and wrote nothing to stderr
 
 A part that cannot run is named, never passed in silence."""
@@ -87,6 +92,21 @@ def app(name):
     return open(os.path.join(APPS, name), encoding='utf-8').read()
 
 
+def deploy(path, body):
+    """A deployment request. The host answers with its outcome -- 201, or 422 and the reason -- when its compile is over within
+    the host's wait (50 ms), and 202 otherwise; then the outcome is read at GET /deploy/<name>, as a 201 when admitted, so a
+    slow machine cannot turn a small app's admission into a false failure. The time is the first answer's."""
+    st, text, ms = req('POST', path, body)
+    name = path.split('/')[2].split('?')[0]
+    t = time.time()
+    while st == 202 and time.time() - t < 300:
+        time.sleep(0.005)
+        st, text, _ = req('GET', '/deploy/' + name)
+        if st == 200:
+            st = 201
+    return st, text, ms
+
+
 # ---- the process's memory, from outside
 class PMC(ctypes.Structure):
     _fields_ = [('cb', ctypes.c_ulong), ('PageFaultCount', ctypes.c_ulong), ('PeakWorkingSetSize', ctypes.c_size_t),
@@ -151,45 +171,45 @@ def main():
     # ---- deploy
     st, body, _ = req('GET', '/hello')
     say(st == 404, 'before the app: GET /hello is 404')
-    st, body, t_admit = req('POST', '/admit/hello', app('hello.ring'))
+    st, body, t_admit = deploy('/admit/hello', app('hello.ring'))
     say(st == 201, 'deploy: hello admitted while the server runs (%d, %.1f ms)' % (st, t_admit))
     st, body, _ = req('GET', '/hello')
     say(st == 200 and body == 'hello from HaroServer', 'deploy: its route answers at once: %r' % body)
-    st, body, _ = req('POST', '/admit/hello', app('hello.ring'))
+    st, body, _ = deploy('/admit/hello', app('hello.ring'))
     say(st == 422 and 'already defined' in body, 'deploy: the same app twice is refused (%d): %s' % (st, body[:90]))
     st, body, _ = req('GET', '/hello')
     say(st == 200, 'deploy: after the refusal the first is still served')
-    st, body, _ = req('POST', '/admit/bad', app('bad.ring'))
+    st, body, _ = deploy('/admit/bad', app('bad.ring'))
     say(st == 422 and 'Rule A' in body, 'deploy: Rule A refuses an app whole (%d): %s' % (st, body[:90]))
     st, body, _ = req('GET', '/bad')
     say(st == 404, 'deploy: the refused app\'s route never appears')
 
     # ---- state, and a live redeploy
-    st, _, _ = req('POST', '/admit/tally', app('tally.ring'))
+    st, _, _ = deploy('/admit/tally', app('tally.ring'))
     a = req('POST', '/tally', '5')
     b = req('POST', '/tally', '7')
     say(st == 201 and a[1] == '5' and b[1] == '12', 'state: the tally app holds an object: 5, then 12')
-    st, body, t_repl = req('POST', '/replace/tally', app('tally_v2.ring'))
+    st, body, t_repl = deploy('/replace/tally', app('tally_v2.ring'))
     say(st == 201, 'redeploy: tally replaced while it runs (%d, %.1f ms)' % (st, t_repl))
     st, body, _ = req('GET', '/tally')
     say(st == 200 and body == 'tally 12 (v2)', 'redeploy: the same object, the new code: %r' % body)
     st, body, _ = req('POST', '/tally', '1')
     st2, body2, _ = req('GET', '/tally')
     say(body == '13' and body2 == 'tally 13 (v2)', 'redeploy: the handler v2 left alone still runs, on the kept object: %r, %r' % (body, body2))
-    st, body, _ = req('POST', '/replace/tally', app('tally_v3.ring'))
+    st, body, _ = deploy('/replace/tally', app('tally_v3.ring'))
     say(st == 201, 'redeploy: an attribute added to the live class is admitted (%d)%s' % (st, '' if st == 201 else ': ' + body[:100]))
     st, body, _ = req('GET', '/tally')
     say(body == 'tally 13 in 0 add(s)', 'redeploy: the running object takes it, starting as declared, its total kept: %r' % body)
     st, body, _ = req('POST', '/tally', '2')
     st2, body2, _ = req('GET', '/tally')
     say(body == '15' and body2 == 'tally 15 in 1 add(s)', 'redeploy: and the new code counts in it: %r, %r' % (body, body2))
-    st, body, _ = req('POST', '/replace/tally', app('tally_v4.ring'))
+    st, body, _ = deploy('/replace/tally', app('tally_v4.ring'))
     say(st == 422 and 'keeps the attributes' in body, 'redeploy: an attribute dropped from the live class is refused (%d): %s' % (st, body[:100]))
     st, body, _ = req('GET', '/tally')
     say(body == 'tally 15 in 1 add(s)', 'redeploy: after the refusal the server answers as before: %r' % body)
 
     # ---- failure, and a class after the first file
-    req('POST', '/admit/boom', app('boom.ring'))
+    deploy('/admit/boom', app('boom.ring'))
     st, body, _ = req('GET', '/boom')
     say(st == 500 and 'the boom app said no' in body, 'failure: a raising handler answers 500 (%s)' % body.strip()[:60])
     st, body, _ = req('GET', '/hello')
@@ -207,33 +227,33 @@ def main():
     held = time.perf_counter() - t
     idle.close()
     say(st == 200 and held < 15, 'failure: a client that says nothing holds the loop %.1f s, then it serves again' % held)
-    st, _, _ = req('POST', '/admit/echo', app('echo.ring'))
+    st, _, _ = deploy('/admit/echo', app('echo.ring'))
     st2, body, _ = req('POST', '/echo', 'abc')
     say(st == 201 and body == 'echo 3 byte(s): abc', 'class: an app with a class admitted while serving: %r' % body)
     # rung 8: a handler that makes objects of a class an app deployed AFTER it brings
-    st, _, _ = req('POST', '/admit/ledger', app('ledger.ring'))
+    st, _, _ = deploy('/admit/ledger', app('ledger.ring'))
     st2, body, _ = req('GET', '/ledger')
     say(st == 201 and st2 == 500 and 'class not found: entry.entry' in body,
         'late new: a handler making a class no app has brought yet answers 500, R11 (%d): %s' % (st2, body.strip()[:70]))
-    st, _, _ = req('POST', '/admit/entry?Entry', app('entry.ring'))
+    st, _, _ = deploy('/admit/entry?Entry', app('entry.ring'))
     st2, body, _ = req('GET', '/ledger')
     say(st == 201 and st2 == 200 and body == 'rent: 40',
         'late new: once the app bringing it is deployed, the same handler makes its objects: %r' % body)
 
     # D31: every app a namespace of its own -- the same names in two apps, and another app's function through its exports
-    sa, _, _ = req('POST', '/admit/twin_a', app('twin_a.ring'))
-    sb, _, _ = req('POST', '/admit/twin_b', app('twin_b.ring'))
+    sa, _, _ = deploy('/admit/twin_a', app('twin_a.ring'))
+    sb, _, _ = deploy('/admit/twin_b', app('twin_b.ring'))
     _, ba, _ = req('GET', '/twin_a')
     _, bb, _ = req('GET', '/twin_b')
     say(sa == 201 and sb == 201 and ba == 'twin a answers' and bb == 'twin b answers',
         'namespaces: two apps define the same functions, each answers its own: %r, %r' % (ba, bb))
-    s1, _, _ = req('POST', '/admit/sum?Sum', app('sum.ring'))
-    s2, _, _ = req('POST', '/admit/calc', app('calc.ring'))
+    s1, _, _ = deploy('/admit/sum?Sum', app('sum.ring'))
+    s2, _, _ = deploy('/admit/calc', app('calc.ring'))
     c1, b1, _ = req('GET', '/calc')
     c2, b2, _ = req('GET', '/peek')
     say(s1 == 201 and s2 == 201 and c1 == 200 and b1 == '2 + 3 = 5' and c2 == 500 and 'sum.secret' in b2,
         'namespaces: an app reaches another\'s exported function (%r) and not what it keeps (%d)' % (b1, c2))
-    s3, b3, _ = req('POST', '/admit/nope?Missing', app('sum.ring'))
+    s3, b3, _ = deploy('/admit/nope?Missing', app('sum.ring'))
     say(s3 == 422 and 'exports Missing' in b3, 'namespaces: an export naming nothing the app defines is refused (%d)' % s3)
 
     # ---- load: one route, sequential
@@ -254,7 +274,7 @@ def main():
     adm, call = [], []
     for i in range(1, N_PER_REQUEST + 1):
         src = 'Route("GET", "/f%d", "PerRequest%d")\nfunc PerRequest%d cBody\n\treturn "f%d"\n' % (i, i, i, i)
-        st, _, ms = req('POST', '/admit/f%d' % i, src)
+        st, _, ms = deploy('/admit/f%d' % i, src)
         st2, body, ms2 = req('GET', '/f%d' % i)
         if st != 201 or body != 'f%d' % i:
             say(False, 'per request: admission %d answered %d %r' % (i, st2, body))
@@ -320,18 +340,97 @@ def main():
     else:
         print('      private memory: not read on this platform -- the bounded-memory check is NOT measured here')
 
+    # ---- background (rung 9): a deployment that takes a while compiles on a thread of its own while the loop serves
+    nbig = int(os.environ.get('HAROSERV_BIG', '8000'))
+    big = 'Route("GET", "/big", "BigApp")\nfunc BigApp cBody\n\treturn "big " + Big%d()\n' % nbig + ''.join(
+        'func Big%d\n\tx = %d\n\ty = x * 2 + 1\n\treturn x\n' % (i, i) for i in range(1, nbig + 1))
+    t0 = time.perf_counter()
+    st, body, t202 = req('POST', '/admit/big', big)
+    say(st == 202 and body == 'compiling big', 'background: a deployment of %d functions is answered 202 in %.0f ms: %r' % (nbig, t202, body))
+    sq, bq, _ = req('POST', '/admit/later', 'Route("GET", "/later", "Later")\nfunc Later cBody\n\treturn "later"\n')
+    sr, br, _ = req('POST', '/run?x', 'func Run cInput\n\treturn cInput\n')
+    sd, bd, _ = req('GET', '/deploy/big')
+    say(sq == 202 and bq == 'queued later' and sr == 503 and sd == 202 and bd == 'compiling big',
+        'background: meanwhile another deployment is queued (%d %r), /run answers %d, GET /deploy/big %d %r' % (sq, bq, sr, sd, bd))
+    lat = []
+    final = (sd, bd)
+    k = 0
+    while time.perf_counter() - t0 < 300:
+        if k % 10 == 0:
+            # the status poll is timed too: the install may fall on it
+            fs, fb, fms = req('GET', '/deploy/big')
+            final = (fs, fb)
+            lat.append(fms)
+            if final[0] != 202:
+                break
+        k += 1
+        s2, b2, ms = req('GET', '/hello')
+        if s2 != 200:
+            break
+        lat.append(ms)
+    took = (time.perf_counter() - t0) * 1000
+    say(final == (200, 'admitted big') and len(lat) >= 10,
+        'background: %d requests answered while it compiled, then admitted: %r' % (len(lat), final))
+    if lat:
+        print('      %.0f ms from the request to admitted; requests meanwhile p50 %.2f ms, max %.2f (the install, between two requests)'
+              % (took, pct(lat, 0.5), max(lat)))
+    st1, b1, _ = req('GET', '/big')
+    t1 = time.time()
+    st2, b2 = 202, ''
+    while time.time() - t1 < 60:
+        st2, b2 = req('GET', '/deploy/later')[:2]
+        if st2 != 202:
+            break
+        time.sleep(0.005)
+    st3, b3, _ = req('GET', '/later')
+    say(st1 == 200 and b1 == 'big %d' % nbig and st2 == 200 and st3 == 200 and b3 == 'later',
+        'background: its route answers (%r), and the deployment queued behind it is admitted after it (%r)' % (b1, b3))
+    # the top level first: a statement after a `func` is that function's (HF-73)
+    st, body, _ = req('POST', '/admit/bigbad', 'zTop = 1\n' + big.replace('BigApp', 'BigBadApp').replace('Big', 'Bab') + 'func Zread\n\treturn zTop\n')
+    t1 = time.time()
+    while st == 202 and time.time() - t1 < 120:
+        time.sleep(0.01)
+        st, body, _ = req('GET', '/deploy/bigbad')
+    say(st == 422 and 'Rule A' in body, 'background: a large deployment refused in the background answers 422 at GET /deploy (%s)' % body[:90])
+    st, body, _ = req('GET', '/hello')
+    say(st == 200, 'background: and the server goes on')
+
     if SOFTANZA:
-        st, body, ms = req('POST', '/base/stz', 'load "stzlib.ring"\n')
-        say(st == 201, 'softanza: Softanza\'s library admitted into the base while serving (%d, %.0f ms)%s' % (st, ms, '' if st == 201 else ': ' + body[:300]))
+        # rung 9: Softanza's library deployed into the base compiles in the background -- the loop answers meanwhile
+        t0 = time.perf_counter()
+        st, body, t202 = req('POST', '/base/stz', 'load "stzlib.ring"\n')
+        lat = []
+        final = (st, body)
+        k = 0
+        while st == 202 and time.perf_counter() - t0 < 600:
+            if k % 20 == 0:
+                # the status poll is timed too: the install may fall on it
+                fs, fb, fms = req('GET', '/deploy/stz')
+                final = (fs, fb)
+                lat.append(fms)
+                if final[0] != 202:
+                    break
+            k += 1
+            s2, _, ms = req('GET', '/hello')
+            if s2 != 200:
+                break
+            lat.append(ms)
+        took = (time.perf_counter() - t0) * 1000
+        st = 201 if final[0] == 200 else final[0]
+        say(st == 201 and len(lat) >= 100, 'softanza: Softanza\'s library admitted into the base in the background, %d requests answered meanwhile (%.0f ms)%s'
+            % (len(lat), took, '' if st == 201 else ': ' + final[1][:300]))
+        if lat:
+            print('      answered 202 in %.0f ms; requests while it compiled: p50 %.2f ms, p95 %.2f, max %.0f ms -- the longest wait, the install'
+                  ' and the library\'s top level between two requests' % (t202, pct(lat, 0.5), pct(lat, 0.95), max(lat)))
         src = 'Route("POST", "/upper", "UpperApp")\nfunc UpperApp cBody\n\treturn StzStringQ(cBody).Uppercased()\n'
-        st, body, _ = req('POST', '/admit/upper', src)
+        st, body, _ = deploy('/admit/upper', src)
         say(st == 201, 'softanza: an app reading the base\'s library admitted (%d)%s' % (st, '' if st == 201 else ': ' + body[:300]))
         st, body, _ = req('POST', '/upper', 'ring++')
         say(st == 200 and body == 'RING++', 'softanza: its route answers through Softanza: %r' % body)
         adm2 = []
         for i in range(1, 51):
             src = 'Route("GET", "/s%d", "PerRequestStz%d")\nfunc PerRequestStz%d cBody\n\treturn StzStringQ("s%d").Uppercased()\n' % (i, i, i, i)
-            st, _, ms = req('POST', '/admit/s%d' % i, src)
+            st, _, ms = deploy('/admit/s%d' % i, src)
             st2, body, _ = req('GET', '/s%d' % i)
             if st != 201 or body != 'S%d' % i:
                 say(False, 'softanza: admission %d answered %d %r' % (i, st2, body))

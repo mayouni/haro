@@ -18,6 +18,14 @@ This first build is that design on the resident VM, with the host loop in the pr
     kept, and every request after it runs the new code. A refusal is 422 with the reason, and the program stays as it was;
   - `POST /base/<name>` admits the body into the BASE (`admitcode`) -- shared code every app reads after its own
     names, Softanza's library for one.
+  - **Every deployment compiles in the background** (rung 9, 2026-11-01): `admitstart` starts its compile on a thread of
+    its own, the loop serves on, and installs it between two requests (`admitstate`, `admitfinish`). A deployment whose
+    compile is over within 50 ms -- a small app's -- is answered with its outcome as before: 201, or 422 and the reason.
+    A larger one is answered 202 (`compiling <app>`), and `GET /deploy/<app>` says where it stands: 202 while it
+    compiles or waits, 200 `admitted ...`, or 422 and the reason. One compiles at a time: a deployment that arrives
+    meanwhile is queued behind it (202, `queued <app>`), and `/run` answers 503 until it is installed. While one is
+    under way the loop waits for a request at most 10 ms (`rpp_http_next(nWaitMs)`), so a compile that ends while
+    nobody asks is installed all the same.
   - An app registers its routes by its handler's name in the app; the host keeps them as `app::Handler`, a name only
     the host may call by string (an app reaching another's internal name by string is R3).
   - `POST /run?<input>` (2026-10-31, the resident VM's sixth rung): the body is code that defines `func Run cInput`. It
@@ -52,6 +60,19 @@ loop for at most 10 s.
 | ... while the program holds Softanza's library (49,700 functions) | 0.94 ms | -- |
 | the program per admitted function | +22 KB of private memory | -- |
 | Softanza's library itself, admitted over HTTP | 13.8 s, cold; the loop answers nothing meanwhile | -- |
+
+## A large deployment, in the background -- measured, 2026-11-01 (rung 9)
+
+| | Windows | Linux |
+|---|---|---|
+| Softanza's library deployed into the base while the court sends requests | 15.5-17.1 s; 67,760-74,110 requests answered meanwhile, p50 0.19 ms; the longest wait 114-143 ms | -- |
+| ... that longest wait, by phase (`RNXC_ADMIT_PHASES=1`) | the install 70-82 ms, the new functions reshaped 22 ms, the library's top level 20-30 ms -- on the program's thread; the parse trees' release (146 ms) and the compaction (~90 ms) after it run on the compiling thread | -- |
+| 8,000 functions deployed while the court sends requests | ~0.5 s; ~1,500 requests answered meanwhile, the longest wait 17-20 ms | ~0.5 s; 331 requests (WSL's relay) |
+| a small deployment, over HTTP | p50 0.39-0.40 ms (0.33 synchronous): the hand-off to the compiling thread | -- |
+
+Before rung 9 the whole compile was a pause: 13.8 s at Softanza's size. The program's thread now pays the install and
+the top level alone. Every check of the court passed through the background path, every small deployment answered 201
+or 422 at once as before.
 
 A Windows client through WSL's localhost relay reads ~2 ms a request against the Linux server; that is the relay.
 
@@ -90,4 +111,7 @@ under a millisecond at this size. The court holds the second half's high-water m
   `new K` compiled before any app brought K finds K by name once one does, as Ring does: `apps/ledger.ring`'s handler
   makes `new Entry(...)`, answers 500 and R11 until `apps/entry.ring` is deployed after it, and 200 from then on. In
   `new K { ... }` of a class not yet held, a bare name the class lacks is R12, where Ring makes a variable.
-- **A large deployment blocks the loop**: Softanza's library compiles for 13.8 s while no request is answered.
+- **A large deployment blocked the loop -- answered by rung 9 (2026-11-01).** Softanza's library compiled for 13.8 s while
+  no request was answered. Every deployment compiles on a thread of its own now while the loop serves: 67,760 requests
+  answered during the library's compile, the longest waiting 114 ms -- the install and the library's top level, which
+  run on the program's thread. A deployment that arrives meanwhile is queued, and `/run` answers 503 until it is in.
