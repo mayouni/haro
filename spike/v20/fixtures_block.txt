@@ -250,8 +250,10 @@ func Tax(n)
 DEFINE REFINE arity AS ( TARGET "gross", KIND block, FROM "sha:e50ec955b97f", TO "return nNet + Tax(nNet, 2)", AUTHOR "aicha", POSTURE trusted, REASON "try" ) => rejected derivation Tax() takes 1 argument(s), called with 2
 DEFINE REFINE unassigned AS ( TARGET "gross", KIND block, FROM "sha:e50ec955b97f", TO "return nNet + nGross", AUTHOR "aicha", POSTURE trusted, REASON "try" ) => rejected derivation nGross is read here, and nothing anywhere assigns it
 
-=== B09 a program the compiler cannot vouch for is not refined by a body
-~~~ an eval anywhere shuts `rnxc check`'s absence rules for the whole unit, so the derivation stage has no answer to give, and it fails closed
+=== B09 an eval elsewhere in the program no longer stops a body: the derivation is closed (D32)
+~~~ this fixture said the opposite until D32: an eval anywhere shut `rnxc check`'s absence rules for the whole unit and the gate failed closed.
+~~~ The gate's derivation now asks the closed question -- does the unit define every name the body uses? -- which an eval cannot make unanswerable;
+~~~ a name only the eval could make is refused by name instead (fixtures_library.txt, LB04 to LB06)
 --- program
 eval("x = 1")
 ? Double(21)
@@ -260,7 +262,14 @@ eval("x = 1")
 func Double(n)
 	return n * 2
 --- do
-DEFINE REFINE add_twice AS ( TARGET "double", KIND block, FROM "sha:34be9794a5f0", TO "return n + n", AUTHOR "mansour", POSTURE trusted, REASON "try" ) => rejected derivation rnxc check does not check this program
+DEFINE REFINE add_twice AS ( TARGET "double", KIND block, FROM "sha:34be9794a5f0", TO "return n + n", AUTHOR "mansour", POSTURE trusted, REASON "try" ) => admitted tx=node.delete,node.create
+--- text
+eval("x = 1")
+? Double(21)
+
+# <R:BLOCK name="double">
+func Double(n)
+	return n + n
 
 === B10 trust: a block's floor holds an origin below it back
 --- program

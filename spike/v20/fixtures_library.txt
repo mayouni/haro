@@ -1,0 +1,237 @@
+~~~ The fixtures of the LIBRARY DERIVATION (rung 5 of the code-graph memo, Haro v0.20; D32): a body point in a file that runs nothing is refined,
+~~~ and its derivation asks `rnxc check --closed` -- inside the program that loads it when the fixture names one, alone when it does not.
+~~~ Hand-composed BEFORE the engine reads them. Sections as fixtures.txt, and two of this file's own:
+~~~   --- root      the loading program's text. The court writes it as root.ring beside the program, which it writes as lib.ring, so the
+~~~                 root's `load "lib.ring"` reaches the file under refinement; the derivation checks the root's unit with lib.ring's text
+~~~                 replaced by the refined one (`--subst`), never the file on disk.
+~~~   --- natives   names the unit's native libraries register, one a line (`--natives`): the engine's own list, never the calls the unit makes.
+~~~
+~~~ WHY (HF-103). `rnxc check` says "nothing in this unit runs" of a file of classes, and "the unit calls loadlib() or eval()" of Softanza's whole
+~~~ unit, and the gate failed closed on both -- so no body of the estate could be refined. Those answers are right for Ring's question (is this an
+~~~ error the moment the line runs?), which needs a program that runs and a world nothing can add to. The refinement gate asks its own: does the
+~~~ unit DEFINE every name the body uses? That question has an answer in a library and in a unit that holds eval or loadlib: a name only eval, loadlib
+~~~ or an admission could make is absent for the gate, because the gate cannot see what it calls (D28). Ring++'s eval defines no function (F-72), and
+~~~ a native is seen when the engine's list names it. A file that could not be read or parsed is still a hole, and the gate still fails closed on it.
+
+=== LB01 a class alone is refined: the check is closed, so a file that runs nothing is still asked about
+~~~ before D32 this was refused at derivation, "nothing in this unit runs"
+--- program
+class Box
+	@nCount = 3
+
+	# <R:METHOD name="Grow" params="n" writes="@nCount">
+	func Size()
+		return @nCount
+--- do
+DEFINE REFINE make_grow AS ( TARGET "Grow", KIND method, FROM "absent", TO "@nCount += n", AUTHOR "mansour", POSTURE trusted, REASON "a counter grows" ) => admitted tx=node.create
+--- text
+class Box
+	@nCount = 3
+
+	# <R:METHOD name="Grow" params="n" writes="@nCount">
+	func Size()
+		return @nCount
+
+	func Grow(n)
+		@nCount += n
+
+=== LB02 through the program that loads it, a body may call what that program defines
+--- program
+class Box
+	@nCount = 3
+
+	# <R:METHOD name="Grow" params="n" calls="Clamp" writes="@nCount">
+	func Size()
+		return @nCount
+--- root
+load "lib.ring"
+o = new Box
+? o.Size()
+
+func Clamp(n)
+	return n
+--- do
+DEFINE REFINE make_grow AS ( TARGET "Grow", KIND method, FROM "absent", TO "@nCount = Clamp(@nCount + n)", AUTHOR "mansour", POSTURE trusted, REASON "a bounded counter" ) => admitted tx=node.create
+--- text
+class Box
+	@nCount = 3
+
+	# <R:METHOD name="Grow" params="n" calls="Clamp" writes="@nCount">
+	func Size()
+		return @nCount
+
+	func Grow(n)
+		@nCount = Clamp(@nCount + n)
+
+=== LB03 the same library asked about alone: what the loading program defines is not there, so the declaration does not lift
+~~~ composed as a derivation refusal; the lift answers first, because a point's `calls` must name what the unit defines (the lift reads the unit's
+~~~ names, and alone the unit is the file) -- the same fault, found one stage earlier
+--- program
+class Box
+	@nCount = 3
+
+	# <R:METHOD name="Grow" params="n" calls="Clamp" writes="@nCount">
+	func Size()
+		return @nCount
+--- do
+DEFINE REFINE make_grow AS ( TARGET "Grow", KIND method, FROM "absent", TO "@nCount = Clamp(@nCount + n)", AUTHOR "mansour", POSTURE trusted, REASON "a bounded counter" ) => rejected structural 'Clamp' in calls of 'Grow' is no function and no builtin
+
+=== LB04 an allowlist naming what nothing in the unit defines does not lift, the loading program read
+~~~ the point may name a call; naming it does not make it exist. Composed as a derivation refusal with an admission after it; the lift answers
+~~~ first, and a declaration that does not lift stops every refinement of the program until it is repaired
+--- program
+class Box
+	@nCount = 3
+
+	# <R:METHOD name="Grow" params="n" calls="Clamp|Nope" writes="@nCount">
+	func Size()
+		return @nCount
+--- root
+load "lib.ring"
+o = new Box
+? o.Size()
+
+func Clamp(n)
+	return n
+--- do
+DEFINE REFINE make_grow AS ( TARGET "Grow", KIND method, FROM "absent", TO "@nCount = Nope(n)", AUTHOR "mansour", POSTURE trusted, REASON "try" ) => rejected structural 'Nope' in calls of 'Grow' is no function and no builtin
+DEFINE REFINE make_grow2 AS ( TARGET "Grow", KIND method, FROM "absent", TO "@nCount = Clamp(n)", AUTHOR "mansour", POSTURE trusted, REASON "a bounded counter" ) => rejected structural 'Nope' in calls of 'Grow' is no function and no builtin
+
+=== LB05 an eval or a loadlib in the loading program no longer stops a body (B09's old rule, replaced by D32)
+--- program
+class Box
+	@nCount = 3
+
+	# <R:METHOD name="Grow" params="n" calls="Clamp" writes="@nCount">
+	func Size()
+		return @nCount
+--- root
+load "lib.ring"
+eval("x = 1")
+loadlib("stz_engine.dll")
+o = new Box
+? o.Size()
+
+func Clamp(n)
+	return n
+--- do
+DEFINE REFINE make_grow AS ( TARGET "Grow", KIND method, FROM "absent", TO "@nCount = Clamp(@nCount + n)", AUTHOR "mansour", POSTURE trusted, REASON "a bounded counter" ) => admitted tx=node.create
+--- text
+class Box
+	@nCount = 3
+
+	# <R:METHOD name="Grow" params="n" calls="Clamp" writes="@nCount">
+	func Size()
+		return @nCount
+
+	func Grow(n)
+		@nCount = Clamp(@nCount + n)
+
+=== LB06 a native the gate is not told of is absent: a loadlib makes names the gate cannot see
+~~~ composed as a derivation refusal; the lift answers first, as in LB03
+--- program
+class Box
+	@nCount = 3
+
+	# <R:METHOD name="Grow" params="n" calls="StzEngineClamp" writes="@nCount">
+	func Size()
+		return @nCount
+--- root
+load "lib.ring"
+loadlib("stz_engine.dll")
+o = new Box
+? o.Size()
+--- do
+DEFINE REFINE make_grow AS ( TARGET "Grow", KIND method, FROM "absent", TO "@nCount = StzEngineClamp(@nCount + n)", AUTHOR "mansour", POSTURE trusted, REASON "the engine bounds it" ) => rejected structural 'StzEngineClamp' in calls of 'Grow' is no function and no builtin
+
+=== LB07 and one the engine's list names is seen
+--- program
+class Box
+	@nCount = 3
+
+	# <R:METHOD name="Grow" params="n" calls="StzEngineClamp" writes="@nCount">
+	func Size()
+		return @nCount
+--- root
+load "lib.ring"
+loadlib("stz_engine.dll")
+o = new Box
+? o.Size()
+--- natives
+StzEngineString
+StzEngineClamp
+--- do
+DEFINE REFINE make_grow AS ( TARGET "Grow", KIND method, FROM "absent", TO "@nCount = StzEngineClamp(@nCount + n)", AUTHOR "mansour", POSTURE trusted, REASON "the engine bounds it" ) => admitted tx=node.create
+--- text
+class Box
+	@nCount = 3
+
+	# <R:METHOD name="Grow" params="n" calls="StzEngineClamp" writes="@nCount">
+	func Size()
+		return @nCount
+
+	func Grow(n)
+		@nCount = StzEngineClamp(@nCount + n)
+
+=== LB08 a global the loading program assigns may be read by a function the library gains
+~~~ the variable rule asks the whole unit too: alone, the read is of a name nothing assigns
+--- program
+# <R:FUNCTION name="Limited" params="n" reads="$nLimit">
+func Twice(n)
+	return n * 2
+--- root
+$nLimit = 10
+load "lib.ring"
+? Twice(2)
+--- do
+DEFINE REFINE make_limited AS ( TARGET "Limited", KIND function, FROM "absent", TO "return $nLimit + n", AUTHOR "mansour", POSTURE trusted, REASON "a limit" ) => admitted tx=node.create
+--- text
+# <R:FUNCTION name="Limited" params="n" reads="$nLimit">
+func Twice(n)
+	return n * 2
+
+func Limited(n)
+	return $nLimit + n
+
+=== LB09 and alone, nothing assigns it
+--- program
+# <R:FUNCTION name="Limited" params="n" reads="$nLimit">
+func Twice(n)
+	return n * 2
+--- do
+DEFINE REFINE make_limited AS ( TARGET "Limited", KIND function, FROM "absent", TO "return $nLimit + n", AUTHOR "mansour", POSTURE trusted, REASON "a limit" ) => rejected derivation $nLimit is read here, and nothing anywhere assigns it
+
+=== LB10 a hole is still a hole: a load the unit cannot read shuts the check, and the gate fails closed
+--- program
+class Box
+	@nCount = 3
+
+	# <R:METHOD name="Grow" params="n" writes="@nCount">
+	func Size()
+		return @nCount
+--- root
+load "lib.ring"
+load "missing.ring"
+o = new Box
+? o.Size()
+--- do
+DEFINE REFINE make_grow AS ( TARGET "Grow", KIND method, FROM "absent", TO "@nCount += n", AUTHOR "mansour", POSTURE trusted, REASON "a counter grows" ) => rejected derivation rnxc check does not check this program
+
+=== LB11 the derivation asks the loading program: a call that does not fit what the program defines is refused there
+~~~ the lift sees that Clamp exists in the unit; only the compiler knows how many arguments it takes
+--- program
+class Box
+	@nCount = 3
+
+	# <R:METHOD name="Grow" params="n" calls="Clamp" writes="@nCount">
+	func Size()
+		return @nCount
+--- root
+load "lib.ring"
+o = new Box
+? o.Size()
+
+func Clamp(n)
+	return n
+--- do
+DEFINE REFINE make_grow AS ( TARGET "Grow", KIND method, FROM "absent", TO "@nCount = Clamp(@nCount, n)", AUTHOR "mansour", POSTURE trusted, REASON "try" ) => rejected derivation Clamp() takes 1 argument(s), called with 2

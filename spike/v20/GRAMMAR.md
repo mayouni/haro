@@ -30,7 +30,7 @@ surface is a sentence against a point, a grammar scoped to the program it is loo
 | the kind `method`: an agent proposes a method of a class that is not there yet, or the body of one that is | **built** (2026-10-20) | section 14 |
 | **a local model as the agent**, on sixteen tasks (the body free or under its point's grammar, one line or lines) | **measured** (2026-10-21): 1.5B 3 of 16 on one line, **10 of 16 on lines under the grammar** (HF-116) | `agent/AGENT.md` |
 | the agent's write surface for a body: the lines grammar of the point, `scoped.body_lines_gbnf` | **built** (2026-10-21), guard stage 28 | `agent/body_gbnf.py` |
-| a body kind on a library file (a class and no top level): the checker's absence rules are shut, so derivation fails closed | **not built** | sections 9, 14 |
+| a body kind on a library file (a class and no top level), refined through the program that loads it: a closed derivation (D32) | **built** (2026-11-01) | section 16 |
 | the kinds `type`, `lib`, `custom`: declared, refused when proposed against | **not built** | section 9 |
 | a writer that keeps the layout of a file that is not canonical (the estate's) | **not built**: `--write` refuses | section 9 |
 | derivation rules that PROPOSE (RCP's `derived_proposals`) | **not built**: they only judge | section 9 |
@@ -243,8 +243,7 @@ now whether the package's compiler is older than the repository's, and on 2026-1
 - **A writer for a file that is not canonical.** The estate's files are not (rung 3: none of Softanza's 6,061 is `fmt`'s fixed point), and the refinement's text is the printer's. `--write` refuses; a span-preserving
   writer needs the byte span of the literal, which the lossless export (`rnxc dump --json`) has and the graph (L1) does not keep. Until then, a refinement on the estate is a diff to read or `fmt` first, with the
   author's word (D23).
-- **A body kind on a library.** A class and no top level is not a program to `rnxc check`, whose absence rules are shut on it, so the derivation of a BLOCK, FUNCTION or METHOD
-  refinement fails closed (HF-103). Softanza's own files are libraries; refining them needs the derivation to ask about the unit through the program that loads them.
+- ~~A body kind on a library.~~ Built 2026-11-01 (section 16, D32): the derivation is closed, and a library is refined through the program that loads it.
 - **Derivation rules that propose.** RCP's derivation stage can produce `derived_proposals`; here a rule only judges, as `stzRefinableCode`'s do.
 - **RCP's authority taxonomy.** The twelve authorities (`developer.direct`, `planner.graphplanner`, ...) and the policy authorities are the governance table's actors and levels here; the mapping is not drawn.
 - **Edges beyond `calls` and `governed_by`.** `references`, `depends_on` and the rest are L2 (`rnxc graph`), which has no `new K` edge yet and no references.
@@ -404,14 +403,14 @@ A human who wants one of these writes it; a BLOCK point still refines the body o
 **A program, not a library (HF-103).** The derivation asks `rnxc check`, whose absence rules are shut on a file with no top level and no Main (`nothing in this unit
 runs`), and the gate fails closed (HF-96). So a class alone is refused at derivation: every program in the fixtures begins with a top-level statement. That is
 exact, not cautious -- and it means the body kinds refine **a program, and not Softanza's library files**, which are almost all classes. Reaching the estate
-needs a derivation that asks the checker about the unit through the program that loads the file; the engine does not read that yet.
+needs a derivation that asks the checker about the unit through the program that loads the file; the engine does not read that yet. **Built 2026-11-01** (section 16).
 
 **The court.** 13 fixtures, MT03 on the oracle and rnxc before and after (`3` and `3`: the method is added and the program prints the same), the programs of MT04-MT08 each carrying a `? "start"` for the reason above. The
 body's locality counts a method that appears or goes as the one thing allowed to, outside the class's own members nothing moves. Two controls added to the
 body kinds': a new method written after the class's `private` marker is caught by 1 fixture (MT04), a name Ring refuses accepted as a name by 1 (L32); the
 lift that checks no FUNCTION or METHOD tag is now caught by 13. Guard stage 24 PASS: 147 fixtures, 21 controls, 471 s.
 
-**Not built, named:** a method whose body is proposed with a comment; a refinement of a METHOD point's `params` (the signature is the human's); a refinement of a library through its loading program; the kinds `type` and `custom`.
+**Not built, named:** a method whose body is proposed with a comment; a refinement of a METHOD point's `params` (the signature is the human's); the kinds `type` and `custom`. (A refinement of a library through its loading program: section 16.)
 
 ## 15. `reads` -- what a body may read of the world outside its frame (built 2026-10-22)
 
@@ -437,3 +436,37 @@ as a parameter (the point has no say in what its caller hands it), an allowed ca
 where my first reads collector took the call `This.Size()` for a read of an attribute `@Size` (MT06) -- fixed, and a body-held-to-no-reads control added (it fails the three fixtures that carry `reads`; I wrote "at least 4" before measuring). Guard stage 24 PASS, stage 28 PASS.
 
 **Cost.** The gate: one more walk of the body's nodes at the constraint stage, which is milliseconds beside `rnxc check`. The compatibility: a body point that reads a global it does not name, written before this, is now outside its own rule -- the lift says so and the allowlist can be widened (as `calls` and `writes` always could).
+
+## 16. The library derivation -- a body point in a file that runs nothing, refined through the program that loads it (built 2026-11-01)
+
+**On the author's "go ahead with the library derivation of rung 5"**, after HF-103: `rnxc check` says "nothing in this unit runs" of a file of classes and "the unit calls loadlib() or eval()" of Softanza's
+whole unit, and the derivation failed closed on both -- so no body of the estate could be refined. Those answers are right for Ring's question (is this an error the moment the line runs?). **The gate asks its own,
+closed (D32): does the unit DEFINE every name the body uses?**
+
+**`rnxc check --closed`** (ringpp, `src/universe.zig`, `src/types.zig`, `src/rnxc.zig`). A unit in which nothing runs is asked about all the same; eval, loadlib and an admission do not shut the absence rules -- a
+name only one of them could make is absent; a call's arity resolves through the whole unit (one definition per name, C22; a name two files define says nothing); a file that could not be read or parsed is still a
+hole. The findings say what was proved -- `... -- checked closed` in place of `Error (R3) the moment this line runs` -- and keep Ring's first clause, so a fixture's expected words still match. `--natives=<file>`
+names what native libraries register (the engine's own list, from `cfunctions()`); `--subst=<file>=<text>` checks the unit with one file's text replaced, the file on disk untouched. A plain `rnxc check` is
+unchanged. ringpp's gate step `check --closed (D32)` (`bench/check_closed.py`): 12 cases, the build before fails 5.
+
+**The engine.** `Model(text, ctx, unit)`, `unit = {'root', 'file', 'natives'}`; the CLI's `--unit root.ring [--natives names.txt]`. Every body derivation is closed; with a unit it checks the ROOT's unit with the file's
+text replaced by the refined one, and the lift reads the unit's names (`rnxc graph` of the root, spelt as each file declares them, and the natives) -- a library's point may call what its loading program defines.
+A native is spelt as the engine registers it, lower case (D24).
+
+**The court.** `fixtures_library.txt`, 11 fixtures composed before the engine read them, with two sections of their own (`--- root`, `--- natives`): a class alone refined (LB01, refused before D32); a call into the
+loading program admitted through it (LB02) and refused alone (LB03); an allowlist naming nothing the unit defines (LB04); eval and loadlib in the loading program no longer stopping a body (LB05); a native refused
+untold (LB06) and admitted when the engine's list names it (LB07); a global the loading program assigns (LB08) and the same read alone (LB09); a load the unit cannot read (LB10, fails closed); an arity against the
+loading program's function, found only once the closed check resolved signatures through the unit (LB11). **Three were composed as derivation refusals and the lift answered first** (LB03, LB04, LB06): an
+allowlist naming what the unit does not define does not lift -- the same fault one stage earlier, and the fixtures say so. B09 and FN10 said "an eval anywhere stops a body"; D32 inverts them. The body kinds' fixtures:
+70 of 70, 131 steps. Five plants, each caught: no unit in the derivation (6 fixtures), an open check (7), a lift blind to the unit (5), no natives (1), no `--subst` (1).
+
+**On Softanza itself** (`probes/library_softanza.py`, the installed Softanza main, read and never written): a METHOD point in the model of `base/common/stzCancelToken.ring`. One argument short to `StzRetryBudget`,
+which another file defines: refused at derivation, R19 in the compiler's words. The right call: admitted. An engine native: admitted through the engine's list (3,670 names). The native spelt as Softanza spells
+it, `StzEngineCancelSignal`: refused by name -- the engine registers `stzenginecancelsignal`. The same refinement with the file alone: refused at the lift. The file on disk: unchanged. About 14 s a derivation,
+the first of a model about 44 s (it also reads the unit's names).
+
+**Cost.** A derivation checks the whole unit: milliseconds for a fixture, ~14 s at Softanza's size. A body that calls a native needs the engine's list. A program holding an eval no longer stops a body refinement,
+so a name only an opaque eval assigns is refused by name instead. A closed check's findings are claims about definitions, not Ring's run-time proof, and they say so.
+
+**Not built, named:** a plain `rnxc check`'s cross-file arity (still unwired; only the closed check resolves through the unit); a writer for a non-canonical file, so a refinement of Softanza is a model and a diff,
+not yet a file (`--write` still refuses a file that is not its own canonical text, section 9); the kinds `type` and `custom`.

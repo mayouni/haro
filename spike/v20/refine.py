@@ -11,7 +11,7 @@ The agent never edits text: its only write surface is a sentence against a point
 the gate. A refinement answers for the rules of the point it touched -- its own bounds and options, and every RULE that names it -- and for
 nothing else, so a program a text edit left inconsistent can be repaired by a refinement, and refined elsewhere meanwhile. A human edit made as TEXT is read back (`audit`) as the refinements it amounts to and judged by the same gate.
 
-    Model(text, ctx)           a program, its ids, its event log
+    Model(text, ctx, unit)     a program, its ids, its event log; `unit` names the program that loads it, for a library (D32)
     Model.refine(sentence)     one proposal through the gate; the outcome is also an event in the log
     Model.edit(text)           a human edit as text: ids carried by rung 19's matcher, an event in the log
     Model.revert(n, ...)       a refinement with REVERTS n, which is how a revert is written: its own event, gated like any other
@@ -1160,6 +1160,44 @@ def body_params(g, p):
     return names_of(p['attrs'].get('params')), p['name']
 
 
+_UNIT_NAMES = [None]   # what the unit of the model being judged defines beyond its own file (D32); None for a program asked about alone
+_UNIT_CACHE = {}
+
+
+def unit_names(unit):
+    """What the program that loads a library defines -- its functions and classes as `rnxc graph` reads them, spelt as each file declares them -- and
+    the natives the engine's list names: the names a library's point may call (D32). The library file's own names come from its graph, so the unit's
+    are read from the files on disk. Cached by the unit."""
+    key = (unit['root'], unit.get('natives'))
+    if key in _UNIT_CACHE:
+        return _UNIT_CACHE[key]
+    import subprocess
+    r = subprocess.run([RNXC, 'graph', unit['root']], capture_output=True, timeout=600)
+    names = set()
+    for ln in r.stdout.decode('utf-8', 'replace').split('\n'):
+        f = ln.strip().split('|')
+        if f[0] in ('FUNC', 'CLASS') and len(f) > 1 and f[1]:
+            names.add(f[1])
+    if unit.get('natives'):
+        names |= set(open(unit['natives'], 'rb').read().decode('latin-1').split())
+    _UNIT_CACHE[key] = names
+    return names
+
+
+class InUnit:
+    """`with InUnit(model.unit):` -- the lift's name check sees the unit's names for the duration."""
+
+    def __init__(self, unit):
+        self.names = unit_names(unit) if unit else None
+
+    def __enter__(self):
+        self.prev = _UNIT_NAMES[0]
+        _UNIT_NAMES[0] = self.names
+
+    def __exit__(self, *exc):
+        _UNIT_NAMES[0] = self.prev
+
+
 def name_list_errors(g, p, attr, names):
     """What is wrong with a list of names as the `calls` or `writes` of a point: a call must be a function, class or builtin the program has, a write a
     global, an attribute or a parameter of the function -- each spelt as declared (D24)."""
@@ -1169,6 +1207,7 @@ def name_list_errors(g, p, attr, names):
         fns = {ids.def_name(it) for it, *_ in walk_items(g) if it['k'] in ('func', 'class')}
         if p['kind'] in DECLARING:
             fns.add(p['name'])                                      # a function the point declares is a function, there or not
+        fns |= _UNIT_NAMES[0] or set()                              # a library's: what the program that loads it defines (D32)
         bis = set(builtins())
         for nm in names:
             if nm in fns or nm in bis:
@@ -1481,18 +1520,30 @@ def lower_block(fn, new_items):
     return tx
 
 
-def rnxc_findings(text):
-    """What `rnxc check` says of a program: ([(severity, rule, message)], [the rules it says it did NOT check, and why])."""
-    key = hashlib.sha256(text.encode('latin-1')).hexdigest()
+def rnxc_findings(text, unit=None):
+    """What `rnxc check --closed` says of a program: ([(severity, rule, message)], [the rules it says it did NOT check, and why]).
+
+    CLOSED (D32): the gate's question is whether the unit DEFINES every name a body uses, not Ring's whether the line errs when it runs. So a file
+    that runs nothing is asked about, and eval, loadlib and an admission do not shut the absence rules -- a name only one of them could make is
+    absent, because the gate cannot see what it calls (D28). `unit` -- {'root', 'file', 'natives'} -- asks it of a LIBRARY file inside the program
+    that loads it: the root's unit is checked with the file's text replaced by `text` (`--subst`, the file on disk untouched), and a native counts
+    when the engine's own list (`natives`, one name a line) names it. A file the unit cannot read or parse still shuts the check."""
+    key = hashlib.sha256(text.encode('latin-1') + repr(sorted((unit or {}).items())).encode()).hexdigest()
     if key in _CHECK:
         return _CHECK[key]
     os.makedirs(SCRATCH, exist_ok=True)
     _n[0] += 1
     path = os.path.join(SCRATCH, 'chk%d_%d.ring' % (os.getpid(), _n[0]))
     open(path, 'wb').write(text.encode('latin-1'))
+    if unit:
+        cmd = [RNXC, 'check', unit['root'], '--closed', '--subst=%s=%s' % (unit['file'], path)]
+    else:
+        cmd = [RNXC, 'check', path, '--closed']
+    if unit and unit.get('natives'):
+        cmd.append('--natives=%s' % unit['natives'])
     import subprocess
     try:
-        r = subprocess.run([RNXC, 'check', path], capture_output=True, timeout=120)
+        r = subprocess.run(cmd, capture_output=True, timeout=600)
         lines = (r.stdout + r.stderr).decode('utf-8', 'replace').replace('\r\n', '\n').split('\n')
     except (OSError, subprocess.TimeoutExpired) as e:
         lines = ['  NOT checked -- rnxc check did not run: %s' % e]
@@ -1597,8 +1648,8 @@ def evaluate_block(model, s, ctx, out, p):
         bad = [e for e in lift(new)['errors'] if not e['own']]
         if bad:
             return out.reject('derivation', 'the declarations no longer lift: ' + bad[0]['msg'])
-        f0, _ = rnxc_findings(text_of(g))
-        f1, shut = rnxc_findings(text_of(new))
+        f0, _ = rnxc_findings(text_of(g), model.unit)
+        f1, shut = rnxc_findings(text_of(new), model.unit)
         if shut:
             return out.reject('derivation', 'rnxc check does not check this program: ' + shut[0])
         seen = {}
@@ -1903,9 +1954,11 @@ def diff_lines(a, b):
 # ---- the model: a program, its ids, its event log ------------------------------------------------------------------------------------
 
 class Model:
-    def __init__(self, text, ctx=None):
+    def __init__(self, text, ctx=None, unit=None):
         self.g = new_graph(text)
         self.ctx = ctx or {}
+        # a LIBRARY file is refined through the program that loads it: {'root': its path, 'file': this file's path, 'natives': a list or None}
+        self.unit = unit
         self.log = []
         self.base = text_of(self.g)
 
@@ -1916,7 +1969,8 @@ class Model:
         return digest(self.text())
 
     def lift(self):
-        return lift(self.g)
+        with InUnit(self.unit):
+            return lift(self.g)
 
     def event(self, seq):
         return self.log[seq - 1] if 1 <= seq <= len(self.log) else None
@@ -1938,7 +1992,8 @@ class Model:
             self.log.append({'seq': len(self.log) + 1, 'kind': 'refine', 'admitted': False, 'sentence': sentence, 'status': 'rejected', 'stage': 'structural',
                              'why': why, 'target': '', 'pre': pre, 'post': pre})
             return out
-        out = evaluate(self, s, self.ctx if ctx is None else ctx)
+        with InUnit(self.unit):
+            out = evaluate(self, s, self.ctx if ctx is None else ctx)
         ev = {'seq': len(self.log) + 1, 'kind': 'refine', 'admitted': out.admitted, 'sentence': s['text'], 'status': out.status, 'stage': out.stage,
               'why': out.why, 'target': s['target'], 'author': s['author'], 'posture': s['posture'], 'pre': pre}
         if out.admitted:
@@ -1965,9 +2020,9 @@ class Model:
         return [e for e in self.log if e['kind'] == 'refine' and e['admitted']]
 
 
-def replay(text, log, ctx):
+def replay(text, log, ctx, unit=None):
     """The log run again from the base text, through the gate: the same verdicts and the same final text. -> (model, list of differences)"""
-    m = Model(text, ctx)
+    m = Model(text, ctx, unit)
     bad = []
     for ev in log:
         if ev['kind'] == 'edit':
@@ -1993,6 +2048,11 @@ def replay_tx(text, log):
 def footprint(model, s):
     """(reads, writes) of a sentence over the pieces of the model: the value of a point, its declaration (its rules), and -- because a derivation rule
     reads the post-state -- the value of every point that shares a rule with it."""
+    with InUnit(model.unit):
+        return _footprint(model, s)
+
+
+def _footprint(model, s):
     L = model.lift()
     base = s['base']
     partners = set()
@@ -2017,6 +2077,11 @@ def commutes(model, s1, s2):
 def audit(model, new_text, posture='trusted', author='text-edit'):
     """What an edit made as text amounts to. Each point whose value or tag changed is read back as the sentence that would have made the same change
     and judged by the gate on the OLD program; every other change is raw. -> (list of (sentence, outcome), the number of raw edits, the faults)"""
+    with InUnit(model.unit):
+        return _audit(model, new_text, posture, author)
+
+
+def _audit(model, new_text, posture='trusted', author='text-edit'):
     ng = parse_text(new_text)
     og = copy.deepcopy(model.g)
     ids.carry(og, ng)
@@ -2099,23 +2164,34 @@ def split_sentences(text):
 
 
 def main(argv):
-    """python refine.py <program.ring> <sentences.rfn> [--ctx governance.txt] [--write]
+    """python refine.py <program.ring> <sentences.rfn> [--ctx governance.txt] [--unit root.ring [--natives names.txt]] [--write]
     Each sentence goes through the gate in order, against what the earlier ones left. Prints the verdict, the primitives and the diff of each; exit 0 when every
     sentence was admitted, 1 when one was refused, 2 when the command could not run. `--write` replaces the program with the canonical text of the result --
     and refuses to when the program is not already its own canonical text, because the diff would then carry layout the refinement did not make (rnxc fmt
-    --write first; never on a tree that is not yours to reformat)."""
+    --write first; never on a tree that is not yours to reformat). `--unit` refines a LIBRARY file through the program that loads it (D32): the
+    derivation checks that program's unit with the file's text replaced, and `--natives` lists the names its native libraries register."""
     args = [a for a in argv if not a.startswith('--')]
     write = '--write' in argv
     ctxfile = None
     if '--ctx' in argv:
         ctxfile = argv[argv.index('--ctx') + 1]
         args = [a for a in args if a != ctxfile]
+    unit = None
+    if '--unit' in argv:
+        root = argv[argv.index('--unit') + 1]
+        args = [a for a in args if a != root]
+        nat = None
+        if '--natives' in argv:
+            nat = argv[argv.index('--natives') + 1]
+            args = [a for a in args if a != nat]
+            nat = os.path.abspath(nat)
+        unit = {'root': os.path.abspath(root), 'file': os.path.abspath(args[0]) if args else '', 'natives': nat}
     if len(args) != 2:
         print(main.__doc__)
         return 2
     prog = open(args[0], 'rb').read().decode('latin-1')
     try:
-        m = Model(prog, parse_context(open(ctxfile, 'rb').read().decode('latin-1')) if ctxfile else {})
+        m = Model(prog, parse_context(open(ctxfile, 'rb').read().decode('latin-1')) if ctxfile else {}, unit)
     except Unreadable as e:
         print('the program does not parse: %s' % e)
         return 2

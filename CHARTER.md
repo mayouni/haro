@@ -1052,6 +1052,24 @@ states principle 14.
   below what the body reads), enforced at the constraint stage, written into the body grammars and the task lint. Least authority had been stated for calls and writes and left open for reads, which is where a secret, a global object and its
   operators were reachable. *Cost:* a body point written before this that reads a global it does not name is outside its own rule until its author names it; a grant to read an object includes using it as a value (its `operator` runs), which the
   author sees in the tag and the court pins as a limit.
+- **D31 -- an app is a namespace of its own: HaroServer's apps never share names** (HaroServer, ruled on the author's delegation, 2026-11-01: "do the open question of haroserv on my behalf"). Running the server
+  answered that every app shared one namespace with the library and with every other app -- Softanza defines `echo`, so an app's `Echo` was refused (C22), and two apps could not both define `Init`. The Haro answer:
+  each admitted app is a namespace, and what it defines -- functions, classes, globals -- is its own and nobody else's. Inside an app a name resolves to the app's own definition first, then to the BASE (the host and
+  the library it admitted before any app) and nowhere else, so the base growing a name never breaks an app. Another app is reached only through a name that app EXPORTS -- declared by the app, nothing by default
+  (least authority) -- spelt qualified and exact, `ledger.Entry` (D24); there is no `import` that pours another app's names into this one, and a qualified name nothing exports is refused when the line runs, as a
+  late name is (rung 8). Ring's `package`/`import` stay refused in Ring++ (C-28): this is Haro's rule, carried by HaroServer's resident host, not Ring's. *Cost:* the resident VM must resolve per app -- an app's
+  definitions stored under its own name, an unqualified call looking in the app and then the base, and the late links (`name_fn`, `name_cls`), `call "f"()` and eval looking the same way -- a compiler change confined
+  to a resident program's admitted code (a plain program compiles as before); an app that uses another's class writes `new ledger.Entry(...)` and the other app exports `Entry`; RingServ's shape (every app eval'd into
+  one global namespace) is not reproduced. **Not built**: it is the next HaroServer rung.
+- **D32 -- a body's derivation asks whether the unit DEFINES what the body uses: `rnxc check --closed`, through the program that loads a library** (rung 5, ruled on the author's delegation, 2026-11-01: "go ahead
+  with the library derivation of rung 5"; HF-123). The derivation asked Ring's question -- is this an error the moment the line runs? -- which has no answer in a library (nothing runs) nor in a unit holding eval,
+  loadlib or an admission, so the gate failed closed on both, and therefore on every body of the estate (HF-103). It asks the gate's own question now, closed: a name only eval, loadlib or an admission could make
+  is absent, because the gate cannot see what it calls (D28; Ring++'s eval defines no function, F-72); a native counts when the engine's own list names it (`cfunctions()` on a run that loaded it), spelt as the
+  engine registers it (D24 -- lower case, so `stzenginecancelsignal`, not Softanza's `StzEngineCancelSignal`, which case folding reaches); a call's arity resolves through the whole unit (one definition per name,
+  C22); a file the unit cannot read or parse is still a hole, and the gate fails closed on it. A library file is refined THROUGH the program that loads it: the lift reads that unit's names, and the derivation
+  checks the unit with the file's text replaced (`--subst`) -- the file is never written. *Cost:* each derivation checks the whole unit, about 14-16 s at Softanza's size (697 files; the first of a model about
+  35-45 s, which also reads the unit's names); a body that calls a native needs the engine's list; an eval elsewhere in a program no longer stops a body's refinement (B09 and FN10 say the opposite of what they
+  said), so what an opaque eval assigns is refused by name instead; and a closed check's findings are claims about what the unit defines, not Ring's run-time proof -- its words say so.
 - **D23 -- `rnxc fmt` is a Ring++ feature, not held for Haro** (CODEGRAPH Q4, ruled on the author's delegation, 2026-10-05: "take
   whatever decision you think is wiser on my behalf"). It is a verb of the one binary (commitment 5), depends on nothing of Haro's, is
   judged against the oracle and refuses what Ring refuses (58 of 6,061 Softanza files, 57 of them Ring's own refusals). It ships inside

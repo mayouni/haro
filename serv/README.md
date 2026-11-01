@@ -63,8 +63,10 @@ under a millisecond at this size. The court holds the second half's high-water m
   program keeps its size and the process its memory, bounded. What cannot be released: code that defines a class or a
   lambda (an object or a closure could outlive it), a replacement, and code a class reaches through `addmethod`; and
   only the LAST admission (a stack).
-- **One namespace for every app.** Softanza's library defines `echo`, so an app defining `Echo` is refused (C22). Apps
-  need names of their own: packages, which Ring has (C-28 keeps them refused in Ring++) and Haro must decide.
+- **One namespace for every app -- DECIDED as D31 (haro/CHARTER.md), not built.** Softanza's library defines `echo`, so
+  an app defining `Echo` is refused (C22). Each app is a namespace of its own: its names first, then the base (the host
+  and the library it admitted first), and another app only through a name that app exports, spelt `ledger.Entry`.
+  Ring's `package`/`import` stay refused (C-28); the resident VM's per-app resolution is the next rung.
 - **Adding an attribute to a live class was refused, and a real app wants it -- answered by rung 7.** `tally_v3.ring`
   adds `nAdds`; the running tally keeps its 13 and counts from 0. Each object made before takes an added attribute at
   its first access past its own slots, starting as declared (a constant; a list a list of its own); about 55 ns an

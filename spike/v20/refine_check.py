@@ -81,7 +81,7 @@ def run(cmd, timeout=300, cwd=None):
 
 # ---- the fixtures ---------------------------------------------------------------------------------------------------------------------------
 
-SECTIONS = ('program', 'context', 'edited', 'do', 'text', 'run', 'lift', 'cascade', 'tx', 'error', 'ids', 'commute', 'audit')
+SECTIONS = ('program', 'context', 'edited', 'do', 'text', 'run', 'lift', 'cascade', 'tx', 'error', 'ids', 'commute', 'audit', 'root', 'natives')
 
 
 def read_fixtures(path):
@@ -114,7 +114,26 @@ def read_fixtures(path):
                 f[s] = '\n'.join(f[s]) + '\n'
         if f['context'] is not None:
             f['context'] = refine.parse_context('\n'.join(f['context']))
+        if f['root'] is not None:
+            f['root'] = '\n'.join(f['root']) + '\n'
     return fx
+
+
+def unit_of(f):
+    """A library fixture's unit (fixtures_library.txt, D32): the root written as root.ring beside the program, written as lib.ring, so the root's
+    `load "lib.ring"` reaches the file under refinement; and the natives list, when the fixture gives one. None for a program asked about alone."""
+    if f.get('root') is None:
+        return None
+    d = os.path.join(SCRATCH, 'unit_%s' % f['id'])
+    os.makedirs(d, exist_ok=True)
+    root, lib = os.path.join(d, 'root.ring'), os.path.join(d, 'lib.ring')
+    open(root, 'wb').write(f['root'].encode('latin-1'))
+    open(lib, 'wb').write(f['program'].encode('latin-1'))
+    nat = None
+    if f.get('natives'):
+        nat = os.path.join(d, 'natives.txt')
+        open(nat, 'wb').write(('\n'.join(f['natives']) + '\n').encode('latin-1'))
+    return {'root': root, 'file': lib, 'natives': nat}
 
 
 def parse_verdict(v):
@@ -206,7 +225,7 @@ def block_locality(before, after, out):
 def run_steps(f, stats):
     """The steps of a refinement fixture through the gate: -> (list of failures, the model)."""
     bad = []
-    m = refine.Model(f['program'], f['context'] or {})
+    m = refine.Model(f['program'], f['context'] or {}, unit_of(f))
     if m.text() != f['program']:
         return ['the program is not its own canonical text (the diff a refinement shows is the printer\'s)'], m
     start_ids = ids.ids_of(m.g)
@@ -300,7 +319,7 @@ def check_fixture(f, stats):
         if ids.ids_of(g) != start_ids:
             bad.append('the inverses did not restore the ids')
     # replay: the same verdicts and text through the gate; the same text from the transactions alone
-    m2, diffs = refine.replay(f['program'], json.loads(json.dumps(m.log)), f['context'] or {})
+    m2, diffs = refine.replay(f['program'], json.loads(json.dumps(m.log)), f['context'] or {}, unit_of(f))
     if diffs or m2.text() != m.text():
         bad.append('the log replayed from the base text through the gate differs: %s' % diffs[:2])
     if not any(e['kind'] == 'edit' for e in m.log):
@@ -1252,7 +1271,8 @@ def main():
     t0 = time.time()
     print('refine_check -- refinement over the program graph, Ring++ face (rung 20)')
     fb = (read_fixtures(os.path.join(HERE, 'fixtures_block.txt')) + read_fixtures(os.path.join(HERE, 'fixtures_function.txt'))
-          + read_fixtures(os.path.join(HERE, 'fixtures_allowlist.txt')) + read_fixtures(os.path.join(HERE, 'fixtures_method.txt')))
+          + read_fixtures(os.path.join(HERE, 'fixtures_allowlist.txt')) + read_fixtures(os.path.join(HERE, 'fixtures_method.txt'))
+          + read_fixtures(os.path.join(HERE, 'fixtures_library.txt')))
     if BLOCK_ONLY:
         stats = new_stats()
         res = judge_fixtures(fb, stats)

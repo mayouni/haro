@@ -183,7 +183,7 @@ func Tax(n)
 DEFINE REFINE arity AS ( TARGET "Round", KIND function, FROM "absent", TO "return Tax(n, 2)", AUTHOR "aicha", POSTURE trusted, REASON "try" ) => rejected derivation Tax() takes 1 argument(s), called with 2
 DEFINE REFINE unassigned AS ( TARGET "Round", KIND function, FROM "absent", TO "return n + nTax", AUTHOR "aicha", POSTURE trusted, REASON "try" ) => rejected derivation nTax is read here, and nothing anywhere assigns it
 
-=== FN10 derivation fails closed on a program the compiler cannot vouch for
+=== FN10 an eval elsewhere no longer stops a function's creation: the derivation is closed (D32; it failed closed here until then)
 --- program
 eval("x = 1")
 # <R:FUNCTION name="Round" params="n">
@@ -192,7 +192,17 @@ eval("x = 1")
 func Gross(nNet)
 	return nNet
 --- do
-DEFINE REFINE make_round AS ( TARGET "Round", KIND function, FROM "absent", TO "return n", AUTHOR "mansour", POSTURE trusted, REASON "try" ) => rejected derivation rnxc check does not check this program
+DEFINE REFINE make_round AS ( TARGET "Round", KIND function, FROM "absent", TO "return n", AUTHOR "mansour", POSTURE trusted, REASON "try" ) => admitted tx=node.create
+--- text
+eval("x = 1")
+# <R:FUNCTION name="Round" params="n">
+? "start"
+
+func Gross(nNet)
+	return nNet
+
+func Round(n)
+	return n
 
 === FN11 trust: a floor holds a lower origin back from writing a function
 --- program
