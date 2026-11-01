@@ -10,9 +10,16 @@ This first build is that design on the resident VM, with the host loop in the pr
 
 - **host.ring** -- the loop. It waits for a request (`rpp_http_next`), routes it to the function an app registered,
   and answers (`rpp_http_reply`). A deployment is a request too:
-  - `POST /admit/<app>` admits the body's code into the running program (`admitcode`);
-  - `POST /replace/<app>` replaces what the app defined (`replacecode`). The app's objects are kept, and every request
-    after it runs the new code. A refusal is 422 with the reason, and the program stays as it was.
+  - `POST /admit/<app>?<exports>` admits the body's code into the running program as a NAMESPACE of its own
+    (`admitapp`, D31): its functions, classes and globals are `app::Name`, it reads the base's names after its own,
+    and another app reaches it only through what it exports -- the query, comma-separated (`?Entry,Sum`), spelt
+    `app.Name` by the other app;
+  - `POST /replace/<app>` replaces what the app defined, within its namespace (`replaceapp`). The app's objects are
+    kept, and every request after it runs the new code. A refusal is 422 with the reason, and the program stays as it was;
+  - `POST /base/<name>` admits the body into the BASE (`admitcode`) -- shared code every app reads after its own
+    names, Softanza's library for one.
+  - An app registers its routes by its handler's name in the app; the host keeps them as `app::Handler`, a name only
+    the host may call by string (an app reaching another's internal name by string is R3).
   - `POST /run?<input>` (2026-10-31, the resident VM's sixth rung): the body is code that defines `func Run cInput`. It
     is admitted, called with what followed `?`, and RELEASED (`releasecode`) before the reply -- the program after the
     request is the program before it. 200 and what Run returned, 500 and its error, 422 when it could not be admitted,
@@ -21,10 +28,13 @@ This first build is that design on the resident VM, with the host loop in the pr
 - **apps/** -- the court's apps. One of each kind: a route, state in an object, a redeploy that keeps it, a redeploy
   that adds an attribute (admitted: the running object takes it, rung 7) and one that drops one (refused), a raising
   handler, a class admitted while serving, a handler that makes objects of a class an app deployed after it brings
-  (`ledger.ring`, then `entry.ring`: rung 8), a Rule A refusal.
+  (`ledger.ring`, then `entry.ring`: rung 8, `new entry.Entry` through `entry`'s export), a Rule A refusal; and two
+  apps defining the same names (`twin_a.ring`, `twin_b.ring`), one exporting a function (`sum.ring`) and one reaching
+  it and failing on what it keeps (`calc.ring`).
 - **court.py** -- boots the host on a free port and drives it over HTTP. Every answer is checked and the costs are
   measured.
-  - `--softanza` adds an app that loads Softanza's library into the running server, run from the install's tree.
+  - `--softanza` admits Softanza's library into the base of the running server (`/base/stz`) and an app reading it,
+    run from the install's tree.
   - `--platform=linux` runs the Linux rnxc under WSL; run the court itself under WSL to time Linux without the relay.
   - The gate runs it with a small load (step `HaroServer`).
 
@@ -63,10 +73,14 @@ under a millisecond at this size. The court holds the second half's high-water m
   program keeps its size and the process its memory, bounded. What cannot be released: code that defines a class or a
   lambda (an object or a closure could outlive it), a replacement, and code a class reaches through `addmethod`; and
   only the LAST admission (a stack).
-- **One namespace for every app -- DECIDED as D31 (haro/CHARTER.md), not built.** Softanza's library defines `echo`, so
-  an app defining `Echo` is refused (C22). Each app is a namespace of its own: its names first, then the base (the host
-  and the library it admitted first), and another app only through a name that app exports, spelt `ledger.Entry`.
-  Ring's `package`/`import` stay refused (C-28); the resident VM's per-app resolution is the next rung.
+- **One namespace for every app -- answered by D31 (2026-11-01, haro/CHARTER.md).** Softanza's library defines `echo`,
+  so an app defining `Echo` was refused (C22). Each app is a namespace of its own now: two apps define `Greet` and
+  `Name` and each answers its own; `calc` reaches `sum.Sum` through `sum`'s export and gets R3 for `sum.Secret`, which
+  `sum` keeps; an export naming nothing the app defines is refused. What the build decided beyond the decision: the
+  host reaches an app's names by their internal spelling `app::Name` (the host owns its apps; only apps are held to
+  exports); an app's top level and its lambdas resolve a name given by string as the base does, and an `eval` in its
+  code resolves every name as the base does (none of them carries the app in its name); and an app's admission is not released, since another app may hold its exports.
+  The resident VM's guard, section 11 (bench/resident/ns_host.ring), holds the rest.
 - **Adding an attribute to a live class was refused, and a real app wants it -- answered by rung 7.** `tally_v3.ring`
   adds `nAdds`; the running tally keeps its 13 and counts from 0. Each object made before takes an added attribute at
   its first access past its own slots, starting as declared (a constant; a list a list of its own); about 55 ns an

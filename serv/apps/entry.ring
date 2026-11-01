@@ -1,4 +1,4 @@
-# the class apps/ledger.ring makes -- deployed after it
+# the class apps/ledger.ring makes -- deployed after it, exporting Entry
 class Entry
 	cWhat = ""
 	nAmount = 0

@@ -7,11 +7,20 @@
 #
 #     rnxc resident host.ring            (HAROSERV_PORT, default 8642)
 #
-#   POST /admit/<app>      the body is the app's source, admitted into the running
-#                          program (admitcode): 201, or 422 and the reason
-#   POST /replace/<app>    the body REPLACES what the app defined (replacecode):
+#   POST /admit/<app>?<exports>
+#                          the body is the app's source, admitted into the running
+#                          program as a NAMESPACE of its own (admitapp, D31): its
+#                          functions, classes and globals are its own, it reads the
+#                          base's after its own, and another app reaches it only
+#                          through the names it exports -- the query, comma-separated
+#                          (`?Entry,Sum`), spelt `app.Name` by the other app: 201,
+#                          or 422 and the reason
+#   POST /replace/<app>    the body REPLACES what the app defined (replaceapp):
 #                          every request after it runs the new code, and what the
 #                          app holds -- its objects -- is kept: 201, or 422
+#   POST /base/<name>      the body is admitted into the BASE (admitcode) -- what
+#                          every app reads after its own names, Softanza's library
+#                          for one: 201, or 422
 #   POST /run?<input>      the body is code that defines `func Run cInput`: admitted,
 #                          called with what followed `?`, and RELEASED (releasecode,
 #                          rung 6) -- the program after the request is the program
@@ -25,10 +34,12 @@
 #                          called by name with the request's body: 200 and what
 #                          it returned, 500 and the error, or 404
 #
-# An app registers its routes when its top level runs:
-#     Route("GET", "/hello", "Hello")
+# An app registers its routes when its top level runs, by its handler's name in
+# the app -- the host keeps it as `app::Handler`, which only the host may call:
+#     Route("GET", "/hello", "HelloApp")
 
 $aRoutes = []
+$cDeploying = ""
 $nServed = 0
 $nAdmitted = 0
 $nRefused = 0
@@ -56,6 +67,8 @@ func ServeLoop
 			Deploy(substr(cPath, 8), rpp_http_body(), false)
 		but cMethod = "POST" and left(cPath, 9) = "/replace/"
 			Deploy(substr(cPath, 10), rpp_http_body(), true)
+		but cMethod = "POST" and left(cPath, 6) = "/base/"
+			DeployBase(substr(cPath, 7), rpp_http_body())
 		but cMethod = "POST" and cPath = "/run"
 			RunOnce(rpp_http_body(), rpp_http_query())
 		but cMethod = "GET" and cPath = "/stats"
@@ -71,11 +84,12 @@ func ServeLoop
 # a deployment: the app's code admitted, or replacing what it defined, while
 # the program runs -- a refusal leaves the program exactly as it was
 func Deploy cApp, cSource, bReplace
+	$cDeploying = cApp
 	try
 		if bReplace
-			replacecode(cApp, cSource)
+			replaceapp(cApp, cSource)
 		else
-			admitcode(cApp, cSource)
+			admitapp(cApp, cSource, Exports(rpp_http_query()))
 		ok
 		$nAdmitted++
 		rpp_http_reply(201, "text/plain", "admitted " + cApp)
@@ -83,6 +97,33 @@ func Deploy cApp, cSource, bReplace
 		$nRefused++
 		rpp_http_reply(422, "text/plain", cCatchError)
 	done
+	$cDeploying = ""
+
+# shared code -- a library every app reads after its own names
+func DeployBase cName, cSource
+	try
+		admitcode(cName, cSource)
+		$nAdmitted++
+		rpp_http_reply(201, "text/plain", "admitted " + cName + " into the base")
+	catch
+		$nRefused++
+		rpp_http_reply(422, "text/plain", cCatchError)
+	done
+
+# `Entry,Sum` -> ["Entry", "Sum"]
+func Exports cQuery
+	aOut = []
+	cCur = ""
+	for i = 1 to len(cQuery)
+		if cQuery[i] = ","
+			if cCur != "" add(aOut, cCur) ok
+			cCur = ""
+		else
+			cCur += cQuery[i]
+		ok
+	next
+	if cCur != "" add(aOut, cCur) ok
+	return aOut
 
 # code that comes with a request and leaves with it: admitted, run, released.
 # The release comes before the reply, so a refusal to release is the answer;
@@ -112,6 +153,9 @@ func RunOnce cSource, cInput
 	rpp_http_reply(nStatus, "text/plain", cOut)
 
 func Route cMethod, cPath, cHandler
+	if $cDeploying != "" and substr(cHandler, "::") = 0
+		cHandler = $cDeploying + "::" + cHandler
+	ok
 	for i = 1 to len($aRoutes)
 		if $aRoutes[i][1] = cMethod and $aRoutes[i][2] = cPath
 			$aRoutes[i][3] = cHandler

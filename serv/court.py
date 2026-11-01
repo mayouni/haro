@@ -213,12 +213,28 @@ def main():
     # rung 8: a handler that makes objects of a class an app deployed AFTER it brings
     st, _, _ = req('POST', '/admit/ledger', app('ledger.ring'))
     st2, body, _ = req('GET', '/ledger')
-    say(st == 201 and st2 == 500 and 'class not found: entry' in body,
+    say(st == 201 and st2 == 500 and 'class not found: entry.entry' in body,
         'late new: a handler making a class no app has brought yet answers 500, R11 (%d): %s' % (st2, body.strip()[:70]))
-    st, _, _ = req('POST', '/admit/entry', app('entry.ring'))
+    st, _, _ = req('POST', '/admit/entry?Entry', app('entry.ring'))
     st2, body, _ = req('GET', '/ledger')
     say(st == 201 and st2 == 200 and body == 'rent: 40',
         'late new: once the app bringing it is deployed, the same handler makes its objects: %r' % body)
+
+    # D31: every app a namespace of its own -- the same names in two apps, and another app's function through its exports
+    sa, _, _ = req('POST', '/admit/twin_a', app('twin_a.ring'))
+    sb, _, _ = req('POST', '/admit/twin_b', app('twin_b.ring'))
+    _, ba, _ = req('GET', '/twin_a')
+    _, bb, _ = req('GET', '/twin_b')
+    say(sa == 201 and sb == 201 and ba == 'twin a answers' and bb == 'twin b answers',
+        'namespaces: two apps define the same functions, each answers its own: %r, %r' % (ba, bb))
+    s1, _, _ = req('POST', '/admit/sum?Sum', app('sum.ring'))
+    s2, _, _ = req('POST', '/admit/calc', app('calc.ring'))
+    c1, b1, _ = req('GET', '/calc')
+    c2, b2, _ = req('GET', '/peek')
+    say(s1 == 201 and s2 == 201 and c1 == 200 and b1 == '2 + 3 = 5' and c2 == 500 and 'sum.secret' in b2,
+        'namespaces: an app reaches another\'s exported function (%r) and not what it keeps (%d)' % (b1, c2))
+    s3, b3, _ = req('POST', '/admit/nope?Missing', app('sum.ring'))
+    say(s3 == 422 and 'exports Missing' in b3, 'namespaces: an export naming nothing the app defines is refused (%d)' % s3)
 
     # ---- load: one route, sequential
     lat = []
@@ -305,9 +321,11 @@ def main():
         print('      private memory: not read on this platform -- the bounded-memory check is NOT measured here')
 
     if SOFTANZA:
-        src = 'load "stzlib.ring"\nRoute("POST", "/upper", "UpperApp")\nfunc UpperApp cBody\n\treturn StzStringQ(cBody).Uppercased()\n'
-        st, body, ms = req('POST', '/admit/stz', src)
-        say(st == 201, 'softanza: an app loading Softanza\'s library admitted while serving (%d, %.0f ms)%s' % (st, ms, '' if st == 201 else ': ' + body[:300]))
+        st, body, ms = req('POST', '/base/stz', 'load "stzlib.ring"\n')
+        say(st == 201, 'softanza: Softanza\'s library admitted into the base while serving (%d, %.0f ms)%s' % (st, ms, '' if st == 201 else ': ' + body[:300]))
+        src = 'Route("POST", "/upper", "UpperApp")\nfunc UpperApp cBody\n\treturn StzStringQ(cBody).Uppercased()\n'
+        st, body, _ = req('POST', '/admit/upper', src)
+        say(st == 201, 'softanza: an app reading the base\'s library admitted (%d)%s' % (st, '' if st == 201 else ': ' + body[:300]))
         st, body, _ = req('POST', '/upper', 'ring++')
         say(st == 200 and body == 'RING++', 'softanza: its route answers through Softanza: %r' % body)
         adm2 = []
