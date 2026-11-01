@@ -204,8 +204,10 @@ HaroServer's natives; the fingerprint `D:\rpp-pkgtest\prog\resident_fp2.ring` te
 
 **DECIDED 2026-11-01, on the author's delegation: the namespace question (D31).** Each app admitted into HaroServer is a
 namespace of its own -- its names first, then the base, and another app only through what it exports, spelt
-`ledger.Entry`. Not built; it is the next HaroServer rung, and it is the resident VM's work (per-app resolution of
-calls, classes, late links, `call "f"()` and eval in admitted code).
+`ledger.Entry`. **BUILT the same day** ("go ahead with building D31"): `admitapp(cApp, cSource, aExports)` and
+`replaceapp`; HaroServer deploys every app into its own namespace and shared code into the base (`POST /base/<name>`).
+Limits named: an app's top level, lambdas and eval resolve a name given by string as the base does; an app's admission
+is not released.
 
 **The alternative, if the author prefers the language side first:** the library derivation of rung 5 (body kinds refine a
 program, not a library, HF-103), or opening Z's route 3 (a runtime for a declared world, CHARTER section 3, HF-45). Both

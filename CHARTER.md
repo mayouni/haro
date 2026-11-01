@@ -1060,7 +1060,13 @@ states principle 14.
   late name is (rung 8). Ring's `package`/`import` stay refused in Ring++ (C-28): this is Haro's rule, carried by HaroServer's resident host, not Ring's. *Cost:* the resident VM must resolve per app -- an app's
   definitions stored under its own name, an unqualified call looking in the app and then the base, and the late links (`name_fn`, `name_cls`), `call "f"()` and eval looking the same way -- a compiler change confined
   to a resident program's admitted code (a plain program compiles as before); an app that uses another's class writes `new ledger.Entry(...)` and the other app exports `Entry`; RingServ's shape (every app eval'd into
-  one global namespace) is not reproduced. **Not built**: it is the next HaroServer rung.
+  one global namespace) is not reproduced. **BUILT the same day**, on the author's word ("go ahead with building D31"): `admitapp(cApp,
+  cSource, aExports)` and `replaceapp(cApp, cSource)`; an app's late names fall back to the base's at run time (VM.name_up); exports answer by
+  their public names (the installer's `applyExports`). What the build decided beyond the decision, recorded so it is not lost: the BASE reaches an
+  app's names by their internal spelling `app::Name` -- the host owns its apps, and its router calls their handlers that way; only apps are held to
+  exports. An app's top level and its lambdas resolve a name given by string as the base does, and an `eval` in its code resolves every name as the base
+  does, because none of them carries the app in its name; and an app's admission is not released, because another app may hold its exports. Guards: the resident VM's section 11 (golden: Ring
+  has no namespaces) and HaroServer's court; a plain program compiles to the same code as before.
 - **D32 -- a body's derivation asks whether the unit DEFINES what the body uses: `rnxc check --closed`, through the program that loads a library** (rung 5, ruled on the author's delegation, 2026-11-01: "go ahead
   with the library derivation of rung 5"; HF-123). The derivation asked Ring's question -- is this an error the moment the line runs? -- which has no answer in a library (nothing runs) nor in a unit holding eval,
   loadlib or an admission, so the gate failed closed on both, and therefore on every body of the estate (HF-103). It asks the gate's own question now, closed: a name only eval, loadlib or an admission could make
