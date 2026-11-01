@@ -1570,8 +1570,8 @@ whole guard re-run on the renamed tree: 28 + 30 + 27 + 23, 117 of 120, 32 of 32,
    six rungs ZC0 to ZC5, one desk across ringpp, stzlib, harobase and zin read-only). ZC0 the inventory, done 2026-11-01
    (`haro/spike/v23/ZIN-INVENTORY.md`, HF-124): 4 articles mapped onto mechanisms that exist, 2 absent (visible state; organizational
    sovereignty as named), 63 fixture candidates among Zin's 4,824 tests, 0 for the weaves (eight in design, none in code). ZC1 the
-   clause, PROPOSED the same day in the charter's section 2, awaiting the author's ratification line in section 0. Not begun: ZC2
-   (the court, fixtures first), ZC3 (the two absent articles), ZC4 (W3 and W4 as field tags in stzlib and HaroBase), ZC5 (a declared
+   clause, proposed the same day in the charter's section 2 and RATIFIED by the author at 23:32 ("Ratified, start ZC2", section 0).
+   Not begun: ZC2 (the court, fixtures first), ZC3 (the two absent articles), ZC4 (W3 and W4 as field tags in stzlib and HaroBase), ZC5 (a declared
    world under a constitution, read by the author).
 18. The forge as an `rnxc` verb (the ringpp session's `src/`, routed); the
    Softanza-resident timing the charter's 2.6 asks for; the court's run time on the

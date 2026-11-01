@@ -75,8 +75,9 @@ target.
   `zin/src/csp/validators_stage4.zig` (cc98126, 2026-05-13), read against this charter's sections
   2, 3 and 6, `haro/spike/v20`, `narrate_lib.ring`, `court_lib.ring`, `haro_lib.ring`,
   `stzlib/base/refine/stzRefinableCode.ring` and `harobanda/declarative/machine/machine.stzu`:
-  `haro/spike/v23/ZIN-INVENTORY.md`, HF-124. The clause is PROPOSED, not ratified, until the
-  author writes his line here: **ratification of the constitution clause: __________**
+  `haro/spike/v23/ZIN-INVENTORY.md`, HF-124. **Ratification of the constitution clause: RATIFIED
+  by the author, 2026-11-01 23:32 -- "Ratified, start ZC2".** ZC2 (the court, fixtures first)
+  opened on that line.
 
 Where a source and this charter disagree, the source is right and the disagreement is in
 `haro/FINDINGS.md`.
@@ -162,8 +163,8 @@ decided this three years ago"); reversibility built into the data model, never l
 **The court** -- the forge's generated judge for each declared language, the compiler for the
 computing altitude, the gate for every refinement -- is owed determinism and the C2 envelope.
 
-**The constitution** (ZC1, PROPOSED 2026-11-01 by the constitution desk on the author's ruling of
-the same day, COMPASS-KERN-09; ratification pending in section 0). Zin's six immutable articles --
+**The constitution** (ZC1, proposed 2026-11-01 by the constitution desk on the author's ruling of
+the same day, COMPASS-KERN-09; **RATIFIED by the author the same night, section 0**). Zin's six immutable articles --
 explainability, reversibility, visible state, predictable authority, organizational sovereignty,
 trust hierarchy -- and its weaves enter Haro as a **declared governance sentence**: a declaration
 of the declaring altitude, written in Haro's own shape (seats typed, `RATIONALE` mandatory, the
