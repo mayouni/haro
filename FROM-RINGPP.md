@@ -197,6 +197,8 @@ defines, the one friction every HaroServer app still meets. The namespace questi
 
 **Next on this road:** the install and both packages carry rungs 1-5 only (2f34bea) -- rungs 6-8 and HaroServer's natives
 reach the desks with a re-lay, at the author's word. The namespace question stays his language decision.
+**RE-LAID 2026-11-01 at his word:** `D:ingppingpp-win64` and both packages carry 1c35218 -- every resident rung and
+HaroServer's natives; the fingerprint `D:pp-pkgtest\progesident_fp2.ring` tells them from the build before.
 
 **The alternative, if the author prefers the language side first:** the library derivation of rung 5 (body kinds refine a
 program, not a library, HF-103), or opening Z's route 3 (a runtime for a declared world, CHARTER section 3, HF-45). Both
