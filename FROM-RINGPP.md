@@ -186,6 +186,18 @@ language decision (packages), and a large deployment blocking the loop waits for
 functions, given to classes. Today a host can make an admitted class's objects only through a function the class's file
 defines, the one friction every HaroServer app still meets. The namespace question stays the author's language decision.
 
+**BUILT, rung 8, 2026-11-01 (1c35218), at the author's word: the late `new`.**
+- **What it is:** a `new K` compiled before any admission defined K finds K by name once one does, as Ring does: R11
+  naming it until then, then its initial values, `init` with its arguments, a brace, a class replaced since (its new
+  initial values) -- in a resident program; a plain one compiles exactly as before.
+- **One divergence, loud:** in `new K { ... }` of a class not yet held, a bare name the class lacks is R12, where Ring
+  makes a variable.
+- **HaroServer:** `apps/ledger.ring`'s handler makes `new Entry(...)` before `apps/entry.ring` is deployed: 500 and R11
+  until then, 200 after, from the same handler.
+
+**Next on this road:** the install and both packages carry rungs 1-5 only (2f34bea) -- rungs 6-8 and HaroServer's natives
+reach the desks with a re-lay, at the author's word. The namespace question stays his language decision.
+
 **The alternative, if the author prefers the language side first:** the library derivation of rung 5 (body kinds refine a
 program, not a library, HF-103), or opening Z's route 3 (a runtime for a declared world, CHARTER section 3, HF-45). Both
 are recorded where they were found.
