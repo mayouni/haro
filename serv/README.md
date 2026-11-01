@@ -65,13 +65,15 @@ loop for at most 10 s.
 
 | | Windows | Linux |
 |---|---|---|
-| Softanza's library deployed into the base while the court sends requests | 15.5-17.1 s; 67,760-74,110 requests answered meanwhile, p50 0.19 ms; the longest wait 114-143 ms | -- |
-| ... that longest wait, by phase (`RNXC_ADMIT_PHASES=1`) | the install 70-82 ms, the new functions reshaped 22 ms, the library's top level 20-30 ms -- on the program's thread; the parse trees' release (146 ms) and the compaction (~90 ms) after it run on the compiling thread | -- |
+| Softanza's library deployed into the base while the court sends requests | 16.0-19.1 s; 71,300-75,300 requests answered meanwhile, p50 0.19-0.25 ms; the longest wait 42-59 ms (114-143 until the install was prepared on the compiling thread, the same evening) | -- |
+| ... that longest wait, by phase (`RNXC_ADMIT_PHASES=1`) | the library's top level 24-30 ms, the install 10-12 ms, the program kept 2-3 ms -- on the program's thread; the install's preparation (66-71 ms), the parse trees' release (146 ms) and the compaction (~90 ms) run on the compiling thread | -- |
 | 8,000 functions deployed while the court sends requests | ~0.5 s; ~1,500 requests answered meanwhile, the longest wait 17-20 ms | ~0.5 s; 331 requests (WSL's relay) |
 | a small deployment, over HTTP | p50 0.39-0.40 ms (0.33 synchronous): the hand-off to the compiling thread | -- |
 
-Before rung 9 the whole compile was a pause: 13.8 s at Softanza's size. The program's thread now pays the install and
-the top level alone. Every check of the court passed through the background path, every small deployment answered 201
+Before rung 9 the whole compile was a pause: 13.8 s at Softanza's size. The program's thread now pays the library's own
+top level -- the deployed code, which runs where the program stands -- and an install of about 10 ms: what the install
+builds from the compile alone (the class tables, the file records, the strings the VM keeps) is built by the compiling
+thread, after the compile. Every check of the court passed through the background path, every small deployment answered 201
 or 422 at once as before.
 
 A Windows client through WSL's localhost relay reads ~2 ms a request against the Linux server; that is the relay.
@@ -114,4 +116,5 @@ under a millisecond at this size. The court holds the second half's high-water m
 - **A large deployment blocked the loop -- answered by rung 9 (2026-11-01).** Softanza's library compiled for 13.8 s while
   no request was answered. Every deployment compiles on a thread of its own now while the loop serves: 67,760 requests
   answered during the library's compile, the longest waiting 114 ms -- the install and the library's top level, which
-  run on the program's thread. A deployment that arrives meanwhile is queued, and `/run` answers 503 until it is in.
+  run on the program's thread. Then the install was prepared on the compiling thread too: 42-59 ms, most of it the
+  library's own top level. A deployment that arrives meanwhile is queued, and `/run` answers 503 until it is in.

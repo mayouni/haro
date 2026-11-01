@@ -215,7 +215,9 @@ compile on a thread of its own and returns; `admitstate([nWaitMs])` says "compil
 installs it where the call stands -- the same admission the verb makes, refused as it would refuse. HaroServer deploys
 everything that way: Softanza's library compiled while the loop answered 67,760 requests, the longest waiting 114 ms
 (the install and the library's top level, on the program's thread), where the whole 13.8 s compile was a pause before.
-One compiles at a time; HaroServer queues the rest and answers `/run` 503 meanwhile.
+One compiles at a time; HaroServer queues the rest and answers `/run` 503 meanwhile. **The install CLOSED the same
+evening** ("close HaroServer remaining task"): what it builds from the compile alone is built by the compiling thread,
+so the longest wait is 42-59 ms, most of it the library's own top level; and `chdir()` waits for a compile under way.
 
 **The alternative, if the author prefers the language side first:** the library derivation of rung 5 (body kinds refine a
 program, not a library, HF-103), or opening Z's route 3 (a runtime for a declared world, CHARTER section 3, HF-45). Both
