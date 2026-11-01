@@ -199,6 +199,8 @@ defines, the one friction every HaroServer app still meets. The namespace questi
 reach the desks with a re-lay, at the author's word. The namespace question stays his language decision.
 **RE-LAID 2026-11-01 at his word:** `D:\ringpp\ringpp-win64` and both packages carry 1c35218 -- every resident rung and
 HaroServer's natives; the fingerprint `D:\rpp-pkgtest\prog\resident_fp2.ring` tells them from the build before.
+**PUBLISHED the same day as release v2.0.8** (public main be4575f): the downloads carry `rnxc resident` and the
+`rpp_http_*` natives, both archives tested as shipped. The notes describe them without naming Haro.
 
 **The alternative, if the author prefers the language side first:** the library derivation of rung 5 (body kinds refine a
 program, not a library, HF-103), or opening Z's route 3 (a runtime for a declared world, CHARTER section 3, HF-45). Both
