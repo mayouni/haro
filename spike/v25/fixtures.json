@@ -1,0 +1,154 @@
+{
+  "grammar": "haro",
+  "version": "0.25",
+  "comment": "The Haro v0.25 conformance floor, written BEFORE the court that passes it (the W discipline: fixtures first, prose second). v0.25 grows v0.24 by the first two weaves (ZC4 of the constitution plane, on the author's 'Start ZC4', 2026-11-02): sovereignty (W3) and privacy (W4) are judged at the declaring altitude over the PERSONAL seats a constitution names, each at the SEVERITY the WEAVES clause declares -- constitutional refuses, governance warns, advisory notes -- and every refusal names the article it serves (Art. 5 organizational_sovereignty) and the declared REGIME's own article: GDPR where the world declares gdpr, Niger Law 2017-28 where it declares niger_2017_28, the regime by its declared name where Haro has no article table, 'no regime declared' where there is none -- never a default. The three paths a personal seat may not reach ungoverned are the ones a language declares: the voice (W4.4, a log), the ask (W4.2, analytics) and the published world (W3.1, a movement out of its zone); the model path is stzlib's and HaroBase's (the same rung). A CONSTRAINT gains SEVERITY (error or warning). The five other weaves stay carried and refused by name. Every v0.24 declaration still passes (A3 is v0.24's A1, unchanged); v0.23's R13 and R16 were amended with this rung and are recorded in v23/GRAMMAR.md. Rejects carry the fragment the refusal must contain.",
+  "accepts": [
+    {
+      "id": "A1",
+      "name": "a clinic under all six articles, both weaves constitutional, a regime and one personal seat the voice does not tell",
+      "source": "DEFINE LANGUAGE clinic AS (VERSION \"0.25\", GRAMMAR \"0.25\", COURT \"x\", EXTENSION \".clinic\") RATIONALE \"x\"\nDEFINE MENU holders AS (WORDS [the_clinic, the_ministry, the_insurer]) RATIONALE \"x\"\nDEFINE MENU wards AS (WORDS [maternity, surgery, outpatients]) RATIONALE \"x\"\nDEFINE DECLARATION patient AS (VERB \"PATIENT\", SEATS [full_name: text, file_no: text, ward: wards]) RATIONALE \"x\"\nDEFINE DECLARATION flow AS (VERB \"FLOW\", SEATS []) RATIONALE \"x\"\nDEFINE DECLARATION registry AS (VERB \"REGISTRY\", SEATS [held_by: holders, entered_through: flow]) RATIONALE \"x\"\nDEFINE REFUSAL unknown_verb AS (MESSAGE \"The verb set is closed\", CODE \"UNKNOWN_VERB\") RATIONALE \"x\"\nDEFINE REFINE clinic AS (POINTS [patient.full_name: field, patient.ward: knob], FLOOR [patient.full_name: external, patient.ward: trusted]) RATIONALE \"x\"\nDEFINE NARRATE voice AS (SAYS [patient: \"{name} (file {file_no}) is on {ward}.\", flow: \"{name} is a flow.\", registry: \"{name} is held by {held_by}, entered through {entered_through}.\"], REFUSES \"Stopped at line {line}: {message} ({cites})\") RATIONALE \"x\"\nDEFINE CONSTITUTION charter AS (ARTICLES [explainability, reversibility, visible_state, predictable_authority, organizational_sovereignty, trust_hierarchy], ZONE registry, SOVEREIGN held_by, MOVEMENT entered_through, WEAVES [sovereignty: constitutional, privacy: constitutional], REGIME gdpr, PERSONAL [patient.full_name]) RATIONALE \"the whole constitution, with its first two weaves\"\n",
+      "expect": {
+        "language": "clinic",
+        "counts": {
+          "declarations": 3,
+          "menus": 2
+        },
+        "constitution": 1,
+        "zone": "registry",
+        "regime": "gdpr",
+        "weaves": "sovereignty:constitutional,privacy:constitutional",
+        "personal": "patient.full_name"
+      }
+    },
+    {
+      "id": "A2",
+      "name": "privacy at governance severity: the voice tells the personal seat, and the sentence is accepted with a warning that names the weave, the article and the regime's own article",
+      "source": "DEFINE LANGUAGE clinic AS (VERSION \"0.25\", GRAMMAR \"0.25\", COURT \"x\", EXTENSION \".clinic\") RATIONALE \"x\"\nDEFINE DECLARATION patient AS (VERB \"PATIENT\", SEATS [full_name: text, file_no: text]) RATIONALE \"x\"\nDEFINE NARRATE voice AS (SAYS [patient: \"{name} is {full_name}, file {file_no}.\"]) RATIONALE \"x\"\nDEFINE CONSTITUTION charter AS (ARTICLES [visible_state], WEAVES [privacy: governance], REGIME gdpr, PERSONAL [patient.full_name]) RATIONALE \"x\"\n",
+      "expect": {
+        "language": "clinic",
+        "counts": {
+          "declarations": 1
+        },
+        "constitution": 1,
+        "weaves": "privacy:governance",
+        "warning": "W4.4 privacy: personal seat 'patient.full_name' is told by the voice -- a log carries no personal datum unredacted [Art. 5 organizational_sovereignty; gdpr: Article 5(1)(e)]"
+      }
+    },
+    {
+      "id": "A3",
+      "name": "a v0.24 declaration is a v0.25 declaration: v0.24's A1, unchanged -- no WEAVES, no REGIME, no PERSONAL",
+      "source": "DEFINE LANGUAGE bank AS (VERSION \"0.24\", GRAMMAR \"0.24\", COURT \"x\", EXTENSION \".bank\") RATIONALE \"x\"\nDEFINE MENU holders AS (WORDS [the_bank, the_clearing_house]) RATIONALE \"x\"\nDEFINE DECLARATION account AS (VERB \"ACCOUNT\", SEATS [holder: text, ceiling: number]) RATIONALE \"x\"\nDEFINE DECLARATION flow AS (VERB \"FLOW\", SEATS []) RATIONALE \"x\"\nDEFINE DECLARATION vault AS (VERB \"VAULT\", SEATS [held_by: holders, entered_through: flow]) RATIONALE \"x\"\nDEFINE REFUSAL unknown_verb AS (MESSAGE \"The verb set is closed\", CODE \"UNKNOWN_VERB\") RATIONALE \"x\"\nDEFINE REFINE bank AS (POINTS [account.ceiling: knob], FLOOR [account.ceiling: external]) RATIONALE \"x\"\nDEFINE NARRATE voice AS (SAYS [account: \"{name} is held by {holder} up to {ceiling}.\", flow: \"{name} is a flow.\", vault: \"{name} is held by {held_by}, entered through {entered_through}.\"], REFUSES \"Stopped at line {line}: {message} ({cites})\") RATIONALE \"x\"\nDEFINE CONSTITUTION charter AS (ARTICLES [explainability, reversibility, visible_state, predictable_authority, organizational_sovereignty, trust_hierarchy], ZONE vault, SOVEREIGN held_by, MOVEMENT entered_through) RATIONALE \"the whole constitution\"\n",
+      "expect": {
+        "language": "bank",
+        "counts": {
+          "declarations": 3
+        },
+        "constitution": 1,
+        "zone": "vault",
+        "regime": "",
+        "weaves": "",
+        "personal": ""
+      }
+    },
+    {
+      "id": "A4",
+      "name": "privacy at advisory severity: the same telling is accepted with a note",
+      "source": "DEFINE LANGUAGE clinic AS (VERSION \"0.25\", GRAMMAR \"0.25\", COURT \"x\", EXTENSION \".clinic\") RATIONALE \"x\"\nDEFINE DECLARATION patient AS (VERB \"PATIENT\", SEATS [full_name: text, file_no: text]) RATIONALE \"x\"\nDEFINE NARRATE voice AS (SAYS [patient: \"{name} is {full_name}, file {file_no}.\"]) RATIONALE \"x\"\nDEFINE CONSTITUTION charter AS (ARTICLES [visible_state], WEAVES [privacy: advisory], REGIME gdpr, PERSONAL [patient.full_name]) RATIONALE \"x\"\n",
+      "expect": {
+        "language": "clinic",
+        "counts": {
+          "declarations": 1
+        },
+        "constitution": 1,
+        "note": "W4.4 privacy: personal seat 'patient.full_name' is told by the voice -- a log carries no personal datum unredacted [Art. 5 organizational_sovereignty; gdpr: Article 5(1)(e)]"
+      }
+    },
+    {
+      "id": "A5",
+      "name": "a regime Haro has no article table for is named as declared, never replaced by a default",
+      "source": "DEFINE LANGUAGE clinic AS (VERSION \"0.25\", GRAMMAR \"0.25\", COURT \"x\", EXTENSION \".clinic\") RATIONALE \"x\"\nDEFINE DECLARATION patient AS (VERB \"PATIENT\", SEATS [full_name: text, file_no: text]) RATIONALE \"x\"\nDEFINE NARRATE voice AS (SAYS [patient: \"{name} is {full_name}, file {file_no}.\"]) RATIONALE \"x\"\nDEFINE CONSTITUTION charter AS (ARTICLES [visible_state], WEAVES [privacy: governance], REGIME ohada, PERSONAL [patient.full_name]) RATIONALE \"x\"\n",
+      "expect": {
+        "language": "clinic",
+        "counts": {
+          "declarations": 1
+        },
+        "regime": "ohada",
+        "warning": "W4.4 privacy: personal seat 'patient.full_name' is told by the voice -- a log carries no personal datum unredacted [Art. 5 organizational_sovereignty; regime 'ohada' as declared, which Haro v0.25 has no article table for]"
+      }
+    },
+    {
+      "id": "A6",
+      "name": "a CONSTRAINT may carry SEVERITY warning: the declaration is accepted (the court speaks it after the verdict)",
+      "source": "DEFINE LANGUAGE clinic AS (VERSION \"0.25\", GRAMMAR \"0.25\", COURT \"x\", EXTENSION \".clinic\") RATIONALE \"x\"\nDEFINE DECLARATION patient AS (VERB \"PATIENT\", SEATS [full_name: text, file_no: text]) RATIONALE \"x\"\nDEFINE CONSTRAINT one_file_per_patient AS (ON patient, WHEN \"earlier patient where file_no = this.file_no\", MESSAGE \"PATIENT {name} and PATIENT {other} share the file {file_no}\", CODE \"SHARED_FILE\", SEVERITY warning) RATIONALE \"x\"\n",
+      "expect": {
+        "language": "clinic",
+        "counts": {
+          "declarations": 1,
+          "constraints": 1
+        }
+      }
+    }
+  ],
+  "rejects": [
+    {
+      "id": "R1",
+      "name": "W4.4 privacy, constitutional: the voice tells a personal seat -- refused with the weave, the article and the regime's own article",
+      "source": "DEFINE LANGUAGE clinic AS (VERSION \"0.25\", GRAMMAR \"0.25\", COURT \"x\", EXTENSION \".clinic\") RATIONALE \"x\"\nDEFINE DECLARATION patient AS (VERB \"PATIENT\", SEATS [full_name: text, file_no: text]) RATIONALE \"x\"\nDEFINE NARRATE voice AS (SAYS [patient: \"{name} is {full_name}, file {file_no}.\"]) RATIONALE \"x\"\nDEFINE CONSTITUTION charter AS (ARTICLES [visible_state], WEAVES [privacy: constitutional], REGIME gdpr, PERSONAL [patient.full_name]) RATIONALE \"x\"\n",
+      "refusal": "W4.4 privacy: personal seat 'patient.full_name' is told by the voice -- a log carries no personal datum unredacted [Art. 5 organizational_sovereignty; gdpr: Article 5(1)(e)]"
+    },
+    {
+      "id": "R2",
+      "name": "W4.2 privacy: a kind that holds a personal seat is asked -- analytics over personal data needs consent",
+      "source": "DEFINE LANGUAGE clinic AS (VERSION \"0.25\", GRAMMAR \"0.25\", COURT \"x\", EXTENSION \".clinic\") RATIONALE \"x\"\nDEFINE DECLARATION patient AS (VERB \"PATIENT\", SEATS [full_name: text, file_no: text]) RATIONALE \"x\"\nDEFINE NARRATE voice AS (SAYS [patient: \"{name}, file {file_no}.\"]) RATIONALE \"x\"\nDEFINE ASK questions AS (FROM [patient]) RATIONALE \"x\"\nDEFINE CONSTITUTION charter AS (ARTICLES [visible_state], WEAVES [privacy: constitutional], REGIME gdpr, PERSONAL [patient.full_name]) RATIONALE \"x\"\n",
+      "refusal": "W4.2 privacy: kind 'patient' holds the personal seat 'full_name' and is asked (ASK FROM) -- usage over personal data is analytics, which needs consent [Art. 5 organizational_sovereignty; gdpr: Article 7]"
+    },
+    {
+      "id": "R3",
+      "name": "W3.1 sovereignty: a kind that holds a personal seat is published to the world -- personal data stays in its declared zone",
+      "source": "DEFINE LANGUAGE clinic AS (VERSION \"0.25\", GRAMMAR \"0.25\", COURT \"x\", EXTENSION \".clinic\") RATIONALE \"x\"\nDEFINE DECLARATION patient AS (VERB \"PATIENT\", SEATS [full_name: text, file_no: text]) RATIONALE \"x\"\nDEFINE NARRATE voice AS (SAYS [patient: \"{name}, file {file_no}.\"]) RATIONALE \"x\"\nDEFINE WORLD w AS (PUBLISH [patient: patient]) RATIONALE \"x\"\nDEFINE CONSTITUTION charter AS (ARTICLES [visible_state], WEAVES [sovereignty: constitutional], REGIME gdpr, PERSONAL [patient.full_name]) RATIONALE \"x\"\n",
+      "refusal": "W3.1 sovereignty: kind 'patient' holds the personal seat 'full_name' and is published to the world -- personal data stays in its declared zone [Art. 5 organizational_sovereignty; gdpr: Chapter V]"
+    },
+    {
+      "id": "R4",
+      "name": "no regime declared: the refusal says so, in place of any default",
+      "source": "DEFINE LANGUAGE clinic AS (VERSION \"0.25\", GRAMMAR \"0.25\", COURT \"x\", EXTENSION \".clinic\") RATIONALE \"x\"\nDEFINE DECLARATION patient AS (VERB \"PATIENT\", SEATS [full_name: text, file_no: text]) RATIONALE \"x\"\nDEFINE NARRATE voice AS (SAYS [patient: \"{name} is {full_name}, file {file_no}.\"]) RATIONALE \"x\"\nDEFINE CONSTITUTION charter AS (ARTICLES [visible_state], WEAVES [privacy: constitutional], PERSONAL [patient.full_name]) RATIONALE \"x\"\n",
+      "refusal": "W4.4 privacy: personal seat 'patient.full_name' is told by the voice -- a log carries no personal datum unredacted [Art. 5 organizational_sovereignty; no regime declared]"
+    },
+    {
+      "id": "R5",
+      "name": "PERSONAL names a seat of a declared kind",
+      "source": "DEFINE LANGUAGE clinic AS (VERSION \"0.25\", GRAMMAR \"0.25\", COURT \"x\", EXTENSION \".clinic\") RATIONALE \"x\"\nDEFINE DECLARATION patient AS (VERB \"PATIENT\", SEATS [full_name: text, file_no: text]) RATIONALE \"x\"\nDEFINE NARRATE voice AS (SAYS [patient: \"{name}, file {file_no}.\"]) RATIONALE \"x\"\nDEFINE CONSTITUTION charter AS (ARTICLES [visible_state], WEAVES [privacy: constitutional], REGIME gdpr, PERSONAL [patient.phone]) RATIONALE \"x\"\n",
+      "refusal": "PERSONAL names 'patient.phone', and 'patient' has no seat 'phone'"
+    },
+    {
+      "id": "R6",
+      "name": "the personal seats are the weaves' to govern: PERSONAL without privacy or sovereignty is refused, not accepted by silence",
+      "source": "DEFINE LANGUAGE clinic AS (VERSION \"0.25\", GRAMMAR \"0.25\", COURT \"x\", EXTENSION \".clinic\") RATIONALE \"x\"\nDEFINE DECLARATION patient AS (VERB \"PATIENT\", SEATS [full_name: text, file_no: text]) RATIONALE \"x\"\nDEFINE NARRATE voice AS (SAYS [patient: \"{name}, file {file_no}.\"]) RATIONALE \"x\"\nDEFINE CONSTITUTION charter AS (ARTICLES [visible_state], REGIME gdpr, PERSONAL [patient.full_name]) RATIONALE \"x\"\n",
+      "refusal": "PERSONAL is named and neither privacy (W4) nor sovereignty (W3) is among WEAVES -- the personal seats are the weaves' to govern"
+    },
+    {
+      "id": "R7",
+      "name": "a weave not built is still refused by name: the five others are carried, not judged",
+      "source": "DEFINE LANGUAGE clinic AS (VERSION \"0.25\", GRAMMAR \"0.25\", COURT \"x\", EXTENSION \".clinic\") RATIONALE \"x\"\nDEFINE DECLARATION patient AS (VERB \"PATIENT\", SEATS [full_name: text, file_no: text]) RATIONALE \"x\"\nDEFINE NARRATE voice AS (SAYS [patient: \"{name}, file {file_no}.\"]) RATIONALE \"x\"\nDEFINE CONSTITUTION charter AS (ARTICLES [visible_state], WEAVES [resilience: constitutional], REGIME gdpr) RATIONALE \"x\"\n",
+      "refusal": "WEAVES names 'resilience', and no weave but sovereignty (W3) and privacy (W4) is judged in Haro v0.25 -- the five others are Zin's design, carried, not built"
+    },
+    {
+      "id": "R8",
+      "name": "the regional regime Zin's companion lists is named by its law: Niger Law 2017-28",
+      "source": "DEFINE LANGUAGE clinic AS (VERSION \"0.25\", GRAMMAR \"0.25\", COURT \"x\", EXTENSION \".clinic\") RATIONALE \"x\"\nDEFINE DECLARATION patient AS (VERB \"PATIENT\", SEATS [full_name: text, file_no: text]) RATIONALE \"x\"\nDEFINE NARRATE voice AS (SAYS [patient: \"{name} is {full_name}, file {file_no}.\"]) RATIONALE \"x\"\nDEFINE CONSTITUTION charter AS (ARTICLES [visible_state], WEAVES [privacy: constitutional], REGIME niger_2017_28, PERSONAL [patient.full_name]) RATIONALE \"x\"\n",
+      "refusal": "W4.4 privacy: personal seat 'patient.full_name' is told by the voice -- a log carries no personal datum unredacted [Art. 5 organizational_sovereignty; Niger Law 2017-28]"
+    },
+    {
+      "id": "R9",
+      "name": "a CONSTRAINT's SEVERITY is error or warning",
+      "source": "DEFINE LANGUAGE clinic AS (VERSION \"0.25\", GRAMMAR \"0.25\", COURT \"x\", EXTENSION \".clinic\") RATIONALE \"x\"\nDEFINE DECLARATION patient AS (VERB \"PATIENT\", SEATS [full_name: text, file_no: text]) RATIONALE \"x\"\nDEFINE CONSTRAINT one_file_per_patient AS (ON patient, WHEN \"earlier patient where file_no = this.file_no\", MESSAGE \"PATIENT {name} and PATIENT {other} share the file {file_no}\", CODE \"SHARED_FILE\", SEVERITY loud) RATIONALE \"x\"\n",
+      "refusal": "'loud' is not a SEVERITY of a CONSTRAINT: error or warning"
+    },
+    {
+      "id": "R10",
+      "name": "REGIME is read by the weaves: a regime without any weave is refused, not accepted by silence",
+      "source": "DEFINE LANGUAGE clinic AS (VERSION \"0.25\", GRAMMAR \"0.25\", COURT \"x\", EXTENSION \".clinic\") RATIONALE \"x\"\nDEFINE DECLARATION patient AS (VERB \"PATIENT\", SEATS [full_name: text, file_no: text]) RATIONALE \"x\"\nDEFINE NARRATE voice AS (SAYS [patient: \"{name}, file {file_no}.\"]) RATIONALE \"x\"\nDEFINE CONSTITUTION charter AS (ARTICLES [visible_state], REGIME gdpr) RATIONALE \"x\"\n",
+      "refusal": "REGIME is named and no weave is among WEAVES -- a regime is read by the weaves' refusals"
+    }
+  ]
+}

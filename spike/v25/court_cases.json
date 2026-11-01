@@ -1,0 +1,65 @@
+{
+  "name": "the clinic under the whole constitution and its first two weaves -- sentence-level cases for Haro v0.25 (ZC4)",
+  "comment": "Written BEFORE the court code (the W discipline). Each case runs the court forged from clinic_v25.haro on rnxc AND on the oracle; the two must print the same bytes. The shapes are v0.24's (first, contains, counts, diagnose, record, sequence); 'diagnose' may also name a severity.",
+  "cases": [
+    {
+      "id": "X1",
+      "name": "the clean clinic is a sentence: two patients, a flow, a registry",
+      "verb": "check",
+      "args": ["clinic/ward.clinic"],
+      "first": "ok",
+      "counts": {"PATIENT": 2, "FLOW": 1, "REGISTRY": 1}
+    },
+    {
+      "id": "X2",
+      "name": "the meta-court reads the clinic's declaration: all six articles, the zone, both weaves constitutional, the regime, the personal seat",
+      "verb": "meta",
+      "args": ["clinic_v25.haro"],
+      "first": "ok",
+      "contains": ["zone registry", "regime gdpr", "weaves sovereignty:constitutional,privacy:constitutional", "personal patient.full_name"]
+    },
+    {
+      "id": "X3",
+      "name": "Art. 3 through the voice, under W4.4: the patients are told by file number, never by name",
+      "verb": "narrate",
+      "args": ["clinic/ward.clinic"],
+      "contains": ["p1 (file F-12) is on maternity.", "p2 (file F-13) is on surgery.", "clinic_registry is held by the_clinic, entered through admission."]
+    },
+    {
+      "id": "X4",
+      "name": "W4.4 in the chain: a personal point refined is admitted with its values redacted, on the admitted line and in the audit chain",
+      "verb": "sequence",
+      "steps": [["refine", "clinic/ward.clinic", "clinic/name_external.rfn"], ["audit", "clinic/ward.clinic"]],
+      "contains": ["admitted: p1.FULL_NAME [personal] -> [personal] [external]", "\"target\": \"p1.FULL_NAME\", \"from\": \"[personal]\", \"to\": \"[personal]\", \"author\": \"the-desk-system\", \"posture\": \"external\", \"verdict\": \"admitted\"", "1 events"]
+    },
+    {
+      "id": "X5",
+      "name": "the redaction is per point: a refused move of a ward keeps its values in the chain, Art. 6 named",
+      "verb": "sequence",
+      "steps": [["refine", "clinic/ward.clinic", "clinic/ward_llm.rfn"], ["audit", "clinic/ward.clinic"]],
+      "contains": ["below the required floor :trusted for 'p1.WARD' [Art. 6 trust_hierarchy]", "\"target\": \"p1.WARD\", \"from\": \"maternity\", \"to\": \"surgery\", \"author\": \"aicha\", \"posture\": \"llm\", \"verdict\": \"refused\", \"stage\": \"trust\", \"code\": \"TRUST_FLOOR\""]
+    },
+    {
+      "id": "X6",
+      "name": "SEVERITY warning on a CONSTRAINT: two patients on one file stand, and the court speaks the warning after its verdict, with its code",
+      "verb": "check",
+      "args": ["clinic/ward_shared_file.clinic"],
+      "first": "ok",
+      "contains": ["warning SHARED_FILE: PATIENT p2 and PATIENT p1 share the file F-12: a file number names one patient (line 9)"]
+    },
+    {
+      "id": "X7",
+      "name": "the same warning in the envelope: severity warning, the constraint's code and what it CITES",
+      "verb": "diagnose",
+      "args": ["clinic/ward_shared_file.clinic"],
+      "diagnose": {"code": "SHARED_FILE", "severity": "warning", "cites": ["right:one-file-one-patient"]}
+    },
+    {
+      "id": "X8",
+      "name": "a clean sentence diagnosed is empty, warnings included",
+      "verb": "diagnose",
+      "args": ["clinic/ward.clinic"],
+      "first": "{\"diagnostics\": []}"
+    }
+  ]
+}

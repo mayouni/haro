@@ -1,0 +1,16 @@
+-- ward.clinic -- a sentence of clinic_v25.haro: two patients, a flow, a registry. Clean.
+-- The names are placeholders, never a person's.
+
+DEFINE PATIENT p1 AS (
+  FULL_NAME "Patient One", FILE_NO "F-12", WARD maternity
+) RATIONALE "Admitted this morning"
+
+DEFINE PATIENT p2 AS (
+  FULL_NAME "Patient Two", FILE_NO "F-13", WARD surgery
+) RATIONALE "Admitted at noon"
+
+DEFINE FLOW admission AS () RATIONALE "The desk's admission, walked before a record lands"
+
+DEFINE REGISTRY clinic_registry AS (
+  HELD_BY the_clinic, ENTERED_THROUGH admission
+) RATIONALE "The clinic's own records, entered only by admission"

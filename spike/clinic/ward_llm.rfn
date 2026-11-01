@@ -1,0 +1,9 @@
+-- ward_llm.rfn -- a model proposes to move a patient to another ward: the ward is a knob
+-- floored trusted, so the proposal is refused at the trust stage, Art. 6 named; the ward is
+-- not personal, so the chain keeps its values.
+DEFINE REFINE move_the_patient AS (
+  TARGET "p1.WARD", KIND knob,
+  FROM "maternity", TO "surgery",
+  AUTHOR "aicha", POSTURE llm,
+  REASON "the maternity ward is full tonight"
+) RATIONALE "A ward is the clinic's to decide"

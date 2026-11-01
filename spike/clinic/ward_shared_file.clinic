@@ -1,0 +1,16 @@
+-- ward_shared_file.clinic -- two patients on one file: the clinic's constraint is a warning,
+-- so the sentence stands and the court speaks the warning after its verdict.
+
+DEFINE PATIENT p1 AS (
+  FULL_NAME "Patient One", FILE_NO "F-12", WARD maternity
+) RATIONALE "Admitted this morning"
+
+DEFINE PATIENT p2 AS (
+  FULL_NAME "Patient Two", FILE_NO "F-12", WARD surgery
+) RATIONALE "Admitted at noon, on the same file by a clerk's slip"
+
+DEFINE FLOW admission AS () RATIONALE "The desk's admission, walked before a record lands"
+
+DEFINE REGISTRY clinic_registry AS (
+  HELD_BY the_clinic, ENTERED_THROUGH admission
+) RATIONALE "The clinic's own records, entered only by admission"

@@ -153,9 +153,9 @@
     },
     {
       "id": "R13",
-      "name": "WEAVES is a seat the sentence carries and v0.23 judges by nothing: a weave named is refused as ZC4's, by name",
-      "source": "DEFINE LANGUAGE bank AS (VERSION \"0.23\", GRAMMAR \"0.23\", COURT \"x\", EXTENSION \".bank\") RATIONALE \"x\"\nDEFINE DECLARATION account AS (VERB \"ACCOUNT\", SEATS [holder: text]) RATIONALE \"x\"\nDEFINE REFINE bank AS (POINTS [account.holder: field]) RATIONALE \"x\"\nDEFINE CONSTITUTION charter AS (ARTICLES [reversibility], WEAVES [privacy: governance]) RATIONALE \"x\"\n",
-      "refusal": "WEAVES names 'privacy', and no weave is judged in Haro v0.23 -- ZC4 builds sovereignty (W3) and privacy (W4) as field tags, fixtures first"
+      "name": "WEAVES: in v0.23 this pinned 'no weave is judged yet'; since v0.25 (ZC4) sovereignty and privacy are, and it pins that the five others are still refused by name (amended 2026-11-02, recorded in v25/GRAMMAR.md)",
+      "source": "DEFINE LANGUAGE bank AS (VERSION \"0.23\", GRAMMAR \"0.23\", COURT \"x\", EXTENSION \".bank\") RATIONALE \"x\"\nDEFINE DECLARATION account AS (VERB \"ACCOUNT\", SEATS [holder: text]) RATIONALE \"x\"\nDEFINE REFINE bank AS (POINTS [account.holder: field]) RATIONALE \"x\"\nDEFINE CONSTITUTION charter AS (ARTICLES [reversibility], WEAVES [resilience: governance]) RATIONALE \"x\"\n",
+      "refusal": "WEAVES names 'resilience', and no weave but sovereignty (W3) and privacy (W4) is judged in Haro v0.25"
     },
     {
       "id": "R14",
@@ -171,9 +171,9 @@
     },
     {
       "id": "R16",
-      "name": "REGIME is a seat the sentence carries and v0.23 reads by nothing: a regime named is refused as ZC4's, by name -- never a default",
+      "name": "REGIME: in v0.23 this pinned 'no weave reads a regime yet'; since v0.25 (ZC4) the weaves do, and it pins that a regime without any weave is refused, not accepted by silence (amended 2026-11-02, recorded in v25/GRAMMAR.md)",
       "source": "DEFINE LANGUAGE bank AS (VERSION \"0.23\", GRAMMAR \"0.23\", COURT \"x\", EXTENSION \".bank\") RATIONALE \"x\"\nDEFINE DECLARATION account AS (VERB \"ACCOUNT\", SEATS [holder: text]) RATIONALE \"x\"\nDEFINE REFINE bank AS (POINTS [account.holder: field]) RATIONALE \"x\"\nDEFINE CONSTITUTION charter AS (ARTICLES [reversibility], REGIME gdpr) RATIONALE \"x\"\n",
-      "refusal": "REGIME names 'gdpr', and no weave reads a regime in Haro v0.23 -- ZC4 names the declared regime in every refusal of a weave, never a default"
+      "refusal": "REGIME is named and no weave is among WEAVES -- a regime is read by the weaves' refusals"
     },
     {
       "id": "R17",

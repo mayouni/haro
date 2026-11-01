@@ -1,0 +1,8 @@
+-- name_external.rfn -- the desk's system corrects a patient's name, at the point's floor:
+-- admitted, and the personal values enter the audit chain redacted (W4.4).
+DEFINE REFINE correct_the_name AS (
+  TARGET "p1.FULL_NAME", KIND field,
+  FROM "Patient One", TO "Patient One Corrected",
+  AUTHOR "the-desk-system", POSTURE external,
+  REASON "the admission form was misread"
+) RATIONALE "A name is a field the desk's system may correct"

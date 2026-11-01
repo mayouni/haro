@@ -1,0 +1,105 @@
+-- clinic_v25.haro -- a clinic's registry declared under the whole constitution and its first
+-- two weaves (Haro v0.25, the constitution plane's ZC4): patients, their wards, the flows an
+-- admission walks and the registries records land in, held by an organization. A patient's
+-- full name is PERSONAL: the voice does not tell it, no question is asked over patients, the
+-- world does not publish them, and a refinement of the name enters the audit chain redacted.
+-- The regime is the declared one -- gdpr here -- and every weave refusal names its article.
+-- A sector, never a patient's real name: the sentences carry file numbers and placeholders.
+-- The sentences judged by `haro_forge.py --stage=31` are in clinic/.
+
+DEFINE LANGUAGE clinic AS (
+  VERSION "0.25",
+  GRAMMAR "0.25",
+  COURT "v25/court_cases.json",
+  EXTENSION ".clinic"
+) RATIONALE "A clinic's patients, wards, admission flows and registries, declared under all six articles and the sovereignty and privacy weaves"
+
+-- ---- the menus -----------------------------------------------------------------------------
+
+DEFINE MENU holders AS (
+  WORDS [the_clinic, the_ministry, the_insurer],
+  MESSAGE "HELD_BY is the_clinic, the_ministry or the_insurer, not '{value}'",
+  CODE "HOLDER"
+) RATIONALE "The organizations that may hold a registry: sectors and roles, never a person"
+
+DEFINE MENU wards AS (
+  WORDS [maternity, surgery, outpatients],
+  MESSAGE "WARD is maternity, surgery or outpatients, not '{value}'",
+  CODE "WARD"
+) RATIONALE "The clinic's three wards"
+
+-- ---- the kinds -----------------------------------------------------------------------------
+
+DEFINE DECLARATION patient AS (
+  VERB "PATIENT",
+  SEATS [full_name: text, file_no: text, ward: wards]
+) RATIONALE "A patient: the name the clinic knows them by (personal), the file number the clinic speaks of them by, and the ward"
+
+DEFINE DECLARATION flow AS (
+  VERB "FLOW",
+  SEATS []
+) RATIONALE "A named walk an admission takes before its record lands"
+
+DEFINE DECLARATION registry AS (
+  VERB "REGISTRY",
+  SEATS [held_by: holders, entered_through: flow],
+  MESSAGES [entered_through: "REGISTRY {name} is entered through '{value}', and no FLOW of that name is declared: a record enters a registry only through a declared flow"],
+  CODES [held_by: "NO_HOLDER", entered_through: "NO_FLOW"]
+) RATIONALE "Where the clinic's records land: held by one organization, entered through one declared flow -- the zone of this world"
+
+-- ---- the constraints -----------------------------------------------------------------------
+
+DEFINE CONSTRAINT one_file_per_patient AS (
+  ON patient, WHEN "earlier patient where file_no = this.file_no",
+  MESSAGE "PATIENT {name} and PATIENT {other} share the file {file_no}: a file number names one patient",
+  CODE "SHARED_FILE",
+  CITES ["right:one-file-one-patient"],
+  SEVERITY warning
+) RATIONALE "Two patients on one file is a clerk's error the clinic corrects at the desk, not a sentence it refuses: a warning, spoken after the verdict"
+
+-- ---- the refusals --------------------------------------------------------------------------
+
+DEFINE REFUSAL unknown_verb AS (
+  MESSAGE "The clinic's verb set is closed: PATIENT, FLOW and REGISTRY, nothing else.",
+  CODE "UNKNOWN_VERB"
+) RATIONALE "A verb the clinic does not know is unparseable, not forbidden"
+
+DEFINE REFUSAL unknown_declaration AS (
+  MESSAGE "The clinic's verb set is closed: PATIENT, FLOW and REGISTRY, nothing else.",
+  CODE "UNKNOWN_DECLARATION"
+) RATIONALE "DEFINE ANYTHING_ELSE is as unparseable as a verb the clinic does not know"
+
+DEFINE REFUSAL dangling_reference AS (
+  MESSAGE "This name resolves to nothing in the clinic.",
+  CODE "DANGLING"
+) RATIONALE "A registry's ENTERED_THROUGH resolves at check time"
+
+-- ---- the refinement points: what may change, by whom ----------------------------------------
+
+DEFINE REFINE clinic AS (
+  POINTS [patient.full_name: field, patient.ward: knob, registry.held_by: policy],
+  FLOOR [patient.full_name: external, patient.ward: trusted, registry.held_by: trusted]
+) RATIONALE "A name is corrected by the desk's system (external); a ward and a registry's holder are the clinic's, and only a trusted actor touches them"
+
+-- ---- the voice: every kind told, the personal seat not --------------------------------------
+
+DEFINE NARRATE clinic_voice AS (
+  OPENS "{file} is a clinic of {count} declarations.",
+  SAYS [
+    patient: "{name} (file {file_no}) is on {ward}. {rationale}",
+    flow: "{name} is a flow admissions walk. {rationale}",
+    registry: "{name} is held by {held_by}, entered through {entered_through}. {rationale}"
+  ],
+  ENDS "That is the whole clinic.",
+  REFUSES "Stopped at line {line}: {message} ({code}; {cites})"
+) RATIONALE "The clinic read back as its matron would say it: by file number, never by name -- a log carries no personal datum"
+
+-- ---- the constitution: all six, and the first two weaves -----------------------------------------
+
+DEFINE CONSTITUTION clinic_charter AS (
+  ARTICLES [explainability, reversibility, visible_state, predictable_authority, organizational_sovereignty, trust_hierarchy],
+  ZONE registry, SOVEREIGN held_by, MOVEMENT entered_through,
+  WEAVES [sovereignty: constitutional, privacy: constitutional],
+  REGIME gdpr,
+  PERSONAL [patient.full_name]
+) RATIONALE "The whole constitution with sovereignty and privacy constitutional: a patient's name is told by no voice, asked by no question, published to no world, and enters the chain redacted; the regime the clinic declares is gdpr, and every refusal names its article"
