@@ -139,7 +139,8 @@ rungs. Running it will show what is still missing rather than guessing:
 - whether objects must move to a class's new layout when an app adds an attribute while it runs.
 
 **BUILT, HaroServer's first build, 2026-10-31 (bd38342), at the author's word: the host loop on the resident VM**
-(`haro/serv/`, with its README).
+(`haro/serv/`, with its README; since 2026-11-02 its own private repository, github.com/mayouni/haroserver, checked out at
+D:\GitHub\haroserver, history kept -- Ring++'s gate runs its court against every build when that checkout is there).
 - **What it is:** the loop is the program's own, under `rnxc resident`. It waits for a request, routes it to the
   function an app registered, and answers. A deployment is a request too (`POST /admit/<app>`, `POST /replace/<app>`).
   The socket under it is eight rnxc natives (`src/httpd.zig`), part of the one binary.
