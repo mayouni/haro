@@ -1,0 +1,131 @@
+{
+ "name": "the one LOAD and its printings (COMPASS-REBOL-06, ruled yes 2026-10-30), fixtures first",
+ "comment": "Written BEFORE any reader or printer. LOAD reads C6 text (strings in double quotes, numbers, lower_snake words, UPPER_SNAKE keywords, paths a.b, pairs key: value, lists [ ], groups ( ), comments --) into a block of typed values; the memo spelling (the indentation subset of C9 and .pia, read as _StzOutputParseMemo reads it) loads to the same values: a map is a group of pairs, a list a list, every scalar a string. \"same\" pairs must LOAD to equal blocks, \"differ\" pairs must not; \"canonical\" gives the one printing of a block; \"refused\" a text the LOAD refuses, with a fragment of why.",
+ "same": [
+  {
+   "id": "L01",
+   "name": "one declaration, one line and many lines",
+   "a": "DEFINE MENU tones AS (WORDS [plain, formal], CODE \"X\") RATIONALE \"the tones\"",
+   "b": "DEFINE MENU tones AS (\n  WORDS [\n    plain,\n    formal,\n  ],\n  CODE \"X\",\n) RATIONALE \"the tones\"\n"
+  },
+  {
+   "id": "L02",
+   "name": "a trailing comma is layout",
+   "a": "[a, b]",
+   "b": "[a, b,]"
+  },
+  {
+   "id": "L03",
+   "name": "a string across lines folds its continuation indent to one space (C6 3.2)",
+   "a": "DEFINE X y AS () RATIONALE \"a long\n    rationale\"",
+   "b": "DEFINE X y AS () RATIONALE \"a long rationale\""
+  },
+  {
+   "id": "L04",
+   "name": "CRLF and LF are the same text (C6 3.10)",
+   "a": "DEFINE MENU tones AS (\r\nWORDS [plain, formal], CODE \"X\") RATIONALE \"the tones\"",
+   "b": "DEFINE MENU tones AS (\nWORDS [plain, formal], CODE \"X\") RATIONALE \"the tones\""
+  },
+  {
+   "id": "L05",
+   "name": "a memo in its own spelling and in C6 are one block",
+   "a": "by: ringpp\nsubject: a memo\ndid:\n  - one thing\n  - another\nstate:\n  ringpp: next 9a92a6f\n",
+   "a_spelling": "memo",
+   "b": "(by: \"ringpp\", subject: \"a memo\", did: [\"one thing\", \"another\"], state: (ringpp: \"next 9a92a6f\"))"
+  },
+  {
+   "id": "L06",
+   "name": "a .pia agent (a list of maps) in both spellings",
+   "a": "pia: 1\nname: stock-watcher\nskills:\n  - name: check-stock\n    when: always\n",
+   "a_spelling": "memo",
+   "b": "(pia: \"1\", name: \"stock-watcher\", skills: [(name: \"check-stock\", when: \"always\")])"
+  },
+  {
+   "id": "L07",
+   "name": "a comment survives as a value of the block, in its place",
+   "a": "(A 1, -- why\n B 2)",
+   "b": "(\n  A 1,\n  -- why\n  B 2\n)"
+  }
+ ],
+ "differ": [
+  {
+   "id": "D01",
+   "name": "two items are not one row of two values",
+   "a": "[a, b]",
+   "b": "[a b]"
+  },
+  {
+   "id": "D02",
+   "name": "a string is not a word",
+   "a": "\"a\"",
+   "b": "a"
+  },
+  {
+   "id": "D03",
+   "name": "a keyword is not a word: case is meaning (C6 3.4, 3.5)",
+   "a": "CODE",
+   "b": "code"
+  },
+  {
+   "id": "D04",
+   "name": "in the memo spelling every scalar is a string, so the C6 word is another value",
+   "a": "by: ringpp\n",
+   "a_spelling": "memo",
+   "b": "(by: ringpp)"
+  }
+ ],
+ "canonical": [
+  {
+   "id": "K01",
+   "name": "a declaration: its clauses one a line, a list inline, no trailing comma",
+   "text": "DEFINE MENU tones AS (\n  WORDS [\n    plain,\n    formal,\n  ],\n  CODE \"X\",\n) RATIONALE \"the tones\"\n",
+   "canonical": "DEFINE MENU tones AS (\n  WORDS [plain, formal],\n  CODE \"X\"\n) RATIONALE \"the tones\"\n"
+  },
+  {
+   "id": "K02",
+   "name": "two declarations: a blank line between them",
+   "text": "DEFINE MENU tones AS (WORDS [plain, formal], CODE \"X\") RATIONALE \"the tones\" DEFINE MENU moods AS (WORDS [plain, formal], CODE \"X\") RATIONALE \"the moods\"",
+   "canonical": "DEFINE MENU tones AS (\n  WORDS [plain, formal],\n  CODE \"X\"\n) RATIONALE \"the tones\"\n\nDEFINE MENU moods AS (\n  WORDS [plain, formal],\n  CODE \"X\"\n) RATIONALE \"the moods\"\n"
+  },
+  {
+   "id": "K03",
+   "name": "a memo printed in its own spelling",
+   "text": "(by: \"ringpp\", subject: \"a memo\", did: [\"one thing\", \"another\"], state: (ringpp: \"next 9a92a6f\"))",
+   "spelling": "memo",
+   "canonical": "by: ringpp\nsubject: a memo\ndid:\n  - one thing\n  - another\nstate:\n  ringpp: next 9a92a6f\n"
+  }
+ ],
+ "refused": [
+  {
+   "id": "F01",
+   "name": "single quotes are .zql's divergence (D-ZQL-1), not C6",
+   "text": "x 'a'",
+   "why": "single quote"
+  },
+  {
+   "id": "F02",
+   "name": "a string never closed",
+   "text": "x \"a",
+   "why": "not closed"
+  },
+  {
+   "id": "F03",
+   "name": "a list never closed",
+   "text": "[a, b",
+   "why": "not closed"
+  },
+  {
+   "id": "F04",
+   "name": "a comma outside a list or a group",
+   "text": "a, b",
+   "why": "comma"
+  },
+  {
+   "id": "F05",
+   "name": "a memo that opens with a bare list (as _StzOutputParseMemo refuses it)",
+   "text": "- a\n- b\n",
+   "spelling": "memo",
+   "why": "bare list"
+  }
+ ]
+}

@@ -1,0 +1,632 @@
+{
+ "name": "pattern rules over blocks of typed values (COMPASS-REBOL-07, ruled yes 2026-10-30), fixtures first",
+ "comment": "Written BEFORE any engine. A rule is a C6 list read by the one LOAD, so a grammar is data. Pattern words are UPPER_SNAKE keywords: the types WORD STRING NUMBER KEYWORD PATH PAIR LIST GROUP ROW and SKIP (any one value); END; OPT ANY SOME REPEAT n [m]; OR (ordered choice, as Parse | and PEG /); NOT and AHEAD (look, consume nothing); INTO (descend into a list, a group, a row or a pair -- a pair reads as its key then its value); TO and THRU; COLLECT and KEEP (Parse collect/keep); RULE name (a named rule); MEMBER name (a value drawn from a declared set -- a set is DATA the court collects from the sentence or the world, never code); LIT v (a keyword or any value matched as itself). A lower_snake word, a string or a number in a rule matches itself. A nested list in a rule is a sub-rule. A rule matches only when it consumes its whole input. THE BOUND, refused at declaration: recursion (the named rules form a DAG), a repetition or TO over a rule that can match nothing (so every ANY/SOME turn consumes a value of a finite input: Parse's documented infinite loop cannot be written), a group in a rule (Parse paren!, the host escape), WHILE, DO, and the editing words (CHANGE, INSERT, REMOVE): a pattern judges and never edits. Comments are not values. In the input, list and group items are separated by commas; an item of several values is a ROW (a clause such as CODE \"X\" is one).",
+ "matches": [
+  {
+   "id": "P01",
+   "name": "a sequence of types",
+   "rules": {
+    "main": "[WORD NUMBER STRING]"
+   },
+   "start": "main",
+   "input": "tone 3 \"x\"",
+   "expect": {
+    "match": true
+   }
+  },
+  {
+   "id": "P02",
+   "name": "the same sequence, out of order, does not match",
+   "rules": {
+    "main": "[WORD NUMBER STRING]"
+   },
+   "start": "main",
+   "input": "tone \"x\" 3",
+   "expect": {
+    "match": false
+   }
+  },
+  {
+   "id": "P03",
+   "name": "OPT: a value that may be absent",
+   "rules": {
+    "main": "[WORD OPT NUMBER STRING]"
+   },
+   "start": "main",
+   "input": "tone \"x\"",
+   "expect": {
+    "match": true
+   }
+  },
+  {
+   "id": "P04",
+   "name": "ANY then END: every value is a word",
+   "rules": {
+    "main": "[ANY WORD END]"
+   },
+   "start": "main",
+   "input": "a b c",
+   "expect": {
+    "match": true
+   }
+  },
+  {
+   "id": "P05",
+   "name": "ANY then END: a number stops it short of the end",
+   "rules": {
+    "main": "[ANY WORD END]"
+   },
+   "start": "main",
+   "input": "a 1",
+   "expect": {
+    "match": false
+   }
+  },
+  {
+   "id": "P06",
+   "name": "SOME needs at least one",
+   "rules": {
+    "main": "[SOME NUMBER]"
+   },
+   "start": "main",
+   "input": "",
+   "expect": {
+    "match": false
+   }
+  },
+  {
+   "id": "P07",
+   "name": "OR: ordered choice, the second alternative taken",
+   "rules": {
+    "main": "[WORD OR NUMBER]"
+   },
+   "start": "main",
+   "input": "5",
+   "expect": {
+    "match": true
+   }
+  },
+  {
+   "id": "P08",
+   "name": "literal words as a closed menu: a word outside it does not match",
+   "rules": {
+    "main": "[plain OR formal OR urgent]"
+   },
+   "start": "main",
+   "input": "shouty",
+   "expect": {
+    "match": false
+   }
+  },
+  {
+   "id": "P09",
+   "name": "literal words as a closed menu: a word inside it matches",
+   "rules": {
+    "main": "[plain OR formal OR urgent]"
+   },
+   "start": "main",
+   "input": "formal",
+   "expect": {
+    "match": true
+   }
+  },
+  {
+   "id": "P10",
+   "name": "LIT matches a keyword as itself (a bare keyword in a rule is a pattern word)",
+   "rules": {
+    "main": "[LIT DEFINE KEYWORD WORD]"
+   },
+   "start": "main",
+   "input": "DEFINE MENU tones",
+   "expect": {
+    "match": true
+   }
+  },
+  {
+   "id": "P11",
+   "name": "INTO descends into a list: every item a word",
+   "rules": {
+    "main": "[WORD INTO [ANY WORD]]"
+   },
+   "start": "main",
+   "input": "tags [a, b, c]",
+   "expect": {
+    "match": true
+   }
+  },
+  {
+   "id": "P12",
+   "name": "INTO: a number among the items does not match",
+   "rules": {
+    "main": "[WORD INTO [ANY WORD]]"
+   },
+   "start": "main",
+   "input": "tags [a, 2, c]",
+   "expect": {
+    "match": false
+   }
+  },
+  {
+   "id": "P13",
+   "name": "a declaration's shape: DEFINE, its kind, its name, AS, a group of rows, RATIONALE and a string",
+   "rules": {
+    "main": "[LIT DEFINE KEYWORD WORD LIT AS INTO [ANY ROW] LIT RATIONALE STRING]"
+   },
+   "start": "main",
+   "input": "DEFINE MENU tones AS (WORDS [plain, formal], CODE \"X\") RATIONALE \"r\"",
+   "expect": {
+    "match": true
+   }
+  },
+  {
+   "id": "P14",
+   "name": "a clause is a row of a keyword and one value",
+   "rules": {
+    "clause": "[INTO [KEYWORD SKIP]]",
+    "main": "[INTO [ANY RULE clause]]"
+   },
+   "start": "main",
+   "input": "(WORDS [plain], CODE \"X\")",
+   "expect": {
+    "match": true
+   }
+  },
+  {
+   "id": "P15",
+   "name": "a bare string where a clause belongs is not a row",
+   "rules": {
+    "clause": "[INTO [KEYWORD SKIP]]",
+    "main": "[INTO [ANY RULE clause]]"
+   },
+   "start": "main",
+   "input": "(WORDS [plain], \"X\")",
+   "expect": {
+    "match": false
+   }
+  },
+  {
+   "id": "P16",
+   "name": "PAIR: a seat list is pairs",
+   "rules": {
+    "main": "[INTO [ANY PAIR]]"
+   },
+   "start": "main",
+   "input": "[name: text, ceiling: number]",
+   "expect": {
+    "match": true
+   }
+  },
+  {
+   "id": "P17",
+   "name": "INTO a pair reads it as its key and its value",
+   "rules": {
+    "main": "[INTO [ANY INTO [WORD WORD]]]"
+   },
+   "start": "main",
+   "input": "[name: text, ceiling: number]",
+   "expect": {
+    "match": true
+   }
+  },
+  {
+   "id": "P18",
+   "name": "MEMBER: a value drawn from a declared set",
+   "rules": {
+    "main": "[INTO [ANY MEMBER tones]]"
+   },
+   "start": "main",
+   "input": "[plain, urgent]",
+   "expect": {
+    "match": true
+   },
+   "sets": {
+    "tones": [
+     "plain",
+     "formal",
+     "urgent"
+    ]
+   }
+  },
+  {
+   "id": "P19",
+   "name": "MEMBER: a value outside the set does not match",
+   "rules": {
+    "main": "[INTO [ANY MEMBER tones]]"
+   },
+   "start": "main",
+   "input": "[plain, loud]",
+   "expect": {
+    "match": false
+   },
+   "sets": {
+    "tones": [
+     "plain",
+     "formal",
+     "urgent"
+    ]
+   }
+  },
+  {
+   "id": "P20",
+   "name": "the value join (stzzui's VIBE_STRIPS_RIGHT): every strip is a value some other declaration's list seat holds -- the set is the union of those seats, which the court collects as data and the rule only reads",
+   "rules": {
+    "main": "[INTO [ANY MEMBER rights]]"
+   },
+   "start": "main",
+   "input": "[left, right]",
+   "expect": {
+    "match": true
+   },
+   "sets": {
+    "rights": [
+     "left",
+     "centre",
+     "right"
+    ]
+   }
+  },
+  {
+   "id": "P21",
+   "name": "COLLECT and KEEP: the words kept, the numbers passed over",
+   "rules": {
+    "main": "[COLLECT [ANY [KEEP WORD OR NUMBER]]]"
+   },
+   "start": "main",
+   "input": "a 1 b 2",
+   "expect": {
+    "match": true,
+    "kept": [
+     "a",
+     "b"
+    ]
+   }
+  },
+  {
+   "id": "P22",
+   "name": "KEEP outside a COLLECT keeps into the result",
+   "rules": {
+    "main": "[ANY [KEEP NUMBER OR SKIP]]"
+   },
+   "start": "main",
+   "input": "a 1 b 2",
+   "expect": {
+    "match": true,
+    "kept": [
+     "1",
+     "2"
+    ]
+   }
+  },
+  {
+   "id": "P23",
+   "name": "TO skips up to what matches, consuming none of it",
+   "rules": {
+    "main": "[TO NUMBER NUMBER END]"
+   },
+   "start": "main",
+   "input": "a b 3",
+   "expect": {
+    "match": true
+   }
+  },
+  {
+   "id": "P24",
+   "name": "THRU skips past what matches",
+   "rules": {
+    "main": "[THRU LIT RATIONALE STRING END]"
+   },
+   "start": "main",
+   "input": "DEFINE X y AS () RATIONALE \"r\"",
+   "expect": {
+    "match": true
+   }
+  },
+  {
+   "id": "P25",
+   "name": "NOT: a value that is not a number, every time",
+   "rules": {
+    "main": "[ANY [NOT NUMBER SKIP] END]"
+   },
+   "start": "main",
+   "input": "a b c",
+   "expect": {
+    "match": true
+   }
+  },
+  {
+   "id": "P26",
+   "name": "NOT: a number stops it",
+   "rules": {
+    "main": "[ANY [NOT NUMBER SKIP] END]"
+   },
+   "start": "main",
+   "input": "a 2",
+   "expect": {
+    "match": false
+   }
+  },
+  {
+   "id": "P27",
+   "name": "AHEAD looks without consuming",
+   "rules": {
+    "main": "[AHEAD WORD SKIP END]"
+   },
+   "start": "main",
+   "input": "a",
+   "expect": {
+    "match": true
+   }
+  },
+  {
+   "id": "P28",
+   "name": "REPEAT n: exactly two words",
+   "rules": {
+    "main": "[REPEAT 2 WORD END]"
+   },
+   "start": "main",
+   "input": "a b",
+   "expect": {
+    "match": true
+   }
+  },
+  {
+   "id": "P29",
+   "name": "REPEAT n: three words are one too many",
+   "rules": {
+    "main": "[REPEAT 2 WORD END]"
+   },
+   "start": "main",
+   "input": "a b c",
+   "expect": {
+    "match": false
+   }
+  },
+  {
+   "id": "P30",
+   "name": "REPEAT n m: between one and two",
+   "rules": {
+    "main": "[REPEAT 1 2 WORD END]"
+   },
+   "start": "main",
+   "input": "a b",
+   "expect": {
+    "match": true
+   }
+  },
+  {
+   "id": "P31",
+   "name": "named rules, referred to and never recursive",
+   "rules": {
+    "seat": "[INTO [WORD WORD]]",
+    "seats": "[INTO [ANY RULE seat]]",
+    "main": "[LIT SEATS RULE seats]"
+   },
+   "start": "main",
+   "input": "SEATS [name: text]",
+   "expect": {
+    "match": true
+   }
+  },
+  {
+   "id": "P32",
+   "name": "a comment is not a value",
+   "rules": {
+    "main": "[WORD END]"
+   },
+   "start": "main",
+   "input": "a -- a note",
+   "expect": {
+    "match": true
+   }
+  },
+  {
+   "id": "P33",
+   "name": "INTO, three deep",
+   "rules": {
+    "main": "[INTO [INTO [INTO [NUMBER]]]]"
+   },
+   "start": "main",
+   "input": "[[[7]]]",
+   "expect": {
+    "match": true
+   }
+  },
+  {
+   "id": "P34",
+   "name": "an empty list",
+   "rules": {
+    "main": "[INTO [END]]"
+   },
+   "start": "main",
+   "input": "[]",
+   "expect": {
+    "match": true
+   }
+  },
+  {
+   "id": "P35",
+   "name": "a path is one value",
+   "rules": {
+    "main": "[PATH END]"
+   },
+   "start": "main",
+   "input": "deposit.amount",
+   "expect": {
+    "match": true
+   }
+  },
+  {
+   "id": "P36",
+   "name": "items are values, a row is one item: [a b, c] is two items, the first a row",
+   "rules": {
+    "main": "[INTO [ROW WORD END]]"
+   },
+   "start": "main",
+   "input": "[a b, c]",
+   "expect": {
+    "match": true
+   }
+  },
+  {
+   "id": "P37",
+   "name": "ordered choice commits: the first alternative that matches is taken, and the rest is not tried again",
+   "rules": {
+    "main": "[[WORD OR WORD NUMBER] END]"
+   },
+   "start": "main",
+   "input": "a 1",
+   "expect": {
+    "match": false
+   }
+  }
+ ],
+ "refusals": [
+  {
+   "id": "X01",
+   "name": "a rule that refers to itself is recursive: refused",
+   "rules": {
+    "main": "[WORD RULE main]"
+   },
+   "start": "main",
+   "refusal": "recursive"
+  },
+  {
+   "id": "X02",
+   "name": "recursion through another rule: refused",
+   "rules": {
+    "a": "[RULE b]",
+    "b": "[RULE a]",
+    "main": "[RULE a]"
+   },
+   "start": "main",
+   "refusal": "recursive"
+  },
+  {
+   "id": "X03",
+   "name": "ANY over a rule that can match nothing would never end: refused",
+   "rules": {
+    "main": "[ANY OPT WORD]"
+   },
+   "start": "main",
+   "refusal": "can match nothing"
+  },
+  {
+   "id": "X04",
+   "name": "SOME over a look-ahead consumes nothing: refused",
+   "rules": {
+    "main": "[SOME AHEAD WORD]"
+   },
+   "start": "main",
+   "refusal": "can match nothing"
+  },
+  {
+   "id": "X05",
+   "name": "ANY over a named rule that can match nothing: refused",
+   "rules": {
+    "e": "[OPT NUMBER]",
+    "main": "[ANY RULE e]"
+   },
+   "start": "main",
+   "refusal": "can match nothing"
+  },
+  {
+   "id": "X06",
+   "name": "WHILE is refused: a pattern rule is total",
+   "rules": {
+    "main": "[WHILE WORD]"
+   },
+   "start": "main",
+   "refusal": "WHILE is refused"
+  },
+  {
+   "id": "X07",
+   "name": "a group in a rule is the host escape (Parse paren!): refused",
+   "rules": {
+    "main": "[WORD (print \"x\")]"
+   },
+   "start": "main",
+   "refusal": "would run the host"
+  },
+  {
+   "id": "X08",
+   "name": "CHANGE is refused: a pattern judges and never edits",
+   "rules": {
+    "main": "[CHANGE WORD \"x\"]"
+   },
+   "start": "main",
+   "refusal": "CHANGE is refused"
+  },
+  {
+   "id": "X09",
+   "name": "a rule that names no pattern",
+   "rules": {
+    "main": "[RULE nope]"
+   },
+   "start": "main",
+   "refusal": "names no pattern"
+  },
+  {
+   "id": "X10",
+   "name": "a set that names nothing",
+   "rules": {
+    "main": "[MEMBER nope]"
+   },
+   "start": "main",
+   "refusal": "names no set"
+  },
+  {
+   "id": "X11",
+   "name": "REPEAT with its minimum above its maximum",
+   "rules": {
+    "main": "[REPEAT 3 2 WORD]"
+   },
+   "start": "main",
+   "refusal": "REPEAT 3 2"
+  },
+  {
+   "id": "X12",
+   "name": "REPEAT without its count",
+   "rules": {
+    "main": "[REPEAT WORD]"
+   },
+   "start": "main",
+   "refusal": "REPEAT takes"
+  },
+  {
+   "id": "X13",
+   "name": "a pattern word with nothing to apply to",
+   "rules": {
+    "main": "[OPT]"
+   },
+   "start": "main",
+   "refusal": "OPT takes a rule"
+  },
+  {
+   "id": "X14",
+   "name": "a keyword that is no pattern word",
+   "rules": {
+    "main": "[FOO WORD]"
+   },
+   "start": "main",
+   "refusal": "FOO is not a pattern word"
+  },
+  {
+   "id": "X15",
+   "name": "DO is refused: a pattern rule runs nothing",
+   "rules": {
+    "main": "[DO WORD]"
+   },
+   "start": "main",
+   "refusal": "DO is refused"
+  },
+  {
+   "id": "X16",
+   "name": "TO over a rule that can match nothing: it would stop at once and mean nothing",
+   "rules": {
+    "main": "[TO OPT WORD]"
+   },
+   "start": "main",
+   "refusal": "can match nothing"
+  }
+ ]
+}
