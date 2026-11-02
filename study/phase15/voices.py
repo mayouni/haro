@@ -5,13 +5,15 @@ language has ONE voice (v0.13, R3). So a second human language is a second decla
 French twin of z_v16.haro (same world, same ASK, a French voice), forges it into a scratch folder with
 copies of the court's libraries -- nothing is written to haro/spike -- and offers both voices.
 """
-import os, re, shutil, subprocess
+import os, re, shutil, subprocess, sys
 
 HERE = os.path.dirname(os.path.abspath(__file__))
-ROOT = os.path.abspath(os.path.join(HERE, '..', '..', '..'))
-SPIKE = os.path.join(ROOT, 'haro', 'spike')
-RNXC = os.path.join(ROOT, 'zig-out', 'bin', 'rnxc.exe')
-ORACLE = os.path.join(ROOT, 'runtime', 'win64', 'ring.exe')
+sys.path.insert(0, os.path.abspath(os.path.join(HERE, '..', '..')))   # this repository's root, for paths.py
+import paths                                   # where Ring++ is (Haro is its own repository since 2026-11-02)
+ROOT = paths.RINGPP
+SPIKE = paths.SPIKE
+RNXC = paths.RNXC
+ORACLE = paths.RING
 OUT = os.path.join(HERE, 'scratch', 'voices')
 LIBS = ('court_lib.ring', 'cond_lib.ring', 'expr_lib.ring', 'world_lib.ring', 'ask_lib.ring', 'narrate_lib.ring')
 
@@ -41,7 +43,7 @@ def build():
     twin = '-- zfr: z_v16.haro with a French voice (Phase 1.5). Derived by voices.py; not a declaration of the spike.\n' + twin
     haro = os.path.join(OUT, 'zfr.haro')
     open(haro, 'w', encoding='utf-8', newline='').write(twin)
-    r = subprocess.run([RNXC, 'forge.ring', haro, OUT], capture_output=True, cwd=SPIKE, env=dict(os.environ, RNXC_NOCACHE='1'), timeout=300)
+    r = subprocess.run([RNXC, 'forge.ring', haro, OUT], capture_output=True, cwd=SPIKE, env=dict(os.environ, RNXC_NOCACHE='1', HARO_NOCACHE='1'), timeout=300)
     o = r.stdout.decode('utf-8', 'replace')
     assert o.startswith('forged zfr'), o[:200]
     for lib in LIBS:
@@ -56,7 +58,7 @@ def tell(exe, lang, question, rows_json):
         court, cwd = 'zfr_court.ring', OUT
     else:
         court, cwd = 'z_court.ring', SPIKE
-    r = subprocess.run([exe, court, 'narrate-ask', 'tontine.z', question, rows_json], capture_output=True, cwd=cwd, env=dict(os.environ, RNXC_NOCACHE='1'), timeout=120)
+    r = subprocess.run([exe, court, 'narrate-ask', 'tontine.z', question, rows_json], capture_output=True, cwd=cwd, env=dict(os.environ, RNXC_NOCACHE='1', HARO_NOCACHE='1'), timeout=120)
     return r.stdout.decode('utf-8', 'replace').replace('\r\n', '\n').strip()
 
 

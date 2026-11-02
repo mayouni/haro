@@ -21,16 +21,18 @@ import json, os, re, shutil, subprocess, sys, tempfile
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 SP = os.path.abspath(os.path.join(HERE, '..'))
-ROOT = os.path.abspath(os.path.join(SP, '..', '..'))
-RNXC = os.path.join(ROOT, 'zig-out', 'bin', 'rnxc.exe')
-ORACLE = os.path.join(ROOT, 'runtime', 'win64', 'ring.exe')
-STUDY = os.path.join(ROOT, 'haro', 'study', 'phase15')
+sys.path.insert(0, os.path.abspath(os.path.join(HERE, '..', '..')))   # this repository's root, for paths.py
+import paths                                   # where Ring++ is (Haro is its own repository since 2026-11-02)
+ROOT = paths.RINGPP
+RNXC = paths.RNXC
+ORACLE = paths.RING
+STUDY = os.path.join(paths.HARO, 'study', 'phase15')
 PLANT = '--plant' in sys.argv
 sys.path.insert(0, HERE)
 import n_model
 
 fails = []
-NOCACHE = dict(os.environ, RNXC_NOCACHE='1')
+NOCACHE = dict(os.environ, RNXC_NOCACHE='1', HARO_NOCACHE='1')
 
 
 def check(ok, text):
@@ -158,7 +160,8 @@ check(not bad, f"C {len(doc['rules'])} defects are caught by the forged court wi
 # ---- C' ------------------------------------------------------------------------------------------------------------------
 def court_copy(patch=None):
     """A copy of the court's files, one of them patched: a court that differs from the real one in exactly one thing."""
-    td = tempfile.mkdtemp(dir=os.path.join(ROOT, 'runtime'))
+    os.makedirs(paths.OUT, exist_ok=True)
+    td = tempfile.mkdtemp(dir=paths.OUT)
     for f in os.listdir(SP):
         if f.endswith('.ring'):
             shutil.copy(os.path.join(SP, f), td)
@@ -198,8 +201,9 @@ check(not bad, f"C' each of the {len(CODES)} codes, with its rule switched off i
 # `check ... surfaces` RUNS the court file a surface names, so what a sentence may name there is a door (principle 12, the
 # Compass's "no effect without a door"): a sibling court, never a path. A program that proves it ran by writing a marker is
 # named by a path (must not run) and, as the control, beside the court (must run, or the marker shows nothing)
-MARKER = os.path.join(ROOT, 'runtime', 'zz_marker.txt')
-PROGRAM = 'write("../../runtime/zz_marker.txt", "ran")\n'
+os.makedirs(paths.OUT, exist_ok=True)
+MARKER = os.path.join(paths.OUT, 'zz_marker.txt')
+PROGRAM = 'write("' + paths.rel(MARKER, SP) + '", "ran")\n'   # the court runs from SP
 HOSTILE, SIBLING = os.path.join(SP, 'v17', 'zz_marker.ring'), os.path.join(SP, 'zz_marker_court.ring')
 
 

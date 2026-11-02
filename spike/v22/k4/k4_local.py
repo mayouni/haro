@@ -28,10 +28,11 @@ import k4, round2, face_py, face_read, face_gbnf, ringpp_gbnf
 import grammar_court as gc
 from k4 import TASKS
 
-ROOT = os.path.abspath(os.path.join(HERE, '..', '..', '..', '..'))
+import paths                                   # on sys.path once k4 is imported
+ROOT = paths.RINGPP
 PACKAGE = os.environ.get('PKG_RNXC') or os.path.join(ROOT, 'runtime', 'package', 'ringpp-win64', 'bin', 'rnxc.exe')
 GEN = os.path.join(HERE, 'k4_gen.ring')
-BATCH = os.path.join(ROOT, 'haro', 'spike', 'v20', 'probes', 'gbnf_batch.ring')
+BATCH = os.path.join(paths.SPIKE, 'v20', 'probes', 'gbnf_batch.ring')
 LOCAL = os.path.join(HERE, 'local')
 END = face_gbnf.END
 BANNER = face_gbnf.BANNER_START
@@ -157,7 +158,7 @@ def run(model, tag, only=None, shapes=('ringpp', 'face'), grammars=('on', 'off')
     exp = json.load(open(os.path.join(HERE, 'expected.json')))
     # a PERSISTENT work directory, so a run that a power cut stopped goes on where it was (k4_gen.ring skips a job whose .meta exists) -- but only when everything the
     # jobs were made from is the same: the key below hashes the model, the prompts, the grammars and the manifest, and a different key clears the finished jobs.
-    work = os.path.join(ROOT, 'runtime', 'k4work', tag)
+    work = os.path.join(paths.OUT, 'k4work', tag)
     os.makedirs(work, exist_ok=True)
     put(os.path.join(work, 'ringpp.gbnf'), ringpp_gbnf.ringpp_grammar().encode('latin-1'))
     put(os.path.join(work, 'face.gbnf'), face_gbnf.face_grammar().encode('latin-1'))

@@ -13,7 +13,9 @@ import glob, os, sys, threading
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 V18 = os.path.dirname(HERE)
-ROOT = os.path.abspath(os.path.join(V18, '..', '..', '..'))
+sys.path.insert(0, os.path.abspath(os.path.join(HERE, '..', '..', '..')))   # this repository's root, for paths.py
+import paths                                   # where Ring++ is (Haro is its own repository since 2026-11-02)
+ROOT = paths.RINGPP
 sys.path.insert(0, V18)
 import cst, l1
 
@@ -23,7 +25,7 @@ STZ = r'D:\GitHub\stzlib\libraries\stzlib'
 def corpus(stride):
     files = sorted(glob.glob(os.path.join(ROOT, 'bench', 'exec', '*.ring')))
     files += sorted(glob.glob(os.path.join(ROOT, 'vendor', 'ring-stdlib', '**', '*.ring'), recursive=True))
-    files += sorted(glob.glob(os.path.join(ROOT, 'haro', 'spike', '*.ring')))
+    files += sorted(glob.glob(os.path.join(paths.SPIKE, '*.ring')))
     if os.path.isdir(STZ):
         stz = sorted(glob.glob(os.path.join(STZ, '**', '*.ring'), recursive=True))
         files += [p for p in stz[::stride] if os.path.getsize(p) <= 400_000]

@@ -1,5 +1,8 @@
 import subprocess, os, tempfile
-RN = os.path.abspath('zig-out-j/bin/rnxc.exe')
+import sys
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', '..', '..')))
+import paths
+RN = paths.RNXC     # it named a scratch build, zig-out-j, of 2026-10-05
 d = tempfile.mkdtemp()
 p = os.path.join(d, 't.ring')
 

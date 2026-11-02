@@ -15,13 +15,15 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, HERE)
 import cst, printer, round as rt
 
-ROOT = os.path.abspath(os.path.join(HERE, '..', '..', '..'))
+sys.path.insert(0, os.path.abspath(os.path.join(HERE, '..', '..')))   # this repository's root, for paths.py
+import paths                                   # where Ring++ is (Haro is its own repository since 2026-11-02)
+ROOT = paths.RINGPP
 STZ = r'D:\GitHub\stzlib\libraries\stzlib\base'
 QUICK = '--quick' in sys.argv
 
 
 def corpora():
-    spike = sorted(glob.glob(os.path.join(ROOT, 'haro', 'spike', '*.ring')))
+    spike = sorted(glob.glob(os.path.join(paths.SPIKE, '*.ring')))
     stdlib = sorted(glob.glob(os.path.join(ROOT, 'vendor', 'ring-stdlib', '**', '*.ring'), recursive=True))
     ringpp = sorted(glob.glob(os.path.join(ROOT, 'bench', '*.ring')) + glob.glob(os.path.join(ROOT, 'tests', '*.ring')))
     stz = sorted(glob.glob(os.path.join(STZ, '**', '*.ring'), recursive=True))
@@ -48,7 +50,7 @@ def control(name, mutate):
 
 
 def sample_for_controls():
-    return sorted(glob.glob(os.path.join(ROOT, 'haro', 'spike', '*.ring')))[:8]
+    return sorted(glob.glob(os.path.join(paths.SPIKE, '*.ring')))[:8]
 
 
 def glue_everything(real):

@@ -1,7 +1,7 @@
 """grammar_court.py -- the court of the two write-surface grammars (face_gbnf.py, ringpp_gbnf.py): does the engine's constrained decoder HOLD each, ACCEPT what each shape's own printer prints,
 REJECT what the shape excludes, and does the court itself have teeth?
 
-    python haro/spike/v22/grammar_court.py            ~15 s; needs the Ring++ package (runtime/package/ringpp-win64) and zig-out/bin/rnxc.exe; no model is loaded
+    python spike/v22/grammar_court.py            ~15 s; needs the Ring++ package (runtime/package/ringpp-win64) and zig-out/bin/rnxc.exe; no model is loaded
 
 It asks the decoder itself -- StzGrammarRefusal and StzGrammarAccepts, in one batch on the package (the v20 driver gbnf_batch.ring) -- so a rule count or a dialect fault is the engine's own verdict.
   held        the decoder holds the grammar (no refusal), and its rule count is under the decoder's 128
@@ -20,10 +20,12 @@ sys.path.insert(0, os.path.join(HERE, 'k4'))
 import face_gbnf, ringpp_gbnf, face_py, face_check
 import tasks as K4TASKS
 
-ROOT = os.path.abspath(os.path.join(HERE, '..', '..', '..'))
+sys.path.insert(0, os.path.abspath(os.path.join(HERE, '..', '..')))   # this repository's root, for paths.py
+import paths                                   # where Ring++ is (Haro is its own repository since 2026-11-02)
+ROOT = paths.RINGPP
 PACKAGE = os.environ.get('PKG_RNXC') or os.path.join(ROOT, 'runtime', 'package', 'ringpp-win64', 'bin', 'rnxc.exe')
-RNXC = os.environ.get('RNXC') or os.path.join(ROOT, 'zig-out', 'bin', 'rnxc.exe')
-BATCH = os.path.join(ROOT, 'haro', 'spike', 'v20', 'probes', 'gbnf_batch.ring')
+RNXC = paths.RNXC
+BATCH = os.path.join(paths.SPIKE, 'v20', 'probes', 'gbnf_batch.ring')
 END = face_gbnf.END
 LIMIT = 128
 

@@ -15,7 +15,9 @@ import os, random, re, subprocess, sys, time
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 V20 = os.path.abspath(os.path.join(HERE, '..'))
-ROOT = os.path.abspath(os.path.join(V20, '..', '..', '..'))
+sys.path.insert(0, os.path.abspath(os.path.join(V20, '..', '..')))   # this repository's root, for paths.py
+import paths
+ROOT = paths.RINGPP
 SRC = os.path.join(V20, 'refine.py')
 SCRATCH = os.path.join(V20, 'scratch', 'mut')
 FUNCS = ('lift', 'resolve_target', 'own_rule_error', 'parse_tag', 'tag_set', 'tag_del', 'tag_insert', 'parse_sentence', 'cascade', 'apply_prim', 'lower', 'lower_pipeline',

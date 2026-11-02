@@ -14,7 +14,9 @@ The matcher is v19/ids.py; the graph it works on is rung 18's.
 import copy, glob, hashlib, json, os, subprocess, sys, tempfile, time
 
 HERE = os.path.dirname(os.path.abspath(__file__))
-ROOT = os.path.abspath(os.path.join(HERE, '..', '..', '..'))
+sys.path.insert(0, os.path.abspath(os.path.join(HERE, '..', '..')))   # this repository's root, for paths.py
+import paths                                   # where Ring++ is (Haro is its own repository since 2026-11-02)
+ROOT = paths.HARO                              # the repository whose history H reads
 sys.path.insert(0, HERE)
 sys.path.insert(0, os.path.join(HERE, '..', 'v18'))
 import ids, l1
@@ -157,7 +159,7 @@ def git(repo, *args):
 
 
 def hand_written():
-    out = git(ROOT, 'ls-files', 'haro/spike/*.ring').stdout.decode().split()
+    out = git(ROOT, 'ls-files', 'spike/*.ring').stdout.decode().split()
     keep = []
     for p in sorted(out):
         head = open(os.path.join(ROOT, p), 'rb').read(400)
@@ -168,7 +170,7 @@ def hand_written():
 
 
 MEMO_SEVEN = [
-    (ROOT, 'haro/spike/court_lib.ring'), (ROOT, 'haro/spike/haro_lib.ring'), (ROOT, 'haro/spike/forge.ring'), (ROOT, 'haro/spike/n_lib.ring'),
+    (ROOT, 'spike/court_lib.ring'), (ROOT, 'spike/haro_lib.ring'), (ROOT, 'spike/forge.ring'), (ROOT, 'spike/n_lib.ring'),
     (r'D:\GitHub\stzlib', 'libraries/stzlib/base/meta/stzCodeGraph.ring'),
     (r'D:\GitHub\stzlib', 'libraries/stzlib/base/refine/stzRefinableCode.ring'),
     (r'D:\GitHub\stzlib', 'libraries/stzlib/base/natural/stzNatural.ring'),

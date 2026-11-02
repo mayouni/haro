@@ -142,7 +142,7 @@ def build(key, work, max_tokens):
 
 
 def run(key, max_tokens=160, count_only=False):
-    work = os.path.join(ROOT, 'runtime', 'k4work', 'r5-retry-' + key)
+    work = os.path.join(L.paths.OUT, 'k4work', 'r5-retry-' + key)
     final, meta, dropped = build(key, work, max_tokens)
     if count_only:
         return

@@ -2,3 +2,7 @@
 # Without it core.autocrlf rewrites them CRLF on checkout, `git status` calls them modified for ever while `git diff` shows nothing,
 # and a court reading its own source by byte offset reads different bytes.
 *.ring text eol=lf
+
+# Vendored third-party sources check out BYTE-EXACT, never line-ending converted: their SHA256SUMS are claims about those bytes
+# (Ring++ found core.autocrlf rewriting the grammar's 21 MB parser.c on checkout, so the copy no longer matched its release).
+vm/vendor/** -text

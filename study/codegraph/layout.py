@@ -6,12 +6,14 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, HERE)
 import cst, printer
 
-ROOT = os.path.abspath(os.path.join(HERE, '..', '..', '..'))
+sys.path.insert(0, os.path.abspath(os.path.join(HERE, '..', '..')))   # this repository's root, for paths.py
+import paths                                   # where Ring++ is (Haro is its own repository since 2026-11-02)
+ROOT = paths.RINGPP
 STZ = r'D:\GitHub\stzlib\libraries\stzlib\base'
 
 
 def sample():
-    spike = sorted(glob.glob(os.path.join(ROOT, 'haro', 'spike', '*.ring')))[:20]
+    spike = sorted(glob.glob(os.path.join(paths.SPIKE, '*.ring')))[:20]
     stdlib = sorted(glob.glob(os.path.join(ROOT, 'vendor', 'ring-stdlib', '**', '*.ring'), recursive=True))[::5]
     stz = sorted(glob.glob(os.path.join(STZ, '**', '*.ring'), recursive=True))[::190]
     stz = [p for p in stz if os.path.getsize(p) <= 300_000]

@@ -22,9 +22,10 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, HERE)
 import r5_agent as A, tasks as T, body_gbnf
 
+import paths                                   # on sys.path once r5_agent is imported
 ROOT = A.ROOT
 PACKAGE = os.environ.get('PKG_RNXC') or os.path.join(ROOT, 'runtime', 'package', 'ringpp-win64', 'bin', 'rnxc.exe')
-GEN = os.path.join(ROOT, 'haro', 'spike', 'v22', 'k4', 'k4_gen.ring')
+GEN = os.path.join(paths.SPIKE, 'v22', 'k4', 'k4_gen.ring')
 LOCAL = os.path.join(HERE, 'local')
 
 SYSTEM = ('''You write the BODY of one Ring++ function. Reply with ONE line: statements separated by single spaces, no line breaks, no double quotes (write text in 'single quotes'), no comments.
@@ -96,7 +97,7 @@ LINT_REFUSED = {}      # task id -> the lint's reason, for a run with --lint (wr
 def run(model, tag, arms=('free', 'scoped'), only=None, max_tokens=100, judge_only=False, count_only=False, lint=False):
     exp = json.load(open(A.expected_path()))
     demo_exp = demo_check()
-    work = os.path.join(ROOT, 'runtime', 'k4work', 'r5-' + tag)
+    work = os.path.join(paths.OUT, 'k4work', 'r5-' + tag)
     os.makedirs(work, exist_ok=True)
     man, meta = [], {}
     LINT_REFUSED.clear()

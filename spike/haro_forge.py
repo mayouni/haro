@@ -12,15 +12,19 @@ Later stages (the forge, the machine court against harb, the GBNF, the
 refinement, the timing, the fleet court, W forged whole, Z forged whole)
 are added below as they are built.
 
-Usage: python haro/spike/haro_forge.py [--stage N] [--plant]
+Usage: python spike/haro_forge.py [--stage N] [--plant]
+Ring++ (rnxc, the oracle, its runtime/ and bench/) is found through paths.py: a checkout beside this repository, or $RINGPP.
   --plant   plants a known-wrong verdict to prove the guard can fail.
 """
 import json, os, re, shutil, subprocess, sys, tempfile, time
 
 HERE = os.path.dirname(os.path.abspath(__file__))
-ROOT = os.path.abspath(os.path.join(HERE, '..', '..'))
-RNXC = os.path.join(ROOT, 'zig-out', 'bin', 'rnxc.exe')
-ORACLE = os.path.join(ROOT, 'runtime', 'win64', 'ring.exe')
+sys.path.insert(0, os.path.dirname(HERE))
+import paths                                   # one place for where Ring++ is (since 2026-11-02, Haro's own repository)
+ROOT = paths.need_ringpp()                     # Ring++'s checkout: its runtime/ and bench/
+RNXC, ORACLE = paths.need_bins()
+ORACLE_OUT = paths.ORACLE_OUT                  # the oracle forges here, by a relative name (stage 2's note)
+ORACLE_OUT_REL = paths.rel(ORACLE_OUT, HERE)
 STZU_FIXTURES = r'D:\GitHub\stz\declarative\stzu\fixtures.json'
 STZU_RING = os.path.join(HERE, 'haro.ring')
 
@@ -33,6 +37,7 @@ def run(exe, script, path):
     # HERE asks the same question of each.
     env = dict(os.environ)
     env['RNXC_NOCACHE'] = '1'
+    env['HARO_NOCACHE'] = '1'
     r = subprocess.run([exe, os.path.basename(script), path], capture_output=True,
                        env=env, timeout=120, cwd=os.path.dirname(script))
     return r.stdout.decode('utf-8', 'replace').replace('\r\n', '\n')
@@ -209,6 +214,7 @@ PARSE_FRAGMENTS = ('Expected', 'Unknown', 'not part of', 'neither', 'Unterminate
 def run_args(exe, args, cwd):
     env = dict(os.environ)
     env['RNXC_NOCACHE'] = '1'
+    env['HARO_NOCACHE'] = '1'
     r = subprocess.run([exe] + args, capture_output=True, env=env, timeout=120, cwd=cwd)
     return r.stdout.decode('utf-8', 'replace').replace('\r\n', '\n')
 
@@ -227,12 +233,12 @@ def stage2(stzu_path=MACHINE_STZU, label='machine'):
     lang = out_rnx.split()[1].rstrip(':')
     # the oracle forges into a scratch folder BESIDE the forge, by a relative
     # name: Ring's write() refused the temp folder's path on this machine
-    td = os.path.join(ROOT, 'runtime', 'haro-forge-oracle')   # runtime/ is gitignored
+    td = ORACLE_OUT   # runtime/ is gitignored
     os.makedirs(td, exist_ok=True)
     for art in (f'{lang}_court.ring', f'{lang}.gbnf'):
         if os.path.exists(os.path.join(td, art)):
             os.remove(os.path.join(td, art))
-    out_or = run_args(ORACLE, ['forge.ring', stzu_path, '../../runtime/haro-forge-oracle'], HERE).strip()
+    out_or = run_args(ORACLE, ['forge.ring', stzu_path, ORACLE_OUT_REL], HERE).strip()
     print('  oracle:', out_or.splitlines()[0] if out_or else 'NO OUTPUT')
     for art in (f'{lang}_court.ring', f'{lang}.gbnf'):
         a = open(os.path.join(HERE, art), 'rb').read()
@@ -700,12 +706,12 @@ def stage8():
     if not out_rnx.startswith('forged w'):
         print('  FAIL the forge did not forge W')
         return 1
-    td = os.path.join(ROOT, 'runtime', 'haro-forge-oracle')
+    td = ORACLE_OUT
     os.makedirs(td, exist_ok=True)
     for art in ('w_expr.ring', 'w_expr.gbnf'):
         if os.path.exists(os.path.join(td, art)):
             os.remove(os.path.join(td, art))
-    out_or = run_args(ORACLE, ['forge.ring', W_STZU, '../../runtime/haro-forge-oracle'], HERE).strip()
+    out_or = run_args(ORACLE, ['forge.ring', W_STZU, ORACLE_OUT_REL], HERE).strip()
     print('  oracle:', out_or.splitlines()[0] if out_or else 'NO OUTPUT')
     for art in ('w_expr.ring', 'w_expr.gbnf'):
         a = open(os.path.join(HERE, art), 'rb').read()
@@ -815,13 +821,13 @@ def stage9():
     if not out_rnx.startswith('forged z'):
         print('  FAIL the forge did not forge Z')
         return 1
-    td = os.path.join(ROOT, 'runtime', 'haro-forge-oracle')
+    td = ORACLE_OUT
     os.makedirs(td, exist_ok=True)
     arts = ('z_court.ring', 'z.gbnf', 'z_expr.ring', 'z_expr.gbnf', 'z_ask.gbnf')
     for art in arts:
         if os.path.exists(os.path.join(td, art)):
             os.remove(os.path.join(td, art))
-    out_or = run_args(ORACLE, ['forge.ring', Z_STZU, '../../runtime/haro-forge-oracle'], HERE).strip()
+    out_or = run_args(ORACLE, ['forge.ring', Z_STZU, ORACLE_OUT_REL], HERE).strip()
     print('  oracle:', out_or.splitlines()[0] if out_or else 'NO OUTPUT')
     for art in arts:
         a = open(os.path.join(HERE, art), 'rb').read()
@@ -1094,12 +1100,12 @@ def stage11():
     if not out_rnx.startswith('forged f'):
         print('  FAIL the forge did not forge F')
         return 1
-    td = os.path.join(ROOT, 'runtime', 'haro-forge-oracle')
+    td = ORACLE_OUT
     os.makedirs(td, exist_ok=True)
     for art in ('f_court.ring', 'f.gbnf'):
         if os.path.exists(os.path.join(td, art)):
             os.remove(os.path.join(td, art))
-    out_or = run_args(ORACLE, ['forge.ring', F_STZU, '../../runtime/haro-forge-oracle'], HERE).strip()
+    out_or = run_args(ORACLE, ['forge.ring', F_STZU, ORACLE_OUT_REL], HERE).strip()
     print('  oracle:', out_or.splitlines()[0] if out_or else 'NO OUTPUT')
     for art in ('f_court.ring', 'f.gbnf'):
         a = open(os.path.join(HERE, art), 'rb').read()
@@ -1197,13 +1203,13 @@ def stage12():
     if not out_rnx.startswith('forged a'):
         print('  FAIL the forge did not forge A')
         return 1
-    td = os.path.join(ROOT, 'runtime', 'haro-forge-oracle')
+    td = ORACLE_OUT
     os.makedirs(td, exist_ok=True)
     arts = ('a_court.ring', 'a.gbnf', 'a_expr.ring', 'a_expr.gbnf')
     for art in arts:
         if os.path.exists(os.path.join(td, art)):
             os.remove(os.path.join(td, art))
-    out_or = run_args(ORACLE, ['forge.ring', A_STZU, '../../runtime/haro-forge-oracle'], HERE).strip()
+    out_or = run_args(ORACLE, ['forge.ring', A_STZU, ORACLE_OUT_REL], HERE).strip()
     print('  oracle:', out_or.splitlines()[0] if out_or else 'NO OUTPUT')
     for art in arts:
         a = open(os.path.join(HERE, art), 'rb').read()
@@ -1715,13 +1721,13 @@ def stage15():
     if not out_rnx.startswith('forged stzv'):
         print('  FAIL the forge did not forge stzv')
         return 1
-    td = os.path.join(ROOT, 'runtime', 'haro-forge-oracle')
+    td = ORACLE_OUT
     os.makedirs(td, exist_ok=True)
     arts = ('stzv_court.ring', 'stzv.gbnf')
     for art in arts:
         if os.path.exists(os.path.join(td, art)):
             os.remove(os.path.join(td, art))
-    out_or = run_args(ORACLE, ['forge.ring', STZV_STZU, '../../runtime/haro-forge-oracle'], HERE).strip()
+    out_or = run_args(ORACLE, ['forge.ring', STZV_STZU, ORACLE_OUT_REL], HERE).strip()
     print('  oracle:', out_or.splitlines()[0] if out_or else 'NO OUTPUT')
     for art in arts:
         a = open(os.path.join(HERE, art), 'rb').read()
@@ -1811,7 +1817,8 @@ def stage15():
         return failures
     src = open(STZ_STRING, encoding='utf-8', errors='replace').read()
     names = sorted(set(re.findall(r'^\s*def\s+((?:Find|Replace|Remove)[A-Za-z0-9_]*)', src, re.M | re.I)))
-    names_path = os.path.join(ROOT, 'runtime', 'stz_names.txt')
+    os.makedirs(paths.OUT, exist_ok=True)
+    names_path = os.path.join(paths.OUT, 'stz_names.txt')
     with open(names_path, 'w', encoding='utf-8', newline='') as fh:
         fh.write('\n'.join(names) + '\n')
     r = stzv_run(RNXC, ['spellings', STZV_SENTENCE, names_path])
@@ -1902,13 +1909,13 @@ def stage16():
     if not out_rnx.startswith('forged f'):
         print('  FAIL the forge did not forge F')
         return 1
-    td = os.path.join(ROOT, 'runtime', 'haro-forge-oracle')
+    td = ORACLE_OUT
     os.makedirs(td, exist_ok=True)
     arts = ('f_court.ring', 'f.gbnf')
     for art in arts:
         if os.path.exists(os.path.join(td, art)):
             os.remove(os.path.join(td, art))
-    out_or = run_args(ORACLE, ['forge.ring', F_STZU, '../../runtime/haro-forge-oracle'], HERE).strip()
+    out_or = run_args(ORACLE, ['forge.ring', F_STZU, ORACLE_OUT_REL], HERE).strip()
     print('  oracle:', out_or.splitlines()[0] if out_or else 'NO OUTPUT')
     for art in arts:
         a = open(os.path.join(HERE, art), 'rb').read()
@@ -3132,13 +3139,13 @@ def ledger_stage(n, stzu, cases_path, lang, plant_id):
     if not out_rnx.startswith('forged ' + lang):
         print(f'  FAIL the forge did not forge {lang}')
         return 1
-    td_or = os.path.join(ROOT, 'runtime', 'haro-forge-oracle')
+    td_or = ORACLE_OUT
     os.makedirs(td_or, exist_ok=True)
     arts = (f'{lang}_court.ring', f'{lang}.gbnf')
     for art in arts:
         if os.path.exists(os.path.join(td_or, art)):
             os.remove(os.path.join(td_or, art))
-    out_or = run_args(ORACLE, ['forge.ring', stzu, '../../runtime/haro-forge-oracle'], HERE).strip()
+    out_or = run_args(ORACLE, ['forge.ring', stzu, ORACLE_OUT_REL], HERE).strip()
     print('  oracle:', out_or.splitlines()[0] if out_or else 'NO OUTPUT')
     for art in arts:
         a = open(os.path.join(HERE, art), 'rb').read()
@@ -3304,9 +3311,10 @@ def stage6(lang, court=None, n=15):
     def best(cmd, cwd, cache):
         env = dict(os.environ)
         if cache:
-            env.pop('RNXC_NOCACHE', None)
+            env.pop('RNXC_NOCACHE', None); env.pop('HARO_NOCACHE', None)
         else:
             env['RNXC_NOCACHE'] = '1'
+            env['HARO_NOCACHE'] = '1'
         ts = []
         for _ in range(n):
             t0 = time.perf_counter()
@@ -3331,6 +3339,7 @@ def stage6(lang, court=None, n=15):
 
 if __name__ == '__main__':
     t0 = time.perf_counter()
+    print('runs on:', paths.rnxc_build(RNXC), '| the oracle', ORACLE)
     stage = None
     for a in sys.argv[1:]:
         if a.startswith('--stage='):

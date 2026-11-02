@@ -1,7 +1,10 @@
 """Which of Softanza's Ring files does `rnxc fmt` refuse (the parser reports an error in them), and where do they live? HF-80. Run it from the
 repository root; RNXC= names the compiler. Then ask Ring itself: `ring file -norun` raises an error on each (45 an unclosed comment, S2)."""
 import glob, os, subprocess, collections
-RN = os.environ.get('RNXC') or os.path.abspath('zig-out/bin/rnxc.exe')
+import sys
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', '..', '..')))
+import paths
+RN = paths.RNXC
 STZ = r'D:\GitHub\stzlib\libraries\stzlib'
 stz = sorted(p for p in glob.glob(os.path.join(STZ, '**', '*.ring'), recursive=True) if os.path.getsize(p) <= 400000)
 ref = []

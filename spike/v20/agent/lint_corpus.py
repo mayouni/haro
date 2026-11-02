@@ -5,9 +5,10 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, HERE)
 import task_lint as TL
 
-ROOT = os.path.abspath(os.path.join(HERE, '..', '..', '..', '..'))
+sys.path.insert(0, os.path.abspath(os.path.join(HERE, '..', '..', '..')))   # this repository's root, for paths.py
+import paths                                   # where Ring++ is (Haro is its own repository since 2026-11-02)
 texts = []
-for fp in glob.glob(os.path.join(ROOT, 'haro', 'spike', 'v20', 'fixtures*.txt')):
+for fp in glob.glob(os.path.join(paths.SPIKE, 'v20', 'fixtures*.txt')):
     s = open(fp, encoding='utf-8', errors='replace').read()
     texts += [('reason', os.path.basename(fp), m) for m in re.findall(r'REASON "([^"]+)"', s)]
 lib = r'D:\GitHub\stzlib\libraries\stzlib\base'

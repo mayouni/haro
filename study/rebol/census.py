@@ -16,7 +16,7 @@ from block import load, load_memo, print_c6, print_memo, Refused
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 GH = 'D:/GitHub'
-SPIKE = os.path.join(GH, 'ringpp', 'haro', 'spike')
+SPIKE = os.path.join(GH, 'haro', 'spike')                 # Haro's own repository since 2026-11-02
 SENTENCE_EXT = ('.z', '.f', '.a', '.n', '.stzv', '.machine', '.fleet', '.ledger', '.bank', '.clinic', '.notice', '.w')
 
 

@@ -18,9 +18,11 @@ import face_read
 from face_read import face_py, l1, ReadRefused
 from tasks import TASKS
 
-ROOT = os.path.abspath(os.path.join(HERE, '..', '..', '..', '..'))
-ORACLE = os.environ.get('RING') or os.path.join(ROOT, 'runtime', 'win64', 'ring.exe')      # Ring 1.27's VM, our build: a retired language, kept as a compatibility guard
-RNXC = os.environ.get('RNXC') or os.path.join(ROOT, 'zig-out', 'bin', 'rnxc.exe')           # Ring++, the product: what a program is judged on
+sys.path.insert(0, os.path.abspath(os.path.join(HERE, '..', '..', '..')))   # this repository's root, for paths.py
+import paths                                   # where Ring++ is (Haro is its own repository since 2026-11-02)
+ROOT = paths.RINGPP
+ORACLE = paths.RING      # Ring 1.27's VM, our build: a retired language, kept as a compatibility guard
+RNXC = paths.RNXC           # Ring++, the product: what a program is judged on
 EXEC = os.environ.get('K4_EXEC', 'rnxc')
 SCRATCH = tempfile.mkdtemp(prefix='k4_')
 

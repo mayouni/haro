@@ -13,7 +13,10 @@ could not find in the source. A file with one is not measured; it is counted and
 """
 import os, re, subprocess
 
-RNXC = os.environ.get('RNXC', r'D:\GitHub\ringpp\zig-out\bin\rnxc.exe')
+import sys
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', '..')))   # for paths.py
+import paths
+RNXC = paths.RNXC
 LINE = re.compile(r"^( *)(\S+)(?:  '(.*)')?$")
 LAYOUT = ' \t\r\n;'
 WORD = re.compile(r"[^\s;\"'`#+*/%.,()=<>!\[\]{}:&|~^?-]+")
@@ -95,7 +98,7 @@ def locate(src, leaf, pos):
 def recover(path):
     """-> (root, src, report). The report names what could not be placed; an empty `bad` is a measured file."""
     src = read_bytes(path)
-    r = subprocess.run([RNXC, 'dump', path], capture_output=True, timeout=300, env=dict(os.environ, RNXC_NOCACHE='1'))
+    r = subprocess.run([RNXC, 'dump', path], capture_output=True, timeout=300, env=dict(os.environ, RNXC_NOCACHE='1', HARO_NOCACHE='1'))
     root, has_error = parse_dump(r.stdout.decode('latin-1'))
     rep = {'error': has_error, 'bad': [], 'leaves': 0, 'hidden': {}}
     if root is None or has_error:

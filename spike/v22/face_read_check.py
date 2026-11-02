@@ -25,9 +25,11 @@ from face_read import face_py, l1, ReadRefused
 PLANT = '--plant' in sys.argv
 QUICK = '--quick' in sys.argv
 CORPUS_N = int(sys.argv[sys.argv.index('--corpus') + 1]) if '--corpus' in sys.argv else 300
-ROOT = os.path.abspath(os.path.join(HERE, '..', '..', '..'))
+sys.path.insert(0, os.path.abspath(os.path.join(HERE, '..', '..')))   # this repository's root, for paths.py
+import paths                                   # where Ring++ is (Haro is its own repository since 2026-11-02)
+ROOT = paths.RINGPP                            # its bench/exec probes are run on the oracle
 STZ = r'D:\GitHub\stzlib\libraries\stzlib'
-ORACLE = os.environ.get('RING') or os.path.join(ROOT, 'runtime', 'win64', 'ring.exe')
+ORACLE = paths.RING
 fails = []
 
 

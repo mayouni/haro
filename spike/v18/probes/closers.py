@@ -1,11 +1,14 @@
 import subprocess, sys
 import os
 HERE = os.path.dirname(os.path.abspath(__file__))
-ROOT = os.path.abspath(os.path.join(HERE, '..', '..', '..', '..'))
+import sys
+sys.path.insert(0, os.path.abspath(os.path.join(HERE, '..', '..', '..')))   # this repository's root, for paths.py
+import paths                                   # where Ring++ is (Haro is its own repository since 2026-11-02)
+ROOT = paths.RINGPP
 SCRATCH = os.path.join(HERE, '..', 'scratch')
 os.makedirs(SCRATCH, exist_ok=True)
-ORACLE = os.environ.get('RING') or os.path.join(ROOT, 'runtime', 'win64', 'ring.exe')
-RNXC = os.environ.get('RNXC') or os.path.join(ROOT, 'zig-out', 'bin', 'rnxc.exe')
+ORACLE = paths.RING
+RNXC = paths.RNXC
 def run(exe, text):
     open(os.path.join(SCRATCH, 'cl.ring'), 'w').write(text)
     args = [exe, os.path.join(SCRATCH, 'cl.ring')] if exe == ORACLE else [exe, 'exec', os.path.join(SCRATCH, 'cl.ring')]

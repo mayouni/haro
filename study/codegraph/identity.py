@@ -18,14 +18,16 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, HERE)
 import cst
 
-ROOT = os.path.abspath(os.path.join(HERE, '..', '..', '..'))
+sys.path.insert(0, os.path.abspath(os.path.join(HERE, '..', '..')))   # this repository's root, for paths.py
+import paths                                   # where Ring++ is (Haro is its own repository since 2026-11-02)
+ROOT = paths.HARO
 SCRATCH = os.path.join(HERE, 'scratch')
 STMT = {'expression_statement', 'return_statement', 'see_statement', 'give_statement', 'if_statement', 'for_statement',
         'while_statement', 'switch_statement', 'try_statement', 'do_again_statement', 'exit_statement', 'loop_statement',
         'bye_statement', 'load_statement', 'import_statement'}
 SOURCES = [
-    (ROOT, 'haro/spike/court_lib.ring'), (ROOT, 'haro/spike/haro_lib.ring'), (ROOT, 'haro/spike/forge.ring'),
-    (ROOT, 'haro/spike/n_lib.ring'),
+    (ROOT, 'spike/court_lib.ring'), (ROOT, 'spike/haro_lib.ring'), (ROOT, 'spike/forge.ring'),
+    (ROOT, 'spike/n_lib.ring'),
     (r'D:\GitHub\stzlib', 'libraries/stzlib/base/meta/stzCodeGraph.ring'),
     (r'D:\GitHub\stzlib', 'libraries/stzlib/base/refine/stzRefinableCode.ring'),
     (r'D:\GitHub\stzlib', 'libraries/stzlib/base/natural/stzNatural.ring'),

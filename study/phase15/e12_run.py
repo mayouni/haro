@@ -6,7 +6,9 @@ Usage: python haro/study/phase15/e12_run.py
 import os, re, subprocess, sys
 
 HERE = os.path.dirname(os.path.abspath(__file__))
-ROOT = os.path.abspath(os.path.join(HERE, '..', '..', '..'))
+sys.path.insert(0, os.path.abspath(os.path.join(HERE, '..', '..')))   # this repository's root, for paths.py
+import paths                                   # where Ring++ is (Haro is its own repository since 2026-11-02)
+ROOT = paths.RINGPP
 PACKAGE_RNXC = os.path.join(ROOT, 'runtime', 'package', 'ringpp-win64', 'bin', 'rnxc.exe')
 fails = []
 
@@ -19,7 +21,7 @@ def check(ok, text):
 
 def run(script):
     env = dict(os.environ)
-    env.pop('RNXC_NOCACHE', None)
+    env.pop('RNXC_NOCACHE', None); env.pop('HARO_NOCACHE', None)
     p = subprocess.run([PACKAGE_RNXC, script], capture_output=True, cwd=HERE, env=env, timeout=900)
     return p.returncode, p.stdout.decode('utf-8', 'replace').replace('\r\n', '\n')
 

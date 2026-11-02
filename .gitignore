@@ -5,3 +5,6 @@ __pycache__/
 *.pyc
 # Ring's compiled objects
 *.ringo
+# the Haro VM's build output and cache (vm/build.zig)
+vm/zig-out/
+vm/.zig-cache/

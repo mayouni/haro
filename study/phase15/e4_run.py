@@ -25,11 +25,13 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import voices
 
 HERE = os.path.dirname(os.path.abspath(__file__))
-ROOT = os.path.abspath(os.path.join(HERE, '..', '..', '..'))
-SPIKE = os.path.join(ROOT, 'haro', 'spike')
+sys.path.insert(0, os.path.abspath(os.path.join(HERE, '..', '..')))   # this repository's root, for paths.py
+import paths                                   # where Ring++ is (Haro is its own repository since 2026-11-02)
+ROOT = paths.RINGPP
+SPIKE = paths.SPIKE
 PACKAGE_RNXC = os.path.join(ROOT, 'runtime', 'package', 'ringpp-win64', 'bin', 'rnxc.exe')
-RNXC = os.path.join(ROOT, 'zig-out', 'bin', 'rnxc.exe')
-ORACLE = os.path.join(ROOT, 'runtime', 'win64', 'ring.exe')
+RNXC = paths.RNXC
+ORACLE = paths.RING
 OFFICIAL_RING = r'D:\ring127\bin\ring.exe'
 STZLIB = r'D:\GitHub\stzlib\libraries\stzlib'
 ZING = r'D:\GitHub\zing\cli\zig-out\bin\zing.exe'
@@ -55,6 +57,7 @@ def check(ok, text):
 def run(exe, args, cwd, env_extra=None):
     env = dict(os.environ)
     env['RNXC_NOCACHE'] = '1'
+    env['HARO_NOCACHE'] = '1'
     if env_extra:
         env.update(env_extra)
     p = subprocess.run([exe] + args, capture_output=True, cwd=cwd, env=env, timeout=600)
@@ -69,7 +72,7 @@ with open(qfile, 'w', encoding='utf-8', newline='') as f:
         assert '|' not in c['id'] and '|' not in c['lang']
         f.write(f"{c['id']}|{c['lang']}|{c['text'].replace(chr(10), '~NL~')}\n")
 env = dict(os.environ)
-env.pop('RNXC_NOCACHE', None)      # the pipeline compiles Softanza once; the image is reused after
+env.pop('RNXC_NOCACHE', None); env.pop('HARO_NOCACHE', None)      # the pipeline compiles Softanza once; the image is reused after
 p = subprocess.run([PACKAGE_RNXC, 'e4_pipeline.ring', os.path.join('scratch', 'questions.txt')], capture_output=True, cwd=HERE, env=env, timeout=900)
 out = p.stdout.decode('utf-8', 'replace').replace('\r\n', '\n')
 open(os.path.join(HERE, 'e4_result.txt'), 'w', encoding='utf-8', newline='').write(out)
@@ -171,8 +174,8 @@ court_cache = {}
 
 def court(zql):
     if zql not in court_cache:
-        r = subprocess.run([RNXC, 'z_court.ring', 'ask', SENTENCE, zql, rows_json], capture_output=True, cwd=SPIKE, env=dict(os.environ, RNXC_NOCACHE='1'), timeout=120)
-        o = subprocess.run([ORACLE, 'z_court.ring', 'ask', SENTENCE, zql, rows_json], capture_output=True, cwd=SPIKE, env=dict(os.environ, RNXC_NOCACHE='1'), timeout=120)
+        r = subprocess.run([RNXC, 'z_court.ring', 'ask', SENTENCE, zql, rows_json], capture_output=True, cwd=SPIKE, env=dict(os.environ, RNXC_NOCACHE='1', HARO_NOCACHE='1'), timeout=120)
+        o = subprocess.run([ORACLE, 'z_court.ring', 'ask', SENTENCE, zql, rows_json], capture_output=True, cwd=SPIKE, env=dict(os.environ, RNXC_NOCACHE='1', HARO_NOCACHE='1'), timeout=120)
         court_cache[zql] = (r.stdout.decode('utf-8', 'replace').replace('\r\n', '\n').strip(), o.stdout.decode('utf-8', 'replace').replace('\r\n', '\n').strip())
     return court_cache[zql]
 
@@ -276,7 +279,7 @@ shutil.copy(os.path.join(HERE, 'e4_pipeline.ring'), ctl)
 shutil.copy(os.path.join(HERE, 'data', 'tontine.zknw'), os.path.join(ctl, 'data'))
 open(os.path.join(ctl, 'q.txt'), 'w', encoding='utf-8', newline='').write('X01|tn-en|show deposits over [ Marker() ]\n')
 env2 = dict(os.environ)
-env2.pop('RNXC_NOCACHE', None)
+env2.pop('RNXC_NOCACHE', None); env2.pop('HARO_NOCACHE', None)
 pc = subprocess.run([PACKAGE_RNXC, 'e4_pipeline.ring', 'q.txt'], capture_output=True, cwd=ctl, env=env2, timeout=900)
 oc = pc.stdout.decode('utf-8', 'replace')
 m = re.search(r'CANARY\t(\d+)', oc)
@@ -288,7 +291,7 @@ shutil.rmtree(ctl, ignore_errors=True)
 tampered = ['SELECT * FROM collect; DROP TABLE collect', 'SELECT * FROM collect WHERE amount > 5000 OR 1=1; --', 'DROP TABLE collect', 'SELECT member FROM collect']
 refused_by_court = 0
 for t in tampered:
-    r = subprocess.run([RNXC, 'z_court.ring', 'ask', SENTENCE, t, rows_json], capture_output=True, cwd=SPIKE, env=dict(os.environ, RNXC_NOCACHE='1'), timeout=120)
+    r = subprocess.run([RNXC, 'z_court.ring', 'ask', SENTENCE, t, rows_json], capture_output=True, cwd=SPIKE, env=dict(os.environ, RNXC_NOCACHE='1', HARO_NOCACHE='1'), timeout=120)
     o = r.stdout.decode('utf-8', 'replace').strip()
     if not o.startswith('[') and o:
         refused_by_court += 1

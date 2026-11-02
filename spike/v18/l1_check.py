@@ -15,14 +15,16 @@ import glob, os, re, subprocess, sys, tempfile, threading, time
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 SP = os.path.abspath(os.path.join(HERE, '..'))
-ROOT = os.path.abspath(os.path.join(SP, '..', '..'))
+sys.path.insert(0, os.path.abspath(os.path.join(HERE, '..', '..')))   # this repository's root, for paths.py
+import paths                                   # where Ring++ is (Haro is its own repository since 2026-11-02)
+ROOT = paths.RINGPP                            # its bench/, tests/ and vendored stdlib are part of the corpus
 sys.path.insert(0, HERE)
 import cst, l1
 
 PLANT = '--plant' in sys.argv
 QUICK = '--quick' in sys.argv
 SCRATCH = os.path.join(HERE, 'scratch')
-ORACLE = os.environ.get('RING') or os.path.join(ROOT, 'runtime', 'win64', 'ring.exe')
+ORACLE = paths.RING
 STZ = r'D:\GitHub\stzlib\libraries\stzlib\base'
 FIXTURE_FLOOR, CORPUS_FLOOR = 20, 24
 fails = []
@@ -79,7 +81,7 @@ def dis(text, name):
     # RNXC_LINES_STATIC: since F-110 (2026-10-12) rnxc puts a LINE into the code where Ring carries one past an `ok` -- and only when the
     # `ok` stands on its own line -- so two layouts of one program compile to different code there; this judge compares no line
     r = subprocess.run([cst.RNXC, 'dis', p], capture_output=True, timeout=300,
-                       env=dict(os.environ, RNXC_NOCACHE='1', RNXC_LINES_STATIC='1'))
+                       env=dict(os.environ, RNXC_NOCACHE='1', RNXC_LINES_STATIC='1', HARO_NOCACHE='1', HARO_LINES_STATIC='1'))
     out = r.stdout.decode('latin-1')
     # a lambda is named after its source LINE (`@@lambda62`): layout leaks into a function's name, and a formatter moves it
     out = re.sub(r'@@lambda\d+', '@@lambdaN', out)
@@ -132,7 +134,7 @@ def refusals(text, name):
     """How many statements rnxc refuses in the text (`rnxc census`): a refused statement compiles to a trap, so the code of a text that has
     one says nothing about the graph -- the canonical text of such a file often compiles where the original does not."""
     p = write(name, text)
-    r = subprocess.run([cst.RNXC, 'census', p], capture_output=True, timeout=300, env=dict(os.environ, RNXC_NOCACHE='1'))
+    r = subprocess.run([cst.RNXC, 'census', p], capture_output=True, timeout=300, env=dict(os.environ, RNXC_NOCACHE='1', HARO_NOCACHE='1'))
     m = re.search(r'statements \d+: \d+ compiled \(\d+%\), (\d+) refused', r.stdout.decode('latin-1'))
     return int(m.group(1)) if m else 0
 

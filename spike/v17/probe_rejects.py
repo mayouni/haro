@@ -3,7 +3,9 @@ Run from anywhere: python haro/spike/v17/probe_rejects.py"""
 import os, subprocess, sys, tempfile
 
 SP = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
-RNXC = os.path.abspath(os.path.join(SP, '..', '..', 'zig-out', 'bin', 'rnxc.exe'))
+sys.path.insert(0, os.path.dirname(SP))
+import paths
+RNXC = paths.RNXC
 SENT = open(os.path.join(SP, 'n', 'tontine.n'), encoding='utf-8', newline='').read()
 
 DEFECTS = [
@@ -33,7 +35,7 @@ with tempfile.TemporaryDirectory() as td:
             continue
         p = os.path.join(td, 'x.n')
         open(p, 'w', encoding='utf-8', newline='').write(SENT.replace(old, new))
-        r = subprocess.run([RNXC, 'n_court.ring', 'check', p], capture_output=True, cwd=SP, env=dict(os.environ, RNXC_NOCACHE='1'), timeout=120)
+        r = subprocess.run([RNXC, 'n_court.ring', 'check', p], capture_output=True, cwd=SP, env=dict(os.environ, RNXC_NOCACHE='1', HARO_NOCACHE='1'), timeout=120)
         o = r.stdout.decode('utf-8', 'replace').replace('\r\n', '\n').strip().splitlines()
         first = o[0] if o else ''
         print(f'{label:52s} -> {first[:170]}')

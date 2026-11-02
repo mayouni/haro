@@ -31,7 +31,9 @@ The engine is v20/refine.py; the graph is rung 18's, the ids rung 19's.
 import contextlib, copy, glob, json, os, re, subprocess, sys, tempfile, threading, time
 
 HERE = os.path.dirname(os.path.abspath(__file__))
-ROOT = os.path.abspath(os.path.join(HERE, '..', '..', '..'))
+sys.path.insert(0, os.path.abspath(os.path.join(HERE, '..', '..')))   # this repository's root, for paths.py
+import paths                                   # where Ring++ is (Haro is its own repository since 2026-11-02)
+ROOT = paths.RINGPP
 sys.path.insert(0, HERE)
 sys.path.insert(0, os.path.join(HERE, '..', 'v19'))
 sys.path.insert(0, os.path.join(HERE, '..'))
@@ -51,8 +53,8 @@ BLOCK_ONLY = '--block' in sys.argv      # the body kinds' fixtures alone (block,
 WIDE = '--wide' in sys.argv
 ONLY_FX = '--fx' in sys.argv
 SCRATCH = os.path.join(HERE, 'scratch')
-RNXC = os.environ.get('RNXC') or os.path.join(ROOT, 'zig-out', 'bin', 'rnxc.exe')
-ORACLE = os.environ.get('RING') or os.path.join(ROOT, 'runtime', 'win64', 'ring.exe')
+RNXC = paths.RNXC
+ORACLE = paths.RING
 PACKAGE = os.path.join(ROOT, 'runtime', 'package', 'ringpp-win64', 'bin', 'rnxc.exe')
 FIXTURE_FLOOR, STEP_FLOOR = 55, 150
 SWEEP_FLOOR = 300
@@ -1111,7 +1113,7 @@ def bump(lit):
 
 def corpus_files():
     files = []
-    files += sorted(glob.glob(os.path.join(ROOT, 'haro', 'spike', '*.ring')))
+    files += sorted(glob.glob(os.path.join(paths.SPIKE, '*.ring')))
     files += sorted(glob.glob(os.path.join(ROOT, 'bench', 'exec', '*.ring')))
     files += sorted(glob.glob(os.path.join(ROOT, 'bench', '*.ring')))
     if WIDE:

@@ -11,7 +11,7 @@ import os, re, sys, json
 ROOTS = {
     'softanza base': r'D:\GitHub\stzlib\libraries\stzlib\base',
     'softanza core': r'D:\GitHub\stzlib\libraries\stzlib\core',
-    'ringpp haro spike': r'D:\GitHub\ringpp\haro\spike',
+    'haro spike': r'D:\GitHub\haro\spike',          # Haro's own repository since 2026-11-02
     'ringpp bench+tests': None,
 }
 COMMENT = re.compile(r'^\s*(#|//)')

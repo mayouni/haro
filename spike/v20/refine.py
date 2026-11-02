@@ -42,8 +42,10 @@ FUNCTION_ATTRS = ('params',) + BLOCK_ATTRS                         # and a FUNCT
 BODY_KINDS = ('block', 'function', 'method')    # the kinds whose value is a function's body
 DECLARING = ('function', 'method')              # ...and those that DECLARE the function, which may not be there yet
 MUTATORS = ('add', 'insert', 'del', 'swap')     # the builtins that write into their first argument
-ROOT = os.path.abspath(os.path.join(HERE, '..', '..', '..'))
-RNXC = os.environ.get('RNXC') or os.path.join(ROOT, 'zig-out', 'bin', 'rnxc.exe')
+sys.path.insert(0, os.path.abspath(os.path.join(HERE, '..', '..')))   # this repository's root, for paths.py
+import paths                                   # where Ring++ is (Haro is its own repository since 2026-11-02)
+ROOT = paths.RINGPP                            # its src/ and vendored scanner are read for the builtin and keyword lists
+RNXC = paths.RNXC
 STAGES = ('structural', 'constraint', 'governance', 'trust', 'derivation')
 RULE_FLOOR = 'trusted'                          # the posture a refinement of a point's own RULES must come from, whatever the point's floor says
 WIDEN_TIER = 4                                  # widening a rule is the heaviest act there is

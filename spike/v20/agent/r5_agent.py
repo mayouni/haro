@@ -20,9 +20,11 @@ for p in (V20, os.path.join(V20, '..', 'v18')):
 import refine
 import tasks as T
 
-ROOT = os.path.abspath(os.path.join(HERE, '..', '..', '..', '..'))
-RNXC = os.environ.get('RNXC') or os.path.join(ROOT, 'zig-out', 'bin', 'rnxc.exe')
-ORACLE = os.environ.get('RING') or os.path.join(ROOT, 'runtime', 'win64', 'ring.exe')
+sys.path.insert(0, os.path.abspath(os.path.join(HERE, '..', '..', '..')))   # this repository's root, for paths.py
+import paths                                   # where Ring++ is (Haro is its own repository since 2026-11-02)
+ROOT = paths.RINGPP
+RNXC = paths.RNXC
+ORACLE = paths.RING
 SCRATCH = tempfile.mkdtemp(prefix='r5a_')
 
 

@@ -8,10 +8,12 @@ Usage: python haro/study/phase15/e3_run.py
 import os, re, subprocess, sys
 
 HERE = os.path.dirname(os.path.abspath(__file__))
-ROOT = os.path.abspath(os.path.join(HERE, '..', '..', '..'))
+sys.path.insert(0, os.path.abspath(os.path.join(HERE, '..', '..')))   # this repository's root, for paths.py
+import paths                                   # where Ring++ is (Haro is its own repository since 2026-11-02)
+ROOT = paths.RINGPP
 RING_OFFICIAL = r'D:\ring127\bin\ring.exe'
 NATLIB = r'D:\ring127\libraries\naturallib'
-RNXC = os.path.join(ROOT, 'zig-out', 'bin', 'rnxc.exe')
+RNXC = paths.RNXC
 EXP = os.path.join(HERE, 'e3_naturallib.ring')
 
 
