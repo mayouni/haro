@@ -1,0 +1,15 @@
+{
+  "world": "register",
+  "contract": "1.0",
+  "symbols": [
+    {
+      "kind": "regulation",
+      "name": "water_code",
+      "span": {
+        "file": "register.zql",
+        "line": 3
+      }
+    }
+  ],
+  "refs": []
+}

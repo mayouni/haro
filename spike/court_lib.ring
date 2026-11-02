@@ -179,6 +179,18 @@ func CtElementCode(cOwn, cDefault, cName)
 	if cOwn != "" return [cOwn, ["rule:" + cOwn]] ok
 	return [cDefault, ["rule:" + cName]]
 
+# v0.28 (HARO-MENU-CITES-01): an element's code and cites, its declared CITES over the default -- the row's
+# nth element, present only when declared: the string "none" cites nothing, a list cites what it names
+func CtElementCites(cOwn, cDefault, cName, aRow, n)
+	aCC = CtElementCode(cOwn, cDefault, cName)
+	if len(aRow) < n return aCC ok
+	if isString(aRow[n])
+		aCC[2] = []
+	but len(aRow[n]) > 0
+		aCC[2] = aRow[n]
+	ok
+	return aCC
+
 # v0.23: whether the court's own language is under an article of its CONSTITUTION
 # (charter 2): the forged court carries ARTICLES in $aCourtConstitution, empty without one.
 # A refusal that enforces an article names it -- "[Art. N name]" -- and cites "article:N",
@@ -258,7 +270,9 @@ func CtRefusalCode(cCategory, cWord, cDefault)
 	if cCode = "" and len(aR) >= 4 cCode = aR[4] ok
 	if cCode = "" cCode = cDefault ok
 	aCites = []
-	if len(aR) >= 6 aCites = aR[6] ok
+	if len(aR) >= 6
+		if isList(aR[6]) aCites = aR[6] ok
+	ok
 	return [cCode, aCites]
 
 func CtInList(cS, aL)
@@ -917,7 +931,7 @@ func CtWantUnion(aDecl, aClause, aSeat)
 	if aClause[3][1] = "word" or aClause[3][1] = "string" or aClause[3][1] = "number" cV = aClause[3][2] ok
 	cOwn = ""
 	if len(aU) >= 4 cOwn = aU[4] ok
-	aCC = CtElementCode(cOwn, "UNION", aU[1])
+	aCC = CtElementCites(cOwn, "UNION", aU[1], aU, 5)
 	CtFailC(aClause[2], aCC[1], aCC[2], CtFill(cMsg, aDecl, cV))
 
 # {name}, {VERB}, {value}, {other}, {seat} and {decl.seat} in a declared message
@@ -1393,8 +1407,13 @@ func CtDeclare(cSrc)
 					# element is assigned, not the list rebuilt from its own element: on Ring 1.27
 					# `a = [a[1], b]` reads a[1] from a list already emptied (R2), rnxc reads it
 					# first -- HF-36, met again here (stage 29's L6 on the oracle, 2026-11-02)
+					# v0.28: CITES none -- the row's "none" -- cites nothing
 					if len(aCn) >= 7
-						if len(aCn[7]) > 0 aCC[2] = aCn[7] ok
+						if isString(aCn[7])
+							aCC[2] = []
+						but len(aCn[7]) > 0
+							aCC[2] = aCn[7]
+						ok
 					ok
 					# v0.25: a CONSTRAINT of SEVERITY warning is noted and spoken after the verdict, never raised
 					cCnSev = "error"
@@ -1497,7 +1516,7 @@ func CtCheckNamed(cNames, cName)
 		if cMsg = "" cMsg = "is not a " + cNames + ": the menu is " + CtJoin(aM[2], ", ") ok
 		cOwn = ""
 		if len(aM) >= 4 cOwn = aM[4] ok
-		aCC = CtElementCode(cOwn, "MENU", aM[1])
+		aCC = CtElementCites(cOwn, "MENU", aM[1], aM, 5)
 		CtSetCode(aCC[1], aCC[2])
 		return CtFill(cMsg, NULL, cName)
 	ok
@@ -1508,7 +1527,7 @@ func CtCheckNamed(cNames, cName)
 		if cMsg = "" cMsg = "is not a " + aF[2] ok
 		cOwn = ""
 		if len(aF) >= 5 cOwn = aF[5] ok
-		aCC = CtElementCode(cOwn, "FORMAT", aF[1])
+		aCC = CtElementCites(cOwn, "FORMAT", aF[1], aF, 6)
 		CtSetCode(aCC[1], aCC[2])
 		return CtFill(cMsg, NULL, cName)
 	ok
@@ -1526,7 +1545,7 @@ func CtCheckScalar(aDecl, aSeat, cValue)
 		if substr(cMsg, "{value}") = 0 cMsg += ", not '{value}'" ok
 		cOwn = ""
 		if len(aM) >= 4 cOwn = aM[4] ok
-		aCC = CtElementCode(cOwn, "MENU", aM[1])
+		aCC = CtElementCites(cOwn, "MENU", aM[1], aM, 5)
 		CtSetCode(aCC[1], aCC[2])
 		return CtFill(cMsg, aDecl, cValue)
 	but cK = "range"
@@ -1538,7 +1557,7 @@ func CtCheckScalar(aDecl, aSeat, cValue)
 		if cMsg = "" cMsg = cClause + " {value} is out of range (" + aR[2] + ".." + aR[3] + ")" ok
 		cOwn = ""
 		if len(aR) >= 5 cOwn = aR[5] ok
-		aCC = CtElementCode(cOwn, "RANGE", aR[1])
+		aCC = CtElementCites(cOwn, "RANGE", aR[1], aR, 6)
 		CtSetCode(aCC[1], aCC[2])
 		return CtFill(cMsg, aDecl, cValue)
 	but cK = "format"
@@ -1548,7 +1567,7 @@ func CtCheckScalar(aDecl, aSeat, cValue)
 		if cMsg = "" cMsg = cClause + " is not a " + aF[2] + ": '{value}'" ok
 		cOwn = ""
 		if len(aF) >= 5 cOwn = aF[5] ok
-		aCC = CtElementCode(cOwn, "FORMAT", aF[1])
+		aCC = CtElementCites(cOwn, "FORMAT", aF[1], aF, 6)
 		CtSetCode(aCC[1], aCC[2])
 		return CtFill(cMsg, aDecl, cValue)
 	but cK = "expr"
@@ -1621,7 +1640,7 @@ func CtCheckUnionWord(aDecl, aSeat, cValue)
 	if cMsg = "" cMsg = "{VERB} {name} " + upper(aSeat[1]) + " '{value}', which resolves to nothing: no such " + CtJoin(aVerbs, " or ") ok
 	cOwn = ""
 	if len(aU) >= 4 cOwn = aU[4] ok
-	aCC = CtElementCode(cOwn, "UNION", aU[1])
+	aCC = CtElementCites(cOwn, "UNION", aU[1], aU, 5)
 	CtSetCode(aCC[1], aCC[2])
 	return CtFill(cMsg, aDecl, cValue)
 

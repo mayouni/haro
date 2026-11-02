@@ -1,4 +1,4 @@
--- unknown_verb.notice -- a sentence of notice_v28.haro: a verb the language does not know; the REFUSAL cites none.
+-- unknown_verb.notice -- a sentence of notice_v28.haro: a verb the language does not know, before any DEFINE; the REFUSAL cites none.
 
 DEFINE OFFICE town_hall AS (
   HEAD "the mayor"
@@ -8,6 +8,6 @@ DEFINE DESK front AS (
   CLERK "the front clerk"
 ) RATIONALE "The front desk posts what the town hall decides"
 
-DEFINE BULLETIN water_cut AS (
+BULLETIN water_cut AS (
   ISSUER town_hall
-) RATIONALE "A bulletin is not a notice"
+) RATIONALE "A bulletin is not a verb of the language"

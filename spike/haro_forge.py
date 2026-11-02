@@ -75,6 +75,7 @@ STZU24_FIXTURES = os.path.join(HERE, 'v24', 'fixtures.json')
 STZU25_FIXTURES = os.path.join(HERE, 'v25', 'fixtures.json')
 STZU26_FIXTURES = os.path.join(HERE, 'v26', 'fixtures.json')
 STZU27_FIXTURES = os.path.join(HERE, 'v27', 'fixtures.json')
+STZU28_FIXTURES = os.path.join(HERE, 'v28', 'fixtures.json')
 
 
 def judge_stzu(exe, label, fixtures=STZU_FIXTURES):
@@ -84,7 +85,7 @@ def judge_stzu(exe, label, fixtures=STZU_FIXTURES):
     counts), world and points."""
     doc = json.load(open(fixtures, encoding='utf-8'))
     # the pinned v0.1 judge is stzu's; everything since is Haro's (D1)
-    assert doc['grammar'] in ('stzu', 'haro') and doc['version'] in ('0.1', '0.2', '0.3', '0.4', '0.5', '0.6', '0.7', '0.8', '0.9', '0.10', '0.11', '0.12', '0.13', '0.16', '0.17', '0.23', '0.24', '0.25', '0.26', '0.27')
+    assert doc['grammar'] in ('stzu', 'haro') and doc['version'] in ('0.1', '0.2', '0.3', '0.4', '0.5', '0.6', '0.7', '0.8', '0.9', '0.10', '0.11', '0.12', '0.13', '0.16', '0.17', '0.23', '0.24', '0.25', '0.26', '0.27', '0.28')
     passed = failed = 0
     outputs = {}
     with tempfile.TemporaryDirectory() as td:
@@ -166,7 +167,8 @@ def stage1():
                             ('v0.24, visible state through the access paths, sovereignty through the zones', STZU24_FIXTURES),
                             ('v0.25, the sovereignty and privacy weaves over the personal seats, the regime named, SEVERITY on a constraint', STZU25_FIXTURES),
                             ('v0.26, Z under the whole constitution -- the refusals Z met on its way (ZC5); no new clause', STZU26_FIXTURES),
-                            ("v0.27, the field tag: a pair form's optional mark, PERSONAL reaching it, SAFEGUARDS on the ask and the voice (ZTAG)", STZU27_FIXTURES)):
+                            ("v0.27, the field tag: a pair form's optional mark, PERSONAL reaching it, SAFEGUARDS on the ask and the voice (ZTAG)", STZU27_FIXTURES),
+                            ('v0.28, CITES on every element that carries a CODE, and the word none (HARO-MENU-CITES-01)', STZU28_FIXTURES)):
         print(f'stage 1 -- the Haro meta-court in pure Ring, judged by its fixtures ({label})')
         f1, o1 = judge_stzu(RNXC, 'rnxc', fixtures)
         f2, o2 = judge_stzu(ORACLE, 'oracle ring.exe', fixtures)
@@ -3286,6 +3288,16 @@ def stage33():
     is refused with its code; two marks; the runtime unchanged; v0.26's declaration still accepted."""
     return ledger_stage(33, Z_STZU, Z27_CASES, 'z', 'Y5')
 
+NOTICE_STZU = os.path.join(HERE, 'notice_v28.haro')
+NOTICE_CASES = os.path.join(HERE, 'v28', 'court_cases.json')
+def stage34():
+    """HARO-MENU-CITES-01, ruled by the Principal 2026-11-02 (v28/GRAMMAR.md): notice_v28.haro, a public notice whose
+    contract binds its media, its issuer, its length and its archive's path and nothing about its tone, and its twelve
+    cases -- a MENU, a RANGE, a FORMAT and a UNION each citing what binds it; a MENU and a CONSTRAINT citing none (the
+    envelope's cites empty, which the Diagnostic Contract calls honest where no law applies); a MENU without CITES
+    keeping rule:<CODE>; the voice telling a refusal with its cite."""
+    return ledger_stage(34, NOTICE_STZU, NOTICE_CASES, 'notice', 'N4')
+
 def stage6(lang, court=None, n=15):
     court = court or f'{lang}_court.ring'
     print(f'stage 6 -- edit to verdict on makeen_box.machine, minima of {n}')
@@ -3411,5 +3423,7 @@ if __name__ == '__main__':
         failures += stage32()
     if stage in (None, 33) and os.path.exists(Z_STZU) and os.path.exists(Z27_CASES):
         failures += stage33()
+    if stage in (None, 34) and os.path.exists(NOTICE_STZU) and os.path.exists(NOTICE_CASES):
+        failures += stage34()
     print(f'haro_forge: {"FAIL" if failures else "PASS"} ({failures} failure(s), {time.perf_counter()-t0:.1f} s)')
     sys.exit(1 if failures else 0)

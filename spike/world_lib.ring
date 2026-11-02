@@ -76,7 +76,12 @@ func CtSymbolCode(aSy)
 	aCites = ["rule:" + aSy[1]]
 	if len(aSy) >= 6
 		if aSy[5] != "" cCode = aSy[5] ok
-		if len(aSy[6]) > 0 aCites = aSy[6] ok
+		# v0.28: CITES none -- the row's "none" -- cites nothing
+		if isString(aSy[6])
+			aCites = []
+		but len(aSy[6]) > 0
+			aCites = aSy[6]
+		ok
 	ok
 	return [cCode, aCites]
 

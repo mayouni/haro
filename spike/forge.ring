@@ -139,6 +139,20 @@ func NamesSource(aNames)
 	next
 	return cBuf + "]"
 
+# v0.28 (HARO-MENU-CITES-01): a cites value as Ring source -- the word none as the string "none", a list as a list
+func CitesSource(xCites)
+	if isString(xCites) return RingStr(xCites) ok
+	return NamesSource(xCites)
+
+# v0.28: the CITES a MENU, RANGE, FORMAT or UNION declares rides into the court after its code, and only
+# when declared, so a language that declares none forges the bytes it forged before
+func CitesTail(aRec, n)
+	if len(aRec) < n return "" ok
+	xC = aRec[n]
+	if isString(xC) return ", " + RingStr(xC) ok
+	if len(xC) = 0 return "" ok
+	return ", " + NamesSource(xC)
+
 func PointsSource(aPoints)
 	cBuf = "["
 	for i = 1 to len(aPoints)
@@ -233,7 +247,7 @@ func LangSource(aLang)
 			aRCodes = aR[i][7]
 			aRCites = aR[i][8]
 		ok
-		aRows + ("[" + RingStr(aR[i][1]) + ", " + RingStr(aR[i][2]) + ", " + MessagesSource(aNamed) + ", " + RingStr(cRCode) + ", " + MessagesSource(aRCodes) + ", " + NamesSource(aRCites) + "]")
+		aRows + ("[" + RingStr(aR[i][1]) + ", " + RingStr(aR[i][2]) + ", " + MessagesSource(aNamed) + ", " + RingStr(cRCode) + ", " + MessagesSource(aRCodes) + ", " + CitesSource(aRCites) + "]")
 	next
 	cRefusals = RowsSource(aRows, nl)
 	aRows = []
@@ -241,7 +255,7 @@ func LangSource(aLang)
 	for i = 1 to len(aM)
 		cMC = ""
 		if len(aM[i]) >= 5 cMC = aM[i][5] ok
-		aRows + ("[" + RingStr(aM[i][1]) + ", " + NamesSource(aM[i][2]) + ", " + RingStr(aM[i][3]) + ", " + RingStr(cMC) + "]")
+		aRows + ("[" + RingStr(aM[i][1]) + ", " + NamesSource(aM[i][2]) + ", " + RingStr(aM[i][3]) + ", " + RingStr(cMC) + CitesTail(aM[i], 6) + "]")
 	next
 	cMenus = RowsSource(aRows, nl)
 	aRows = []
@@ -249,7 +263,7 @@ func LangSource(aLang)
 	for i = 1 to len(aRg)
 		cRgC = ""
 		if len(aRg[i]) >= 6 cRgC = aRg[i][6] ok
-		aRows + ("[" + RingStr(aRg[i][1]) + ", " + aRg[i][2] + ", " + aRg[i][3] + ", " + RingStr(aRg[i][4]) + ", " + RingStr(cRgC) + "]")
+		aRows + ("[" + RingStr(aRg[i][1]) + ", " + aRg[i][2] + ", " + aRg[i][3] + ", " + RingStr(aRg[i][4]) + ", " + RingStr(cRgC) + CitesTail(aRg[i], 7) + "]")
 	next
 	cRanges = RowsSource(aRows, nl)
 	aRows = []
@@ -259,7 +273,7 @@ func LangSource(aLang)
 		if len(aFm[i]) >= 5 cFold = aFm[i][5] ok
 		cFmC = ""
 		if len(aFm[i]) >= 6 cFmC = aFm[i][6] ok
-		aRows + ("[" + RingStr(aFm[i][1]) + ", " + RingStr(aFm[i][2]) + ", " + RingStr(aFm[i][3]) + ", " + RingStr(cFold) + ", " + RingStr(cFmC) + "]")
+		aRows + ("[" + RingStr(aFm[i][1]) + ", " + RingStr(aFm[i][2]) + ", " + RingStr(aFm[i][3]) + ", " + RingStr(cFold) + ", " + RingStr(cFmC) + CitesTail(aFm[i], 7) + "]")
 	next
 	cFormats = RowsSource(aRows, nl)
 	aRows = []
@@ -267,7 +281,7 @@ func LangSource(aLang)
 	for i = 1 to len(aU)
 		cUC = ""
 		if len(aU[i]) >= 5 cUC = aU[i][5] ok
-		aRows + ("[" + RingStr(aU[i][1]) + ", " + AltsSource(aLang, aU[i][2]) + ", " + RingStr(aU[i][3]) + ", " + RingStr(cUC) + "]")
+		aRows + ("[" + RingStr(aU[i][1]) + ", " + AltsSource(aLang, aU[i][2]) + ", " + RingStr(aU[i][3]) + ", " + RingStr(cUC) + CitesTail(aU[i], 6) + "]")
 	next
 	cUnions = RowsSource(aRows, nl)
 	aRows = []
@@ -281,7 +295,7 @@ func LangSource(aLang)
 		# v0.25: the SEVERITY (error or warning) rides along as the eighth element
 		cCSev = "error"
 		if len(aC[i]) >= 9 cCSev = aC[i][9] ok
-		aRows + ("[" + RingStr(aC[i][1]) + ", " + RingStr(aC[i][2]) + ", " + RingStr(aC[i][3]) + ", " + RingStr(aC[i][4]) + ", " + RingStr(aC[i][5]) + ", " + RingStr(cCC) + ", " + NamesSource(aCCites) + ", " + RingStr(cCSev) + "]")
+		aRows + ("[" + RingStr(aC[i][1]) + ", " + RingStr(aC[i][2]) + ", " + RingStr(aC[i][3]) + ", " + RingStr(aC[i][4]) + ", " + RingStr(aC[i][5]) + ", " + RingStr(cCC) + ", " + CitesSource(aCCites) + ", " + RingStr(cCSev) + "]")
 	next
 	cConstraints = RowsSource(aRows, nl)
 	aW = LangGet(aLang, "world")
@@ -310,7 +324,7 @@ func LangSource(aLang)
 			cSyC = aSy[i][6]
 			aSyCites = aSy[i][7]
 		ok
-		cSymbols += "[" + RingStr(aSy[i][1]) + ", " + RingStr(aSy[i][2]) + ", " + RingStr(aSy[i][3]) + ", " + RingStr(aSy[i][4]) + ", " + RingStr(cSyC) + ", " + NamesSource(aSyCites) + "]"
+		cSymbols += "[" + RingStr(aSy[i][1]) + ", " + RingStr(aSy[i][2]) + ", " + RingStr(aSy[i][3]) + ", " + RingStr(aSy[i][4]) + ", " + RingStr(cSyC) + ", " + CitesSource(aSyCites) + "]"
 	next
 	cSymbols += "]"
 	aRf = LangGet(aLang, "refine")

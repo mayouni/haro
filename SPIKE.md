@@ -1562,6 +1562,19 @@ question's rows redacted under redaction. `spike/v27/GRAMMAR.md` is the account.
 with no voice) and corrected after the court spoke; stage 19's law now reads the sentence's marks; consent is why zing's pin holds; a schema is not a datum;
 a `\b` in a heredoc is a backspace. **Routed** through Central: the mark and the safeguards' meaning to zing (zql.zig, PINNING-ZQL.md) and to StzZql.
 
+## The twenty-eighth rung -- Haro v0.28, every element that carries a CODE may cite, and the word none -- 2026-11-02
+
+**On the Principal's ruling HARO-MENU-CITES-01** (2026-11-02, LEDGER.md line 156, carried by Central to this desk at 01:08: a MENU may carry CITES as a CONSTRAINT does; where the contract binds nothing, the cite is none), built by the haro-charter desk (D38). MENU, RANGE, FORMAT and UNION take `CITES`; `CITES none` cites nothing on all seven elements that cite; no CITES keeps the default; `CITES []` is refused by name. `spike/v28/GRAMMAR.md` is the account.
+
+    v28/fixtures.json                   12 meta fixtures, written before any court code (4 accepts, 8 rejects); 2 of 12 passed on v0.27
+    notice_v28.haro, notice/            a public notice whose contract binds its media, issuer, length and archive, and nothing else
+    v28/court_cases.json                14 sentence cases: each element citing what binds it or none, the default kept, the voice, a SYMBOL
+    haro_lib.ring, forge.ring, court_lib.ring, world_lib.ring   the `citelist` shape and the word none; the empty list refused; the four
+                                        records' cites; CitesTail and CitesSource; CtElementCites; the constraint's, refusal's and symbol's none
+    haro_forge.py                       stage 1 grows by v0.28; stage 34 is the notice
+
+**Results.** 12 of 12 and 14 of 14, rnxc and the oracle byte-identical; 8 of 8 protections switched off in turn each fail the guard; the ten committed courts re-forge byte for byte. **What building found** (HF-132): an empty CITES had meant two things in three readers; one fixture sentence was spelt wrong and respelt, its judgement unchanged; no case reached the SYMBOL path until N13 and N14 were added after the court. **Routed** through Central: stzzui's six envelopes (three `CITES none`, three cites), its generator's change.
+
 ## The names -- `.haro`, not `.stzu` -- corrected 2026-10-02
 
 **At the author's word ("we agreed to use .haro instead of .stzu, no?").** D1 was ratified
@@ -1697,6 +1710,8 @@ whole guard re-run on the renamed tree: 28 + 30 + 27 + 23, 117 of 120, 32 of 32,
    **Then, on his "yes" to ZTAG-01 the same morning, Haro v0.27** (the twenty-seventh rung below; `v27/GRAMMAR.md`, guard stage 33, D37, HF-131): the
    field tag -- `member: text personal` at the sentence, PERSONAL by a three-part path, SAFEGUARDS on the ask and the voice; 14 meta fixtures and the
    tontine's 11 cases written first, 25 of 25 on both runtimes; the court names the marks, answers whole under consent, tells redacted under redaction.
+   **Then, on the Principal's ruling HARO-MENU-CITES-01, Haro v0.28** (the twenty-eighth rung below; `v28/GRAMMAR.md`, guard stage 34, D38, HF-132):
+   every element that carries a CODE may cite, and `CITES none` cites nothing; 12 meta fixtures and the notice's 14 cases, both runtimes alike.
 18. The forge as an `rnxc` verb (the ringpp session's `src/`, routed); the
    Softanza-resident timing the charter's 2.6 asks for; the court's run time on the
    oracle under paths and views (6.4x the image this pass, named at stage 6); the

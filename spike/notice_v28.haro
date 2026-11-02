@@ -3,7 +3,7 @@
 -- binds four things -- the media (rule 4), the issuer (rule 2), the length (a right) and the archive's
 -- path (a pattern) -- and nothing about the tone or about a letter's urgency. So the tone's menu and the
 -- urgency constraint cite none, the audience's menu declares no CITES and keeps the default, and the
--- rest cite what binds them. The sentences judged by `haro_forge.py --stage=34` are in notice/.
+-- rest cite what binds them; a regulation the town's register lacks cites none. The sentences judged by `haro_forge.py --stage=34` are in notice/.
 
 DEFINE LANGUAGE notice AS (
   VERSION "0.28",
@@ -48,6 +48,13 @@ DEFINE FORMAT archive_path AS (
   CITES ["pattern:absolute-path"]
 ) RATIONALE "Where the notice is kept, named from the archive's root"
 
+DEFINE SYMBOL regulations AS (
+  KIND "regulation", REF "follows",
+  MESSAGE "NOTICE {name} follows '{value}', and the town's register declares no regulation:{value}",
+  CODE "UNKNOWN_REGULATION",
+  CITES none
+) RATIONALE "A regulation a notice follows lives in the town's register, not in the sentence; the contract binds none of them, so a name the register lacks cites nothing"
+
 -- ---- the kinds ------------------------------------------------------------------------------
 
 DEFINE DECLARATION office AS (
@@ -69,7 +76,7 @@ DEFINE UNION issuers AS (
 
 DEFINE DECLARATION notice AS (
   VERB "NOTICE",
-  SEATS [issuer: issuers, tone: tones, medium: media, audience: audiences, length: lengths, archive: archive_path]
+  SEATS [issuer: issuers, tone: tones, medium: media, audience: audiences, length: lengths, archive: archive_path, follows: regulations?]
 ) RATIONALE "One notice: who issues it, how it speaks, where it goes, to whom, how long it is, where it is kept"
 
 -- ---- the constraint and the refusals ----------------------------------------------------------
