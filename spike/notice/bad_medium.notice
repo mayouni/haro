@@ -1,0 +1,13 @@
+-- bad_medium.notice -- a sentence of notice_v28.haro: MEDIUM email: the media menu cites rule 4.
+
+DEFINE OFFICE town_hall AS (
+  HEAD "the mayor"
+) RATIONALE "The town hall issues the town's notices"
+
+DEFINE DESK front AS (
+  CLERK "the front clerk"
+) RATIONALE "The front desk posts what the town hall decides"
+
+DEFINE NOTICE water_cut AS (
+  ISSUER town_hall, TONE urgent, MEDIUM email, AUDIENCE public, LENGTH 120, ARCHIVE "/notices/2026/water"
+) RATIONALE "The water is cut on Tuesday"

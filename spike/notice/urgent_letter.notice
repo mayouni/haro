@@ -1,0 +1,13 @@
+-- urgent_letter.notice -- a sentence of notice_v28.haro: an urgent notice by letter: the constraint cites none.
+
+DEFINE OFFICE town_hall AS (
+  HEAD "the mayor"
+) RATIONALE "The town hall issues the town's notices"
+
+DEFINE DESK front AS (
+  CLERK "the front clerk"
+) RATIONALE "The front desk posts what the town hall decides"
+
+DEFINE NOTICE water_cut AS (
+  ISSUER town_hall, TONE urgent, MEDIUM letter, AUDIENCE public, LENGTH 120, ARCHIVE "/notices/2026/water"
+) RATIONALE "The water is cut on Tuesday"

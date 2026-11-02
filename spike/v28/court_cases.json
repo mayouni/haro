@@ -1,0 +1,169 @@
+{
+ "name": "the notice -- sentence-level cases for Haro v0.28 (HARO-MENU-CITES-01)",
+ "comment": "Written BEFORE the court code (the W discipline). Each case runs the court forged from notice_v28.haro on rnxc AND on the oracle; the two must print the same bytes. N3, N9 and N10 cite none; N4, N6, N7 and N8 cite what binds them; N5 keeps the default. The diagnose cases compare the first diagnostic's cites exactly.",
+ "cases": [
+  {
+   "id": "N1",
+   "name": "the clean notice is a sentence: one office, one desk, one notice",
+   "verb": "check",
+   "args": [
+    "notice/clean.notice"
+   ],
+   "first": "ok",
+   "counts": {
+    "OFFICE": 1,
+    "DESK": 1,
+    "NOTICE": 1
+   }
+  },
+  {
+   "id": "N2",
+   "name": "the meta-court reads the notice world: three menus, a range, a format, a union, a constraint, two refusals, a voice",
+   "verb": "meta",
+   "args": [
+    "notice_v28.haro"
+   ],
+   "first": "ok",
+   "contains": [
+    "menus 3",
+    "ranges 1",
+    "formats 1",
+    "unions 1",
+    "constraints 1",
+    "refusals 2",
+    "narrates 1"
+   ]
+  },
+  {
+   "id": "N3",
+   "name": "a MENU that cites none: the envelope carries its code and no cite (the six envelopes of stzzui, case one)",
+   "verb": "diagnose",
+   "args": [
+    "notice/bad_tone.notice"
+   ],
+   "diagnose": {
+    "code": "INVALID_TONE",
+    "cites": []
+   }
+  },
+  {
+   "id": "N4",
+   "name": "a MENU that cites what binds it: rule:4, never rule:UNKNOWN_MEDIUM",
+   "verb": "diagnose",
+   "args": [
+    "notice/bad_medium.notice"
+   ],
+   "diagnose": {
+    "code": "UNKNOWN_MEDIUM",
+    "cites": [
+     "rule:4"
+    ]
+   }
+  },
+  {
+   "id": "N5",
+   "name": "a MENU without CITES keeps the default every court has cited since v0.11: rule:<CODE>",
+   "verb": "diagnose",
+   "args": [
+    "notice/bad_audience.notice"
+   ],
+   "diagnose": {
+    "code": "UNKNOWN_AUDIENCE",
+    "cites": [
+     "rule:UNKNOWN_AUDIENCE"
+    ]
+   }
+  },
+  {
+   "id": "N6",
+   "name": "a RANGE cites the reader's right",
+   "verb": "diagnose",
+   "args": [
+    "notice/too_long.notice"
+   ],
+   "diagnose": {
+    "code": "TOO_LONG",
+    "cites": [
+     "right:read-in-one-sitting"
+    ]
+   }
+  },
+  {
+   "id": "N7",
+   "name": "a FORMAT cites its pattern",
+   "verb": "diagnose",
+   "args": [
+    "notice/bad_archive.notice"
+   ],
+   "diagnose": {
+    "code": "BAD_ARCHIVE",
+    "cites": [
+     "pattern:absolute-path"
+    ]
+   }
+  },
+  {
+   "id": "N8",
+   "name": "a UNION cites rule 2",
+   "verb": "diagnose",
+   "args": [
+    "notice/no_issuer.notice"
+   ],
+   "diagnose": {
+    "code": "NO_ISSUER",
+    "cites": [
+     "rule:2"
+    ]
+   }
+  },
+  {
+   "id": "N9",
+   "name": "a CONSTRAINT that cites none: its code, no cite -- where v0.23 to v0.27 could only cite rule:<CODE>",
+   "verb": "diagnose",
+   "args": [
+    "notice/urgent_letter.notice"
+   ],
+   "diagnose": {
+    "code": "URGENT_LETTER",
+    "cites": []
+   }
+  },
+  {
+   "id": "N10",
+   "name": "a REFUSAL that cites none, which a REFUSAL without CITES already did: the same envelope",
+   "verb": "diagnose",
+   "args": [
+    "notice/unknown_verb.notice"
+   ],
+   "diagnose": {
+    "code": "UNKNOWN_VERB",
+    "cites": []
+   }
+  },
+  {
+   "id": "N11",
+   "name": "the voice tells a refusal with what it cites: the medium's rule 4",
+   "verb": "narrate",
+   "args": [
+    "notice/bad_medium.notice"
+   ],
+   "contains": [
+    "Stopped at line",
+    "MEDIUM is board, letter or radio, not 'email'",
+    "(UNKNOWN_MEDIUM; rule:4)"
+   ]
+  },
+  {
+   "id": "N12",
+   "name": "check speaks as it did: the refusal line carries the message, never the cites",
+   "verb": "check",
+   "args": [
+    "notice/bad_tone.notice"
+   ],
+   "refused": true,
+   "contains": [
+    "TONE is plain, formal or urgent, not 'shouty'"
+   ]
+  }
+ ]
+}

@@ -1,0 +1,13 @@
+-- too_long.notice -- a sentence of notice_v28.haro: LENGTH 900: the range cites the reader's right.
+
+DEFINE OFFICE town_hall AS (
+  HEAD "the mayor"
+) RATIONALE "The town hall issues the town's notices"
+
+DEFINE DESK front AS (
+  CLERK "the front clerk"
+) RATIONALE "The front desk posts what the town hall decides"
+
+DEFINE NOTICE water_cut AS (
+  ISSUER town_hall, TONE urgent, MEDIUM radio, AUDIENCE public, LENGTH 900, ARCHIVE "/notices/2026/water"
+) RATIONALE "The water is cut on Tuesday"

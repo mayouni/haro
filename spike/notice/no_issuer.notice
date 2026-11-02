@@ -1,0 +1,13 @@
+-- no_issuer.notice -- a sentence of notice_v28.haro: ISSUER mayor_office, declared nowhere: the union cites rule 2.
+
+DEFINE OFFICE town_hall AS (
+  HEAD "the mayor"
+) RATIONALE "The town hall issues the town's notices"
+
+DEFINE DESK front AS (
+  CLERK "the front clerk"
+) RATIONALE "The front desk posts what the town hall decides"
+
+DEFINE NOTICE water_cut AS (
+  ISSUER mayor_office, TONE urgent, MEDIUM radio, AUDIENCE public, LENGTH 120, ARCHIVE "/notices/2026/water"
+) RATIONALE "The water is cut on Tuesday"

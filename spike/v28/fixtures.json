@@ -1,0 +1,115 @@
+{
+ "grammar": "haro",
+ "version": "0.28",
+ "comment": "Written BEFORE any court code (the W discipline). The Principal ruled HARO-MENU-CITES-01 on 2026-11-02 (LEDGER.md line 156): an envelope cites only what exists; a MENU may carry CITES as a CONSTRAINT does; where the contract binds nothing the cite is none, never rule:<CODE> for a rule that does not exist. v0.28 answers it for every element that carries a CODE: MENU, RANGE, FORMAT and UNION take CITES as CONSTRAINT (v0.23), REFUSAL and SYMBOL (v0.11) do. Three spellings, each meaning one thing: a list of cites replaces the default; the word none says the refusal cites nothing (the envelope's cites is [], which the Diagnostic Contract calls honest where no law applies, 2.5); no CITES clause keeps the default every court has cited since v0.11, so no court prints a different byte. An empty list is refused by name -- the machine language's own idiom for EGRESS (\"a list names where the machine may go, and the word none says it goes nowhere\"). R2 reverses an acceptance: from v0.23 to v0.27 an empty CITES on a CONSTRAINT was read as the default, silently; no estate file wrote one.",
+ "accepts": [
+  {
+   "id": "A1",
+   "name": "every element that carries a CODE may carry CITES: a MENU, a RANGE, a FORMAT and a UNION, each citing what its contract binds",
+   "source": "DEFINE LANGUAGE notice AS (VERSION \"0.28\", GRAMMAR \"0.28\", COURT \"x\", EXTENSION \".notice\") RATIONALE \"x\"\nDEFINE MENU tones AS (WORDS [plain, formal], CODE \"INVALID_TONE\", CITES [\"rule:4\"]) RATIONALE \"x\"\nDEFINE RANGE lengths AS (MIN 1, MAX 300, CODE \"TOO_LONG\", CITES [\"right:read-in-one-sitting\"]) RATIONALE \"x\"\nDEFINE FORMAT archive_path AS (SHAPE absolute_path, CODE \"BAD_ARCHIVE\", CITES [\"pattern:absolute-path\"]) RATIONALE \"x\"\nDEFINE DECLARATION office AS (VERB \"OFFICE\", SEATS [head: text]) RATIONALE \"x\"\nDEFINE DECLARATION desk AS (VERB \"DESK\", SEATS [clerk: text]) RATIONALE \"x\"\nDEFINE UNION issuers AS (OF [office, desk], CODE \"NO_ISSUER\", CITES [\"rule:2\", \"article:1\"]) RATIONALE \"x\"\nDEFINE DECLARATION notice AS (VERB \"NOTICE\", SEATS [issuer: issuers, tone: tones, length: lengths, archive: archive_path]) RATIONALE \"x\"\n",
+   "expect": {
+    "language": "notice",
+    "counts": {
+     "declarations": 3,
+     "menus": 1,
+     "ranges": 1,
+     "formats": 1,
+     "unions": 1
+    }
+   }
+  },
+  {
+   "id": "A2",
+   "name": "the word none on every element that cites -- MENU, RANGE, FORMAT, UNION, CONSTRAINT, REFUSAL, SYMBOL: where the contract binds nothing, the refusal cites nothing",
+   "source": "DEFINE LANGUAGE notice AS (VERSION \"0.28\", GRAMMAR \"0.28\", COURT \"x\", EXTENSION \".notice\") RATIONALE \"x\"\nDEFINE MENU tones AS (WORDS [plain, formal], CODE \"INVALID_TONE\", CITES none) RATIONALE \"x\"\nDEFINE RANGE lengths AS (MIN 1, MAX 300, CODE \"TOO_LONG\", CITES none) RATIONALE \"x\"\nDEFINE FORMAT archive_path AS (SHAPE absolute_path, CODE \"BAD_ARCHIVE\", CITES none) RATIONALE \"x\"\nDEFINE DECLARATION office AS (VERB \"OFFICE\", SEATS [head: text]) RATIONALE \"x\"\nDEFINE DECLARATION desk AS (VERB \"DESK\", SEATS [clerk: text]) RATIONALE \"x\"\nDEFINE UNION issuers AS (OF [office, desk], CODE \"NO_ISSUER\", CITES none) RATIONALE \"x\"\nDEFINE DECLARATION notice AS (VERB \"NOTICE\", SEATS [issuer: issuers, tone: tones, length: lengths, archive: archive_path]) RATIONALE \"x\"\nDEFINE SYMBOL flow AS (KIND \"flow\", REF \"calls\", CODE \"UNRESOLVED_FLOW\", CITES none) RATIONALE \"x\"\nDEFINE CONSTRAINT short_formal AS (ON notice, WHEN \"tone = formal and length < 3\", MESSAGE \"x\", CODE \"SHORT_FORMAL\", CITES none) RATIONALE \"x\"\nDEFINE REFUSAL unknown_verb AS (MESSAGE \"the verb set is closed\", CODE \"UNKNOWN_VERB\", CITES none) RATIONALE \"x\"\n",
+   "expect": {
+    "language": "notice",
+    "counts": {
+     "declarations": 3,
+     "menus": 1,
+     "ranges": 1,
+     "formats": 1,
+     "unions": 1,
+     "symbols": 1,
+     "constraints": 1,
+     "refusals": 1
+    }
+   }
+  },
+  {
+   "id": "A3",
+   "name": "CITES without a CODE: the element keeps its default code and cites what it declares",
+   "source": "DEFINE LANGUAGE notice AS (VERSION \"0.28\", GRAMMAR \"0.28\", COURT \"x\", EXTENSION \".notice\") RATIONALE \"x\"\nDEFINE MENU tones AS (WORDS [plain, formal], CITES [\"rule:4\"]) RATIONALE \"x\"\nDEFINE DECLARATION notice AS (VERB \"NOTICE\", SEATS [tone: tones]) RATIONALE \"x\"\n",
+   "expect": {
+    "language": "notice",
+    "counts": {
+     "declarations": 1,
+     "menus": 1
+    }
+   }
+  },
+  {
+   "id": "A4",
+   "name": "an element without CITES is read as before (v0.11): nothing a v0.27 language declared changes",
+   "source": "DEFINE LANGUAGE notice AS (VERSION \"0.28\", GRAMMAR \"0.28\", COURT \"x\", EXTENSION \".notice\") RATIONALE \"x\"\nDEFINE MENU tones AS (WORDS [plain, formal], MESSAGE \"TONE is plain or formal, not {value}\", CODE \"INVALID_TONE\") RATIONALE \"x\"\nDEFINE RANGE lengths AS (MIN 1, MAX 300) RATIONALE \"x\"\nDEFINE DECLARATION notice AS (VERB \"NOTICE\", SEATS [tone: tones, length: lengths]) RATIONALE \"x\"\n",
+   "expect": {
+    "language": "notice",
+    "counts": {
+     "declarations": 1,
+     "menus": 1,
+     "ranges": 1
+    }
+   }
+  }
+ ],
+ "rejects": [
+  {
+   "id": "R1",
+   "name": "an empty CITES on a MENU says nothing: the word none says it cites nothing",
+   "source": "DEFINE LANGUAGE notice AS (VERSION \"0.28\", GRAMMAR \"0.28\", COURT \"x\", EXTENSION \".notice\") RATIONALE \"x\"\nDEFINE MENU tones AS (WORDS [plain, formal], CODE \"INVALID_TONE\", CITES []) RATIONALE \"x\"\nDEFINE DECLARATION notice AS (VERB \"NOTICE\", SEATS [tone: tones]) RATIONALE \"x\"\n",
+   "refusal": "an empty CITES says nothing: a list names what the refusal cites, and the word none says it cites nothing"
+  },
+  {
+   "id": "R2",
+   "name": "an empty CITES on a CONSTRAINT, read as the default from v0.23 to v0.27, is refused by name now (HF-55: a reversal, never silent)",
+   "source": "DEFINE LANGUAGE notice AS (VERSION \"0.28\", GRAMMAR \"0.28\", COURT \"x\", EXTENSION \".notice\") RATIONALE \"x\"\nDEFINE MENU tones AS (WORDS [plain, formal]) RATIONALE \"x\"\nDEFINE DECLARATION notice AS (VERB \"NOTICE\", SEATS [tone: tones, length: number]) RATIONALE \"x\"\nDEFINE CONSTRAINT short_formal AS (ON notice, WHEN \"tone = formal and length < 3\", MESSAGE \"x\", CODE \"SHORT_FORMAL\", CITES []) RATIONALE \"x\"\n",
+   "refusal": "an empty CITES says nothing: a list names what the refusal cites, and the word none says it cites nothing"
+  },
+  {
+   "id": "R3",
+   "name": "an empty CITES on a REFUSAL says nothing either: a refusal that cites nothing says none",
+   "source": "DEFINE LANGUAGE notice AS (VERSION \"0.28\", GRAMMAR \"0.28\", COURT \"x\", EXTENSION \".notice\") RATIONALE \"x\"\nDEFINE DECLARATION notice AS (VERB \"NOTICE\", SEATS [head: text]) RATIONALE \"x\"\nDEFINE REFUSAL unknown_verb AS (MESSAGE \"the verb set is closed\", CODE \"UNKNOWN_VERB\", CITES []) RATIONALE \"x\"\n",
+   "refusal": "an empty CITES says nothing: a list names what the refusal cites, and the word none says it cites nothing"
+  },
+  {
+   "id": "R4",
+   "name": "CITES takes a list of cites or the word none, and no other word",
+   "source": "DEFINE LANGUAGE notice AS (VERSION \"0.28\", GRAMMAR \"0.28\", COURT \"x\", EXTENSION \".notice\") RATIONALE \"x\"\nDEFINE RANGE lengths AS (MIN 1, MAX 300, CODE \"TOO_LONG\", CITES nothing) RATIONALE \"x\"\nDEFINE DECLARATION notice AS (VERB \"NOTICE\", SEATS [length: lengths]) RATIONALE \"x\"\n",
+   "refusal": "CITES is a list of cites or the word none, not 'nothing'"
+  },
+  {
+   "id": "R5",
+   "name": "a FORMAT's cite is kind:value, as every cite since v0.11",
+   "source": "DEFINE LANGUAGE notice AS (VERSION \"0.28\", GRAMMAR \"0.28\", COURT \"x\", EXTENSION \".notice\") RATIONALE \"x\"\nDEFINE FORMAT archive_path AS (SHAPE absolute_path, CODE \"BAD_ARCHIVE\", CITES [\"absolute-path\"]) RATIONALE \"x\"\nDEFINE DECLARATION notice AS (VERB \"NOTICE\", SEATS [archive: archive_path]) RATIONALE \"x\"\n",
+   "refusal": "'absolute-path' on archive_path is not a cite: kind:value with kind rule, article, right or pattern"
+  },
+  {
+   "id": "R6",
+   "name": "a UNION's cite names one of the four binding kinds: law is not one",
+   "source": "DEFINE LANGUAGE notice AS (VERSION \"0.28\", GRAMMAR \"0.28\", COURT \"x\", EXTENSION \".notice\") RATIONALE \"x\"\nDEFINE DECLARATION office AS (VERB \"OFFICE\", SEATS [head: text]) RATIONALE \"x\"\nDEFINE DECLARATION desk AS (VERB \"DESK\", SEATS [clerk: text]) RATIONALE \"x\"\nDEFINE UNION issuers AS (OF [office, desk], CODE \"NO_ISSUER\", CITES [\"law:2\"]) RATIONALE \"x\"\nDEFINE DECLARATION notice AS (VERB \"NOTICE\", SEATS [issuer: issuers]) RATIONALE \"x\"\n",
+   "refusal": "'law:2' on issuers is not a cite"
+  },
+  {
+   "id": "R7",
+   "name": "a DECLARATION carries no CITES: its seats are coded by CODES, and v0.28 does not grow a cite per seat",
+   "source": "DEFINE LANGUAGE notice AS (VERSION \"0.28\", GRAMMAR \"0.28\", COURT \"x\", EXTENSION \".notice\") RATIONALE \"x\"\nDEFINE DECLARATION notice AS (VERB \"NOTICE\", SEATS [head: text], CITES [\"rule:1\"]) RATIONALE \"x\"\n",
+   "refusal": "Unknown clause 'CITES' in DECLARATION"
+  },
+  {
+   "id": "R8",
+   "name": "CITES given twice on a MENU, a list and the word none, is refused as any clause given twice",
+   "source": "DEFINE LANGUAGE notice AS (VERSION \"0.28\", GRAMMAR \"0.28\", COURT \"x\", EXTENSION \".notice\") RATIONALE \"x\"\nDEFINE MENU tones AS (WORDS [plain, formal], CITES [\"rule:4\"], CITES none) RATIONALE \"x\"\nDEFINE DECLARATION notice AS (VERB \"NOTICE\", SEATS [tone: tones]) RATIONALE \"x\"\n",
+   "refusal": "clause CITES given twice"
+  }
+ ]
+}

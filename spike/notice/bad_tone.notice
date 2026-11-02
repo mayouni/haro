@@ -1,0 +1,13 @@
+-- bad_tone.notice -- a sentence of notice_v28.haro: TONE shouty: the tones menu cites none.
+
+DEFINE OFFICE town_hall AS (
+  HEAD "the mayor"
+) RATIONALE "The town hall issues the town's notices"
+
+DEFINE DESK front AS (
+  CLERK "the front clerk"
+) RATIONALE "The front desk posts what the town hall decides"
+
+DEFINE NOTICE water_cut AS (
+  ISSUER town_hall, TONE shouty, MEDIUM radio, AUDIENCE public, LENGTH 120, ARCHIVE "/notices/2026/water"
+) RATIONALE "The water is cut on Tuesday"

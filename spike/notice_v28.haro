@@ -1,0 +1,100 @@
+-- notice_v28.haro -- a public notice, declared for Haro v0.28 (HARO-MENU-CITES-01): every element that
+-- carries a CODE may carry CITES, and the word none says a refusal cites nothing. The notice's contract
+-- binds four things -- the media (rule 4), the issuer (rule 2), the length (a right) and the archive's
+-- path (a pattern) -- and nothing about the tone or about a letter's urgency. So the tone's menu and the
+-- urgency constraint cite none, the audience's menu declares no CITES and keeps the default, and the
+-- rest cite what binds them. The sentences judged by `haro_forge.py --stage=34` are in notice/.
+
+DEFINE LANGUAGE notice AS (
+  VERSION "0.28",
+  GRAMMAR "0.28",
+  COURT "v28/court_cases.json",
+  EXTENSION ".notice"
+) RATIONALE "A notice an office or a desk puts out: who issues it, in what tone, on which medium, to whom, how long it is and where it is kept"
+
+-- ---- the menus, the range and the format ----------------------------------------------------
+
+DEFINE MENU tones AS (
+  WORDS [plain, formal, urgent],
+  MESSAGE "TONE is plain, formal or urgent, not '{value}'",
+  CODE "INVALID_TONE",
+  CITES none
+) RATIONALE "The contract binds no tone: refusing one is the court's own grammar, and it cites nothing"
+
+DEFINE MENU media AS (
+  WORDS [board, letter, radio],
+  MESSAGE "MEDIUM is board, letter or radio, not '{value}'",
+  CODE "UNKNOWN_MEDIUM",
+  CITES ["rule:4"]
+) RATIONALE "Rule 4 of the notice contract names the three media a notice may go out on"
+
+DEFINE MENU audiences AS (
+  WORDS [public, staff],
+  MESSAGE "AUDIENCE is public or staff, not '{value}'",
+  CODE "UNKNOWN_AUDIENCE"
+) RATIONALE "No CITES: the court cites the menu's own code, as every court has since v0.11"
+
+DEFINE RANGE lengths AS (
+  MIN 1, MAX 300,
+  MESSAGE "LENGTH {value} is outside 1..300 words",
+  CODE "TOO_LONG",
+  CITES ["right:read-in-one-sitting"]
+) RATIONALE "A reader's right: a notice is read in one sitting"
+
+DEFINE FORMAT archive_path AS (
+  SHAPE absolute_path,
+  MESSAGE "ARCHIVE is an absolute path, not '{value}'",
+  CODE "BAD_ARCHIVE",
+  CITES ["pattern:absolute-path"]
+) RATIONALE "Where the notice is kept, named from the archive's root"
+
+-- ---- the kinds ------------------------------------------------------------------------------
+
+DEFINE DECLARATION office AS (
+  VERB "OFFICE",
+  SEATS [head: text]
+) RATIONALE "An office that issues notices, and who heads it"
+
+DEFINE DECLARATION desk AS (
+  VERB "DESK",
+  SEATS [clerk: text]
+) RATIONALE "A desk that issues notices, and who keeps it"
+
+DEFINE UNION issuers AS (
+  OF [office, desk],
+  MESSAGE "NOTICE {name} is issued by '{value}', which is no OFFICE and no DESK",
+  CODE "NO_ISSUER",
+  CITES ["rule:2"]
+) RATIONALE "Rule 2: a notice is issued by an office or a desk the sentence declares"
+
+DEFINE DECLARATION notice AS (
+  VERB "NOTICE",
+  SEATS [issuer: issuers, tone: tones, medium: media, audience: audiences, length: lengths, archive: archive_path]
+) RATIONALE "One notice: who issues it, how it speaks, where it goes, to whom, how long it is, where it is kept"
+
+-- ---- the constraint and the refusals ----------------------------------------------------------
+
+DEFINE CONSTRAINT urgent_not_by_letter AS (
+  ON notice, WHEN "tone = urgent and medium = letter",
+  MESSAGE "NOTICE {name} is urgent and goes out by letter, which arrives days late",
+  CODE "URGENT_LETTER",
+  CITES none
+) RATIONALE "Good sense the contract does not bind: the refusal is the language's own, and cites nothing"
+
+DEFINE REFUSAL unknown_verb AS (
+  MESSAGE "The notice's verb set is closed: OFFICE, DESK and NOTICE, nothing else.",
+  CODE "UNKNOWN_VERB",
+  CITES none
+) RATIONALE "A verb the language does not know is unparseable; no provision is broken"
+
+DEFINE REFUSAL unknown_declaration AS (
+  MESSAGE "The notice's verb set is closed: OFFICE, DESK and NOTICE, nothing else.",
+  CODE "UNKNOWN_DECLARATION"
+) RATIONALE "DEFINE ANYTHING_ELSE is as unparseable as a verb the language does not know"
+
+-- ---- the voice ------------------------------------------------------------------------------
+
+DEFINE NARRATE voice AS (
+  SAYS [notice: "{name} goes out on {medium} to the {audience}, issued by {issuer}."],
+  REFUSES "Stopped at line {line}: {message} ({code}; {cites})"
+) RATIONALE "Told so a clerk hears what was refused and what it cites"
