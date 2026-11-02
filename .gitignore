@@ -1,0 +1,7 @@
+# what a run writes: the guard's oracle work folder (it was Ring++'s runtime/haro-forge-oracle), measurements, scratch output
+runtime/
+# Python's bytecode, written beside the scripts
+__pycache__/
+*.pyc
+# Ring's compiled objects
+*.ringo

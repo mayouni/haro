@@ -1,0 +1,4 @@
+# Ring sources check out LF, as they did in Ring++ (whose .gitattributes carried this rule for every .ring file, these included).
+# Without it core.autocrlf rewrites them CRLF on checkout, `git status` calls them modified for ever while `git diff` shows nothing,
+# and a court reading its own source by byte offset reads different bytes.
+*.ring text eol=lf
