@@ -1,0 +1,8 @@
+-- message_llm.rfn -- the same model proposes new words for the norm's message: a message is a
+-- field floored llm, so the proposal is admitted. A model may word a refusal; it may not rule.
+DEFINE REFINE reword_the_norm AS (
+  TARGET "positive_deposit.MESSAGE", KIND field,
+  FROM "A deposit must bring something to the circle", TO "A deposit brings something to the circle, or it is not a deposit",
+  AUTHOR "aicha", POSTURE llm,
+  REASON "the collectors found the old words curt"
+) RATIONALE "The words of a refusal are a model's to propose"

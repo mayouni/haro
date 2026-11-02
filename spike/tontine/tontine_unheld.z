@@ -1,0 +1,60 @@
+-- tontine_unheld.z -- the tontine exactly as zing's fixture wrote it and as tontine.z stood before ZC5:
+-- nobody holds the landing zone. Under Art. 5 the court refuses it, naming the article (T4, T5).
+-- The one line the constitution adds to the sentence is HELD_BY.
+
+
+DEFINE ENUM deposit_status AS (
+  WORDS [staged, audited, active]
+) RATIONALE "The states a deposit passes through: staged by the collector, audited by the treasurer, active in the round"
+
+DEFINE ENTITY deposit AS (
+  FIELDS [id: uuid, member: text, amount: currency, round: int, status: deposit_status]
+) RATIONALE "One member's contribution to one round of the circle"
+
+DEFINE NORM positive_deposit AS (
+  RULE "amount > 0",
+  MESSAGE "A deposit must bring something to the circle"
+) RATIONALE "A deposit of nothing is not a deposit"
+
+DEFINE FLOW collect AS () RATIONALE "The collector records; the treasurer audits"
+
+DEFINE STEP record AS (
+  FLOW collect, ORDER 1, ACTOR collector,
+  VALIDATE "member != ''",
+  ON_FAIL "NO_MEMBER"
+) RATIONALE "A deposit is somebody's"
+
+DEFINE STEP audit AS (
+  FLOW collect, ORDER 2, ACTOR treasurer,
+  ENFORCING positive_deposit,
+  ON_SUCCESS commit_to_bedrock
+) RATIONALE "The treasurer holds the deposit to the norm and commits it"
+
+DEFINE FLOW indice AS () RATIONALE "The satisfaction survey computes its index in-flow"
+
+DEFINE STEP saisie AS (
+  FLOW indice, ORDER 1, ACTOR collector,
+  VALIDATE "COUNT(reponses) >= 1",
+  ON_FAIL "VIDE"
+) RATIONALE "An empty survey is refused before computing"
+
+DEFINE STEP calcul AS (
+  FLOW indice, ORDER 2, ACTOR system,
+  COMPUTE score,
+  FORMULA "ROUND((SUM(reponses) / (COUNT(reponses) * 5)) * 100)"
+) RATIONALE "The index is the mean answer over five, as a percentage, rounded"
+
+DEFINE STEP controle AS (
+  FLOW indice, ORDER 3, ACTOR treasurer,
+  ENFORCING indice_plafond,
+  ON_SUCCESS commit_to_bedrock
+) RATIONALE "The index is held to its ceiling and committed"
+
+DEFINE NORM indice_plafond AS (
+  RULE "score >= 0 AND score <= 100",
+  MESSAGE "An index lives between 0 and 100"
+) RATIONALE "A percentage"
+
+DEFINE LANDING_ZONE cotisations AS (
+  FORMAT json, INTO collect
+) RATIONALE "Deposits exported by the mobile collector land here; every record walks the flow"

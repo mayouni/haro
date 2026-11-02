@@ -1,0 +1,9 @@
+-- rule_llm.rfn -- a model proposes to loosen the norm: a deposit of nothing would pass. A rule
+-- is a policy point floored trusted (Art. 4 keeps llm off it at the declaring altitude), so the
+-- court refuses the proposal at the trust stage, Art. 6 named.
+DEFINE REFINE loosen_the_norm AS (
+  TARGET "positive_deposit.RULE", KIND policy,
+  FROM "amount > 0", TO "amount >= 0",
+  AUTHOR "aicha", POSTURE llm,
+  REASON "a zero deposit keeps a member's place in the round"
+) RATIONALE "A rule means one thing everywhere, and no model rewrites it"

@@ -1,0 +1,8 @@
+-- holder_llm.rfn -- a model proposes that the bank hold the deposits' landing zone: the holder
+-- is a policy point floored trusted, so the proposal is refused at the trust stage, Art. 6 named.
+DEFINE REFINE move_the_zone AS (
+  TARGET "cotisations.HELD_BY", KIND policy,
+  FROM "the_commons", TO "the_bank",
+  AUTHOR "aicha", POSTURE llm,
+  REASON "the bank's vault is safer than the circle's box"
+) RATIONALE "Who holds the deposits is the circle's to decide, never a model's"

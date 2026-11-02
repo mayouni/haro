@@ -1,0 +1,108 @@
+{
+  "grammar": "haro",
+  "version": "0.26",
+  "name": "Z, the Commons' tontine language, under the whole constitution -- the refusals Z met on its way (ZC5)",
+  "comment": "Written BEFORE z_v26.haro and before any court change (the W discipline). Every source is Z's own declaration reduced to the kinds the case needs: the rejects are the six articles' refusals as Z itself met them when it was first declared under the constitution -- a refusal without a CODE, a constraint without one, no REFINE, a kind the voice of TELLS reaches nowhere, a landing zone nobody holds, a holder typed as a flow, a movement typed as a format, a holder that may be silent, a rule a model may refine, a point without a floor. The accepts are Z whole under the six articles and both weaves, Z under explainability alone with its voice of TELLS, and Z with the weaves at governance and no PERSONAL seat (nothing to govern at this altitude: a tontine's personal datum is a FIELD of an ENTITY, HF-130). v0.26 adds no clause to the grammar: the rung is the proof on a real world.",
+  "accepts": [
+    {
+      "id": "A1",
+      "name": "Z whole under the six articles and both weaves constitutional: its refusals and constraint coded, a REFINE with every point floored and no rule floored llm, a voice that SAYS every kind and TELLS the question, a landing zone held by a MENU of organizations and entered through a flow, the regime Niger Law 2017-28",
+      "source": "DEFINE LANGUAGE z AS (VERSION \"0.26\", GRAMMAR \"0.26\", COURT \"x\", EXTENSION \".z\") RATIONALE \"x\"\nDEFINE EXPRESSION zexpr AS (OPERATORS [or, and, not, cmp, contains, add, sub, mul, div, round, neg], OPERANDS [number, text, flag, ref, agg], AGGREGATES [sum, count], ABSENT missing, DIVISION calm, EQUALITY value) RATIONALE \"x\"\nDEFINE MENU actors AS (WORDS [collector, treasurer, system, member, auditor]) RATIONALE \"x\"\nDEFINE MENU outcomes AS (WORDS [commit_to_bedrock, hold]) RATIONALE \"x\"\nDEFINE MENU formats AS (WORDS [json, csv]) RATIONALE \"x\"\nDEFINE MENU holders AS (WORDS [the_commons, the_cooperative, the_bank]) RATIONALE \"x\"\nDEFINE FORM word AS (SEATS [value: name]) RATIONALE \"x\"\nDEFINE FORM field AS (SEATS [name: name, type: name]) RATIONALE \"x\"\nDEFINE DECLARATION enum AS (VERB \"ENUM\", SEATS [words: [word]]) RATIONALE \"x\"\nDEFINE DECLARATION entity AS (VERB \"ENTITY\", SEATS [fields: [field]]) RATIONALE \"x\"\nDEFINE DECLARATION norm AS (VERB \"NORM\", SEATS [rule: zexpr, message: text]) RATIONALE \"x\"\nDEFINE DECLARATION flow AS (VERB \"FLOW\", SEATS []) RATIONALE \"x\"\nDEFINE DECLARATION step AS (VERB \"STEP\", SEATS [flow: flow, order: number, actor: actors, validate: zexpr?, enforcing: norm?, compute: name?, formula: zexpr?, on_fail: text?, on_success: outcomes?]) RATIONALE \"x\"\nDEFINE DECLARATION landing_zone AS (VERB \"LANDING_ZONE\", SEATS [format: formats, into: flow, held_by: holders]) RATIONALE \"x\"\nDEFINE WALK flows AS (OF flow, STEPS step, THROUGH flow, ORDER order, GUARDS [validate, enforcing.rule], COMPUTE compute, FORMULA formula, FAIL on_fail) RATIONALE \"x\"\nDEFINE ASK questions AS (FROM [flow], WHERE zexpr, CLAUSES [where, order, limit]) RATIONALE \"x\"\nDEFINE WORLD z AS (PUBLISH [flow: flow, entity: entity, norm: norm, landing_zone: zone]) RATIONALE \"x\"\nDEFINE CONSTRAINT one_rank_per_flow AS (ON step, WHEN \"earlier step where flow = this.flow and order = this.order\", MESSAGE \"STEP {name} and STEP {other} both stand at ORDER {order} of {flow}: one rank, one step\", CODE \"ONE_RANK\") RATIONALE \"x\"\nDEFINE REFUSAL unknown_verb AS (MESSAGE \"The ZQL verb set is closed\", CODE \"UNKNOWN_VERB\") RATIONALE \"x\"\nDEFINE REFINE z AS (POINTS [norm.rule: policy, norm.message: field, step.actor: policy, landing_zone.format: knob, landing_zone.held_by: policy], FLOOR [norm.rule: trusted, norm.message: llm, step.actor: trusted, landing_zone.format: external, landing_zone.held_by: trusted]) RATIONALE \"x\"\nDEFINE NARRATE telling AS (SAYS [enum: \"{name} is one of {words}.\", entity: \"{name} is a record of {fields}.\", norm: \"{name} holds {rule}.\", flow: \"{name} is a flow.\", step: \"{name} is step {order} of {flow}.\", landing_zone: \"{name} is held by {held_by}.\"], TELLS [ask: \"Asking {from}: {question}\", answer: \"The answer is {count} row(s): {rows}\"], REFUSES \"I stopped: {message} ({code})\") RATIONALE \"x\"\nDEFINE CONSTITUTION z_charter AS (ARTICLES [explainability, reversibility, visible_state, predictable_authority, organizational_sovereignty, trust_hierarchy], ZONE landing_zone, SOVEREIGN held_by, MOVEMENT into, WEAVES [sovereignty: constitutional, privacy: constitutional], REGIME niger_2017_28) RATIONALE \"the Commons' tontine under the whole constitution\"\n",
+      "expect": {
+        "language": "z",
+        "counts": {"declarations": 6, "menus": 4, "refusals": 1, "constraints": 1, "points": 5, "narrates": 1, "asks": 1, "world": 1},
+        "constitution": 1,
+        "articles": "explainability,reversibility,visible_state,predictable_authority,organizational_sovereignty,trust_hierarchy",
+        "zone": "landing_zone",
+        "regime": "niger_2017_28",
+        "weaves": "sovereignty:constitutional,privacy:constitutional"
+      }
+    },
+    {
+      "id": "A2",
+      "name": "Z under explainability alone, with its voice of TELLS only (v0.16's): Art. 1 asks for a NARRATE and the codes, not for every kind told -- that is Art. 3, which this world does not declare",
+      "source": "DEFINE LANGUAGE z AS (VERSION \"0.26\", GRAMMAR \"0.26\", COURT \"x\", EXTENSION \".z\") RATIONALE \"x\"\nDEFINE EXPRESSION zexpr AS (OPERATORS [or, and, not, cmp, contains, add, sub, mul, div, round, neg], OPERANDS [number, text, flag, ref, agg], AGGREGATES [sum, count], ABSENT missing, DIVISION calm, EQUALITY value) RATIONALE \"x\"\nDEFINE MENU formats AS (WORDS [json, csv]) RATIONALE \"x\"\nDEFINE MENU holders AS (WORDS [the_commons, the_cooperative, the_bank]) RATIONALE \"x\"\nDEFINE DECLARATION flow AS (VERB \"FLOW\", SEATS []) RATIONALE \"x\"\nDEFINE DECLARATION landing_zone AS (VERB \"LANDING_ZONE\", SEATS [format: formats, into: flow, held_by: holders]) RATIONALE \"x\"\nDEFINE ASK questions AS (FROM [flow], WHERE zexpr, CLAUSES [where, order, limit]) RATIONALE \"x\"\nDEFINE REFUSAL unknown_verb AS (MESSAGE \"The ZQL verb set is closed\", CODE \"UNKNOWN_VERB\") RATIONALE \"x\"\nDEFINE NARRATE telling AS (TELLS [ask: \"Asking {from}: {question}\", answer: \"The answer is {count} row(s): {rows}\"], REFUSES \"I stopped: {message} ({code})\") RATIONALE \"x\"\nDEFINE CONSTITUTION z_charter AS (ARTICLES [explainability]) RATIONALE \"x\"\n",
+      "expect": {
+        "language": "z",
+        "counts": {"declarations": 2, "narrates": 1, "asks": 1, "refusals": 1},
+        "constitution": 1,
+        "articles": "explainability"
+      }
+    },
+    {
+      "id": "A3",
+      "name": "Z with both weaves at governance and no PERSONAL seat: accepted without a warning -- at this altitude a tontine's personal datum is a FIELD of an ENTITY, which no seat of Z holds (HF-130); the weaves are declared for the seats a later Z names",
+      "source": "DEFINE LANGUAGE z AS (VERSION \"0.26\", GRAMMAR \"0.26\", COURT \"x\", EXTENSION \".z\") RATIONALE \"x\"\nDEFINE EXPRESSION zexpr AS (OPERATORS [or, and, not, cmp, contains, add, sub, mul, div, round, neg], OPERANDS [number, text, flag, ref, agg], AGGREGATES [sum, count], ABSENT missing, DIVISION calm, EQUALITY value) RATIONALE \"x\"\nDEFINE MENU formats AS (WORDS [json, csv]) RATIONALE \"x\"\nDEFINE MENU holders AS (WORDS [the_commons, the_cooperative, the_bank]) RATIONALE \"x\"\nDEFINE FORM field AS (SEATS [name: name, type: name]) RATIONALE \"x\"\nDEFINE DECLARATION entity AS (VERB \"ENTITY\", SEATS [fields: [field]]) RATIONALE \"x\"\nDEFINE DECLARATION flow AS (VERB \"FLOW\", SEATS []) RATIONALE \"x\"\nDEFINE DECLARATION landing_zone AS (VERB \"LANDING_ZONE\", SEATS [format: formats, into: flow, held_by: holders]) RATIONALE \"x\"\nDEFINE ASK questions AS (FROM [flow], WHERE zexpr, CLAUSES [where, order, limit]) RATIONALE \"x\"\nDEFINE WORLD z AS (PUBLISH [flow: flow, entity: entity, landing_zone: zone]) RATIONALE \"x\"\nDEFINE REFUSAL unknown_verb AS (MESSAGE \"The ZQL verb set is closed\", CODE \"UNKNOWN_VERB\") RATIONALE \"x\"\nDEFINE REFINE z AS (POINTS [landing_zone.format: knob, landing_zone.held_by: policy], FLOOR [landing_zone.format: external, landing_zone.held_by: trusted]) RATIONALE \"x\"\nDEFINE NARRATE telling AS (SAYS [entity: \"{name} is a record of {fields}.\", flow: \"{name} is a flow.\", landing_zone: \"{name} is held by {held_by}.\"], TELLS [ask: \"Asking {from}: {question}\", answer: \"The answer is {count} row(s): {rows}\"], REFUSES \"I stopped: {message} ({code})\") RATIONALE \"x\"\nDEFINE CONSTITUTION z_charter AS (ARTICLES [explainability, reversibility, visible_state, predictable_authority, organizational_sovereignty, trust_hierarchy], ZONE landing_zone, SOVEREIGN held_by, MOVEMENT into, WEAVES [sovereignty: governance, privacy: governance], REGIME niger_2017_28) RATIONALE \"x\"\n",
+      "expect": {
+        "language": "z",
+        "counts": {"declarations": 3, "points": 2},
+        "constitution": 1,
+        "zone": "landing_zone",
+        "regime": "niger_2017_28",
+        "weaves": "sovereignty:governance,privacy:governance"
+      }
+    }
+  ],
+  "rejects": [
+    {
+      "id": "R1",
+      "name": "Art. 1 as Z met it: its REFUSAL unknown_verb carried no CODE",
+      "source": "DEFINE LANGUAGE z AS (VERSION \"0.26\", GRAMMAR \"0.26\", COURT \"x\", EXTENSION \".z\") RATIONALE \"x\"\nDEFINE DECLARATION flow AS (VERB \"FLOW\", SEATS []) RATIONALE \"x\"\nDEFINE REFUSAL unknown_verb AS (MESSAGE \"The ZQL verb set is closed -- destructive or unrecognized operations are not part of the grammar.\") RATIONALE \"x\"\nDEFINE NARRATE telling AS (SAYS [flow: \"{name} is a flow.\"]) RATIONALE \"x\"\nDEFINE CONSTITUTION z_charter AS (ARTICLES [explainability]) RATIONALE \"x\"\n",
+      "refusal": "Art. 1 explainability: REFUSAL 'unknown_verb' carries no CODE -- a refusal under explainability is traceable by its stable identifier (C2 2.1)"
+    },
+    {
+      "id": "R2",
+      "name": "Art. 1 as Z met it: its CONSTRAINT one_rank_per_flow carried no CODE",
+      "source": "DEFINE LANGUAGE z AS (VERSION \"0.26\", GRAMMAR \"0.26\", COURT \"x\", EXTENSION \".z\") RATIONALE \"x\"\nDEFINE MENU actors AS (WORDS [collector, treasurer, system, member, auditor]) RATIONALE \"x\"\nDEFINE DECLARATION flow AS (VERB \"FLOW\", SEATS []) RATIONALE \"x\"\nDEFINE DECLARATION step AS (VERB \"STEP\", SEATS [flow: flow, order: number, actor: actors]) RATIONALE \"x\"\nDEFINE CONSTRAINT one_rank_per_flow AS (ON step, WHEN \"earlier step where flow = this.flow and order = this.order\", MESSAGE \"STEP {name} and STEP {other} both stand at ORDER {order} of {flow}: one rank, one step\") RATIONALE \"x\"\nDEFINE REFUSAL unknown_verb AS (MESSAGE \"The ZQL verb set is closed\", CODE \"UNKNOWN_VERB\") RATIONALE \"x\"\nDEFINE NARRATE telling AS (SAYS [flow: \"{name} is a flow.\", step: \"{name} is step {order} of {flow}.\"]) RATIONALE \"x\"\nDEFINE CONSTITUTION z_charter AS (ARTICLES [explainability]) RATIONALE \"x\"\n",
+      "refusal": "Art. 1 explainability: CONSTRAINT 'one_rank_per_flow' carries no CODE -- a refusal under explainability is traceable by its stable identifier (C2 2.1)"
+    },
+    {
+      "id": "R3",
+      "name": "Art. 2 as Z met it: no REFINE -- a world under reversibility changes only by refinement",
+      "source": "DEFINE LANGUAGE z AS (VERSION \"0.26\", GRAMMAR \"0.26\", COURT \"x\", EXTENSION \".z\") RATIONALE \"x\"\nDEFINE DECLARATION flow AS (VERB \"FLOW\", SEATS []) RATIONALE \"x\"\nDEFINE NARRATE telling AS (SAYS [flow: \"{name} is a flow.\"]) RATIONALE \"x\"\nDEFINE CONSTITUTION z_charter AS (ARTICLES [reversibility]) RATIONALE \"x\"\n",
+      "refusal": "Art. 2 reversibility: 'z' declares no REFINE -- a world under reversibility changes only by refinement, whose inverse is computed before it lands and whose revert is an event (charter 6.5)"
+    },
+    {
+      "id": "R4",
+      "name": "Art. 3 as Z met it: its voice TELLS the question and SAYS nothing, so the enum (and the step) is reached by no declared path",
+      "source": "DEFINE LANGUAGE z AS (VERSION \"0.26\", GRAMMAR \"0.26\", COURT \"x\", EXTENSION \".z\") RATIONALE \"x\"\nDEFINE EXPRESSION zexpr AS (OPERATORS [or, and, not, cmp, contains, add, sub, mul, div, round, neg], OPERANDS [number, text, flag, ref, agg], AGGREGATES [sum, count], ABSENT missing, DIVISION calm, EQUALITY value) RATIONALE \"x\"\nDEFINE FORM word AS (SEATS [value: name]) RATIONALE \"x\"\nDEFINE DECLARATION enum AS (VERB \"ENUM\", SEATS [words: [word]]) RATIONALE \"x\"\nDEFINE DECLARATION flow AS (VERB \"FLOW\", SEATS []) RATIONALE \"x\"\nDEFINE ASK questions AS (FROM [flow], WHERE zexpr, CLAUSES [where, order, limit]) RATIONALE \"x\"\nDEFINE NARRATE telling AS (TELLS [ask: \"Asking {from}: {question}\"]) RATIONALE \"x\"\nDEFINE CONSTITUTION z_charter AS (ARTICLES [visible_state]) RATIONALE \"x\"\n",
+      "refusal": "Art. 3 visible_state: kind 'enum' is reached by no declared path -- not told (NARRATE SAYS), not asked (ASK FROM), not published (WORLD PUBLISH): a state nothing can read is hidden"
+    },
+    {
+      "id": "R5",
+      "name": "Art. 5 as Z met it: a landing zone of FORMAT and INTO, nobody holding it -- no SOVEREIGN seat",
+      "source": "DEFINE LANGUAGE z AS (VERSION \"0.26\", GRAMMAR \"0.26\", COURT \"x\", EXTENSION \".z\") RATIONALE \"x\"\nDEFINE MENU formats AS (WORDS [json, csv]) RATIONALE \"x\"\nDEFINE DECLARATION flow AS (VERB \"FLOW\", SEATS []) RATIONALE \"x\"\nDEFINE DECLARATION landing_zone AS (VERB \"LANDING_ZONE\", SEATS [format: formats, into: flow]) RATIONALE \"x\"\nDEFINE CONSTITUTION z_charter AS (ARTICLES [organizational_sovereignty], ZONE landing_zone, MOVEMENT into) RATIONALE \"x\"\n",
+      "refusal": "Art. 5 organizational_sovereignty: ZONE 'landing_zone' has no SOVEREIGN seat named -- a zone is held by someone, never by silence"
+    },
+    {
+      "id": "R6",
+      "name": "Art. 5: the flow a zone is entered through is not its holder -- SOVEREIGN into is typed flow",
+      "source": "DEFINE LANGUAGE z AS (VERSION \"0.26\", GRAMMAR \"0.26\", COURT \"x\", EXTENSION \".z\") RATIONALE \"x\"\nDEFINE MENU formats AS (WORDS [json, csv]) RATIONALE \"x\"\nDEFINE DECLARATION flow AS (VERB \"FLOW\", SEATS []) RATIONALE \"x\"\nDEFINE DECLARATION landing_zone AS (VERB \"LANDING_ZONE\", SEATS [format: formats, into: flow]) RATIONALE \"x\"\nDEFINE CONSTITUTION z_charter AS (ARTICLES [organizational_sovereignty], ZONE landing_zone, SOVEREIGN into, MOVEMENT into) RATIONALE \"x\"\n",
+      "refusal": "Art. 5 organizational_sovereignty: SOVEREIGN seat 'into' of 'landing_zone' is typed 'flow' -- a holder is a word of a MENU of organizations, or a text"
+    },
+    {
+      "id": "R7",
+      "name": "Art. 5: a zone's format is not the flow its records enter through -- MOVEMENT format is typed formats",
+      "source": "DEFINE LANGUAGE z AS (VERSION \"0.26\", GRAMMAR \"0.26\", COURT \"x\", EXTENSION \".z\") RATIONALE \"x\"\nDEFINE MENU formats AS (WORDS [json, csv]) RATIONALE \"x\"\nDEFINE MENU holders AS (WORDS [the_commons, the_cooperative, the_bank]) RATIONALE \"x\"\nDEFINE DECLARATION flow AS (VERB \"FLOW\", SEATS []) RATIONALE \"x\"\nDEFINE DECLARATION landing_zone AS (VERB \"LANDING_ZONE\", SEATS [format: formats, into: flow, held_by: holders]) RATIONALE \"x\"\nDEFINE CONSTITUTION z_charter AS (ARTICLES [organizational_sovereignty], ZONE landing_zone, SOVEREIGN held_by, MOVEMENT format) RATIONALE \"x\"\n",
+      "refusal": "Art. 5 organizational_sovereignty: MOVEMENT seat 'format' of 'landing_zone' is typed 'formats' -- it names a declared kind, the flow a record walks in"
+    },
+    {
+      "id": "R8",
+      "name": "Art. 5: a holder that may be silent is no holder -- HELD_BY optional",
+      "source": "DEFINE LANGUAGE z AS (VERSION \"0.26\", GRAMMAR \"0.26\", COURT \"x\", EXTENSION \".z\") RATIONALE \"x\"\nDEFINE MENU formats AS (WORDS [json, csv]) RATIONALE \"x\"\nDEFINE MENU holders AS (WORDS [the_commons, the_cooperative, the_bank]) RATIONALE \"x\"\nDEFINE DECLARATION flow AS (VERB \"FLOW\", SEATS []) RATIONALE \"x\"\nDEFINE DECLARATION landing_zone AS (VERB \"LANDING_ZONE\", SEATS [format: formats, into: flow, held_by: holders?]) RATIONALE \"x\"\nDEFINE CONSTITUTION z_charter AS (ARTICLES [organizational_sovereignty], ZONE landing_zone, SOVEREIGN held_by, MOVEMENT into) RATIONALE \"x\"\n",
+      "refusal": "Art. 5 organizational_sovereignty: SOVEREIGN seat 'held_by' of 'landing_zone' is optional -- a zone's holder is never silent"
+    },
+    {
+      "id": "R9",
+      "name": "Art. 4: a norm's RULE is a policy point, and a policy point floored llm lets a model refine a rule",
+      "source": "DEFINE LANGUAGE z AS (VERSION \"0.26\", GRAMMAR \"0.26\", COURT \"x\", EXTENSION \".z\") RATIONALE \"x\"\nDEFINE EXPRESSION zexpr AS (OPERATORS [or, and, not, cmp, contains, add, sub, mul, div, round, neg], OPERANDS [number, text, flag, ref, agg], AGGREGATES [sum, count], ABSENT missing, DIVISION calm, EQUALITY value) RATIONALE \"x\"\nDEFINE DECLARATION norm AS (VERB \"NORM\", SEATS [rule: zexpr, message: text]) RATIONALE \"x\"\nDEFINE REFINE z AS (POINTS [norm.rule: policy], FLOOR [norm.rule: llm]) RATIONALE \"x\"\nDEFINE CONSTITUTION z_charter AS (ARTICLES [predictable_authority]) RATIONALE \"x\"\n",
+      "refusal": "Art. 4 predictable_authority: policy point 'norm.rule' has FLOOR llm -- a rule is refined by no model-composed proposal, by construction (charter 6.4)"
+    },
+    {
+      "id": "R10",
+      "name": "Art. 6: a zone's holder declared as a point with no FLOOR -- silence refuses",
+      "source": "DEFINE LANGUAGE z AS (VERSION \"0.26\", GRAMMAR \"0.26\", COURT \"x\", EXTENSION \".z\") RATIONALE \"x\"\nDEFINE MENU formats AS (WORDS [json, csv]) RATIONALE \"x\"\nDEFINE MENU holders AS (WORDS [the_commons, the_cooperative, the_bank]) RATIONALE \"x\"\nDEFINE DECLARATION flow AS (VERB \"FLOW\", SEATS []) RATIONALE \"x\"\nDEFINE DECLARATION landing_zone AS (VERB \"LANDING_ZONE\", SEATS [format: formats, into: flow, held_by: holders]) RATIONALE \"x\"\nDEFINE REFINE z AS (POINTS [landing_zone.held_by: policy]) RATIONALE \"x\"\nDEFINE CONSTITUTION z_charter AS (ARTICLES [trust_hierarchy]) RATIONALE \"x\"\n",
+      "refusal": "Art. 6 trust_hierarchy: point 'landing_zone.held_by' has no FLOOR -- a trust requirement is declared, never implied: silence refuses"
+    }
+  ]
+}

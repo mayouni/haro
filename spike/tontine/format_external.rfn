@@ -1,0 +1,8 @@
+-- format_external.rfn -- the mobile collector's app turns the zone's format from json to csv:
+-- a knob floored external, admitted, and the inverse restores the sentence (Art. 2, Art. 6).
+DEFINE REFINE switch_the_format AS (
+  TARGET "cotisations.FORMAT", KIND knob,
+  FROM "json", TO "csv",
+  AUTHOR "the-mobile-collector-app", POSTURE external,
+  REASON "the new handsets export csv"
+) RATIONALE "A format is a knob the collector's own system may turn"

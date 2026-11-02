@@ -1,0 +1,125 @@
+{
+  "name": "the Commons' tontine under the whole constitution -- sentence-level cases for Haro v0.26 (ZC5), the ones the author reads",
+  "comment": "Written BEFORE z_v26.haro and before tontine.z gained its holder (the W discipline). Each case runs the court forged from z_v26.haro on rnxc AND on the oracle; the two must print the same bytes. The shapes are v0.25's (first, contains, counts, diagnose, record, sequence, revert). tontine/ holds the tontine as zing's fixture wrote it (unheld), three sentences each breaking one rule, a destructive verb, and four proposals: a knob turned by the collector's app, a holder and a rule a model proposes, the words of a refusal a model proposes.",
+  "cases": [
+    {
+      "id": "T1",
+      "name": "the held tontine is a sentence of Z: its counts are zing's, plus nothing",
+      "verb": "check",
+      "args": ["tontine.z"],
+      "first": "ok",
+      "counts": {"ENUM": 1, "ENTITY": 1, "NORM": 2, "FLOW": 2, "STEP": 5, "LANDING_ZONE": 1}
+    },
+    {
+      "id": "T2",
+      "name": "the meta-court reads Z's declaration: all six articles, the landing zone as the zone, both weaves constitutional, Niger Law 2017-28 as the regime, five points",
+      "verb": "meta",
+      "args": ["z_v26.haro"],
+      "first": "ok",
+      "contains": ["constitution 1", "articles explainability,reversibility,visible_state,predictable_authority,organizational_sovereignty,trust_hierarchy", "zone landing_zone", "regime niger_2017_28", "weaves sovereignty:constitutional,privacy:constitutional", "points 5", "narrates 1", "asks 1", "world 1"]
+    },
+    {
+      "id": "T3",
+      "name": "Z's previous declaration (v0.16) is still accepted unchanged: the constitution is a world's choice, not a demand on every world",
+      "verb": "meta",
+      "args": ["z_v16.haro"],
+      "first": "ok",
+      "contains": ["constitution 0"]
+    },
+    {
+      "id": "T4",
+      "name": "Art. 5, the one line the constitution adds to the tontine: as zing's fixture wrote it, nobody holds the landing zone -- refused, the article named",
+      "verb": "check",
+      "args": ["tontine/tontine_unheld.z"],
+      "refused": true,
+      "contains": ["HELD_BY is required on LANDING_ZONE cotisations", "[Art. 5 organizational_sovereignty]"]
+    },
+    {
+      "id": "T5",
+      "name": "the same refusal in the envelope: the seat's code, the rule and the article cited",
+      "verb": "diagnose",
+      "args": ["tontine/tontine_unheld.z"],
+      "diagnose": {"code": "NO_HOLDER", "cites": ["rule:NO_HOLDER", "article:5"]}
+    },
+    {
+      "id": "T6",
+      "name": "Art. 5: a landing zone whose records enter through a flow nobody declared -- refused in the zone's own words, the article named",
+      "verb": "check",
+      "args": ["tontine/tontine_nowhere.z"],
+      "refused": true,
+      "contains": ["LANDING_ZONE enquetes lands INTO 'sondage', and no FLOW of that name is declared", "[Art. 5 organizational_sovereignty]"]
+    },
+    {
+      "id": "T7",
+      "name": "the same in the envelope: NO_FLOW, the rule and the article cited",
+      "verb": "diagnose",
+      "args": ["tontine/tontine_nowhere.z"],
+      "diagnose": {"code": "NO_FLOW", "cites": ["rule:NO_FLOW", "article:5"]}
+    },
+    {
+      "id": "T8",
+      "name": "Art. 1: a step with a FORMULA and no COMPUTE is refused in Z's words, and the envelope carries the constraint's own CODE, not the generic one",
+      "verb": "diagnose",
+      "args": ["tontine/tontine_no_compute.z"],
+      "diagnose": {"code": "NO_COMPUTE", "cites": ["rule:a_formula_names_its_field"]}
+    },
+    {
+      "id": "T9",
+      "name": "Art. 1: two steps at one rank of collect -- refused with the constraint's words and its CODE",
+      "verb": "check",
+      "args": ["tontine/tontine_two_ranks.z"],
+      "refused": true,
+      "contains": ["STEP record_again and STEP record both stand at ORDER 1 of collect: one rank, one step"]
+    },
+    {
+      "id": "T10",
+      "name": "the same in the envelope: ONE_RANK",
+      "verb": "diagnose",
+      "args": ["tontine/tontine_two_ranks.z"],
+      "diagnose": {"code": "ONE_RANK", "cites": ["rule:one_rank_per_flow"]}
+    },
+    {
+      "id": "T11",
+      "name": "zing's own first law, unchanged under the constitution: DROP is not forbidden, it is unparseable -- and now carries the declared CODE",
+      "verb": "diagnose",
+      "args": ["tontine/drop.z"],
+      "diagnose": {"code": "UNKNOWN_VERB", "cites": []}
+    },
+    {
+      "id": "T12",
+      "name": "Art. 3 through the voice: every kind of the tontine told in Z's own words -- the enum's words, the entity's fields, the norms' rules, the flows, the steps and who acts, the zone and who holds it",
+      "verb": "narrate",
+      "args": ["tontine.z"],
+      "contains": ["deposit_status is one of staged, audited, active.", "deposit is a record of id -> uuid, member -> text, amount -> currency, round -> int, status -> deposit_status.", "positive_deposit holds amount > 0; broken, it says: A deposit must bring something to the circle.", "collect is a flow records walk.", "record is step 1 of collect, acted by collector.", "calcul is step 2 of indice, acted by system.", "cotisations is held by the_commons; json records land in it and walk collect.", "That is the whole world."]
+    },
+    {
+      "id": "T13",
+      "name": "Art. 2 and 6: the collector's app turns the zone's format, a knob floored external -- admitted, and the inverse restores the sentence byte for byte",
+      "verb": "refine",
+      "args": ["tontine.z", "tontine/format_external.rfn"],
+      "contains": ["admitted: cotisations.FORMAT json -> csv [external]"],
+      "revert": true
+    },
+    {
+      "id": "T14",
+      "name": "Art. 4 and 6 at the sentence: a model proposes a new holder for the zone and a looser rule for the norm -- both refused at the trust stage, Art. 6 named; the same model proposes new words for the norm's message -- admitted, a message being a field floored llm; the chain keeps all three, Art. 3",
+      "verb": "sequence",
+      "steps": [["refine", "tontine.z", "tontine/holder_llm.rfn"], ["refine", "tontine.z", "tontine/rule_llm.rfn"], ["refine", "tontine.z", "tontine/message_llm.rfn"], ["audit", "tontine.z"]],
+      "contains": ["below the required floor :trusted for 'cotisations.HELD_BY' [Art. 6 trust_hierarchy]", "below the required floor :trusted for 'positive_deposit.RULE' [Art. 6 trust_hierarchy]", "admitted: positive_deposit.MESSAGE A deposit must bring something to the circle -> A deposit brings something to the circle, or it is not a deposit [llm]", "\"target\": \"cotisations.HELD_BY\", \"from\": \"the_commons\", \"to\": \"the_bank\", \"author\": \"aicha\", \"posture\": \"llm\", \"verdict\": \"refused\", \"stage\": \"trust\", \"code\": \"TRUST_FLOOR\"", "\"target\": \"positive_deposit.RULE\", \"from\": \"amount > 0\", \"to\": \"amount >= 0\", \"author\": \"aicha\", \"posture\": \"llm\", \"verdict\": \"refused\", \"stage\": \"trust\", \"code\": \"TRUST_FLOOR\"", "\"target\": \"positive_deposit.MESSAGE\"", "\"verdict\": \"admitted\"", "3 events"]
+    },
+    {
+      "id": "T15",
+      "name": "the runtime under the constitution, unchanged: a deposit with no member fails at the first step with the step's own code",
+      "verb": "walk",
+      "args": ["tontine.z", "collect", "{\"member\":\"\",\"amount\":5,\"round\":1}"],
+      "first": "{\"status\": \"failed\", \"at\": \"record\", \"code\": \"NO_MEMBER\""
+    },
+    {
+      "id": "T16",
+      "name": "the runtime under the constitution, unchanged: the survey's index computed in-flow, zing's own number",
+      "verb": "walk",
+      "args": ["tontine.z", "indice", "{\"reponses\":[4,5,3,4,5]}"],
+      "first": "{\"status\": \"complete\", \"computed\": {\"score\": 84}}"
+    }
+  ]
+}
