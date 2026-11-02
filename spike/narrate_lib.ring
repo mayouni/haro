@@ -308,7 +308,16 @@ func NarTellAsk(cFile, cQ, cRows)
 		if cT = "" cT = NarAskDefault(aE[1]) ok
 		aVals = [["language", $cCourtLang], ["file", cBase]]
 		for j = 1 to len(aE[2])
-			aVals + aE[2][j]
+			aV2 = aE[2][j]
+			if isList(aV2[2])
+				# v0.27: the rows a told answer carries leave redacted under the voice's safeguard
+				aRows2 = aV2[2]
+				if CtSafeguard("voice") = "redaction" aRows2 = CtRedactRows(aRows2, CtMarkedFields(aDecls)) ok
+				aV3 = [aV2[1], ExJson(aRows2)]
+				aVals + aV3
+			else
+				aVals + aV2
+			ok
 		next
 		? NarFill(cT, aVals)
 	next

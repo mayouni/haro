@@ -24,6 +24,6 @@ number ::= [0-9]+
 namelist ::= "[" ws (ident (ws "," ws ident)* (ws ",")?)? ws "]"
 stringlist ::= "[" ws (string (ws "," ws string)* (ws ",")?)? ws "]"
 pairlist ::= "[" ws (pair (ws "," ws pair)* (ws ",")?)? ws "]"
-pair ::= ident ws ":" ws (ident | string | number)
+pair ::= ident ws ":" ws (ident | string | number) (sp ident)?
 sp ::= [ \t]+
 ws ::= ([ \t\r\n] | "--" [^\n]* "\n")*

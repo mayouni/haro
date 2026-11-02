@@ -7,13 +7,15 @@
 -- this sentence unadapted. Under the constitution (z_v26.haro, ZC5) the landing zone gained one
 -- line, HELD_BY the_commons: who holds the deposits (Art. 5). tontine/tontine_unheld.z keeps the
 -- sentence as zing wrote it, which the court now refuses, naming the article.
+-- Under the field tag (z_v27.haro, ZTAG) the member field gained one word, `personal`: what a question
+-- tells of it leaves the circle redacted; the treasurer's own question is answered whole, by consent.
 
 DEFINE ENUM deposit_status AS (
   WORDS [staged, audited, active]
 ) RATIONALE "The states a deposit passes through: staged by the collector, audited by the treasurer, active in the round"
 
 DEFINE ENTITY deposit AS (
-  FIELDS [id: uuid, member: text, amount: currency, round: int, status: deposit_status]
+  FIELDS [id: uuid, member: text personal, amount: currency, round: int, status: deposit_status]
 ) RATIONALE "One member's contribution to one round of the circle"
 
 DEFINE NORM positive_deposit AS (

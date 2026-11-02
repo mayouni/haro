@@ -216,7 +216,7 @@ no expression position, no escape):
 | **`ASK`** (the pragmatics stratum) | absent | the language's own closed query grammar (the Q letter) and the human languages its natural door speaks; NL asks, never declares; the engine compiles to this grammar and never to host code [R, mission.md rules 1-2]. *The query grammar is built, v0.7 (the seventh rung); the natural door is not.* |
 | **`NARRATE`** | absent | how a run of the language is narrated back (stzn); the court's voice. *Built, v0.13 (the thirteenth rung): SAYS, OPENS, ENDS, REFUSES; `narrate <file>`; a projection, never stored, never parsed back.* |
 | **`REFINE`** | absent | which declared points of a sentence may be refined, by whom, within what bounds, at what trust floor (section 7) |
-| **`CONSTITUTION`** | absent | the articles a world declares itself under, judged through the seats above and the gate, never reimplemented (section 2; D33). *Built, v0.23 (ZC2, 2026-11-02): `ARTICLES` drawn from Zin's six by name and number, `WEAVES` and `REGIME` carried for ZC4; 22 fixtures and a bank's ledger judged on both runtimes. v0.24 (ZC3, the same day, D34): `ZONE`, `SOVEREIGN`, `MOVEMENT`; visible state through the access paths and the audit chain; 18 fixtures and the bank under all six. v0.25 (ZC4's Haro slice, D35): `PERSONAL`, the sovereignty and privacy weaves at their severities, the regime read, `SEVERITY` on a constraint; 16 fixtures and the clinic. v0.26 (ZC5, the same day, D36): no clause -- Z, the tontine language, declared under all six and both weaves and judged end to end on the tontine, zing's cases unchanged; 13 fixtures and 16 cases; the author's reading of the refusals is the gate* |
+| **`CONSTITUTION`** | absent | the articles a world declares itself under, judged through the seats above and the gate, never reimplemented (section 2; D33). *Built, v0.23 (ZC2, 2026-11-02): `ARTICLES` drawn from Zin's six by name and number, `WEAVES` and `REGIME` carried for ZC4; 22 fixtures and a bank's ledger judged on both runtimes. v0.24 (ZC3, the same day, D34): `ZONE`, `SOVEREIGN`, `MOVEMENT`; visible state through the access paths and the audit chain; 18 fixtures and the bank under all six. v0.25 (ZC4's Haro slice, D35): `PERSONAL`, the sovereignty and privacy weaves at their severities, the regime read, `SEVERITY` on a constraint; 16 fixtures and the clinic. v0.26 (ZC5, the same day, D36): no clause -- Z, the tontine language, declared under all six and both weaves and judged end to end on the tontine, zing's cases unchanged; 13 fixtures and 16 cases; the author's reading of the refusals is the gate. v0.27 (ZTAG, the same day, D37): a pair form's mark (`member: text personal`), `PERSONAL` by a three-part path, `SAFEGUARDS` on the ask and the voice; the court names the marked fields, answers whole under consent, tells redacted under redaction; 14 fixtures and 11 cases* |
 | **`FORMS` inside a vocabulary** | absent | the function-name grammar of principle 7 declared as data for the computing altitude's families. *Built, v0.12 (the twelfth rung): FLUENT, PASSIVE, STATEMENT, PARAMS and FAMILY; the families generated, the shipped spellings judged live.* |
 
 **Built 2026-10-01, the first slice of two of these rows -- Haro v0.2, the spike's second
@@ -1186,6 +1186,27 @@ states principle 14.
   the member's field is unmarked at this altitude and is the next question. *The name:* Mansour Ayouni, by delegation to the constitution desk. A reading
   by the author in his own eyes stays open to him at any time and would supersede this one. **The compass re-rates Kern lanes 1 and 3 on it**
   (CONSTITUTION-KERN-01, routed). ZC5 DONE; the desk's charge, ZC0 to ZC5, is complete.
+- **D37 -- the field tag: a pair form's mark, PERSONAL reaching it by a three-part path, SAFEGUARDS on the ask and the voice** (ZTAG, built on the author's
+  "yes" to CONSTITUTION-ZTAG-01, 2026-11-02; `haro/spike/v27/GRAMMAR.md`; HF-131; the twenty-seventh rung). A pair form -- a name and a scalar, written `a: b` --
+  may carry a third, optional seat typed by a MENU, the mark, and a sentence writes it after the value: `member: text personal`; a mark the MENU does not know is
+  refused in the MENU's words with its CODE. The CONSTITUTION's `PERSONAL` may name the mark seat by a three-part path, `entity.fields.tag` -- the seat a list of a
+  pair form, the mark its MENU seat, that MENU able to say `personal` -- and every field a sentence marks personal or confidential is a personal datum at the
+  record level, which `check` names (`personal member`). `SAFEGUARDS [ask: consent | anonymisation, voice: redaction]` declares what each path out of the world
+  gives, in stzFieldTags' five words, each on its path; the model path stays stzlib's and HaroBase's (D35). **The weaves over the marks**: W4.2 -- a language
+  with an ASK and a mark path declares a safeguard for the ask path or is refused at constitutional, warned at governance, noted at advisory; W4.4 -- a voice that
+  TELLS `{rows}` declares redaction or the same; W3.1 stays silent on a mark, because a published schema moves no datum. **The forged court applies what it can**:
+  under anonymisation `ask` answers with the marked fields `[personal]`, under consent whole, as zing answers; under redaction `narrate-ask` tells its rows with
+  the marked fields `[personal]`; the voice's shape line (`member -> text`) is kept, a shape being no datum. **The tontine**: `member: text personal`, the ask
+  under consent (the members consented to the circle's ledger, so the treasurer's question is answered whole and zing's pin holds), the voice under redaction
+  (what is told leaves the circle). Fixtures first: 14 meta fixtures and the tontine's 11 cases, 25 of 25 on both runtimes, byte-identical; zing's 16 cases, 25
+  questions and 22 told questions unchanged, the told ones now redacting the member -- which stage 19's law reads off the sentence's marks and the declaration's
+  safeguards, the fixture (zing's answers) unchanged. *Cost:* the ten committed courts regenerated (the prologue grew: `$aCourtMarks`, `$aCourtSafeguards`); the
+  `pair` rule of a grammar whose pair form has a mark seat gains `(sp ident)?` (only `z.gbnf` moved); a fixture was wrong once (R1 declared explainability without
+  a voice, so Art. 1 refused it first) and corrected after the court spoke, said in the fixture file and in HF-131; a `\b` in a heredoc became a backspace inside
+  a regex, found by `repr`. *What zing and StzZql learn* (HARO-Z-02, routed through Central): one shape, the mark after a pair's value, and the two safeguards'
+  meaning on a question's answer and a told answer. *Not built:* a mark on a form that is not a pair form; retention and on_premise as Haro safeguards (stzlib's
+  `:log`, HaroBase's grant); a default safeguard -- a marking world that declares nothing is refused, warned or noted at its own severity, never answered whole in
+  silence.
 - **D23 -- `rnxc fmt` is a Ring++ feature, not held for Haro** (CODEGRAPH Q4, ruled on the author's delegation, 2026-10-05: "take
   whatever decision you think is wiser on my behalf"). It is a verb of the one binary (commitment 5), depends on nothing of Haro's, is
   judged against the oracle and refuses what Ring refuses (58 of 6,061 Softanza files, 57 of them Ring's own refusals). It ships inside

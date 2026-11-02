@@ -60,6 +60,8 @@ $cCourtAuditFile = ""
 $aCourtAuditProposal = []
 $aCourtPersonal = []
 $aCourtWarnings = []
+$aCourtMarks = []
+$aCourtSafeguards = []
 $bCourtCollect = 0
 $aCourtFound = []
 $aCourtBroken = []
@@ -94,7 +96,7 @@ $aCourtLangs = [
     ],
     [
       ["word", [["value", "name", 0, 0, "prim"]]],
-      ["field", [["name", "name", 0, 0, "prim"], ["type", "name", 0, 0, "prim"]]]
+      ["field", [["name", "name", 0, 0, "prim"], ["type", "name", 0, 0, "prim"], ["tag", "tags", 0, 1, "menu"]]]
     ],
     [
       ["unknown_verb", "The ZQL verb set is closed -- destructive or unrecognized operations are not part of the grammar.", [], "UNKNOWN_VERB", [], []],
@@ -105,7 +107,8 @@ $aCourtLangs = [
       ["actors", ["collector", "treasurer", "system", "member", "auditor"], "ACTOR is collector, treasurer, system, member or auditor", ""],
       ["outcomes", ["commit_to_bedrock", "hold"], "ON_SUCCESS is commit_to_bedrock or hold", ""],
       ["formats", ["json", "csv"], "FORMAT is json or csv", ""],
-      ["holders", ["the_commons", "the_cooperative", "the_bank"], "HELD_BY is the_commons, the_cooperative or the_bank, not '{value}'", "HOLDER"]
+      ["holders", ["the_commons", "the_cooperative", "the_bank"], "HELD_BY is the_commons, the_cooperative or the_bank, not '{value}'", "HOLDER"],
+      ["tags", ["plain", "personal", "confidential"], "a field's tag is plain, personal or confidential, not '{value}'", "TAG"]
     ],
     [
     ],
@@ -143,5 +146,7 @@ CtUseLanguage("z")
 CtBuildCondLangs()
 $aCourtConstitution = ["explainability", "reversibility", "visible_state", "predictable_authority", "organizational_sovereignty", "trust_hierarchy"]
 $aCourtZone = ["landing_zone", "held_by", "into"]
+$aCourtMarks = [["entity", "fields", "tag"]]
+$aCourtSafeguards = [["ask", "consent"], ["voice", "redaction"]]
 
 CtMain()

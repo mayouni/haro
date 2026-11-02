@@ -1541,6 +1541,27 @@ said. **The gate: CLOSED on the author's delegation, 2026-11-02 09:43** ("Answer
 the voice run live before him, each answered by the desk and recorded under D36 as a delegated reading, the member's unmarked field named as the open
 question (CONSTITUTION-ZTAG-01); the compass re-rates Kern lanes 1 and 3. ZC5 DONE.
 
+## The twenty-seventh rung -- Haro v0.27, the field tag: a pair form's mark, PERSONAL reaching it, SAFEGUARDS on the ask and the voice -- 2026-11-02
+
+**On the author's "yes" to CONSTITUTION-ZTAG-01** (2026-11-02, the question ZC5 left open: HF-130), built by the constitution desk after its charge (D37). A pair
+form may carry a third, optional MENU seat, the mark, written after the value -- `member: text personal`; the CONSTITUTION's `PERSONAL` names the mark seat by
+a three-part path, `entity.fields.tag`; `SAFEGUARDS [ask: consent | anonymisation, voice: redaction]` declares what each path out of the world gives, in
+stzFieldTags' words. The weaves judge the marks on the two paths rows take: the ask (W4.2) and the told answer (W4.4); a published schema moves no datum (W3.1
+silent). The forged court names the marked fields, answers a question whole under consent (zing's pin holds) or redacted under anonymisation, and tells a
+question's rows redacted under redaction. `spike/v27/GRAMMAR.md` is the account.
+
+    v27/fixtures.json                   14 meta fixtures, written before any court code (5 accepts, 9 rejects)
+    z_v27.haro, tontine.z, tontine/     Z with the tag; the member marked personal; a tag the MENU does not know; two marks
+    v27/court_cases.json                11 sentence cases: the marks named, the ask whole, the voice redacted, the code TAG, the runtime unchanged
+    haro_lib.ring, court_lib.ring, forge.ring, ask_lib.ring, narrate_lib.ring   the mark seat and the pair's mark; PERSONAL's third part; SAFEGUARDS;
+                                        the weaves over marks; $aCourtMarks and $aCourtSafeguards; the ask's and the voice's redaction; the pair rule
+    haro_forge.py                       stage 1 grows by v0.27; stage 33 is the tagged tontine; the `lacks` key; stage 19's law reads the marks and the safeguard
+
+**Results.** 14 of 14 and 11 of 11, rnxc and the oracle byte-identical; stages 9, 10, 13, 14, 19 and 32 pass on the regenerated Z; stages 1 to 5, 11, 12,
+15 to 18, 21 and 29 to 31 pass; the ten committed courts regenerated. **What building found** (HF-131): the fixture was wrong once (R1 under explainability
+with no voice) and corrected after the court spoke; stage 19's law now reads the sentence's marks; consent is why zing's pin holds; a schema is not a datum;
+a `\b` in a heredoc is a backspace. **Routed** through Central: the mark and the safeguards' meaning to zing (zql.zig, PINNING-ZQL.md) and to StzZql.
+
 ## The names -- `.haro`, not `.stzu` -- corrected 2026-10-02
 
 **At the author's word ("we agreed to use .haro instead of .stzu, no?").** D1 was ratified
@@ -1673,6 +1694,9 @@ whole guard re-run on the renamed tree: 28 + 30 + 27 + 23, 117 of 120, 32 of 32,
    both runtimes; no clause added to the grammar; the sentence changed by one clause, who holds the zone. **The perception gate CLOSED on the author's
    delegation, 2026-11-02 09:43** ("Answer each on my behalf. I authorise you."): the seven verdicts are under D36 as a delegated reading, the
    member's unmarked field the open question; the compass re-rates Kern lanes 1 and 3. **ZC5 DONE; the desk's charge ZC0 to ZC5 is complete.**
+   **Then, on his "yes" to ZTAG-01 the same morning, Haro v0.27** (the twenty-seventh rung below; `v27/GRAMMAR.md`, guard stage 33, D37, HF-131): the
+   field tag -- `member: text personal` at the sentence, PERSONAL by a three-part path, SAFEGUARDS on the ask and the voice; 14 meta fixtures and the
+   tontine's 11 cases written first, 25 of 25 on both runtimes; the court names the marks, answers whole under consent, tells redacted under redaction.
 18. The forge as an `rnxc` verb (the ringpp session's `src/`, routed); the
    Softanza-resident timing the charter's 2.6 asks for; the court's run time on the
    oracle under paths and views (6.4x the image this pass, named at stage 6); the

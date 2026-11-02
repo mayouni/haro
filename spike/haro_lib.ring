@@ -122,7 +122,7 @@ func StzuClauses(cKind)
 	but cKind = "REFINE"
 		return [["FLOOR", "pointlist"], ["POINTS", "pointlist"]]
 	but cKind = "CONSTITUTION"
-		return [["ARTICLES", "namelist"], ["MOVEMENT", "ident"], ["PERSONAL", "pathlist"], ["REGIME", "ident"], ["SOVEREIGN", "ident"], ["WEAVES", "pairlist"], ["ZONE", "ident"]]
+		return [["ARTICLES", "namelist"], ["MOVEMENT", "ident"], ["PERSONAL", "pathlist"], ["REGIME", "ident"], ["SAFEGUARDS", "pairlist"], ["SOVEREIGN", "ident"], ["WEAVES", "pairlist"], ["ZONE", "ident"]]
 	but cKind = "UNION"
 		return [["CODE", "string"], ["MESSAGE", "string"], ["OF", "typelist"]]
 	but cKind = "WALK"
@@ -1174,7 +1174,10 @@ func StzuDeclare(cSrc)
 				# v0.25: the PERSONAL seats the weaves govern, as paths decl.seat
 				aCPersonal = []
 				if HasClause(aClauses, "PERSONAL") aCPersonal = ClauseValue(aClauses, "PERSONAL") ok
-				aConstitution = [cName, ClauseValue(aClauses, "ARTICLES"), aCWeaves, cCRegime, nLine, cRationale, cCZone, cCSov, cCMov, aCPersonal]
+				# v0.27: SAFEGUARDS [ask: consent | anonymisation, voice: redaction] -- what each path out of the world declares
+				aCSafe = []
+				if HasClause(aClauses, "SAFEGUARDS") aCSafe = ClauseValue(aClauses, "SAFEGUARDS") ok
+				aConstitution = [cName, ClauseValue(aClauses, "ARTICLES"), aCWeaves, cCRegime, nLine, cRationale, cCZone, cCSov, cCMov, aCPersonal, aCSafe]
 			else
 				if DeclaredKind(aDeclared, cName) != ""
 					StzuFail(nLine, "'" + cName + "' is already declared -- one namespace, one name, one meaning")
@@ -2116,20 +2119,72 @@ func StzuDeclare(cSrc)
 			next
 			# v0.25: the PERSONAL seats: each a seat of a declared kind, and the weaves' to govern
 			aPers = aConstitution[10]
+			aMarks = []
 			for i = 1 to len(aPers)
 				cPP = aPers[i][1]
 				nPD = substr(cPP, ".")
 				cPDecl = ""
 				cPSeat = ""
+				cPSub = ""
 				if nPD > 0
 					cPDecl = left(cPP, nPD - 1)
 					cPSeat = substr(cPP, nPD + 1)
+					# v0.27: a three-part path decl.seat.mark names the form seat that marks a field
+					nPS = substr(cPSeat, ".")
+					if nPS > 0
+						cPSub = substr(cPSeat, nPS + 1)
+						cPSeat = left(cPSeat, nPS - 1)
+					ok
 				ok
 				if nPD = 0 or DeclaredKind(aDeclared, cPDecl) != "DECLARATION"
 					StzuFail(aPers[i][2], "PERSONAL names '" + cPP + "', and '" + cPDecl + "' is not a declaration kind")
 				ok
 				if not StzuHasSeat(aDeclarations, cPDecl, cPSeat)
 					StzuFail(aPers[i][2], "PERSONAL names '" + cPP + "', and '" + cPDecl + "' has no seat '" + cPSeat + "'")
+				ok
+				if cPSub != ""
+					aMS = StzuSeatRec(aDeclarations, cPDecl, cPSeat)
+					aMF = NULL
+					if aMS[3] aMF = StzuFormRec(aForms, aMS[2]) ok
+					if isNull(aMF) or not StzuIsPairForm(aMF[2], aDeclared)
+						StzuFail(aPers[i][2], "PERSONAL names '" + cPP + "', and '" + cPDecl + "." + cPSeat + "' is not a list of a pair form -- a mark lives on a form's seat")
+					ok
+					aTS = NULL
+					for j = 1 to len(aMF[2])
+						if aMF[2][j][1] = cPSub aTS = aMF[2][j] ok
+					next
+					if isNull(aTS)
+						StzuFail(aPers[i][2], "PERSONAL names '" + cPP + "', and the form '" + aMF[1] + "' of '" + cPDecl + "." + cPSeat + "' has no seat '" + cPSub + "'")
+					ok
+					aTM = StzuMenuRec(aMenus, aTS[2])
+					if isNull(aTM) or not InStrList("personal", aTM[2])
+						StzuFail(aPers[i][2], "PERSONAL names '" + cPP + "' as a mark, and the MENU '" + aTS[2] + "' has no word 'personal' -- a mark seat is a MENU that can say personal")
+					ok
+					aMarks + [cPP, aPers[i][2]]
+				ok
+			next
+			# v0.27: the safeguards -- a path (ask, voice) and the word it declares: stzFieldTags' five words, each on its path
+			aSafe = aConstitution[11]
+			cSafeAsk = ""
+			cSafeVoice = ""
+			for i = 1 to len(aSafe)
+				cSP = aSafe[i][1]
+				cSW = aSafe[i][2]
+				if not InStrList(cSW, ["consent", "anonymisation", "retention", "redaction", "on_premise"])
+					StzuFail(aSafe[i][3], "'" + cSW + "' is not a safeguard: consent, anonymisation, retention, redaction or on_premise")
+				ok
+				if cSP = "ask"
+					if not InStrList(cSW, ["consent", "anonymisation"])
+						StzuFail(aSafe[i][3], "'" + cSW + "' is not a safeguard of the ask path: consent or anonymisation")
+					ok
+					cSafeAsk = cSW
+				but cSP = "voice"
+					if cSW != "redaction"
+						StzuFail(aSafe[i][3], "'" + cSW + "' is not a safeguard of the voice path: redaction")
+					ok
+					cSafeVoice = cSW
+				else
+					StzuFail(aSafe[i][3], "'" + cSP + "' is not a path Haro's weaves govern here: ask or voice -- the model path is stzlib's and HaroBase's (D35)")
 				ok
 			next
 			cSevPrivacy = ""
@@ -2140,6 +2195,9 @@ func StzuDeclare(cSrc)
 			next
 			if len(aPers) > 0 and cSevPrivacy = "" and cSevSovereignty = ""
 				StzuFail(nCL, "PERSONAL is named and neither privacy (W4) nor sovereignty (W3) is among WEAVES -- the personal seats are the weaves' to govern")
+			ok
+			if len(aSafe) > 0 and cSevPrivacy = ""
+				StzuFail(nCL, "SAFEGUARDS is named and privacy (W4) is not among WEAVES -- a safeguard is a weave's escape")
 			ok
 			# v0.25: a regime is read by the weaves' refusals; without a weave it is accepted by nothing
 			if aConstitution[4] != "" and len(aWv) = 0
@@ -2273,6 +2331,8 @@ func StzuDeclare(cSrc)
 				nPD = substr(cPP, ".")
 				cPDecl = left(cPP, nPD - 1)
 				cPSeat = substr(cPP, nPD + 1)
+				# v0.27: a mark path (decl.seat.mark) is judged below, on the paths records take; a published schema moves no datum
+				if substr(cPSeat, ".") > 0 loop ok
 				if cSevPrivacy != ""
 					if not isNull(aNarrate)
 						for k = 1 to len(aNarrate[5])
@@ -2301,6 +2361,23 @@ func StzuDeclare(cSrc)
 					ok
 				ok
 			next
+			# v0.27: the weaves over the marks, on the two paths records take out of the world: the ask (W4.2) needs
+			# consent or anonymisation, the voice telling rows (W4.4) needs redaction; the court applies what it can
+			if cSevPrivacy != ""
+				for i = 1 to len(aMarks)
+					if not isNull(aAsk) and cSafeAsk = ""
+						StzuWeave(cSevPrivacy, aAsk[6], "W4.2 privacy: the fields marked by '" + aMarks[i][1] + "' may be asked (ASK " + aAsk[1] + ") and no safeguard is declared for the ask path -- usage over personal data is analytics, which needs consent or anonymisation" + StzuRegimeTail(cRg, "W4.2"))
+					ok
+					if not isNull(aNarrate) and cSafeVoice = ""
+						aTls = aNarrate[8]
+						for k = 1 to len(aTls)
+							if substr(aTls[k][2], "{rows}") > 0
+								StzuWeave(cSevPrivacy, aTls[k][3], "W4.4 privacy: the fields marked by '" + aMarks[i][1] + "' are told by the voice ('" + aTls[k][1] + "' tells {rows}) and no redaction is declared for the voice path -- a log carries no personal datum unredacted" + StzuRegimeTail(cRg, "W4.4"))
+							ok
+						next
+					ok
+				next
+			ok
 		catch
 			StzuNote(cCatchError)
 		done
@@ -2392,11 +2469,18 @@ func StzuSeatNamed(aSeats, cSeat)
 # FORM keeps v0.1's reading (its items follow the form's first seat), because
 # the pinned judge lists a six-seat FORM and v0.6 refuses nothing v0.5 accepted
 func StzuIsPairForm(aFS, aDeclared)
-	if len(aFS) != 2 return 0 ok
+	# v0.27: a pair form may carry a third, optional seat typed by a MENU -- the mark, written after the value
+	if len(aFS) != 2 and not StzuHasMarkSeat(aFS, aDeclared) return 0 ok
 	if aFS[1][3] or aFS[2][3] return 0 ok
 	cK1 = DeclaredKind(aDeclared, aFS[1][2])
 	if aFS[1][2] != "name" and cK1 != "MENU" and cK1 != "DECLARATION" return 0 ok
 	return 1
+
+# v0.27: the mark seat of a pair form -- third, optional, a MENU
+func StzuHasMarkSeat(aFS, aDeclared)
+	if len(aFS) != 3 return 0 ok
+	if aFS[3][3] or not aFS[3][4] return 0 ok
+	return DeclaredKind(aDeclared, aFS[3][2]) = "MENU"
 
 # a pair form whose key or value is a reference (v0.8)
 func StzuPairRefs(aFS, aDeclared)
@@ -2444,6 +2528,19 @@ func StzuSeatRec(aDeclarations, cDecl, cSeat)
 				if aS[j][1] = cSeat return aS[j] ok
 			next
 		ok
+	next
+	return NULL
+
+# v0.27: a FORM's record by name, a MENU's record by name, or NULL
+func StzuFormRec(aForms, cName)
+	for i = 1 to len(aForms)
+		if aForms[i][1] = cName return aForms[i] ok
+	next
+	return NULL
+
+func StzuMenuRec(aMenus, cName)
+	for i = 1 to len(aMenus)
+		if aMenus[i][1] = cName return aMenus[i] ok
 	next
 	return NULL
 
@@ -2596,9 +2693,20 @@ func StzuPrintLanguage(aLang)
 			next
 		ok
 	ok
+	# v0.27: the safeguards, as path:word, comma-joined
+	cSafeg = ""
+	if not isNull(aCs)
+		if len(aCs) >= 11
+			for i = 1 to len(aCs[11])
+				if i > 1 cSafeg += "," ok
+				cSafeg += aCs[11][i][1] + ":" + aCs[11][i][2]
+			next
+		ok
+	ok
 	? "regime " + cRegime
 	? "weaves " + cWeaves
 	? "personal " + cPersonal
+	? "safeguards " + cSafeg
 	aD = LangGet(aLang, "declarations")
 	aV = []
 	for i = 1 to len(aD)

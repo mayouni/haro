@@ -149,6 +149,15 @@ func PointsSource(aPoints)
 
 # a table of rows as a Ring list literal, one row a line; fnRow is applied by the
 # caller, so this takes the rows' texts
+# v0.27: rows joined on one line
+func JoinRows(aRows)
+	c = ""
+	for i = 1 to len(aRows)
+		if i > 1 c += ", " ok
+		c += aRows[i]
+	next
+	return c
+
 func RowsSource(aRows, nl)
 	c = "[" + nl
 	for i = 1 to len(aRows)
@@ -493,6 +502,7 @@ func ForgeCourt(aLang)
 	c += "$aCourtZone = []" + nl + "$cCourtAuditFile = " + '""' + nl + "$aCourtAuditProposal = []" + nl
 	# v0.25: the personal seats the chain redacts, and the warnings a court speaks after its verdict
 	c += "$aCourtPersonal = []" + nl + "$aCourtWarnings = []" + nl
+	c += "$aCourtMarks = []" + nl + "$aCourtSafeguards = []" + nl
 	c += "$bCourtCollect = 0" + nl + "$aCourtFound = []" + nl + "$aCourtBroken = []" + nl
 	c += "$bRunTrace = 0" + nl + "$aRunTrace = []" + nl + "$nRunDepth = 0" + nl + "$bAskTrace = 0" + nl + "$aAskTrace = []" + nl
 	c += ExprGlobals()
@@ -521,10 +531,31 @@ func ForgeCourt(aLang)
 		if len(aCst) >= 10
 			if len(aCst[10]) > 0
 				aPersNames = []
+				aMarkRows = []
 				for i = 1 to len(aCst[10])
-					aPersNames + aCst[10][i][1]
+					cPth = aCst[10][i][1]
+					n1 = substr(cPth, ".")
+					cRest = substr(cPth, n1 + 1)
+					n2 = substr(cRest, ".")
+					if n2 > 0
+						# v0.27: a three-part path is a mark -- [kind, seat, markSeat]
+						aMarkRows + ("[" + RingStr(left(cPth, n1 - 1)) + ", " + RingStr(left(cRest, n2 - 1)) + ", " + RingStr(substr(cRest, n2 + 1)) + "]")
+					else
+						aPersNames + cPth
+					ok
 				next
-				c += "$aCourtPersonal = " + NamesSource(aPersNames) + nl
+				if len(aPersNames) > 0 c += "$aCourtPersonal = " + NamesSource(aPersNames) + nl ok
+				if len(aMarkRows) > 0 c += "$aCourtMarks = [" + JoinRows(aMarkRows) + "]" + nl ok
+			ok
+		ok
+		# v0.27: the safeguards, [path, word]
+		if len(aCst) >= 11
+			if len(aCst[11]) > 0
+				aSgRows = []
+				for i = 1 to len(aCst[11])
+					aSgRows + ("[" + RingStr(aCst[11][i][1]) + ", " + RingStr(aCst[11][i][2]) + "]")
+				next
+				c += "$aCourtSafeguards = [" + JoinRows(aSgRows) + "]" + nl
 			ok
 		ok
 	ok
@@ -827,7 +858,22 @@ func ForgeGbnf(aLang)
 	next
 	if bPairs
 		g += 'pairlist ::= "[" ws (pair (ws "," ws pair)* (ws ",")?)? ws "]"' + nl
-		g += 'pair ::= ident ws ":" ws (ident | string | number)' + nl
+		# v0.27: a pair form with a mark seat writes the mark after the value
+		bMark = 0
+		aDeclaredM = []
+		aDLm = LangGet(aLang, "declarations")
+		for i = 1 to len(aDLm) aDeclaredM + [aDLm[i][1], "DECLARATION"] next
+		aMLm = LangGet(aLang, "menus")
+		for i = 1 to len(aMLm) aDeclaredM + [aMLm[i][1], "MENU"] next
+		aFm = LangGet(aLang, "forms")
+		for i = 1 to len(aFm)
+			if StzuHasMarkSeat(aFm[i][2], aDeclaredM) bMark = 1 ok
+		next
+		if bMark
+			g += 'pair ::= ident ws ":" ws (ident | string | number) (sp ident)?' + nl
+		else
+			g += 'pair ::= ident ws ":" ws (ident | string | number)' + nl
+		ok
 	ok
 	g += "sp ::= [ " + bs + "t]+" + nl
 	g += "ws ::= ([ " + bs + "t" + bs + "r" + bs + "n] | " + q + "--" + q + " [^" + bs + "n]* " + q + bs + "n" + q + ")*" + nl

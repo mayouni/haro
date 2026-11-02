@@ -777,11 +777,18 @@ func CtTypeKind(aSeat)
 	return "prim"
 
 func CtIsPairForm(aFS)
-	if len(aFS) != 2 return 0 ok
+	# v0.27: a third, optional MENU seat is the mark, written after the value
+	if len(aFS) != 2 and not CtHasMarkSeat(aFS) return 0 ok
 	if aFS[1][3] or aFS[2][3] return 0 ok
 	cK1 = CtTypeKind(aFS[1])
 	if aFS[1][2] != "name" and cK1 != "menu" and cK1 != "decl" return 0 ok
 	return 1
+
+# v0.27: the mark seat of a pair form -- third, optional, a MENU
+func CtHasMarkSeat(aFS)
+	if len(aFS) != 3 return 0 ok
+	if aFS[3][3] or not aFS[3][4] return 0 ok
+	return CtTypeKind(aFS[3]) = "menu"
 
 # v0.8: does a seat take part in the references pass -- a reference, a UNION
 # of declarations, or a pair list whose keys or values are references -- and
@@ -1081,7 +1088,12 @@ func CtParseValue()
 				if tv[1] != "ident" and tv[1] != "string" and tv[1] != "number"
 					CtFail(tv[3], "A pair's value is a word, a string or a number, found '" + CtShown(tv) + "'")
 				ok
-				aPair = [item[2], tv[2], tv[1]]
+				aPair = [item[2], tv[2], tv[1], ""]
+				# v0.27: a mark after the value -- `member: text personal`
+				if CtPeek()[1] = "ident"
+					tm = CtNext()
+					aPair[4] = tm[2]
+				ok
 				aPairs + aPair
 			but item[1] = "ident"
 				aNames + item[2]
@@ -1678,6 +1690,17 @@ func CtCheckSeatValue(aDecl, aSeat, aClause, bRefs)
 					if cWhy != "" return cWhy ok
 				next
 			ok
+			# v0.27: a mark after a value is a word of the form's third seat's MENU
+			for i = 1 to len(aItems)
+				if len(aItems[i]) >= 4 and aItems[i][4] != ""
+					if len(aF[2]) < 3
+						CtSetCode("PARSE", [])
+						return "'" + aItems[i][4] + "' marks '" + aItems[i][1] + "' in " + upper(aSeat[1]) + " of " + aDecl[1] + " " + aDecl[2] + ", and the form takes no mark"
+					ok
+					cWhy = CtCheckScalar(aDecl, aF[2][3], aItems[i][4])
+					if cWhy != "" return cWhy ok
+				ok
+			next
 			return ""
 		ok
 		if cKeyK = "decl"
@@ -1743,6 +1766,63 @@ func CtPrintVerdict(aDecls)
 		next
 		? "count " + aV[i] + " " + n
 	next
+	# v0.27: the fields the sentence marks personal or confidential, in the order written
+	aMk = CtMarkedFields(aDecls)
+	if len(aMk) > 0 ? "personal " + CtJoin(aMk, ", ") ok
+
+# ---- v0.27: the marks and the safeguards -------------------------------------------
+# $aCourtMarks holds [kind, seat, markSeat] paths from the CONSTITUTION's three-part PERSONAL paths; a
+# field whose mark reads personal or confidential is a personal datum at the record level (stzFieldTags'
+# two tags). $aCourtSafeguards holds [path, word]: the ask under anonymisation answers redacted, under
+# consent whole; the voice under redaction tells its rows redacted.
+func CtMarkedFields(aDecls)
+	aOut = []
+	for m = 1 to len($aCourtMarks)
+		aKind = NULL
+		for k = 1 to len($aCourtKinds)
+			if $aCourtKinds[k][2] = $aCourtMarks[m][1] aKind = $aCourtKinds[k] ok
+		next
+		if isNull(aKind) loop ok
+		for d = 1 to len(aDecls)
+			if aDecls[d][1] != aKind[1] loop ok
+			aC = aDecls[d][4]
+			for c = 1 to len(aC)
+				if lower(aC[c][1]) != $aCourtMarks[m][2] loop ok
+				if aC[c][3][1] != "pairlist" loop ok
+				aItems = aC[c][3][2]
+				for i = 1 to len(aItems)
+					if len(aItems[i]) >= 4 and (aItems[i][4] = "personal" or aItems[i][4] = "confidential")
+						if not CtInList(aItems[i][1], aOut) aOut + aItems[i][1] ok
+					ok
+				next
+			next
+		next
+	next
+	return aOut
+
+func CtSafeguard(cPath)
+	for i = 1 to len($aCourtSafeguards)
+		if $aCourtSafeguards[i][1] = cPath return $aCourtSafeguards[i][2] ok
+	next
+	return ""
+
+# a copy of the rows (JSON objects: the mark, then [key, value] pairs) with each marked field's value [personal]
+func CtRedactRows(aRows, aFields)
+	if len(aFields) = 0 return aRows ok
+	aOut = []
+	for i = 1 to len(aRows)
+		aRow = []
+		for j = 1 to len(aRows[i])
+			v = aRows[i][j]
+			if j > 1 and isList(v) and len(v) = 2 and isString(v[1]) and CtInList(v[1], aFields)
+				aRow + [v[1], "[personal]"]
+			else
+				aRow + v
+			ok
+		next
+		aOut + aRow
+	next
+	return aOut
 
 # ---- the refinement gate ------------------------------------------------------
 # `<court>.ring refine <file> <file.rfn>`: one refinement, judged by the
@@ -2363,7 +2443,10 @@ func CtMain()
 			aDecls = CtDeclare(cSrc)
 			if isNull($aCourtAsk) CtFail(1, "this language declares no ASK, so it answers no question") ok
 			aRows = ExJsonParse(sysargv[6])
-			? ExJson(AskRun(aDecls, sysargv[5], aRows))
+			aAns = AskRun(aDecls, sysargv[5], aRows)
+			# v0.27: under anonymisation the ask path answers with the marked fields redacted; under consent, whole
+			if CtSafeguard("ask") = "anonymisation" aAns = CtRedactRows(aAns, CtMarkedFields(aDecls)) ok
+			? ExJson(aAns)
 		catch
 			? cCatchError
 		done

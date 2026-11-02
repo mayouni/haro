@@ -74,6 +74,7 @@ STZU23_FIXTURES = os.path.join(HERE, 'v23', 'fixtures.json')
 STZU24_FIXTURES = os.path.join(HERE, 'v24', 'fixtures.json')
 STZU25_FIXTURES = os.path.join(HERE, 'v25', 'fixtures.json')
 STZU26_FIXTURES = os.path.join(HERE, 'v26', 'fixtures.json')
+STZU27_FIXTURES = os.path.join(HERE, 'v27', 'fixtures.json')
 
 
 def judge_stzu(exe, label, fixtures=STZU_FIXTURES):
@@ -83,7 +84,7 @@ def judge_stzu(exe, label, fixtures=STZU_FIXTURES):
     counts), world and points."""
     doc = json.load(open(fixtures, encoding='utf-8'))
     # the pinned v0.1 judge is stzu's; everything since is Haro's (D1)
-    assert doc['grammar'] in ('stzu', 'haro') and doc['version'] in ('0.1', '0.2', '0.3', '0.4', '0.5', '0.6', '0.7', '0.8', '0.9', '0.10', '0.11', '0.12', '0.13', '0.16', '0.17', '0.23', '0.24', '0.25', '0.26')
+    assert doc['grammar'] in ('stzu', 'haro') and doc['version'] in ('0.1', '0.2', '0.3', '0.4', '0.5', '0.6', '0.7', '0.8', '0.9', '0.10', '0.11', '0.12', '0.13', '0.16', '0.17', '0.23', '0.24', '0.25', '0.26', '0.27')
     passed = failed = 0
     outputs = {}
     with tempfile.TemporaryDirectory() as td:
@@ -164,7 +165,8 @@ def stage1():
                             ('v0.23, CONSTITUTION: a world under Zin\'s articles, judged through the charter\'s mechanisms', STZU23_FIXTURES),
                             ('v0.24, visible state through the access paths, sovereignty through the zones', STZU24_FIXTURES),
                             ('v0.25, the sovereignty and privacy weaves over the personal seats, the regime named, SEVERITY on a constraint', STZU25_FIXTURES),
-                            ('v0.26, Z under the whole constitution -- the refusals Z met on its way (ZC5); no new clause', STZU26_FIXTURES)):
+                            ('v0.26, Z under the whole constitution -- the refusals Z met on its way (ZC5); no new clause', STZU26_FIXTURES),
+                            ("v0.27, the field tag: a pair form's optional mark, PERSONAL reaching it, SAFEGUARDS on the ask and the voice (ZTAG)", STZU27_FIXTURES)):
         print(f'stage 1 -- the Haro meta-court in pure Ring, judged by its fixtures ({label})')
         f1, o1 = judge_stzu(RNXC, 'rnxc', fixtures)
         f2, o2 = judge_stzu(ORACLE, 'oracle ring.exe', fixtures)
@@ -780,8 +782,9 @@ def stage8():
 
 # ---- stage 9: Z, a WORLD forged whole -- court AND runtime -- judged by zing's 16 cases
 
-Z_STZU = os.path.join(HERE, 'z_v26.haro')   # z_v16.haro under the whole constitution (the twenty-sixth rung, ZC5); the 16 cases and 25 questions are unchanged, tontine.z gained HELD_BY
+Z_STZU = os.path.join(HERE, 'z_v27.haro')   # z_v26.haro with the field tag (the twenty-seventh rung, ZTAG); the 16 cases and 25 questions are unchanged, tontine.z marks member personal
 Z26_CASES = os.path.join(HERE, 'v26', 'court_cases.json')
+Z27_CASES = os.path.join(HERE, 'v27', 'court_cases.json')
 Z_SENTENCE = 'tontine.z'
 Z_FIXTURES = r'D:\GitHub\zing\conformance\fixtures.json'
 Z_FLOOR = 16
@@ -2542,6 +2545,28 @@ def judge_run(lines, defs, alg, rec, expected, refusal):
     return bad, rebuilt_n
 
 
+def marked_fields(sentence_path):
+    """v0.27: the fields a sentence marks personal or confidential -- `member: text personal` -- read off its text."""
+    text = open(sentence_path, encoding="utf-8").read()
+    pat = re.compile(r"([A-Za-z_][A-Za-z0-9_]*)[ \t]*:[ \t]*[A-Za-z_][A-Za-z0-9_]*[ \t]+(personal|confidential)\b")
+    return [m.group(1) for m in pat.finditer(text)]
+
+
+def voice_redacts(stzu_path):
+    """v0.27: whether the declaration's SAFEGUARDS put the voice under redaction."""
+    text = open(stzu_path, encoding='utf-8').read()
+    m = re.search(r'SAFEGUARDS\s*\[(.*?)\]', text, re.S)
+    return bool(m) and re.search(r'voice:\s*redaction', m.group(1)) is not None
+
+
+def told_rows(sentence_path, stzu_path, rows):
+    """The rows a told answer must carry: zing's, with the marked fields [personal] under the voice's redaction."""
+    if rows is None or not voice_redacts(stzu_path):
+        return rows
+    marks = set(marked_fields(sentence_path))
+    return [{k: ('[personal]' if k in marks else v) for k, v in row.items()} for row in rows]
+
+
 def judge_ask(lines, query, rows_total, expect, refusal):
     """The laws of a told question: how many matched of how many, the order, the cut and the
     answer are checked against the query's own clauses and the answer zing gave, never against
@@ -2704,7 +2729,7 @@ def stage19():
     for c in qdoc['cases']:
         refusal = c.get('refusal')
         r = both('z_court.ring', ['narrate-ask', Z_SENTENCE, c['query'], rows_json], 'ask:' + c['id'])
-        b = judge_ask(r.splitlines(), c['query'], len(qdoc['rows']), c.get('expect'), refusal)
+        b = judge_ask(r.splitlines(), c['query'], len(qdoc['rows']), told_rows(Z_SENTENCE, Z_STZU, c.get('expect')), refusal)
         if refusal is None:
             n_asks += 1
         else:
@@ -2714,7 +2739,7 @@ def stage19():
     by_id = {c['id']: c for c in qdoc['cases']}
     for query, base_id in Q16_UNCUT:
         r = both('z_court.ring', ['narrate-ask', Z_SENTENCE, query, rows_json], 'ask:uncut:' + base_id)
-        for x in judge_ask(r.splitlines(), query, len(qdoc['rows']), by_id[base_id]['expect'], None):
+        for x in judge_ask(r.splitlines(), query, len(qdoc['rows']), told_rows(Z_SENTENCE, Z_STZU, by_id[base_id]['expect']), None):
             ask_bad.append(('uncut ' + base_id, x))
         n_asks += 1
     failures += len(ask_bad)
@@ -3180,6 +3205,9 @@ def ledger_stage(n, stzu, cases_path, lang, plant_id):
         for frag in case.get('contains', []):
             if frag not in r:
                 ok = False; why = f"'{frag}' not in '{r.strip()[:240]}'"
+        for frag in case.get('lacks', []):
+            if frag in r:
+                ok = False; why = f"'{frag}' found in '{r.strip()[:240]}' (must be absent)"
         if 'record' in case:
             try:
                 rec = json.loads(lines[1]) if len(lines) > 1 else {}
@@ -3250,6 +3278,13 @@ def stage32():
     knob and the inverse restoring the bytes; a model refused a holder and a rule, admitted the words of a message,
     the chain keeping all three; the runtime unchanged under the constitution. The author reads these."""
     return ledger_stage(32, Z_STZU, Z26_CASES, 'z', 'T4')
+
+def stage33():
+    """ZTAG, the field tag (v27/GRAMMAR.md): z_v27.haro marks a field personal where it is declared -- `member: text
+    personal` -- and the tontine's eleven cases: the court names the marked fields; the treasurer's question is
+    answered whole under consent; the voice tells it with the marked fields redacted; a tag the MENU does not know
+    is refused with its code; two marks; the runtime unchanged; v0.26's declaration still accepted."""
+    return ledger_stage(33, Z_STZU, Z27_CASES, 'z', 'Y5')
 
 def stage6(lang, court=None, n=15):
     court = court or f'{lang}_court.ring'
@@ -3374,5 +3409,7 @@ if __name__ == '__main__':
         failures += stage31()
     if stage in (None, 32) and os.path.exists(Z_STZU) and os.path.exists(Z26_CASES):
         failures += stage32()
+    if stage in (None, 33) and os.path.exists(Z_STZU) and os.path.exists(Z27_CASES):
+        failures += stage33()
     print(f'haro_forge: {"FAIL" if failures else "PASS"} ({failures} failure(s), {time.perf_counter()-t0:.1f} s)')
     sys.exit(1 if failures else 0)

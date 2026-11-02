@@ -314,5 +314,6 @@ func AskRun(aDecls, cQ, aRows)
 		next
 		aOut = aCut
 	ok
-	if $bAskTrace AskNote("answer", [["count", "" + len(aOut)], ["rows", ExJson(aOut)]]) ok
+	# v0.27: the rows themselves, not their JSON -- the voice renders them, redacted under its safeguard
+	if $bAskTrace AskNote("answer", [["count", "" + len(aOut)], ["rows", aOut]]) ok
 	return aOut
