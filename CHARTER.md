@@ -1146,7 +1146,17 @@ states principle 14.
   -- a per-seat severity beside `MESSAGES` is the next step, named. **The model path** -- a field declared personal that reaches a model -- is not a Haro rule: it is stzlib's field tags and
   HaroBase's column flags, this rung's other two slices. *Cost:* a world under privacy writes its voice without its personal seats and asks no question over the kinds that hold them, or declares
   the weave at governance and reads the warnings; the personal seats are declared by hand, never inferred from a name (Zin's own open question, answered the honest way); and the regime table is
-  the size of what the estate has read.
+  the size of what the estate has read. **In stzlib** (`base/governance/stzFieldTags.ring` on the branch `constitution` of the desk's worktree, origin and codeberg; the guard
+  `base/test/governance/field_tags_narrated.ring`, written first): a field tagged `:personal` or `:confidential` reaches `:analytics`, `:log` or `:model` only when the path declares the
+  safeguards Zin's weave gives it -- consent and anonymisation (W4.2), retention and redaction (W4.4), on_premise (W3.3); `MayReach` refuses otherwise and `Why()` names the weave's rule, Art. 5
+  and the declared regime's own article, the same table as Haro's; a refusal builds a `stzSecurityEvent` of the new catalog kind `data.path.refused` (the security plane's half: the catalog is
+  closed by doctrine and learned the kind on purpose) carrying the field's descriptor, never a value, and `RecordTo(ledger)` enters it. 36 of 36 assertions on rnxc, against the install's library
+  with the desk's files overlaid (bench/sec_guard.py's recipe); the oracle is not involved, Ring being retired for the library. **In HaroBase** (`CHARTER.md 5.5a`, main 01401ea): a flag is a
+  property of a projection's column -- `personal`, `confidential`, `plain` -- declared by `hb_flag_column` as a `column.flag` event, rebuilt by replay, read back by `hb_column_flag`; before HB5's
+  lens reads the flags live, `hb_grant` refuses a lens that is a declared table with a flagged column to an actor of posture `llm` (a model path), naming the article; six guards G5.0 to G5.1c, 35
+  of 35 in `zig build test`. The launch assumed HB5's lens filters per column today; it is specified and not built, so the flag is laid where the lens will read it and the grant is the one place
+  a column is met now -- the repository was right, and the prompt is reported. *Acceptance held:* a field declared personal that reaches an analytics, log or model path is refused with the article
+  named -- in Haro on both runtimes (the voice, the ask, the world), in stzlib on rnxc (the three paths), in HaroBase at the grant (the model path); a guard in each repository.
 - **D23 -- `rnxc fmt` is a Ring++ feature, not held for Haro** (CODEGRAPH Q4, ruled on the author's delegation, 2026-10-05: "take
   whatever decision you think is wiser on my behalf"). It is a verb of the one binary (commitment 5), depends on nothing of Haro's, is
   judged against the oracle and refuses what Ring refuses (58 of 6,061 Softanza files, 57 of them Ring's own refusals). It ships inside

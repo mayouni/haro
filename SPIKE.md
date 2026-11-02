@@ -1640,7 +1640,9 @@ whole guard re-run on the renamed tree: 28 + 30 + 27 + 23, 117 of 120, 32 of 32,
    all six articles' 10 cases written first, 28 of 28 on both runtimes. **ZC4, the Haro slice, BUILT 2026-11-02 as Haro v0.25** (the
    twenty-fifth rung below; `v25/GRAMMAR.md`, guard stage 31, D35, HF-128): sovereignty and privacy judged over the PERSONAL seats at a
    declared severity, the regime named, SEVERITY on a constraint; 16 meta fixtures and the clinic's 8 cases, 24 of 24 on both runtimes.
-   ZC4's stzlib and HaroBase slices follow under D35; not begun: ZC5 (the tontine under the whole constitution, read by the author).
+   **ZC4's stzlib and HaroBase slices BUILT the same night under D35** (HF-129): `stzFieldTags` with its guard first, 36 of 36 on rnxc, on the
+   branch `constitution` of the desk's stzlib worktree (origin and codeberg); HaroBase's column flags (CHARTER 5.5a, main 01401ea), six guards
+   G5.0 to G5.1c, 35 of 35. **ZC4 DONE.** Not begun: ZC5 (the tontine under the whole constitution, read by the author).
 18. The forge as an `rnxc` verb (the ringpp session's `src/`, routed); the
    Softanza-resident timing the charter's 2.6 asks for; the court's run time on the
    oracle under paths and views (6.4x the image this pass, named at stage 6); the
