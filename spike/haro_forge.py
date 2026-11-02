@@ -2556,7 +2556,7 @@ def judge_run(lines, defs, alg, rec, expected, refusal):
 
 def marked_fields(sentence_path):
     """v0.27: the fields a sentence marks personal or confidential -- `member: text personal` -- read off its text."""
-    text = open(sentence_path, encoding="utf-8").read()
+    text = open(os.path.join(HERE, sentence_path), encoding="utf-8").read()   # beside the courts, whatever the current folder is
     pat = re.compile(r"([A-Za-z_][A-Za-z0-9_]*)[ \t]*:[ \t]*[A-Za-z_][A-Za-z0-9_]*[ \t]+(personal|confidential)\b")
     return [m.group(1) for m in pat.finditer(text)]
 
