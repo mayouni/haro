@@ -1208,6 +1208,33 @@ states principle 14.
   `:log`, HaroBase's grant); a default safeguard -- a marking world that declares nothing is refused, warned or noted at its own severity, never answered whole in
   silence.
 - **D38 -- every element that carries a CODE may carry CITES, and the word none cites nothing** (HARO-MENU-CITES-01, ruled by the Principal 2026-11-02, LEDGER.md line 156: "an envelope cites only what exists"; the form and the version left to this desk; `haro/spike/v28/GRAMMAR.md`; HF-132; the twenty-eighth rung). `CITES` stands on MENU, RANGE, FORMAT and UNION as on CONSTRAINT (v0.23), REFUSAL and SYMBOL (v0.11) -- the ruling names the MENU, and its reason holds for every element whose refusal carries a code. **Three spellings, one meaning each**: a list of cites replaces the default; `CITES none` says the refusal cites nothing, and the envelope's `cites` is `[]`, which the Diagnostic Contract calls honest where no law applies (2.5); no CITES clause keeps `rule:<CODE>`, so every court that declares none prints the bytes it printed. `CITES []` is refused by name, the machine language's own idiom for EGRESS ("a list names where the machine may go, and the word none says it goes nowhere"): it had meant the default on a CONSTRAINT and a SYMBOL and nothing on a REFUSAL. *Cost:* one reversal of an acceptance no estate file used (an empty CITES), named; the courts unchanged. *What stzzui learns* (routed through Central): its three MENUs whose contract binds nothing write `CITES none`, its three others write their cites. *Not built:* a cite per seat of a DECLARATION (REQUIRED and DANGLING still cite the language's own `rule:<kind.seat>`); a rule that a language under a pinned instrument cite on every coded element.
+- **D39 -- Haro owns its VM and compiler: `haro`, forked from Ring++** (the author, 2026-11-02: "Haro now will have its own VM and
+  compiler: they will use Ring++ but even the name of Ring in Ring++ should not be carried on"; the form ruled by him the same hour: a
+  fork into this repository, one binary named `haro`). `vm/` holds Ring++'s VM and compiler as they stood at ringpp `next` 2ea38fd --
+  `src/*.zig` and its three vendored C trees -- built as one binary, `haro`; Haro evolves it from here, and Ring++ stays the bridge
+  that keeps Softanza's legacy Ring code running. Everything a user sees is renamed: the binary and its usage, the environment
+  variables (`HARO_*`), the image cache, the runtime's name in its own messages, the checker's rule ids (`haro/...`) and anchor
+  (`#haro:`). *Kept, and why* (`vm/NOTES.md`): the code's comments (Ring++'s record); the language surface Haro's code is written in
+  today, with its error codes and Rule A, until Haro designs its own computing syntax (BLOCKS.md Q-B3); the vendored grammar of that
+  surface, a third party's work under its own name and licence; the native ABI names (`rpp_init`, `rpp_http_*`), contracts with
+  Softanza's engine and HaroServer. *Cost:* a fix made in one VM is carried to the other by hand, when it matters to both.
+- **D40 -- every Haro source file is `.haro`, declarations and code alike** (the author, 2026-11-02: "*.ring files should become
+  *.haro files"; one extension for both, ruled the same hour). The 27 files that are Haro's own code -- the meta-court, the forge, the
+  libraries, the forged courts -- are `.haro`, and the forge writes `<lang>_court.haro`. A declaration is told from code by its first
+  word, past `--` comments: DEFINE (`paths.is_declaration`, `paths.code_files`). What stays `.ring` is not Haro's code, and says what
+  it is: the programs that drive Softanza or RingFlex through the legacy bridge, and the probes and studies OF Ring's behaviour. The
+  VM runs a `.ring` program too: the code-graph and refinement rungs write Softanza-shaped programs and run them. *Cost:* `.haro`
+  names two languages; a tool that wants one asks the first word.
+- **D41 -- no Ring runs in a Haro court: the second judge is Haro's own checked build** (the author, 2026-11-02, two rulings: "Drop
+  it from Haro" for Ring 1.27, and "Haro's checked build" for the second judge). Every court runs on `haro` as it ships (ReleaseFast)
+  and on its checked build (ReleaseSafe: every integer overflow, bound and refcount checked), and the two must print the same bytes --
+  the twin rule of the spike since v0.1, its second runtime changed. RingFlex's own court, which is Ring code and judged stages 11,
+  13, 14 and 17 live on official Ring 1.27, is READ from `spike/f/ringflex_record.json` (five answers taken once, each with the hashes
+  of the inputs it read; an edited input makes its answer stale and the stage fail by name; `HARO_RECORD_RINGFLEX=1` takes them again).
+  Ring 1.27 remains only as the SUBJECT of the studies and probes of Ring (`paths.RING_ORACLE`). *Cost:* the second judge is no longer
+  independent of Haro's compiler. It catches what a checked build catches -- Ring++'s record has three defects that only it saw, each a
+  right answer from the fast build (the `s[i]` refcount, the widened parameter, a borrow in a catch) -- but not a semantic defect both
+  builds share, which Ring 1.27 found once (the v0.3 rung's one defect). The fixtures and the plants are the judge of meaning.
 - **D23 -- `rnxc fmt` is a Ring++ feature, not held for Haro** (CODEGRAPH Q4, ruled on the author's delegation, 2026-10-05: "take
   whatever decision you think is wiser on my behalf"). It is a verb of the one binary (commitment 5), depends on nothing of Haro's, is
   judged against the oracle and refuses what Ring refuses (58 of 6,061 Softanza files, 57 of them Ring's own refusals). It ships inside

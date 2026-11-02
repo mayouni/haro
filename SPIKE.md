@@ -1575,6 +1575,22 @@ a `\b` in a heredoc is a backspace. **Routed** through Central: the mark and the
 
 **Results.** 12 of 12 and 14 of 14, rnxc and the oracle byte-identical; 8 of 8 protections switched off in turn each fail the guard; the ten committed courts re-forge byte for byte. **What building found** (HF-132): an empty CITES had meant two things in three readers; one fixture sentence was spelt wrong and respelt, its judgement unchanged; no case reached the SYMBOL path until N13 and N14 were added after the court. **Routed** through Central: stzzui's six envelopes (three `CITES none`, three cites), its generator's change.
 
+## The cut -- Haro stands alone, on its own VM, with no Ring in its courts -- 2026-11-02
+
+At the author's word ("Before I start the Haro session I want to be sure that the cut with Ring legacy is realised"). **Haro moved
+out of Ring++** into its own repository (github.com/mayouni/haro, private; 152 commits of history kept), **owns its VM and compiler**
+(`vm/`, forked from Ring++ at 2ea38fd, one binary `haro`: D39), **writes every source file `.haro`** (D40), and **judges every court
+on `haro` and on its own checked build** -- no Ring runs in a court (D41).
+
+    step 2, the fork     the full guard on `haro` with Ring++'s own rnxc in the second seat, from D:\GitHub\haro -- stages 1-18 in one run and 19-34 each alone -- passed every stage byte-identical on both, the timing target of stage 6 aside (compile-each-run 142.5 ms on haro and 141.9 on rnxc on a CPU held at 79%).
+    the proof            a fresh clone of github.com/mayouni/haro (0 of 928 files CRLF under core.autocrlf true; the grammar's hashes checked), both judges built from it, the whole guard run there on `haro` and its checked build: 31 of 34 stages passed at once; stage 20 and stage 24 failed on what step 3 missed (a court file told by a bare `.ring`; a fixture quoting `rnxc check`), fixed in ed65a38 and both passing on re-run (56.9 s, 167.2 s); `--plant` fails it. Stage 6 still misses its pinned 100 ms, and not because of the cut: on one quiet machine at full speed the machine court compiled each run reads 125.3 ms on haro, 127.0 on Ring++'s rnxc, and 112.3 on haro with the files as they stood before v0.23 -- the court library's growth today (2,220 to 2,474 lines, loaded by every court) costs about 12 ms, and the rest of the gap to the recorded 84.5-89 ms predates the cut. The target stays pinned; lowering what a court loads, or the author moving the target, is the remedy (HF-49's lesson).
+    what stays Ring      the programs that drive Softanza and RingFlex through the legacy bridge, and the studies and probes OF Ring
+                         (D40); RingFlex's own court, read from its recording (D41)
+    the language surface unchanged: Haro's code is written in the surface Ring++ keeps for Softanza's legacy code, until Haro designs
+                         its own computing syntax (BLOCKS.md Q-B3). The cut is the names, the files, the toolchain and the judges --
+                         not yet the syntax
+    found                HF-134: every script climbed to Ring++; a v0.27 reader read the current folder; HF-126 answered
+
 ## The names -- `.haro`, not `.stzu` -- corrected 2026-10-02
 
 **At the author's word ("we agreed to use .haro instead of .stzu, no?").** D1 was ratified
