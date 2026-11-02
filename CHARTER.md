@@ -178,7 +178,9 @@ trust posture and a point's floor (section 6, item 4). The two Haro lacked -- vi
 organizational sovereignty -- were built as rungs, fixtures first (ZC3, 2026-11-02, D34): the first
 through the access paths a language declares (told, asked, published) and the gate's events kept
 as an audit chain the court answers as a query; the second on the zones a world declares, each
-held by a named organization and entered through a declared flow. A refusal under an article names its number and the article, in the domain's
+held by a named organization and entered through a declared flow. The whole was then proved on a real world (ZC5, 2026-11-02, D36): the Commons' tontine
+declared under the six articles and both weaves and judged end to end on both runtimes, with no clause added to the grammar -- the constitution changed
+its sentence by one clause, who holds the zone; the author's reading of its refusals is the gate. A refusal under an article names its number and the article, in the domain's
 words (COMPASS-KERN-06, adopted here, not copied). No letter: the alphabet Z W Q F A N is closed,
 and the sentence is a declaration like any other. Zin keeps its federation, its pillars, its
 foundry, its IDE and every customer's constitution text. The inventory behind this clause is
@@ -214,7 +216,7 @@ no expression position, no escape):
 | **`ASK`** (the pragmatics stratum) | absent | the language's own closed query grammar (the Q letter) and the human languages its natural door speaks; NL asks, never declares; the engine compiles to this grammar and never to host code [R, mission.md rules 1-2]. *The query grammar is built, v0.7 (the seventh rung); the natural door is not.* |
 | **`NARRATE`** | absent | how a run of the language is narrated back (stzn); the court's voice. *Built, v0.13 (the thirteenth rung): SAYS, OPENS, ENDS, REFUSES; `narrate <file>`; a projection, never stored, never parsed back.* |
 | **`REFINE`** | absent | which declared points of a sentence may be refined, by whom, within what bounds, at what trust floor (section 7) |
-| **`CONSTITUTION`** | absent | the articles a world declares itself under, judged through the seats above and the gate, never reimplemented (section 2; D33). *Built, v0.23 (ZC2, 2026-11-02): `ARTICLES` drawn from Zin's six by name and number, `WEAVES` and `REGIME` carried for ZC4; 22 fixtures and a bank's ledger judged on both runtimes. v0.24 (ZC3, the same day, D34): `ZONE`, `SOVEREIGN`, `MOVEMENT`; visible state through the access paths and the audit chain; 18 fixtures and the bank under all six. v0.25 (ZC4's Haro slice, D35): `PERSONAL`, the sovereignty and privacy weaves at their severities, the regime read, `SEVERITY` on a constraint; 16 fixtures and the clinic* |
+| **`CONSTITUTION`** | absent | the articles a world declares itself under, judged through the seats above and the gate, never reimplemented (section 2; D33). *Built, v0.23 (ZC2, 2026-11-02): `ARTICLES` drawn from Zin's six by name and number, `WEAVES` and `REGIME` carried for ZC4; 22 fixtures and a bank's ledger judged on both runtimes. v0.24 (ZC3, the same day, D34): `ZONE`, `SOVEREIGN`, `MOVEMENT`; visible state through the access paths and the audit chain; 18 fixtures and the bank under all six. v0.25 (ZC4's Haro slice, D35): `PERSONAL`, the sovereignty and privacy weaves at their severities, the regime read, `SEVERITY` on a constraint; 16 fixtures and the clinic. v0.26 (ZC5, the same day, D36): no clause -- Z, the tontine language, declared under all six and both weaves and judged end to end on the tontine, zing's cases unchanged; 13 fixtures and 16 cases; the author's reading of the refusals is the gate* |
 | **`FORMS` inside a vocabulary** | absent | the function-name grammar of principle 7 declared as data for the computing altitude's families. *Built, v0.12 (the twelfth rung): FLUENT, PASSIVE, STATEMENT, PARAMS and FAMILY; the families generated, the shipped spellings judged live.* |
 
 **Built 2026-10-01, the first slice of two of these rows -- Haro v0.2, the spike's second
@@ -1157,6 +1159,22 @@ states principle 14.
   of 35 in `zig build test`. The launch assumed HB5's lens filters per column today; it is specified and not built, so the flag is laid where the lens will read it and the grant is the one place
   a column is met now -- the repository was right, and the prompt is reported. *Acceptance held:* a field declared personal that reaches an analytics, log or model path is refused with the article
   named -- in Haro on both runtimes (the voice, the ask, the world), in stzlib on rnxc (the three paths), in HaroBase at the grant (the model path); a guard in each repository.
+- **D36 -- the constitution proved on a real world: the Commons' tontine under the six articles and both weaves; the author's reading is the gate** (ZC5, the launch's last rung, built on
+  the author's "Start ZC5", 2026-11-02; `haro/spike/v26/GRAMMAR.md`; HF-130). Z, the tontine language of `z_v06.haro` grown to `z_v16.haro`, was declared under all six articles,
+  `WEAVES [sovereignty: constitutional, privacy: constitutional]` and `REGIME niger_2017_28` -- the circle's own law -- and judged end to end on `tontine.z`, zing's fixture source: 13 meta
+  fixtures (the refusals Z itself met on the way: a refusal and a constraint without a CODE, no REFINE, a kind the voice of TELLS reached nowhere, a zone nobody held, a holder typed as
+  a flow, a movement typed as a format, a holder that may be silent, a rule floored llm, a point without a floor) and the tontine's 16 cases, written first, 29 of 29 on both runtimes,
+  byte-identical; zing's 16 cases and 25 questions unchanged on the amended Z (stages 9, 10, 13, 14, 19). **No clause was added to the grammar**: every fixture held on the v0.25
+  meta-court before a line of court code was touched, and none was; the rung is the proof, and the number names the rung. **What the constitution asked of the language**: a CODE on
+  every refusal and constraint (1), a REFINE with every point floored and no rule floored llm (2, 4, 6), a voice that SAYS every kind beside the TELLS it had (3), a landing zone HELD_BY
+  an organization -- a MENU of sectors -- and entered INTO a declared flow (5). **Of the sentence, one clause**: `HELD_BY the_commons`; `tontine/tontine_unheld.z` keeps zing's text and is
+  refused, the article named. **No PERSONAL seat**: at Z's altitude the tontine's personal datum (`member: text`) is a field of an entity, a value in the sentence, not a seat of the
+  language; the weaves are declared, judge nothing here, and the declaration's RATIONALE says so; the datum is governed on the record plane, D35's stzlib and HaroBase slices. Whether
+  Z's `field` form should carry a tag (a change to zing's grammar, HARO-Z-02) is the author's question, not a rung taken. *Cost:* a world under the constitution answers who holds each
+  zone or is refused; a language under it writes a voice for every kind and codes every refusal; the fixture was wrong once about a cite's form (written against a probe of the uncoded
+  court) and was corrected after the court spoke, said in the case file and in HF-130. *The gate:* the author reads the refusals -- `v26/court_cases.json` T4 to T14, or
+  `rnxc z_court.ring check tontine/tontine_unheld.z` and `narrate tontine.z` -- and signs the memo with a verdict (the launch's ZC5: "a name and a sentence"); then the compass re-rates
+  Kern lanes 1 and 3 (the launch's section 6). **Not signed yet.**
 - **D23 -- `rnxc fmt` is a Ring++ feature, not held for Haro** (CODEGRAPH Q4, ruled on the author's delegation, 2026-10-05: "take
   whatever decision you think is wiser on my behalf"). It is a verb of the one binary (commitment 5), depends on nothing of Haro's, is
   judged against the oracle and refuses what Ring refuses (58 of 6,061 Softanza files, 57 of them Ring's own refusals). It ships inside

@@ -16,7 +16,7 @@ clause_FLOW ::= "NOTHING"
 decl_STEP ::= "DEFINE" sp "STEP" sp ident sp "AS" ws "(" ws (clause_STEP (ws "," ws clause_STEP)* (ws ",")?)? ws ")" ws "RATIONALE" sp string
 clause_STEP ::= "FLOW" sp ident | "ORDER" sp number | "ACTOR" sp ident | "VALIDATE" sp string | "ENFORCING" sp ident | "COMPUTE" sp ident | "FORMULA" sp string | "ON_FAIL" sp string | "ON_SUCCESS" sp ident
 decl_LANDING_ZONE ::= "DEFINE" sp "LANDING_ZONE" sp ident sp "AS" ws "(" ws (clause_LANDING_ZONE (ws "," ws clause_LANDING_ZONE)* (ws ",")?)? ws ")" ws "RATIONALE" sp string
-clause_LANDING_ZONE ::= "FORMAT" sp ident | "INTO" sp ident
+clause_LANDING_ZONE ::= "FORMAT" sp ident | "INTO" sp ident | "HELD_BY" sp ident
 
 ident ::= [a-z_] [a-z0-9_]*
 string ::= "\"" [^"]* "\""

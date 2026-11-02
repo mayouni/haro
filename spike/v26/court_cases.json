@@ -1,6 +1,6 @@
 {
   "name": "the Commons' tontine under the whole constitution -- sentence-level cases for Haro v0.26 (ZC5), the ones the author reads",
-  "comment": "Written BEFORE z_v26.haro and before tontine.z gained its holder (the W discipline). Each case runs the court forged from z_v26.haro on rnxc AND on the oracle; the two must print the same bytes. The shapes are v0.25's (first, contains, counts, diagnose, record, sequence, revert). tontine/ holds the tontine as zing's fixture wrote it (unheld), three sentences each breaking one rule, a destructive verb, and four proposals: a knob turned by the collector's app, a holder and a rule a model proposes, the words of a refusal a model proposes.",
+  "comment": "Written BEFORE z_v26.haro and before tontine.z gained its holder (the W discipline). Each case runs the court forged from z_v26.haro on rnxc AND on the oracle; the two must print the same bytes. The shapes are v0.25's (first, contains, counts, diagnose, record, sequence, revert). tontine/ holds the tontine as zing's fixture wrote it (unheld), three sentences each breaking one rule, a destructive verb, and four proposals: a knob turned by the collector's app, a holder and a rule a model proposes, the words of a refusal a model proposes. Corrected once after the court spoke (HF-130): T8 and T10 were written citing the constraint's NAME (rule:a_formula_names_its_field), the form the court uses when no CODE is declared; with a CODE declared it cites the code (rule:NO_COMPUTE), as v0.11 ruled and as T5 and T7 already expected of a seat -- the fixture was wrong, the court right, the substance (the constraint's own code in the envelope) unchanged.",
   "cases": [
     {
       "id": "T1",
@@ -61,7 +61,7 @@
       "name": "Art. 1: a step with a FORMULA and no COMPUTE is refused in Z's words, and the envelope carries the constraint's own CODE, not the generic one",
       "verb": "diagnose",
       "args": ["tontine/tontine_no_compute.z"],
-      "diagnose": {"code": "NO_COMPUTE", "cites": ["rule:a_formula_names_its_field"]}
+      "diagnose": {"code": "NO_COMPUTE", "cites": ["rule:NO_COMPUTE"]}
     },
     {
       "id": "T9",
@@ -76,7 +76,7 @@
       "name": "the same in the envelope: ONE_RANK",
       "verb": "diagnose",
       "args": ["tontine/tontine_two_ranks.z"],
-      "diagnose": {"code": "ONE_RANK", "cites": ["rule:one_rank_per_flow"]}
+      "diagnose": {"code": "ONE_RANK", "cites": ["rule:ONE_RANK"]}
     },
     {
       "id": "T11",

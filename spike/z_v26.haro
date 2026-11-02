@@ -1,0 +1,193 @@
+-- z_v26.haro -- Z under the whole constitution (Haro v0.26, the constitution plane's ZC5): z_v16.haro
+-- declared under Zin's six articles and the sovereignty and privacy weaves, judged end to end on the
+-- Commons' tontine. What the constitution asked of Z, and Z gave: a CODE on every REFUSAL and
+-- CONSTRAINT (Art. 1); a REFINE with its points floored, no rule floored llm (Art. 2, 4, 6); a voice
+-- that SAYS every kind, beside the TELLS of v0.16 (Art. 3); a landing zone HELD_BY an organization and
+-- entered INTO a declared flow (Art. 5). The regime is Niger Law 2017-28, the circle's own. No PERSONAL
+-- seat: at this altitude the tontine's personal datum is a FIELD of an ENTITY (member: text), which
+-- no seat of Z holds -- the record plane's matter (D35: stzFieldTags, HaroBase's column flags), HF-130.
+-- Nothing of v0.16 is lost: the 16 tontine cases and the 25 questions are judged unchanged; tontine.z
+-- gained one line, HELD_BY the_commons, and tontine/tontine_unheld.z keeps the sentence as zing wrote
+-- it, refused under Art. 5. z_v16.haro was Z with a voice that tells a question (Haro v0.16): z_v10.haro
+-- plus a NARRATE whose TELLS narrate how a question was answered. z_v10.haro was Z with its world
+-- (Haro v0.10): z_v07.haro plus PUBLISH -- the flows, entities, norms and zones a sentence of Z
+-- contributes to the C1 world every other court resolves against (`z_court.ring world tontine.z`).
+-- Z, the alphabet's Z letter: ZQL (canonical in StzZql, pinned by zing, stz's fourth runtime),
+-- declared in Haro v0.7: z_v06.haro (the sixth rung, a WORLD forged whole -- court and runtime)
+-- grown by the Q letter, the world's own question grammar (ASK), and by ABSENT missing -- zing's
+-- reading of a reference to nothing. A sentence of Z is written in the Grammar Commons' shape (D8,
+-- ruled 2026-10-02). A PROPOSAL for StzZql and zing (HARO-Z-02).
+
+DEFINE LANGUAGE z AS (
+  VERSION "0.26",
+  GRAMMAR "0.26",
+  COURT "zing/conformance/fixtures.json",
+  EXTENSION ".z"
+) RATIONALE "The declared WORLD -- entities, norms, flows, zones -- whose every destructive act is unparseable, whose rules mean one thing everywhere, which answers questions in one closed grammar, and which stands under a constitution it names"
+
+-- ---- the expression language of RULE, VALIDATE, FORMULA and WHERE ------------------
+
+DEFINE EXPRESSION zexpr AS (
+  OPERATORS [or, and, not, cmp, contains, add, sub, mul, div, round, neg],
+  OPERANDS [number, text, flag, ref, agg],
+  AGGREGATES [sum, count],
+  ABSENT missing, DIVISION calm, EQUALITY value
+) RATIONALE "zql.zig: equality is loose (a numeric text and its number are one value), CONTAINS is case-blind; a reference to nothing is zql's missing -- 0 to arithmetic, the empty text to a comparison, first in an order; FORMULA arithmetic is calm, division by zero yields 0; ROUND rounds half away from zero"
+
+-- ---- the menus and the forms ------------------------------------------------------------
+
+DEFINE MENU actors AS (
+  WORDS [collector, treasurer, system, member, auditor], MESSAGE "ACTOR is collector, treasurer, system, member or auditor"
+) RATIONALE "Who acts at a step"
+
+DEFINE MENU outcomes AS (
+  WORDS [commit_to_bedrock, hold], MESSAGE "ON_SUCCESS is commit_to_bedrock or hold"
+) RATIONALE "What a step does with a record that passed"
+
+DEFINE MENU formats AS (
+  WORDS [json, csv], MESSAGE "FORMAT is json or csv"
+) RATIONALE "The forms a landing zone reads"
+
+DEFINE MENU holders AS (
+  WORDS [the_commons, the_cooperative, the_bank],
+  MESSAGE "HELD_BY is the_commons, the_cooperative or the_bank, not '{value}'",
+  CODE "HOLDER"
+) RATIONALE "The organizations that may hold a landing zone: the circle itself, a cooperative it belongs to, or a bank that keeps its box -- sectors and roles, never a person (Art. 5)"
+
+DEFINE FORM word AS (
+  SEATS [value: name]
+) RATIONALE "One word of an enum, a lower_snake name as the Commons writes a word"
+
+DEFINE FORM field AS (
+  SEATS [name: name, type: name]
+) RATIONALE "A field is a name and a type: id: uuid, amount: currency, status: deposit_status"
+
+-- ---- the kinds ----------------------------------------------------------------------------
+
+DEFINE DECLARATION enum AS (
+  VERB "ENUM",
+  SEATS [words: [word]]
+) RATIONALE "The closed values a field may take; ZQL v0 writes them inline as enum('A', 'B'), Z names them"
+
+DEFINE DECLARATION entity AS (
+  VERB "ENTITY",
+  SEATS [fields: [field]]
+) RATIONALE "A record's shape: its fields, each with a type"
+
+DEFINE DECLARATION norm AS (
+  VERB "NORM",
+  SEATS [rule: zexpr, message: text]
+) RATIONALE "A rule a record must satisfy, and the words spoken when it does not; a norm is a visible-violation transformer, never a silent filter"
+
+DEFINE DECLARATION flow AS (
+  VERB "FLOW",
+  SEATS []
+) RATIONALE "A named walk a record takes; its steps declare themselves THROUGH it, and its committed records are what a question asks"
+
+DEFINE DECLARATION step AS (
+  VERB "STEP",
+  SEATS [flow: flow, order: number, actor: actors, validate: zexpr?, enforcing: norm?, compute: name?, formula: zexpr?, on_fail: text?, on_success: outcomes?],
+  MESSAGES [flow: "STEP {name} walks '{value}', and no FLOW of that name is declared", enforcing: "STEP {name} enforces '{value}', and no NORM of that name is declared: referencing an undeclared norm is a registration error"],
+  CODES [flow: "NO_FLOW", enforcing: "NO_NORM"]
+) RATIONALE "One step of a flow: who acts, what must hold (VALIDATE, or a NORM ENFORCING), what is computed, what happens on failure and on success"
+
+DEFINE DECLARATION landing_zone AS (
+  VERB "LANDING_ZONE",
+  SEATS [format: formats, into: flow, held_by: holders],
+  MESSAGES [into: "LANDING_ZONE {name} lands INTO '{value}', and no FLOW of that name is declared"],
+  CODES [held_by: "NO_HOLDER", into: "NO_FLOW"]
+) RATIONALE "Where exported records land, the flow every one of them walks, and the organization that holds them -- the zone of this world (Art. 5: a zone is held by someone, never by silence)"
+
+DEFINE WALK flows AS (
+  OF flow, STEPS step, THROUGH flow, ORDER order,
+  GUARDS [validate, enforcing.rule],
+  COMPUTE compute, FORMULA formula, FAIL on_fail
+) RATIONALE "A record walks a flow's steps in order of ORDER: a step's VALIDATE must hold, its ENFORCING norm's RULE must hold, its FORMULA computes its COMPUTE field into the record for every later step; a guard that fails stops the walk there, with the step's ON_FAIL code"
+
+-- ---- the question (the Q letter) ---------------------------------------------------------
+
+DEFINE ASK questions AS (
+  FROM [flow], WHERE zexpr, CLAUSES [where, order, limit]
+) RATIONALE "zing query: SELECT * FROM flow [WHERE expr] [ORDER BY field [ASC | DESC]] [LIMIT n] over the records that walked the flow; WHERE reuses the expression that gates the flow -- a rule means one thing everywhere -- and a question never writes"
+
+-- ---- the world --------------------------------------------------------------------------------
+
+DEFINE WORLD z AS (
+  PUBLISH [flow: flow, entity: entity, norm: norm, landing_zone: zone]
+) RATIONALE "What a declared world contributes to the C1 world: its flows (which a workflow invokes), its entities, its norms, its zones -- each a symbol with its span and its rationale"
+
+-- ---- the constraints, each with its code (Art. 1) ---------------------------------------------
+
+DEFINE CONSTRAINT a_formula_names_its_field AS (
+  ON step, WHEN "formula present and compute absent",
+  MESSAGE "STEP {name} has a FORMULA and no COMPUTE: a computed value is named",
+  CODE "NO_COMPUTE"
+) RATIONALE "FORMULA: ref = aexpr, the name and the expression"
+
+DEFINE CONSTRAINT a_computed_field_has_a_formula AS (
+  ON step, WHEN "compute present and formula absent",
+  MESSAGE "STEP {name} names COMPUTE {compute} and has no FORMULA",
+  CODE "NO_FORMULA"
+) RATIONALE "A name without an expression computes nothing"
+
+DEFINE CONSTRAINT one_rank_per_flow AS (
+  ON step, WHEN "earlier step where flow = this.flow and order = this.order",
+  MESSAGE "STEP {name} and STEP {other} both stand at ORDER {order} of {flow}: one rank, one step",
+  CODE "ONE_RANK"
+) RATIONALE "Steps are walked in order, and an order is one step"
+
+-- ---- the refusals, each with its code (Art. 1) -----------------------------------------------
+
+DEFINE REFUSAL unknown_verb AS (
+  MESSAGE "The ZQL verb set is closed -- destructive or unrecognized operations are not part of the grammar.",
+  CODE "UNKNOWN_VERB"
+) RATIONALE "DROP, TRUNCATE, DELETE are not forbidden; they are unparseable -- in a declaration and in a question alike"
+
+DEFINE REFUSAL unknown_declaration AS (
+  MESSAGE "The ZQL verb set is closed -- destructive or unrecognized operations are not part of the grammar.",
+  CODE "UNKNOWN_DECLARATION"
+) RATIONALE "DEFINE VIRUS is as unparseable as DROP"
+
+DEFINE REFUSAL dangling_reference AS (
+  MESSAGE "This name resolves to nothing in the declared world.",
+  CODE "DANGLING"
+) RATIONALE "A step's FLOW, its ENFORCING, a zone's INTO and a question's FROM resolve at check time"
+
+-- ---- the refinement points: what may change, by whom (Art. 2, 4, 6) -----------------------------
+
+DEFINE REFINE z AS (
+  POINTS [norm.rule: policy, norm.message: field, step.actor: policy, landing_zone.format: knob, landing_zone.held_by: policy],
+  FLOOR [norm.rule: trusted, norm.message: llm, step.actor: trusted, landing_zone.format: external, landing_zone.held_by: trusted]
+) RATIONALE "A rule, who acts at a step and who holds a zone are the circle's, and only a trusted actor touches them -- a model never a rule (Art. 4); a zone's format is a knob the collector's own system may turn; the words of a norm's refusal a model may propose"
+
+-- ---- the voice: every kind said (Art. 3), the question told (v0.16) -----------------------------
+
+DEFINE NARRATE telling AS (
+  OPENS "{file} is a world of Z, {count} declarations.",
+  SAYS [
+    enum: "{name} is one of {words}. {rationale}",
+    entity: "{name} is a record of {fields}. {rationale}",
+    norm: "{name} holds {rule}; broken, it says: {message}. {rationale}",
+    flow: "{name} is a flow records walk. {rationale}",
+    step: "{name} is step {order} of {flow}, acted by {actor}. {rationale}",
+    landing_zone: "{name} is held by {held_by}; {format} records land in it and walk {into}. {rationale}"
+  ],
+  TELLS [
+    ask: "Asking {from}: {question}",
+    matched: "{count} of the {total} rows match.",
+    ordered: "Ordered by {field} {direction}.",
+    cut: "Only the first {limit} are kept.",
+    answer: "The answer is {count} row(s): {rows}"
+  ],
+  ENDS "That is the whole world.",
+  REFUSES "I stopped: {message} ({code})"
+) RATIONALE "The world read back the way its treasurer would say it -- the enum's words, the record's fields, the rule and its words, who acts where, who holds the box -- and a question read back the way a person would tell it: how many rows matched of how many, how they were ordered, how many were kept, and the answer -- the same answer `ask` gives, recorded as the question runs and never asked twice"
+
+-- ---- the constitution: all six articles, the first two weaves, the circle's own regime -----------
+
+DEFINE CONSTITUTION z_charter AS (
+  ARTICLES [explainability, reversibility, visible_state, predictable_authority, organizational_sovereignty, trust_hierarchy],
+  ZONE landing_zone, SOVEREIGN held_by, MOVEMENT into,
+  WEAVES [sovereignty: constitutional, privacy: constitutional],
+  REGIME niger_2017_28
+) RATIONALE "The Commons' tontine under the whole constitution: every refusal coded and told (1), every change a refinement with its inverse first (2), every kind said, asked or published and every change kept in the chain (3), no model into a rule (4), every landing zone held by a named organization and entered through a declared flow (5), every point floored (6); the weaves constitutional under Niger Law 2017-28, the circle's own regime, over the seats a later Z names PERSONAL -- none at this altitude, where the member is a field of a record, not a seat of the sentence"

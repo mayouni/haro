@@ -4,7 +4,9 @@
 -- [name: type], an enum is its own declaration, a flow's steps are STEP declarations
 -- that name their FLOW and their ORDER, FORMULA's target is COMPUTE, and the landing
 -- zone's AS JSON INTO is FORMAT and INTO. The cases of the fixture file are judged on
--- this sentence unadapted.
+-- this sentence unadapted. Under the constitution (z_v26.haro, ZC5) the landing zone gained one
+-- line, HELD_BY the_commons: who holds the deposits (Art. 5). tontine/tontine_unheld.z keeps the
+-- sentence as zing wrote it, which the court now refuses, naming the article.
 
 DEFINE ENUM deposit_status AS (
   WORDS [staged, audited, active]
@@ -59,5 +61,5 @@ DEFINE NORM indice_plafond AS (
 ) RATIONALE "A percentage"
 
 DEFINE LANDING_ZONE cotisations AS (
-  FORMAT json, INTO collect
-) RATIONALE "Deposits exported by the mobile collector land here; every record walks the flow"
+  FORMAT json, INTO collect, HELD_BY the_commons
+) RATIONALE "Deposits exported by the mobile collector land here; every record walks the flow, and the circle itself holds them"

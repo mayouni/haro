@@ -73,6 +73,7 @@ STZU17_FIXTURES = os.path.join(HERE, 'v17', 'meta_fixtures.json')
 STZU23_FIXTURES = os.path.join(HERE, 'v23', 'fixtures.json')
 STZU24_FIXTURES = os.path.join(HERE, 'v24', 'fixtures.json')
 STZU25_FIXTURES = os.path.join(HERE, 'v25', 'fixtures.json')
+STZU26_FIXTURES = os.path.join(HERE, 'v26', 'fixtures.json')
 
 
 def judge_stzu(exe, label, fixtures=STZU_FIXTURES):
@@ -82,7 +83,7 @@ def judge_stzu(exe, label, fixtures=STZU_FIXTURES):
     counts), world and points."""
     doc = json.load(open(fixtures, encoding='utf-8'))
     # the pinned v0.1 judge is stzu's; everything since is Haro's (D1)
-    assert doc['grammar'] in ('stzu', 'haro') and doc['version'] in ('0.1', '0.2', '0.3', '0.4', '0.5', '0.6', '0.7', '0.8', '0.9', '0.10', '0.11', '0.12', '0.13', '0.16', '0.17', '0.23', '0.24', '0.25')
+    assert doc['grammar'] in ('stzu', 'haro') and doc['version'] in ('0.1', '0.2', '0.3', '0.4', '0.5', '0.6', '0.7', '0.8', '0.9', '0.10', '0.11', '0.12', '0.13', '0.16', '0.17', '0.23', '0.24', '0.25', '0.26')
     passed = failed = 0
     outputs = {}
     with tempfile.TemporaryDirectory() as td:
@@ -162,7 +163,8 @@ def stage1():
                             ('v0.17, UNDERSTAND: what a human language reaches closed questions with', STZU17_FIXTURES),
                             ('v0.23, CONSTITUTION: a world under Zin\'s articles, judged through the charter\'s mechanisms', STZU23_FIXTURES),
                             ('v0.24, visible state through the access paths, sovereignty through the zones', STZU24_FIXTURES),
-                            ('v0.25, the sovereignty and privacy weaves over the personal seats, the regime named, SEVERITY on a constraint', STZU25_FIXTURES)):
+                            ('v0.25, the sovereignty and privacy weaves over the personal seats, the regime named, SEVERITY on a constraint', STZU25_FIXTURES),
+                            ('v0.26, Z under the whole constitution -- the refusals Z met on its way (ZC5); no new clause', STZU26_FIXTURES)):
         print(f'stage 1 -- the Haro meta-court in pure Ring, judged by its fixtures ({label})')
         f1, o1 = judge_stzu(RNXC, 'rnxc', fixtures)
         f2, o2 = judge_stzu(ORACLE, 'oracle ring.exe', fixtures)
@@ -778,7 +780,8 @@ def stage8():
 
 # ---- stage 9: Z, a WORLD forged whole -- court AND runtime -- judged by zing's 16 cases
 
-Z_STZU = os.path.join(HERE, 'z_v16.haro')   # z_v10.haro plus a NARRATE that tells a question (the sixteenth rung); the 16 cases and 25 questions are unchanged
+Z_STZU = os.path.join(HERE, 'z_v26.haro')   # z_v16.haro under the whole constitution (the twenty-sixth rung, ZC5); the 16 cases and 25 questions are unchanged, tontine.z gained HELD_BY
+Z26_CASES = os.path.join(HERE, 'v26', 'court_cases.json')
 Z_SENTENCE = 'tontine.z'
 Z_FIXTURES = r'D:\GitHub\zing\conformance\fixtures.json'
 Z_FLOOR = 16
@@ -2617,7 +2620,7 @@ def stage19():
     cut and answer lines agree with its own clauses and zing's rows. Plus three runs and a
     question composed by hand BEFORE the court, and the same court under a voice that tells
     almost nothing, also composed by hand."""
-    print('stage 19 -- NARRATE tells a run and a question: a_v16.haro and z_v16.haro -> `narrate-run` and `narrate-ask`, judged by laws read in Python')
+    print(f'stage 19 -- NARRATE tells a run and a question: a_v16.haro and {os.path.basename(Z_STZU)} -> `narrate-run` and `narrate-ask`, judged by laws read in Python')
     failures = 0
     for stzu, lead in ((A_STZU, 'forged a'), (Z_STZU, 'forged z')):
         out = run_args(RNXC, ['forge.ring', stzu, '.'], HERE).strip()
@@ -3239,6 +3242,15 @@ def stage31():
     a warning; a clean sentence diagnoses empty."""
     return ledger_stage(31, CLINIC_STZU, CLINIC_CASES, 'clinic', 'X4')
 
+def stage32():
+    """ZC5, the proof on a real world (v26/GRAMMAR.md): z_v26.haro, the Commons' tontine language under the whole
+    constitution and both weaves, Niger Law 2017-28 the regime, and the tontine's sixteen cases -- the one line Art. 5
+    adds to the sentence (HELD_BY) and the unheld tontine refused; a zone into no flow; Z's constraints refusing with
+    their own codes; DROP unparseable with its code; the whole world told in Z's voice; the collector's app turning a
+    knob and the inverse restoring the bytes; a model refused a holder and a rule, admitted the words of a message,
+    the chain keeping all three; the runtime unchanged under the constitution. The author reads these."""
+    return ledger_stage(32, Z_STZU, Z26_CASES, 'z', 'T4')
+
 def stage6(lang, court=None, n=15):
     court = court or f'{lang}_court.ring'
     print(f'stage 6 -- edit to verdict on makeen_box.machine, minima of {n}')
@@ -3360,5 +3372,7 @@ if __name__ == '__main__':
         failures += stage30()
     if stage in (None, 31) and os.path.exists(CLINIC_STZU) and os.path.exists(CLINIC_CASES):
         failures += stage31()
+    if stage in (None, 32) and os.path.exists(Z_STZU) and os.path.exists(Z26_CASES):
+        failures += stage32()
     print(f'haro_forge: {"FAIL" if failures else "PASS"} ({failures} failure(s), {time.perf_counter()-t0:.1f} s)')
     sys.exit(1 if failures else 0)

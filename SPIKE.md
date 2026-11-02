@@ -1515,6 +1515,30 @@ regenerated. **What building found** (HF-128): two true refusals and the fixture
 court ran; the regime table is the size of what the estate has read; a REFUSAL's severity has nowhere to be a warning (a per-seat severity is the next
 step, named); the chain redacts per point.
 
+## The twenty-sixth rung -- Haro v0.26, the proof on a real world: the Commons' tontine under the whole constitution -- 2026-11-02
+
+**On the author's "Start ZC5"** (2026-11-02, after ZC4's memo), the constitution plane's last rung (D36). Z, the tontine language of `z_v06.haro` grown to
+`z_v16.haro`, is declared under all six articles, both weaves constitutional and `REGIME niger_2017_28`, the circle's own law, and judged end to end on
+`tontine.z`, zing's fixture source, on both runtimes. **No clause is added to the grammar**: the 13 meta fixtures -- the refusals Z itself met on its way to the
+constitution -- held on the v0.25 meta-court before a line of court code was touched, and none was. What the constitution asked of the language: a CODE on
+every refusal and constraint, a REFINE with every point floored and no rule floored llm, a voice that SAYS every kind beside the TELLS it had, a landing zone
+HELD_BY an organization and entered INTO a declared flow. Of the sentence, one clause: `HELD_BY the_commons`; `tontine/tontine_unheld.z` keeps zing's text,
+refused with the article named. No PERSONAL seat: the tontine's personal datum is a field of an entity, not a seat of the language (HF-130).
+`spike/v26/GRAMMAR.md` is the account.
+
+    v26/fixtures.json                   13 meta fixtures, written before Z was amended (3 accepts, 10 rejects): the six articles' refusals on Z's own declaration
+    z_v26.haro, tontine.z, tontine/     Z under the constitution; the tontine held; the unheld tontine, three sentences each breaking one rule, DROP, four proposals
+    v26/court_cases.json                16 sentence cases, the ones the author reads: the unheld zone, a zone into no flow, the coded constraints, DROP, the whole
+                                        world in Z's voice, a knob turned and reverted, a model refused a holder and a rule and admitted the words, the runtime unchanged
+    z_court.ring, z.gbnf                regenerated from z_v26.haro; the forge, the meta-court and the generic court untouched
+    haro_forge.py                       stage 1 grows by v0.26; stage 32 is the tontine; Z_STZU is z_v26.haro for stages 9, 10, 13, 14 and 19
+
+**Results.** 13 of 13 and 16 of 16, rnxc and the oracle byte-identical; stages 9, 10, 13, 14 and 19 pass on the regenerated Z (zing's 16 cases and 25
+questions unchanged, 22 questions told); stages 1 and 21 pass. **What building found** (HF-130): no seat of Z is personal, and the declaration says so
+rather than inventing one; the fixture was wrong once about a cite's form and the court right, corrected after the court spoke and said; the constitution
+found one question the world had not answered, and only one; TELLS and SAYS live together, so Art. 3 cost v0.16's voice nothing but the kinds it had never
+said. **The gate is open**: the author reads the refusals and signs the memo; then the compass re-rates Kern lanes 1 and 3.
+
 ## The names -- `.haro`, not `.stzu` -- corrected 2026-10-02
 
 **At the author's word ("we agreed to use .haro instead of .stzu, no?").** D1 was ratified
@@ -1642,7 +1666,10 @@ whole guard re-run on the renamed tree: 28 + 30 + 27 + 23, 117 of 120, 32 of 32,
    declared severity, the regime named, SEVERITY on a constraint; 16 meta fixtures and the clinic's 8 cases, 24 of 24 on both runtimes.
    **ZC4's stzlib and HaroBase slices BUILT the same night under D35** (HF-129): `stzFieldTags` with its guard first, 36 of 36 on rnxc, on the
    branch `constitution` of the desk's stzlib worktree (origin and codeberg); HaroBase's column flags (CHARTER 5.5a, main 01401ea), six guards
-   G5.0 to G5.1c, 35 of 35. **ZC4 DONE.** Not begun: ZC5 (the tontine under the whole constitution, read by the author).
+   G5.0 to G5.1c, 35 of 35. **ZC4 DONE.** **ZC5 BUILT 2026-11-02 as Haro v0.26** (the twenty-sixth rung below; `v26/GRAMMAR.md`, guard stage 32, D36, HF-130): the Commons'
+   tontine declared under the six articles and both weaves, judged end to end; 13 meta fixtures and the tontine's 16 cases written first, 29 of 29 on
+   both runtimes; no clause added to the grammar; the sentence changed by one clause, who holds the zone. **The perception gate is open**: the author
+   reads the refusals and signs the memo; then the compass re-rates Kern lanes 1 and 3.
 18. The forge as an `rnxc` verb (the ringpp session's `src/`, routed); the
    Softanza-resident timing the charter's 2.6 asks for; the court's run time on the
    oracle under paths and views (6.4x the image this pass, named at stage 6); the

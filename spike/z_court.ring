@@ -89,22 +89,23 @@ $aCourtLangs = [
       ["ENTITY", "entity", [["fields", "field", 1, 0, "form"]], "", [], []],
       ["NORM", "norm", [["rule", "zexpr", 0, 0, "expr"], ["message", "text", 0, 0, "prim"]], "", [], []],
       ["FLOW", "flow", [], "", [], []],
-      ["STEP", "step", [["flow", "flow", 0, 0, "decl"], ["order", "number", 0, 0, "prim"], ["actor", "actors", 0, 0, "menu"], ["validate", "zexpr", 0, 1, "expr"], ["enforcing", "norm", 0, 1, "decl"], ["compute", "name", 0, 1, "prim"], ["formula", "zexpr", 0, 1, "expr"], ["on_fail", "text", 0, 1, "prim"], ["on_success", "outcomes", 0, 1, "menu"]], "", [["flow", "STEP {name} walks '{value}', and no FLOW of that name is declared"], ["enforcing", "STEP {name} enforces '{value}', and no NORM of that name is declared: referencing an undeclared norm is a registration error"]], []],
-      ["LANDING_ZONE", "landing_zone", [["format", "formats", 0, 0, "menu"], ["into", "flow", 0, 0, "decl"]], "", [], []]
+      ["STEP", "step", [["flow", "flow", 0, 0, "decl"], ["order", "number", 0, 0, "prim"], ["actor", "actors", 0, 0, "menu"], ["validate", "zexpr", 0, 1, "expr"], ["enforcing", "norm", 0, 1, "decl"], ["compute", "name", 0, 1, "prim"], ["formula", "zexpr", 0, 1, "expr"], ["on_fail", "text", 0, 1, "prim"], ["on_success", "outcomes", 0, 1, "menu"]], "", [["flow", "STEP {name} walks '{value}', and no FLOW of that name is declared"], ["enforcing", "STEP {name} enforces '{value}', and no NORM of that name is declared: referencing an undeclared norm is a registration error"]], [["flow", "NO_FLOW"], ["enforcing", "NO_NORM"]]],
+      ["LANDING_ZONE", "landing_zone", [["format", "formats", 0, 0, "menu"], ["into", "flow", 0, 0, "decl"], ["held_by", "holders", 0, 0, "menu"]], "", [["into", "LANDING_ZONE {name} lands INTO '{value}', and no FLOW of that name is declared"]], [["held_by", "NO_HOLDER"], ["into", "NO_FLOW"]]]
     ],
     [
       ["word", [["value", "name", 0, 0, "prim"]]],
       ["field", [["name", "name", 0, 0, "prim"], ["type", "name", 0, 0, "prim"]]]
     ],
     [
-      ["unknown_verb", "The ZQL verb set is closed -- destructive or unrecognized operations are not part of the grammar.", [], "", [], []],
-      ["unknown_declaration", "The ZQL verb set is closed -- destructive or unrecognized operations are not part of the grammar.", [], "", [], []],
-      ["dangling_reference", "This name resolves to nothing in the declared world.", [], "", [], []]
+      ["unknown_verb", "The ZQL verb set is closed -- destructive or unrecognized operations are not part of the grammar.", [], "UNKNOWN_VERB", [], []],
+      ["unknown_declaration", "The ZQL verb set is closed -- destructive or unrecognized operations are not part of the grammar.", [], "UNKNOWN_DECLARATION", [], []],
+      ["dangling_reference", "This name resolves to nothing in the declared world.", [], "DANGLING", [], []]
     ],
     [
       ["actors", ["collector", "treasurer", "system", "member", "auditor"], "ACTOR is collector, treasurer, system, member or auditor", ""],
       ["outcomes", ["commit_to_bedrock", "hold"], "ON_SUCCESS is commit_to_bedrock or hold", ""],
-      ["formats", ["json", "csv"], "FORMAT is json or csv", ""]
+      ["formats", ["json", "csv"], "FORMAT is json or csv", ""],
+      ["holders", ["the_commons", "the_cooperative", "the_bank"], "HELD_BY is the_commons, the_cooperative or the_bank, not '{value}'", "HOLDER"]
     ],
     [
     ],
@@ -113,13 +114,13 @@ $aCourtLangs = [
     [
     ],
     [
-      ["a_formula_names_its_field", "step", "formula present and compute absent", "", "STEP {name} has a FORMULA and no COMPUTE: a computed value is named", "", [], "error"],
-      ["a_computed_field_has_a_formula", "step", "compute present and formula absent", "", "STEP {name} names COMPUTE {compute} and has no FORMULA", "", [], "error"],
-      ["one_rank_per_flow", "step", "earlier step where flow = this.flow and order = this.order", "", "STEP {name} and STEP {other} both stand at ORDER {order} of {flow}: one rank, one step", "", [], "error"]
+      ["a_formula_names_its_field", "step", "formula present and compute absent", "", "STEP {name} has a FORMULA and no COMPUTE: a computed value is named", "NO_COMPUTE", [], "error"],
+      ["a_computed_field_has_a_formula", "step", "compute present and formula absent", "", "STEP {name} names COMPUTE {compute} and has no FORMULA", "NO_FORMULA", [], "error"],
+      ["one_rank_per_flow", "step", "earlier step where flow = this.flow and order = this.order", "", "STEP {name} and STEP {other} both stand at ORDER {order} of {flow}: one rank, one step", "ONE_RANK", [], "error"]
     ],
     [[], "", [], [["flow", "flow"], ["entity", "entity"], ["norm", "norm"], ["landing_zone", "zone"]]],
-    [],
-    [],
+    [["norm.rule", "policy"], ["norm.message", "field"], ["step.actor", "policy"], ["landing_zone.format", "knob"], ["landing_zone.held_by", "policy"]],
+    [["norm.rule", "trusted"], ["norm.message", "llm"], ["step.actor", "trusted"], ["landing_zone.format", "external"], ["landing_zone.held_by", "trusted"]],
     [
     ],
     [
@@ -134,11 +135,13 @@ $aCourtLangs = [
     NULL,
     [],
     NULL,
-    ["telling", "", "", "I stopped: {message} ({code})", [], [["ask", "Asking {from}: {question}"], ["matched", "{count} of the {total} rows match."], ["ordered", "Ordered by {field} {direction}."], ["cut", "Only the first {limit} are kept."], ["answer", "The answer is {count} row(s): {rows}"]]],
+    ["telling", "{file} is a world of Z, {count} declarations.", "That is the whole world.", "I stopped: {message} ({code})", [["enum", "{name} is one of {words}. {rationale}"], ["entity", "{name} is a record of {fields}. {rationale}"], ["norm", "{name} holds {rule}; broken, it says: {message}. {rationale}"], ["flow", "{name} is a flow records walk. {rationale}"], ["step", "{name} is step {order} of {flow}, acted by {actor}. {rationale}"], ["landing_zone", "{name} is held by {held_by}; {format} records land in it and walk {into}. {rationale}"]], [["ask", "Asking {from}: {question}"], ["matched", "{count} of the {total} rows match."], ["ordered", "Ordered by {field} {direction}."], ["cut", "Only the first {limit} are kept."], ["answer", "The answer is {count} row(s): {rows}"]]],
     NULL
   ]
 ]
 CtUseLanguage("z")
 CtBuildCondLangs()
+$aCourtConstitution = ["explainability", "reversibility", "visible_state", "predictable_authority", "organizational_sovereignty", "trust_hierarchy"]
+$aCourtZone = ["landing_zone", "held_by", "into"]
 
 CtMain()
