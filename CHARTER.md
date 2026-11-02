@@ -1235,6 +1235,19 @@ states principle 14.
   independent of Haro's compiler. It catches what a checked build catches -- Ring++'s record has three defects that only it saw, each a
   right answer from the fast build (the `s[i]` refcount, the widened parameter, a borrow in a catch) -- but not a semantic defect both
   builds share, which Ring 1.27 found once (the v0.3 rung's one defect). The fixtures and the plants are the judge of meaning.
+- **D42 -- stage 6 judges what a person waits for: a sentence edited, its court's image reused, under 50 ms; the court compiled
+  from scratch under a 150 ms ceiling** (the author, 2026-11-03: "go ahead with your recommendation", after asking whether to move
+  the target to 130 ms). The pinned 100 ms was put on the court compiled every run, "image or no image", and every build had come
+  to miss it: 125.3 ms on `haro`, 127.0 on Ring++'s rnxc, 131.4 on the checked build, on a quiet machine at full speed (HF-134).
+  130 ms would have passed by 4.7 ms and broken on the next rung that grows the court library (today's 254 lines cost about 12 ms;
+  the checked build already read 131); a target moved to the measurement only describes it. A person edits the SENTENCE, not the
+  court, so the court's compiled image stays valid: that path is the promise, measured with the sentence rewritten before every run
+  -- 14.9 ms against 50 (the verdict byte-identical to the unedited one's). The cold compile is the first run after the court itself
+  changed: it is printed every run and held under a ceiling, 128.1 ms against 150, a tripwire for whatever makes every court load
+  more. Both made to fail (5 ms and 50 ms: two failures). *Cost:* the cold compile may grow by about 20 ms before anything fails.
+  *Not done, named:* moving the code today's constitution rungs added out of the court library -- its ten new functions are called
+  from the court's generic paths (validation, `diagnose`, cites, the voice), so a split needs stand-ins in every court: a rung, taken
+  when the ceiling is first hit.
 - **D23 -- `rnxc fmt` is a Ring++ feature, not held for Haro** (CODEGRAPH Q4, ruled on the author's delegation, 2026-10-05: "take
   whatever decision you think is wiser on my behalf"). It is a verb of the one binary (commitment 5), depends on nothing of Haro's, is
   judged against the oracle and refuses what Ring refuses (58 of 6,061 Softanza files, 57 of them Ring's own refusals). It ships inside

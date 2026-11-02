@@ -28,7 +28,7 @@ the Ring legacy: it moved here with its history, forked Ring++'s VM and compiler
 ## Where to read
 
     CLAUDE.md        the brief, and what is where
-    CHARTER.md       the charter: the alphabet, the decisions (D1-D41), the amendments
+    CHARTER.md       the charter: the alphabet, the decisions (D1-D42), the amendments
     PRINCIPLES.md    the founding principles;  GRAMMAR-SKETCH.md  the first grammar
     SPIKE.md         every rung, one section each, the cut, and what comes next
     FINDINGS.md      HF-1 to HF-134, each one measured

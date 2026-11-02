@@ -39,7 +39,7 @@ the cut say `haro/X`, `X.ring`, `rnxc` and "the oracle"**: read them as this rep
                      their subject (paths.RING_ORACLE), never as a judge
     runtime/         gitignored: what runs write (the second judge's forge folder, scratch)
 
-The records: `CHARTER.md` (section 13 the decisions, D1 to D41; section 15 the v0.3 amendments), `PRINCIPLES.md`,
+The records: `CHARTER.md` (section 13 the decisions, D1 to D42; section 15 the v0.3 amendments), `PRINCIPLES.md`,
 `GRAMMAR-SKETCH.md`, `FINDINGS.md` (HF-1 to HF-134, each measured), `SPIKE.md` (every rung, one section each, and "Next"),
 `CODEGRAPH.md` (the code-graph memo), `BLOCKS.md` (one format and pattern rules, REBOL-06/07: its four questions RULED 2026-11-02),
 `FROM-RINGPP.md`.
@@ -65,7 +65,7 @@ The records: `CHARTER.md` (section 13 the decisions, D1 to D41; section 15 the v
   reading as his own.
 - **Measure, never assert**; two significant figures; minima over repetitions; state the pattern a change hurts.
 - **The machine**: one heavy job at a time; `python D:\GitHub\ringpp\bench\heartbeat.py` before any timing (the CPU is often held at
-  20-80% of its rated speed, and stage 6's 100 ms target then fails for every build alike); a long run gets a heartbeat, never a
+  20-80% of its rated speed, and no timing taken then is a measurement); a long run gets a heartbeat, never a
   silent watch; power cuts are routine -- commit often.
 - **Tools**: write scripts with the Write tool -- Bash heredocs strip backslashes; never round-trip text through PowerShell
   Get-Content/Set-Content; every checkout is LF (`.gitattributes`); commit explicit paths, never `git add -A`.
@@ -73,7 +73,8 @@ The records: `CHARTER.md` (section 13 the decisions, D1 to D41; section 15 the v
 
 ## Where it stands -- 2026-11-02, after the cut
 
-- The cut is done and proved (SPIKE.md "The cut"; D39-D41; HF-134).
+- The cut is done and proved (SPIKE.md "The cut"; D39-D41; HF-134); every stage of the guard passes. Stage 6 is judged by D42:
+  a sentence edit under 50 ms (14.9 today), the court compiled from scratch under a 150 ms ceiling (128.1 today).
 - **Next, on the author's word as Central relayed it: step 1 of REBOL-06, as v0.30** -- one reader of C6 and a canonical printer,
   under the printing court, as a guard stage (BLOCKS.md section 5; study/rebol/block.py the reference, printing_fixtures.json the
   start). The four questions are ruled: Q-B1 `AS` and `?` recorded in C6 (Ringua writes them); Q-B2 both C6 amendments, yes

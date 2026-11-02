@@ -3339,10 +3339,24 @@ def stage34():
     keeping rule:<CODE>; the voice telling a refusal with its cite."""
     return ledger_stage(34, NOTICE_STZU, NOTICE_CASES, 'notice', 'N4')
 
+SENTENCE_TARGET = 50.0     # D42: a sentence edited, its court's image reused -- what a person editing a sentence waits for
+COLD_CEILING = 150.0       # D42: the court compiled from scratch -- a ceiling that catches the court library growing
+
+
 def stage6(lang, court=None, n=15):
+    """Edit to verdict on makeen_box.machine (D42, 2026-11-03). A person edits the SENTENCE; the court is unchanged, so its compiled
+    image is reused -- that path is judged against SENTENCE_TARGET, the sentence rewritten (one more trailing newline) before every
+    run so each verdict follows a real edit. The court compiled from scratch (the first run after the court itself changed) is judged
+    against COLD_CEILING: not a promise about editing, a tripwire for every rung that makes every court load more (HF-49, HF-134).
+    harb, the native court, and the checked build are printed beside them for scale."""
     court = court or f'{lang}_court.haro'
     print(f'stage 6 -- edit to verdict on makeen_box.machine, minima of {n}')
-    def best(cmd, cwd, cache):
+    work = os.path.join(paths.OUT, 'stage6')
+    os.makedirs(work, exist_ok=True)
+    edited = os.path.join(work, os.path.basename(MAKEEN))
+    text = open(MAKEEN, 'rb').read()
+
+    def best(cmd, cwd, cache, edit=False):
         env = dict(os.environ)
         if cache:
             env.pop('RNXC_NOCACHE', None); env.pop('HARO_NOCACHE', None)
@@ -3350,26 +3364,35 @@ def stage6(lang, court=None, n=15):
             env['RNXC_NOCACHE'] = '1'
             env['HARO_NOCACHE'] = '1'
         ts = []
-        for _ in range(n):
+        for i in range(n):
+            if edit:
+                with open(edited, 'wb') as fh:
+                    fh.write(text + b'\n' * (i % 3 + 1))
             t0 = time.perf_counter()
             subprocess.run(cmd, capture_output=True, env=env, cwd=cwd, timeout=120)
             ts.append(time.perf_counter() - t0)
         return min(ts) * 1000, sorted(ts)[n // 2] * 1000
     h = best([HARB, 'check', MAKEEN], os.path.dirname(HARB), False)
     r = best([HARO_VM, court, 'check', MAKEEN], HERE, False)
-    rc = best([HARO_VM, court, 'check', MAKEEN], HERE, True)
+    subprocess.run([HARO_VM, court, 'check', MAKEEN], capture_output=True, cwd=HERE, timeout=120)    # the image, written once
+    rc = best([HARO_VM, court, 'check', edited], HERE, True, edit=True)
     o = best([TWIN, court, 'check', MAKEEN], HERE, False)
-    print(f'  harb check (Zig, the native court)       min {h[0]:7.1f} ms   median {h[1]:7.1f} ms')
-    print(f'  forged court on haro, compiled each run  min {r[0]:7.1f} ms   median {r[1]:7.1f} ms')
-    print(f'  forged court on haro, its image reused   min {rc[0]:7.1f} ms   median {rc[1]:7.1f} ms')
-    print(f'  forged court on the checked build               min {o[0]:7.1f} ms   median {o[1]:7.1f} ms')
-    target = 100.0
-    if r[0] <= target:
-        print(f'  ok   under the {target:.0f} ms target on haro, image or no image')
-        return 0
-    print(f'  FAIL {r[0]:.1f} ms is over the {target:.0f} ms target on haro')
-    return 1
-
+    print(f'  harb check (Zig, the native court)                   min {h[0]:7.1f} ms   median {h[1]:7.1f} ms')
+    print(f'  the sentence edited, the court\'s image reused       min {rc[0]:7.1f} ms   median {rc[1]:7.1f} ms   target {SENTENCE_TARGET:.0f}')
+    print(f'  the court compiled from scratch                      min {r[0]:7.1f} ms   median {r[1]:7.1f} ms   ceiling {COLD_CEILING:.0f}')
+    print(f'  the checked build, compiled from scratch             min {o[0]:7.1f} ms   median {o[1]:7.1f} ms')
+    failures = 0
+    if rc[0] <= SENTENCE_TARGET:
+        print(f'  ok   a sentence edit is judged in {rc[0]:.1f} ms, under the {SENTENCE_TARGET:.0f} ms target')
+    else:
+        failures += 1
+        print(f'  FAIL a sentence edit takes {rc[0]:.1f} ms, over the {SENTENCE_TARGET:.0f} ms target')
+    if r[0] <= COLD_CEILING:
+        print(f'  ok   the court compiled from scratch in {r[0]:.1f} ms, under the {COLD_CEILING:.0f} ms ceiling')
+    else:
+        failures += 1
+        print(f'  FAIL the court compiled from scratch takes {r[0]:.1f} ms, over the {COLD_CEILING:.0f} ms ceiling: what made every court load more?')
+    return failures
 
 if __name__ == '__main__':
     t0 = time.perf_counter()

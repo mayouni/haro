@@ -1590,6 +1590,8 @@ on `haro` and on its own checked build** -- no Ring runs in a court (D41).
                          its own computing syntax (BLOCKS.md Q-B3). The cut is the names, the files, the toolchain and the judges --
                          not yet the syntax
     found                HF-134: every script climbed to Ring++; a v0.27 reader read the current folder; HF-126 answered
+    stage 6, after       D42 (2026-11-03): a sentence edited, its court's image reused, 14.9 ms against 50; the court compiled from
+                         scratch, 128.1 ms against a 150 ms ceiling -- every stage of the guard passes
 
 ## The names -- `.haro`, not `.stzu` -- corrected 2026-10-02
 
