@@ -202,6 +202,8 @@ func Twice(n)
 DEFINE REFINE make_limited AS ( TARGET "Limited", KIND function, FROM "absent", TO "return $nLimit + n", AUTHOR "mansour", POSTURE trusted, REASON "a limit" ) => rejected derivation $nLimit is read here, and nothing anywhere assigns it
 
 === LB10 a hole is still a hole: a load the unit cannot read shuts the check, and the gate fails closed
+~~~ changed after the court spoke, in the cut (2026-11-02, D39): the checker is Haro's own now and names itself `haro check`; the
+~~~ words were `rnxc check does not check this program`, and the verdict, the stage and the hole are unchanged
 --- program
 class Box
 	@nCount = 3
@@ -215,7 +217,7 @@ load "missing.ring"
 o = new Box
 ? o.Size()
 --- do
-DEFINE REFINE make_grow AS ( TARGET "Grow", KIND method, FROM "absent", TO "@nCount += n", AUTHOR "mansour", POSTURE trusted, REASON "a counter grows" ) => rejected derivation rnxc check does not check this program
+DEFINE REFINE make_grow AS ( TARGET "Grow", KIND method, FROM "absent", TO "@nCount += n", AUTHOR "mansour", POSTURE trusted, REASON "a counter grows" ) => rejected derivation haro check does not check this program
 
 === LB11 the derivation asks the loading program: a call that does not fit what the program defines is refused there
 ~~~ the lift sees that Clamp exists in the unit; only the compiler knows how many arguments it takes

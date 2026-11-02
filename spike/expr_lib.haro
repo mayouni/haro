@@ -933,7 +933,7 @@ func ExRun(cSeat, cExpr, aInput, vInit, bHasInit)
 
 func ExMain()
 	if len(sysargv) < 5
-		? "usage: <court>.ring check <seat> <expr> | eval <seat> <expr> [input] [init]"
+		? "usage: <court>.haro check <seat> <expr> | eval <seat> <expr> [input] [init]"
 		return
 	ok
 	cVerb = sysargv[3]

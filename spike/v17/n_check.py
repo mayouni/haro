@@ -163,7 +163,7 @@ def court_copy(patch=None):
     os.makedirs(paths.OUT, exist_ok=True)
     td = tempfile.mkdtemp(dir=paths.OUT)
     for f in os.listdir(SP):
-        if f.endswith('.ring'):
+        if f.endswith('.haro'):
             shutil.copy(os.path.join(SP, f), td)
     for f in ('tontine.z',):
         shutil.copy(os.path.join(SP, f), td)
@@ -204,7 +204,7 @@ check(not bad, f"C' each of the {len(CODES)} codes, with its rule switched off i
 os.makedirs(paths.OUT, exist_ok=True)
 MARKER = os.path.join(paths.OUT, 'zz_marker.txt')
 PROGRAM = 'write("' + paths.rel(MARKER, SP) + '", "ran")\n'   # the court runs from SP
-HOSTILE, SIBLING = os.path.join(SP, 'v17', 'zz_marker.ring'), os.path.join(SP, 'zz_marker_court.haro')
+HOSTILE, SIBLING = os.path.join(SP, 'v17', 'zz_marker.haro'), os.path.join(SP, 'zz_marker_court.haro')
 
 
 def marker_after(court_name):
@@ -223,7 +223,7 @@ def marker_after(court_name):
 try:
     for f in (HOSTILE, SIBLING):
         open(f, 'w', encoding='utf-8', newline='').write(PROGRAM)
-    hostile, control = marker_after('v17/zz_marker.ring'), marker_after('zz_marker_court.haro')
+    hostile, control = marker_after('v17/zz_marker.haro'), marker_after('zz_marker_court.haro')
 finally:
     for f in (HOSTILE, SIBLING, MARKER) + tuple(os.path.join(SP, 'n', x) for x in os.listdir(os.path.join(SP, 'n')) if x.startswith('_mut_')):
         if os.path.exists(f):

@@ -2258,7 +2258,7 @@ func CtWalk(aDecls, cName, aRecord)
 # the command: check <file> | refine <file> <file.rfn> | eval ... | walk ... | ask ...
 func CtMain()
 	if len(sysargv) < 4
-		? "usage: <court>.ring check <file" + $cCourtExt + "> | refine <file" + $cCourtExt + "> <file.rfn> | eval <file> <decl> <seat> <json> | walk <file> <name> <json> | ask <file> <question> <rows json> | audit <file>"
+		? "usage: <court>.haro check <file" + $cCourtExt + "> | refine <file" + $cCourtExt + "> <file.rfn> | eval <file> <decl> <seat> <json> | walk <file> <name> <json> | ask <file> <question> <rows json> | audit <file>"
 		return
 	ok
 	cVerb = sysargv[3]
@@ -2311,7 +2311,7 @@ func CtMain()
 		done
 	but cVerb = "refine"
 		if len(sysargv) < 5
-			? "usage: <court>.ring refine <file" + $cCourtExt + "> <file.rfn>"
+			? "usage: <court>.haro refine <file" + $cCourtExt + "> <file.rfn>"
 			return
 		ok
 		CtRefine(sysargv[4], sysargv[5])
@@ -2342,7 +2342,7 @@ func CtMain()
 		ok
 	but cVerb = "eval"
 		if len(sysargv) < 7
-			? "usage: <court>.ring eval <file" + $cCourtExt + "> <decl> <seat> <json>"
+			? "usage: <court>.haro eval <file" + $cCourtExt + "> <decl> <seat> <json>"
 			return
 		ok
 		cSrc = read(sysargv[4])
@@ -2359,7 +2359,7 @@ func CtMain()
 		done
 	but cVerb = "walk"
 		if len(sysargv) < 6
-			? "usage: <court>.ring walk <file" + $cCourtExt + "> <name> <json>"
+			? "usage: <court>.haro walk <file" + $cCourtExt + "> <name> <json>"
 			return
 		ok
 		cSrc = read(sysargv[4])
@@ -2373,7 +2373,7 @@ func CtMain()
 	but cVerb = "run"
 		# v0.9: an algorithm run on a record
 		if len(sysargv) < 6
-			? "usage: <court>.ring run <file" + $cCourtExt + "> <algorithm> <record json>"
+			? "usage: <court>.haro run <file" + $cCourtExt + "> <algorithm> <record json>"
 			return
 		ok
 		cSrc = read(sysargv[4])
@@ -2388,7 +2388,7 @@ func CtMain()
 	but cVerb = "narrate"
 		# v0.13: the sentence narrated back in the language's own voice, on stdout, never stored
 		if len(sysargv) < 4
-			? "usage: <court>.ring narrate <file" + $cCourtExt + ">"
+			? "usage: <court>.haro narrate <file" + $cCourtExt + ">"
 			return
 		ok
 		try
@@ -2400,7 +2400,7 @@ func CtMain()
 	but cVerb = "narrate-run"
 		# v0.16: an algorithm run on a record, told in the language's own voice -- the same run `run` makes, never a second one
 		if len(sysargv) < 6
-			? "usage: <court>.ring narrate-run <file" + $cCourtExt + "> <algorithm> <record json>"
+			? "usage: <court>.haro narrate-run <file" + $cCourtExt + "> <algorithm> <record json>"
 			return
 		ok
 		try
@@ -2413,7 +2413,7 @@ func CtMain()
 	but cVerb = "narrate-ask"
 		# v0.16: a question answered on rows, told in the language's own voice -- the same answer `ask` gives
 		if len(sysargv) < 6
-			? "usage: <court>.ring narrate-ask <file" + $cCourtExt + "> <question> <rows json>"
+			? "usage: <court>.haro narrate-ask <file" + $cCourtExt + "> <question> <rows json>"
 			return
 		ok
 		try
@@ -2436,7 +2436,7 @@ func CtMain()
 	but cVerb = "spellings"
 		# v0.12: a list of names judged against the FORMS and the declared families
 		if len(sysargv) < 5
-			? "usage: <court>.ring spellings <file" + $cCourtExt + "> <names.txt>"
+			? "usage: <court>.haro spellings <file" + $cCourtExt + "> <names.txt>"
 			return
 		ok
 		cSrc = read(sysargv[4])
@@ -2454,7 +2454,7 @@ func CtMain()
 	but cVerb = "ask"
 		# v0.7: a question of the declared world, answered on the rows handed in
 		if len(sysargv) < 6
-			? "usage: <court>.ring ask <file" + $cCourtExt + "> <question> <rows json>"
+			? "usage: <court>.haro ask <file" + $cCourtExt + "> <question> <rows json>"
 			return
 		ok
 		cSrc = read(sysargv[4])
