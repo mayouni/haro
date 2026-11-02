@@ -116,13 +116,13 @@ func StzuClauses(cKind)
 	but cKind = "VIEW"
 		return [["NAMED", "string"], ["ON", "ident"], ["ONE", "string"], ["WHERE", "string"]]
 	but cKind = "CONSTRAINT"
-		return [["CITES", "stringlist"], ["CODE", "string"], ["MESSAGE", "string"], ["ON", "ident"], ["THEN", "string"], ["WHEN", "string"]]
+		return [["CITES", "stringlist"], ["CODE", "string"], ["MESSAGE", "string"], ["ON", "ident"], ["SEVERITY", "ident"], ["THEN", "string"], ["WHEN", "string"]]
 	but cKind = "WORLD"
 		return [["ENTRY", "namelist"], ["FIRST", "ident"], ["ONE", "namelist"], ["PUBLISH", "pairlist"]]
 	but cKind = "REFINE"
 		return [["FLOOR", "pointlist"], ["POINTS", "pointlist"]]
 	but cKind = "CONSTITUTION"
-		return [["ARTICLES", "namelist"], ["MOVEMENT", "ident"], ["REGIME", "ident"], ["SOVEREIGN", "ident"], ["WEAVES", "pairlist"], ["ZONE", "ident"]]
+		return [["ARTICLES", "namelist"], ["MOVEMENT", "ident"], ["PERSONAL", "pathlist"], ["REGIME", "ident"], ["SOVEREIGN", "ident"], ["WEAVES", "pairlist"], ["ZONE", "ident"]]
 	but cKind = "UNION"
 		return [["CODE", "string"], ["MESSAGE", "string"], ["OF", "typelist"]]
 	but cKind = "WALK"
@@ -1073,6 +1073,8 @@ func DeclaredKind(aDeclared, cName)
 func StzuDeclare(cSrc)
 	$aStzuToks = StzuTokenize(cSrc)
 	$nStzuPos = 1
+	$aStzuWarnings = []
+	$aStzuNotes = []
 
 	if StzuPeek()[1] = "eof"
 		StzuFail(1, "an empty file declares nothing -- a .haro file opens with DEFINE LANGUAGE")
@@ -1169,7 +1171,10 @@ func StzuDeclare(cSrc)
 				if HasClause(aClauses, "SOVEREIGN") cCSov = ClauseValue(aClauses, "SOVEREIGN") ok
 				cCMov = ""
 				if HasClause(aClauses, "MOVEMENT") cCMov = ClauseValue(aClauses, "MOVEMENT") ok
-				aConstitution = [cName, ClauseValue(aClauses, "ARTICLES"), aCWeaves, cCRegime, nLine, cRationale, cCZone, cCSov, cCMov]
+				# v0.25: the PERSONAL seats the weaves govern, as paths decl.seat
+				aCPersonal = []
+				if HasClause(aClauses, "PERSONAL") aCPersonal = ClauseValue(aClauses, "PERSONAL") ok
+				aConstitution = [cName, ClauseValue(aClauses, "ARTICLES"), aCWeaves, cCRegime, nLine, cRationale, cCZone, cCSov, cCMov, aCPersonal]
 			else
 				if DeclaredKind(aDeclared, cName) != ""
 					StzuFail(nLine, "'" + cName + "' is already declared -- one namespace, one name, one meaning")
@@ -1472,7 +1477,13 @@ func StzuDeclare(cSrc)
 					cThen = ""
 					if HasClause(aClauses, "THEN") cThen = ClauseValue(aClauses, "THEN") ok
 					# v0.23: CITES on a CONSTRAINT -- the pinned instruments the maker's own rule cites (stzzui's S2)
-					aConstraints + [cName, ClauseValue(aClauses, "ON"), ClauseValue(aClauses, "WHEN"), cThen, ClauseValue(aClauses, "MESSAGE"), nLine, StzuCodeOf(aClauses, nLine, cName), StzuCitesOf(aClauses, nLine, cName)]
+					# v0.25: SEVERITY -- error (the court refuses) or warning (the court speaks it after its verdict); stzzui's S1
+					cCnSev = "error"
+					if HasClause(aClauses, "SEVERITY") cCnSev = ClauseValue(aClauses, "SEVERITY") ok
+					if cCnSev != "error" and cCnSev != "warning"
+						StzuFail(nLine, "'" + cCnSev + "' is not a SEVERITY of a CONSTRAINT: error or warning")
+					ok
+					aConstraints + [cName, ClauseValue(aClauses, "ON"), ClauseValue(aClauses, "WHEN"), cThen, ClauseValue(aClauses, "MESSAGE"), nLine, StzuCodeOf(aClauses, nLine, cName), StzuCitesOf(aClauses, nLine, cName), cCnSev]
 				ok
 			ok
 		catch
@@ -2097,11 +2108,42 @@ func StzuDeclare(cSrc)
 					StzuFail(aWv[i][3], "'" + aWv[i][2] + "' is not a severity: constitutional, governance or advisory")
 				ok
 			next
-			if len(aWv) > 0
-				StzuFail(aWv[1][3], "WEAVES names '" + aWv[1][1] + "', and no weave is judged in Haro v0.23 -- ZC4 builds sovereignty (W3) and privacy (W4) as field tags, fixtures first")
+			# v0.25: sovereignty (W3) and privacy (W4) are judged below; the five other weaves are carried and refused by name
+			for i = 1 to len(aWv)
+				if aWv[i][1] != "sovereignty" and aWv[i][1] != "privacy"
+					StzuFail(aWv[i][3], "WEAVES names '" + aWv[i][1] + "', and no weave but sovereignty (W3) and privacy (W4) is judged in Haro v0.25 -- the five others are Zin's design, carried, not built")
+				ok
+			next
+			# v0.25: the PERSONAL seats: each a seat of a declared kind, and the weaves' to govern
+			aPers = aConstitution[10]
+			for i = 1 to len(aPers)
+				cPP = aPers[i][1]
+				nPD = substr(cPP, ".")
+				cPDecl = ""
+				cPSeat = ""
+				if nPD > 0
+					cPDecl = left(cPP, nPD - 1)
+					cPSeat = substr(cPP, nPD + 1)
+				ok
+				if nPD = 0 or DeclaredKind(aDeclared, cPDecl) != "DECLARATION"
+					StzuFail(aPers[i][2], "PERSONAL names '" + cPP + "', and '" + cPDecl + "' is not a declaration kind")
+				ok
+				if not StzuHasSeat(aDeclarations, cPDecl, cPSeat)
+					StzuFail(aPers[i][2], "PERSONAL names '" + cPP + "', and '" + cPDecl + "' has no seat '" + cPSeat + "'")
+				ok
+			next
+			cSevPrivacy = ""
+			cSevSovereignty = ""
+			for i = 1 to len(aWv)
+				if aWv[i][1] = "privacy" cSevPrivacy = aWv[i][2] ok
+				if aWv[i][1] = "sovereignty" cSevSovereignty = aWv[i][2] ok
+			next
+			if len(aPers) > 0 and cSevPrivacy = "" and cSevSovereignty = ""
+				StzuFail(nCL, "PERSONAL is named and neither privacy (W4) nor sovereignty (W3) is among WEAVES -- the personal seats are the weaves' to govern")
 			ok
-			if aConstitution[4] != ""
-				StzuFail(nCL, "REGIME names '" + aConstitution[4] + "', and no weave reads a regime in Haro v0.23 -- ZC4 names the declared regime in every refusal of a weave, never a default")
+			# v0.25: a regime is read by the weaves' refusals; without a weave it is accepted by nothing
+			if aConstitution[4] != "" and len(aWv) = 0
+				StzuFail(nCL, "REGIME is named and no weave is among WEAVES -- a regime is read by the weaves' refusals")
 			ok
 			# v0.24: the zone seats are the sovereignty article's; named without it they are refused, not accepted by silence
 			if aConstitution[7] != "" or aConstitution[8] != "" or aConstitution[9] != ""
@@ -2221,12 +2263,83 @@ func StzuDeclare(cSrc)
 					ok
 				ok
 			next
+			# v0.25: the weaves over the PERSONAL seats, at the declared severity, the regime named.
+			# Three paths a language declares: the voice (W4.4, a log), the ask (W4.2, analytics),
+			# the published world (W3.1, a movement out of its zone); the model path is stzlib's and
+			# HaroBase's, the same rung.
+			cRg = aConstitution[4]
+			for i = 1 to len(aPers)
+				cPP = aPers[i][1]
+				nPD = substr(cPP, ".")
+				cPDecl = left(cPP, nPD - 1)
+				cPSeat = substr(cPP, nPD + 1)
+				if cSevPrivacy != ""
+					if not isNull(aNarrate)
+						for k = 1 to len(aNarrate[5])
+							if aNarrate[5][k][1] = cPDecl
+								if substr(aNarrate[5][k][2], "{" + cPSeat + "}") > 0
+									StzuWeave(cSevPrivacy, aNarrate[5][k][3], "W4.4 privacy: personal seat '" + cPP + "' is told by the voice -- a log carries no personal datum unredacted" + StzuRegimeTail(cRg, "W4.4"))
+								ok
+							ok
+						next
+					ok
+					if not isNull(aAsk)
+						if InStrList(cPDecl, aAsk[2])
+							StzuWeave(cSevPrivacy, aAsk[6], "W4.2 privacy: kind '" + cPDecl + "' holds the personal seat '" + cPSeat + "' and is asked (ASK FROM) -- usage over personal data is analytics, which needs consent" + StzuRegimeTail(cRg, "W4.2"))
+						ok
+					ok
+				ok
+				if cSevSovereignty != ""
+					if not isNull(aWorld)
+						if len(aWorld) >= 5
+							for k = 1 to len(aWorld[5])
+								if aWorld[5][k][1] = cPDecl
+									StzuWeave(cSevSovereignty, aWorld[5][k][3], "W3.1 sovereignty: kind '" + cPDecl + "' holds the personal seat '" + cPSeat + "' and is published to the world -- personal data stays in its declared zone" + StzuRegimeTail(cRg, "W3.1"))
+								ok
+							next
+						ok
+					ok
+				ok
+			next
 		catch
 			StzuNote(cCatchError)
 		done
 	ok
 
 	return aRec
+
+# v0.25: a weave's verdict at its declared severity -- constitutional refuses, governance warns,
+# advisory notes; the warnings and notes are printed after the structural fields
+func StzuWeave(cSev, nLine, cMsg)
+	if cSev = "constitutional"
+		StzuFail(nLine, cMsg)
+	but cSev = "governance"
+		$aStzuWarnings + cMsg
+	else
+		$aStzuNotes + cMsg
+	ok
+
+# v0.25: the regime's own article beside the constitution's, in a weave refusal -- the declared
+# regime, never a default: gdpr's articles, Niger Law 2017-28 as Zin's African companion names it,
+# a regime Haro has no table for named as declared, and "no regime declared" where there is none
+func StzuRegimeTail(cRegime, cRule)
+	cTail = ""
+	if cRegime = ""
+		cTail = "no regime declared"
+	but cRegime = "gdpr"
+		cTail = "gdpr: " + StzuGdprArticle(cRule)
+	but cRegime = "niger_2017_28"
+		cTail = "Niger Law 2017-28"
+	else
+		cTail = "regime '" + cRegime + "' as declared, which Haro v0.25 has no article table for"
+	ok
+	return " [Art. 5 organizational_sovereignty; " + cTail + "]"
+
+func StzuGdprArticle(cRule)
+	if cRule = "W4.4" return "Article 5(1)(e)" ok
+	if cRule = "W4.2" return "Article 7" ok
+	if cRule = "W3.1" return "Chapter V" ok
+	return "Article 5"
 
 # the value shape of a UNION's alternative, or the refusal (v0.3)
 func StzuAltShape(aAlt, aDeclared, aForms, nLine)
@@ -2466,6 +2579,26 @@ func StzuPrintLanguage(aLang)
 		if len(aCs) >= 7 cZone = aCs[7] ok
 	ok
 	? "zone " + cZone
+	# v0.25: the regime, the weaves with their severities, the personal seats
+	cRegime = ""
+	cWeaves = ""
+	cPersonal = ""
+	if not isNull(aCs)
+		if len(aCs) >= 10
+			cRegime = aCs[4]
+			for i = 1 to len(aCs[3])
+				if i > 1 cWeaves += "," ok
+				cWeaves += aCs[3][i][1] + ":" + aCs[3][i][2]
+			next
+			for i = 1 to len(aCs[10])
+				if i > 1 cPersonal += "," ok
+				cPersonal += aCs[10][i][1]
+			next
+		ok
+	ok
+	? "regime " + cRegime
+	? "weaves " + cWeaves
+	? "personal " + cPersonal
 	aD = LangGet(aLang, "declarations")
 	aV = []
 	for i = 1 to len(aD)
@@ -2478,3 +2611,10 @@ func StzuPrintLanguage(aLang)
 		cV += aV[i]
 	next
 	? "verbs " + cV
+	# v0.25: a weave's warnings and notes, after the fields
+	for i = 1 to len($aStzuWarnings)
+		? "warning " + $aStzuWarnings[i]
+	next
+	for i = 1 to len($aStzuNotes)
+		? "note " + $aStzuNotes[i]
+	next

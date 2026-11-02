@@ -34,6 +34,8 @@ $aStzuFound = []
 $aStzuBroken = []
 $aStzuLastName = ""
 $aStzuUnresolved = []
+$aStzuWarnings = []
+$aStzuNotes = []
 
 # The top level's names are its own (cInPath, cOutDir, ...): on Ring a
 # function's bare assignment to a name that exists as a global WRITES THE
@@ -267,7 +269,10 @@ func LangSource(aLang)
 		# v0.23: the CITES a CONSTRAINT declares ride into the court beside its CODE
 		aCCites = []
 		if len(aC[i]) >= 8 aCCites = aC[i][8] ok
-		aRows + ("[" + RingStr(aC[i][1]) + ", " + RingStr(aC[i][2]) + ", " + RingStr(aC[i][3]) + ", " + RingStr(aC[i][4]) + ", " + RingStr(aC[i][5]) + ", " + RingStr(cCC) + ", " + NamesSource(aCCites) + "]")
+		# v0.25: the SEVERITY (error or warning) rides along as the eighth element
+		cCSev = "error"
+		if len(aC[i]) >= 9 cCSev = aC[i][9] ok
+		aRows + ("[" + RingStr(aC[i][1]) + ", " + RingStr(aC[i][2]) + ", " + RingStr(aC[i][3]) + ", " + RingStr(aC[i][4]) + ", " + RingStr(aC[i][5]) + ", " + RingStr(cCC) + ", " + NamesSource(aCCites) + ", " + RingStr(cCSev) + "]")
 	next
 	cConstraints = RowsSource(aRows, nl)
 	aW = LangGet(aLang, "world")
@@ -486,6 +491,8 @@ func ForgeCourt(aLang)
 	c += "$aCourtConstitution = []" + nl
 	# v0.24: the zone of organizational_sovereignty, and the audit chain of visible_state
 	c += "$aCourtZone = []" + nl + "$cCourtAuditFile = " + '""' + nl + "$aCourtAuditProposal = []" + nl
+	# v0.25: the personal seats the chain redacts, and the warnings a court speaks after its verdict
+	c += "$aCourtPersonal = []" + nl + "$aCourtWarnings = []" + nl
 	c += "$bCourtCollect = 0" + nl + "$aCourtFound = []" + nl + "$aCourtBroken = []" + nl
 	c += "$bRunTrace = 0" + nl + "$aRunTrace = []" + nl + "$nRunDepth = 0" + nl + "$bAskTrace = 0" + nl + "$aAskTrace = []" + nl
 	c += ExprGlobals()
@@ -508,6 +515,16 @@ func ForgeCourt(aLang)
 		if len(aCst) >= 9
 			if aCst[7] != ""
 				c += "$aCourtZone = [" + RingStr(aCst[7]) + ", " + RingStr(aCst[8]) + ", " + RingStr(aCst[9]) + "]" + nl
+			ok
+		ok
+		# v0.25: the personal seats, as point names decl.seat, which the chain redacts
+		if len(aCst) >= 10
+			if len(aCst[10]) > 0
+				aPersNames = []
+				for i = 1 to len(aCst[10])
+					aPersNames + aCst[10][i][1]
+				next
+				c += "$aCourtPersonal = " + NamesSource(aPersNames) + nl
 			ok
 		ok
 	ok

@@ -214,7 +214,7 @@ no expression position, no escape):
 | **`ASK`** (the pragmatics stratum) | absent | the language's own closed query grammar (the Q letter) and the human languages its natural door speaks; NL asks, never declares; the engine compiles to this grammar and never to host code [R, mission.md rules 1-2]. *The query grammar is built, v0.7 (the seventh rung); the natural door is not.* |
 | **`NARRATE`** | absent | how a run of the language is narrated back (stzn); the court's voice. *Built, v0.13 (the thirteenth rung): SAYS, OPENS, ENDS, REFUSES; `narrate <file>`; a projection, never stored, never parsed back.* |
 | **`REFINE`** | absent | which declared points of a sentence may be refined, by whom, within what bounds, at what trust floor (section 7) |
-| **`CONSTITUTION`** | absent | the articles a world declares itself under, judged through the seats above and the gate, never reimplemented (section 2; D33). *Built, v0.23 (ZC2, 2026-11-02): `ARTICLES` drawn from Zin's six by name and number, `WEAVES` and `REGIME` carried for ZC4; 22 fixtures and a bank's ledger judged on both runtimes. v0.24 (ZC3, the same day, D34): `ZONE`, `SOVEREIGN`, `MOVEMENT`; visible state through the access paths and the audit chain; 18 fixtures and the bank under all six* |
+| **`CONSTITUTION`** | absent | the articles a world declares itself under, judged through the seats above and the gate, never reimplemented (section 2; D33). *Built, v0.23 (ZC2, 2026-11-02): `ARTICLES` drawn from Zin's six by name and number, `WEAVES` and `REGIME` carried for ZC4; 22 fixtures and a bank's ledger judged on both runtimes. v0.24 (ZC3, the same day, D34): `ZONE`, `SOVEREIGN`, `MOVEMENT`; visible state through the access paths and the audit chain; 18 fixtures and the bank under all six. v0.25 (ZC4's Haro slice, D35): `PERSONAL`, the sovereignty and privacy weaves at their severities, the regime read, `SEVERITY` on a constraint; 16 fixtures and the clinic* |
 | **`FORMS` inside a vocabulary** | absent | the function-name grammar of principle 7 declared as data for the computing altitude's families. *Built, v0.12 (the twelfth rung): FLUENT, PASSIVE, STATEMENT, PARAMS and FAMILY; the families generated, the shipped spellings judged live.* |
 
 **Built 2026-10-01, the first slice of two of these rows -- Haro v0.2, the spike's second
@@ -1134,6 +1134,19 @@ states principle 14.
   sentence; a world under sovereignty declares a zone kind with two required seats -- Z's `LANDING_ZONE` has `INTO` and no holder, so the tontine stands under Art. 5 once its zone says who holds it
   (ZC5's second act, with the codes Art. 1 asks for); and a global the forge adds must be born in every generated court, because on Ring 1.27 a `$name` first assigned in a function is that function's
   local, so every rung that grows the forge regenerates the committed courts (HF-127).
+- **D35 -- the weaves enter as judged field tags: sovereignty and privacy over the personal seats, at a declared severity, the regime named** (ZC4, the cross-repository rung, built on the
+  author's "Start ZC4", 2026-11-02; the Haro slice is `haro/spike/v25/GRAMMAR.md`; the stzlib and HaroBase slices are recorded under this decision as they land). **In Haro:** the `CONSTITUTION`
+  names its `PERSONAL` seats (paths `decl.seat`), and `WEAVES [sovereignty: <severity>, privacy: <severity>]` are judged over them THROUGH the three paths a language already declares: a personal
+  seat told by the voice is a log that carries a personal datum (W4.4), a kind holding one that the ask asks is analytics without consent (W4.2), a kind holding one that the world publishes is a
+  movement out of its zone (W3.1). `constitutional` refuses, `governance` warns, `advisory` notes -- Zin's three severities, kept. Every weave refusal names the article it serves and the declared
+  `REGIME`'s own article: gdpr's (Article 5(1)(e), Article 7, Chapter V, the numbers Zin's documents cite), Niger Law 2017-28 as Zin's African companion names it, a regime Haro has no table for as
+  declared, "no regime declared" where there is none -- never a default. The forged court redacts a personal point's values on the admitted line and in the audit chain. The five other weaves
+  stay carried and refused by name. **`SEVERITY error | warning` on a `CONSTRAINT`** (stzzui's S1, Central's item 2): a warning leaves the verdict `ok`, is spoken after it with its code and
+  line, and enters the envelope as a `"warning"` diagnostic; a `REFUSAL`'s severity is not built, because a refusal of the grammar stops the parse, and stzzui's five warnings are reference-level
+  -- a per-seat severity beside `MESSAGES` is the next step, named. **The model path** -- a field declared personal that reaches a model -- is not a Haro rule: it is stzlib's field tags and
+  HaroBase's column flags, this rung's other two slices. *Cost:* a world under privacy writes its voice without its personal seats and asks no question over the kinds that hold them, or declares
+  the weave at governance and reads the warnings; the personal seats are declared by hand, never inferred from a name (Zin's own open question, answered the honest way); and the regime table is
+  the size of what the estate has read.
 - **D23 -- `rnxc fmt` is a Ring++ feature, not held for Haro** (CODEGRAPH Q4, ruled on the author's delegation, 2026-10-05: "take
   whatever decision you think is wiser on my behalf"). It is a verb of the one binary (commitment 5), depends on nothing of Haro's, is
   judged against the oracle and refuses what Ring refuses (58 of 6,061 Softanza files, 57 of them Ring's own refusals). It ships inside

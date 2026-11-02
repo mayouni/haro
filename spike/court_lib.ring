@@ -197,6 +197,20 @@ func CtZoneSeat(cKindName, cSeat)
 	if cKindName != $aCourtZone[1] return 0 ok
 	return (cSeat = $aCourtZone[2] or cSeat = $aCourtZone[3])
 
+# v0.25: whether a point (kind.seat) is one of the constitution's PERSONAL seats
+func CtIsPersonal(cPoint)
+	for i = 1 to len($aCourtPersonal)
+		if $aCourtPersonal[i] = cPoint return 1 ok
+	next
+	return 0
+
+# v0.25: the warnings a court collected (a CONSTRAINT of SEVERITY warning), as C2 diagnostics
+func CtAppendWarnings(aDiags, cFile)
+	for i = 1 to len($aCourtWarnings)
+		aW = $aCourtWarnings[i]
+		aDiags + [aW[1], "warning", aW[4], cFile, aW[3], aW[2]]
+	next
+
 # v0.24: the audit chain of a sentence under visible_state (3): every refinement event, admitted
 # or refused, is one JSON line appended beside the sentence (<file>.audit), numbered in order --
 # no clock, so both runtimes write the same bytes; `audit <file>` answers the chain as a query.
@@ -210,8 +224,17 @@ func CtAuditWrite(cVerdict, cStage, cCode)
 		if cOld[i] = char(10) nEv++ ok
 	next
 	aP = $aCourtAuditProposal
+	# v0.25: a personal point's values enter the chain redacted (W4.4: a log carries no personal datum)
+	cFromA = aP[3]
+	cToA = aP[4]
+	if len(aP) >= 7
+		if CtIsPersonal(aP[7])
+			cFromA = "[personal]"
+			cToA = "[personal]"
+		ok
+	ok
 	cLine = '{"event": ' + (nEv + 1) + ', "proposal": ' + CtJson(aP[1]) + ', "target": ' + CtJson(aP[2]) +
-	        ', "from": ' + CtJson(aP[3]) + ', "to": ' + CtJson(aP[4]) + ', "author": ' + CtJson(aP[5]) +
+	        ', "from": ' + CtJson(cFromA) + ', "to": ' + CtJson(cToA) + ', "author": ' + CtJson(aP[5]) +
 	        ', "posture": ' + CtJson(aP[6]) + ', "verdict": ' + CtJson(cVerdict) + ', "stage": ' + CtJson(cStage) +
 	        ', "code": ' + CtJson(cCode) + '}'
 	write($cCourtAuditFile, cOld + cLine + char(10))
@@ -491,6 +514,7 @@ func CtDiagnose(cFile, cWorldPath)
 	aDiags = []
 	cSrc = read(cFile)
 	CtSetCode("PARSE", [])
+	$aCourtWarnings = []
 	# v0.14: this verb collects -- every pass goes on past a refusal to its next element
 	$bCourtCollect = 1
 	$aCourtFound = []
@@ -514,8 +538,10 @@ func CtDiagnose(cFile, cWorldPath)
 		for i = 1 to len(aF)
 			aDiags + [aF[i][1], "error", aF[i][4], cFile, aF[i][3], aF[i][2]]
 		next
+		CtAppendWarnings(aDiags, cFile)
 		return aDiags
 	ok
+	CtAppendWarnings(aDiags, cFile)
 	if isNull($aCourtWorldFile) and len($aCourtSymbols) > 0
 		aSites = CtSymbolSites(aDecls)
 		if len(aSites) > 0
@@ -1358,11 +1384,18 @@ func CtDeclare(cSrc)
 					if len(aCn) >= 7
 						if len(aCn[7]) > 0 aCC[2] = aCn[7] ok
 					ok
-					try
-						CtFailC(aD[3], aCC[1], aCC[2], CtFill(aCn[5], aD, ""))
-					catch
-						CtNote(cCatchError)
-					done
+					# v0.25: a CONSTRAINT of SEVERITY warning is noted and spoken after the verdict, never raised
+					cCnSev = "error"
+					if len(aCn) >= 8 cCnSev = aCn[8] ok
+					if cCnSev = "warning"
+						$aCourtWarnings + [aCC[1], aCC[2], aD[3], CtFill(aCn[5], aD, "")]
+					else
+						try
+							CtFailC(aD[3], aCC[1], aCC[2], CtFill(aCn[5], aD, ""))
+						catch
+							CtNote(cCatchError)
+						done
+					ok
 				ok
 			ok
 		next
@@ -1862,6 +1895,8 @@ func CtRefine(cFile, cRfnFile)
 	# scalar seat is a point (a word or number a knob, a text a field) at the
 	# court's floor, trusted.
 	cPointName = aKind[2] + "." + lower(cClause)
+	# v0.25: the chain learns the point, so a personal point's values are redacted in it
+	if $cCourtAuditFile != "" $aCourtAuditProposal + cPointName ok
 	cDeclaredKind = ""
 	for i = 1 to len($aCourtPoints)
 		if $aCourtPoints[i][1] = cPointName cDeclaredKind = $aCourtPoints[i][2] ok
@@ -1983,7 +2018,10 @@ func CtRefine(cFile, cRfnFile)
 	          '  REASON "the inverse of ' + aR[2] + ', computed before it landed"' + char(10) +
 	          ') RATIONALE "A revert is its own event; nothing is erased"' + char(10)
 	write(cFile + ".revert.rfn", cRevert)
-	? "admitted: " + cTarget + " " + cFrom + " -> " + cTo + " [" + cPosture + "] (structural + constraint + derivation + governance + trust passed); inverse in " + cFile + ".revert.rfn"
+	# v0.25: a personal point's values are not spoken (W4.4); the inverse beside the file keeps them, as the file does
+	cShownA = cFrom + " -> " + cTo
+	if CtIsPersonal(cPointName) cShownA = "[personal] -> [personal]" ok
+	? "admitted: " + cTarget + " " + cShownA + " [" + cPosture + "] (structural + constraint + derivation + governance + trust passed); inverse in " + cFile + ".revert.rfn"
 	CtAuditWrite("admitted", "", "")
 
 # ---- v0.6: a sentence's expressions evaluated, and a WALK run ---------------------
@@ -2139,8 +2177,13 @@ func CtMain()
 				if sysargv[5] = "surfaces" $bNSurfaces = 1 ok
 			ok
 			if len(sysargv) >= 5 and not $bNSurfaces $aCourtWorldFile = CtWorldLoad(sysargv[5]) ok
+			$aCourtWarnings = []
 			aDecls = CtDeclare(cSrc)
 			CtPrintVerdict(aDecls)
+			# v0.25: a CONSTRAINT of SEVERITY warning is spoken after the verdict, with its code and line
+			for i = 1 to len($aCourtWarnings)
+				? "warning " + $aCourtWarnings[i][1] + ": " + $aCourtWarnings[i][4] + " (line " + $aCourtWarnings[i][3] + ")"
+			next
 			if isNull($aCourtWorldFile) and len($aCourtSymbols) > 0
 				nSites = len(CtSymbolSites(aDecls))
 				if nSites > 0

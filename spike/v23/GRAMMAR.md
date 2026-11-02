@@ -107,3 +107,9 @@ have failed the court that closed it. Each now pins its mechanism's first refusa
 v0.23 source (`Art. 3 visible_state: kind 'account' is reached by no declared path`; `Art. 5
 organizational_sovereignty: 'bank' names no ZONE`), and its name says so. Nothing else in this
 file changed.
+
+**Amended again 2026-11-02 (v0.25, ZC4).** R13 pinned "no weave is judged in Haro v0.23" and R16
+"no weave reads a regime"; v0.25 judges sovereignty and privacy and reads the regime
+(`v25/GRAMMAR.md`, D35). R13 now names `resilience` and pins that the five other weaves are still
+refused by name; R16 keeps its source and pins that a regime without any weave is refused, not
+accepted by silence. Their names say so.

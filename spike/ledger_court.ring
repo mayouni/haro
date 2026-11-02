@@ -56,6 +56,8 @@ $aCourtConstitution = []
 $aCourtZone = []
 $cCourtAuditFile = ""
 $aCourtAuditProposal = []
+$aCourtPersonal = []
+$aCourtWarnings = []
 $bCourtCollect = 0
 $aCourtFound = []
 $aCourtBroken = []
@@ -101,7 +103,7 @@ $aCourtLangs = [
     [
     ],
     [
-      ["one_limit_per_account", "limit", "earlier limit where on = this.on", "", "LIMIT {name} and LIMIT {other} both stand on {on}: one limit an account", "ONE_LIMIT", ["right:one-limit-per-account"]]
+      ["one_limit_per_account", "limit", "earlier limit where on = this.on", "", "LIMIT {name} and LIMIT {other} both stand on {on}: one limit an account", "ONE_LIMIT", ["right:one-limit-per-account"], "error"]
     ],
     [[], "", [], []],
     [["account.ceiling", "knob"], ["limit.daily", "knob"], ["limit.rule", "policy"], ["limit.message", "field"]],

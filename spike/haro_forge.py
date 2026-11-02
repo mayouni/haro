@@ -72,6 +72,7 @@ STZU16_FIXTURES = os.path.join(HERE, 'v16', 'fixtures.json')
 STZU17_FIXTURES = os.path.join(HERE, 'v17', 'meta_fixtures.json')
 STZU23_FIXTURES = os.path.join(HERE, 'v23', 'fixtures.json')
 STZU24_FIXTURES = os.path.join(HERE, 'v24', 'fixtures.json')
+STZU25_FIXTURES = os.path.join(HERE, 'v25', 'fixtures.json')
 
 
 def judge_stzu(exe, label, fixtures=STZU_FIXTURES):
@@ -81,7 +82,7 @@ def judge_stzu(exe, label, fixtures=STZU_FIXTURES):
     counts), world and points."""
     doc = json.load(open(fixtures, encoding='utf-8'))
     # the pinned v0.1 judge is stzu's; everything since is Haro's (D1)
-    assert doc['grammar'] in ('stzu', 'haro') and doc['version'] in ('0.1', '0.2', '0.3', '0.4', '0.5', '0.6', '0.7', '0.8', '0.9', '0.10', '0.11', '0.12', '0.13', '0.16', '0.17', '0.23', '0.24')
+    assert doc['grammar'] in ('stzu', 'haro') and doc['version'] in ('0.1', '0.2', '0.3', '0.4', '0.5', '0.6', '0.7', '0.8', '0.9', '0.10', '0.11', '0.12', '0.13', '0.16', '0.17', '0.23', '0.24', '0.25')
     passed = failed = 0
     outputs = {}
     with tempfile.TemporaryDirectory() as td:
@@ -160,7 +161,8 @@ def stage1():
                             ('v0.16, NARRATE tells a run and a question', STZU16_FIXTURES),
                             ('v0.17, UNDERSTAND: what a human language reaches closed questions with', STZU17_FIXTURES),
                             ('v0.23, CONSTITUTION: a world under Zin\'s articles, judged through the charter\'s mechanisms', STZU23_FIXTURES),
-                            ('v0.24, visible state through the access paths, sovereignty through the zones', STZU24_FIXTURES)):
+                            ('v0.24, visible state through the access paths, sovereignty through the zones', STZU24_FIXTURES),
+                            ('v0.25, the sovereignty and privacy weaves over the personal seats, the regime named, SEVERITY on a constraint', STZU25_FIXTURES)):
         print(f'stage 1 -- the Haro meta-court in pure Ring, judged by its fixtures ({label})')
         f1, o1 = judge_stzu(RNXC, 'rnxc', fixtures)
         f2, o2 = judge_stzu(ORACLE, 'oracle ring.exe', fixtures)
@@ -3081,6 +3083,8 @@ LEDGER_STZU = os.path.join(HERE, 'ledger_v23.haro')
 LEDGER_CASES = os.path.join(HERE, 'v23', 'court_cases.json')
 BANK_STZU = os.path.join(HERE, 'bank_v24.haro')
 BANK_CASES = os.path.join(HERE, 'v24', 'court_cases.json')
+CLINIC_STZU = os.path.join(HERE, 'clinic_v25.haro')
+CLINIC_CASES = os.path.join(HERE, 'v25', 'court_cases.json')
 
 
 def ledger_stage(n, stzu, cases_path, lang, plant_id):
@@ -3187,7 +3191,7 @@ def ledger_stage(n, stzu, cases_path, lang, plant_id):
             except (json.JSONDecodeError, KeyError, IndexError, TypeError):
                 d = {}
             want = case['diagnose']
-            if d.get('code') != want['code'] or d.get('cites') != want['cites']:
+            if d.get('code') != want['code'] or d.get('cites') != want['cites'] or ('severity' in want and d.get('severity') != want['severity']):
                 ok = False; why = f'diagnostic {json.dumps(d)[:200]}'
         if case.get('revert') and '[revert] restored byte for byte' not in r:
             ok = False; why = r.strip().splitlines()[-1][:160] if r.strip() else 'no output'
@@ -3224,6 +3228,16 @@ def stage30():
     through the audit chain (two events kept beside the sentence and answered as a query); the chain is
     the article's, so the v0.23 ledger keeps none."""
     return ledger_stage(30, BANK_STZU, BANK_CASES, 'bank', 'W3')
+
+
+def stage31():
+    """ZC4, the Haro slice (v25/GRAMMAR.md): clinic_v25.haro, a clinic under the whole constitution with
+    the sovereignty and privacy weaves constitutional, a declared regime and one PERSONAL seat, and its
+    eight cases -- the voice tells by file number, never by name; a personal point refined is admitted
+    with its values redacted on the admitted line and in the chain, a non-personal one keeps them; a
+    CONSTRAINT of SEVERITY warning stands and is spoken after the verdict and placed in the envelope as
+    a warning; a clean sentence diagnoses empty."""
+    return ledger_stage(31, CLINIC_STZU, CLINIC_CASES, 'clinic', 'X4')
 
 def stage6(lang, court=None, n=15):
     court = court or f'{lang}_court.ring'
@@ -3344,5 +3358,7 @@ if __name__ == '__main__':
         failures += stage29()
     if stage in (None, 30) and os.path.exists(BANK_STZU) and os.path.exists(BANK_CASES):
         failures += stage30()
+    if stage in (None, 31) and os.path.exists(CLINIC_STZU) and os.path.exists(CLINIC_CASES):
+        failures += stage31()
     print(f'haro_forge: {"FAIL" if failures else "PASS"} ({failures} failure(s), {time.perf_counter()-t0:.1f} s)')
     sys.exit(1 if failures else 0)

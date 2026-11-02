@@ -33,6 +33,8 @@ $aStzuFound = []
 $aStzuBroken = []
 $aStzuLastName = ""
 $aStzuUnresolved = []
+$aStzuWarnings = []
+$aStzuNotes = []
 
 if len(sysargv) < 3
 	? "usage: haro.ring <file.haro> [all]"

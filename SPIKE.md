@@ -1495,6 +1495,26 @@ in a function is that function's local, and a court generated before the forge g
 and R12 amended to pin each mechanism's first refusal; an ASK of a FROM alone is an access path; the chain is numbered, not dated; Z's zone has no
 holder yet (ZC5's second act).
 
+## The twenty-fifth rung -- Haro v0.25, the first two weaves: sovereignty and privacy over the personal seats -- 2026-11-02
+
+**On the author's "Start ZC4"** (2026-11-02 00:40), the Haro slice of the constitution plane's cross-repository rung (D35). The CONSTITUTION names its
+`PERSONAL` seats, and `WEAVES [sovereignty: s, privacy: s]` are judged over them through the three paths a language declares -- the voice (W4.4), the
+ask (W4.2), the published world (W3.1) -- at Zin's three severities: constitutional refuses, governance warns, advisory notes. Every refusal names Art. 5
+and the declared `REGIME`'s own article (gdpr's, Niger Law 2017-28, a regime as declared, "no regime declared"), never a default. The forged court
+redacts a personal point in the chain and on the admitted line. `SEVERITY error | warning` on a CONSTRAINT: a warning is spoken after the verdict and
+enters the envelope. `spike/v25/GRAMMAR.md` is the account; the model path is stzlib's and HaroBase's, the same rung.
+
+    v25/fixtures.json                   16 meta fixtures, written before the court (6 accepts, 10 rejects)
+    clinic_v25.haro, clinic/            a clinic under the whole constitution and both weaves: the language, two sentences, two proposals
+    v25/court_cases.json                8 sentence cases: the voice by file number, the chain redacting, a warning constraint, an empty diagnosis
+    haro_lib.ring, forge.ring, court_lib.ring   the weave checks and the regime table; the personal seats and warnings carried; the court's redaction and warnings
+    haro_forge.py                       stage 1 grows by v0.25; stage 31 is the clinic
+
+**Results.** 16 of 16 and 8 of 8, rnxc and the oracle byte-identical; stages 1 to 5, 9 to 18, 21, 29 and 30 unchanged; the ten committed courts
+regenerated. **What building found** (HF-128): two true refusals and the fixture's order kept; a line miscounted and corrected by inspection before the
+court ran; the regime table is the size of what the estate has read; a REFUSAL's severity has nowhere to be a warning (a per-seat severity is the next
+step, named); the chain redacts per point.
+
 ## The names -- `.haro`, not `.stzu` -- corrected 2026-10-02
 
 **At the author's word ("we agreed to use .haro instead of .stzu, no?").** D1 was ratified
@@ -1617,8 +1637,10 @@ whole guard re-run on the renamed tree: 28 + 30 + 27 + 23, 117 of 120, 32 of 32,
    `CONSTITUTION` declaration, 22 meta fixtures and a bank's ledger's 10 cases written first, 32 of 32 on both runtimes, byte-identical.
    **ZC3 BUILT 2026-11-02 as Haro v0.24** (the twenty-fourth rung below; `v24/GRAMMAR.md`, guard stage 30, D34, HF-127): visible state
    through the three access paths and the audit chain, sovereignty through a zone's holder and entry; 18 meta fixtures and the bank under
-   all six articles' 10 cases written first, 28 of 28 on both runtimes. Not begun: ZC4 (W3 and W4 as field tags in stzlib and HaroBase;
-   SEVERITY), ZC5 (the tontine under the whole constitution, read by the author: its refusals coded, its zone held).
+   all six articles' 10 cases written first, 28 of 28 on both runtimes. **ZC4, the Haro slice, BUILT 2026-11-02 as Haro v0.25** (the
+   twenty-fifth rung below; `v25/GRAMMAR.md`, guard stage 31, D35, HF-128): sovereignty and privacy judged over the PERSONAL seats at a
+   declared severity, the regime named, SEVERITY on a constraint; 16 meta fixtures and the clinic's 8 cases, 24 of 24 on both runtimes.
+   ZC4's stzlib and HaroBase slices follow under D35; not begun: ZC5 (the tontine under the whole constitution, read by the author).
 18. The forge as an `rnxc` verb (the ringpp session's `src/`, routed); the
    Softanza-resident timing the charter's 2.6 asks for; the court's run time on the
    oracle under paths and views (6.4x the image this pass, named at stage 6); the

@@ -45,7 +45,7 @@
       "verb": "check",
       "args": ["clinic/ward_shared_file.clinic"],
       "first": "ok",
-      "contains": ["warning SHARED_FILE: PATIENT p2 and PATIENT p1 share the file F-12: a file number names one patient (line 9)"]
+      "contains": ["warning SHARED_FILE: PATIENT p2 and PATIENT p1 share the file F-12: a file number names one patient (line 8)"]
     },
     {
       "id": "X7",
