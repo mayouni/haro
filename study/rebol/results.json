@@ -1,0 +1,218 @@
+{
+ "when": "2026-11-02 12:33",
+ "c6": [
+  {
+   "family": "Haro's meta-language (.haro, the spike)",
+   "files": 29,
+   "loaded": 29,
+   "round_trip": 29,
+   "refused_why": {},
+   "round_trip_failed": [],
+   "bytes": 237620,
+   "canonical_bytes": 238565
+  },
+  {
+   "family": "the letters' sentences (the spike's worlds)",
+   "files": 62,
+   "loaded": 61,
+   "round_trip": 61,
+   "refused_why": {
+    "unexpected '_'": 1
+   },
+   "round_trip_failed": [],
+   "bytes": 89216,
+   "canonical_bytes": 91764
+  },
+  {
+   "family": "the machine language (.stzu, harobanda and stzzui)",
+   "files": 2,
+   "loaded": 2,
+   "round_trip": 2,
+   "refused_why": {},
+   "round_trip_failed": [],
+   "bytes": 103530,
+   "canonical_bytes": 103644
+  },
+  {
+   "family": ".zql (zing), an elder",
+   "files": 19,
+   "loaded": 0,
+   "round_trip": 0,
+   "refused_why": {
+    "a single quote; C6 strings are double-quoted (.zql's D-ZQL-1 is a divergence)": 19
+   },
+   "round_trip_failed": [],
+   "bytes": 0,
+   "canonical_bytes": 0
+  },
+  {
+   "family": ".wflow (RingFlex), an elder",
+   "files": 29,
+   "loaded": 5,
+   "round_trip": 5,
+   "refused_why": {
+    "unexpected '_'": 24
+   },
+   "round_trip_failed": [],
+   "bytes": 1757,
+   "canonical_bytes": 1813
+  },
+  {
+   "family": ".zui (StzZui), an elder",
+   "files": 72,
+   "loaded": 0,
+   "round_trip": 0,
+   "refused_why": {
+    "unexpected '_'": 72
+   },
+   "round_trip_failed": [],
+   "bytes": 0,
+   "canonical_bytes": 0
+  }
+ ],
+ "memo": [
+  {
+   "family": "the journal (softanza/memos, yaml fences), as C9 reads it",
+   "texts": 1241,
+   "loaded": 109,
+   "own_round_trip": 109,
+   "into_c6_and_back": 62,
+   "refused_why": {
+    "unexpected indentation before '_'": 657,
+    "'_' is not a '_' line": 318,
+    "unexpected indentation before '_'s'": 7,
+    "unexpected indentation before '_'s own'": 2,
+    "unexpected indentation before '_'s clock'": 2,
+    "'_'s'_'field: value' line": 2,
+    "unexpected indentation before '_'s own OBS-45 repair while installing them'": 1,
+    "unexpected indentation before '_'s deadlock'": 1
+   },
+   "c6_crossing_refused_why": {
+    "a string holding a double quote has no C6 printing (C6 strings have no escape)": 47
+   },
+   "keys": 1211,
+   "keys_not_c6_identifiers": 180
+  },
+  {
+   "family": "the mailboxes (softanza/mailbox, yaml fences), as C9 reads it",
+   "texts": 790,
+   "loaded": 11,
+   "own_round_trip": 11,
+   "into_c6_and_back": 6,
+   "refused_why": {
+    "unexpected indentation before '_'": 631,
+    "'_' is not a '_' line": 67,
+    "unexpected indentation before '_'s'": 6,
+    "unexpected indentation before '_'s 11:05 finding across the registered estate, not'": 6,
+    "unexpected indentation before '_'s clock'": 3,
+    "unexpected indentation before '_'s finding, carried in their words'": 2,
+    "unexpected indentation before '_'s and ringine'_'": 2,
+    "unexpected indentation before '_'s own'": 1
+   },
+   "c6_crossing_refused_why": {
+    "a string holding a double quote has no C6 printing (C6 strings have no escape)": 5
+   },
+   "keys": 164,
+   "keys_not_c6_identifiers": 50
+  },
+  {
+   "family": ".pia agents (roster, stzlib, harobanda), as C9 reads it",
+   "texts": 18,
+   "loaded": 18,
+   "own_round_trip": 18,
+   "into_c6_and_back": 18,
+   "refused_why": {},
+   "c6_crossing_refused_why": {},
+   "keys": 416,
+   "keys_not_c6_identifiers": 15
+  },
+  {
+   "family": "the journal (softanza/memos, yaml fences), the house reading",
+   "texts": 1241,
+   "loaded": 1007,
+   "own_round_trip": 1007,
+   "into_c6_and_back": 400,
+   "refused_why": {
+    "'_' is not a '_' line": 189,
+    "unexpected indentation before '_'": 21,
+    "unexpected indentation before '_'S DISAGREE UPHELD IN FULL. It was told to re-send three i": 1,
+    "'_'s condition'_'field: value' line": 1,
+    "'_'s closure IS in it, at line 412, buried mid-sentence in a'_'field: value' line": 1,
+    "unexpected indentation before '_'s HEAD, authored 2026-08-26 08:57:42 +0100, on origin/mai": 1,
+    "unexpected indentation before '_'s behaviour, so no suite driving a real server with an or": 1,
+    "'_'s slot, empty slots fill from defaults. A complete positional'_'field: value' line": 1
+   },
+   "c6_crossing_refused_why": {
+    "a string holding a double quote has no C6 printing (C6 strings have no escape)": 607
+   },
+   "keys": 13342,
+   "keys_not_c6_identifiers": 3202
+  },
+  {
+   "family": "the mailboxes (softanza/mailbox, yaml fences), the house reading",
+   "texts": 790,
+   "loaded": 572,
+   "own_round_trip": 572,
+   "into_c6_and_back": 159,
+   "refused_why": {
+    "'_' is not a '_' line": 165,
+    "unexpected indentation before '_'": 23,
+    "'_'s callback path, from opposite directions.'_'field: value' line": 2,
+    "'_'s and is routed there too. But a seat that cannot be reached is a'_'field: value' line": 1,
+    "'_'s own integrity clause, which is the part Bangalo should test'_'field: value' line": 1,
+    "'_'s A/B of 2026-08-17 12:05 -- two builds differing in'_'field: value' line": 1,
+    "'_'s words, stated as facts and NOT as a'_'field: value' line": 1,
+    "'_'S OWN WORDS ON WHY THIS IS SEPARATE, and they are the argument for doing'_'field: value": 1
+   },
+   "c6_crossing_refused_why": {
+    "a string holding a double quote has no C6 printing (C6 strings have no escape)": 413
+   },
+   "keys": 8199,
+   "keys_not_c6_identifiers": 2728
+  },
+  {
+   "family": ".pia agents (roster, stzlib, harobanda), the house reading",
+   "texts": 18,
+   "loaded": 18,
+   "own_round_trip": 18,
+   "into_c6_and_back": 18,
+   "refused_why": {},
+   "c6_crossing_refused_why": {},
+   "keys": 416,
+   "keys_not_c6_identifiers": 15
+  }
+ ],
+ "face": {
+  "family": "Ring++ face (Softanza base, a sample)",
+  "files": 300,
+  "loaded": 0,
+  "refused_why": {
+   "unexpected '_'": 300
+  }
+ },
+ "house_reading_agrees_with_c9": {
+  "same_block": 138,
+  "another_block": 0
+ },
+ "doubled_quote": {
+  "journal": 1007,
+  "mailboxes": 572,
+  "c6_files_read_alike": 97,
+  "c6_files_that_differ": 0
+ },
+ "pattern_over_corpus": {
+  "rule": {
+   "decl": "[LIT DEFINE KEYWORD WORD LIT AS GROUP LIT RATIONALE STRING]",
+   "main": "[ANY RULE decl END]"
+  },
+  "files_matching": 87,
+  "files_not": 10,
+  "steps": 13008,
+  "seconds": 0.85,
+  "largest_input_values": [
+   1113,
+   "zui.stzu"
+  ]
+ },
+ "seconds": 20.2
+}

@@ -72,6 +72,12 @@
    "a": "by: ringpp\n",
    "a_spelling": "memo",
    "b": "(by: ringpp)"
+  },
+  {
+   "id": "D05",
+   "name": "a comment is a value of the block: a text with it is not the text without it (added after the reader: L07 compared two texts that both held the comment, so it could not see a reader that drops comments)",
+   "a": "(A 1, -- why\n B 2)",
+   "b": "(A 1, B 2)"
   }
  ],
  "canonical": [
@@ -126,6 +132,12 @@
    "text": "- a\n- b\n",
    "spelling": "memo",
    "why": "bare list"
+  },
+  {
+   "id": "F06",
+   "name": "an empty item between two commas (added after the reader: no fixture pinned the refusal, found by switching it off)",
+   "text": "[a, , b]",
+   "why": "an empty item"
   }
  ]
 }
