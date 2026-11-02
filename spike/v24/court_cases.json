@@ -73,7 +73,7 @@
       "id": "W10",
       "name": "the chain is article 3's: the v0.23 ledger, under no visible_state, keeps none and says so",
       "verb": "sequence",
-      "court": "ledger_court.ring",
+      "court": "ledger_court.haro",
       "steps": [["refine", "ledger/bank.ledger", "ledger/ceiling_external.rfn"], ["audit", "ledger/bank.ledger"]],
       "contains": ["admitted: main.CEILING", "no audit chain: ledger is under no visible_state"]
     }

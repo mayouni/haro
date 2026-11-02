@@ -30,8 +30,8 @@ import paths                                   # where Ring++ is (Haro is its ow
 ROOT = paths.RINGPP
 SPIKE = paths.SPIKE
 PACKAGE_RNXC = os.path.join(ROOT, 'runtime', 'package', 'ringpp-win64', 'bin', 'rnxc.exe')
-RNXC = paths.RNXC
-ORACLE = paths.RING
+RNXC = paths.HARO_VM
+ORACLE = paths.RING_ORACLE
 OFFICIAL_RING = r'D:\ring127\bin\ring.exe'
 STZLIB = r'D:\GitHub\stzlib\libraries\stzlib'
 ZING = r'D:\GitHub\zing\cli\zig-out\bin\zing.exe'
@@ -174,8 +174,8 @@ court_cache = {}
 
 def court(zql):
     if zql not in court_cache:
-        r = subprocess.run([RNXC, 'z_court.ring', 'ask', SENTENCE, zql, rows_json], capture_output=True, cwd=SPIKE, env=dict(os.environ, RNXC_NOCACHE='1', HARO_NOCACHE='1'), timeout=120)
-        o = subprocess.run([ORACLE, 'z_court.ring', 'ask', SENTENCE, zql, rows_json], capture_output=True, cwd=SPIKE, env=dict(os.environ, RNXC_NOCACHE='1', HARO_NOCACHE='1'), timeout=120)
+        r = subprocess.run([RNXC, 'z_court.haro', 'ask', SENTENCE, zql, rows_json], capture_output=True, cwd=SPIKE, env=dict(os.environ, RNXC_NOCACHE='1', HARO_NOCACHE='1'), timeout=120)
+        o = subprocess.run([ORACLE, 'z_court.haro', 'ask', SENTENCE, zql, rows_json], capture_output=True, cwd=SPIKE, env=dict(os.environ, RNXC_NOCACHE='1', HARO_NOCACHE='1'), timeout=120)
         court_cache[zql] = (r.stdout.decode('utf-8', 'replace').replace('\r\n', '\n').strip(), o.stdout.decode('utf-8', 'replace').replace('\r\n', '\n').strip())
     return court_cache[zql]
 
@@ -291,7 +291,7 @@ shutil.rmtree(ctl, ignore_errors=True)
 tampered = ['SELECT * FROM collect; DROP TABLE collect', 'SELECT * FROM collect WHERE amount > 5000 OR 1=1; --', 'DROP TABLE collect', 'SELECT member FROM collect']
 refused_by_court = 0
 for t in tampered:
-    r = subprocess.run([RNXC, 'z_court.ring', 'ask', SENTENCE, t, rows_json], capture_output=True, cwd=SPIKE, env=dict(os.environ, RNXC_NOCACHE='1', HARO_NOCACHE='1'), timeout=120)
+    r = subprocess.run([RNXC, 'z_court.haro', 'ask', SENTENCE, t, rows_json], capture_output=True, cwd=SPIKE, env=dict(os.environ, RNXC_NOCACHE='1', HARO_NOCACHE='1'), timeout=120)
     o = r.stdout.decode('utf-8', 'replace').strip()
     if not o.startswith('[') and o:
         refused_by_court += 1

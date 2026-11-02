@@ -1,8 +1,8 @@
-# expr_lib.ring -- the generic court AND evaluator of a declared EXPRESSION
+# expr_lib.haro -- the generic court AND evaluator of a declared EXPRESSION
 # language (Haro v0.5, grown in v0.6), in pure core Ring.
 #
 # A court FORGED from a .haro declaration that holds an EXPRESSION loads this
-# file and fills its tables (see forge.ring): the language's name, its
+# file and fills its tables (see forge.haro): the language's name, its
 # OPERATORS and OPERANDS (words of the closed menus), its AGGREGATES, its
 # VARIABLES, its CONTEXTS -- the seats a host offers the expression, each
 # with the variables it admits -- and, since v0.6, the three semantics an
@@ -30,7 +30,7 @@
 # the host's numbers (Ring's doubles); a comparison answers 1 or 0; a string
 # is always true, as on the Luau host. A record (a JSON object) is the list
 # [ExObjMark(), [key, value], ...]; a sentence court sets it with
-# ExSetRecord() before evaluating a seat's expression on it (court_lib.ring,
+# ExSetRecord() before evaluating a seat's expression on it (court_lib.haro,
 # the eval and walk verbs), and FORMULA results overlay it by name, as
 # zing's runner does (cli/src/zql.zig, EvalCtx.overlay).
 #

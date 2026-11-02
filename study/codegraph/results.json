@@ -1,59 +1,59 @@
 {
- "D:\\GitHub\\ringpp\\haro\\spike\\a_court.ring": {
+ "D:\\GitHub\\ringpp\\haro\\spike\\a_court.haro": {
   "group": "spike",
   "status": "same",
   "bytes": 4725,
   "detail": null
  },
- "D:\\GitHub\\ringpp\\haro\\spike\\a_expr.ring": {
+ "D:\\GitHub\\ringpp\\haro\\spike\\a_expr.haro": {
   "group": "spike",
   "status": "same",
   "bytes": 852,
   "detail": null
  },
- "D:\\GitHub\\ringpp\\haro\\spike\\ask_lib.ring": {
+ "D:\\GitHub\\ringpp\\haro\\spike\\ask_lib.haro": {
   "group": "spike",
   "status": "same",
   "bytes": 9893,
   "detail": null
  },
- "D:\\GitHub\\ringpp\\haro\\spike\\cond_lib.ring": {
+ "D:\\GitHub\\ringpp\\haro\\spike\\cond_lib.haro": {
   "group": "spike",
   "status": "same",
   "bytes": 48116,
   "detail": null
  },
- "D:\\GitHub\\ringpp\\haro\\spike\\court_lib.ring": {
+ "D:\\GitHub\\ringpp\\haro\\spike\\court_lib.haro": {
   "group": "spike",
   "status": "same",
   "bytes": 73888,
   "detail": null
  },
- "D:\\GitHub\\ringpp\\haro\\spike\\expr_lib.ring": {
+ "D:\\GitHub\\ringpp\\haro\\spike\\expr_lib.haro": {
   "group": "spike",
   "status": "same",
   "bytes": 24881,
   "detail": null
  },
- "D:\\GitHub\\ringpp\\haro\\spike\\f_court.ring": {
+ "D:\\GitHub\\ringpp\\haro\\spike\\f_court.haro": {
   "group": "spike",
   "status": "same",
   "bytes": 14159,
   "detail": null
  },
- "D:\\GitHub\\ringpp\\haro\\spike\\fleet_court.ring": {
+ "D:\\GitHub\\ringpp\\haro\\spike\\fleet_court.haro": {
   "group": "spike",
   "status": "same",
   "bytes": 25995,
   "detail": null
  },
- "D:\\GitHub\\ringpp\\haro\\spike\\forge.ring": {
+ "D:\\GitHub\\ringpp\\haro\\spike\\forge.haro": {
   "group": "spike",
   "status": "same",
   "bytes": 30673,
   "detail": null
  },
- "D:\\GitHub\\ringpp\\haro\\spike\\forms_lib.ring": {
+ "D:\\GitHub\\ringpp\\haro\\spike\\forms_lib.haro": {
   "group": "spike",
   "status": "same",
   "bytes": 9995,
@@ -65,37 +65,37 @@
   "bytes": 764,
   "detail": null
  },
- "D:\\GitHub\\ringpp\\haro\\spike\\haro.ring": {
+ "D:\\GitHub\\ringpp\\haro\\spike\\haro.haro": {
   "group": "spike",
   "status": "same",
   "bytes": 2249,
   "detail": null
  },
- "D:\\GitHub\\ringpp\\haro\\spike\\haro_lib.ring": {
+ "D:\\GitHub\\ringpp\\haro\\spike\\haro_lib.haro": {
   "group": "spike",
   "status": "same",
   "bytes": 81810,
   "detail": null
  },
- "D:\\GitHub\\ringpp\\haro\\spike\\machine_court.ring": {
+ "D:\\GitHub\\ringpp\\haro\\spike\\machine_court.haro": {
   "group": "spike",
   "status": "same",
   "bytes": 19852,
   "detail": null
  },
- "D:\\GitHub\\ringpp\\haro\\spike\\n_court.ring": {
+ "D:\\GitHub\\ringpp\\haro\\spike\\n_court.haro": {
   "group": "spike",
   "status": "same",
   "bytes": 6994,
   "detail": null
  },
- "D:\\GitHub\\ringpp\\haro\\spike\\n_lib.ring": {
+ "D:\\GitHub\\ringpp\\haro\\spike\\n_lib.haro": {
   "group": "spike",
   "status": "same",
   "bytes": 36540,
   "detail": null
  },
- "D:\\GitHub\\ringpp\\haro\\spike\\narrate_lib.ring": {
+ "D:\\GitHub\\ringpp\\haro\\spike\\narrate_lib.haro": {
   "group": "spike",
   "status": "same",
   "bytes": 9064,
@@ -113,43 +113,43 @@
   "bytes": 710,
   "detail": null
  },
- "D:\\GitHub\\ringpp\\haro\\spike\\run_lib.ring": {
+ "D:\\GitHub\\ringpp\\haro\\spike\\run_lib.haro": {
   "group": "spike",
   "status": "same",
   "bytes": 7754,
   "detail": null
  },
- "D:\\GitHub\\ringpp\\haro\\spike\\stzv_court.ring": {
+ "D:\\GitHub\\ringpp\\haro\\spike\\stzv_court.haro": {
   "group": "spike",
   "status": "same",
   "bytes": 2965,
   "detail": null
  },
- "D:\\GitHub\\ringpp\\haro\\spike\\w_expr.ring": {
+ "D:\\GitHub\\ringpp\\haro\\spike\\w_expr.haro": {
   "group": "spike",
   "status": "same",
   "bytes": 1009,
   "detail": null
  },
- "D:\\GitHub\\ringpp\\haro\\spike\\world_lib.ring": {
+ "D:\\GitHub\\ringpp\\haro\\spike\\world_lib.haro": {
   "group": "spike",
   "status": "same",
   "bytes": 4613,
   "detail": null
  },
- "D:\\GitHub\\ringpp\\haro\\spike\\world_stub.ring": {
+ "D:\\GitHub\\ringpp\\haro\\spike\\world_stub.haro": {
   "group": "spike",
   "status": "same",
   "bytes": 769,
   "detail": null
  },
- "D:\\GitHub\\ringpp\\haro\\spike\\z_court.ring": {
+ "D:\\GitHub\\ringpp\\haro\\spike\\z_court.haro": {
   "group": "spike",
   "status": "same",
   "bytes": 5278,
   "detail": null
  },
- "D:\\GitHub\\ringpp\\haro\\spike\\z_expr.ring": {
+ "D:\\GitHub\\ringpp\\haro\\spike\\z_expr.haro": {
   "group": "spike",
   "status": "same",
   "bytes": 844,

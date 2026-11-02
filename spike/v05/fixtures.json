@@ -1,7 +1,7 @@
 {
   "grammar": "haro",
   "version": "0.5",
-  "comment": "The Haro v0.5 conformance floor, written BEFORE the court that passes it (the W discipline: fixtures first, prose second). v0.5 grows v0.4 by what an EXPRESSION language needs to be forged whole -- its court AND its evaluator -- from its declaration (haro/SPIKE.md, the fifth rung: stz's W, the alphabet's W letter, 29 fixtures): CONTEXTS on an EXPRESSION, naming the seats a host offers the expression and which of its VARIABLES each seat admits; a language that is only an EXPRESSION, with no DECLARATION, is a language, and the forge emits <lang>_expr.ring for it. Every v0.4 fixture still passes: v0.5 refuses nothing v0.4 accepted. Rejects carry the fragment the refusal must contain.",
+  "comment": "The Haro v0.5 conformance floor, written BEFORE the court that passes it (the W discipline: fixtures first, prose second). v0.5 grows v0.4 by what an EXPRESSION language needs to be forged whole -- its court AND its evaluator -- from its declaration (haro/SPIKE.md, the fifth rung: stz's W, the alphabet's W letter, 29 fixtures): CONTEXTS on an EXPRESSION, naming the seats a host offers the expression and which of its VARIABLES each seat admits; a language that is only an EXPRESSION, with no DECLARATION, is a language, and the forge emits <lang>_expr.haro for it. Every v0.4 fixture still passes: v0.5 refuses nothing v0.4 accepted. Rejects carry the fragment the refusal must contain.",
   "accepts": [
     {
       "id": "A1",

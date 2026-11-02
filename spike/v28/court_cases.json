@@ -1,6 +1,6 @@
 {
  "name": "the notice -- sentence-level cases for Haro v0.28 (HARO-MENU-CITES-01)",
- "comment": "Written BEFORE the court code (the W discipline). Each case runs the court forged from notice_v28.haro on rnxc AND on the oracle; the two must print the same bytes. N3, N9 and N10 cite none; N4, N6, N7 and N8 cite what binds them; N5 keeps the default. The diagnose cases compare the first diagnostic's cites exactly. N13 and N14 were added after the court change: no case reached the SYMBOL path (world_lib.ring), so the notice gained an optional FOLLOWS seat typed by a SYMBOL that cites none, judged against notice/register.json.",
+ "comment": "Written BEFORE the court code (the W discipline). Each case runs the court forged from notice_v28.haro on rnxc AND on the oracle; the two must print the same bytes. N3, N9 and N10 cite none; N4, N6, N7 and N8 cite what binds them; N5 keeps the default. The diagnose cases compare the first diagnostic's cites exactly. N13 and N14 were added after the court change: no case reached the SYMBOL path (world_lib.haro), so the notice gained an optional FOLLOWS seat typed by a SYMBOL that cites none, judged against notice/register.json.",
  "cases": [
   {
    "id": "N1",

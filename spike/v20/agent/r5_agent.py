@@ -23,8 +23,8 @@ import tasks as T
 sys.path.insert(0, os.path.abspath(os.path.join(HERE, '..', '..', '..')))   # this repository's root, for paths.py
 import paths                                   # where Ring++ is (Haro is its own repository since 2026-11-02)
 ROOT = paths.RINGPP
-RNXC = paths.RNXC
-ORACLE = paths.RING
+HARO_VM = paths.HARO_VM
+TWIN = paths.TWIN
 SCRATCH = tempfile.mkdtemp(prefix='r5a_')
 
 
@@ -32,7 +32,7 @@ def run_text(text, exe=None):
     p = os.path.join(SCRATCH, 'p.ring')
     open(p, 'wb').write(text.encode('latin-1', 'replace'))
     try:
-        r = subprocess.run([exe or RNXC, p], capture_output=True, cwd=SCRATCH, timeout=15, stdin=subprocess.DEVNULL)
+        r = subprocess.run([exe or HARO_VM, p], capture_output=True, cwd=SCRATCH, timeout=15, stdin=subprocess.DEVNULL)
     except subprocess.TimeoutExpired:
         return 'TIMEOUT', 'timeout', 124
     return r.stdout.decode('latin-1').replace('\r\n', '\n'), r.stderr.decode('latin-1'), r.returncode
@@ -69,8 +69,8 @@ def expected():
             if not out.admitted:
                 raise SystemExit('%s/%s: the gate refuses the gold body: %s %s' % (t['id'], w, out.stage, out.why))
             got = norm(run_text(text)[0])
-            if norm(run_text(text, ORACLE)[0]) != got:
-                raise SystemExit('%s/%s: rnxc and the oracle disagree on the reference -- a finding, not a task' % (t['id'], w))
+            if norm(run_text(text, TWIN)[0]) != got:
+                raise SystemExit('%s/%s: haro and its checked build disagree on the reference -- a finding, not a task' % (t['id'], w))
             exp[t['id']][w] = got
     return exp
 

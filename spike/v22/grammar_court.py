@@ -24,7 +24,7 @@ sys.path.insert(0, os.path.abspath(os.path.join(HERE, '..', '..')))   # this rep
 import paths                                   # where Ring++ is (Haro is its own repository since 2026-11-02)
 ROOT = paths.RINGPP
 PACKAGE = os.environ.get('PKG_RNXC') or os.path.join(ROOT, 'runtime', 'package', 'ringpp-win64', 'bin', 'rnxc.exe')
-RNXC = paths.RNXC
+HARO_VM = paths.HARO_VM
 BATCH = os.path.join(paths.SPIKE, 'v20', 'probes', 'gbnf_batch.ring')
 END = face_gbnf.END
 LIMIT = 128
@@ -39,7 +39,7 @@ def fmt_ring(text):
     d = tempfile.mkdtemp(prefix='gc_')
     p = os.path.join(d, 'p.ring')
     open(p, 'wb').write(text.encode('latin-1', 'replace'))
-    r = subprocess.run([RNXC, 'fmt', '--write', p], capture_output=True, stdin=subprocess.DEVNULL, timeout=60)
+    r = subprocess.run([HARO_VM, 'fmt', '--write', p], capture_output=True, stdin=subprocess.DEVNULL, timeout=60)
     if r.returncode != 0:
         return None
     return open(p, 'rb').read().decode('latin-1').replace('\r\n', '\n')
@@ -140,7 +140,7 @@ def main():
         face_gold.append((t['id'], face_text(with_data(t))))
         f = fmt_ring(with_data(t))
         if f is None:
-            raise SystemExit('rnxc fmt refuses the reference of %s' % t['id'])
+            raise SystemExit('haro fmt refuses the reference of %s' % t['id'])
         rpp_gold.append((t['id'], f))
     for f in face_check.read_fixtures(os.path.join(HERE, '..', 'v21', 'fixtures.txt')):
         if f['refused'] is not None:
@@ -180,7 +180,7 @@ def main():
             if m not in acc:
                 print('      not accepted: %-4s %s' % (m[0].split('/', 2)[2], hint.get(m[0].split('/', 2)[2], '')))
         if shape == 'ringpp' and rpp_skipped:
-            print('  ringpp fixtures `rnxc fmt` refuses (not counted): %s' % ', '.join(rpp_skipped))
+            print('  ringpp fixtures `haro fmt` refuses (not counted): %s' % ', '.join(rpp_skipped))
         for kind, want, what in (('control-reject', False, 'broken grammar fails a gold text'), ('control-accept', True, 'loosened grammar accepts an excluded text')):
             rows = [m for m in mine if m[1] == kind]
             ok = all(m[2] == want and not m[3] for m in rows)

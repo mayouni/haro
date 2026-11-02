@@ -29,7 +29,7 @@ sys.path.insert(0, os.path.abspath(os.path.join(HERE, '..', '..')))   # this rep
 import paths                                   # where Ring++ is (Haro is its own repository since 2026-11-02)
 ROOT = paths.RINGPP                            # its bench/exec probes are run on the oracle
 STZ = r'D:\GitHub\stzlib\libraries\stzlib'
-ORACLE = paths.RING
+TWIN = paths.TWIN
 fails = []
 
 
@@ -211,7 +211,7 @@ def corpus(n):
 # ---- S: the oracle ------------------------------------------------------------------------------------------------------------------------------
 
 def run_ring(path, cwd):
-    pr = subprocess.run([ORACLE, path], capture_output=True, cwd=cwd, timeout=60, stdin=subprocess.DEVNULL)
+    pr = subprocess.run([TWIN, path], capture_output=True, cwd=cwd, timeout=60, stdin=subprocess.DEVNULL)
     out = (pr.stdout + pr.stderr).decode('latin-1').replace(chr(13) + chr(10), chr(10))
     out = out.replace(path, '<file>').replace(os.path.basename(path), '<file>')
     out = re.sub(r'(?i)\bline \(?\d+\)?', 'Line #', out)       # the face prints the program again, so its lines move
@@ -365,15 +365,15 @@ def main():
     else:
         print('  SKIP K the Softanza tree is not at %s' % STZ)
 
-    if os.path.exists(ORACLE) and not QUICK:
+    if os.path.exists(TWIN) and not QUICK:
         s = probes()
         for p, r in s['bad'][:8]:
             print('  FAIL S %s: %s' % (p, r))
         top = ', '.join('%s %d' % kv for kv in s['refused'].most_common(6))
-        check(not s['bad'] and s['spelt'] >= 20, 'S %d probes of bench/exec: %d spelt by the face (the rest refused: %s), each printed, read back and run on the oracle: %d print what the original '
+        check(not s['bad'] and s['spelt'] >= 20, 'S %d probes of bench/exec: %d spelt by the face (the rest refused: %s), each printed, read back and run on the checked build: %d print what the original '
                                                   'prints (%d differ)' % (s['tried'], s['spelt'], top, s['same'], len(s['bad'])))
     else:
-        print('  SKIP S %s' % ('--quick' if QUICK else 'the oracle is not at %s' % ORACLE))
+        print('  SKIP S %s' % ('--quick' if QUICK else 'the checked build is not at %s' % TWIN))
 
     if PLANT:
         fails.append('PLANTED')

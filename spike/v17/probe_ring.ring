@@ -1,4 +1,4 @@
-# probe_ring.ring -- core-Ring behaviours n_lib.ring relies on, asked of both runtimes before it was written.
+# probe_ring.ring -- core-Ring behaviours n_lib.haro relies on, asked of both runtimes before it was written.
 # python: run it on rnxc and on the oracle; the two outputs must be identical.
 
 ? "ci-eq " + ("Abc" = "aBC")

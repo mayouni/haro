@@ -1,8 +1,8 @@
-# run_lib.ring -- the A letter: a declared language's structured steps, run
+# run_lib.haro -- the A letter: a declared language's structured steps, run
 # (Haro v0.9), in pure core Ring.
 #
 # A court FORGED from a .haro declaration that holds a RUN loads this file
-# beside court_lib.ring and expr_lib.ring, and carries the RUN as $aCourtRun
+# beside court_lib.haro and expr_lib.haro, and carries the RUN as $aCourtRun
 # = [[role, [kind, seat, ...]], ...] -- OF [run kind, steps seat, result seat],
 # COMPUTE [kind, into, value], COLLECT [kind, into, value], GROUP [kind, into,
 # by, value], BRANCH [kind, when, then, else], ITERATE [kind, over, as, do].

@@ -4,7 +4,7 @@ import glob, os, subprocess, collections
 import sys
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', '..', '..')))
 import paths
-RN = paths.RNXC
+RN = paths.HARO_VM
 STZ = r'D:\GitHub\stzlib\libraries\stzlib'
 stz = sorted(p for p in glob.glob(os.path.join(STZ, '**', '*.ring'), recursive=True) if os.path.getsize(p) <= 400000)
 ref = []

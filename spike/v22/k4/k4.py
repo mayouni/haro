@@ -21,9 +21,9 @@ from tasks import TASKS
 sys.path.insert(0, os.path.abspath(os.path.join(HERE, '..', '..', '..')))   # this repository's root, for paths.py
 import paths                                   # where Ring++ is (Haro is its own repository since 2026-11-02)
 ROOT = paths.RINGPP
-ORACLE = paths.RING      # Ring 1.27's VM, our build: a retired language, kept as a compatibility guard
-RNXC = paths.RNXC           # Ring++, the product: what a program is judged on
-EXEC = os.environ.get('K4_EXEC', 'rnxc')
+TWIN = paths.TWIN      # Ring 1.27's VM, our build: a retired language, kept as a compatibility guard
+HARO_VM = paths.HARO_VM           # Ring++, the product: what a program is judged on
+EXEC = os.environ.get('K4_EXEC', 'haro')
 SCRATCH = tempfile.mkdtemp(prefix='k4_')
 
 RING_PRIMER = '''You write programs in Ring (version 1.27), a small dynamic language. Facts about it:
@@ -68,7 +68,7 @@ accepts only the face's own spelling. Rules:
 
 
 def run(path, exe=None):
-    exe = exe or (RNXC if EXEC == 'rnxc' else ORACLE)
+    exe = exe or (HARO_VM if EXEC == 'haro' else TWIN)
     p = subprocess.run([exe, path], capture_output=True, cwd=os.path.dirname(path), timeout=30, stdin=subprocess.DEVNULL)
     return (p.stdout.decode('latin-1')).replace('\r\n', '\n')
 
@@ -92,10 +92,10 @@ def expected():
     """What each task prints on each input, on rnxc -- and the oracle must say the same, or the task has found a difference between Ring++ and Ring."""
     out = {}
     for t in TASKS:
-        out[t['id']] = {v: ring_output(with_data(t, v), RNXC) for v in ('a', 'b')}
+        out[t['id']] = {v: ring_output(with_data(t, v), HARO_VM) for v in ('a', 'b')}
         for v in ('a', 'b'):
-            if ring_output(with_data(t, v), ORACLE) != out[t['id']][v]:
-                raise SystemExit('%s/%s: rnxc and the oracle disagree on the reference -- a finding, not a task' % (t['id'], v))
+            if ring_output(with_data(t, v), TWIN) != out[t['id']][v]:
+                raise SystemExit('%s/%s: haro and its checked build disagree on the reference -- a finding, not a task' % (t['id'], v))
     return out
 
 

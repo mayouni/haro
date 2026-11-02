@@ -18,7 +18,7 @@ STZ = r'D:\GitHub\stzlib\libraries\stzlib\base'
 
 
 def files():
-    spike = sorted(glob.glob(os.path.join(paths.SPIKE, '*.ring')))
+    spike = paths.code_files(paths.SPIKE)
     stdlib = sorted(glob.glob(os.path.join(ROOT, 'vendor', 'ring-stdlib', '**', '*.ring'), recursive=True))
     ringpp = sorted(glob.glob(os.path.join(ROOT, 'bench', '*.ring')) + glob.glob(os.path.join(ROOT, 'tests', '*.ring')))
     stz = sorted(glob.glob(os.path.join(STZ, '**', '*.ring'), recursive=True), key=os.path.getsize)[:30]

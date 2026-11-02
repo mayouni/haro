@@ -55,7 +55,7 @@ C('C13', 'a spelling that does not exist', 'SPELLS [member: upper_first],', 'SPE
   "a spelling is as_is or upper_first, not 'shouting'", 'PARSE')
 C('C14', 'a meaning with no slot', 'DEFINE MEANING show AS (\n  SLOT none,', 'DEFINE MEANING show AS (',
   "MEANING show needs a SLOT", 'MEANING_INCOMPLETE')
-C('C15', 'a surface with no court: a surface is a protocol', 'KIND query, GRAMMAR "ZQL ASK", COURT "z_court.ring ask",', 'KIND query, GRAMMAR "ZQL ASK",',
+C('C15', 'a surface with no court: a surface is a protocol', 'KIND query, GRAMMAR "ZQL ASK", COURT "z_court.haro ask",', 'KIND query, GRAMMAR "ZQL ASK",',
   "SURFACE ledger needs its COURT", 'SURFACE_INCOMPLETE')
 C('C16', 'a declaration without its rationale', 'DEFINE ALIAS collector AS (\n  MEANING role, ENTITY "collector",\n  WORDS [english: "collector", french: "collecteur"]\n) RATIONALE "The member who takes the deposits"',
   'DEFINE ALIAS collector AS (\n  MEANING role, ENTITY "collector",\n  WORDS [english: "collector", french: "collecteur"]\n)',
@@ -85,7 +85,7 @@ R('R18', 'an example its own text does not reach', 'ASKING [english: "show depos
 R('R19', 'an example whose tongues compile to different queries', 'ASKING [english: "show deposits over 5000", french: "montre les dépôts au dessus de 5000"]', 'ASKING [english: "show deposits over 5000", french: "montre les dépôts au dessus de 4000"]', 'N_EXAMPLE_DIVERGES')
 R('R20', 'a counterexample that IS understood', 'ASKING [english: "what is the meaning of life"], REFUSED word', 'ASKING [english: "show deposits"], REFUSED word', 'N_COUNTEREXAMPLE_FAILED')
 R('R21', 'a surface whose world is not there', 'WORLD "../../study/phase15/data/tontine.zknw"', 'WORLD "../../study/phase15/data/nowhere.zknw"', 'N_WORLD_UNREAD')
-R('R22', 'a surface whose court is a path: `check ... surfaces` would run whatever the sentence names', 'COURT "z_court.ring ask"', 'COURT "../z_court.ring ask"', 'N_SURFACE_COURT')
+R('R22', 'a surface whose court is a path: `check ... surfaces` would run whatever the sentence names', 'COURT "z_court.haro ask"', 'COURT "../z_court.haro ask"', 'N_SURFACE_COURT')
 
 doc = {
     'grammar': 'haro-n', 'version': '0.17',

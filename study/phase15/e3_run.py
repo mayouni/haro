@@ -13,7 +13,7 @@ import paths                                   # where Ring++ is (Haro is its ow
 ROOT = paths.RINGPP
 RING_OFFICIAL = r'D:\ring127\bin\ring.exe'
 NATLIB = r'D:\ring127\libraries\naturallib'
-RNXC = paths.RNXC
+RNXC = paths.HARO_VM
 EXP = os.path.join(HERE, 'e3_naturallib.ring')
 
 

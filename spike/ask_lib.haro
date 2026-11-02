@@ -1,8 +1,8 @@
-# ask_lib.ring -- the Q letter: a declared language's question grammar, judged
+# ask_lib.haro -- the Q letter: a declared language's question grammar, judged
 # and answered (Haro v0.7), in pure core Ring.
 #
 # A court FORGED from a .haro declaration that holds an ASK loads this file
-# beside court_lib.ring and expr_lib.ring, and carries the ASK as
+# beside court_lib.haro and expr_lib.haro, and carries the ASK as
 # $aCourtAsk = [name, from kinds, where expression, clauses]. The question
 # grammar is ZQL's SELECT (StzZql GRAMMAR.md 6; zing cli/src/zql.zig
 # parseQuery and query_cmd.zig), the one question shape the estate pins:

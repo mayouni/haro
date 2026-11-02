@@ -12,10 +12,10 @@ sys.path.insert(0, os.path.abspath(os.path.join(HERE, '..', '..')))   # this rep
 import paths                                   # where Ring++ is (Haro is its own repository since 2026-11-02)
 ROOT = paths.RINGPP
 SPIKE = paths.SPIKE
-RNXC = paths.RNXC
-ORACLE = paths.RING
+RNXC = paths.HARO_VM
+ORACLE = paths.RING_ORACLE
 OUT = os.path.join(HERE, 'scratch', 'voices')
-LIBS = ('court_lib.ring', 'cond_lib.ring', 'expr_lib.ring', 'world_lib.ring', 'ask_lib.ring', 'narrate_lib.ring')
+LIBS = ('court_lib.haro', 'cond_lib.haro', 'expr_lib.haro', 'world_lib.haro', 'ask_lib.haro', 'narrate_lib.haro')
 
 FRENCH_VOICE = '''DEFINE NARRATE telling AS (
   TELLS [
@@ -43,7 +43,7 @@ def build():
     twin = '-- zfr: z_v16.haro with a French voice (Phase 1.5). Derived by voices.py; not a declaration of the spike.\n' + twin
     haro = os.path.join(OUT, 'zfr.haro')
     open(haro, 'w', encoding='utf-8', newline='').write(twin)
-    r = subprocess.run([RNXC, 'forge.ring', haro, OUT], capture_output=True, cwd=SPIKE, env=dict(os.environ, RNXC_NOCACHE='1', HARO_NOCACHE='1'), timeout=300)
+    r = subprocess.run([RNXC, 'forge.haro', haro, OUT], capture_output=True, cwd=SPIKE, env=dict(os.environ, RNXC_NOCACHE='1', HARO_NOCACHE='1'), timeout=300)
     o = r.stdout.decode('utf-8', 'replace')
     assert o.startswith('forged zfr'), o[:200]
     for lib in LIBS:
@@ -55,9 +55,9 @@ def build():
 def tell(exe, lang, question, rows_json):
     """narrate-ask in the voice of the question's language; 'en' is the spike's z court, 'fr' the twin."""
     if lang == 'tn-fr':
-        court, cwd = 'zfr_court.ring', OUT
+        court, cwd = 'zfr_court.haro', OUT
     else:
-        court, cwd = 'z_court.ring', SPIKE
+        court, cwd = 'z_court.haro', SPIKE
     r = subprocess.run([exe, court, 'narrate-ask', 'tontine.z', question, rows_json], capture_output=True, cwd=cwd, env=dict(os.environ, RNXC_NOCACHE='1', HARO_NOCACHE='1'), timeout=120)
     return r.stdout.decode('utf-8', 'replace').replace('\r\n', '\n').strip()
 

@@ -120,7 +120,7 @@
   {
    "id": "C15",
    "name": "a surface with no court: a surface is a protocol",
-   "old": "KIND query, GRAMMAR \"ZQL ASK\", COURT \"z_court.ring ask\",",
+   "old": "KIND query, GRAMMAR \"ZQL ASK\", COURT \"z_court.haro ask\",",
    "new": "KIND query, GRAMMAR \"ZQL ASK\",",
    "message": "SURFACE ledger needs its COURT",
    "code": "SURFACE_INCOMPLETE"
@@ -314,8 +314,8 @@
   {
    "id": "R22",
    "name": "a surface whose court is a path: `check ... surfaces` would run whatever the sentence names",
-   "old": "COURT \"z_court.ring ask\"",
-   "new": "COURT \"../z_court.ring ask\"",
+   "old": "COURT \"z_court.haro ask\"",
+   "new": "COURT \"../z_court.haro ask\"",
    "code": "N_SURFACE_COURT",
    "surfaces": false
   }

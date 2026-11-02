@@ -123,7 +123,7 @@ DEFINE ALIAS collector AS (
 -- ---- the surfaces: where a question ends -----------------------------------------------------------------
 
 DEFINE SURFACE ledger AS (
-  KIND query, GRAMMAR "ZQL ASK", COURT "z_court.ring ask", WORLD "../tontine.z",
+  KIND query, GRAMMAR "ZQL ASK", COURT "z_court.haro ask", WORLD "../tontine.z",
   SPELLS [member: upper_first],
   TELLS [english, french]
 ) RATIONALE "The ledger of deposits, asked in zing's closed query grammar; a member is spelled the way the ledger spells it (Moussa, not moussa). Its court judges a query and runs it; it answers in English as the Z court's own voice and in French as a second declaration"

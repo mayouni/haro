@@ -1,7 +1,7 @@
-# narrate_lib.ring -- NARRATE: the court's voice (Haro v0.13), in pure core Ring.
+# narrate_lib.haro -- NARRATE: the court's voice (Haro v0.13), in pure core Ring.
 #
 # A court FORGED from a .haro declaration that holds a NARRATE loads this file
-# beside court_lib.ring and carries the voice as
+# beside court_lib.haro and carries the voice as
 #   $aCourtNarrate = [name, opens, ends, refuses, [[kind, template], ...]]
 # `narrate <file>` answers a sentence back in that voice: the opening, one
 # sentence per declaration in file order, the ending -- or, when the court

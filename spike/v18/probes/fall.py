@@ -7,8 +7,8 @@ import paths                                   # where Ring++ is (Haro is its ow
 ROOT = paths.RINGPP
 SCRATCH = os.path.join(HERE, '..', 'scratch')
 os.makedirs(SCRATCH, exist_ok=True)
-ORACLE = paths.RING
-RNXC = paths.RNXC
+ORACLE = paths.RING_ORACLE
+RNXC = paths.HARO_VM
 def run(exe, text):
     open(os.path.join(SCRATCH, 'fl.ring'), 'w').write(text)
     args = [exe, os.path.join(SCRATCH, 'fl.ring')] if exe == ORACLE else [exe, 'exec', os.path.join(SCRATCH, 'fl.ring')]

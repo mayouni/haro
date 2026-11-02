@@ -1,8 +1,8 @@
-# forms_lib.ring -- FORMS: a vocabulary's function-name grammar as data
+# forms_lib.haro -- FORMS: a vocabulary's function-name grammar as data
 # (Haro v0.12, principle 7 of haro/PRINCIPLES.md), in pure core Ring.
 #
 # A court FORGED from a .haro declaration that holds a FORMS loads this file
-# beside court_lib.ring and carries the FORMS as
+# beside court_lib.haro and carries the FORMS as
 #   $aCourtFormset = [name, fluent, passive, statement, [[key, suffix], ...],
 #                     [kind, base seat, forms seat]]
 # The grammar is the forms document's (stzlib base/doc/narrations/

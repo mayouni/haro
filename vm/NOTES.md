@@ -20,7 +20,8 @@ Everything a user sees:
 - the image cache (`%LOCALAPPDATA%\haro\images`; `.haroi` images and `.harop` prefixes);
 - the runtime's name in its own messages;
 - the checker's rule ids (`haro/...`) and its source anchor (`#haro:`);
-- `haro <file.haro>` runs a file, as `haro exec` does.
+- `haro <file.haro>` runs a file, as `haro exec` does. A `.ring` file runs the same way. Haro's own code is `.haro` (D40), but the
+  code-graph and refinement rungs write Softanza-shaped programs of the legacy surface and run them.
 
 `src/rnxc.zig` is `src/haro.zig`.
 

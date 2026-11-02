@@ -3,7 +3,7 @@
 Born standalone; folded into bench/gate.py only when green. Every claim it
 prints is a comparison against a pinned judge or an oracle:
 
-  stage 1  the Haro meta-court (stzu v0.1's grammar, grown), ported to pure Ring (haro/spike/haro.ring),
+  stage 1  the Haro meta-court (stzu v0.1's grammar, grown), ported to pure Ring (haro/spike/haro.haro),
            judged by stz/declarative/stzu/fixtures.json exactly as the Luau
            runner judges it, on rnxc AND on the oracle ring.exe -- and the two
            runtimes must print the same bytes for every fixture.
@@ -22,11 +22,11 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, os.path.dirname(HERE))
 import paths                                   # one place for where Ring++ is (since 2026-11-02, Haro's own repository)
 ROOT = paths.need_ringpp()                     # Ring++'s checkout: its runtime/ and bench/
-RNXC, ORACLE = paths.need_bins()
-ORACLE_OUT = paths.ORACLE_OUT                  # the oracle forges here, by a relative name (stage 2's note)
-ORACLE_OUT_REL = paths.rel(ORACLE_OUT, HERE)
+HARO_VM, TWIN = paths.need_bins()
+TWIN_OUT = paths.TWIN_OUT                  # the oracle forges here, by a relative name (stage 2's note)
+TWIN_OUT_REL = paths.rel(TWIN_OUT, HERE)
 STZU_FIXTURES = r'D:\GitHub\stz\declarative\stzu\fixtures.json'
-STZU_RING = os.path.join(HERE, 'haro.ring')
+STZU_RING = os.path.join(HERE, 'haro.haro')
 
 PLANT = '--plant' in sys.argv
 
@@ -175,16 +175,16 @@ def stage1():
                             ("v0.27, the field tag: a pair form's optional mark, PERSONAL reaching it, SAFEGUARDS on the ask and the voice (ZTAG)", STZU27_FIXTURES),
                             ('v0.28, CITES on every element that carries a CODE, and the word none (HARO-MENU-CITES-01)', STZU28_FIXTURES)):
         print(f'stage 1 -- the Haro meta-court in pure Ring, judged by its fixtures ({label})')
-        f1, o1 = judge_stzu(RNXC, 'rnxc', fixtures)
-        f2, o2 = judge_stzu(ORACLE, 'oracle ring.exe', fixtures)
+        f1, o1 = judge_stzu(HARO_VM, 'haro', fixtures)
+        f2, o2 = judge_stzu(TWIN, 'haro checked', fixtures)
         diff = [k for k in o1 if o1[k] != o2.get(k)]
         if diff:
             print(f'  FAIL the two runtimes differ on {len(diff)} fixture(s): {diff}')
             for k in diff[:3]:
-                print('    rnxc  :', o1[k].strip()[:200])
-                print('    oracle:', o2[k].strip()[:200])
+                print('    haro  :', o1[k].strip()[:200])
+                print('    checked:', o2[k].strip()[:200])
         else:
-            print(f'  ok   rnxc and the oracle print the same bytes on all {len(o1)} fixtures')
+            print(f'  ok   haro and its checked build print the same bytes on all {len(o1)} fixtures')
         failures += f1 + f2 + len(diff)
     return failures
 
@@ -201,7 +201,7 @@ AGREE_FLOOR = 117
 MACHINE_FIXTURES = r'D:\GitHub\harobanda\declarative\machine\fixtures.json'
 MAKEEN = r'D:\GitHub\harobanda\machines\makeen_box.machine'
 HARB = r'D:\GitHub\harobanda\zig-out\bin\harb.exe'
-FORGE_RING = os.path.join(HERE, 'forge.ring')
+FORGE_RING = os.path.join(HERE, 'forge.haro')
 
 SYNTAX_FRAGMENTS = ('Expected', 'Unknown', 'not part of', 'neither', 'Unterminated',
                     'A list', 'given twice', 'RATIONALE is mandatory', 'declares nothing')
@@ -220,12 +220,12 @@ def run_args(exe, args, cwd):
 
 
 def stage2(stzu_path=MACHINE_STZU, label='machine'):
-    """The forge on rnxc writes <lang>_court.ring and <lang>.gbnf beside
-    court_lib.ring; the forge on the oracle writes the same into a scratch
+    """The forge on rnxc writes <lang>_court.haro and <lang>.gbnf beside
+    court_lib.haro; the forge on the oracle writes the same into a scratch
     folder, and the two must be byte-identical (the forge is A/B'd too)."""
-    print(f'stage 2 -- the forge: {os.path.basename(stzu_path)} -> a court and a grammar, on rnxc and on the oracle')
-    out_rnx = run_args(RNXC, ['forge.ring', stzu_path, '.'], HERE).strip()
-    print('  rnxc  :', out_rnx.splitlines()[0] if out_rnx else 'NO OUTPUT')
+    print(f'stage 2 -- the forge: {os.path.basename(stzu_path)} -> a court and a grammar, on haro and on the checked build')
+    out_rnx = run_args(HARO_VM, ['forge.haro', stzu_path, '.'], HERE).strip()
+    print('  haro  :', out_rnx.splitlines()[0] if out_rnx else 'NO OUTPUT')
     failures = 0
     if not out_rnx.startswith('forged '):
         print('  FAIL the forge did not forge')
@@ -233,14 +233,14 @@ def stage2(stzu_path=MACHINE_STZU, label='machine'):
     lang = out_rnx.split()[1].rstrip(':')
     # the oracle forges into a scratch folder BESIDE the forge, by a relative
     # name: Ring's write() refused the temp folder's path on this machine
-    td = ORACLE_OUT   # runtime/ is gitignored
+    td = TWIN_OUT   # runtime/ is gitignored
     os.makedirs(td, exist_ok=True)
-    for art in (f'{lang}_court.ring', f'{lang}.gbnf'):
+    for art in (f'{lang}_court.haro', f'{lang}.gbnf'):
         if os.path.exists(os.path.join(td, art)):
             os.remove(os.path.join(td, art))
-    out_or = run_args(ORACLE, ['forge.ring', stzu_path, ORACLE_OUT_REL], HERE).strip()
-    print('  oracle:', out_or.splitlines()[0] if out_or else 'NO OUTPUT')
-    for art in (f'{lang}_court.ring', f'{lang}.gbnf'):
+    out_or = run_args(TWIN, ['forge.haro', stzu_path, TWIN_OUT_REL], HERE).strip()
+    print('  checked:', out_or.splitlines()[0] if out_or else 'NO OUTPUT')
+    for art in (f'{lang}_court.haro', f'{lang}.gbnf'):
         a = open(os.path.join(HERE, art), 'rb').read()
         b = open(os.path.join(td, art), 'rb').read() if os.path.exists(os.path.join(td, art)) else b''
         if a != b:
@@ -282,7 +282,7 @@ def stage3(lang, court=None, floor=0, fixtures=MACHINE_FIXTURES, verb='check', c
     (harb refuses on a rule the .stzu does not carry) is the measurement.
     A fixture harb accepts and the forged court refuses is a DEFECT; an
     agree count under the pinned floor is one too."""
-    court = court or f'{lang}_court.ring'
+    court = court or f'{lang}_court.haro'
     print(f'stage 3 -- the forged court ({court}) against harb on the {lang} fixtures')
     doc = json.load(open(fixtures, encoding='utf-8'))
     cases = doc['accepts'] + doc['rejects']
@@ -309,8 +309,8 @@ def stage3(lang, court=None, floor=0, fixtures=MACHINE_FIXTURES, verb='check', c
             with open(p, 'w', encoding='utf-8', newline='') as f:
                 f.write(case['source'])
             h_ok, h_line = harb_verdict(p, verb, lang)
-            c_ok, c_got = court_verdict(RNXC, court, p)
-            o_ok, o_got = court_verdict(ORACLE, court, p)
+            c_ok, c_got = court_verdict(HARO_VM, court, p)
+            o_ok, o_got = court_verdict(TWIN, court, p)
             if (c_ok, c_got) != (o_ok, o_got):
                 ab_diff.append(case['id'])
             is_accept = 'expect' in case
@@ -381,9 +381,9 @@ def stage3(lang, court=None, floor=0, fixtures=MACHINE_FIXTURES, verb='check', c
     for cid, why in defects:
         print(f'    DEFECT  {cid}: {why[:140]}')
     if ab_diff:
-        print(f'  FAIL rnxc and the oracle differ on {len(ab_diff)} fixture(s): {ab_diff}')
+        print(f'  FAIL haro and its checked build differ on {len(ab_diff)} fixture(s): {ab_diff}')
     else:
-        print(f'  ok   rnxc and the oracle agree on all {n} fixtures through the forged court')
+        print(f'  ok   haro and its checked build agree on all {n} fixtures through the forged court')
     under = 0
     if floor and len(agree) < floor:
         under = 1
@@ -503,7 +503,7 @@ def stage4(lang, court=None, n=200):
     given twice or a required seat absent -- the grammar is context-free);
     (b) the engine's decoder accepts the grammar text and accepts the
     reference machine under it, through Softanza on rnxc in the package."""
-    court = court or f'{lang}_court.ring'
+    court = court or f'{lang}_court.haro'
     gbnf_path = os.path.join(HERE, f'{lang}.gbnf')
     print(f'stage 4 -- the grammar: {lang}.gbnf sampled {n} times, and held by the engine')
     failures = 0
@@ -517,7 +517,7 @@ def stage4(lang, court=None, n=200):
             p = os.path.join(td, f's{k}.machine')
             with open(p, 'w', encoding='utf-8', newline='') as f:
                 f.write(text)
-            ok, got = court_verdict(RNXC, court, p)
+            ok, got = court_verdict(HARO_VM, court, p)
             if not ok:
                 msg = got.split('): ', 1)[-1]
                 # a SYNTAX refusal comes from the court's tokenizer or parser and
@@ -550,7 +550,7 @@ def stage4(lang, court=None, n=200):
         print('  SKIP the engine probe: no package at runtime/package/ringpp-win64 (bench/package.py builds it)')
         return failures
     sentence = r'D:\GitHub\harobanda\machines\qemu_hello.machine'
-    ok_c, _ = court_verdict(RNXC, court, sentence)
+    ok_c, _ = court_verdict(HARO_VM, court, sentence)
     if not ok_c:
         sentence = MAKEEN
     out = run_args(PACKAGE_RNXC, [GBNF_PROBE, gbnf_path, sentence], os.path.dirname(PACKAGE_RNXC))
@@ -590,7 +590,7 @@ def c2_valid(rec):
 
 
 def stage5(lang, court=None, v02=False):
-    court = court or f'{lang}_court.ring'
+    court = court or f'{lang}_court.haro'
     print('stage 5 -- one refinement through the gate: hello.RESTART never -> always'
           + (' (v0.2: the points and floors the language declares)' if v02 else ''))
     failures = 0
@@ -602,22 +602,22 @@ def stage5(lang, court=None, v02=False):
         if v02:
             # (v) a point the language does not declare refinable; a value outside the
             # knob's MENU; the external actor admitted at the point's declared floor
-            o = run_args(RNXC, [court, 'refine', p, os.path.join(HERE, 'fixtures', 'refine_point.rfn')], HERE)
+            o = run_args(HARO_VM, [court, 'refine', p, os.path.join(HERE, 'fixtures', 'refine_point.rfn')], HERE)
             if "is not a declared refinement point" in o and 'NOT_A_POINT' in o:
                 print('  ok   a seat outside REFINE\'s POINTS is refused: qemu_hello.ARCH is not a declared point')
             else:
                 failures += 1; print(f'  FAIL expected NOT_A_POINT, got: {o.strip()[:160]}')
-            o = run_args(RNXC, [court, 'refine', p, os.path.join(HERE, 'fixtures', 'refine_kind.rfn')], HERE)
+            o = run_args(HARO_VM, [court, 'refine', p, os.path.join(HERE, 'fixtures', 'refine_kind.rfn')], HERE)
             if "'qemu_hello.PROFILE' is a policy, not a knob" in o and 'KIND_MISMATCH' in o:
                 print('  ok   a declared point of another KIND is refused: qemu_hello.PROFILE is a policy, not a knob')
             else:
                 failures += 1; print(f'  FAIL expected KIND_MISMATCH, got: {o.strip()[:160]}')
-            o = run_args(RNXC, [court, 'refine', p, os.path.join(HERE, 'fixtures', 'hello_menu.rfn')], HERE)
+            o = run_args(HARO_VM, [court, 'refine', p, os.path.join(HERE, 'fixtures', 'hello_menu.rfn')], HERE)
             if "RESTART is never, always or on_failure, not 'sometimes'" in o and 'OUT_OF_BOUNDS' in o:
                 print('  ok   a value outside the knob\'s MENU is refused at constraint, in the menu\'s own words')
             else:
                 failures += 1; print(f'  FAIL expected the menu\'s refusal, got: {o.strip()[:160]}')
-            o = run_args(RNXC, [court, 'refine', p, os.path.join(HERE, 'fixtures', 'hello_external.rfn')], HERE)
+            o = run_args(HARO_VM, [court, 'refine', p, os.path.join(HERE, 'fixtures', 'hello_external.rfn')], HERE)
             if o.startswith('admitted: hello.RESTART never -> always [external]'):
                 print('  ok   an external actor is admitted at the point\'s declared floor, external')
                 for ext in ('.refined', '.revert.rfn'):
@@ -626,7 +626,7 @@ def stage5(lang, court=None, v02=False):
             else:
                 failures += 1; print(f'  FAIL expected admission as :external, got: {o.strip()[:160]}')
         # (a) the model-composed proposal is refused at the trust stage, with a C2 record
-        out = run_args(RNXC, [court, 'refine', p, os.path.join(HERE, 'fixtures', 'hello_llm.rfn')], HERE)
+        out = run_args(HARO_VM, [court, 'refine', p, os.path.join(HERE, 'fixtures', 'hello_llm.rfn')], HERE)
         if PLANT:
             out = out.replace('trust: posture :llm', 'PLANTED: posture :llm')
         lines = [l for l in out.splitlines() if l]
@@ -649,17 +649,17 @@ def stage5(lang, court=None, v02=False):
             failures += 1
             print('  FAIL a refused refinement wrote a refined file')
         # (b) the trusted proposal is admitted; the refined file differs on the one value
-        out = run_args(RNXC, [court, 'refine', p, os.path.join(HERE, 'fixtures', 'hello_trusted.rfn')], HERE)
+        out = run_args(HARO_VM, [court, 'refine', p, os.path.join(HERE, 'fixtures', 'hello_trusted.rfn')], HERE)
         if out.startswith('admitted: hello.RESTART never -> always [trusted]'):
             refined = open(p + '.refined', 'rb').read()
-            ok2, _ = court_verdict(RNXC, court, p + '.refined')
+            ok2, _ = court_verdict(HARO_VM, court, p + '.refined')
             if refined.count(b'RESTART always') == 1 and refined.replace(b'RESTART always', b'RESTART never', 1) == src and ok2:
                 print('  ok   admitted as :trusted; the refined file differs on the one value and is a sentence of the language')
             else:
                 failures += 1
                 print('  FAIL the refined file is not the original with one value changed')
             # (c) the inverse, computed before the refinement landed, restores the bytes
-            out2 = run_args(RNXC, [court, 'refine', p + '.refined', p + '.revert.rfn'], HERE)
+            out2 = run_args(HARO_VM, [court, 'refine', p + '.refined', p + '.revert.rfn'], HERE)
             reverted = open(p + '.refined.refined', 'rb').read() if os.path.exists(p + '.refined.refined') else b''
             if out2.startswith('admitted:') and reverted == src:
                 print('  ok   the revert restores the original byte for byte')
@@ -670,21 +670,21 @@ def stage5(lang, court=None, v02=False):
             failures += 1
             print(f'  FAIL expected admission, got: {out.strip()[:200]}')
         # the same gate on the oracle: byte-identical verdicts
-        o = run_args(ORACLE, [court, 'refine', p, os.path.join(HERE, 'fixtures', 'hello_llm.rfn')], HERE)
-        r = run_args(RNXC, [court, 'refine', p, os.path.join(HERE, 'fixtures', 'hello_llm.rfn')], HERE)
+        o = run_args(TWIN, [court, 'refine', p, os.path.join(HERE, 'fixtures', 'hello_llm.rfn')], HERE)
+        r = run_args(HARO_VM, [court, 'refine', p, os.path.join(HERE, 'fixtures', 'hello_llm.rfn')], HERE)
         if o == r:
-            print('  ok   rnxc and the oracle print the same refusal, byte for byte')
+            print('  ok   haro and its checked build print the same refusal, byte for byte')
         else:
             failures += 1
             print('  FAIL the two runtimes differ on the refusal')
-            print('    rnxc  :', r.strip()[:160]); print('    oracle:', o.strip()[:160])
+            print('    haro  :', r.strip()[:160]); print('    checked:', o.strip()[:160])
     return failures
 
 
 # ---- stage 6: edit to verdict, measured ------------------------------------------
 
 # ---- stage 8: W, an EXPRESSION language forged whole (the fifth rung) ---------------
-# stz's W is declared in w_v05.haro; the forge emits w_expr.ring (court and
+# stz's W is declared in w_v05.haro; the forge emits w_expr.haro (court and
 # evaluator) and w_expr.gbnf; stz's 29 fixtures (declarative/w/fixtures.json,
 # read by reference, unadapted) judge the evaluator on rnxc and on the oracle,
 # byte for byte; 200 derivations of the grammar must all be sentences to it.
@@ -695,25 +695,25 @@ W_FLOOR = 29
 
 
 def w_run(exe, args):
-    return run_args(exe, ['w_expr.ring'] + args, HERE).strip()
+    return run_args(exe, ['w_expr.haro'] + args, HERE).strip()
 
 
 def stage8():
-    print('stage 8 -- W, an EXPRESSION language forged whole: w_v05.haro -> w_expr.ring and w_expr.gbnf, judged by stz\'s W fixtures unadapted')
+    print('stage 8 -- W, an EXPRESSION language forged whole: w_v05.haro -> w_expr.haro and w_expr.gbnf, judged by stz\'s W fixtures unadapted')
     failures = 0
-    out_rnx = run_args(RNXC, ['forge.ring', W_STZU, '.'], HERE).strip()
-    print('  rnxc  :', out_rnx.splitlines()[0] if out_rnx else 'NO OUTPUT')
+    out_rnx = run_args(HARO_VM, ['forge.haro', W_STZU, '.'], HERE).strip()
+    print('  haro  :', out_rnx.splitlines()[0] if out_rnx else 'NO OUTPUT')
     if not out_rnx.startswith('forged w'):
         print('  FAIL the forge did not forge W')
         return 1
-    td = ORACLE_OUT
+    td = TWIN_OUT
     os.makedirs(td, exist_ok=True)
-    for art in ('w_expr.ring', 'w_expr.gbnf'):
+    for art in ('w_expr.haro', 'w_expr.gbnf'):
         if os.path.exists(os.path.join(td, art)):
             os.remove(os.path.join(td, art))
-    out_or = run_args(ORACLE, ['forge.ring', W_STZU, ORACLE_OUT_REL], HERE).strip()
-    print('  oracle:', out_or.splitlines()[0] if out_or else 'NO OUTPUT')
-    for art in ('w_expr.ring', 'w_expr.gbnf'):
+    out_or = run_args(TWIN, ['forge.haro', W_STZU, TWIN_OUT_REL], HERE).strip()
+    print('  checked:', out_or.splitlines()[0] if out_or else 'NO OUTPUT')
+    for art in ('w_expr.haro', 'w_expr.gbnf'):
         a = open(os.path.join(HERE, art), 'rb').read()
         b = open(os.path.join(td, art), 'rb').read() if os.path.exists(os.path.join(td, art)) else b''
         if a != b:
@@ -736,8 +736,8 @@ def stage8():
                 args.append(json.dumps(case['input']))
             if 'init' in case:
                 args.append(json.dumps(case['init']))
-        r = w_run(RNXC, args)
-        o = w_run(ORACLE, args)
+        r = w_run(HARO_VM, args)
+        o = w_run(TWIN, args)
         if r != o:
             ab_diff.append(case['id'])
         if kind == 'refuse':
@@ -758,13 +758,13 @@ def stage8():
         else:
             failed += 1
             print(f'  FAIL {case["id"]} ({kind}): {case["expr"]}{why}')
-    print(f'W-CONFORMANCE (the forged evaluator on rnxc): {passed} passed, {failed} failed')
+    print(f'W-CONFORMANCE (the forged evaluator on haro): {passed} passed, {failed} failed')
     failures += failed
     if ab_diff:
         failures += 1
-        print(f'  FAIL rnxc and the oracle differ on {len(ab_diff)} case(s): {ab_diff}')
+        print(f'  FAIL haro and its checked build differ on {len(ab_diff)} case(s): {ab_diff}')
     else:
-        print(f'  ok   rnxc and the oracle print the same bytes on all {len(doc["cases"])} cases')
+        print(f'  ok   haro and its checked build print the same bytes on all {len(doc["cases"])} cases')
     if W_FLOOR and passed < W_FLOOR:
         failures += 1
         print(f'  FAIL {passed} passed, under the pinned floor of {W_FLOOR}')
@@ -775,7 +775,7 @@ def stage8():
     n = 200
     for k in range(n):
         text = g.sample(rnd)
-        r = w_run(RNXC, ['check', 'reduce', text])
+        r = w_run(HARO_VM, ['check', 'reduce', text])
         if r != 'ok':
             bad += 1
             if bad <= 3:
@@ -800,7 +800,7 @@ Z_COUNTS = {'entities': 'ENTITY', 'norms': 'NORM', 'flows': 'FLOW', 'zones': 'LA
 
 
 def z_run(exe, args):
-    return run_args(exe, ['z_court.ring'] + args, HERE).strip()
+    return run_args(exe, ['z_court.haro'] + args, HERE).strip()
 
 
 def stage9():
@@ -814,21 +814,21 @@ def stage9():
     are judged on the forged court unadapted, their data and expectations
     read from zing's file. A step is named lower_snake in the Commons where
     ZQL names it UPPER, so `at` is compared case-blind; nothing else is."""
-    print('stage 9 -- Z, a WORLD forged whole: z_v06.haro -> z_court.ring, z.gbnf, z_expr.ring, z_expr.gbnf; tontine.z judged by zing\'s 16 cases unadapted')
+    print('stage 9 -- Z, a WORLD forged whole: z_v06.haro -> z_court.haro, z.gbnf, z_expr.haro, z_expr.gbnf; tontine.z judged by zing\'s 16 cases unadapted')
     failures = 0
-    out_rnx = run_args(RNXC, ['forge.ring', Z_STZU, '.'], HERE).strip()
-    print('  rnxc  :', out_rnx.splitlines()[0] if out_rnx else 'NO OUTPUT')
+    out_rnx = run_args(HARO_VM, ['forge.haro', Z_STZU, '.'], HERE).strip()
+    print('  haro  :', out_rnx.splitlines()[0] if out_rnx else 'NO OUTPUT')
     if not out_rnx.startswith('forged z'):
         print('  FAIL the forge did not forge Z')
         return 1
-    td = ORACLE_OUT
+    td = TWIN_OUT
     os.makedirs(td, exist_ok=True)
-    arts = ('z_court.ring', 'z.gbnf', 'z_expr.ring', 'z_expr.gbnf', 'z_ask.gbnf')
+    arts = ('z_court.haro', 'z.gbnf', 'z_expr.haro', 'z_expr.gbnf', 'z_ask.gbnf')
     for art in arts:
         if os.path.exists(os.path.join(td, art)):
             os.remove(os.path.join(td, art))
-    out_or = run_args(ORACLE, ['forge.ring', Z_STZU, ORACLE_OUT_REL], HERE).strip()
-    print('  oracle:', out_or.splitlines()[0] if out_or else 'NO OUTPUT')
+    out_or = run_args(TWIN, ['forge.haro', Z_STZU, TWIN_OUT_REL], HERE).strip()
+    print('  checked:', out_or.splitlines()[0] if out_or else 'NO OUTPUT')
     for art in arts:
         a = open(os.path.join(HERE, art), 'rb').read()
         b = open(os.path.join(td, art), 'rb').read() if os.path.exists(os.path.join(td, art)) else b''
@@ -841,8 +841,8 @@ def stage9():
     assert doc['name'] == 'tontine conformance fixtures v1', 'unexpected Z fixture file'
     ab_diff = []
     # the sentence itself: accepted, with the fixture's counts
-    r = z_run(RNXC, ['check', Z_SENTENCE])
-    o = z_run(ORACLE, ['check', Z_SENTENCE])
+    r = z_run(HARO_VM, ['check', Z_SENTENCE])
+    o = z_run(TWIN, ['check', Z_SENTENCE])
     if r != o:
         ab_diff.append('check tontine.z')
     ok, fields = parse_verdict(r)
@@ -860,8 +860,8 @@ def stage9():
     passed = failed = 0
     for case in doc['normCases']:
         args = ['eval', Z_SENTENCE, case['norm'], 'rule', json.dumps(case['data'])]
-        r = z_run(RNXC, args)
-        o = z_run(ORACLE, args)
+        r = z_run(HARO_VM, args)
+        o = z_run(TWIN, args)
         if r != o:
             ab_diff.append(case['name'])
         ok = r == json.dumps(case['expect'])
@@ -872,8 +872,8 @@ def stage9():
             print(f'  FAIL norm {case["norm"]} / {case["name"]}: expected {json.dumps(case["expect"])} got {r[:120]}')
     for case in doc['flowCases']:
         args = ['walk', Z_SENTENCE, case['flow'], json.dumps(case['data'])]
-        r = z_run(RNXC, args)
-        o = z_run(ORACLE, args)
+        r = z_run(HARO_VM, args)
+        o = z_run(TWIN, args)
         if r != o:
             ab_diff.append(case['name'])
         why = ''
@@ -902,8 +902,8 @@ def stage9():
             p = os.path.join(tdr, f'reject{k}.z')
             with open(p, 'w', encoding='utf-8', newline='') as f:
                 f.write(text + '\n')
-            r = z_run(RNXC, ['check', p])
-            o = z_run(ORACLE, ['check', p])
+            r = z_run(HARO_VM, ['check', p])
+            o = z_run(TWIN, ['check', p])
             if r != o:
                 ab_diff.append(text)
             ok = not r.startswith('ok') and 'closed' in r
@@ -929,19 +929,19 @@ def stage9():
         with open(p, 'w', encoding='utf-8', newline='') as f:
             f.write(reversed_src)
         for case in doc['flowCases']:
-            r1 = z_run(RNXC, ['walk', Z_SENTENCE, case['flow'], json.dumps(case['data'])])
-            r2 = z_run(RNXC, ['walk', p, case['flow'], json.dumps(case['data'])])
+            r1 = z_run(HARO_VM, ['walk', Z_SENTENCE, case['flow'], json.dumps(case['data'])])
+            r2 = z_run(HARO_VM, ['walk', p, case['flow'], json.dumps(case['data'])])
             if r1 != r2:
                 failed += 1
                 print(f"  FAIL the walk depends on where its steps stand in the file: {case['name']}: {r2[:120]}")
     n = len(doc['normCases']) + len(doc['flowCases']) + len(doc['rejects'])
-    print(f'Z-CONFORMANCE (the forged court and runtime on rnxc): {passed} passed, {failed} failed of {n}; the {len(doc["flowCases"])} flow cases identical with the steps declared in reverse')
+    print(f'Z-CONFORMANCE (the forged court and runtime on haro): {passed} passed, {failed} failed of {n}; the {len(doc["flowCases"])} flow cases identical with the steps declared in reverse')
     failures += failed
     if ab_diff:
         failures += 1
-        print(f'  FAIL rnxc and the oracle differ on {len(ab_diff)} case(s): {ab_diff}')
+        print(f'  FAIL haro and its checked build differ on {len(ab_diff)} case(s): {ab_diff}')
     else:
-        print(f'  ok   rnxc and the oracle print the same bytes on all {n} cases and the sentence')
+        print(f'  ok   haro and its checked build print the same bytes on all {n} cases and the sentence')
     if Z_FLOOR and passed < Z_FLOOR:
         failures += 1
         print(f'  FAIL {passed} passed, under the pinned floor of {Z_FLOOR}')
@@ -985,8 +985,8 @@ def stage10():
     ab_diff = []
     for case in doc['cases']:
         args = ['ask', Z_SENTENCE, case['query'], rows_json]
-        r = z_run(RNXC, args)
-        o = z_run(ORACLE, args)
+        r = z_run(HARO_VM, args)
+        o = z_run(TWIN, args)
         if r != o:
             ab_diff.append(case['id'])
         if 'refusal' in case:
@@ -1008,13 +1008,13 @@ def stage10():
             failed += 1
             print(f'  FAIL {case["id"]}: {case["query"]}{why}')
     n = len(doc['cases'])
-    print(f'Q-CONFORMANCE (the forged court\'s ask verb on rnxc): {passed} passed, {failed} failed of {n}')
+    print(f'Q-CONFORMANCE (the forged court\'s ask verb on haro): {passed} passed, {failed} failed of {n}')
     failures += failed
     if ab_diff:
         failures += 1
-        print(f'  FAIL rnxc and the oracle differ on {len(ab_diff)} question(s): {ab_diff}')
+        print(f'  FAIL haro and its checked build differ on {len(ab_diff)} question(s): {ab_diff}')
     else:
-        print(f'  ok   rnxc and the oracle print the same bytes on all {n} questions')
+        print(f'  ok   haro and its checked build print the same bytes on all {n} questions')
     if Q_FLOOR and passed < Q_FLOOR:
         failures += 1
         print(f'  FAIL {passed} passed, under the pinned floor of {Q_FLOOR}')
@@ -1068,10 +1068,48 @@ F_DIR = os.path.join(HERE, 'f')
 F_FLOOR = 26
 RINGFLEX = r'D:\GitHub\ringflex'
 RING_OFFICIAL = r'D:\ring127\bin\ring.exe'
+RINGFLEX_RECORD = os.path.join(HERE, 'f', 'ringflex_record.json')
+
+
+def _sha(path):
+    import hashlib
+    return hashlib.sha256(open(path, 'rb').read()).hexdigest()[:16] if os.path.isfile(path) else None
+
+
+def ringflex(args, timeout=180):
+    """RingFlex's own court, which is Ring code, answering `args` (run from RingFlex's folder): READ from a recording.
+
+    Since the cut (2026-11-02) Haro's guard runs no Ring. RingFlex's court stays a judge of the F letter, so its answers were taken
+    once on official Ring 1.27 and are kept in f/ringflex_record.json beside the inputs they answer, each with the sha256 of every file
+    it read that lives here; an input edited since the recording makes the answer stale, and a stale answer is None (the stage
+    fails, naming the way out). HARO_RECORD_RINGFLEX=1 takes the answers again, live, on official Ring -- the one place Ring is
+    run for this repository, and only when asked."""
+    key = ' '.join(os.path.basename(a) for a in args)
+    rec = json.load(open(RINGFLEX_RECORD, encoding='utf-8')) if os.path.exists(RINGFLEX_RECORD) else {'runs': {}}
+    hashes = {os.path.basename(a): _sha(a) for a in args if os.path.isabs(a)}
+    if os.environ.get('HARO_RECORD_RINGFLEX') == '1':
+        p = subprocess.run([RING_OFFICIAL] + args, cwd=RINGFLEX, capture_output=True, timeout=timeout)
+        out = p.stdout.decode('utf-8', 'replace')
+        head = subprocess.run(['git', '-C', RINGFLEX, 'log', '-1', '--format=%h %ad', '--date=short'], capture_output=True, text=True).stdout.strip()
+        rec.setdefault('about', 'RingFlex\'s own court on official Ring 1.27, taken with HARO_RECORD_RINGFLEX=1; read by the guard')
+        rec['runs'][key] = {'stdout': out, 'inputs': hashes, 'ringflex': head, 'taken': time.strftime('%Y-%m-%d %H:%M')}
+        with open(RINGFLEX_RECORD, 'w', encoding='utf-8', newline='\n') as fh:
+            json.dump(rec, fh, indent=1, sort_keys=True)
+            fh.write('\n')
+        return out
+    run = rec['runs'].get(key)
+    if run is None or run.get('inputs') != hashes:
+        print(f'  FAIL RingFlex\'s recorded answer to `{key}` is missing or stale -- take it again with HARO_RECORD_RINGFLEX=1')
+        return None
+    return run['stdout']
+
+
+def ringflex_recorded():
+    return os.path.exists(RINGFLEX_RECORD) or os.environ.get('HARO_RECORD_RINGFLEX') == '1'
 
 
 def f_run(exe, args):
-    return run_args(exe, ['f_court.ring'] + args, HERE).strip()
+    return run_args(exe, ['f_court.haro'] + args, HERE).strip()
 
 
 def f_expect(src):
@@ -1093,21 +1131,21 @@ def stage11():
     live on the ORIGINAL fixtures when official Ring 1.27 is installed (its
     runner loads Ring's full stdlib, which the oracle cannot), to show the
     expectations hold on their own side."""
-    print('stage 11 -- F, the flow of work: f_v08.haro -> f_court.ring and f.gbnf, judged by RingFlex\'s 26 fixtures re-expressed in the Commons\' shape')
+    print('stage 11 -- F, the flow of work: f_v08.haro -> f_court.haro and f.gbnf, judged by RingFlex\'s 26 fixtures re-expressed in the Commons\' shape')
     failures = 0
-    out_rnx = run_args(RNXC, ['forge.ring', F_STZU, '.'], HERE).strip()
-    print('  rnxc  :', out_rnx.splitlines()[0] if out_rnx else 'NO OUTPUT')
+    out_rnx = run_args(HARO_VM, ['forge.haro', F_STZU, '.'], HERE).strip()
+    print('  haro  :', out_rnx.splitlines()[0] if out_rnx else 'NO OUTPUT')
     if not out_rnx.startswith('forged f'):
         print('  FAIL the forge did not forge F')
         return 1
-    td = ORACLE_OUT
+    td = TWIN_OUT
     os.makedirs(td, exist_ok=True)
-    for art in ('f_court.ring', 'f.gbnf'):
+    for art in ('f_court.haro', 'f.gbnf'):
         if os.path.exists(os.path.join(td, art)):
             os.remove(os.path.join(td, art))
-    out_or = run_args(ORACLE, ['forge.ring', F_STZU, ORACLE_OUT_REL], HERE).strip()
-    print('  oracle:', out_or.splitlines()[0] if out_or else 'NO OUTPUT')
-    for art in ('f_court.ring', 'f.gbnf'):
+    out_or = run_args(TWIN, ['forge.haro', F_STZU, TWIN_OUT_REL], HERE).strip()
+    print('  checked:', out_or.splitlines()[0] if out_or else 'NO OUTPUT')
+    for art in ('f_court.haro', 'f.gbnf'):
         a = open(os.path.join(HERE, art), 'rb').read()
         b = open(os.path.join(td, art), 'rb').read() if os.path.exists(os.path.join(td, art)) else b''
         if a != b:
@@ -1125,8 +1163,8 @@ def stage11():
             failed += 1
             print(f'  FAIL {name}: no -- EXPECT: line')
             continue
-        r = f_run(RNXC, ['check', os.path.join('f', name)])
-        o = f_run(ORACLE, ['check', os.path.join('f', name)])
+        r = f_run(HARO_VM, ['check', os.path.join('f', name)])
+        o = f_run(TWIN, ['check', os.path.join('f', name)])
         if r != o:
             ab_diff.append(name)
         kind, _, arg = exp.partition(' ')
@@ -1149,28 +1187,27 @@ def stage11():
         else:
             failed += 1
             print(f'  FAIL {name} ({exp}){why}')
-    print(f'F-CONFORMANCE (the forged court on rnxc, RingFlex\'s fixtures re-expressed): {passed} passed, {failed} failed of {len(files)}')
+    print(f'F-CONFORMANCE (the forged court on haro, RingFlex\'s fixtures re-expressed): {passed} passed, {failed} failed of {len(files)}')
     failures += failed
     if ab_diff:
         failures += 1
-        print(f'  FAIL rnxc and the oracle differ on {len(ab_diff)} fixture(s): {ab_diff}')
+        print(f'  FAIL haro and its checked build differ on {len(ab_diff)} fixture(s): {ab_diff}')
     else:
-        print(f'  ok   rnxc and the oracle print the same bytes on all {len(files)} fixtures')
+        print(f'  ok   haro and its checked build print the same bytes on all {len(files)} fixtures')
     if F_FLOOR and passed < F_FLOOR:
         failures += 1
         print(f'  FAIL {passed} passed, under the pinned floor of {F_FLOOR}')
     # RingFlex's own court on the original fixtures: the expectations hold there
-    if os.path.exists(RING_OFFICIAL) and os.path.isdir(RINGFLEX):
-        p = subprocess.run([RING_OFFICIAL, 'tests/run.ring'], cwd=RINGFLEX, capture_output=True, timeout=120)
-        out = p.stdout.decode('utf-8', 'replace')
+    if ringflex_recorded():
+        out = ringflex(['tests/run.ring']) or ''
         m = re.search(r'(\d+) passed, (\d+) failed', out)
         if m and m.group(2) == '0' and int(m.group(1)) >= F_FLOOR:
-            print(f'  ok   RingFlex\'s own court (official Ring 1.27, read-only): {m.group(1)} passed, 0 failed on its original fixtures')
+            print(f'  ok   RingFlex\'s own court (its recorded answer, taken on official Ring 1.27): {m.group(1)} passed, 0 failed on its original fixtures')
         else:
             failures += 1
             print(f'  FAIL RingFlex\'s own court did not hold its fixtures: {out[-200:]}')
     else:
-        print('  SKIP RingFlex\'s own court: its runner loads Ring\'s full stdlib.ring, which the oracle cannot, and official Ring 1.27 is not installed here')
+        print('  SKIP RingFlex\'s own court: no recording of its answers (f/ringflex_record.json; HARO_RECORD_RINGFLEX=1 takes it on official Ring)')
     return failures
 
 
@@ -1183,7 +1220,7 @@ A_FLOOR = 35
 
 
 def a_run(exe, args):
-    return run_args(exe, ['a_court.ring'] + args, HERE).strip()
+    return run_args(exe, ['a_court.haro'] + args, HERE).strip()
 
 
 def stage12():
@@ -1196,21 +1233,21 @@ def stage12():
     plus three hand cases that the W shape cannot say (nested iteration, a
     running maximum, a branch inside a branch), each computed by hand and
     marked so."""
-    print('stage 12 -- A, the algorithm: a_v09.haro -> a_court.ring and its runner, judged by stz\'s W cases and zing\'s formulas re-expressed as step trees')
+    print('stage 12 -- A, the algorithm: a_v09.haro -> a_court.haro and its runner, judged by stz\'s W cases and zing\'s formulas re-expressed as step trees')
     failures = 0
-    out_rnx = run_args(RNXC, ['forge.ring', A_STZU, '.'], HERE).strip()
-    print('  rnxc  :', out_rnx.splitlines()[0] if out_rnx else 'NO OUTPUT')
+    out_rnx = run_args(HARO_VM, ['forge.haro', A_STZU, '.'], HERE).strip()
+    print('  haro  :', out_rnx.splitlines()[0] if out_rnx else 'NO OUTPUT')
     if not out_rnx.startswith('forged a'):
         print('  FAIL the forge did not forge A')
         return 1
-    td = ORACLE_OUT
+    td = TWIN_OUT
     os.makedirs(td, exist_ok=True)
-    arts = ('a_court.ring', 'a.gbnf', 'a_expr.ring', 'a_expr.gbnf')
+    arts = ('a_court.haro', 'a.gbnf', 'a_expr.haro', 'a_expr.gbnf')
     for art in arts:
         if os.path.exists(os.path.join(td, art)):
             os.remove(os.path.join(td, art))
-    out_or = run_args(ORACLE, ['forge.ring', A_STZU, ORACLE_OUT_REL], HERE).strip()
-    print('  oracle:', out_or.splitlines()[0] if out_or else 'NO OUTPUT')
+    out_or = run_args(TWIN, ['forge.haro', A_STZU, TWIN_OUT_REL], HERE).strip()
+    print('  checked:', out_or.splitlines()[0] if out_or else 'NO OUTPUT')
     for art in arts:
         a = open(os.path.join(HERE, art), 'rb').read()
         b = open(os.path.join(td, art), 'rb').read() if os.path.exists(os.path.join(td, art)) else b''
@@ -1222,8 +1259,8 @@ def stage12():
     doc = json.load(open(A_CASES, encoding='utf-8'))
     assert doc['grammar'] == 'A' and doc['version'] == '0.9', 'unexpected A case file'
     ab_diff = []
-    r = a_run(RNXC, ['check', A_SENTENCE])
-    o = a_run(ORACLE, ['check', A_SENTENCE])
+    r = a_run(HARO_VM, ['check', A_SENTENCE])
+    o = a_run(TWIN, ['check', A_SENTENCE])
     if r != o:
         ab_diff.append('check')
     ok, fields = parse_verdict(r)
@@ -1239,14 +1276,14 @@ def stage12():
                 p = os.path.join(tdr, case['id'] + '.a')
                 with open(p, 'w', encoding='utf-8', newline='') as f:
                     f.write(case['source'])
-                r = a_run(RNXC, ['check', p])
-                o = a_run(ORACLE, ['check', p])
+                r = a_run(HARO_VM, ['check', p])
+                o = a_run(TWIN, ['check', p])
                 ok = (not r.startswith('ok')) and case['refusal'] in r
                 why = '' if ok else f' -- expected a refusal holding {case["refusal"]!r}, got {r[:160]}'
             else:
                 args = ['run', A_SENTENCE, case['algorithm'], json.dumps(case['input'])]
-                r = a_run(RNXC, args)
-                o = a_run(ORACLE, args)
+                r = a_run(HARO_VM, args)
+                o = a_run(TWIN, args)
                 if 'refusal' in case:
                     ok = case['refusal'] in r
                     why = '' if ok else f' -- expected a refusal holding {case["refusal"]!r}, got {r[:160]}'
@@ -1268,13 +1305,13 @@ def stage12():
                 failed += 1
                 print(f'  FAIL {case["id"]} ({case["from"]}){why}')
     n = len(doc['cases'])
-    print(f'A-CONFORMANCE (the forged runner on rnxc): {passed} passed, {failed} failed of {n}')
+    print(f'A-CONFORMANCE (the forged runner on haro): {passed} passed, {failed} failed of {n}')
     failures += failed
     if ab_diff:
         failures += 1
-        print(f'  FAIL rnxc and the oracle differ on {len(ab_diff)} case(s): {ab_diff}')
+        print(f'  FAIL haro and its checked build differ on {len(ab_diff)} case(s): {ab_diff}')
     else:
-        print(f'  ok   rnxc and the oracle print the same bytes on all {n} cases and the sentence')
+        print(f'  ok   haro and its checked build print the same bytes on all {n} cases and the sentence')
     if A_FLOOR and passed < A_FLOOR:
         failures += 1
         print(f'  FAIL {passed} passed, under the pinned floor of {A_FLOOR}')
@@ -1286,7 +1323,7 @@ def stage12():
         p = os.path.join(tdr, 'loop.a')
         with open(p, 'w', encoding='utf-8', newline='') as f:
             f.write(cyc)
-        r = a_run(RNXC, ['check', p])
+        r = a_run(HARO_VM, ['check', p])
         if r.startswith('ok') or 're-enters itself' not in r:
             failures += 1
             print(f'  FAIL a step tree with a cycle was not refused at check: {r[:160]}')
@@ -1316,14 +1353,14 @@ def stage13():
     print('stage 13 -- the WORLD as versioned data: z_v10.haro publishes, f_v10.haro resolves; judged by RingFlex\'s placement fixtures and the Z->F seam')
     failures = 0
     for stzu in (Z_STZU, F_STZU):
-        out = run_args(RNXC, ['forge.ring', stzu, '.'], HERE).strip()
+        out = run_args(HARO_VM, ['forge.haro', stzu, '.'], HERE).strip()
         if not out.startswith('forged '):
             print(f'  FAIL the forge did not forge {os.path.basename(stzu)}: {out[:120]}')
             return 1
     ab_diff = []
     def both(court, args, label):
-        r = run_args(RNXC, [court] + args, HERE).strip()
-        o = run_args(ORACLE, [court] + args, HERE).strip()
+        r = run_args(HARO_VM, [court] + args, HERE).strip()
+        o = run_args(TWIN, [court] + args, HERE).strip()
         if r != o:
             ab_diff.append(label)
         return r
@@ -1333,23 +1370,23 @@ def stage13():
     if not all(os.path.exists(p) for p in worlds.values()):
         print('  SKIP RingFlex\'s world fixtures are not here')
         return 0
-    r = both('f_court.ring', ['check', wf, worlds['world']], 'resolved')
+    r = both('f_court.haro', ['check', wf, worlds['world']], 'resolved')
     ok = r.startswith('ok') and 'warning' not in r
     checks += 1; failures += 0 if ok else 1
     print(('  ok   ' if ok else '  FAIL ') + f'the lawful workflow resolves every INVOKES against world.json: {r.splitlines()[0][:60]}')
-    r = both('f_court.ring', ['check', wf, worlds['world-missing-flow']], 'missing-flow')
+    r = both('f_court.haro', ['check', wf, worlds['world-missing-flow']], 'missing-flow')
     ok = (not r.startswith('ok')) and 'declares no flow:' in r and 'notifier' in r and 'notifier_client' in r
     checks += 1; failures += 0 if ok else 1
     print(('  ok   ' if ok else '  FAIL ') + f'a world missing one flow refuses the step that names it, by both names: {r[:110]}')
-    r = both('f_court.ring', ['check', wf, worlds['world-missing-compensating']], 'missing-compensating')
+    r = both('f_court.haro', ['check', wf, worlds['world-missing-compensating']], 'missing-compensating')
     ok = (not r.startswith('ok')) and 'declares no flow:' in r and 'encaisser' in r and 'rembourser_paiement' in r
     checks += 1; failures += 0 if ok else 1
     print(('  ok   ' if ok else '  FAIL ') + f'a world missing the compensating flow refuses the compensating step by the flow\'s name: {r[:110]}')
-    r = both('f_court.ring', ['check', wf], 'no-world')
+    r = both('f_court.haro', ['check', wf], 'no-world')
     ok = r.startswith('ok') and 'warning NO_WORLD' in r
     checks += 1; failures += 0 if ok else 1
     print(('  ok   ' if ok else '  FAIL ') + f'no world at all is a warning, not a refusal: {r.splitlines()[-1][:90]}')
-    r = both('f_court.ring', ['world', wf], 'rows')
+    r = both('f_court.haro', ['world', wf], 'rows')
     try:
         w = json.loads(r)
         syms = w['symbols']; refs = w['refs']
@@ -1361,7 +1398,7 @@ def stage13():
     checks += 1; failures += 0 if ok else 1
     print(('  ok   ' if ok else '  FAIL ') + f'the rows a workflow contributes: one process symbol, three calls refs, no flow symbol: {r[:100]}')
     # the seam between two forged letters
-    z = both('z_court.ring', ['world', 'tontine.z'], 'z-world')
+    z = both('z_court.haro', ['world', 'tontine.z'], 'z-world')
     with tempfile.TemporaryDirectory() as td:
         try:
             zw = json.loads(z)
@@ -1377,15 +1414,15 @@ def stage13():
             with open(p, 'w', encoding='utf-8', newline='') as f:
                 json.dump(zw, f)
             cyc = os.path.join('f', 'tontine_cycle.f')
-            r = both('f_court.ring', ['check', cyc, p], 'seam-resolved')
+            r = both('f_court.haro', ['check', cyc, p], 'seam-resolved')
             ok = r.startswith('ok') and 'warning' not in r
             checks += 1; failures += 0 if ok else 1
             print(('  ok   ' if ok else '  FAIL ') + f'an F workflow invoking two Z flows resolves against the world Z emitted: {r.splitlines()[0][:60]}')
-            r = both('f_court.ring', ['check', cyc, worlds['world']], 'seam-unresolved')
+            r = both('f_court.haro', ['check', cyc, worlds['world']], 'seam-unresolved')
             ok = (not r.startswith('ok')) and 'declares no flow:' in r and 'collect' in r
             checks += 1; failures += 0 if ok else 1
             print(('  ok   ' if ok else '  FAIL ') + f'and against RingFlex\'s world, which declares no collect, the deposit step is refused: {r[:100]}')
-            fw = json.loads(both('f_court.ring', ['world', cyc], 'f-rows'))
+            fw = json.loads(both('f_court.haro', ['world', cyc], 'f-rows'))
             merged = zw['symbols'] + fw['symbols']
             ids = set(s['kind'].lower() + ':' + s['name'].lower() for s in merged)
             dangling = [x for x in zw['refs'] + fw['refs'] if x['from'].lower() not in ids or x['to'].lower() not in ids]
@@ -1397,20 +1434,19 @@ def stage13():
         print('  FAIL the seam -- PLANTED')
     if ab_diff:
         failures += 1
-        print(f'  FAIL rnxc and the oracle differ on {len(ab_diff)} check(s): {ab_diff}')
+        print(f'  FAIL haro and its checked build differ on {len(ab_diff)} check(s): {ab_diff}')
     else:
-        print(f'  ok   rnxc and the oracle print the same bytes on all {checks} checks')
-    if os.path.exists(RING_OFFICIAL) and os.path.isdir(RINGFLEX):
-        p = subprocess.run([RING_OFFICIAL, 'tests/boundary-run.ring'], cwd=RINGFLEX, capture_output=True, timeout=120)
-        out = p.stdout.decode('utf-8', 'replace')
+        print(f'  ok   haro and its checked build print the same bytes on all {checks} checks')
+    if ringflex_recorded():
+        out = ringflex(['tests/boundary-run.ring']) or ''
         m = re.search(r'(\d+) passed, (\d+) failed', out)
         if m and m.group(2) == '0':
-            print(f'  ok   RingFlex\'s own placement gate (official Ring 1.27, read-only): {m.group(1)} passed, 0 failed on its original fixtures')
+            print(f'  ok   RingFlex\'s own placement gate (its recorded answer, taken on official Ring 1.27): {m.group(1)} passed, 0 failed on its original fixtures')
         else:
             failures += 1
             print(f'  FAIL RingFlex\'s placement gate did not hold: {out[-200:]}')
     else:
-        print('  SKIP RingFlex\'s placement gate: official Ring 1.27 is not installed here')
+        print('  SKIP RingFlex\'s placement gate: no recording of its answers (f/ringflex_record.json; HARO_RECORD_RINGFLEX=1 takes it on official Ring)')
     return failures
 
 
@@ -1482,19 +1518,19 @@ def stage14():
     same line-or-file-wide as the forged court gives on the re-expressed ones,
     which is what CODE, CODES and CITES in f_v11.haro declare; and the family's
     one consumer, which must be able to tell a clean run from no output."""
-    print('stage 14 -- the Diagnostic Contract (C2 v1.2.0): every forged court\'s `diagnose`, judged by the contract\'s shape and by RingFlex\'s own codes, live')
+    print('stage 14 -- the Diagnostic Contract (C2 v1.2.0): every forged court\'s `diagnose`, judged by the contract\'s shape and by RingFlex\'s own codes, recorded')
     failures = 0
     # every court this stage asks is re-forged first: a court forged before the
     # forge learned a global is a court the ORACLE refuses (a `$name` first
     # assigned inside a function is that function's local on Ring, R24 at the
     # next read) while rnxc, under Rule A, runs it -- which is how a stale
-    # a_court.ring passed on one runtime and failed on the other
+    # a_court.haro passed on one runtime and failed on the other
     for stzu in (F_STZU, Z_STZU, A_STZU, os.path.join(HERE, 'machine_v03.haro')):
-        run_args(RNXC, ['forge.ring', stzu, '.'], HERE)
+        run_args(HARO_VM, ['forge.haro', stzu, '.'], HERE)
     ab_diff = []
     def both(court, args, label):
-        r = run_args(RNXC, [court] + args, HERE).strip()
-        o = run_args(ORACLE, [court] + args, HERE).strip()
+        r = run_args(HARO_VM, [court] + args, HERE).strip()
+        o = run_args(TWIN, [court] + args, HERE).strip()
         if r != o:
             ab_diff.append(label)
         return r
@@ -1503,7 +1539,7 @@ def stage14():
     n_diag = 0
     shape_bad = []
     for name in sorted(f for f in os.listdir(F_DIR) if f.endswith('.f')):
-        r = both('f_court.ring', ['diagnose', os.path.join('f', name)], 'f:' + name)
+        r = both('f_court.haro', ['diagnose', os.path.join('f', name)], 'f:' + name)
         try:
             rep = json.loads(r)
         except json.JSONDecodeError:
@@ -1516,9 +1552,9 @@ def stage14():
     # the machine sentence the forged court accepts (stage 4's rule: qemu_hello under the
     # pinned declaration, makeen_box under machine_v03.haro; HF-31)
     machine_sentence = r'D:\GitHub\harobanda\machines\qemu_hello.machine'
-    if not court_verdict(RNXC, 'machine_court.ring', machine_sentence)[0]:
+    if not court_verdict(HARO_VM, 'machine_court.haro', machine_sentence)[0]:
         machine_sentence = MAKEEN
-    others = [('z_court.ring', 'tontine.z'), ('a_court.ring', os.path.join('a', 'w_in_a.a')), ('machine_court.ring', machine_sentence)]
+    others = [('z_court.haro', 'tontine.z'), ('a_court.haro', os.path.join('a', 'w_in_a.a')), ('machine_court.haro', machine_sentence)]
     for court, f in others:
         r = both(court, ['diagnose', f], court + ':' + os.path.basename(f))
         try:
@@ -1535,7 +1571,7 @@ def stage14():
         p = os.path.join(td, 'drop.z')
         with open(p, 'w', encoding='utf-8', newline='') as fh:
             fh.write('DROP TABLE deposit\n')
-        r = both('z_court.ring', ['diagnose', p], 'z:drop')
+        r = both('z_court.haro', ['diagnose', p], 'z:drop')
         try:
             rep = json.loads(r); bad = c2_validate(rep)
             if len(rep['diagnostics']) != 1 or rep['diagnostics'][0]['code'] != 'UNKNOWN_VERB' or rep['diagnostics'][0]['severity'] != 'error':
@@ -1547,7 +1583,7 @@ def stage14():
         p = os.path.join(td, 'loop.a')
         with open(p, 'w', encoding='utf-8', newline='') as fh:
             fh.write('DEFINE ALGORITHM loop AS (STEPS [again], RESULT [n]) RATIONALE "x"\nDEFINE COMPUTE bump AS (INTO n, VALUE "n + 1") RATIONALE "x"\nDEFINE BRANCH again AS (WHEN "n < 10", THEN [bump, again]) RATIONALE "x"\n')
-        r = both('a_court.ring', ['diagnose', p], 'a:loop')
+        r = both('a_court.haro', ['diagnose', p], 'a:loop')
         try:
             rep = json.loads(r); bad = c2_validate(rep)
             if len(rep['diagnostics']) != 1 or rep['diagnostics'][0]['code'] != 'CYCLE' or rep['diagnostics'][0]['cites'] != ['rule:run']:
@@ -1608,7 +1644,7 @@ def stage14():
     wf = os.path.join('f', 'boundary-invokes-flow.f')
     res_bad = []
     for wname, want in (('world', None), ('world-missing-flow', 'UNRESOLVED_FLOW'), ('world-missing-compensating', 'UNRESOLVED_FLOW')):
-        r = both('f_court.ring', ['diagnose', wf, os.path.join(RINGFLEX_WORLDS, wname + '.json')], 'diag:' + wname)
+        r = both('f_court.haro', ['diagnose', wf, os.path.join(RINGFLEX_WORLDS, wname + '.json')], 'diag:' + wname)
         try:
             rep = json.loads(r)
             bad = c2_validate(rep)
@@ -1621,7 +1657,7 @@ def stage14():
             bad = ['not JSON: ' + r[:80]]
         if bad:
             res_bad.append((wname, '; '.join(bad)))
-    r = both('f_court.ring', ['diagnose', wf], 'diag:absent')
+    r = both('f_court.haro', ['diagnose', wf], 'diag:absent')
     try:
         ds = json.loads(r)['diagnostics']
         if len(ds) != 1 or ds[0]['code'] != 'NO_WORLD' or ds[0]['severity'] != 'warning' or ds[0]['span']['line'] != 0 or ds[0]['cites'] != ['article:placement-3.2']:
@@ -1638,13 +1674,12 @@ def stage14():
         print('  FAIL the envelope -- PLANTED')
     if ab_diff:
         failures += 1
-        print(f'  FAIL rnxc and the oracle differ on {len(ab_diff)} diagnose run(s): {ab_diff[:5]}')
+        print(f'  FAIL haro and its checked build differ on {len(ab_diff)} diagnose run(s): {ab_diff[:5]}')
     else:
-        print(f'  ok   rnxc and the oracle print the same bytes on every diagnose run')
+        print(f'  ok   haro and its checked build print the same bytes on every diagnose run')
     # 3. RingFlex's court live: its codes on its originals, compared one by one
-    if os.path.exists(RING_OFFICIAL) and os.path.isdir(RINGFLEX):
-        p = subprocess.run([RING_OFFICIAL, RF_DIAG], cwd=RINGFLEX, capture_output=True, timeout=120)
-        out = p.stdout.decode('utf-8', 'replace')
+    if ringflex_recorded():
+        out = ringflex([RF_DIAG]) or ''
         live = {}
         for line in out.splitlines():
             if '\t' in line:
@@ -1668,7 +1703,7 @@ def stage14():
         for wname in ('world', 'world-missing-flow', 'world-missing-compensating', 'absent'):
             if 'resolve:' + wname in live:
                 theirs = [(d['code'], d['severity']) for d in live['resolve:' + wname]]
-                rr = both('f_court.ring', ['diagnose', wf] + ([os.path.join(RINGFLEX_WORLDS, wname + '.json')] if wname != 'absent' else []), 'live:' + wname)
+                rr = both('f_court.haro', ['diagnose', wf] + ([os.path.join(RINGFLEX_WORLDS, wname + '.json')] if wname != 'absent' else []), 'live:' + wname)
                 ours = [(d['code'], d['severity']) for d in json.loads(rr)['diagnostics']]
                 if theirs != ours:
                     live_bad.append(('resolve:' + wname, f'RingFlex {theirs} / forged {ours}'))
@@ -1680,9 +1715,9 @@ def stage14():
             for name, why in live_bad[:6]:
                 print(f'  FAIL {name}: {why}')
         else:
-            print(f'  ok   RingFlex\'s own court, live under official Ring on its {len([k for k in live if k.endswith(".wflow")])} original fixtures and 4 worlds: the same first code, the same cites, the same severities as the forged court on the re-expressed ones')
+            print(f'  ok   RingFlex\'s own court, its recorded answers (official Ring 1.27) on its {len([k for k in live if k.endswith(".wflow")])} original fixtures and 4 worlds: the same first code, the same cites, the same severities as the forged court on the re-expressed ones')
     else:
-        print('  SKIP RingFlex\'s court live: official Ring 1.27 is not installed here')
+        print('  SKIP RingFlex\'s court: no recording of its answers (f/ringflex_record.json; HARO_RECORD_RINGFLEX=1 takes it on official Ring)')
     return failures
 
 
@@ -1699,7 +1734,7 @@ FORMS_FLOOR = 584
 
 
 def stzv_run(exe, args):
-    return run_args(exe, ['stzv_court.ring'] + args, HERE).strip()
+    return run_args(exe, ['stzv_court.haro'] + args, HERE).strip()
 
 
 def stage15():
@@ -1714,21 +1749,21 @@ def stage15():
     spellings, every Find*, Replace* and Remove* definition of stzString.ring
     read live from the author's tree (read-only), whose agreement count is
     pinned and whose disagreements are the number the migration measures."""
-    print('stage 15 -- FORMS, the function-name grammar as data: stzv_v12.haro -> stzv_court.ring with `family` and `spellings`, judged by the forms document and by stzString\'s own spellings')
+    print('stage 15 -- FORMS, the function-name grammar as data: stzv_v12.haro -> stzv_court.haro with `family` and `spellings`, judged by the forms document and by stzString\'s own spellings')
     failures = 0
-    out_rnx = run_args(RNXC, ['forge.ring', STZV_STZU, '.'], HERE).strip()
-    print('  rnxc  :', out_rnx.splitlines()[0] if out_rnx else 'NO OUTPUT')
+    out_rnx = run_args(HARO_VM, ['forge.haro', STZV_STZU, '.'], HERE).strip()
+    print('  haro  :', out_rnx.splitlines()[0] if out_rnx else 'NO OUTPUT')
     if not out_rnx.startswith('forged stzv'):
         print('  FAIL the forge did not forge stzv')
         return 1
-    td = ORACLE_OUT
+    td = TWIN_OUT
     os.makedirs(td, exist_ok=True)
-    arts = ('stzv_court.ring', 'stzv.gbnf')
+    arts = ('stzv_court.haro', 'stzv.gbnf')
     for art in arts:
         if os.path.exists(os.path.join(td, art)):
             os.remove(os.path.join(td, art))
-    out_or = run_args(ORACLE, ['forge.ring', STZV_STZU, ORACLE_OUT_REL], HERE).strip()
-    print('  oracle:', out_or.splitlines()[0] if out_or else 'NO OUTPUT')
+    out_or = run_args(TWIN, ['forge.haro', STZV_STZU, TWIN_OUT_REL], HERE).strip()
+    print('  checked:', out_or.splitlines()[0] if out_or else 'NO OUTPUT')
     for art in arts:
         a = open(os.path.join(HERE, art), 'rb').read()
         b = open(os.path.join(td, art), 'rb').read() if os.path.exists(os.path.join(td, art)) else b''
@@ -1739,8 +1774,8 @@ def stage15():
             print(f'  ok   {art}: {len(a)} bytes, byte-identical on both runtimes')
     ab_diff = []
     def both(args, label):
-        r = stzv_run(RNXC, args)
-        o = stzv_run(ORACLE, args)
+        r = stzv_run(HARO_VM, args)
+        o = stzv_run(TWIN, args)
         if r != o:
             ab_diff.append(label)
         return r
@@ -1808,9 +1843,9 @@ def stage15():
     print(('  FAIL ' if sp_bad else '  ok   ') + f'{n_cases} names of the forms document judged as principle 7 judges them ({sp_bad} differ)')
     if ab_diff:
         failures += 1
-        print(f'  FAIL rnxc and the oracle differ on {len(ab_diff)} run(s): {ab_diff}')
+        print(f'  FAIL haro and its checked build differ on {len(ab_diff)} run(s): {ab_diff}')
     else:
-        print('  ok   rnxc and the oracle print the same bytes on every family and spellings run')
+        print('  ok   haro and its checked build print the same bytes on every family and spellings run')
     # the live census: Softanza's own spellings, read-only
     if not os.path.exists(STZ_STRING):
         print('  SKIP the live census: stzString.ring is not at its path')
@@ -1821,13 +1856,13 @@ def stage15():
     names_path = os.path.join(paths.OUT, 'stz_names.txt')
     with open(names_path, 'w', encoding='utf-8', newline='') as fh:
         fh.write('\n'.join(names) + '\n')
-    r = stzv_run(RNXC, ['spellings', STZV_SENTENCE, names_path])
-    o = stzv_run(ORACLE, ['spellings', STZV_SENTENCE, names_path])
+    r = stzv_run(HARO_VM, ['spellings', STZV_SENTENCE, names_path])
+    o = stzv_run(TWIN, ['spellings', STZV_SENTENCE, names_path])
     summary = [l for l in r.splitlines() if l.startswith('spellings:')]
     m = re.match(r'spellings: (\d+) agree, (\d+) disagree of (\d+); (\d+) declared members missing', summary[0]) if summary else None
     if r != o:
         failures += 1
-        print('  FAIL rnxc and the oracle differ on the live census')
+        print('  FAIL haro and its checked build differ on the live census')
     if not m:
         failures += 1
         print(f'  FAIL the census printed no summary: {r[-200:]}')
@@ -1854,7 +1889,7 @@ DEF_RE = re.compile(r'^DEFINE\s+(\w+)\s+(\w+)\s+AS\s*\((.*)\)\s*RATIONALE\s+"(.*
 
 
 def narr_run(exe, args):
-    return run_args(exe, ['f_court.ring'] + args, HERE).strip()
+    return run_args(exe, ['f_court.haro'] + args, HERE).strip()
 
 
 def read_definitions(path):
@@ -1904,19 +1939,19 @@ def stage16():
     v0.11 gives the same verdict."""
     print('stage 16 -- NARRATE, the court\'s voice: f_v13.haro -> `narrate`, judged by the StzNarration law and stzn\'s honesty guard, read by Python')
     failures = 0
-    out_rnx = run_args(RNXC, ['forge.ring', F_STZU, '.'], HERE).strip()
-    print('  rnxc  :', out_rnx.splitlines()[0] if out_rnx else 'NO OUTPUT')
+    out_rnx = run_args(HARO_VM, ['forge.haro', F_STZU, '.'], HERE).strip()
+    print('  haro  :', out_rnx.splitlines()[0] if out_rnx else 'NO OUTPUT')
     if not out_rnx.startswith('forged f'):
         print('  FAIL the forge did not forge F')
         return 1
-    td = ORACLE_OUT
+    td = TWIN_OUT
     os.makedirs(td, exist_ok=True)
-    arts = ('f_court.ring', 'f.gbnf')
+    arts = ('f_court.haro', 'f.gbnf')
     for art in arts:
         if os.path.exists(os.path.join(td, art)):
             os.remove(os.path.join(td, art))
-    out_or = run_args(ORACLE, ['forge.ring', F_STZU, ORACLE_OUT_REL], HERE).strip()
-    print('  oracle:', out_or.splitlines()[0] if out_or else 'NO OUTPUT')
+    out_or = run_args(TWIN, ['forge.haro', F_STZU, TWIN_OUT_REL], HERE).strip()
+    print('  checked:', out_or.splitlines()[0] if out_or else 'NO OUTPUT')
     for art in arts:
         a = open(os.path.join(HERE, art), 'rb').read()
         b = open(os.path.join(td, art), 'rb').read() if os.path.exists(os.path.join(td, art)) else b''
@@ -1927,8 +1962,8 @@ def stage16():
             print(f'  ok   {art}: {len(a)} bytes, byte-identical on both runtimes')
     ab_diff = []
     def both(args, label):
-        r = narr_run(RNXC, args)
-        o = narr_run(ORACLE, args)
+        r = narr_run(HARO_VM, args)
+        o = narr_run(TWIN, args)
         if r != o:
             ab_diff.append(label)
         return r
@@ -1989,7 +2024,7 @@ def stage16():
         p = os.path.join(tdir, 'back.f')
         with open(p, 'w', encoding='utf-8', newline='') as fh:
             fh.write(nar + '\n')
-        r = narr_run(RNXC, ['check', p])
+        r = narr_run(HARO_VM, ['check', p])
         if r.startswith('ok'):
             failures += 1
             print('  FAIL a narration was accepted as a sentence: the court reads one back')
@@ -2008,9 +2043,9 @@ def stage16():
     # forge learned a global is a court the oracle refuses and rnxc runs, HF-61). z had been the
     # voiceless one until the sixteenth rung gave it a voice that tells a question; the machine
     # language declares none
-    run_args(RNXC, ['forge.ring', os.path.join(HERE, 'machine_v03.haro'), '.'], HERE)
-    r = run_args(RNXC, ['machine_court.ring', 'narrate', 'x'], HERE).strip()
-    o = run_args(ORACLE, ['machine_court.ring', 'narrate', 'x'], HERE).strip()
+    run_args(HARO_VM, ['forge.haro', os.path.join(HERE, 'machine_v03.haro'), '.'], HERE)
+    r = run_args(HARO_VM, ['machine_court.haro', 'narrate', 'x'], HERE).strip()
+    o = run_args(TWIN, ['machine_court.haro', 'narrate', 'x'], HERE).strip()
     if r != o:
         ab_diff.append('machine:narrate')
     if 'declares no NARRATE' not in r:
@@ -2023,9 +2058,9 @@ def stage16():
         print('  FAIL the voice -- PLANTED')
     if ab_diff:
         failures += 1
-        print(f'  FAIL rnxc and the oracle differ on {len(ab_diff)} run(s): {ab_diff[:5]}')
+        print(f'  FAIL haro and its checked build differ on {len(ab_diff)} run(s): {ab_diff[:5]}')
     else:
-        print('  ok   rnxc and the oracle print the same bytes on every narrate and diagnose run')
+        print('  ok   haro and its checked build print the same bytes on every narrate and diagnose run')
     return failures
 
 
@@ -2069,9 +2104,8 @@ def pairs_of(diags, starts):
 
 
 def rf_findings(paths, script):
-    p = subprocess.run([RING_OFFICIAL, script] + paths, cwd=RINGFLEX, capture_output=True, timeout=180)
     live = {}
-    for line in p.stdout.decode('utf-8', 'replace').splitlines():
+    for line in (ringflex([script] + paths) or '').splitlines():
         if '\t' in line:
             k, _, js = line.partition('\t')
             try:
@@ -2090,18 +2124,18 @@ def stage17():
     its 24 original fixtures. The forged court must report every (code, declaration) pair
     RingFlex reports and no pair RingFlex does not; it may say a pair more often (a missing
     TIMEOUT and a missing ON_TIMEOUT are two seats under one law)."""
-    print('stage 17 -- a court that collects: `diagnose` answers every finding, judged by RingFlex\'s own Check() pass, live')
+    print('stage 17 -- a court that collects: `diagnose` answers every finding, judged by RingFlex\'s own Check() pass, recorded')
     failures = 0
-    run_args(RNXC, ['forge.ring', F_STZU, '.'], HERE)
+    run_args(HARO_VM, ['forge.haro', F_STZU, '.'], HERE)
     ab_diff = []
     def both(args, label):
-        r = narr_run(RNXC, args)
-        o = narr_run(ORACLE, args)
+        r = narr_run(HARO_VM, args)
+        o = narr_run(TWIN, args)
         if r != o:
             ab_diff.append(label)
         return r
-    if not (os.path.exists(RING_OFFICIAL) and os.path.isdir(RINGFLEX)):
-        print('  SKIP RingFlex\'s court live: official Ring 1.27 is not installed here')
+    if not ringflex_recorded():
+        print('  SKIP RingFlex\'s court: no recording of its answers (f/ringflex_record.json; HARO_RECORD_RINGFLEX=1 takes it)')
         return 0
     doc = json.load(open(MULTI_CASES, encoding='utf-8'))
     wpaths = [os.path.join(MULTI_DIR, c['name'] + '.wflow') for c in doc['cases']]
@@ -2193,9 +2227,9 @@ def stage17():
         print('  FAIL the collection -- PLANTED')
     if ab_diff:
         failures += 1
-        print(f'  FAIL rnxc and the oracle differ on {len(ab_diff)} run(s): {ab_diff[:5]}')
+        print(f'  FAIL haro and its checked build differ on {len(ab_diff)} run(s): {ab_diff[:5]}')
     else:
-        print('  ok   rnxc and the oracle print the same bytes on every diagnose and check run')
+        print('  ok   haro and its checked build print the same bytes on every diagnose and check run')
     return failures
 
 
@@ -2214,12 +2248,12 @@ META_LINE = re.compile(r'^haro \(line (\d+)\): (.*)$')
 
 
 def meta_run(exe, path, mode=None):
-    out = run_args(exe, ['haro.ring', path] + ([mode] if mode else []), HERE)
+    out = run_args(exe, ['haro.haro', path] + ([mode] if mode else []), HERE)
     return [l for l in out.split('\n') if l != '']
 
 
 def stage18():
-    """The fifteenth rung. The meta-court gains `haro.ring <file> all`: every defect of a
+    """The fifteenth rung. The meta-court gains `haro.haro <file> all`: every defect of a
     language declaration, one line each, in the order of the file, where it gave the first.
     The judge is the court's own first refusal. A defect put into a sound declaration by
     haro_mutate.py is refused alone in default mode; the court that collects must give
@@ -2229,12 +2263,12 @@ def stage18():
     come before the relations among declarations are judged (a barrier, as RingFlex's parser
     stands before its Check()), so when any of the first two kinds is present the relational
     ones wait. Before that, five files whose findings were written by hand."""
-    print('stage 18 -- the meta-court that collects: `haro.ring <file> all`, judged by its own first refusal one defect at a time, and by findings written by hand')
+    print('stage 18 -- the meta-court that collects: `haro.haro <file> all`, judged by its own first refusal one defect at a time, and by findings written by hand')
     failures = 0
     ab_diff = []
     def both(path, mode):
-        r = meta_run(RNXC, path, mode)
-        o = meta_run(ORACLE, path, mode)
+        r = meta_run(HARO_VM, path, mode)
+        o = meta_run(TWIN, path, mode)
         if r != o:
             ab_diff.append(os.path.basename(path) + ':' + str(mode))
         return r
@@ -2245,7 +2279,7 @@ def stage18():
         path = os.path.join('v15', c['file'])
         got = both(path, 'all')
         if not c['findings']:
-            want = meta_run(RNXC, path, None)
+            want = meta_run(HARO_VM, path, None)
             if got != want or not got or got[0] != 'ok':
                 hand_bad += 1
                 print(f'  FAIL {c["file"]}: a clean declaration must print what the default prints')
@@ -2276,7 +2310,7 @@ def stage18():
                 elig = hm.eligible(head, stmts, text)
                 if seed == LAW_SEEDS[0]:
                     n_clean += 1
-                    if both(os.path.join(HERE, base), 'all') != meta_run(RNXC, os.path.join(HERE, base), None):
+                    if both(os.path.join(HERE, base), 'all') != meta_run(HARO_VM, os.path.join(HERE, base), None):
                         law_bad.append((base, 'a sound declaration: all differs from the default'))
                 pick = []
                 for op in ('clause', 'rationale', 'dup', 'dangle', 'on'):
@@ -2290,7 +2324,7 @@ def stage18():
                         continue
                     with open(mut, 'w', encoding='utf-8', newline='') as fh:
                         fh.write(mt)
-                    d = meta_run(RNXC, mut, None)
+                    d = meta_run(HARO_VM, mut, None)
                     a = both(mut, 'all')
                     singles[(m['op'], m['at'])] = (m, d)
                     n_single += 1
@@ -2333,9 +2367,9 @@ def stage18():
         print('  FAIL the meta-court collection -- PLANTED')
     if ab_diff:
         failures += 1
-        print(f'  FAIL rnxc and the oracle differ on {len(ab_diff)} run(s): {ab_diff[:5]}')
+        print(f'  FAIL haro and its checked build differ on {len(ab_diff)} run(s): {ab_diff[:5]}')
     else:
-        print('  ok   rnxc and the oracle print the same bytes on every collecting run')
+        print('  ok   haro and its checked build print the same bytes on every collecting run')
     return failures
 
 
@@ -2657,15 +2691,15 @@ def stage19():
     print(f'stage 19 -- NARRATE tells a run and a question: a_v16.haro and {os.path.basename(Z_STZU)} -> `narrate-run` and `narrate-ask`, judged by laws read in Python')
     failures = 0
     for stzu, lead in ((A_STZU, 'forged a'), (Z_STZU, 'forged z')):
-        out = run_args(RNXC, ['forge.ring', stzu, '.'], HERE).strip()
+        out = run_args(HARO_VM, ['forge.haro', stzu, '.'], HERE).strip()
         if not out.startswith(lead):
             print(f'  FAIL the forge did not forge {os.path.basename(stzu)}: {out[:100]}')
             return 1
     ab_diff = []
 
     def both(court, args, label):
-        r = run_args(RNXC, [court] + args, HERE).strip()
-        o = run_args(ORACLE, [court] + args, HERE).strip()
+        r = run_args(HARO_VM, [court] + args, HERE).strip()
+        o = run_args(TWIN, [court] + args, HERE).strip()
         if r != o:
             ab_diff.append(label)
         return r
@@ -2683,7 +2717,7 @@ def stage19():
     # 1. hand-written narrations: three runs and a question
     bad_hand = 0
     for c in doc['runs']:
-        r = both('a_court.ring', ['narrate-run', c['sentence'], c['algorithm'], c['record']], 'hand:' + c['algorithm'])
+        r = both('a_court.haro', ['narrate-run', c['sentence'], c['algorithm'], c['record']], 'hand:' + c['algorithm'])
         if r != '\n'.join(c['narration']):
             bad_hand += 1
             print(f'  FAIL the hand-written narration of {c["algorithm"]}')
@@ -2691,7 +2725,7 @@ def stage19():
                 if a != b:
                     print('    court :', a[:140]); print('    hand  :', b[:140]); break
     for c in doc['asks']:
-        r = both('z_court.ring', ['narrate-ask', c['sentence'], c['question'], c['rows']], 'hand:ask')
+        r = both('z_court.haro', ['narrate-ask', c['sentence'], c['question'], c['rows']], 'hand:ask')
         if r != '\n'.join(c['narration']):
             bad_hand += 1
             print('  FAIL the hand-written narration of a question')
@@ -2710,7 +2744,7 @@ def stage19():
         if 'algorithm' not in c:
             continue
         refusal = c.get('refusal')
-        r = both('a_court.ring', ['narrate-run', A_SENTENCE, c['algorithm'], json.dumps(c['input'])], 'run:' + c['id'])
+        r = both('a_court.haro', ['narrate-run', A_SENTENCE, c['algorithm'], json.dumps(c['input'])], 'run:' + c['id'])
         bad, rb = judge_run(r.splitlines(), defs, c['algorithm'], c['input'], c.get('expected'), refusal)
         if refusal is None:
             n_runs += 1
@@ -2737,7 +2771,7 @@ def stage19():
     ask_bad = []
     for c in qdoc['cases']:
         refusal = c.get('refusal')
-        r = both('z_court.ring', ['narrate-ask', Z_SENTENCE, c['query'], rows_json], 'ask:' + c['id'])
+        r = both('z_court.haro', ['narrate-ask', Z_SENTENCE, c['query'], rows_json], 'ask:' + c['id'])
         b = judge_ask(r.splitlines(), c['query'], len(qdoc['rows']), told_rows(Z_SENTENCE, Z_STZU, c.get('expect')), refusal)
         if refusal is None:
             n_asks += 1
@@ -2747,7 +2781,7 @@ def stage19():
             ask_bad.append((c['id'], x))
     by_id = {c['id']: c for c in qdoc['cases']}
     for query, base_id in Q16_UNCUT:
-        r = both('z_court.ring', ['narrate-ask', Z_SENTENCE, query, rows_json], 'ask:uncut:' + base_id)
+        r = both('z_court.haro', ['narrate-ask', Z_SENTENCE, query, rows_json], 'ask:uncut:' + base_id)
         for x in judge_ask(r.splitlines(), query, len(qdoc['rows']), told_rows(Z_SENTENCE, Z_STZU, by_id[base_id]['expect']), None):
             ask_bad.append(('uncut ' + base_id, x))
         n_asks += 1
@@ -2770,24 +2804,24 @@ def stage19():
     bad_def = 0
     with tempfile.TemporaryDirectory() as tdir:
         try:
-            out = run_args(RNXC, ['forge.ring', variant(A_STZU, d['a_tells'], 'a_plain'), '.'], HERE).strip()
+            out = run_args(HARO_VM, ['forge.haro', variant(A_STZU, d['a_tells'], 'a_plain'), '.'], HERE).strip()
             if not out.startswith('forged a'):
                 bad_def += 1
                 print(f'  FAIL the plain voice of a did not forge: {out[:100]}')
             for c in d['runs']:
-                r = both('a_court.ring', ['narrate-run', c['sentence'], c['algorithm'], c['record']], 'plain:' + c['algorithm'])
+                r = both('a_court.haro', ['narrate-run', c['sentence'], c['algorithm'], c['record']], 'plain:' + c['algorithm'])
                 if r != '\n'.join(c['narration']):
                     bad_def += 1
                     print(f'  FAIL the plain narration of {c["algorithm"]}')
                     for x, y in zip(r.splitlines() + [''] * 12, c['narration'] + [''] * 12):
                         if x != y:
                             print('    court :', x[:140]); print('    hand  :', y[:140]); break
-            out = run_args(RNXC, ['forge.ring', variant(Z_STZU, d['z_tells'], 'z_plain'), '.'], HERE).strip()
+            out = run_args(HARO_VM, ['forge.haro', variant(Z_STZU, d['z_tells'], 'z_plain'), '.'], HERE).strip()
             if not out.startswith('forged z'):
                 bad_def += 1
                 print(f'  FAIL the plain voice of z did not forge: {out[:100]}')
             for c in d['asks']:
-                r = both('z_court.ring', ['narrate-ask', c['sentence'], c['question'], c['rows']], 'plain:ask')
+                r = both('z_court.haro', ['narrate-ask', c['sentence'], c['question'], c['rows']], 'plain:ask')
                 if r != '\n'.join(c['narration']):
                     bad_def += 1
                     print('  FAIL the plain narration of a question')
@@ -2796,12 +2830,12 @@ def stage19():
                             print('    court :', x[:140]); print('    hand  :', y[:140]); break
         finally:
             for stzu in (A_STZU, Z_STZU):
-                run_args(RNXC, ['forge.ring', stzu, '.'], HERE)
+                run_args(HARO_VM, ['forge.haro', stzu, '.'], HERE)
     failures += bad_def
     if not bad_def:
         print(f'  ok   a voice that tells almost nothing: {len(d["runs"])} runs and {len(d["asks"])} question told plainly, as composed by hand; the real courts re-forged after')
     # 5. one run, one question: the narration is the run, not a second execution of it
-    src = open(os.path.join(HERE, 'narrate_lib.ring'), encoding='utf-8').read()
+    src = open(os.path.join(HERE, 'narrate_lib.haro'), encoding='utf-8').read()
     def body_of(fn):
         i = src.index('func ' + fn + '(')
         j = src.find('\nfunc ', i + 1)
@@ -2819,8 +2853,8 @@ def stage19():
         print('  ok   a narration is one execution: NarTellRun calls RunAlgorithm once and NarTellAsk calls AskRun once (and the check fails on a doctored copy that calls it twice)')
     # 6. never stored, never read back
     before = sorted(os.listdir(HERE))
-    both('a_court.ring', ['narrate-run', A_SENTENCE, 'map_scale', '{"items":[1,2,3]}'], 'stored:a')
-    both('z_court.ring', ['narrate-ask', Z_SENTENCE, 'SELECT * FROM collect LIMIT 1', rows_json], 'stored:z')
+    both('a_court.haro', ['narrate-run', A_SENTENCE, 'map_scale', '{"items":[1,2,3]}'], 'stored:a')
+    both('z_court.haro', ['narrate-ask', Z_SENTENCE, 'SELECT * FROM collect LIMIT 1', rows_json], 'stored:z')
     after = sorted(os.listdir(HERE))
     if before != after:
         failures += 1
@@ -2828,11 +2862,11 @@ def stage19():
     else:
         print('  ok   telling writes no file: a narration is a rendering of a run, never stored')
     with tempfile.TemporaryDirectory() as tdir:
-        nar = both('a_court.ring', ['narrate-run', A_SENTENCE, 'map_scale', '{"items":[1,2,3]}'], 'back')
+        nar = both('a_court.haro', ['narrate-run', A_SENTENCE, 'map_scale', '{"items":[1,2,3]}'], 'back')
         p = os.path.join(tdir, 'back.a')
         with open(p, 'w', encoding='utf-8', newline='') as fh:
             fh.write(nar + '\n')
-        r = run_args(RNXC, ['a_court.ring', 'check', p], HERE).strip()
+        r = run_args(HARO_VM, ['a_court.haro', 'check', p], HERE).strip()
         if r.startswith('ok'):
             failures += 1
             print('  FAIL a told run was accepted as a sentence of A: the court reads one back')
@@ -2840,11 +2874,11 @@ def stage19():
             print('  ok   a told run is not a sentence of the language: the court refuses it, and has no verb that reads one back')
     # 7. a voice needs a run to tell, and a run needs a voice
     refuse_bad = 0
-    for court, verb, want, what in (('machine_court.ring', 'narrate-run', 'declares no NARRATE', 'a language with no voice'),
-                                    ('f_court.ring', 'narrate-run', 'declares no RUN', 'a voice over a language with no RUN'),
-                                    ('f_court.ring', 'narrate-ask', 'declares no ASK', 'a voice over a language with no ASK'),
-                                    ('a_court.ring', 'narrate-ask', 'declares no ASK', 'a language with a RUN and no ASK'),
-                                    ('z_court.ring', 'narrate-run', 'declares no RUN', 'a language with an ASK and no RUN')):
+    for court, verb, want, what in (('machine_court.haro', 'narrate-run', 'declares no NARRATE', 'a language with no voice'),
+                                    ('f_court.haro', 'narrate-run', 'declares no RUN', 'a voice over a language with no RUN'),
+                                    ('f_court.haro', 'narrate-ask', 'declares no ASK', 'a voice over a language with no ASK'),
+                                    ('a_court.haro', 'narrate-ask', 'declares no ASK', 'a language with a RUN and no ASK'),
+                                    ('z_court.haro', 'narrate-run', 'declares no RUN', 'a language with an ASK and no RUN')):
         r = both(court, [verb, 'x', 'y', '[]'], f'refuse:{court}:{verb}')
         if want not in r:
             refuse_bad += 1
@@ -2857,9 +2891,9 @@ def stage19():
         print('  FAIL the telling -- PLANTED')
     if ab_diff:
         failures += 1
-        print(f'  FAIL rnxc and the oracle differ on {len(ab_diff)} run(s): {ab_diff[:5]}')
+        print(f'  FAIL haro and its checked build differ on {len(ab_diff)} run(s): {ab_diff[:5]}')
     else:
-        print('  ok   rnxc and the oracle print the same bytes on every told run and question')
+        print('  ok   haro and its checked build print the same bytes on every told run and question')
     return failures
 
 
@@ -2875,7 +2909,7 @@ def stage20():
     tontine's natural door in English and French. The judge is v17/n_check.py's: the REAL court, asked the Phase 1.5
     study's 74 questions, answers what the study answered and what a reference model (read from the sentence alone)
     answers, a sample byte-identical on the oracle; with its gate removed it disagrees on the attacks."""
-    print('stage 20 -- N, the natural letter built: n_v17.haro (UNDERSTAND) -> n_court.ring, n/tontine.n, judged by v17/n_check.py (the forged court reproduces the Phase 1.5 study on 74 questions)')
+    print('stage 20 -- N, the natural letter built: n_v17.haro (UNDERSTAND) -> n_court.haro, n/tontine.n, judged by v17/n_check.py (the forged court reproduces the Phase 1.5 study on 74 questions)')
     failures = 0
     p = subprocess.run([sys.executable, N_CHECK], capture_output=True, cwd=ROOT, timeout=900)
     out = p.stdout.decode('utf-8', 'replace').replace('\r\n', '\n')
@@ -2980,7 +3014,7 @@ def stage24():
     fixtures written before the engine (v20/refine_check.py), by Softanza's own stzRefinableCode put the same proposals on the Ring++ package, by `rnxc graph`
     for a retargeted call, by the engine's constrained decoder for the grammar scoped to each program (the agent's write surface, charter 6.2), by controls
     that must fail, by Haro's own history (a drafted refinement still lands after the next human edit) and by a corpus of real Ring files refined at a literal."""
-    print('stage 24 -- refinement over the program graph: v20/refine_check.py (147 fixtures, the BLOCK, FUNCTION and METHOD kinds and the allowlist rules among them, the live gate, rnxc graph, the scoped grammar, controls, history, a corpus)')
+    print('stage 24 -- refinement over the program graph: v20/refine_check.py (147 fixtures, the BLOCK, FUNCTION and METHOD kinds and the allowlist rules among them, the live gate, haro graph, the scoped grammar, controls, history, a corpus)')
     failures = 0
     p = subprocess.run([sys.executable, REFINE_CHECK], capture_output=True, cwd=ROOT, timeout=3600)
     out = p.stdout.decode('utf-8', 'replace').replace('\r\n', '\n')
@@ -3032,7 +3066,7 @@ def stage26():
     Ring meaning. Judged by fixtures written before the reader (v22/face_read_check.py), by the printer's own text read back to the same text, by the corpus read back
     to the same graph up to twelve declared losses (each shown needed by a control), by controls that must fail, and by the oracle: every runnable probe of bench/exec
     that the face can spell, printed, read back and run, prints what it printed before."""
-    print('stage 26 -- the reader of the face: v22/face_read_check.py (67 fixtures, the round trip, 12 declared losses, controls, a corpus, the oracle)')
+    print('stage 26 -- the reader of the face: v22/face_read_check.py (67 fixtures, the round trip, 12 declared losses, controls, a corpus, the checked build)')
     failures = 0
     p = subprocess.run([sys.executable, FACE_READ_CHECK], capture_output=True, cwd=ROOT, timeout=3600)
     out = p.stdout.decode('utf-8', 'replace').replace(chr(13) + chr(10), chr(10))
@@ -3132,21 +3166,21 @@ def ledger_stage(n, stzu, cases_path, lang, plant_id):
     and the audit chain beside it); 'first' is a fragment of the first line, 'contains' fragments of
     the whole output, 'counts' the verdict's counts, 'record' the C2 record of a refine refusal,
     'diagnose' the first diagnostic, 'revert' that the inverse restores the bytes."""
-    print(f'stage {n} -- the constitution plane: {os.path.basename(stzu)} -> {lang}_court.ring; {os.path.relpath(cases_path, HERE)} judged on rnxc and the oracle')
+    print(f'stage {n} -- the constitution plane: {os.path.basename(stzu)} -> {lang}_court.haro; {os.path.relpath(cases_path, HERE)} judged on haro and its checked build')
     failures = 0
-    out_rnx = run_args(RNXC, ['forge.ring', stzu, '.'], HERE).strip()
-    print('  rnxc  :', out_rnx.splitlines()[0] if out_rnx else 'NO OUTPUT')
+    out_rnx = run_args(HARO_VM, ['forge.haro', stzu, '.'], HERE).strip()
+    print('  haro  :', out_rnx.splitlines()[0] if out_rnx else 'NO OUTPUT')
     if not out_rnx.startswith('forged ' + lang):
         print(f'  FAIL the forge did not forge {lang}')
         return 1
-    td_or = ORACLE_OUT
+    td_or = TWIN_OUT
     os.makedirs(td_or, exist_ok=True)
-    arts = (f'{lang}_court.ring', f'{lang}.gbnf')
+    arts = (f'{lang}_court.haro', f'{lang}.gbnf')
     for art in arts:
         if os.path.exists(os.path.join(td_or, art)):
             os.remove(os.path.join(td_or, art))
-    out_or = run_args(ORACLE, ['forge.ring', stzu, ORACLE_OUT_REL], HERE).strip()
-    print('  oracle:', out_or.splitlines()[0] if out_or else 'NO OUTPUT')
+    out_or = run_args(TWIN, ['forge.haro', stzu, TWIN_OUT_REL], HERE).strip()
+    print('  checked:', out_or.splitlines()[0] if out_or else 'NO OUTPUT')
     for art in arts:
         a = open(os.path.join(HERE, art), 'rb').read()
         b = open(os.path.join(td_or, art), 'rb').read() if os.path.exists(os.path.join(td_or, art)) else b''
@@ -3160,11 +3194,11 @@ def ledger_stage(n, stzu, cases_path, lang, plant_id):
     ab_diff = []
     for case in doc['cases']:
         verb = case['verb']
-        court = case.get('court', f'{lang}_court.ring')
+        court = case.get('court', f'{lang}_court.haro')
         steps = case['steps'] if verb == 'sequence' else [[verb] + case['args']]
         outs = {}
         with tempfile.TemporaryDirectory() as td:
-            for label, exe in (('rnxc', RNXC), ('oracle', ORACLE)):
+            for label, exe in (('haro', HARO_VM), ('checked', TWIN)):
                 cd = os.path.join(td, label)
                 os.makedirs(cd, exist_ok=True)
                 copies = {}
@@ -3172,7 +3206,7 @@ def ledger_stage(n, stzu, cases_path, lang, plant_id):
                 for step in steps:
                     sverb, sargs = step[0], step[1:]
                     if sverb == 'meta':
-                        out = run_args(exe, ['haro.ring'] + sargs, HERE)
+                        out = run_args(exe, ['haro.haro'] + sargs, HERE)
                     elif sverb in ('refine', 'audit'):
                         # the court writes beside the sentence: a copy per runtime, shared by the steps of a sequence
                         src_rel = sargs[0]
@@ -3195,8 +3229,8 @@ def ledger_stage(n, stzu, cases_path, lang, plant_id):
                         out = run_args(exe, [court, sverb] + sargs, HERE)
                     parts.append(out)
                 outs[label] = '\n'.join(parts)
-        r = outs['rnxc']
-        if outs['rnxc'] != outs['oracle']:
+        r = outs['haro']
+        if outs['haro'] != outs['checked']:
             ab_diff.append(case['id'])
         lines = [l for l in r.split('\n') if l != '']
         first = lines[0] if lines else ''
@@ -3247,9 +3281,9 @@ def ledger_stage(n, stzu, cases_path, lang, plant_id):
     print(f'{lang.upper()}-CONSTITUTION: {passed} of {len(doc["cases"])} cases hold')
     if ab_diff:
         failures += 1
-        print(f'  FAIL rnxc and the oracle differ on {len(ab_diff)} case(s): {ab_diff}')
+        print(f'  FAIL haro and its checked build differ on {len(ab_diff)} case(s): {ab_diff}')
     else:
-        print(f'  ok   rnxc and the oracle print the same bytes on all {len(doc["cases"])} cases')
+        print(f'  ok   haro and its checked build print the same bytes on all {len(doc["cases"])} cases')
     return failures
 
 
@@ -3306,7 +3340,7 @@ def stage34():
     return ledger_stage(34, NOTICE_STZU, NOTICE_CASES, 'notice', 'N4')
 
 def stage6(lang, court=None, n=15):
-    court = court or f'{lang}_court.ring'
+    court = court or f'{lang}_court.haro'
     print(f'stage 6 -- edit to verdict on makeen_box.machine, minima of {n}')
     def best(cmd, cwd, cache):
         env = dict(os.environ)
@@ -3322,24 +3356,24 @@ def stage6(lang, court=None, n=15):
             ts.append(time.perf_counter() - t0)
         return min(ts) * 1000, sorted(ts)[n // 2] * 1000
     h = best([HARB, 'check', MAKEEN], os.path.dirname(HARB), False)
-    r = best([RNXC, court, 'check', MAKEEN], HERE, False)
-    rc = best([RNXC, court, 'check', MAKEEN], HERE, True)
-    o = best([ORACLE, court, 'check', MAKEEN], HERE, False)
+    r = best([HARO_VM, court, 'check', MAKEEN], HERE, False)
+    rc = best([HARO_VM, court, 'check', MAKEEN], HERE, True)
+    o = best([TWIN, court, 'check', MAKEEN], HERE, False)
     print(f'  harb check (Zig, the native court)       min {h[0]:7.1f} ms   median {h[1]:7.1f} ms')
-    print(f'  forged court on rnxc, compiled each run  min {r[0]:7.1f} ms   median {r[1]:7.1f} ms')
-    print(f'  forged court on rnxc, its image reused   min {rc[0]:7.1f} ms   median {rc[1]:7.1f} ms')
-    print(f'  forged court on the oracle               min {o[0]:7.1f} ms   median {o[1]:7.1f} ms')
+    print(f'  forged court on haro, compiled each run  min {r[0]:7.1f} ms   median {r[1]:7.1f} ms')
+    print(f'  forged court on haro, its image reused   min {rc[0]:7.1f} ms   median {rc[1]:7.1f} ms')
+    print(f'  forged court on the checked build               min {o[0]:7.1f} ms   median {o[1]:7.1f} ms')
     target = 100.0
     if r[0] <= target:
-        print(f'  ok   under the {target:.0f} ms target on rnxc, image or no image')
+        print(f'  ok   under the {target:.0f} ms target on haro, image or no image')
         return 0
-    print(f'  FAIL {r[0]:.1f} ms is over the {target:.0f} ms target on rnxc')
+    print(f'  FAIL {r[0]:.1f} ms is over the {target:.0f} ms target on haro')
     return 1
 
 
 if __name__ == '__main__':
     t0 = time.perf_counter()
-    print('runs on:', paths.rnxc_build(RNXC), '| the oracle', ORACLE)
+    print('runs on:', paths.build_of(HARO_VM), '| the checked build', TWIN)
     stage = None
     for a in sys.argv[1:]:
         if a.startswith('--stage='):
@@ -3384,7 +3418,7 @@ if __name__ == '__main__':
         failures += stage9()
     if stage in (None, 10) and os.path.exists(Z_STZU) and os.path.exists(Q_FIXTURES):
         if stage == 10:
-            run_args(RNXC, ['forge.ring', Z_STZU, '.'], HERE)
+            run_args(HARO_VM, ['forge.haro', Z_STZU, '.'], HERE)
         failures += stage10()
     if stage in (None, 11) and os.path.exists(F_STZU) and os.path.isdir(F_DIR):
         failures += stage11()

@@ -1,5 +1,5 @@
-# world_stub.ring -- what a court whose language declares no SYMBOL and no PUBLISH has of a
-# world: nothing (Haro v0.14). It stands where world_lib.ring would, so the court's own calls
+# world_stub.haro -- what a court whose language declares no SYMBOL and no PUBLISH has of a
+# world: nothing (Haro v0.14). It stands where world_lib.haro would, so the court's own calls
 # resolve, and costs the compiler a handful of lines instead of a hundred (HF-49).
 # Functions only; the globals are the generated court's.
 

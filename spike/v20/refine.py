@@ -45,7 +45,7 @@ MUTATORS = ('add', 'insert', 'del', 'swap')     # the builtins that write into t
 sys.path.insert(0, os.path.abspath(os.path.join(HERE, '..', '..')))   # this repository's root, for paths.py
 import paths                                   # where Ring++ is (Haro is its own repository since 2026-11-02)
 ROOT = paths.RINGPP                            # its src/ and vendored scanner are read for the builtin and keyword lists
-RNXC = paths.RNXC
+HARO_VM = paths.HARO_VM
 STAGES = ('structural', 'constraint', 'governance', 'trust', 'derivation')
 RULE_FLOOR = 'trusted'                          # the posture a refinement of a point's own RULES must come from, whatever the point's floor says
 WIDEN_TIER = 4                                  # widening a rule is the heaviest act there is
@@ -1174,7 +1174,7 @@ def unit_names(unit):
     if key in _UNIT_CACHE:
         return _UNIT_CACHE[key]
     import subprocess
-    r = subprocess.run([RNXC, 'graph', unit['root']], capture_output=True, timeout=600)
+    r = subprocess.run([HARO_VM, 'graph', unit['root']], capture_output=True, timeout=600)
     names = set()
     for ln in r.stdout.decode('utf-8', 'replace').split('\n'):
         f = ln.strip().split('|')
@@ -1538,9 +1538,9 @@ def rnxc_findings(text, unit=None):
     path = os.path.join(SCRATCH, 'chk%d_%d.ring' % (os.getpid(), _n[0]))
     open(path, 'wb').write(text.encode('latin-1'))
     if unit:
-        cmd = [RNXC, 'check', unit['root'], '--closed', '--subst=%s=%s' % (unit['file'], path)]
+        cmd = [HARO_VM, 'check', unit['root'], '--closed', '--subst=%s=%s' % (unit['file'], path)]
     else:
-        cmd = [RNXC, 'check', path, '--closed']
+        cmd = [HARO_VM, 'check', path, '--closed']
     if unit and unit.get('natives'):
         cmd.append('--natives=%s' % unit['natives'])
     import subprocess
@@ -1548,7 +1548,7 @@ def rnxc_findings(text, unit=None):
         r = subprocess.run(cmd, capture_output=True, timeout=600)
         lines = (r.stdout + r.stderr).decode('utf-8', 'replace').replace('\r\n', '\n').split('\n')
     except (OSError, subprocess.TimeoutExpired) as e:
-        lines = ['  NOT checked -- rnxc check did not run: %s' % e]
+        lines = ['  NOT checked -- haro check did not run: %s' % e]
     finally:
         try:
             os.remove(path)
@@ -1653,7 +1653,7 @@ def evaluate_block(model, s, ctx, out, p):
         f0, _ = rnxc_findings(text_of(g), model.unit)
         f1, shut = rnxc_findings(text_of(new), model.unit)
         if shut:
-            return out.reject('derivation', 'rnxc check does not check this program: ' + shut[0])
+            return out.reject('derivation', 'haro check does not check this program: ' + shut[0])
         seen = {}
         for sev, rule, msg in f0:
             k = (rule, re.sub(r'[0-9]+', '#', msg))
@@ -1663,7 +1663,7 @@ def evaluate_block(model, s, ctx, out, p):
             if seen.get(k):
                 seen[k] -= 1
             elif sev in ('error', 'warn'):
-                return out.reject('derivation', 'rnxc check: %s (%s)' % (msg, rule))
+                return out.reject('derivation', 'haro check: %s (%s)' % (msg, rule))
         if 'cascade' in s and s['cascade']:
             return out.reject('derivation', "cascade stated %s but a body has callers, not readers" % sorted(set(s['cascade'])))
         out.passed('derivation')
@@ -2198,7 +2198,7 @@ def main(argv):
         print('the program does not parse: %s' % e)
         return 2
     if write and m.text() != prog.replace('\r\n', '\n'):
-        print('refused: %s is not its own canonical text, so a written result would carry layout changes no refinement made; run `rnxc fmt --write` on it first' % args[0])
+        print('refused: %s is not its own canonical text, so a written result would carry layout changes no refinement made; run `haro fmt --write` on it first' % args[0])
         return 2
     sents = split_sentences(open(args[1], 'rb').read().decode('latin-1'))
     if not sents:

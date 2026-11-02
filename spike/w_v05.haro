@@ -1,7 +1,7 @@
 -- w_v05.haro -- W, the Softanza conditional-code grammar (stz/declarative/w, v0.1),
 -- declared in Haro v0.5 as an EXPRESSION language: the operators and operands it
 -- admits, the variables a seat may use, and which seat admits which. From this
--- declaration the forge emits W's court AND its evaluator (w_expr.ring), judged by
+-- declaration the forge emits W's court AND its evaluator (w_expr.haro), judged by
 -- stz's 29 fixtures unadapted. The alphabet's W letter, declared by its own
 -- grammar's text (declarative/w/GRAMMAR.md), not re-designed.
 

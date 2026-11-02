@@ -62,7 +62,7 @@ def main():
                 res['fails'].append((t['id'], r['lenient']))
         rows[(cond, model)].append((rep, res))
     out = ['# K4 -- results', '', 'Twenty tasks, two inputs each (the shown data and hidden data), one attempt per task; the models are Claude haiku and Claude sonnet, run as sub-agents that read one prompt file and '
-           'wrote one answer file (two tool calls each). Ring++ is judged on rnxc; the face is read by the reader (strict: the face\'s own spelling; lenient: its meaning) and the Ring++ that comes out is run on rnxc. (Rounds 1-3 were written as Ring 1.27 and first judged on the oracle; see K4.md.)', '',
+           'wrote one answer file (two tool calls each). Ring++ is judged on haro; the face is read by the reader (strict: the face\'s own spelling; lenient: its meaning) and the Ring++ that comes out is run on haro. (Rounds 1-3 were written as Ring 1.27 and first judged on the checked build; see K4.md.)', '',
            '| condition | model | runs | strict | lenient | respelled by the printer then strict |', '|---|---|---|---|---|---|']
     for cond in ('R', 'R0', 'F', 'F2', 'F3'):
         for model in ('haiku', 'sonnet'):

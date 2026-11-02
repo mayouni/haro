@@ -1,8 +1,10 @@
-# Ring sources check out LF, as they did in Ring++ (whose .gitattributes carried this rule for every .ring file, these included).
-# Without it core.autocrlf rewrites them CRLF on checkout, `git status` calls them modified for ever while `git diff` shows nothing,
-# and a court reading its own source by byte offset reads different bytes.
-*.ring text eol=lf
+# Every text file checks out LF, as it is stored (HF-126, decided in the cut of 2026-11-02). Measured: of 821 text files none holds a
+# CR in the index, and 162 sat CRLF on disk because core.autocrlf rewrote them at checkout -- so a fresh clone read `n/tontine.n`
+# with 440 CRs and stage 20 counted a fragment holding a newline as absent, and the forge's grammars (written LF) showed as modified
+# in every status. With this rule a checkout is LF whatever the machine's setting; a court reading its own sources by byte offset
+# reads the bytes git holds.
+* text=auto eol=lf
 
-# Vendored third-party sources check out BYTE-EXACT, never line-ending converted: their SHA256SUMS are claims about those bytes
-# (Ring++ found core.autocrlf rewriting the grammar's 21 MB parser.c on checkout, so the copy no longer matched its release).
+# Vendored third-party sources check out BYTE-EXACT, never converted: their SHA256SUMS are claims about those bytes (Ring++ found
+# core.autocrlf rewriting the grammar's 21 MB parser.c on checkout, so the copy no longer matched its release).
 vm/vendor/** -text

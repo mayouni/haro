@@ -23,7 +23,7 @@ QUICK = '--quick' in sys.argv
 
 
 def corpora():
-    spike = sorted(glob.glob(os.path.join(paths.SPIKE, '*.ring')))
+    spike = paths.code_files(paths.SPIKE)
     stdlib = sorted(glob.glob(os.path.join(ROOT, 'vendor', 'ring-stdlib', '**', '*.ring'), recursive=True))
     ringpp = sorted(glob.glob(os.path.join(ROOT, 'bench', '*.ring')) + glob.glob(os.path.join(ROOT, 'tests', '*.ring')))
     stz = sorted(glob.glob(os.path.join(STZ, '**', '*.ring'), recursive=True))
@@ -50,7 +50,7 @@ def control(name, mutate):
 
 
 def sample_for_controls():
-    return sorted(glob.glob(os.path.join(paths.SPIKE, '*.ring')))[:8]
+    return paths.code_files(paths.SPIKE)[:8]
 
 
 def glue_everything(real):

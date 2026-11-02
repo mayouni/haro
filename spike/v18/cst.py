@@ -16,7 +16,7 @@ import os, re, subprocess, sys
 
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', '..')))   # for paths.py
 import paths
-RNXC = paths.RNXC
+HARO_VM = paths.HARO_VM
 LINE = re.compile(r"^( *)(\S+)(?:  '(.*)')?$")
 LAYOUT = ' \t\r\n;'
 WORD = re.compile(r"[^\s;\"'`#+*/%.,()=<>!\[\]{}:&|~^?-]+")
@@ -99,7 +99,7 @@ def locate(src, leaf, pos):
 def recover(path):
     """-> (root, src, report). The report names what could not be placed; an empty `bad` is a measured file."""
     src = read_bytes(path)
-    r = subprocess.run([RNXC, 'dump', path], capture_output=True, timeout=300, env=dict(os.environ, RNXC_NOCACHE='1', HARO_NOCACHE='1'))
+    r = subprocess.run([HARO_VM, 'dump', path], capture_output=True, timeout=300, env=dict(os.environ, RNXC_NOCACHE='1', HARO_NOCACHE='1'))
     root, has_error = parse_dump(r.stdout.decode('latin-1'))
     rep = {'error': has_error, 'bad': [], 'leaves': 0, 'hidden': {}}
     if root is None or has_error:
@@ -137,10 +137,10 @@ def recover_export(path):
     parser's own, a leaf's text is complete, and nothing is placed by walking the leaves against the source."""
     import json
     src = read_bytes(path)
-    r = subprocess.run([RNXC, 'dump', '--json', path], capture_output=True, timeout=300)
+    r = subprocess.run([HARO_VM, 'dump', '--json', path], capture_output=True, timeout=300)
     rep = {'error': False, 'bad': [], 'leaves': 0, 'hidden': {}}
     if r.returncode != 0:
-        rep['bad'].append(('rnxc dump --json failed', r.returncode, '', 0))
+        rep['bad'].append(('haro dump --json failed', r.returncode, '', 0))
         return None, src, rep
     doc = json.loads(r.stdout.decode('ascii'))
     rep['error'] = bool(doc['error'])

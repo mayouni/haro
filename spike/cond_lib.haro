@@ -1,4 +1,4 @@
-# cond_lib.ring -- the condition language of stzu's CONSTRAINT and VIEW (v0.2,
+# cond_lib.haro -- the condition language of stzu's CONSTRAINT and VIEW (v0.2,
 # grown in v0.3 and v0.4), in pure core Ring.
 #
 # Closed and total: a condition is read, never run. The grammar is in
@@ -162,7 +162,7 @@ func CondParseRightText(cS)
 # A node is built in a fresh variable and assigned after: `aL = ["or", aL,
 # aR]` puts the variable being assigned inside the list assigned to it, and
 # on Ring the copy taken of aL dangles once aL is replaced -- an R2 at the
-# next read (Ring, Judged by the Record, 4.4). rnxc ran the one-line form
+# next read (Ring, Judged by the Record, 4.4). haro ran the one-line form
 # correctly; the oracle named it (HF-36).
 func CondOr()
 	aL = CondAnd()

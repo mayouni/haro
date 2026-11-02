@@ -25,7 +25,7 @@ STZ = r'D:\GitHub\stzlib\libraries\stzlib'
 def corpus(stride):
     files = sorted(glob.glob(os.path.join(ROOT, 'bench', 'exec', '*.ring')))
     files += sorted(glob.glob(os.path.join(ROOT, 'vendor', 'ring-stdlib', '**', '*.ring'), recursive=True))
-    files += sorted(glob.glob(os.path.join(paths.SPIKE, '*.ring')))
+    files += paths.code_files(paths.SPIKE)
     if os.path.isdir(STZ):
         stz = sorted(glob.glob(os.path.join(STZ, '**', '*.ring'), recursive=True))
         files += [p for p in stz[::stride] if os.path.getsize(p) <= 400_000]

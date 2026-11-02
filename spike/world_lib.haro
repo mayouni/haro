@@ -1,7 +1,7 @@
-# world_lib.ring -- the world a court reads and writes (Haro v0.10): a SYMBOL seat resolved
-# against a C1 world.json, and the sentence's own C1 rows. MOVED OUT of court_lib.ring in v0.14,
-# because court_lib.ring is compiled by every court on every run (HF-49): the forge loads this
-# file only where the language declares a SYMBOL or a PUBLISH, and world_stub.ring -- what a
+# world_lib.haro -- the world a court reads and writes (Haro v0.10): a SYMBOL seat resolved
+# against a C1 world.json, and the sentence's own C1 rows. MOVED OUT of court_lib.haro in v0.14,
+# because court_lib.haro is compiled by every court on every run (HF-49): the forge loads this
+# file only where the language declares a SYMBOL or a PUBLISH, and world_stub.haro -- what a
 # language with no world has of one -- everywhere else. Functions only; the globals are the
 # generated court's.
 

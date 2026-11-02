@@ -2,7 +2,7 @@
 -- THE SEAM BETWEEN TWO FORGED LETTERS: a workflow of F that INVOKES two flows of Z
 -- (tontine.z: collect, indice) by name and never restates them. Judged clean alone
 -- (the court reads the file and nothing else); resolved against the C1 world that
--- Z's own court emits from tontine.z (`z_court.ring world tontine.z`), every
+-- Z's own court emits from tontine.z (`z_court.haro world tontine.z`), every
 -- invocation lands on a flow: symbol; against a world that declares no `indice`,
 -- the second step is refused by name. The placement contract C3 section 3.2,
 -- between two languages the forge made.

@@ -1,6 +1,6 @@
 [
  {
-  "file": "haro/spike/court_lib.ring",
+  "file": "haro/spike/court_lib.haro",
   "revisions": 12,
   "pairs": 11,
   "kept": 14320,
@@ -11,7 +11,7 @@
   "all": 11
  },
  {
-  "file": "haro/spike/haro_lib.ring",
+  "file": "haro/spike/haro_lib.haro",
   "revisions": 12,
   "pairs": 11,
   "kept": 13206,
@@ -22,7 +22,7 @@
   "all": 11
  },
  {
-  "file": "haro/spike/forge.ring",
+  "file": "haro/spike/forge.haro",
   "revisions": 12,
   "pairs": 11,
   "kept": 6396,
@@ -33,7 +33,7 @@
   "all": 11
  },
  {
-  "file": "haro/spike/n_lib.ring",
+  "file": "haro/spike/n_lib.haro",
   "revisions": 2,
   "pairs": 1,
   "kept": 876,

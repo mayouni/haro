@@ -26,8 +26,8 @@ STMT = {'expression_statement', 'return_statement', 'see_statement', 'give_state
         'while_statement', 'switch_statement', 'try_statement', 'do_again_statement', 'exit_statement', 'loop_statement',
         'bye_statement', 'load_statement', 'import_statement'}
 SOURCES = [
-    (ROOT, 'spike/court_lib.ring'), (ROOT, 'spike/haro_lib.ring'), (ROOT, 'spike/forge.ring'),
-    (ROOT, 'spike/n_lib.ring'),
+    (ROOT, 'spike/court_lib.haro'), (ROOT, 'spike/haro_lib.haro'), (ROOT, 'spike/forge.haro'),
+    (ROOT, 'spike/n_lib.haro'),
     (r'D:\GitHub\stzlib', 'libraries/stzlib/base/meta/stzCodeGraph.ring'),
     (r'D:\GitHub\stzlib', 'libraries/stzlib/base/refine/stzRefinableCode.ring'),
     (r'D:\GitHub\stzlib', 'libraries/stzlib/base/natural/stzNatural.ring'),

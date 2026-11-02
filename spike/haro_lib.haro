@@ -1,4 +1,4 @@
-# haro_lib.ring -- the stzu meta-court, v0.2, in pure core Ring (no Softanza).
+# haro_lib.haro -- the stzu meta-court, v0.2, in pure core Ring (no Softanza).
 #
 # v0.1 was a port of stz/face/stz/Stzu.luau (437 lines); it still is, and the
 # 28 v0.1 fixtures still pass unchanged. v0.2 is the declaring altitude of Haro
@@ -6,7 +6,7 @@
 # court needs (haro/spike/v02/GRAMMAR.md; the judge is v02/fixtures.json,
 # written first): MENU, RANGE, FORMAT as seat types; a seat typed by a
 # DECLARATION as a reference; NAMES on a declaration; CONSTRAINT with a
-# condition in the closed language of cond_lib.ring; WORLD (ONE, FIRST);
+# condition in the closed language of cond_lib.haro; WORLD (ONE, FIRST);
 # REFINE (POINTS, FLOOR).
 #
 # v0.6 (haro/spike/v06/GRAMMAR.md): a list of a two-seat FORM written as
@@ -47,11 +47,11 @@
 # ENTRY kinds; the relations reachable, referenced and keyed_by.
 
 #
-# The same file runs on rnxc and on the oracle and must print the same bytes.
+# The same file runs on haro and on the oracle and must print the same bytes.
 # Refusals are one channel, "stzu (line N): message". Functions only; the
 # globals ($aStzuToks, $nStzuPos, and cond_lib's) are born in the root file.
 
-load "cond_lib.ring"
+load "cond_lib.haro"
 
 # ---- the closed menus -------------------------------------------------------
 

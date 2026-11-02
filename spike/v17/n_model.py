@@ -432,8 +432,8 @@ PLACEHOLDER = re.compile(r'\{([A-Za-z0-9_\u0080-\U0010ffff]+)\}')
 
 
 def court_is_sibling(name):
-    """A surface's court that is a court file is a bare name ending in _court.ring, never a path: `check ... surfaces` runs it."""
-    return name.endswith('_court.ring') and len(name) > len('_court.ring') and not any(c in name for c in '/\\:') and '..' not in name
+    """A surface's court that is a court file is a bare name ending in _court.haro, never a path: `check ... surfaces` runs it."""
+    return name.endswith('_court.haro') and len(name) > len('_court.haro') and not any(c in name for c in '/\\:') and '..' not in name
 
 
 def default_surface_check(surface, query, runner=None):
@@ -470,7 +470,7 @@ def rules(n, runner=None):
     for sf in n.kinds('SURFACE'):
         cw = words(sf.get('COURT') or '')
         if cw and cw[0].endswith('.ring') and not court_is_sibling(cw[0]):
-            add('N_SURFACE_COURT', sf, f"SURFACE {sf.name} names the court file '{cw[0]}': a surface's court is a court beside this one, a bare name ending in _court.ring and never a path, because `check ... surfaces` runs it")
+            add('N_SURFACE_COURT', sf, f"SURFACE {sf.name} names the court file '{cw[0]}': a surface's court is a court beside this one, a bare name ending in _court.haro and never a path, because `check ... surfaces` runs it")
         if sf.get('WORLD') and not n.world_read(sf.name):
             add('N_WORLD_UNREAD', sf, f"SURFACE {sf.name} reads the world '{sf.get('WORLD')}', which cannot be read from the sentence's folder")
     for fr in n.kinds('FRAME'):

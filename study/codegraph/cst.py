@@ -16,7 +16,7 @@ import os, re, subprocess
 import sys
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', '..')))   # for paths.py
 import paths
-RNXC = paths.RNXC
+RNXC = paths.HARO_VM
 LINE = re.compile(r"^( *)(\S+)(?:  '(.*)')?$")
 LAYOUT = ' \t\r\n;'
 WORD = re.compile(r"[^\s;\"'`#+*/%.,()=<>!\[\]{}:&|~^?-]+")
