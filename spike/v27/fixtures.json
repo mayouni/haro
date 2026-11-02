@@ -1,0 +1,126 @@
+{
+  "grammar": "haro",
+  "version": "0.27",
+  "name": "the field tag -- a pair form's optional mark, PERSONAL reaching it, SAFEGUARDS on the ask and the voice (ZTAG, the author's yes of 2026-11-02)",
+  "comment": "Written BEFORE any court code (the W discipline). A pair form may carry a third, optional seat typed by a MENU -- the mark -- and a sentence writes it after the value: `member: text personal`. The CONSTITUTION's PERSONAL may then name the mark seat by a three-part path, decl.seat.mark: every field a sentence marks personal or confidential is a personal datum at the record level. The weaves judge the two paths records take out of the world: the ask (W4.2) needs a SAFEGUARD -- consent, or anonymisation, which the court applies -- and the voice (W4.4) needs redaction, which the court applies; at constitutional a missing safeguard refuses, at governance it warns, at advisory it notes. The safeguard words are stzFieldTags' (D35); the model path stays stzlib's and HaroBase's. The regime is Niger Law 2017-28 throughout, the circle's own. v0.27 refuses nothing v0.26 accepted (A4 is v0.26's A1 unchanged; A5 shows the tag seat alone governs nothing).",
+  "accepts": [
+    {
+      "id": "A1",
+      "name": "Z with the tag on its field form, PERSONAL reaching the mark, and both safeguards: consent on the ask, redaction on the voice",
+      "source": "DEFINE LANGUAGE z AS (VERSION \"0.27\", GRAMMAR \"0.27\", COURT \"x\", EXTENSION \".z\") RATIONALE \"x\"\nDEFINE EXPRESSION zexpr AS (OPERATORS [or, and, not, cmp, contains, add, sub, mul, div, round, neg], OPERANDS [number, text, flag, ref, agg], AGGREGATES [sum, count], ABSENT missing, DIVISION calm, EQUALITY value) RATIONALE \"x\"\nDEFINE MENU actors AS (WORDS [collector, treasurer, system, member, auditor]) RATIONALE \"x\"\nDEFINE MENU formats AS (WORDS [json, csv]) RATIONALE \"x\"\nDEFINE MENU holders AS (WORDS [the_commons, the_cooperative, the_bank]) RATIONALE \"x\"\nDEFINE MENU tags AS (WORDS [plain, personal, confidential]) RATIONALE \"x\"\nDEFINE FORM word AS (SEATS [value: name]) RATIONALE \"x\"\nDEFINE FORM field AS (SEATS [name: name, type: name, tag: tags?]) RATIONALE \"x\"\nDEFINE DECLARATION enum AS (VERB \"ENUM\", SEATS [words: [word]]) RATIONALE \"x\"\nDEFINE DECLARATION entity AS (VERB \"ENTITY\", SEATS [fields: [field]]) RATIONALE \"x\"\nDEFINE DECLARATION norm AS (VERB \"NORM\", SEATS [rule: zexpr, message: text]) RATIONALE \"x\"\nDEFINE DECLARATION flow AS (VERB \"FLOW\", SEATS []) RATIONALE \"x\"\nDEFINE DECLARATION step AS (VERB \"STEP\", SEATS [flow: flow, order: number, actor: actors]) RATIONALE \"x\"\nDEFINE DECLARATION landing_zone AS (VERB \"LANDING_ZONE\", SEATS [format: formats, into: flow, held_by: holders]) RATIONALE \"x\"\nDEFINE ASK questions AS (FROM [flow], WHERE zexpr, CLAUSES [where, order, limit]) RATIONALE \"x\"\nDEFINE WORLD z AS (PUBLISH [flow: flow, entity: entity, norm: norm, landing_zone: zone]) RATIONALE \"x\"\nDEFINE REFUSAL unknown_verb AS (MESSAGE \"The ZQL verb set is closed\", CODE \"UNKNOWN_VERB\") RATIONALE \"x\"\nDEFINE REFINE z AS (POINTS [landing_zone.held_by: policy], FLOOR [landing_zone.held_by: trusted]) RATIONALE \"x\"\nDEFINE NARRATE telling AS (SAYS [enum: \"{name} is one of {words}.\", entity: \"{name} is a record of {fields}.\", norm: \"{name} holds {rule}.\", flow: \"{name} is a flow.\", step: \"{name} is step {order} of {flow}.\", landing_zone: \"{name} is held by {held_by}.\"], TELLS [ask: \"Asking {from}: {question}\", answer: \"The answer is {count} row(s): {rows}\"], REFUSES \"I stopped: {message} ({code})\") RATIONALE \"x\"\nDEFINE CONSTITUTION z_charter AS (ARTICLES [explainability, reversibility, visible_state, predictable_authority, organizational_sovereignty, trust_hierarchy], ZONE landing_zone, SOVEREIGN held_by, MOVEMENT into, WEAVES [sovereignty: constitutional, privacy: constitutional], REGIME niger_2017_28, PERSONAL [entity.fields.tag], SAFEGUARDS [ask: consent, voice: redaction]) RATIONALE \"the members consented to the circle's ledger; what the voice tells leaves redacted\"\n",
+      "expect": {
+        "language": "z",
+        "counts": {"declarations": 6, "forms": 2, "menus": 4},
+        "constitution": 1,
+        "zone": "landing_zone",
+        "regime": "niger_2017_28",
+        "weaves": "sovereignty:constitutional,privacy:constitutional",
+        "personal": "entity.fields.tag",
+        "safeguards": "ask:consent,voice:redaction"
+      }
+    },
+    {
+      "id": "A2",
+      "name": "anonymisation on the ask is the other safeguard of that path: accepted, and the court will answer such a question with the marked fields redacted",
+      "source": "DEFINE LANGUAGE z AS (VERSION \"0.27\", GRAMMAR \"0.27\", COURT \"x\", EXTENSION \".z\") RATIONALE \"x\"\nDEFINE EXPRESSION zexpr AS (OPERATORS [or, and, not, cmp, contains, add, sub, mul, div, round, neg], OPERANDS [number, text, flag, ref, agg], AGGREGATES [sum, count], ABSENT missing, DIVISION calm, EQUALITY value) RATIONALE \"x\"\nDEFINE MENU tags AS (WORDS [plain, personal, confidential]) RATIONALE \"x\"\nDEFINE FORM field AS (SEATS [name: name, type: name, tag: tags?]) RATIONALE \"x\"\nDEFINE DECLARATION entity AS (VERB \"ENTITY\", SEATS [fields: [field]]) RATIONALE \"x\"\nDEFINE DECLARATION flow AS (VERB \"FLOW\", SEATS []) RATIONALE \"x\"\nDEFINE ASK questions AS (FROM [flow], WHERE zexpr, CLAUSES [where, order, limit]) RATIONALE \"x\"\nDEFINE NARRATE telling AS (TELLS [ask: \"Asking {from}: {question}\", answer: \"The answer is {count} row(s): {rows}\"]) RATIONALE \"x\"\nDEFINE CONSTITUTION z_charter AS (ARTICLES [explainability], WEAVES [privacy: constitutional], REGIME niger_2017_28, PERSONAL [entity.fields.tag], SAFEGUARDS [ask: anonymisation, voice: redaction]) RATIONALE \"x\"\n",
+      "expect": {
+        "language": "z",
+        "constitution": 1,
+        "personal": "entity.fields.tag",
+        "safeguards": "ask:anonymisation,voice:redaction"
+      }
+    },
+    {
+      "id": "A3",
+      "name": "privacy at governance with marks and no safeguard: accepted with two warnings, the ask's (W4.2) and the voice's (W4.4), each naming the article and the regime's law",
+      "source": "DEFINE LANGUAGE z AS (VERSION \"0.27\", GRAMMAR \"0.27\", COURT \"x\", EXTENSION \".z\") RATIONALE \"x\"\nDEFINE EXPRESSION zexpr AS (OPERATORS [or, and, not, cmp, contains, add, sub, mul, div, round, neg], OPERANDS [number, text, flag, ref, agg], AGGREGATES [sum, count], ABSENT missing, DIVISION calm, EQUALITY value) RATIONALE \"x\"\nDEFINE MENU tags AS (WORDS [plain, personal, confidential]) RATIONALE \"x\"\nDEFINE FORM field AS (SEATS [name: name, type: name, tag: tags?]) RATIONALE \"x\"\nDEFINE DECLARATION entity AS (VERB \"ENTITY\", SEATS [fields: [field]]) RATIONALE \"x\"\nDEFINE DECLARATION flow AS (VERB \"FLOW\", SEATS []) RATIONALE \"x\"\nDEFINE ASK questions AS (FROM [flow], WHERE zexpr, CLAUSES [where, order, limit]) RATIONALE \"x\"\nDEFINE NARRATE telling AS (TELLS [ask: \"Asking {from}: {question}\", answer: \"The answer is {count} row(s): {rows}\"]) RATIONALE \"x\"\nDEFINE CONSTITUTION z_charter AS (ARTICLES [explainability], WEAVES [privacy: governance], REGIME niger_2017_28, PERSONAL [entity.fields.tag]) RATIONALE \"x\"\n",
+      "expect": {
+        "language": "z",
+        "constitution": 1,
+        "personal": "entity.fields.tag",
+        "safeguards": "",
+        "warning": "W4.4 privacy: the fields marked by 'entity.fields.tag' are told by the voice ('answer' tells {rows}) and no redaction is declared for the voice path -- a log carries no personal datum unredacted [Art. 5 organizational_sovereignty; Niger Law 2017-28]"
+      }
+    },
+    {
+      "id": "A4",
+      "name": "a v0.26 declaration is a v0.27 declaration: v0.26's A1, unchanged -- no tag, no mark, no safeguard",
+      "source": "DEFINE LANGUAGE z AS (VERSION \"0.26\", GRAMMAR \"0.26\", COURT \"x\", EXTENSION \".z\") RATIONALE \"x\"\nDEFINE EXPRESSION zexpr AS (OPERATORS [or, and, not, cmp, contains, add, sub, mul, div, round, neg], OPERANDS [number, text, flag, ref, agg], AGGREGATES [sum, count], ABSENT missing, DIVISION calm, EQUALITY value) RATIONALE \"x\"\nDEFINE MENU actors AS (WORDS [collector, treasurer, system, member, auditor]) RATIONALE \"x\"\nDEFINE MENU outcomes AS (WORDS [commit_to_bedrock, hold]) RATIONALE \"x\"\nDEFINE MENU formats AS (WORDS [json, csv]) RATIONALE \"x\"\nDEFINE MENU holders AS (WORDS [the_commons, the_cooperative, the_bank]) RATIONALE \"x\"\nDEFINE FORM word AS (SEATS [value: name]) RATIONALE \"x\"\nDEFINE FORM field AS (SEATS [name: name, type: name]) RATIONALE \"x\"\nDEFINE DECLARATION enum AS (VERB \"ENUM\", SEATS [words: [word]]) RATIONALE \"x\"\nDEFINE DECLARATION entity AS (VERB \"ENTITY\", SEATS [fields: [field]]) RATIONALE \"x\"\nDEFINE DECLARATION norm AS (VERB \"NORM\", SEATS [rule: zexpr, message: text]) RATIONALE \"x\"\nDEFINE DECLARATION flow AS (VERB \"FLOW\", SEATS []) RATIONALE \"x\"\nDEFINE DECLARATION step AS (VERB \"STEP\", SEATS [flow: flow, order: number, actor: actors, validate: zexpr?, enforcing: norm?, compute: name?, formula: zexpr?, on_fail: text?, on_success: outcomes?]) RATIONALE \"x\"\nDEFINE DECLARATION landing_zone AS (VERB \"LANDING_ZONE\", SEATS [format: formats, into: flow, held_by: holders]) RATIONALE \"x\"\nDEFINE WALK flows AS (OF flow, STEPS step, THROUGH flow, ORDER order, GUARDS [validate, enforcing.rule], COMPUTE compute, FORMULA formula, FAIL on_fail) RATIONALE \"x\"\nDEFINE ASK questions AS (FROM [flow], WHERE zexpr, CLAUSES [where, order, limit]) RATIONALE \"x\"\nDEFINE WORLD z AS (PUBLISH [flow: flow, entity: entity, norm: norm, landing_zone: zone]) RATIONALE \"x\"\nDEFINE CONSTRAINT one_rank_per_flow AS (ON step, WHEN \"earlier step where flow = this.flow and order = this.order\", MESSAGE \"STEP {name} and STEP {other} both stand at ORDER {order} of {flow}: one rank, one step\", CODE \"ONE_RANK\") RATIONALE \"x\"\nDEFINE REFUSAL unknown_verb AS (MESSAGE \"The ZQL verb set is closed\", CODE \"UNKNOWN_VERB\") RATIONALE \"x\"\nDEFINE REFINE z AS (POINTS [norm.rule: policy, norm.message: field, step.actor: policy, landing_zone.format: knob, landing_zone.held_by: policy], FLOOR [norm.rule: trusted, norm.message: llm, step.actor: trusted, landing_zone.format: external, landing_zone.held_by: trusted]) RATIONALE \"x\"\nDEFINE NARRATE telling AS (SAYS [enum: \"{name} is one of {words}.\", entity: \"{name} is a record of {fields}.\", norm: \"{name} holds {rule}.\", flow: \"{name} is a flow.\", step: \"{name} is step {order} of {flow}.\", landing_zone: \"{name} is held by {held_by}.\"], TELLS [ask: \"Asking {from}: {question}\", answer: \"The answer is {count} row(s): {rows}\"], REFUSES \"I stopped: {message} ({code})\") RATIONALE \"x\"\nDEFINE CONSTITUTION z_charter AS (ARTICLES [explainability, reversibility, visible_state, predictable_authority, organizational_sovereignty, trust_hierarchy], ZONE landing_zone, SOVEREIGN held_by, MOVEMENT into, WEAVES [sovereignty: constitutional, privacy: constitutional], REGIME niger_2017_28) RATIONALE \"the Commons' tontine under the whole constitution\"\n",
+      "expect": {
+        "language": "z",
+        "counts": {"declarations": 6, "menus": 4, "refusals": 1, "constraints": 1, "points": 5},
+        "constitution": 1,
+        "personal": "",
+        "safeguards": ""
+      }
+    },
+    {
+      "id": "A5",
+      "name": "the tag seat alone governs nothing: a field form with a mark seat and no PERSONAL path to it is accepted under privacy constitutional with no safeguard -- a mark the constitution does not name is a word",
+      "source": "DEFINE LANGUAGE z AS (VERSION \"0.27\", GRAMMAR \"0.27\", COURT \"x\", EXTENSION \".z\") RATIONALE \"x\"\nDEFINE EXPRESSION zexpr AS (OPERATORS [or, and, not, cmp, contains, add, sub, mul, div, round, neg], OPERANDS [number, text, flag, ref, agg], AGGREGATES [sum, count], ABSENT missing, DIVISION calm, EQUALITY value) RATIONALE \"x\"\nDEFINE MENU tags AS (WORDS [plain, personal, confidential]) RATIONALE \"x\"\nDEFINE FORM field AS (SEATS [name: name, type: name, tag: tags?]) RATIONALE \"x\"\nDEFINE DECLARATION entity AS (VERB \"ENTITY\", SEATS [fields: [field]]) RATIONALE \"x\"\nDEFINE DECLARATION flow AS (VERB \"FLOW\", SEATS []) RATIONALE \"x\"\nDEFINE ASK questions AS (FROM [flow], WHERE zexpr, CLAUSES [where, order, limit]) RATIONALE \"x\"\nDEFINE NARRATE telling AS (TELLS [ask: \"Asking {from}: {question}\", answer: \"The answer is {count} row(s): {rows}\"]) RATIONALE \"x\"\nDEFINE CONSTITUTION z_charter AS (ARTICLES [explainability], WEAVES [privacy: constitutional], REGIME niger_2017_28) RATIONALE \"x\"\n",
+      "expect": {
+        "language": "z",
+        "counts": {"forms": 1},
+        "constitution": 1,
+        "personal": "",
+        "safeguards": ""
+      }
+    }
+  ],
+  "rejects": [
+    {
+      "id": "R1",
+      "name": "W4.2 privacy, constitutional: marked fields may be asked and no safeguard is declared for the ask path",
+      "source": "DEFINE LANGUAGE z AS (VERSION \"0.27\", GRAMMAR \"0.27\", COURT \"x\", EXTENSION \".z\") RATIONALE \"x\"\nDEFINE EXPRESSION zexpr AS (OPERATORS [or, and, not, cmp, contains, add, sub, mul, div, round, neg], OPERANDS [number, text, flag, ref, agg], AGGREGATES [sum, count], ABSENT missing, DIVISION calm, EQUALITY value) RATIONALE \"x\"\nDEFINE MENU tags AS (WORDS [plain, personal, confidential]) RATIONALE \"x\"\nDEFINE FORM field AS (SEATS [name: name, type: name, tag: tags?]) RATIONALE \"x\"\nDEFINE DECLARATION entity AS (VERB \"ENTITY\", SEATS [fields: [field]]) RATIONALE \"x\"\nDEFINE DECLARATION flow AS (VERB \"FLOW\", SEATS []) RATIONALE \"x\"\nDEFINE ASK questions AS (FROM [flow], WHERE zexpr, CLAUSES [where, order, limit]) RATIONALE \"x\"\nDEFINE CONSTITUTION z_charter AS (ARTICLES [explainability], WEAVES [privacy: constitutional], REGIME niger_2017_28, PERSONAL [entity.fields.tag]) RATIONALE \"x\"\n",
+      "refusal": "W4.2 privacy: the fields marked by 'entity.fields.tag' may be asked (ASK questions) and no safeguard is declared for the ask path -- usage over personal data is analytics, which needs consent or anonymisation [Art. 5 organizational_sovereignty; Niger Law 2017-28]"
+    },
+    {
+      "id": "R2",
+      "name": "W4.4 privacy, constitutional: the voice tells the answer's rows and no redaction is declared for the voice path",
+      "source": "DEFINE LANGUAGE z AS (VERSION \"0.27\", GRAMMAR \"0.27\", COURT \"x\", EXTENSION \".z\") RATIONALE \"x\"\nDEFINE EXPRESSION zexpr AS (OPERATORS [or, and, not, cmp, contains, add, sub, mul, div, round, neg], OPERANDS [number, text, flag, ref, agg], AGGREGATES [sum, count], ABSENT missing, DIVISION calm, EQUALITY value) RATIONALE \"x\"\nDEFINE MENU tags AS (WORDS [plain, personal, confidential]) RATIONALE \"x\"\nDEFINE FORM field AS (SEATS [name: name, type: name, tag: tags?]) RATIONALE \"x\"\nDEFINE DECLARATION entity AS (VERB \"ENTITY\", SEATS [fields: [field]]) RATIONALE \"x\"\nDEFINE DECLARATION flow AS (VERB \"FLOW\", SEATS []) RATIONALE \"x\"\nDEFINE ASK questions AS (FROM [flow], WHERE zexpr, CLAUSES [where, order, limit]) RATIONALE \"x\"\nDEFINE NARRATE telling AS (TELLS [ask: \"Asking {from}: {question}\", answer: \"The answer is {count} row(s): {rows}\"]) RATIONALE \"x\"\nDEFINE CONSTITUTION z_charter AS (ARTICLES [explainability], WEAVES [privacy: constitutional], REGIME niger_2017_28, PERSONAL [entity.fields.tag], SAFEGUARDS [ask: consent]) RATIONALE \"x\"\n",
+      "refusal": "W4.4 privacy: the fields marked by 'entity.fields.tag' are told by the voice ('answer' tells {rows}) and no redaction is declared for the voice path -- a log carries no personal datum unredacted [Art. 5 organizational_sovereignty; Niger Law 2017-28]"
+    },
+    {
+      "id": "R3",
+      "name": "a three-part PERSONAL path names a seat the form has not got",
+      "source": "DEFINE LANGUAGE z AS (VERSION \"0.27\", GRAMMAR \"0.27\", COURT \"x\", EXTENSION \".z\") RATIONALE \"x\"\nDEFINE MENU tags AS (WORDS [plain, personal, confidential]) RATIONALE \"x\"\nDEFINE FORM field AS (SEATS [name: name, type: name, tag: tags?]) RATIONALE \"x\"\nDEFINE DECLARATION entity AS (VERB \"ENTITY\", SEATS [fields: [field]]) RATIONALE \"x\"\nDEFINE CONSTITUTION z_charter AS (ARTICLES [explainability], WEAVES [privacy: constitutional], REGIME niger_2017_28, PERSONAL [entity.fields.mark]) RATIONALE \"x\"\n",
+      "refusal": "PERSONAL names 'entity.fields.mark', and the form 'field' of 'entity.fields' has no seat 'mark'"
+    },
+    {
+      "id": "R4",
+      "name": "a mark seat is a MENU that can say personal: one that cannot is refused",
+      "source": "DEFINE LANGUAGE z AS (VERSION \"0.27\", GRAMMAR \"0.27\", COURT \"x\", EXTENSION \".z\") RATIONALE \"x\"\nDEFINE MENU tags AS (WORDS [plain, indexed]) RATIONALE \"x\"\nDEFINE FORM field AS (SEATS [name: name, type: name, tag: tags?]) RATIONALE \"x\"\nDEFINE DECLARATION entity AS (VERB \"ENTITY\", SEATS [fields: [field]]) RATIONALE \"x\"\nDEFINE CONSTITUTION z_charter AS (ARTICLES [explainability], WEAVES [privacy: constitutional], REGIME niger_2017_28, PERSONAL [entity.fields.tag]) RATIONALE \"x\"\n",
+      "refusal": "PERSONAL names 'entity.fields.tag' as a mark, and the MENU 'tags' has no word 'personal' -- a mark seat is a MENU that can say personal"
+    },
+    {
+      "id": "R5",
+      "name": "the safeguard words are closed: stzFieldTags' five, nothing else",
+      "source": "DEFINE LANGUAGE z AS (VERSION \"0.27\", GRAMMAR \"0.27\", COURT \"x\", EXTENSION \".z\") RATIONALE \"x\"\nDEFINE MENU tags AS (WORDS [plain, personal, confidential]) RATIONALE \"x\"\nDEFINE FORM field AS (SEATS [name: name, type: name, tag: tags?]) RATIONALE \"x\"\nDEFINE DECLARATION entity AS (VERB \"ENTITY\", SEATS [fields: [field]]) RATIONALE \"x\"\nDEFINE CONSTITUTION z_charter AS (ARTICLES [explainability], WEAVES [privacy: constitutional], REGIME niger_2017_28, PERSONAL [entity.fields.tag], SAFEGUARDS [ask: secrecy]) RATIONALE \"x\"\n",
+      "refusal": "'secrecy' is not a safeguard: consent, anonymisation, retention, redaction or on_premise"
+    },
+    {
+      "id": "R6",
+      "name": "a safeguard belongs to its path: redaction is the voice's, not the ask's",
+      "source": "DEFINE LANGUAGE z AS (VERSION \"0.27\", GRAMMAR \"0.27\", COURT \"x\", EXTENSION \".z\") RATIONALE \"x\"\nDEFINE MENU tags AS (WORDS [plain, personal, confidential]) RATIONALE \"x\"\nDEFINE FORM field AS (SEATS [name: name, type: name, tag: tags?]) RATIONALE \"x\"\nDEFINE DECLARATION entity AS (VERB \"ENTITY\", SEATS [fields: [field]]) RATIONALE \"x\"\nDEFINE CONSTITUTION z_charter AS (ARTICLES [explainability], WEAVES [privacy: constitutional], REGIME niger_2017_28, PERSONAL [entity.fields.tag], SAFEGUARDS [ask: redaction]) RATIONALE \"x\"\n",
+      "refusal": "'redaction' is not a safeguard of the ask path: consent or anonymisation"
+    },
+    {
+      "id": "R7",
+      "name": "SAFEGUARDS without privacy among WEAVES is refused, not accepted by silence: a safeguard is a weave's escape",
+      "source": "DEFINE LANGUAGE z AS (VERSION \"0.27\", GRAMMAR \"0.27\", COURT \"x\", EXTENSION \".z\") RATIONALE \"x\"\nDEFINE DECLARATION flow AS (VERB \"FLOW\", SEATS []) RATIONALE \"x\"\nDEFINE CONSTITUTION z_charter AS (ARTICLES [explainability], SAFEGUARDS [ask: consent]) RATIONALE \"x\"\n",
+      "refusal": "SAFEGUARDS is named and privacy (W4) is not among WEAVES -- a safeguard is a weave's escape"
+    },
+    {
+      "id": "R8",
+      "name": "the paths Haro governs here are the ask and the voice; the model path is stzlib's and HaroBase's",
+      "source": "DEFINE LANGUAGE z AS (VERSION \"0.27\", GRAMMAR \"0.27\", COURT \"x\", EXTENSION \".z\") RATIONALE \"x\"\nDEFINE MENU tags AS (WORDS [plain, personal, confidential]) RATIONALE \"x\"\nDEFINE FORM field AS (SEATS [name: name, type: name, tag: tags?]) RATIONALE \"x\"\nDEFINE DECLARATION entity AS (VERB \"ENTITY\", SEATS [fields: [field]]) RATIONALE \"x\"\nDEFINE CONSTITUTION z_charter AS (ARTICLES [explainability], WEAVES [privacy: constitutional], REGIME niger_2017_28, PERSONAL [entity.fields.tag], SAFEGUARDS [model: on_premise]) RATIONALE \"x\"\n",
+      "refusal": "'model' is not a path Haro's weaves govern here: ask or voice -- the model path is stzlib's and HaroBase's (D35)"
+    },
+    {
+      "id": "R9",
+      "name": "a mark lives on a form's seat: a three-part path through a seat that is not a list of a pair form is refused",
+      "source": "DEFINE LANGUAGE z AS (VERSION \"0.27\", GRAMMAR \"0.27\", COURT \"x\", EXTENSION \".z\") RATIONALE \"x\"\nDEFINE MENU actors AS (WORDS [collector, treasurer]) RATIONALE \"x\"\nDEFINE DECLARATION flow AS (VERB \"FLOW\", SEATS []) RATIONALE \"x\"\nDEFINE DECLARATION step AS (VERB \"STEP\", SEATS [flow: flow, order: number, actor: actors]) RATIONALE \"x\"\nDEFINE CONSTITUTION z_charter AS (ARTICLES [explainability], WEAVES [privacy: constitutional], REGIME niger_2017_28, PERSONAL [step.actor.tag]) RATIONALE \"x\"\n",
+      "refusal": "PERSONAL names 'step.actor.tag', and 'step.actor' is not a list of a pair form -- a mark lives on a form's seat"
+    }
+  ]
+}

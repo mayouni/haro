@@ -1,0 +1,92 @@
+{
+  "name": "the field tag on the tontine -- sentence-level cases for Haro v0.27 (ZTAG)",
+  "comment": "Written BEFORE the court code (the W discipline). Each case runs the court forged from z_v27.haro on rnxc AND on the oracle; the two must print the same bytes. New judge key: 'lacks', fragments the whole output must NOT contain (a redacted name). tontine.z marks `member: text personal`; the tontine's constitution declares consent on the ask (the members consented to the circle's ledger) and redaction on the voice (what is told leaves redacted). The rows handed to the ask and the voice are zing's own three from its bedrock-query example.",
+  "cases": [
+    {
+      "id": "Y1",
+      "name": "the tagged tontine is a sentence: zing's counts unchanged, and the court names the marked field",
+      "verb": "check",
+      "args": ["tontine.z"],
+      "first": "ok",
+      "counts": {"ENUM": 1, "ENTITY": 1, "NORM": 2, "FLOW": 2, "STEP": 5, "LANDING_ZONE": 1},
+      "contains": ["personal member"]
+    },
+    {
+      "id": "Y2",
+      "name": "the meta-court reads the mark path and the safeguards",
+      "verb": "meta",
+      "args": ["z_v27.haro"],
+      "first": "ok",
+      "contains": ["personal entity.fields.tag", "safeguards ask:consent,voice:redaction", "forms 2", "menus 5"]
+    },
+    {
+      "id": "Y3",
+      "name": "the voice still says the record's shape, which is schema and no datum: the tag is not spoken there",
+      "verb": "narrate",
+      "args": ["tontine.z"],
+      "contains": ["deposit is a record of id -> uuid, member -> text, amount -> currency, round -> int, status -> deposit_status."]
+    },
+    {
+      "id": "Y4",
+      "name": "W4.2 under consent: the question is answered whole -- zing's own rows, the treasurer inside the circle",
+      "verb": "ask",
+      "args": ["tontine.z", "SELECT * FROM collect WHERE round = 1", "[{\"member\":\"Aminata\",\"amount\":5000,\"round\":1},{\"member\":\"Moussa\",\"amount\":2500,\"round\":1},{\"member\":\"Fatima\",\"amount\":7500,\"round\":2}]"],
+      "contains": ["\"member\": \"Aminata\"", "\"member\": \"Moussa\""],
+      "lacks": ["Fatima"]
+    },
+    {
+      "id": "Y5",
+      "name": "W4.4 under redaction: the same question told by the voice leaves with the marked field redacted -- a log carries no personal datum",
+      "verb": "narrate-ask",
+      "args": ["tontine.z", "SELECT * FROM collect WHERE round = 1", "[{\"member\":\"Aminata\",\"amount\":5000,\"round\":1},{\"member\":\"Moussa\",\"amount\":2500,\"round\":1},{\"member\":\"Fatima\",\"amount\":7500,\"round\":2}]"],
+      "contains": ["2 of the 3 rows match.", "The answer is 2 row(s): [{\"member\": \"[personal]\", \"amount\": 5000, \"round\": 1}, {\"member\": \"[personal]\", \"amount\": 2500, \"round\": 1}]"],
+      "lacks": ["Aminata", "Moussa"]
+    },
+    {
+      "id": "Y6",
+      "name": "a tag the MENU does not know is refused in the menu's words, with its code",
+      "verb": "check",
+      "args": ["tontine/tontine_tag_secret.z"],
+      "refused": true,
+      "contains": ["a field's tag is plain, personal or confidential, not 'secret'"]
+    },
+    {
+      "id": "Y7",
+      "name": "the same in the envelope: TAG",
+      "verb": "diagnose",
+      "args": ["tontine/tontine_tag_secret.z"],
+      "diagnose": {"code": "TAG", "cites": ["rule:TAG"]}
+    },
+    {
+      "id": "Y8",
+      "name": "two marks: member personal and amount confidential -- both named, in the order the sentence writes them",
+      "verb": "check",
+      "args": ["tontine/tontine_tag_two.z"],
+      "first": "ok",
+      "contains": ["personal member, amount"]
+    },
+    {
+      "id": "Y9",
+      "name": "both marks redacted by the voice",
+      "verb": "narrate-ask",
+      "args": ["tontine/tontine_tag_two.z", "SELECT * FROM collect WHERE round = 2", "[{\"member\":\"Aminata\",\"amount\":5000,\"round\":1},{\"member\":\"Moussa\",\"amount\":2500,\"round\":1},{\"member\":\"Fatima\",\"amount\":7500,\"round\":2}]"],
+      "contains": ["The answer is 1 row(s): [{\"member\": \"[personal]\", \"amount\": \"[personal]\", \"round\": 2}]"],
+      "lacks": ["Fatima", "7500"]
+    },
+    {
+      "id": "Y10",
+      "name": "the runtime under the tag, unchanged: a deposit walks collect as before",
+      "verb": "walk",
+      "args": ["tontine.z", "collect", "{\"member\":\"Aminata\",\"amount\":5,\"round\":1}"],
+      "first": "{\"status\": \"complete\", \"computed\": {}}"
+    },
+    {
+      "id": "Y11",
+      "name": "Z's previous declaration (v0.26) is still accepted unchanged by the v0.27 meta-court",
+      "verb": "meta",
+      "args": ["z_v26.haro"],
+      "first": "ok",
+      "contains": ["personal ", "safeguards "]
+    }
+  ]
+}
