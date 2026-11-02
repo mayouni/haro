@@ -1537,7 +1537,9 @@ refused with the article named. No PERSONAL seat: the tontine's personal datum i
 questions unchanged, 22 questions told); stages 1 and 21 pass. **What building found** (HF-130): no seat of Z is personal, and the declaration says so
 rather than inventing one; the fixture was wrong once about a cite's form and the court right, corrected after the court spoke and said; the constitution
 found one question the world had not answered, and only one; TELLS and SAYS live together, so Art. 3 cost v0.16's voice nothing but the kinds it had never
-said. **The gate is open**: the author reads the refusals and signs the memo; then the compass re-rates Kern lanes 1 and 3.
+said. **The gate: CLOSED on the author's delegation, 2026-11-02 09:43** ("Answer each on my behalf. I authorise you."): the seven refusals, the chain and
+the voice run live before him, each answered by the desk and recorded under D36 as a delegated reading, the member's unmarked field named as the open
+question (CONSTITUTION-ZTAG-01); the compass re-rates Kern lanes 1 and 3. ZC5 DONE.
 
 ## The names -- `.haro`, not `.stzu` -- corrected 2026-10-02
 
@@ -1668,8 +1670,9 @@ whole guard re-run on the renamed tree: 28 + 30 + 27 + 23, 117 of 120, 32 of 32,
    branch `constitution` of the desk's stzlib worktree (origin and codeberg); HaroBase's column flags (CHARTER 5.5a, main 01401ea), six guards
    G5.0 to G5.1c, 35 of 35. **ZC4 DONE.** **ZC5 BUILT 2026-11-02 as Haro v0.26** (the twenty-sixth rung below; `v26/GRAMMAR.md`, guard stage 32, D36, HF-130): the Commons'
    tontine declared under the six articles and both weaves, judged end to end; 13 meta fixtures and the tontine's 16 cases written first, 29 of 29 on
-   both runtimes; no clause added to the grammar; the sentence changed by one clause, who holds the zone. **The perception gate is open**: the author
-   reads the refusals and signs the memo; then the compass re-rates Kern lanes 1 and 3.
+   both runtimes; no clause added to the grammar; the sentence changed by one clause, who holds the zone. **The perception gate CLOSED on the author's
+   delegation, 2026-11-02 09:43** ("Answer each on my behalf. I authorise you."): the seven verdicts are under D36 as a delegated reading, the
+   member's unmarked field the open question; the compass re-rates Kern lanes 1 and 3. **ZC5 DONE; the desk's charge ZC0 to ZC5 is complete.**
 18. The forge as an `rnxc` verb (the ringpp session's `src/`, routed); the
    Softanza-resident timing the charter's 2.6 asks for; the court's run time on the
    oracle under paths and views (6.4x the image this pass, named at stage 6); the

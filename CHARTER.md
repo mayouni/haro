@@ -1174,7 +1174,18 @@ states principle 14.
   zone or is refused; a language under it writes a voice for every kind and codes every refusal; the fixture was wrong once about a cite's form (written against a probe of the uncoded
   court) and was corrected after the court spoke, said in the case file and in HF-130. *The gate:* the author reads the refusals -- `v26/court_cases.json` T4 to T14, or
   `rnxc z_court.ring check tontine/tontine_unheld.z` and `narrate tontine.z` -- and signs the memo with a verdict (the launch's ZC5: "a name and a sentence"); then the compass re-rates
-  Kern lanes 1 and 3 (the launch's section 6). **Not signed yet.**
+  Kern lanes 1 and 3 (the launch's section 6). **SIGNED ON THE AUTHOR'S DELEGATION, 2026-11-02 09:43.** His words, after the seven refusals, the chain and the voice were run live before him and
+  summarised one line each: "Answer each on my behalf. I authorise you." The desk answered each, and the record says so rather than presenting the reading
+  as his: (1) the unheld tontine -- the refusal the constitution exists for, a zone held by nobody refused with the article named: a constitution at work;
+  (2) a zone into no flow -- right, in the zone's own words, Art. 5; (3) NO_COMPUTE -- right, and rightly without an article tag, a world's rule not being an
+  article's; (4) ONE_RANK -- right; (5) DROP -- right and unchanged, which is the point: the constitution added nothing to zing's first law; (6) the model's
+  three proposals -- refused where it rules (the holder, the rule; Art. 6), admitted where it words (the message), the chain keeping the refusals as events
+  too: Articles 4 and 6 at work; (7) the voice -- the tontine read back as its treasurer would say it, with one gap named and not hidden: `member -> text`
+  spoken as a plain field, unmarked at this altitude (CONSTITUTION-ZTAG-01, the author's question, not a defect of this rung). *The sentence:* the
+  constitution governs the tontine as declared -- a zone is held or refused, a model may word but not rule, every refusal names the article it serves;
+  the member's field is unmarked at this altitude and is the next question. *The name:* Mansour Ayouni, by delegation to the constitution desk. A reading
+  by the author in his own eyes stays open to him at any time and would supersede this one. **The compass re-rates Kern lanes 1 and 3 on it**
+  (CONSTITUTION-KERN-01, routed). ZC5 DONE; the desk's charge, ZC0 to ZC5, is complete.
 - **D23 -- `rnxc fmt` is a Ring++ feature, not held for Haro** (CODEGRAPH Q4, ruled on the author's delegation, 2026-10-05: "take
   whatever decision you think is wiser on my behalf"). It is a verb of the one binary (commitment 5), depends on nothing of Haro's, is
   judged against the oracle and refuses what Ring refuses (58 of 6,061 Softanza files, 57 of them Ring's own refusals). It ships inside
