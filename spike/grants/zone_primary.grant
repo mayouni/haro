@@ -1,0 +1,11 @@
+-- zone_primary.grant -- a sentence of grants_v32.haro: a ZONE writes a PRIMARY too (a right it is mostly for, here one it does not grant); the pattern over USE's PRIMARY does not judge a ZONE's.
+
+DEFINE ZONE ops AS (
+  RIGHTS [read],
+  PRIMARY audit
+) RATIONALE "The operations zone grants reading, and is mostly for auditing"
+
+DEFINE USE report AS (
+  WANTS [read],
+  PRIMARY read
+) RATIONALE "A report that reads"

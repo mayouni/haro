@@ -1,0 +1,99 @@
+# pattern_judge.haro -- a court judges the PATTERNs of its language (Haro v0.32; BLOCKS.md 4.3).
+#
+# The generated court loads this file, with pattern_lib.haro, only where a language it carries declares a PATTERN -- as expr_lib.haro
+# rides along only for an EXPRESSION -- so the court library every court loads does not grow for a language that has none (HF-49,
+# D42). CtDeclare calls CtCheckPatterns when the language entry has a 24th element. Functions only.
+
+# v0.32: the PATTERNs of the language (the language entry's 24th element; a court whose language declares none is not here), each on every
+# declaration of its OVER kind that writes the seat: the value AS WRITTEN, read by the one LOAD and matched by the pattern engine
+# (pattern_lib.haro, which the generated court loads only for such a language). The sets MEMBER draws from are collected here, from the
+# sentence's own declarations and the language's menus -- data, never code. A seat the sentence does not write is not judged. The
+# finding stands at the line of the seat's clause, and it refuses, or warns, as a CONSTRAINT's does
+func CtCheckPatterns(aDecls, cSrc)
+	aE = CtLangEntry($cCourtLang)
+	if isNull(aE) return ok
+	if len(aE) < 24 return ok
+	aPats = aE[24]
+	aNames = []
+	aTexts = []
+	aSetN = []
+	aSetM = []
+	for i = 1 to len(aPats)
+		aNames + aPats[i][1]
+		aTexts + aPats[i][4]
+		for j = 1 to len(aPats[i][5])
+			aSetN + aPats[i][5][j][3]
+			aSetM + CtSetMembers(aDecls, aPats[i][5][j][1], aPats[i][5][j][2])
+		next
+	next
+	for i = 1 to len($aCourtMenus)
+		aSetN + $aCourtMenus[i][1]
+		aSetM + $aCourtMenus[i][2]
+	next
+	PatDeclare(aNames, aTexts, aSetN, aSetM)
+	for i = 1 to len(aPats)
+		aP = aPats[i]
+		aK = CtKindByDeclName(aP[2])
+		if isNull(aK) loop ok
+		cClause = upper(aP[3])
+		for j = 1 to len(aDecls)
+			aD = aDecls[j]
+			if aD[1] != aK[1] loop ok
+			if CtIsBroken(j) loop ok
+			aCl = CtClauseNamed(aD, cClause)
+			if isNull(aCl) loop ok
+			cText = substr(cSrc, aCl[3][3], aCl[3][4] - aCl[3][3])
+			bHolds = 0
+			try
+				aR = PatRun(aP[1], cText)
+				bHolds = aR[1]
+			catch
+				bHolds = 0
+			done
+			if bHolds loop ok
+			aCC = CtElementCode(aP[8], "PATTERN", aP[1])
+			if isString(aP[9])
+				aCC[2] = []
+			but len(aP[9]) > 0
+				aCC[2] = aP[9]
+			ok
+			if aP[10] = "warning"
+				$aCourtWarnings + [aCC[1], aCC[2], aCl[2], CtFill(aP[6], aD, "")]
+			else
+				try
+					CtFailC(aCl[2], aCC[1], aCC[2], CtFill(aP[6], aD, ""))
+				catch
+					CtNote(cCatchError)
+				done
+			ok
+		next
+	next
+
+func CtClauseNamed(aD, cClause)
+	for i = 1 to len(aD[4])
+		if aD[4][i][1] = cClause return aD[4][i] ok
+	next
+	return NULL
+
+# the values of a seat across every declaration of a kind: a word, a string or a number is one, a list its items (a list of pairs is refused by the meta-court)
+func CtSetMembers(aDecls, cDecl, cSeat)
+	aOut = []
+	aK = CtKindByDeclName(cDecl)
+	if isNull(aK) return aOut ok
+	cClause = upper(cSeat)
+	for j = 1 to len(aDecls)
+		if aDecls[j][1] != aK[1] loop ok
+		if CtIsBroken(j) loop ok
+		aCl = CtClauseNamed(aDecls[j], cClause)
+		if isNull(aCl) loop ok
+		cShape = aCl[3][1]
+		xPay = aCl[3][2]
+		if cShape = "word" or cShape = "string" or cShape = "number"
+			aOut + xPay
+		else
+			for k = 1 to len(xPay)
+				aOut + xPay[k]
+			next
+		ok
+	next
+	return aOut

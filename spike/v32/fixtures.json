@@ -1,7 +1,7 @@
 {
  "grammar": "haro",
  "version": "0.32",
- "comment": "Written BEFORE any code reads a PATTERN (the W discipline). v0.32 is BLOCKS.md 4.3 and Central's item 3, the value join: a fact across declarations, said once as a pattern over a seat, judged by the pattern engine of v0.31. DEFINE PATTERN name AS (OVER kind.seat, MATCH [ rule ], SETS [kind.seat: set], MESSAGE, CODE, CITES, SEVERITY). The module docstring of gen_fixtures.py states the design each fixture pins. A1-A6 accept; R1-R25 refuse, each by the fragment of why. R7-R12 are the bound and the names, the pattern engine's own words in the meta-court's mouth; R25 is the pattern joining Art. 1.",
+ "comment": "Written BEFORE any code reads a PATTERN (the W discipline). v0.32 is BLOCKS.md 4.3 and Central's item 3, the value join: a fact across declarations, said once as a pattern over a seat, judged by the pattern engine of v0.31. DEFINE PATTERN name AS (OVER kind.seat, MATCH [ rule ], SETS [kind.seat: set], MESSAGE, CODE, CITES, SEVERITY). The module docstring of gen_fixtures.py states the design each fixture pins. A1-A6 accept; R1-R27 refuse, each by the fragment of why. R7-R12 are the bound and the names, the pattern engine's own words in the meta-court's mouth; R25 is the pattern joining Art. 1.",
  "accepts": [
   {
    "id": "A1",
@@ -232,6 +232,18 @@
    "name": "an unknown clause lists the allowed ones, sorted",
    "source": "DEFINE LANGUAGE grants AS (VERSION \"0.32\", GRAMMAR \"0.32\", COURT \"x\", EXTENSION \".grant\") RATIONALE \"x\"\nDEFINE FORM word AS (SEATS [value: name]) RATIONALE \"x\"\nDEFINE MENU channels AS (WORDS [mail, chat, call], CODE \"UNKNOWN_CHANNEL\") RATIONALE \"x\"\nDEFINE DECLARATION zone AS (VERB \"ZONE\", SEATS [rights: [word]]) RATIONALE \"x\"\nDEFINE DECLARATION use AS (VERB \"USE\", SEATS [wants: [word], primary: name?, via: [word]?]) RATIONALE \"x\"\nDEFINE PATTERN p AS (OVER use.wants, MATCH [INTO [ANY WORD]], MESSAGE \"m\", WHEN \"x\") RATIONALE \"x\"\n",
    "refusal": "Unknown clause 'WHEN' in PATTERN -- allowed: CITES, CODE, MATCH, MESSAGE, OVER, SETS, SEVERITY"
+  },
+  {
+   "id": "R26",
+   "name": "a PATTERN without MESSAGE (added after the code, found by reading it: no fixture said MESSAGE is required)",
+   "source": "DEFINE LANGUAGE grants AS (VERSION \"0.32\", GRAMMAR \"0.32\", COURT \"x\", EXTENSION \".grant\") RATIONALE \"x\"\nDEFINE FORM word AS (SEATS [value: name]) RATIONALE \"x\"\nDEFINE MENU channels AS (WORDS [mail, chat, call], CODE \"UNKNOWN_CHANNEL\") RATIONALE \"x\"\nDEFINE DECLARATION zone AS (VERB \"ZONE\", SEATS [rights: [word]]) RATIONALE \"x\"\nDEFINE DECLARATION use AS (VERB \"USE\", SEATS [wants: [word], primary: name?, via: [word]?]) RATIONALE \"x\"\nDEFINE PATTERN p AS (OVER use.wants, MATCH [WORD]) RATIONALE \"x\"\n",
+   "refusal": "PATTERN requires the MESSAGE clause"
+  },
+  {
+   "id": "R27",
+   "name": "SETS draws from words, strings and numbers: a list of pairs is refused by name (added after the code: the court once gave a pair list's values, and no fixture pinned it)",
+   "source": "DEFINE LANGUAGE grants AS (VERSION \"0.32\", GRAMMAR \"0.32\", COURT \"x\", EXTENSION \".grant\") RATIONALE \"x\"\nDEFINE FORM word AS (SEATS [value: name]) RATIONALE \"x\"\nDEFINE MENU channels AS (WORDS [mail, chat, call], CODE \"UNKNOWN_CHANNEL\") RATIONALE \"x\"\nDEFINE DECLARATION zone AS (VERB \"ZONE\", SEATS [rights: [word]]) RATIONALE \"x\"\nDEFINE DECLARATION use AS (VERB \"USE\", SEATS [wants: [word], primary: name?, via: [word]?]) RATIONALE \"x\"\nDEFINE FORM limit AS (SEATS [right: name, max: number]) RATIONALE \"x\"\nDEFINE DECLARATION cap AS (VERB \"CAP\", SEATS [limits: [limit]]) RATIONALE \"x\"\nDEFINE PATTERN p AS (OVER use.wants, MATCH [INTO [ANY WORD]], MESSAGE \"m\", SETS [cap.limits: caps]) RATIONALE \"x\"\n",
+   "refusal": "SETS: 'cap.limits' is a list of pairs; a set draws from words, strings and numbers"
   },
   {
    "id": "R25",

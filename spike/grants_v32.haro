@@ -27,8 +27,8 @@ DEFINE FORM word AS (
 
 DEFINE DECLARATION zone AS (
   VERB "ZONE",
-  SEATS [rights: [word]]
-) RATIONALE "A zone and the rights it grants"
+  SEATS [rights: [word], primary: name?]
+) RATIONALE "A zone, the rights it grants and, if it says so, the one it is mostly for"
 
 DEFINE DECLARATION use AS (
   VERB "USE",

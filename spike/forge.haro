@@ -298,6 +298,32 @@ func LangSource(aLang)
 		aRows + ("[" + RingStr(aC[i][1]) + ", " + RingStr(aC[i][2]) + ", " + RingStr(aC[i][3]) + ", " + RingStr(aC[i][4]) + ", " + RingStr(aC[i][5]) + ", " + RingStr(cCC) + ", " + CitesSource(aCCites) + ", " + RingStr(cCSev) + "]")
 	next
 	cConstraints = RowsSource(aRows, nl)
+	# v0.32: the PATTERNs [name, over kind, over seat, rule, sets, message, line, code, cites, severity], the language entry's 24th element,
+	# present only where the language declares one -- so a court without a pattern is the court it was
+	cPatterns = ""
+	aPt = LangGet(aLang, "patterns")
+	if not isNull(aPt)
+		if len(aPt) > 0
+			aRows = []
+			for i = 1 to len(aPt)
+				aSetRows = []
+				for j = 1 to len(aPt[i][5])
+					aSetRows + ("[" + RingStr(aPt[i][5][j][1]) + ", " + RingStr(aPt[i][5][j][2]) + ", " + RingStr(aPt[i][5][j][3]) + ", " + aPt[i][5][j][4] + "]")
+				next
+				cSets = "[]"
+				if len(aSetRows) > 0
+					cSets = "["
+					for j = 1 to len(aSetRows)
+						if j > 1 cSets += ", " ok
+						cSets += aSetRows[j]
+					next
+					cSets += "]"
+				ok
+				aRows + ("[" + RingStr(aPt[i][1]) + ", " + RingStr(aPt[i][2]) + ", " + RingStr(aPt[i][3]) + ", " + RingStr(aPt[i][4]) + ", " + cSets + ", " + RingStr(aPt[i][6]) + ", " + aPt[i][7] + ", " + RingStr(aPt[i][8]) + ", " + CitesSource(aPt[i][9]) + ", " + RingStr(aPt[i][10]) + "]")
+			next
+			cPatterns = RowsSource(aRows, nl)
+		ok
+	ok
 	aW = LangGet(aLang, "world")
 	cWorld = "[[], " + '""' + ", [], []]"
 	if not isNull(aW)
@@ -420,7 +446,11 @@ func LangSource(aLang)
 	c += "    " + cSymbols + "," + nl
 	c += "    " + cFormset + "," + nl
 	c += "    " + cNarrate + "," + nl
-	c += "    " + cUnderstand + nl
+	if cPatterns = ""
+		c += "    " + cUnderstand + nl
+	else
+		c += "    " + cUnderstand + "," + nl + "    " + cPatterns + nl
+	ok
 	c += "  ]"
 	return c
 
@@ -494,6 +524,19 @@ func ForgeCourt(aLang)
 	ok
 	if bUnderstand
 		c += 'load "n_lib.haro"' + nl
+	ok
+	# v0.32: the pattern engine rides along only where a language the court carries declares a PATTERN
+	bPattern = 0
+	aPatRecs = ForgeLangRecords(aLang, [])
+	for i = 1 to len(aPatRecs)
+		aPatsOf = LangGet(aPatRecs[i], "patterns")
+		if not isNull(aPatsOf)
+			if len(aPatsOf) > 0 bPattern = 1 ok
+		ok
+	next
+	if bPattern
+		c += 'load "pattern_lib.haro"' + nl
+		c += 'load "pattern_judge.haro"' + nl
 	ok
 	c += nl
 	c += "$cCourtLang = " + '""' + nl + "$cCourtExt = " + '""' + nl + "$cCourtDir = " + '""' + nl

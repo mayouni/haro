@@ -1358,6 +1358,13 @@ func CtDeclare(cSrc)
 		next
 	next
 
+	# v0.32: the PATTERNs, each on the value of its OVER seat as the sentence writes it
+	# (pattern_judge.haro, loaded by a court whose language declares a PATTERN: the language entry has a 24th element)
+	aEPat = CtLangEntry($cCourtLang)
+	if not isNull(aEPat)
+		if len(aEPat) >= 24 CtCheckPatterns(aDecls, cSrc) ok
+	ok
+
 	# the references, last
 	CtCheckValues(aDecls, 1)
 	# v0.9: an algorithm's step tree is a tree

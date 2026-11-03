@@ -53,6 +53,7 @@
 
 load "cond_lib.haro"
 load "block_lib.haro"
+load "pattern_lib.haro"
 
 # ---- the closed menus -------------------------------------------------------
 
@@ -132,6 +133,8 @@ func StzuClauses(cKind)
 		return [["CLAUSES", "namelist"], ["FROM", "namelist"], ["WHERE", "ident"]]
 	but cKind = "RUN"
 		return [["BRANCH", "namelist"], ["COLLECT", "namelist"], ["COMPUTE", "namelist"], ["GROUP", "namelist"], ["ITERATE", "namelist"], ["OF", "namelist"]]
+	but cKind = "PATTERN"
+		return [["CITES", "citelist"], ["CODE", "string"], ["MATCH", "rule"], ["MESSAGE", "string"], ["OVER", "path"], ["SETS", "pointlist"], ["SEVERITY", "ident"]]
 	but cKind = "SYMBOL"
 		return [["CITES", "citelist"], ["CODE", "string"], ["KIND", "string"], ["MESSAGE", "string"], ["REF", "string"]]
 	but cKind = "FORMS"
@@ -180,6 +183,8 @@ func StzuRequired(cKind)
 		return ["FROM"]
 	but cKind = "RUN"
 		return ["OF"]
+	but cKind = "PATTERN"
+		return ["OVER", "MATCH", "MESSAGE"]
 	but cKind = "SYMBOL"
 		return ["KIND"]
 	but cKind = "FORMS"
@@ -194,7 +199,7 @@ func StzuRequired(cKind)
 func StzuIsKind(cWord)
 	return InStrList(cWord, ["LANGUAGE", "DECLARATION", "FORM", "EXPRESSION", "REFUSAL",
 	                         "MENU", "RANGE", "FORMAT", "CONSTRAINT", "WORLD", "REFINE", "UNION",
-	                         "SENTENCE", "VIEW", "WALK", "ASK", "RUN", "SYMBOL", "FORMS", "NARRATE", "UNDERSTAND", "CONSTITUTION"])
+	                         "SENTENCE", "VIEW", "WALK", "ASK", "RUN", "SYMBOL", "FORMS", "NARRATE", "UNDERSTAND", "CONSTITUTION", "PATTERN"])
 
 # C2 2.1: a code is ^[A-Z][A-Z0-9]*([_-][A-Z0-9]+)*$ ; C2 2.5: a cite is
 # kind:value, kind in rule|article|right|pattern, value [A-Za-z0-9_.-]+ (v0.11)
@@ -786,6 +791,42 @@ func StzuParsePathList()
 	StzuAdvance()
 	return aPaths
 
+# v0.32: a rule, between brackets, as the pattern engine reads it (BLOCKS.md 4.3): the tokens between the matching brackets
+# rejoined into one line of C6. Comments are layout to the meta-court and go; a rule that holds both quote marks cannot ride in the
+# source of a court, so it is refused here
+func StzuParseRule()
+	t0 = StzuExpect("lbracket", "'[': a rule is written [ ... ]")
+	nDepth = 1
+	cOut = "["
+	cPrevT = "lbracket"
+	while nDepth > 0
+		t = StzuPeek()
+		if t[1] = "eof"
+			StzuFail(t0[3], "a rule is not closed: the '[' on line " + t0[3] + " has no ']'")
+		ok
+		StzuAdvance()
+		cT = t[1]
+		cText = t[2]
+		if cT = "string" cText = '"' + t[2] + '"' ok
+		if cT = "lbracket" nDepth++ ok
+		if cT = "rbracket" nDepth-- ok
+		bTight = cT = "rbracket" or cT = "rparen" or cT = "comma" or cT = "colon" or cT = "question" or cT = "dot" or cPrevT = "lbracket" or cPrevT = "lparen" or cPrevT = "dot"
+		if not bTight cOut += " " ok
+		cOut += cText
+		cPrevT = cT
+	end
+	if substr(cOut, '"') > 0 and substr(cOut, "'") > 0
+		StzuFail(t0[3], "a rule that holds a double quote and a single quote cannot ride into a court: spell the string without the apostrophe")
+	ok
+	return cOut
+
+# v0.32: a seat named as declaration.seat
+func StzuParsePath()
+	t1 = StzuExpect("ident", "a declaration name")
+	StzuExpect("dot", "'.' after the declaration: OVER names a seat as declaration.seat")
+	t2 = StzuExpect("ident", "a seat name after '.'")
+	return t1[2] + "." + t2[2]
+
 # a string list: [ "a", "b", ... ]   (v0.11)
 func StzuParseStringList()
 	StzuExpect("lbracket", "'['")
@@ -925,6 +966,10 @@ func StzuParseDeclaration()
 			aClauses + [ct[2], StzuParseCiteList()]
 		but cShape = "stringlist"
 			aClauses + [ct[2], StzuParseStringList()]
+		but cShape = "rule"
+			aClauses + [ct[2], StzuParseRule()]
+		but cShape = "path"
+			aClauses + [ct[2], StzuParsePath()]
 		else
 			aClauses + [ct[2], StzuParsePointList()]
 		ok
@@ -1016,6 +1061,7 @@ func StzuDeclare(cSrc)
 	aRanges = []
 	aFormats = []
 	aConstraints = []
+	aPatterns = []
 	aUnions = []
 	aSentences = []
 	aViews = []
@@ -1401,6 +1447,18 @@ func StzuDeclare(cSrc)
 					cMsg = ""
 					if HasClause(aClauses, "MESSAGE") cMsg = ClauseValue(aClauses, "MESSAGE") ok
 					aUnions + [cName, aAlts, cMsg, nLine, StzuCodeOf(aClauses, nLine, cName), StzuCitesOf(aClauses, nLine, cName)]
+				but cKind = "PATTERN"
+					# v0.32: OVER kind.seat, MATCH [rule], SETS [kind.seat: set]; resolved after the whole file is read
+					cOver = ClauseValue(aClauses, "OVER")
+					nDotAt = substr(cOver, ".")
+					cPSev = "error"
+					if HasClause(aClauses, "SEVERITY") cPSev = ClauseValue(aClauses, "SEVERITY") ok
+					if cPSev != "error" and cPSev != "warning"
+						StzuFail(nLine, "'" + cPSev + "' is not a SEVERITY of a PATTERN: error or warning")
+					ok
+					aPSets = []
+					if HasClause(aClauses, "SETS") aPSets = ClauseValue(aClauses, "SETS") ok
+					aPatterns + [cName, left(cOver, nDotAt - 1), substr(cOver, nDotAt + 1), ClauseValue(aClauses, "MATCH"), aPSets, ClauseValue(aClauses, "MESSAGE"), nLine, StzuCodeOf(aClauses, nLine, cName), StzuCitesOf(aClauses, nLine, cName), cPSev]
 				else
 					# CONSTRAINT: resolved after the whole file is read
 					cThen = ""
@@ -1703,7 +1761,7 @@ func StzuDeclare(cSrc)
 	         ["unions", aUnions], ["sentences", aSentences], ["views", aViews],
 	         ["walks", aWalks], ["ask", aAsk], ["run", aRun], ["symbols", aSymbols],
 	         ["formset", aFormset], ["narrate", aNarrate], ["understand", aUnderstand],
-	         ["constitution", aConstitution] ]
+	         ["constitution", aConstitution], ["patterns", aPatterns] ]
 	$cCondLang = cLName
 	$aCondLangs = StzuCondLangs(aRec, [])
 	$aCondFormats = []
@@ -1761,6 +1819,77 @@ func StzuDeclare(cSrc)
 			StzuNote(cCatchError)
 		done
 	next
+
+	# v0.32: the PATTERNs. OVER and SETS name seats that exist; a set has one declaration and is neither a MENU nor a kind; the rules, taken
+	# together, are judged by the pattern engine's own declaration -- the bound, the names, no recursion -- in its own words
+	aSetSeen = []
+	for i = 1 to len(aPatterns)
+		try
+			aP = aPatterns[i]
+			cK = DeclaredKind(aDeclared, aP[2])
+			if cK = "" StzuFail(aP[7], "OVER: '" + aP[2] + "' resolves to nothing in this declaration") ok
+			if cK != "DECLARATION" StzuFail(aP[7], "OVER must name a DECLARATION; '" + aP[2] + "' is a " + cK) ok
+			if isNull(StzuSeatNamed(StzuSeatsOf(aDeclarations, aP[2]), aP[3]))
+				StzuFail(aP[7], "OVER names a seat of " + aP[2] + "; '" + aP[3] + "' is not one")
+			ok
+			aPS = aP[5]
+			for j = 1 to len(aPS)
+				cK = DeclaredKind(aDeclared, aPS[j][1])
+				if cK = "" StzuFail(aPS[j][4], "SETS: '" + aPS[j][1] + "' resolves to nothing in this declaration") ok
+				if cK != "DECLARATION" StzuFail(aPS[j][4], "SETS must name a DECLARATION; '" + aPS[j][1] + "' is a " + cK) ok
+				aSetSeat = StzuSeatNamed(StzuSeatsOf(aDeclarations, aPS[j][1]), aPS[j][2])
+				if isNull(aSetSeat)
+					StzuFail(aPS[j][4], "SETS names a seat of " + aPS[j][1] + "; '" + aPS[j][2] + "' is not one")
+				ok
+				if StzuIsPairListSeat(aSetSeat, aDeclared, aForms)
+					StzuFail(aPS[j][4], "SETS: '" + aPS[j][1] + "." + aPS[j][2] + "' is a list of pairs; a set draws from words, strings and numbers")
+				ok
+				cSK = DeclaredKind(aDeclared, aPS[j][3])
+				if cSK != "" StzuFail(aPS[j][4], "set '" + aPS[j][3] + "' is already a " + cSK + ": one name, one meaning") ok
+				if InStrList(aPS[j][3], aSetSeen) StzuFail(aPS[j][4], "set '" + aPS[j][3] + "' is declared twice") ok
+				aSetSeen + aPS[j][3]
+			next
+		catch
+			StzuNote(cCatchError)
+		done
+	next
+	if len(aPatterns) > 0
+		aPN = []
+		aPT = []
+		aPSN = []
+		aPSM = []
+		for i = 1 to len(aPatterns)
+			aPN + aPatterns[i][1]
+			aPT + aPatterns[i][4]
+			for j = 1 to len(aPatterns[i][5])
+				aPSN + aPatterns[i][5][j][3]
+				aPSM + []
+			next
+		next
+		for i = 1 to len(aMenus)
+			aPSN + aMenus[i][1]
+			aPSM + []
+		next
+		cPErr = ""
+		try
+			PatDeclare(aPN, aPT, aPSN, aPSM)
+		catch
+			cPErr = cCatchError
+		done
+		if cPErr != ""
+			# the engine's words name the pattern first ("pattern NAME: ..." or "pattern NAME is recursive ..."): the finding stands at that pattern's line
+			nPL = aPatterns[1][7]
+			for i = 1 to len(aPatterns)
+				cHead = "pattern " + aPatterns[i][1]
+				if left(cPErr, len(cHead) + 1) = cHead + ":" or left(cPErr, len(cHead) + 1) = cHead + " " nPL = aPatterns[i][7] ok
+			next
+			try
+				StzuFail(nPL, cPErr)
+			catch
+				StzuNote(cCatchError)
+			done
+		ok
+	ok
 
 	# v0.6: a WALK names the kind it walks, the kind of its steps, and the seats
 	# of a step that carry its walk, its rank, its guards, its computed value
@@ -2151,6 +2280,12 @@ func StzuDeclare(cSrc)
 							StzuFail(aConstraints[j][6], "Art. 1 explainability: CONSTRAINT '" + aConstraints[j][1] + "' carries no CODE -- a refusal under explainability is traceable by its stable identifier (C2 2.1)")
 						ok
 					next
+					# v0.32: a PATTERN refuses as a CONSTRAINT does, so it is traceable the same way
+					for j = 1 to len(aPatterns)
+						if aPatterns[j][8] = ""
+							StzuFail(aPatterns[j][7], "Art. 1 explainability: PATTERN '" + aPatterns[j][1] + "' carries no CODE -- a refusal under explainability is traceable by its stable identifier (C2 2.1)")
+						ok
+					next
 				but cArt = "reversibility"
 					if isNull(aRefine)
 						StzuFail(nCL, "Art. 2 reversibility: '" + cLName + "' declares no REFINE -- a world under reversibility changes only by refinement, whose inverse is computed before it lands and whose revert is an event (charter 6.5)")
@@ -2394,6 +2529,15 @@ func StzuSeatNamed(aSeats, cSeat)
 # name and the second a scalar, is written as name: value pairs; every other
 # FORM keeps v0.1's reading (its items follow the form's first seat), because
 # the pinned judge lists a six-seat FORM and v0.6 refuses nothing v0.5 accepted
+# v0.32: a seat that is a list of a FORM whose seats make a pair (name: value), which the court reads as a pair list
+func StzuIsPairListSeat(aSeat, aDeclared, aForms)
+	if not aSeat[3] return 0 ok
+	if DeclaredKind(aDeclared, aSeat[2]) != "FORM" return 0 ok
+	for i = 1 to len(aForms)
+		if aForms[i][1] = aSeat[2] return StzuIsPairForm(aForms[i][2], aDeclared) ok
+	next
+	return 0
+
 func StzuIsPairForm(aFS, aDeclared)
 	# v0.27: a pair form may carry a third, optional seat typed by a MENU -- the mark, written after the value
 	if len(aFS) != 2 and not StzuHasMarkSeat(aFS, aDeclared) return 0 ok
@@ -2550,6 +2694,11 @@ func StzuPrintLanguage(aLang)
 	? "sentences " + len(LangGet(aLang, "sentences"))
 	? "views " + len(LangGet(aLang, "views"))
 	? "constraints " + len(LangGet(aLang, "constraints"))
+	# v0.32: printed only where there is one, so a language without a PATTERN prints the bytes it printed
+	aPaL = LangGet(aLang, "patterns")
+	if not isNull(aPaL)
+		if len(aPaL) > 0 ? "patterns " + len(aPaL) ok
+	ok
 	nCtx = 0
 	aE = LangGet(aLang, "expressions")
 	for i = 1 to len(aE)

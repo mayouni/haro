@@ -1,6 +1,6 @@
 {
  "name": "the grants world -- sentence-level cases for Haro v0.32 (DEFINE PATTERN, BLOCKS.md 4.3; Central's item 3, the value join)",
- "comment": "Written BEFORE any court code reads a PATTERN. Each case runs the court forged from grants_v32.haro on haro AND on its checked build; the two must print the same bytes. The sentences are in grants/: clean, ungranted, primary_ungranted, no_zone, bad_channel, many, union, absent, empty, two. A refusal is at the line of the clause it is about (WANTS line 8, PRIMARY line 9, VIA line 9, and line 4 in the zoneless sentence), not at the declaration's.",
+ "comment": "Written BEFORE any court code reads a PATTERN. Each case runs the court forged from grants_v32.haro on haro AND on its checked build; the two must print the same bytes. The sentences are in grants/: clean, ungranted, primary_ungranted, no_zone, bad_channel, many, union, absent, empty, two, shape_broken, zone_primary. A refusal is at the line of the clause it is about (WANTS line 8, PRIMARY line 9, VIA line 9, and line 4 in the zoneless sentence), not at the declaration's.",
  "cases": [
   {
    "id": "G1",
@@ -122,14 +122,16 @@
   },
   {
    "id": "G10",
-   "name": "a warning is a warning in the envelope too",
+   "name": "a warning is a warning in the envelope too, and a pattern with no CITES keeps the default rule:<CODE> (written with cites [] and corrected after the court spoke: v0.28 keeps the default where no CITES is declared, as a CONSTRAINT does)",
    "verb": "diagnose",
    "args": [
     "grants/many.grant"
    ],
    "diagnose": {
     "code": "MANY_RIGHTS",
-    "cites": [],
+    "cites": [
+     "rule:MANY_RIGHTS"
+    ],
     "severity": "warning"
    }
   },
@@ -184,6 +186,33 @@
     "NOT_A_CHANNEL",
     "\"line\": 8",
     "\"line\": 9"
+   ]
+  },
+  {
+   "id": "G16",
+   "name": "a pattern judges the seat of its own kind only: a ZONE writes a PRIMARY the pattern over USE.primary would refuse, and it is not judged (added after the code, found by planting the kind filter off)",
+   "verb": "check",
+   "args": [
+    "grants/zone_primary.grant"
+   ],
+   "first": "ok",
+   "counts": {
+    "ZONE": 1,
+    "USE": 1
+   }
+  },
+  {
+   "id": "G15",
+   "name": "a declaration the structural court refused is not judged again by a pattern: one finding, the shape's (added after the code, found by reading it)",
+   "verb": "diagnose",
+   "args": [
+    "grants/shape_broken.grant"
+   ],
+   "contains": [
+    "Clause WANTS takes a list of words"
+   ],
+   "lacks": [
+    "RIGHT_NOT_GRANTED"
    ]
   }
  ]

@@ -1,0 +1,9 @@
+-- shape_broken.grant -- a sentence of grants_v32.haro: WANTS written as a word where a list belongs (line 8); the structural court refuses it, and no pattern judges what it refused.
+
+DEFINE ZONE ops AS (
+  RIGHTS [read]
+) RATIONALE "The operations zone grants reading"
+
+DEFINE USE report AS (
+  WANTS read
+) RATIONALE "A report whose WANTS is no list"

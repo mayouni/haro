@@ -87,6 +87,10 @@ rejects = [
            'a rule that holds a double quote and a single quote'),
     reject('R23', 'an empty CITES says nothing, on a PATTERN as on every element that cites', BASE + pat('p', extra=', CITES []'), 'an empty CITES says nothing'),
     reject('R24', 'an unknown clause lists the allowed ones, sorted', BASE + pat('p', extra=', WHEN "x"'), "Unknown clause 'WHEN' in PATTERN -- allowed: CITES, CODE, MATCH, MESSAGE, OVER, SETS, SEVERITY"),
+    reject('R26', 'a PATTERN without MESSAGE (added after the code, found by reading it: no fixture said MESSAGE is required)', BASE + 'DEFINE PATTERN p AS (OVER use.wants, MATCH [WORD]) RATIONALE "x"\n', 'PATTERN requires the MESSAGE clause'),
+    reject('R27', "SETS draws from words, strings and numbers: a list of pairs is refused by name (added after the code: the court once gave a pair list's values, and no fixture pinned it)",
+           BASE + 'DEFINE FORM limit AS (SEATS [right: name, max: number]) RATIONALE "x"\nDEFINE DECLARATION cap AS (VERB "CAP", SEATS [limits: [limit]]) RATIONALE "x"\n' + pat('p', extra=', SETS [cap.limits: caps]'),
+           "SETS: 'cap.limits' is a list of pairs; a set draws from words, strings and numbers"),
     reject('R25', 'Art. 1 explainability: a refusal is traceable by a stable identifier, so a PATTERN carries a CODE',
            BASE + 'DEFINE NARRATE voice AS (SAYS [use: "{name} wants {wants}."], REFUSES "Stopped at line {line}: {message} ({cites})") RATIONALE "x"\n' +
            pat('p') + 'DEFINE CONSTITUTION charter AS (ARTICLES [explainability]) RATIONALE "x"\n',
@@ -97,7 +101,7 @@ doc = {
     'comment': ('Written BEFORE any code reads a PATTERN (the W discipline). v0.32 is BLOCKS.md 4.3 and Central\'s item 3, the value join: a fact across '
                 'declarations, said once as a pattern over a seat, judged by the pattern engine of v0.31. DEFINE PATTERN name AS (OVER kind.seat, MATCH [ rule ], '
                 'SETS [kind.seat: set], MESSAGE, CODE, CITES, SEVERITY). The module docstring of gen_fixtures.py states the design each fixture pins. '
-                'A1-A6 accept; R1-R25 refuse, each by the fragment of why. R7-R12 are the bound and the names, the pattern engine\'s own words in the meta-court\'s '
+                'A1-A6 accept; R1-R27 refuse, each by the fragment of why. R7-R12 are the bound and the names, the pattern engine\'s own words in the meta-court\'s '
                 'mouth; R25 is the pattern joining Art. 1.'),
     'accepts': accepts, 'rejects': rejects,
 }
@@ -124,18 +128,23 @@ cases = [
     {'id': 'G8', 'name': 'CITES none: the envelope carries the code and no cite', 'verb': 'diagnose', 'args': ['grants/bad_channel.grant'], 'diagnose': {'code': 'NOT_A_CHANNEL', 'cites': []}},
     {'id': 'G9', 'name': 'SEVERITY warning: the sentence stands and the pattern speaks after the verdict, with its code and line', 'verb': 'check', 'args': ['grants/many.grant'],
      'first': 'ok', 'counts': {'ZONE': 1, 'USE': 1}, 'contains': ['warning MANY_RIGHTS: USE report asks for more than three rights (line 8)']},
-    {'id': 'G10', 'name': 'a warning is a warning in the envelope too', 'verb': 'diagnose', 'args': ['grants/many.grant'], 'diagnose': {'code': 'MANY_RIGHTS', 'cites': [], 'severity': 'warning'}},
+    {'id': 'G10', 'name': 'a warning is a warning in the envelope too, and a pattern with no CITES keeps the default rule:<CODE> (written with cites [] and corrected after the court spoke: v0.28 keeps the default where no CITES is declared, as a CONSTRAINT does)',
+     'verb': 'diagnose', 'args': ['grants/many.grant'], 'diagnose': {'code': 'MANY_RIGHTS', 'cites': ['rule:MANY_RIGHTS'], 'severity': 'warning'}},
     {'id': 'G11', 'name': 'a set is the UNION of every zone\'s rights: two zones grant one right each, and a use may ask for both', 'verb': 'check', 'args': ['grants/union.grant'],
      'first': 'ok', 'counts': {'ZONE': 2, 'USE': 1}},
     {'id': 'G12', 'name': 'a seat the sentence does not write is not judged', 'verb': 'check', 'args': ['grants/absent.grant'], 'first': 'ok', 'counts': {'ZONE': 1, 'USE': 1}},
     {'id': 'G13', 'name': 'an empty list asks for nothing, and every right it asks for is granted', 'verb': 'check', 'args': ['grants/empty.grant'], 'first': 'ok', 'counts': {'ZONE': 1, 'USE': 1}},
     {'id': 'G14', 'name': 'two patterns refuse at once: diagnose carries both findings, each at its own line',
      'verb': 'diagnose', 'args': ['grants/two.grant'], 'contains': ['RIGHT_NOT_GRANTED', 'NOT_A_CHANNEL', '"line": 8', '"line": 9']},
+    {'id': 'G16', 'name': 'a pattern judges the seat of its own kind only: a ZONE writes a PRIMARY the pattern over USE.primary would refuse, and it is not judged (added after the code, found by planting the kind filter off)',
+     'verb': 'check', 'args': ['grants/zone_primary.grant'], 'first': 'ok', 'counts': {'ZONE': 1, 'USE': 1}},
+    {'id': 'G15', 'name': 'a declaration the structural court refused is not judged again by a pattern: one finding, the shape\'s (added after the code, found by reading it)',
+     'verb': 'diagnose', 'args': ['grants/shape_broken.grant'], 'contains': ['Clause WANTS takes a list of words'], 'lacks': ['RIGHT_NOT_GRANTED']},
 ]
 cdoc = {
     'name': 'the grants world -- sentence-level cases for Haro v0.32 (DEFINE PATTERN, BLOCKS.md 4.3; Central\'s item 3, the value join)',
     'comment': ('Written BEFORE any court code reads a PATTERN. Each case runs the court forged from grants_v32.haro on haro AND on its checked build; the two must '
-                'print the same bytes. The sentences are in grants/: clean, ungranted, primary_ungranted, no_zone, bad_channel, many, union, absent, empty, two. '
+                'print the same bytes. The sentences are in grants/: clean, ungranted, primary_ungranted, no_zone, bad_channel, many, union, absent, empty, two, shape_broken, zone_primary. '
                 'A refusal is at the line of the clause it is about (WANTS line 8, PRIMARY line 9, VIA line 9, and line 4 in the zoneless sentence), not at the declaration\'s.'),
     'cases': cases,
 }
