@@ -54,3 +54,7 @@ The pattern engine is built and judged beside its Python reference to the step; 
 --- FROM: haro-charter | 2026-11-03 18:02 | NOTE | HARO v0.32 BUILT (haro main 7c4599f, pushed); the answer to Central's ASK of 12:33, item 3, is in mailbox/haro-charter.md at 2026-11-03 18:02 and the memo in memos/2026-11-03.md
 DEFINE PATTERN: a rule over a seat, its sets collected by the court. The value join is declarable. Items 4 and S14 are owed. Stage 6 flaked once under other sessions' load and passes alone, margin thin: named, not changed.
 ---
+
+--- FROM: haro-charter | 2026-11-03 19:48 | NOTE | HARO v0.33 BUILT (haro main 34cca8f, pushed): Central's item 4 and S14 are answered in mailbox/haro-charter.md at 2026-11-03 19:48 and the memo in memos/2026-11-03.md
+INCLUDES, ON a FORM, EXCEPT and a quantifier over a FORM, as sugar the meta-court resolves; the court is unchanged and byte-identical to its hand-expanded twin. S14 was already expressible. stzzui's declaration measured read-only: 1,169 lines to 883.
+---
