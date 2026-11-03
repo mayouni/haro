@@ -1593,6 +1593,34 @@ on `haro` and on its own checked build** -- no Ring runs in a court (D41).
     stage 6, after       D42 (2026-11-03): a sentence edited, its court's image reused, 14.9 ms against 50; the court compiled from
                          scratch, 128.1 ms against a 150 ms ceiling -- every stage of the guard passes
 
+## The thirtieth rung -- Haro v0.30, the one reader of C6 and its canonical printer -- 2026-11-03
+
+**Step 1 of COMPASS-REBOL-06** (BLOCKS.md 3.5), on the Principal's word of 2026-11-02 as Central read it and prompt 56 carried it, built
+by the haro-charter desk in Haro's own repository (D44). The spike had two C6 lexers -- `StzuTokenize` in the meta-court and `CtTokenize`
+in every forged court -- and no printer. It has one lexer, one block loader, one canonical printer and a printing court, and **every court
+prints the bytes it printed**.
+
+    v30/fixtures.json                   33 fixtures, written before any code (ee9071c): the study's 16 C6 fixtures verbatim, and Haro's --
+                                        `?` as C6 (Q-B1), paths, numbers, comments, the printer on them, Q-B2's two amendments refused by
+                                        name; the five memo-spelling fixtures named as step 3's
+    block_lib.haro                      the one lexer (BlkTokenize: C6's lexis, tokens with byte spans, comments as tokens, an error token
+                                        each reader words itself), the block loader (BlkLoad, BLOCKS.md 3.1), the dump, the canonical
+                                        printer (BlkPrintC6, 3.2)
+    block.haro                          the one LOAD at the command line: load, fmt, same, roundtrip (one process for the whole family)
+    haro_lib.haro, court_lib.haro       StzuTokenize and CtTokenize read the one lexer's tokens and compose their refusals in their own words
+    haro.haro                           `haro haro.haro <file> fmt`: a declaration's canonical spelling
+    v30/block_court.py, v30/plants.py   the printing court (guard stage 35) and the sixteen protections switched off in turn
+    v30/GRAMMAR.md                      the lexis, exactly, and where the one reader diverges from the two it replaces and from the study
+
+**Results.** 33 of 33 on `haro` and its checked build, byte-identical; the round trip over every declaration (29) and every sentence (62):
+90 of 91 read, print canonically and read back to the same block, the one refused written to be, 328,088 bytes written against 330,329
+printed (+0.7%), a quarter of a second per build; the meta-court's `fmt` prints what `block.haro fmt` prints; 16 of 16 protections
+load-bearing; `--plant` fails the stage; the whole guard passes, 34 stages printing the bytes the baseline run printed (stage 21 reads four more refusal texts, 1,189 to 1,193, none naming a person) and stage 35 new. Stage 6: the court compiled from scratch 122.1 -> 129.1 ms (the court library loads
+the block library and loses a lexer), the sentence-edited path 14.1 ms, unchanged. **What building found** (HF-135): the two lexers had
+drifted in four places and no fixture had stood on any of them; the round trip read the guard's own scratch file; the messages followed
+the fixtures; 107 working-copy files carry CRLF that the repository does not. **Not done, named**: the two parsers stay two over the one
+lexer's tokens; the memo spelling is step 3; the elders stay spellings (Q-B4), the round-trip court they waited for now existing.
+
 ## The names -- `.haro`, not `.stzu` -- corrected 2026-10-02
 
 **At the author's word ("we agreed to use .haro instead of .stzu, no?").** D1 was ratified
@@ -1738,3 +1766,8 @@ whole guard re-run on the renamed tree: 28 + 30 + 27 + 23, 117 of 120, 32 of 32,
    them -- N last, per 06-ALPHABET's route 3, behind the ringua Phase 1.5 study (the
    tontine domain given a graph and an NL surface, in two human languages): the author's
    gate, not a rung.
+26. ~~Step 1 of COMPASS-REBOL-06~~ -- built 2026-11-03 as Haro v0.30, the thirtieth rung above, in Haro's own repository: the one reader
+   of C6 (one lexer for the meta-court and every court), the block loader, the canonical printer, the printing court as guard stage 35;
+   every court prints the bytes it printed. Next in BLOCKS.md 3.5: step 2, the pattern rules (COMPASS-REBOL-07) over the blocks step 1
+   reads -- `study/rebol/pattern.py` the reference, `pattern_fixtures.json` (53) the start; step 3, the memo spelling, waits for Q-B2's
+   amendments at Ringua; Q-B4's question to the elders' owners is Central's to carry now that the round-trip court exists.

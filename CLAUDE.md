@@ -65,7 +65,7 @@ not resolve, that file is the authority, not the prompt.
 ## Haro runs on its own VM -- the binary `haro`, not rnxc
 
 Haro was cut from Ring on 2026-11-02, at the author's word as haro-charter recorded it (mailbox/haro-charter.md, 2026-11-02 14:34). Its code is `.haro`, its courts run on Haro's own VM and compiler, the one binary `haro` (`haro run`, `haro check`, `haro fmt`, `haro resident`), and the old name is not carried into this repository.
-Build it in `vm/` with `zig build -Doptimize=ReleaseFast -j2` and `zig build -Doptimize=ReleaseSafe -j2 -p zig-out-safe`, or point `HARO_VM` and `HARO_TWIN` at a built one. Read `STANDALONE.md` before the guard.
+Build it in `vm/` with `zig build -Doptimize=ReleaseFast -j2` and `zig build -Doptimize=ReleaseSafe -j2 -p zig-out-safe`, or point `HARO_VM` and `HARO_TWIN` at a built one. `python paths.py` says what this checkout runs on; `STANDALONE.md` records how the scripts stopped climbing out of the repository (done 2026-11-02).
 Do not run Haro code on another runtime, and do not write the old name into a new file here. A finding about Softanza's legacy bridge goes to its own desk through Central.
 
 ## Keep the loop short -- PX, `CENTRAL-PXLATENCY-01`
@@ -344,7 +344,7 @@ the cut say `haro/X`, `X.ring`, `rnxc` and "the oracle"**: read them as this rep
                      (one heavy job each: the grammar's parser is 21 MB of C). vm/NOTES.md: what the fork kept and why
     spike/           the meta-court (haro.haro, haro_lib.haro), the forge (forge.haro), the libraries, the forged courts and grammars,
                      the letters' declarations (*_vNN.haro) and sentences, and vNN/ per rung: fixtures.json (written FIRST),
-                     GRAMMAR.md (prose second), court cases. spike/haro_forge.py is THE GUARD: 34 stages, --stage=N runs one,
+                     GRAMMAR.md (prose second), court cases. spike/haro_forge.py is THE GUARD: 35 stages, --stage=N runs one,
                      --plant must fail it. spike/f/ringflex_record.json: RingFlex's own court's answers, recorded (D41)
     study/           the measurements behind design memos (codegraph, phase15, rebol). Studies and probes OF Ring keep Ring 1.27 as
                      their subject (paths.RING_ORACLE), never as a judge
@@ -382,14 +382,20 @@ The records: `CHARTER.md` (section 13 the decisions, D1 to D42; section 15 the v
   Get-Content/Set-Content; every checkout is LF (`.gitattributes`); commit explicit paths, never `git add -A`.
 - **Versions**: take the next free version number and say so -- the constitution desk takes them too (it holds v0.29).
 
-## Where it stands -- 2026-11-02, after the cut
+## Where it stands -- 2026-11-03, after v0.30
 
-- The cut is done and proved (SPIKE.md "The cut"; D39-D41; HF-134); every stage of the guard passes. Stage 6 is judged by D42:
-  a sentence edit under 50 ms (14.9 today), the court compiled from scratch under a 150 ms ceiling (128.1 today).
-- **Next, on the author's word as Central relayed it: step 1 of REBOL-06, as v0.30** -- one reader of C6 and a canonical printer,
-  under the printing court, as a guard stage (BLOCKS.md section 5; study/rebol/block.py the reference, printing_fixtures.json the
-  start). The four questions are ruled: Q-B1 `AS` and `?` recorded in C6 (Ringua writes them); Q-B2 both C6 amendments, yes
-  (Ringua writes them; refuse them until its text lands); Q-B3 the block export now, the syntax later; Q-B4 the elders wait for the
-  round-trip court.
-- Owed (mailbox): Central's items 3 and 4 of 2026-10-31 (a value join -- a case of REBOL-07 -- and a seat shared by ten kinds),
-  COMPASS-KERN-03's field check (`spike/ask_lib.haro`), and the constitution desk's ask for a per-seat severity design.
+- The cut is done and proved (SPIKE.md "The cut"; D39-D41; HF-134). **v0.30 is built** (the thirtieth rung; D44; HF-135; guard stage 35):
+  one reader of C6 -- `spike/block_lib.haro`, the one lexer the meta-court and every court tokenise through, the block loader and the
+  canonical printer -- judged by `v30/fixtures.json` (33, written first) and the round trip over every declaration and sentence, on
+  `haro` and its checked build; `haro haro.haro <file> fmt` prints a declaration's one spelling. Every court prints the bytes it printed.
+  Stage 6 is judged by D42: a sentence edit under 50 ms (14.1 today), the cold compile under a 150 ms ceiling (129.1 today).
+- D43 is the twin-court clause (COMPASS-REBOL-03, ruled 2026-11-03). Of BLOCKS.md's four questions: Q-B1 is built (`?` is C6); Q-B2's two
+  amendments are refused by name until Ringua's text lands (then F07 and F08 move from `refused` to `same`); Q-B3 the block export of a
+  program is not started; Q-B4 the round-trip court the elders waited for exists -- asking their owners is Central's.
+- **Next in BLOCKS.md 3.5: step 2, the pattern rules (COMPASS-REBOL-07) over the blocks step 1 reads** -- `study/rebol/pattern.py` the
+  reference, `pattern_fixtures.json` (53) the start, declared in the meta-language (`DEFINE PATTERN`), one library every court loads
+  (section 4.3; stzzui's value join is its first customer). Then step 3, the memo spelling, when Q-B2's text lands.
+- Owed (mailbox): Central's item 4 of 2026-10-31 (a seat shared by ten kinds), COMPASS-KERN-03's field check (`spike/ask_lib.haro`), and
+  the constitution desk's ask for a per-seat severity design. Item 3 (the value join) is step 2's first fixture.
+- This working copy carries CRLF in 107 tracked files while the repository holds LF (HF-135): normalise a file before an exact-text edit;
+  a fresh clone is clean.

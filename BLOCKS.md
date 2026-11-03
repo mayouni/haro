@@ -124,7 +124,7 @@ the three rules and keeps every text it reads today: on all 138 (109 + 11 + 18) 
 
 | step | what | cost | why in this order |
 |---|---|---|---|
-| **1** | **C6 declarations become the canonical text**: one reader in Ring (`block_lib.ring`, replacing `StzuTokenize` and `CtTokenize` -- one LOAD for the meta-court and every forged court), a canonical printer (`haro.ring fmt <file>`), and the printing court as a guard stage over every `.haro` and sentence | one rung of the spike; nothing visible changes (every court prints the same verdicts) | it is 99% true already; the rest is two instruments |
+| **1** | **C6 declarations become the canonical text**: one reader in Ring (`block_lib.ring`, replacing `StzuTokenize` and `CtTokenize` -- one LOAD for the meta-court and every forged court), a canonical printer (`haro.ring fmt <file>`), and the printing court as a guard stage over every `.haro` and sentence | one rung of the spike; nothing visible changes (every court prints the same verdicts) | it is 99% true already; the rest is two instruments | **BUILT 2026-11-03 as Haro v0.30** (`spike/v30/GRAMMAR.md`, guard stage 35, D44): `block_lib.haro` is the one lexer, loader and printer; `haro.haro <file> fmt` the printer at the command line; every court prints the bytes it printed. Written before the cut, this row says `.ring` and `haro.ring`: read `.haro` and `haro.haro` (CLAUDE.md, "The cut").
 | 2 | **pattern rules** (07, section 4) over the blocks step 1 reads | one rung | 07's rules are data only when they are read by the one LOAD |
 | 3 | **the memo spelling**: the house rules in C9's reader, a memo printer, and two C6 amendments -- the doubled quote and a string as a pair's key -- at Ringua, C6's owner | an amendment of C6 and a change to stzlib's reader; every desk's memos then read by one reader | the amendments are another desk's to make; nothing in steps 1 and 2 waits on them |
 | 4 | **programs**: a block printing of the L1 graph (an export, so tools read programs with the one LOAD), the Ring++ face staying the human spelling under its rung-3 court | small for the export; the rest is Q-B3 | a program is not C6 text, and whether it becomes one is the author's |
@@ -221,6 +221,8 @@ asks for it.
 - **Q-B4** the elders: converge on C6's lexis, or stay spellings with their own readers -- their owners', on the author's word.
 
 ## Files
+
+- **Step 1, built** (Haro v0.30, 2026-11-03): `spike/block_lib.haro`, `spike/block.haro`, `spike/v30/` (fixtures first, the court, the plants, GRAMMAR.md).
 
 - `haro/study/rebol/gen_fixtures.py`, `pattern_fixtures.json` (53), `printing_fixtures.json` (21) -- written first (17d9b4e); D05 and F06
   added after the reader, each found by a plant.

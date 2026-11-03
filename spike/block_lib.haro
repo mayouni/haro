@@ -1,0 +1,518 @@
+# block_lib.haro -- the one reader of C6 and its canonical printer (COMPASS-REBOL-06, step 1; Haro v0.30).
+#
+# One lexer for the whole family: the meta-court (haro_lib.haro) and every forged court (court_lib.haro) tokenise
+# through BlkTokenize, where each had its own; the block loader (BlkLoad) reads the tokens into a BLOCK -- a sequence
+# of typed values -- and BlkPrintC6 prints a block in the one canonical spelling. The reference is
+# study/rebol/block.py (the Python model BLOCKS.md was measured with); the judge is v30/fixtures.json, written first.
+#
+# A token is [type, text, line, start, end]: start the index of its first byte, end the index after its last (the
+# refinement gate splices a value's span). Types: ident keyword string number lparen rparen lbracket rbracket comma
+# colon question dot comment eof. When the text cannot be read the LAST token is
+#   [error, category, line, text]   category: unterminated_string | doubled_quote | single_quote | mixed_case |
+#                                             number_glued | unexpected_character
+# and the lexer stops there. The lexer refuses nothing itself: each reader composes its refusal from the error token
+# in its own words (the meta-court's, a court's, the block loader's), so every court prints the bytes it printed.
+#
+# A value of a block is a list whose first item names its kind:
+#   ["word", text]  ["kw", text]  ["str", text]  ["num", text]  ["path", [parts]]
+#   ["pair", key, value]      the key a word, a keyword or a path (a string key waits for C6's amendment: Q-B2)
+#   ["list", [items]]  ["group", [items]]  ["row", [values]]  ["comment", text]  ["opt", value]   (Haro's `?`: Q-B1)
+# A list or a group holds ITEMS separated by commas: an item of one value is that value, an item of several is a ROW.
+# A comment is a value in the sequence that holds it; a comment inside a row moves after the row (the one named
+# loss besides layout).
+#
+# Functions only. The loader's two globals, $aBlkToks and $nBlkPos, are born in the root file that calls BlkLoad
+# (block.haro, haro.haro); the courts call only the lexer.
+
+# ---- the lexer -----------------------------------------------------------------------------------------------------
+
+func BlkIsDigit(c)
+	n = ascii(c)
+	return (n >= 48 and n <= 57)
+
+func BlkIsLower(c)
+	n = ascii(c)
+	return (n >= 97 and n <= 122)
+
+func BlkIsUpper(c)
+	n = ascii(c)
+	return (n >= 65 and n <= 90)
+
+func BlkIsWordChar(c)
+	return BlkIsLower(c) or BlkIsUpper(c) or BlkIsDigit(c) or ascii(c) = 95
+
+func BlkTrim(cS)
+	nA = 1
+	nB = len(cS)
+	while nA <= nB and (cS[nA] = " " or cS[nA] = char(9) or cS[nA] = char(13))
+		nA++
+	end
+	while nB >= nA and (cS[nB] = " " or cS[nB] = char(9) or cS[nB] = char(13))
+		nB--
+	end
+	if nB < nA return "" ok
+	return substr(cS, nA, nB - nA + 1)
+
+func BlkTokenize(cSrc)
+	aToks = []
+	n = len(cSrc)
+	i = 1
+	nLine = 1
+	# a byte-order mark at the start of the text is layout (C6 3.10)
+	if n >= 3 and ascii(cSrc[1]) = 239 and ascii(cSrc[2]) = 187 and ascii(cSrc[3]) = 191 i = 4 ok
+	while i <= n
+		c = cSrc[i]
+		if c = char(10)
+			nLine++
+			i++
+		but c = " " or c = char(9) or c = char(13)
+			i++
+		but c = "-" and i < n and cSrc[i+1] = "-"
+			# a comment runs to the line's end; it is a value of the block, in its place
+			j = i + 2
+			while j <= n and cSrc[j] != char(10)
+				j++
+			end
+			aToks + ["comment", BlkTrim(substr(cSrc, i + 2, j - i - 2)), nLine, i, j]
+			i = j
+		but c = '"'
+			# C6 3.2: a continuation line's leading whitespace folds to one space; what stands before the
+			# newline is kept, and \r is dropped (block.py and the courts' reading; the meta-court's old lexer
+			# also dropped the whitespace before the newline -- HF-135)
+			nStart = nLine
+			nBeg = i
+			cBuf = ""
+			i++
+			bClosed = 0
+			while i <= n
+				d = cSrc[i]
+				if d = '"'
+					bClosed = 1
+					i++
+					exit
+				ok
+				if d = char(10)
+					nLine++
+					i++
+					while i <= n and (cSrc[i] = " " or cSrc[i] = char(9) or cSrc[i] = char(13))
+						i++
+					end
+					cBuf += " "
+					loop
+				ok
+				if d = char(13)
+					i++
+					loop
+				ok
+				cBuf += d
+				i++
+			end
+			if not bClosed
+				aToks + ["error", "unterminated_string", nStart, ""]
+				return aToks
+			ok
+			# Q-B2 (ruled 2026-11-02): a doubled quote inside a string is a C6 amendment Ringua writes. Until its
+			# text lands, a quote that closes one string and opens the next at once is refused by name, so the
+			# old reading (two adjacent strings) never stands in for the amendment
+			if i <= n and cSrc[i] = '"'
+				aToks + ["error", "doubled_quote", nStart, ""]
+				return aToks
+			ok
+			aToks + ["string", cBuf, nStart, nBeg, i]
+		but c = "'"
+			aToks + ["error", "single_quote", nLine, c]
+			return aToks
+		but BlkIsDigit(c) or (c = "-" and i < n and BlkIsDigit(cSrc[i+1]))
+			# C6 3.3: an optional sign, digits, an optional fraction
+			j = i
+			if cSrc[j] = "-" j++ ok
+			while j <= n and BlkIsDigit(cSrc[j])
+				j++
+			end
+			if j < n and cSrc[j] = "." and BlkIsDigit(cSrc[j+1])
+				j++
+				while j <= n and BlkIsDigit(cSrc[j])
+					j++
+				end
+			ok
+			if j <= n and BlkIsWordChar(cSrc[j])
+				while j <= n and BlkIsWordChar(cSrc[j])
+					j++
+				end
+				aToks + ["error", "number_glued", nLine, substr(cSrc, i, j - i)]
+				return aToks
+			ok
+			aToks + ["number", substr(cSrc, i, j - i), nLine, i, j]
+			i = j
+		but BlkIsWordChar(c)
+			# C6 3.4, 3.5: a lower_snake word or an UPPER_SNAKE keyword; case is meaning, and mixed case is neither
+			j = i
+			while j <= n and BlkIsWordChar(cSrc[j])
+				j++
+			end
+			cW = substr(cSrc, i, j - i)
+			bLower = 1
+			bUpper = 1
+			for k = 1 to len(cW)
+				if BlkIsLower(cW[k]) bUpper = 0 ok
+				if BlkIsUpper(cW[k]) bLower = 0 ok
+			next
+			if bLower
+				aToks + ["ident", cW, nLine, i, j]
+			but bUpper
+				aToks + ["keyword", cW, nLine, i, j]
+			else
+				aToks + ["error", "mixed_case", nLine, cW]
+				return aToks
+			ok
+			i = j
+		else
+			cT = ""
+			if c = "(" cT = "lparen"
+			but c = ")" cT = "rparen"
+			but c = "[" cT = "lbracket"
+			but c = "]" cT = "rbracket"
+			but c = "," cT = "comma"
+			but c = ":" cT = "colon"
+			but c = "?" cT = "question"
+			but c = "." cT = "dot"
+			ok
+			if cT = ""
+				aToks + ["error", "unexpected_character", nLine, c]
+				return aToks
+			ok
+			aToks + [cT, c, nLine, i, i + 1]
+			i++
+		ok
+	end
+	aToks + ["eof", "", nLine, n + 1, n + 1]
+	return aToks
+
+# the last token, when it is an error; NULL otherwise
+func BlkLexError(aToks)
+	t = aToks[len(aToks)]
+	if t[1] = "error" return t ok
+	return NULL
+
+# the tokens without their comments: what a court's parser reads (a comment is layout to a court, a value to the block)
+func BlkWithoutComments(aToks)
+	aOut = []
+	for i = 1 to len(aToks)
+		if aToks[i][1] != "comment" aOut + aToks[i] ok
+	next
+	return aOut
+
+# ---- the block loader --------------------------------------------------------------------------------------------------
+
+func BlkFail(nLine, cMsg)
+	raise("block (line " + nLine + "): " + cMsg)
+
+func BlkLexMessage(t)
+	cCat = t[2]
+	if cCat = "unterminated_string" return "a string opened and not closed" ok
+	if cCat = "doubled_quote" return "a doubled quote inside a string waits for C6's amendment (Q-B2): Ringua writes it; today a C6 string has no escape" ok
+	if cCat = "single_quote" return "a single quote; C6 strings are double-quoted (.zql's D-ZQL-1 is a divergence)" ok
+	if cCat = "mixed_case" return "'" + t[4] + "' is neither a lower_snake identifier nor an UPPER_SNAKE keyword" ok
+	if cCat = "number_glued" return "'" + t[4] + "' is neither a number nor a word" ok
+	return "the character '" + t[4] + "' is not part of C6"
+
+func BlkPeek()
+	return $aBlkToks[$nBlkPos]
+
+func BlkPeekAt(k)
+	j = $nBlkPos + k
+	if j > len($aBlkToks) return $aBlkToks[len($aBlkToks)] ok
+	return $aBlkToks[j]
+
+# C6 text -> the top-level sequence of values
+func BlkLoad(cSrc)
+	$aBlkToks = BlkTokenize(cSrc)
+	tE = BlkLexError($aBlkToks)
+	if not isNull(tE) BlkFail(tE[3], BlkLexMessage(tE)) ok
+	$nBlkPos = 1
+	aOut = []
+	while BlkPeek()[1] != "eof"
+		if BlkPeek()[1] = "comment"
+			aOut + ["comment", BlkPeek()[2]]
+			$nBlkPos++
+		else
+			aOut + BlkValue()
+		ok
+	end
+	return aOut
+
+# a name is a word or a keyword, or a path: words joined by dots with no space between (deposit.amount)
+func BlkName()
+	t = BlkPeek()
+	$nBlkPos++
+	aParts = [t[2]]
+	nEnd = t[5]
+	while BlkPeek()[1] = "dot" and BlkPeek()[4] = nEnd and BlkPeekAt(1)[1] = "ident" and BlkPeekAt(1)[4] = BlkPeek()[5]
+		$nBlkPos++
+		t2 = BlkPeek()
+		$nBlkPos++
+		aParts + t2[2]
+		nEnd = t2[5]
+	end
+	if len(aParts) > 1 return ["path", aParts] ok
+	if t[1] = "keyword" return ["kw", t[2]] ok
+	return ["word", t[2]]
+
+func BlkNameText(v)
+	if v[1] = "path" return BlkJoin(v[2], ".") ok
+	return v[2]
+
+func BlkValue()
+	v = BlkValue1()
+	while BlkPeek()[1] = "question"
+		$nBlkPos++
+		v = ["opt", v]
+	end
+	return v
+
+func BlkValue1()
+	t = BlkPeek()
+	if t[1] = "ident" or t[1] = "keyword"
+		vKey = BlkName()
+		if BlkPeek()[1] = "colon"
+			$nBlkPos++
+			cNx = BlkPeek()[1]
+			if cNx = "comma" or cNx = "rparen" or cNx = "rbracket" or cNx = "eof"
+				BlkFail(t[3], "a pair with no value after " + BlkNameText(vKey) + ":")
+			ok
+			return ["pair", vKey, BlkValue()]
+		ok
+		return vKey
+	ok
+	if t[1] = "string"
+		$nBlkPos++
+		if BlkPeek()[1] = "colon"
+			# Q-B2 (ruled 2026-11-02): a string as a pair's key is a C6 amendment Ringua writes; refused by name until its text lands
+			BlkFail(t[3], "a string as a pair's key waits for C6's amendment (Q-B2): Ringua writes it; today a key is a word, a keyword or a path")
+		ok
+		return ["str", t[2]]
+	ok
+	if t[1] = "number"
+		$nBlkPos++
+		return ["num", t[2]]
+	ok
+	if t[1] = "lbracket"
+		$nBlkPos++
+		return ["list", BlkContainer("rbracket", "list", t[3])]
+	ok
+	if t[1] = "lparen"
+		$nBlkPos++
+		return ["group", BlkContainer("rparen", "group", t[3])]
+	ok
+	if t[1] = "comma" BlkFail(t[3], "a comma outside a list or a group") ok
+	if t[1] = "eof" BlkFail(t[3], "the text ends inside a value") ok
+	if t[1] = "dot" BlkFail(t[3], "unexpected '.': a dot joins the words of a path, with no space on either side") ok
+	if t[1] = "question" BlkFail(t[3], "unexpected '?': the mark stands after the value it makes optional, and nothing stands before this one") ok
+	BlkFail(t[3], "unexpected '" + t[2] + "'")
+
+func BlkCountValues(aSeg)
+	n = 0
+	for i = 1 to len(aSeg)
+		if aSeg[i][1] != "comment" n++ ok
+	next
+	return n
+
+# one item of a container, closed by a comma or the closing bracket: its comments before the first value lead,
+# the ones after follow; one value is that value, several are a row
+func BlkFlush(aItems, aSeg)
+	aVals = []
+	aLead = []
+	aTrail = []
+	bSeen = 0
+	for i = 1 to len(aSeg)
+		v = aSeg[i]
+		if v[1] = "comment"
+			if bSeen
+				aTrail + v
+			else
+				aLead + v
+			ok
+		else
+			bSeen = 1
+			aVals + v
+		ok
+	next
+	for i = 1 to len(aLead)
+		aItems + aLead[i]
+	next
+	if len(aVals) = 1
+		aItems + aVals[1]
+	but len(aVals) > 1
+		aItems + ["row", aVals]
+	ok
+	for i = 1 to len(aTrail)
+		aItems + aTrail[i]
+	next
+	return aItems
+
+func BlkContainer(cClose, cWhat, nLine0)
+	aItems = []
+	aSeg = []
+	while 1
+		t = BlkPeek()
+		if t[1] = "eof"
+			BlkFail(nLine0, "a " + cWhat + " not closed")
+		ok
+		if t[1] = cClose
+			$nBlkPos++
+			aItems = BlkFlush(aItems, aSeg)
+			return aItems
+		ok
+		if t[1] = "comma"
+			$nBlkPos++
+			if BlkCountValues(aSeg) = 0
+				BlkFail(t[3], "an empty item before a comma")
+			ok
+			aItems = BlkFlush(aItems, aSeg)
+			aSeg = []
+			loop
+		ok
+		if t[1] = "comment"
+			$nBlkPos++
+			aSeg + ["comment", t[2]]
+			loop
+		ok
+		aSeg + BlkValue()
+	end
+
+# ---- equality: one spelling of a block, for comparing two ------------------------------------------------------------
+
+func BlkJoin(aParts, cSep)
+	cOut = ""
+	for i = 1 to len(aParts)
+		if i > 1 cOut += cSep ok
+		cOut += aParts[i]
+	next
+	return cOut
+
+# a block dumped as one line: every kind tagged, every text length-prefixed, so two blocks are equal exactly when
+# their dumps are. `block.haro load` prints it; `same` compares it
+func BlkDump(v)
+	k = v[1]
+	if k = "word" or k = "kw" or k = "num" or k = "str" or k = "comment"
+		return "(" + k + " " + len(v[2]) + ":" + v[2] + ")"
+	ok
+	if k = "path" return "(path " + BlkJoin(v[2], ".") + ")" ok
+	if k = "pair" return "(pair " + BlkDump(v[2]) + " " + BlkDump(v[3]) + ")" ok
+	if k = "opt" return "(opt " + BlkDump(v[2]) + ")" ok
+	cOut = "(" + k
+	for i = 1 to len(v[2])
+		cOut += " " + BlkDump(v[2][i])
+	next
+	return cOut + ")"
+
+func BlkDumpAll(aVals)
+	cOut = ""
+	for i = 1 to len(aVals)
+		if i > 1 cOut += " " ok
+		cOut += BlkDump(aVals[i])
+	next
+	return cOut
+
+# ---- the canonical printing (BLOCKS.md 3.2) ----------------------------------------------------------------------------
+# One spelling per block: a declaration a paragraph and a blank line between them; a group's items one a line, two
+# spaces deeper, a comma after each but the last; a list inline unless it holds a comment or a group; a string on one
+# line; a comment on its own line.
+
+func BlkHoldsCommentOrGroup(aItems)
+	for i = 1 to len(aItems)
+		if aItems[i][1] = "comment" or aItems[i][1] = "group" return 1 ok
+	next
+	return 0
+
+func BlkPrint(v, nInd)
+	k = v[1]
+	if k = "word" or k = "kw" or k = "num" return v[2] ok
+	if k = "str"
+		for i = 1 to len(v[2])
+			if v[2][i] = '"' BlkFail(0, "a string holding a double quote has no C6 printing (C6 strings have no escape)") ok
+		next
+		return '"' + v[2] + '"'
+	ok
+	if k = "path" return BlkJoin(v[2], ".") ok
+	if k = "pair" return BlkPrint(v[2], nInd) + ": " + BlkPrint(v[3], nInd) ok
+	if k = "row"
+		aP = []
+		for i = 1 to len(v[2])
+			aP + BlkPrint(v[2][i], nInd)
+		next
+		return BlkJoin(aP, " ")
+	ok
+	if k = "opt" return BlkPrint(v[2], nInd) + "?" ok
+	if k = "comment"
+		if v[2] = "" return "--" ok
+		return "-- " + v[2]
+	ok
+	if k = "list"
+		if len(v[2]) = 0 return "[]" ok
+		if BlkHoldsCommentOrGroup(v[2]) return "[" + BlkLines(v[2], nInd) + "]" ok
+		aP = []
+		for i = 1 to len(v[2])
+			aP + BlkPrint(v[2][i], nInd)
+		next
+		return "[" + BlkJoin(aP, ", ") + "]"
+	ok
+	if k = "group"
+		if len(v[2]) = 0 return "()" ok
+		return "(" + BlkLines(v[2], nInd) + ")"
+	ok
+	BlkFail(0, "no printing for a value of kind '" + k + "'")
+
+func BlkSpaces(n)
+	cOut = ""
+	for i = 1 to n
+		cOut += " "
+	next
+	return cOut
+
+func BlkLines(aItems, nInd)
+	cPad = BlkSpaces(nInd + 2)
+	nLastReal = 0
+	for j = 1 to len(aItems)
+		if aItems[j][1] != "comment" nLastReal = j ok
+	next
+	cOut = char(10)
+	for j = 1 to len(aItems)
+		cComma = ""
+		if aItems[j][1] != "comment" and j != nLastReal cComma = "," ok
+		cOut += cPad + BlkPrint(aItems[j], nInd + 2) + cComma + char(10)
+	next
+	return cOut + BlkSpaces(nInd)
+
+# the whole text: a paragraph per declaration (each DEFINE opens one), a comment on a line of its own, a blank line
+# between paragraphs
+func BlkPrintC6(aVals)
+	aParas = []
+	aCur = []
+	for i = 1 to len(aVals)
+		v = aVals[i]
+		if v[1] = "kw" and v[2] = "DEFINE" and len(aCur) > 0
+			aParas + aCur
+			aCur = []
+		ok
+		if v[1] = "comment"
+			if len(aCur) > 0
+				aParas + aCur
+				aCur = []
+			ok
+			aParas + [v]
+			loop
+		ok
+		aCur + v
+	next
+	if len(aCur) > 0 aParas + aCur ok
+	cOut = ""
+	for p = 1 to len(aParas)
+		if p > 1 cOut += char(10) ok
+		aP = []
+		for i = 1 to len(aParas[p])
+			aP + BlkPrint(aParas[p][i], 0)
+		next
+		cOut += BlkJoin(aP, " ") + char(10)
+	next
+	return cOut

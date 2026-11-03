@@ -35,18 +35,24 @@ $aStzuLastName = ""
 $aStzuUnresolved = []
 $aStzuWarnings = []
 $aStzuNotes = []
+$aBlkToks = []
+$nBlkPos = 1
 
 if len(sysargv) < 3
-	? "usage: haro.haro <file.haro> [all]"
+	? "usage: haro.haro <file.haro> [all | fmt]"
 else
 	cPath = sysargv[3]
 	cSrc = read(cPath)
 	$cStzuDir = StzuDirOf(cPath)
 	bAll = 0
+	bFmt = 0
 	if len(sysargv) >= 4
 		if sysargv[4] = "all" bAll = 1 ok
+		if sysargv[4] = "fmt" bFmt = 1 ok
 	ok
-	if bAll
+	if bFmt
+		HaroFmt(cSrc)
+	but bAll
 		HaroAll(cSrc)
 	else
 		try
@@ -57,6 +63,16 @@ else
 		done
 	ok
 ok
+
+# v0.30: `fmt` -- the canonical printing of the declaration (BLOCKS.md 3.2): the one reader of C6 reads it into a
+# block and the one printer prints it; a text the reader refuses prints the refusal line. The meta-court judges
+# nothing here: a declaration is printed before it is judged, so an author sees the spelling of what was written
+func HaroFmt(cText)
+	try
+		see BlkPrintC6(BlkLoad(cText))
+	catch
+		? cCatchError
+	done
 
 # v0.15: `all` -- every defect of the declaration, one line each, in the order of the file.
 # A FUNCTION, not top-level code, on purpose: on Ring a bare assignment inside a function to a

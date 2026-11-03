@@ -1,0 +1,74 @@
+# block.haro -- the one LOAD at the command line (Haro v0.30, step 1 of COMPASS-REBOL-06):
+#
+#   haro block.haro load <file>                 the block the text reads to, dumped on one line (every kind tagged)
+#   haro block.haro fmt <file>                  the canonical C6 printing of the text
+#   haro block.haro same <a> <b>                "same" when the two texts read to one block, "differ" when not
+#   haro block.haro roundtrip <file> ...        text -> block -> canonical printing -> block, one line per file:
+#                                               "ok <file> <values> <bytes in> <bytes out>" when the two blocks are
+#                                               one, "DIFFERS <file>" when not -- one process for the whole family
+#
+# A text the reader refuses prints the one refusal line "block (line N): message". The same program runs on the
+# Haro VM and on its checked build and must print the same bytes (D41). The loader's globals are born here.
+
+load "block_lib.haro"
+
+$aBlkToks = []
+$nBlkPos = 1
+
+if len(sysargv) < 4
+	? "usage: block.haro load <file> | fmt <file> | same <a> <b> | roundtrip <file> ..."
+else
+	cVerb = sysargv[3]
+	if cVerb = "load"
+		try
+			? BlkDumpAll(BlkLoad(read(sysargv[4])))
+		catch
+			? cCatchError
+		done
+	but cVerb = "fmt"
+		try
+			see BlkPrintC6(BlkLoad(read(sysargv[4])))
+		catch
+			? cCatchError
+		done
+	but cVerb = "same"
+		if len(sysargv) < 5
+			? "usage: block.haro same <a> <b>"
+		else
+			try
+				cA = BlkDumpAll(BlkLoad(read(sysargv[4])))
+				cB = BlkDumpAll(BlkLoad(read(sysargv[5])))
+				if cA = cB
+					? "same"
+				else
+					? "differ"
+				ok
+			catch
+				? cCatchError
+			done
+		ok
+	but cVerb = "roundtrip"
+		for k = 4 to len(sysargv)
+			BlkRoundTrip(sysargv[k])
+		next
+	else
+		? "usage: block.haro load <file> | fmt <file> | same <a> <b> | roundtrip <file> ..."
+	ok
+ok
+
+# a function, not top-level code: a name assigned at the top level is a global on this surface, and a function's
+# own names must not be those (haro.haro's note)
+func BlkRoundTrip(cPath)
+	try
+		cIn = read(cPath)
+		aA = BlkLoad(cIn)
+		cOut = BlkPrintC6(aA)
+		aB = BlkLoad(cOut)
+		if BlkDumpAll(aA) = BlkDumpAll(aB)
+			? "ok " + cPath + " " + len(aA) + " " + len(cIn) + " " + len(cOut)
+		else
+			? "DIFFERS " + cPath
+		ok
+	catch
+		? "refused " + cPath + ": " + cCatchError
+	done

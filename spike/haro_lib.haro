@@ -52,6 +52,7 @@
 # globals ($aStzuToks, $nStzuPos, and cond_lib's) are born in the root file.
 
 load "cond_lib.haro"
+load "block_lib.haro"
 
 # ---- the closed menus -------------------------------------------------------
 
@@ -495,24 +496,9 @@ func IsUpperChar(c)
 	n = ascii(c)
 	return (n >= 65 and n <= 90) or n = 95 or (n >= 48 and n <= 57)
 
-func IsWordStart(c)
-	n = ascii(c)
-	return (n >= 97 and n <= 122) or (n >= 65 and n <= 90) or n = 95
-
-func IsWordChar(c)
-	return IsWordStart(c) or IsDigitChar(c)
-
 func IsDigitChar(c)
 	n = ascii(c)
 	return (n >= 48 and n <= 57)
-
-func IsLowerSnake(cW)
-	if len(cW) = 0 return 0 ok
-	if not IsLowerStart(cW[1]) return 0 ok
-	for i = 2 to len(cW)
-		if not IsLowerChar(cW[i]) return 0 ok
-	next
-	return 1
 
 func IsUpperSnake(cW)
 	if len(cW) = 0 return 0 ok
@@ -618,107 +604,24 @@ func StzuSortFound(aF)
 # lparen rparen lbracket rbracket comma colon question dot eof
 
 func StzuTokenize(cSrc)
-	aToks = []
-	n = len(cSrc)
-	i = 1
-	nLine = 1
-	while i <= n
-		c = cSrc[i]
-		if c = char(10)
-			nLine++
-			i++
-		but c = " " or c = char(9) or c = char(13)
-			i++
-		but c = "-" and i < n and cSrc[i+1] = "-"
-			while i <= n and cSrc[i] != char(10)
-				i++
-			end
-		but c = '"'
-			nStart = nLine
-			j = i + 1
-			cRaw = ""
-			while j <= n and cSrc[j] != '"'
-				if cSrc[j] = char(10) nLine++ ok
-				cRaw += cSrc[j]
-				j++
-			end
-			if j > n
-				StzuFail(nStart, "Unterminated string")
-			ok
-			aToks + ["string", FoldString(cRaw), nStart]
-			i = j + 1
-		but IsDigitChar(c) or (c = "-" and i < n and IsDigitChar(cSrc[i+1]))
-			j = i
-			if cSrc[j] = "-" j++ ok
-			while j <= n and IsDigitChar(cSrc[j])
-				j++
-			end
-			if j <= n and cSrc[j] = "."
-				j++
-				while j <= n and IsDigitChar(cSrc[j])
-					j++
-				end
-			ok
-			aToks + ["number", substr(cSrc, i, j - i), nLine]
-			i = j
-		but IsWordStart(c)
-			j = i
-			while j <= n and IsWordChar(cSrc[j])
-				j++
-			end
-			cW = substr(cSrc, i, j - i)
-			if IsLowerSnake(cW)
-				aToks + ["ident", cW, nLine]
-			but IsUpperSnake(cW)
-				aToks + ["keyword", cW, nLine]
-			else
-				StzuFail(nLine, "'" + cW + "' is neither a lower_snake identifier nor an UPPER_SNAKE keyword")
-			ok
-			i = j
+	# v0.30: the one lexer (block_lib.haro) reads the text; the meta-court keeps its own words for what it refuses.
+	# A comment is a value of the block and layout to the meta-court
+	aToks = BlkTokenize(cSrc)
+	tE = BlkLexError(aToks)
+	if not isNull(tE)
+		if tE[2] = "unterminated_string"
+			StzuFail(tE[3], "Unterminated string")
+		but tE[2] = "mixed_case"
+			StzuFail(tE[3], "'" + tE[4] + "' is neither a lower_snake identifier nor an UPPER_SNAKE keyword")
+		but tE[2] = "number_glued"
+			StzuFail(tE[3], "'" + tE[4] + "' is neither a number nor a word")
+		but tE[2] = "doubled_quote"
+			StzuFail(tE[3], "a doubled quote inside a string waits for C6's amendment (Q-B2): Ringua writes it; today a C6 string has no escape")
 		else
-			cT = ""
-			if c = "(" cT = "lparen"
-			but c = ")" cT = "rparen"
-			but c = "[" cT = "lbracket"
-			but c = "]" cT = "rbracket"
-			but c = "," cT = "comma"
-			but c = ":" cT = "colon"
-			but c = "?" cT = "question"
-			but c = "." cT = "dot"
-			ok
-			if cT = ""
-				StzuFail(nLine, "character '" + c + "' is not part of the stzu grammar")
-			ok
-			aToks + [cT, c, nLine]
-			i++
+			StzuFail(tE[3], "character '" + tE[4] + "' is not part of the stzu grammar")
 		ok
-	end
-	aToks + ["eof", "", nLine]
-	return aToks
-
-# Luau: string.gsub(raw, "[ \t]*\r?\n[ \t]*", " ")
-func FoldString(cRaw)
-	cOut = ""
-	n = len(cRaw)
-	i = 1
-	while i <= n
-		c = cRaw[i]
-		if c = char(10) or (c = char(13) and i < n and cRaw[i+1] = char(10))
-			while len(cOut) > 0 and (cOut[len(cOut)] = " " or cOut[len(cOut)] = char(9))
-				cOut = left(cOut, len(cOut) - 1)
-			end
-			if c = char(13) i++ ok
-			i++
-			while i <= n and (cRaw[i] = " " or cRaw[i] = char(9))
-				i++
-			end
-			cOut += " "
-		else
-			cOut += c
-			i++
-		ok
-	end
-	return cOut
+	ok
+	return BlkWithoutComments(aToks)
 
 # ---- parser -----------------------------------------------------------------
 

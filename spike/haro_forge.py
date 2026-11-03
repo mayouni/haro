@@ -3339,6 +3339,24 @@ def stage34():
     keeping rule:<CODE>; the voice telling a refusal with its cite."""
     return ledger_stage(34, NOTICE_STZU, NOTICE_CASES, 'notice', 'N4')
 
+BLOCK_COURT = os.path.join(HERE, 'v30', 'block_court.py')
+def stage35():
+    """Haro v0.30, step 1 of COMPASS-REBOL-06 (v30/GRAMMAR.md): the one reader of C6 and its canonical printer, block_lib.haro,
+    judged by v30/block_court.py -- the study's reference still holding its 21; v30/fixtures.json (33, written first) on haro
+    and its checked build, byte-identical, the five memo-spelling fixtures it leaves to step 3 printed by name; the round trip
+    over every declaration and every sentence of the spike (text -> block -> canonical printing -> block), one process per
+    build, the one text written to be refused named; and the meta-court's fmt verb printing what block.haro prints."""
+    print('stage 35 -- the one reader of C6 and its canonical printer: v30/block_court.py on haro and its checked build')
+    p = subprocess.run([sys.executable, BLOCK_COURT] + (['--plant'] if PLANT else []), capture_output=True, cwd=HERE, timeout=1800)
+    out = p.stdout.decode('utf-8', 'replace').replace(chr(13) + chr(10), chr(10))
+    for line in out.splitlines():
+        if line.startswith('  ') or line.startswith('PRINTING COURT') or line.startswith('ROUND TRIP') or line.startswith('block_court'):
+            print(line)
+    if p.returncode != 0:
+        print(f'  FAIL the printing court exited {p.returncode}' + ('' if out.strip() else ': ' + p.stderr.decode('utf-8', 'replace')[-400:]))
+        return 1
+    return 0
+
 SENTENCE_TARGET = 50.0     # D42: a sentence edited, its court's image reused -- what a person editing a sentence waits for
 COLD_CEILING = 150.0       # D42: the court compiled from scratch -- a ceiling that catches the court library growing
 
@@ -3491,5 +3509,7 @@ if __name__ == '__main__':
         failures += stage33()
     if stage in (None, 34) and os.path.exists(NOTICE_STZU) and os.path.exists(NOTICE_CASES):
         failures += stage34()
+    if stage in (None, 35) and os.path.exists(BLOCK_COURT):
+        failures += stage35()
     print(f'haro_forge: {"FAIL" if failures else "PASS"} ({failures} failure(s), {time.perf_counter()-t0:.1f} s)')
     sys.exit(1 if failures else 0)

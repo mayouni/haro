@@ -91,6 +91,7 @@
 # are born in the generated court, at its top level, for both runtimes' sake.
 
 load "cond_lib.haro"
+load "block_lib.haro"
 # expr_lib.haro is loaded by the GENERATED court, and only when its language
 # declares an EXPRESSION (forge.haro): a court carries what its language says,
 # and the machine court's edit-to-verdict stays under its 100 ms target
@@ -108,9 +109,6 @@ func CtIsLowerish(c)
 func CtIsUpperish(c)
 	n = ascii(c)
 	return (n >= 65 and n <= 90) or n = 95 or (n >= 48 and n <= 57)
-
-func CtIsWordChar(c)
-	return CtIsLowerish(c) or CtIsUpperish(c)
 
 func CtFail(nLine, cMsg)
 	raise($cCourtLang + " (line " + nLine + "): " + cMsg)
@@ -654,110 +652,38 @@ func CtJudgeSentence(aDecl, aSeat, aClause)
 # lparen rparen lbracket rbracket comma eof
 
 func CtTokenize(cSrc)
-	aToks = []
-	n = len(cSrc)
-	i = 1
-	nLine = 1
-	while i <= n
-		c = cSrc[i]
-		if c = char(10)
-			nLine++
-			i++
-		but c = " " or c = char(9) or c = char(13)
-			i++
-		but c = "-" and i < n and cSrc[i+1] = "-"
-			while i <= n and cSrc[i] != char(10)
-				i++
-			end
-		but c = '"'
-			# C6 3.2: a continuation line's leading whitespace folds to one
-			# space (harb keeps what stands before the newline; \r is dropped)
-			nStart = nLine
-			nStrBeg = i
-			cBuf = ""
-			i++
-			bClosed = 0
-			while i <= n
-				d = cSrc[i]
-				if d = '"'
-					bClosed = 1
-					i++
-					exit
-				ok
-				if d = char(10)
-					nLine++
-					i++
-					while i <= n and (cSrc[i] = " " or cSrc[i] = char(9) or cSrc[i] = char(13))
-						i++
-					end
-					cBuf += " "
-					loop
-				ok
-				if d = char(13)
-					i++
-					loop
-				ok
-				cBuf += d
-				i++
-			end
-			if not bClosed
-				CtFail(nStart, "Unterminated string")
-			ok
-			# a token is [type, text, line, start, end]: start is the index of
-			# its first byte, end the index after its last, so the gate can
-			# splice a value's span and nothing else (nStrBeg was set at the quote)
-			aToks + ["string", cBuf, nStart, nStrBeg, i]
-		but CtIsDigit(c)
-			j = i
-			while j <= n and CtIsDigit(cSrc[j])
-				j++
-			end
-			if j <= n and CtIsWordChar(cSrc[j])
-				CtFail(nLine, "'" + substr(cSrc, i, j - i + 1) + "' is neither a number nor a word")
-			ok
-			aToks + ["number", substr(cSrc, i, j - i), nLine, i, j]
-			i = j
-		but CtIsWordChar(c)
-			j = i
-			while j <= n and CtIsWordChar(cSrc[j])
-				j++
-			end
-			cW = substr(cSrc, i, j - i)
-			bLower = 1
-			bUpper = 1
-			for k = 1 to len(cW)
-				nK = ascii(cW[k])
-				if nK >= 97 and nK <= 122 bUpper = 0 ok
-				if nK >= 65 and nK <= 90 bLower = 0 ok
-			next
-			if bLower
-				aToks + ["ident", cW, nLine, i, j]
-			but bUpper
-				aToks + ["keyword", cW, nLine, i, j]
-			else
-				CtFail(nLine, "'" + cW + "' is neither a lower_snake identifier nor an UPPER_SNAKE keyword")
-			ok
-			i = j
-		else
-			cT = ""
-			if c = "(" cT = "lparen"
-			but c = ")" cT = "rparen"
-			but c = "[" cT = "lbracket"
-			but c = "]" cT = "rbracket"
-			but c = "," cT = "comma"
-			but c = ":" cT = "colon"
-			ok
-			if cT = ""
-				cMsgC = CtRefusalMessage("unexpected_character")
-				if cMsgC != "" cMsgC = " -- " + cMsgC ok
-				CtFail(nLine, "The character '" + c + "' is not part of the " + $cCourtLang + " grammar" + cMsgC)
-			ok
-			aToks + [cT, c, nLine, i, i + 1]
-			i++
+	# v0.30: the one lexer (block_lib.haro) reads the sentence; the court keeps its own words for what it refuses,
+	# in the language's voice (unexpected_character). A `?` and a `.` are C6 (Q-B1, paths) and read by the lexer;
+	# a sentence has no use for either, so the court refuses them as it always did. A comment is layout to a court
+	aToks = BlkTokenize(cSrc)
+	aOut = []
+	for i = 1 to len(aToks)
+		t = aToks[i]
+		if t[1] = "comment" loop ok
+		if t[1] = "question" or t[1] = "dot"
+			CtFailChar(t[3], t[2])
 		ok
-	end
-	aToks + ["eof", "", nLine, n + 1, n + 1]
-	return aToks
+		if t[1] = "error"
+			if t[2] = "unterminated_string"
+				CtFail(t[3], "Unterminated string")
+			but t[2] = "mixed_case"
+				CtFail(t[3], "'" + t[4] + "' is neither a lower_snake identifier nor an UPPER_SNAKE keyword")
+			but t[2] = "number_glued"
+				CtFail(t[3], "'" + t[4] + "' is neither a number nor a word")
+			but t[2] = "doubled_quote"
+				CtFail(t[3], "a doubled quote inside a string waits for C6's amendment (Q-B2): Ringua writes it; today a C6 string has no escape")
+			else
+				CtFailChar(t[3], t[4])
+			ok
+		ok
+		aOut + t
+	next
+	return aOut
+
+func CtFailChar(nLine, c)
+	cMsgC = CtRefusalMessage("unexpected_character")
+	if cMsgC != "" cMsgC = " -- " + cMsgC ok
+	CtFail(nLine, "The character '" + c + "' is not part of the " + $cCourtLang + " grammar" + cMsgC)
 
 # ---- the tables, read ---------------------------------------------------------
 

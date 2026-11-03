@@ -1248,6 +1248,31 @@ states principle 14.
   *Not done, named:* moving the code today's constitution rungs added out of the court library -- its ten new functions are called
   from the court's generic paths (validation, `diagnose`, cites, the voice), so a split needs stand-ins in every court: a rung, taken
   when the ceiling is first hit.
+- **D43 -- the twin-court clause: no second evaluator of the graph without a court that runs both on the same fixtures and
+  refuses a difference, a difference refused by name as its test** (COMPASS-REBOL-03, ruled by the Principal 2026-11-03, LEDGER.md
+  line 161, on this desk's answer of 2026-11-02 11:52; carried by Central 2026-11-03 01:46: "haro-charter writes it"). Worded as the
+  Compass's row, and entered where the spike has practised it since v0.1: every court runs on two evaluators of the same text -- Ring
+  and Ring++ until the cut, `haro` and its checked build since D41 -- on the same fixtures, and a difference in the bytes they print
+  is a failure of the guard, named by stage and case, before any verdict is believed. The clause constrains what the cut left open: a
+  future second runtime of Haro (a port, a resident, a browser cell) is not a judge of anything until the court that runs it beside
+  `haro` on the same fixtures exists and refuses the first difference by name. *Cost:* a second evaluator cannot be adopted on its
+  own say-so, which is the point; the first difference it finds is a finding, never a reason to loosen the court (HF-61's lesson).
+  *Not a change to today's judges:* D41 stands; the clause names what D41 does.
+- **D44 -- one reader of C6 and one canonical printer: the block is the family's one format, read once** (step 1 of COMPASS-REBOL-06,
+  on the Principal's word of 2026-11-02 as Central read it and prompt 56 carried it; `haro/spike/v30/GRAMMAR.md`; HF-135; the
+  thirtieth rung; guard stage 35). `block_lib.haro` holds the one lexer of C6's lexis, the block loader (BLOCKS.md 3.1) and the
+  canonical printer (3.2); the meta-court and every forged court tokenise through it, each composing its refusals in its own words
+  from the lexer's error token, so **every court prints the bytes it printed**. `haro.haro <file> fmt` prints a declaration's one
+  spelling. Judged by `v30/fixtures.json` (33, written first; the five memo-spelling fixtures named as step 3's) on `haro` and its
+  checked build, byte-identical, and by the round trip over every declaration and sentence of the spike (91 of 92; the one refused
+  was written to be). **Q-B1 built**: `?` is read and printed as C6. **Q-B2 held**: a string as a pair's key and a doubled quote
+  inside a string are refused by name until Ringua's text lands; two fixtures then move from `refused` to `same`. *Three readings
+  taken on the author's delegation, each named in GRAMMAR.md's lexis table:* the one lexer keeps what stands before a folded line
+  break (the courts' and the study's reading, not the meta-court's), refuses mixed case (both lexers' reading, not the study's), and
+  reads a signed or fractional number everywhere (the meta-court's reading, not the courts'). *Cost:* the court library loads one
+  more file and loses a lexer; the cold compile of stage 6 is the measurement (SPIKE.md). *Not done, named:* the two parsers stay
+  two (a declaration's and a sentence's, over the one lexer's tokens); the memo spelling is step 3; the elders stay spellings (Q-B4),
+  the round-trip court they waited for now existing.
 - **D23 -- `rnxc fmt` is a Ring++ feature, not held for Haro** (CODEGRAPH Q4, ruled on the author's delegation, 2026-10-05: "take
   whatever decision you think is wiser on my behalf"). It is a verb of the one binary (commitment 5), depends on nothing of Haro's, is
   judged against the oracle and refuses what Ring refuses (58 of 6,061 Softanza files, 57 of them Ring's own refusals). It ships inside
