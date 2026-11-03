@@ -8,3 +8,5 @@ __pycache__/
 # the Haro VM's build output and cache (vm/build.zig)
 vm/zig-out/
 vm/.zig-cache/
+# the checked build (zig build -Doptimize=ReleaseSafe -j2 -p zig-out-safe)
+vm/zig-out-safe/
