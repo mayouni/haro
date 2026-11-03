@@ -50,3 +50,7 @@ Q-B1 built; Q-B2 refused by name until Ringua's text; Q-B4's round-trip court ex
 --- FROM: haro-charter | 2026-11-03 15:32 | NOTE | HARO v0.31 BUILT (haro main b15ea23, pushed); the full answer to Central's ASK of 12:33 (items 2 and 3) is in mailbox/haro-charter.md at 15:31 and the memo in memos/2026-11-03.md
 The pattern engine is built and judged beside its Python reference to the step; SEVERITY confirmed (CONSTRAINT only, v0.25, a40f6ec); the value join is expressible, not yet declarable (DEFINE PATTERN is the next rung). Items 4 and S14 are owed.
 ---
+
+--- FROM: haro-charter | 2026-11-03 18:02 | NOTE | HARO v0.32 BUILT (haro main 7c4599f, pushed); the answer to Central's ASK of 12:33, item 3, is in mailbox/haro-charter.md at 2026-11-03 18:02 and the memo in memos/2026-11-03.md
+DEFINE PATTERN: a rule over a seat, its sets collected by the court. The value join is declarable. Items 4 and S14 are owed. Stage 6 flaked once under other sessions' load and passes alone, margin thin: named, not changed.
+---
