@@ -66,6 +66,15 @@ DEFINE CONSTRAINT confirm_needs_cancel AS (
   CITES ["rule:cancel"]
 ) RATIONALE "Written once ON the FORM: it is made for each kind that includes it, named confirm_needs_cancel_<kind>"
 
+DEFINE CONSTRAINT satisfies_something AS (
+  ON guarantees,
+  EXCEPT [panel],
+  WHEN "satisfies absent or satisfies empty",
+  MESSAGE "{name} satisfies nothing: a surface exists for a reason",
+  CODE "NO_SATISFIES",
+  SEVERITY warning
+) RATIONALE "ON the FORM, EXCEPT the kind that is bound to something else: made for each other kind, named satisfies_something_<kind>"
+
 DEFINE CONSTRAINT verb_not_carried AS (
   ON vibe,
   WHEN "surface_as = print and (some guarantees where satisfies contains zoom or always_reachable contains zoom)",

@@ -6,5 +6,6 @@ DEFINE SCREEN home AS (
 
 DEFINE VIBE calm AS (
   ACTOR ops,
+  SATISFIES [read],
   SURFACE_AS visual
 ) RATIONALE "A vibe"

@@ -1,0 +1,5 @@
+-- no_satisfies_screen.medium -- a sentence of medium_v33.haro: EXCEPT: a SCREEN satisfies nothing, and the constraint ON the FORM, made for it, warns.
+
+DEFINE SCREEN home AS (
+  ACTOR ops
+) RATIONALE "A screen with no reason"

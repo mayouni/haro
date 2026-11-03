@@ -1,0 +1,6 @@
+-- no_satisfies_vibe.medium -- a sentence of medium_v33.haro: EXCEPT: a VIBE satisfies nothing, and the constraint is made for it too.
+
+DEFINE VIBE calm AS (
+  ACTOR ops,
+  SURFACE_AS visual
+) RATIONALE "A vibe with no reason"

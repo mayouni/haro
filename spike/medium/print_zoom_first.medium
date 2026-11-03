@@ -7,5 +7,6 @@ DEFINE SCREEN home AS (
 
 DEFINE VIBE loud AS (
   ACTOR ops,
+  SATISFIES [read],
   SURFACE_AS print
 ) RATIONALE "A vibe on a medium that carries no zoom"

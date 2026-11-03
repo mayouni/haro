@@ -12,6 +12,8 @@ The design this file pins (the desk's, within the author's word "Items 4 and S14
                           the same condition, message, code, cites and severity
   some | all | earlier | exists FORM  in a condition (a CONSTRAINT's WHEN and THEN, a VIEW's WHERE) ranges over every kind that includes the FORM: the `or` of the
                           quantifier over each kind for some, earlier and exists, the `and` for all. A name that is already a seat of the constraint's kind keeps its meaning
+  EXCEPT [kind, ...]      a clause of a CONSTRAINT written ON a FORM: the kinds it is not made for. Found by rewriting stzzui's real declaration: two of its five repeated stems are
+                          identical for nine kinds and differ for INTERACTION alone, which has the extra seat ROLE; that kind keeps an explicit constraint of its own
   S14                     a verb guaranteed in either of two lists is ONE where: `some K where satisfies contains V or always_reachable contains V`, which the condition language
                           could always say; the answer to S14 is that, and the quantifier over a FORM that spares writing it once per kind
 
@@ -54,19 +56,25 @@ nc_panel = sentence('no_cancel_panel.medium', 'ON a FORM reaches a PANEL.', [
     ('PANEL', 'signup', [A, ('SATISFIES', '[confirm]')], 'A panel that confirms with no way out')])
 p_first = sentence('print_zoom_first.medium', 'S14, the first list: a VIBE on print while a SCREEN satisfies ZOOM.', [
     ('SCREEN', 'home', [A, ('SATISFIES', '[zoom]')], 'A screen that zooms'),
-    ('VIBE', 'loud', [A, ('SURFACE_AS', 'print')], 'A vibe on a medium that carries no zoom')])
+    ('VIBE', 'loud', [A, ('SATISFIES', '[read]'), ('SURFACE_AS', 'print')], 'A vibe on a medium that carries no zoom')])
 p_second = sentence('print_zoom_second.medium', 'S14, the second list: a VIBE on print while a PANEL keeps ZOOM always reachable.', [
     ('PANEL', 'signup', [A, ('ALWAYS_REACHABLE', '[zoom]')], 'A panel that keeps zoom within reach'),
-    ('VIBE', 'loud', [A, ('SURFACE_AS', 'print')], 'A vibe on a medium that carries no zoom')])
+    ('VIBE', 'loud', [A, ('SATISFIES', '[read]'), ('SURFACE_AS', 'print')], 'A vibe on a medium that carries no zoom')])
 sentence('print_no_zoom.medium', 'a VIBE on print and no declaration guarantees ZOOM: lawful.', [
     ('SCREEN', 'home', [A, ('SATISFIES', '[read]')], 'A screen that reads'),
-    ('VIBE', 'loud', [A, ('SURFACE_AS', 'print')], 'A vibe on print')])
+    ('VIBE', 'loud', [A, ('SATISFIES', '[read]'), ('SURFACE_AS', 'print')], 'A vibe on print')])
 sentence('visual_zoom.medium', 'a SCREEN satisfies ZOOM and the VIBE is on a visual surface, which carries it: lawful.', [
     ('SCREEN', 'home', [A, ('SATISFIES', '[zoom]')], 'A screen that zooms'),
-    ('VIBE', 'calm', [A, ('SURFACE_AS', 'visual')], 'A vibe on a visual surface')])
+    ('VIBE', 'calm', [A, ('SATISFIES', '[read]'), ('SURFACE_AS', 'visual')], 'A vibe on a visual surface')])
 no_actor = sentence('no_actor.medium', 'a SCREEN names no actor: the sentence stands and the VIBE warns (ALL over a FORM).', [
     ('SCREEN', 'home', [('SATISFIES', '[read]')], 'A screen with no actor'),
-    ('VIBE', 'calm', [A, ('SURFACE_AS', 'visual')], 'A vibe')])
+    ('VIBE', 'calm', [A, ('SATISFIES', '[read]'), ('SURFACE_AS', 'visual')], 'A vibe')])
+ns_screen = sentence('no_satisfies_screen.medium', 'EXCEPT: a SCREEN satisfies nothing, and the constraint ON the FORM, made for it, warns.', [
+    ('SCREEN', 'home', [A], 'A screen with no reason')])
+sentence('no_satisfies_panel.medium', 'EXCEPT [panel]: a PANEL satisfies nothing, and the constraint ON the FORM was not made for it, so nothing warns.', [
+    ('PANEL', 'signup', [A], 'A panel bound to something else')])
+ns_vibe = sentence('no_satisfies_vibe.medium', 'EXCEPT: a VIBE satisfies nothing, and the constraint is made for it too.', [
+    ('VIBE', 'calm', [A, ('SURFACE_AS', 'visual')], 'A vibe with no reason')])
 sentence('bad_intent.medium', 'an intent the menu lacks, in a seat a kind got from the FORM: refused by the seat\'s own MENU.', [
     ('SCREEN', 'home', [A, ('SATISFIES', '[dance]')], 'A screen that dances')])
 sentence('own_seat.medium', 'a seat a kind adds to what it includes (SURFACE_AS) next to the included ones: lawful.', [
@@ -78,8 +86,8 @@ sentence('unknown_seat.medium', 'a seat no kind has: the expanded kinds are clos
 MC = 'satisfies CONFIRM and keeps no CANCEL always reachable'
 cases = [
     {'id': 'M1', 'name': 'the clean sentence: three kinds that include the shared guarantees', 'verb': 'check', 'args': ['medium/clean.medium'], 'first': 'ok', 'counts': {'SCREEN': 1, 'VIBE': 1, 'PANEL': 1}},
-    {'id': 'M2', 'name': 'the meta-court reads the world: three declarations, one form, five constraints (ON a FORM made three)', 'verb': 'meta', 'args': ['medium_v33.haro'], 'first': 'ok',
-     'contains': ['declarations 3', 'forms 1', 'menus 2', 'constraints 5']},
+    {'id': 'M2', 'name': 'the meta-court reads the world: three declarations, one form, seven constraints (ON a FORM made three, and ON a FORM EXCEPT one made two)', 'verb': 'meta', 'args': ['medium_v33.haro'], 'first': 'ok',
+     'contains': ['declarations 3', 'forms 1', 'menus 2', 'constraints 7']},
     {'id': 'M3', 'name': 'ON a FORM, on a SCREEN: made once, enforced on the first kind that includes it', 'verb': 'check', 'args': ['medium/no_cancel_screen.medium'], 'refused': True,
      'contains': [f'medium (line {nc_screen["home"]}): home {MC}']},
     {'id': 'M4', 'name': 'ON a FORM, on a VIBE', 'verb': 'check', 'args': ['medium/no_cancel_vibe.medium'], 'refused': True, 'contains': [f'medium (line {nc_vibe["calm"]}): calm {MC}']},
@@ -99,13 +107,19 @@ cases = [
     {'id': 'M13', 'name': 'a seat a kind got from the FORM is checked by its own MENU, as a hand-written one is', 'verb': 'check', 'args': ['medium/bad_intent.medium'], 'refused': True,
      'contains': ["An intent is confirm, cancel, zoom or read, not 'dance'"]},
     {'id': 'M14', 'name': 'a seat the kind adds beside the included ones is lawful', 'verb': 'check', 'args': ['medium/own_seat.medium'], 'first': 'ok', 'counts': {'VIBE': 1}},
+    {'id': 'M16', 'name': 'EXCEPT: the constraint ON the FORM is made for a SCREEN, which satisfies nothing, and warns at its own line', 'verb': 'check', 'args': ['medium/no_satisfies_screen.medium'],
+     'first': 'ok', 'contains': [f'warning NO_SATISFIES: home satisfies nothing: a surface exists for a reason (line {ns_screen["home"]})']},
+    {'id': 'M17', 'name': 'EXCEPT [panel]: the constraint was not made for a PANEL, so a panel that satisfies nothing is lawful and silent', 'verb': 'check', 'args': ['medium/no_satisfies_panel.medium'],
+     'first': 'ok', 'lacks': ['NO_SATISFIES']},
+    {'id': 'M18', 'name': 'EXCEPT leaves the other kinds: a VIBE that satisfies nothing warns', 'verb': 'check', 'args': ['medium/no_satisfies_vibe.medium'],
+     'first': 'ok', 'contains': [f'warning NO_SATISFIES: calm satisfies nothing: a surface exists for a reason (line {ns_vibe["calm"]})']},
     {'id': 'M15', 'name': 'the expanded kinds are closed: a seat no kind has is refused', 'verb': 'check', 'args': ['medium/unknown_seat.medium'], 'refused': True, 'contains': ["DENSITY"]},
 ]
 cdoc = {
     'name': 'the medium world -- sentence-level cases for Haro v0.33 (INCLUDES, ON a FORM, a quantifier over a FORM; Central\'s item 4, stzzui\'s S5; S14)',
     'comment': ('Written BEFORE any code reads INCLUDES. Each case runs the court forged from medium_v33.haro on haro AND on its checked build; the two must print the same '
                 'bytes, and the guard also forges v33/medium_expanded.haro, the hand-expanded twin, and requires the same court byte for byte. The sentences are in medium/. '
-                'M7 and M8 are S14: one where reads two lists. A constraint ON a FORM is enforced on every kind that includes it (M3, M4, M5).'),
+                'M7 and M8 are S14: one where reads two lists. A constraint ON a FORM is enforced on every kind that includes it (M3, M4, M5), except the kinds it EXCEPTs (M16, M17, M18).'),
     'cases': cases,
 }
 with open(os.path.join(HERE, 'court_cases.json'), 'w', encoding='utf-8', newline='\n') as fh:
@@ -126,8 +140,9 @@ def decl(name, verb, incl='[guarantees]', seats='[]'):
 BASE = LANG + MENU + FORMG + decl('screen', 'SCREEN') + decl('vibe', 'VIBE', seats='[density: name?]')
 
 
-def con(name, on, when, extra=''):
-    return f'DEFINE CONSTRAINT {name} AS (ON {on}, WHEN "{when}", MESSAGE "m"{extra}) RATIONALE "x"\n'
+def con(name, on, when, extra='', exc=''):
+    e = f'EXCEPT {exc}, ' if exc else ''
+    return f'DEFINE CONSTRAINT {name} AS (ON {on}, {e}WHEN "{when}", MESSAGE "m"{extra}) RATIONALE "x"\n'
 
 
 def accept(id_, name, src, **counts):
@@ -154,6 +169,9 @@ accepts = [
            + con('c', 'screen', 'some guarantees where tag present'), constraints=1),
     accept('A8', 'a FORM no kind includes is still a FORM: ON still names a DECLARATION, as it did, and a kind without INCLUDES is the kind it was',
            LANG + MENU + FORMG + decl('screen', 'SCREEN', incl='', seats='[actor: name?]') + con('c', 'screen', 'actor present'), declarations=1, constraints=1),
+    accept('A9', 'EXCEPT [kind]: a constraint ON a FORM is made for the including kinds but the ones it excepts', BASE + con('c', 'guarantees', 'actor present', exc='[vibe]'), constraints=1),
+    accept('A10', 'the excepted kind has its own constraint beside the one made for the others: two constraints, no collision',
+           BASE + con('c', 'guarantees', 'actor present', exc='[vibe]') + con('c_vibe', 'vibe', 'actor present and density present'), constraints=2),
 ]
 rejects = [
     reject('R1', 'INCLUDES names nothing', BASE.replace('INCLUDES [guarantees], SEATS []', 'INCLUDES [ghost], SEATS []'), "INCLUDES: 'ghost' resolves to nothing in this declaration"),
@@ -178,13 +196,19 @@ rejects = [
            'DECLARATION requires the SEATS clause'),
     reject('R13', 'a constraint made ON a FORM names its condition\'s seat for each kind: a seat the FORM does not give is refused where it is missing',
            BASE + con('c', 'guarantees', 'density present'), "no seat 'density' on screen"),
+    reject('R14', 'EXCEPT belongs to a constraint ON a FORM: ON a kind has nothing to except', BASE + con('c', 'screen', 'actor present', exc='[vibe]'), "EXCEPT belongs to a constraint ON a FORM, and 'screen' is a DECLARATION"),
+    reject('R15', 'EXCEPT names nothing', BASE + con('c', 'guarantees', 'actor present', exc='[ghost]'), "EXCEPT: 'ghost' resolves to nothing in this declaration"),
+    reject('R16', 'EXCEPT names a kind that does not include the FORM', BASE + decl('plain', 'PLAIN', incl='', seats='[actor: name?]') + con('c', 'guarantees', 'actor present', exc='[plain]'),
+           "EXCEPT names 'plain', which does not include the FORM 'guarantees'"),
+    reject('R17', 'EXCEPT names a kind twice', BASE + con('c', 'guarantees', 'actor present', exc='[vibe, vibe]'), "EXCEPT names 'vibe' twice"),
+    reject('R18', 'EXCEPT may not leave the constraint without a kind', BASE + con('c', 'guarantees', 'actor present', exc='[screen, vibe]'), "EXCEPT leaves no kind for ON guarantees"),
 ]
 doc = {
     'grammar': 'haro', 'version': '0.33',
     'comment': ('Written BEFORE any code reads INCLUDES (the W discipline). v0.33 answers Central\'s item 4 (stzzui\'s S5: four seats and 40 of 60 constraints written ten times) and S14. '
                 'INCLUDES [form] on a DECLARATION; ON a FORM, and a quantifier (some, all, earlier, exists) over a FORM, expand over the kinds that include it. All of it is sugar '
                 'the meta-court resolves: the court never sees it, which the guard proves by forging the hand-expanded twin and comparing the courts byte for byte. '
-                'A1-A8 accept (A7 and A8 pin that no existing reading changes); R1-R13 refuse, each by the fragment of why. R6, R7 and R9 keep refusals the language already spoke.'),
+                'A1-A10 accept (A7 and A8 pin that no existing reading changes); R1-R18 refuse, each by the fragment of why. R6, R7 and R9 keep refusals the language already spoke.'),
     'accepts': accepts, 'rejects': rejects,
 }
 with open(os.path.join(HERE, 'fixtures.json'), 'w', encoding='utf-8', newline='\n') as fh:

@@ -1,6 +1,6 @@
 {
  "name": "the medium world -- sentence-level cases for Haro v0.33 (INCLUDES, ON a FORM, a quantifier over a FORM; Central's item 4, stzzui's S5; S14)",
- "comment": "Written BEFORE any code reads INCLUDES. Each case runs the court forged from medium_v33.haro on haro AND on its checked build; the two must print the same bytes, and the guard also forges v33/medium_expanded.haro, the hand-expanded twin, and requires the same court byte for byte. The sentences are in medium/. M7 and M8 are S14: one where reads two lists. A constraint ON a FORM is enforced on every kind that includes it (M3, M4, M5).",
+ "comment": "Written BEFORE any code reads INCLUDES. Each case runs the court forged from medium_v33.haro on haro AND on its checked build; the two must print the same bytes, and the guard also forges v33/medium_expanded.haro, the hand-expanded twin, and requires the same court byte for byte. The sentences are in medium/. M7 and M8 are S14: one where reads two lists. A constraint ON a FORM is enforced on every kind that includes it (M3, M4, M5), except the kinds it EXCEPTs (M16, M17, M18).",
  "cases": [
   {
    "id": "M1",
@@ -18,7 +18,7 @@
   },
   {
    "id": "M2",
-   "name": "the meta-court reads the world: three declarations, one form, five constraints (ON a FORM made three)",
+   "name": "the meta-court reads the world: three declarations, one form, seven constraints (ON a FORM made three, and ON a FORM EXCEPT one made two)",
    "verb": "meta",
    "args": [
     "medium_v33.haro"
@@ -28,7 +28,7 @@
     "declarations 3",
     "forms 1",
     "menus 2",
-    "constraints 5"
+    "constraints 7"
    ]
   },
   {
@@ -180,6 +180,42 @@
    "counts": {
     "VIBE": 1
    }
+  },
+  {
+   "id": "M16",
+   "name": "EXCEPT: the constraint ON the FORM is made for a SCREEN, which satisfies nothing, and warns at its own line",
+   "verb": "check",
+   "args": [
+    "medium/no_satisfies_screen.medium"
+   ],
+   "first": "ok",
+   "contains": [
+    "warning NO_SATISFIES: home satisfies nothing: a surface exists for a reason (line 3)"
+   ]
+  },
+  {
+   "id": "M17",
+   "name": "EXCEPT [panel]: the constraint was not made for a PANEL, so a panel that satisfies nothing is lawful and silent",
+   "verb": "check",
+   "args": [
+    "medium/no_satisfies_panel.medium"
+   ],
+   "first": "ok",
+   "lacks": [
+    "NO_SATISFIES"
+   ]
+  },
+  {
+   "id": "M18",
+   "name": "EXCEPT leaves the other kinds: a VIBE that satisfies nothing warns",
+   "verb": "check",
+   "args": [
+    "medium/no_satisfies_vibe.medium"
+   ],
+   "first": "ok",
+   "contains": [
+    "warning NO_SATISFIES: calm satisfies nothing: a surface exists for a reason (line 3)"
+   ]
   },
   {
    "id": "M15",

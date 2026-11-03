@@ -1,0 +1,5 @@
+-- no_satisfies_panel.medium -- a sentence of medium_v33.haro: EXCEPT [panel]: a PANEL satisfies nothing, and the constraint ON the FORM was not made for it, so nothing warns.
+
+DEFINE PANEL signup AS (
+  ACTOR ops
+) RATIONALE "A panel bound to something else"
