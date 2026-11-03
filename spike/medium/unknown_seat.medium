@@ -1,0 +1,6 @@
+-- unknown_seat.medium -- a sentence of medium_v33.haro: a seat no kind has: the expanded kinds are closed, as a hand-written one is (line 4).
+
+DEFINE SCREEN home AS (
+  ACTOR ops,
+  DENSITY high
+) RATIONALE "A screen with a seat it does not have"

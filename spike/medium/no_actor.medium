@@ -1,0 +1,10 @@
+-- no_actor.medium -- a sentence of medium_v33.haro: a SCREEN names no actor: the sentence stands and the VIBE warns (ALL over a FORM).
+
+DEFINE SCREEN home AS (
+  SATISFIES [read]
+) RATIONALE "A screen with no actor"
+
+DEFINE VIBE calm AS (
+  ACTOR ops,
+  SURFACE_AS visual
+) RATIONALE "A vibe"

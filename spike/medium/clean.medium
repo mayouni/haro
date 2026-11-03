@@ -1,0 +1,18 @@
+-- clean.medium -- a sentence of medium_v33.haro: three kinds that include the shared guarantees; nothing refused.
+
+DEFINE SCREEN home AS (
+  ACTOR ops,
+  SATISFIES [read]
+) RATIONALE "The home screen reads"
+
+DEFINE VIBE calm AS (
+  ACTOR ops,
+  SATISFIES [confirm],
+  ALWAYS_REACHABLE [cancel],
+  SURFACE_AS visual
+) RATIONALE "Confirm, with cancel always reachable"
+
+DEFINE PANEL signup AS (
+  ACTOR ops,
+  SATISFIES [read]
+) RATIONALE "A sign-up panel"

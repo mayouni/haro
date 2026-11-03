@@ -1,0 +1,179 @@
+{
+ "grammar": "haro",
+ "version": "0.33",
+ "comment": "Written BEFORE any code reads INCLUDES (the W discipline). v0.33 answers Central's item 4 (stzzui's S5: four seats and 40 of 60 constraints written ten times) and S14. INCLUDES [form] on a DECLARATION; ON a FORM, and a quantifier (some, all, earlier, exists) over a FORM, expand over the kinds that include it. All of it is sugar the meta-court resolves: the court never sees it, which the guard proves by forging the hand-expanded twin and comparing the courts byte for byte. A1-A8 accept (A7 and A8 pin that no existing reading changes); R1-R13 refuse, each by the fragment of why. R6, R7 and R9 keep refusals the language already spoke.",
+ "accepts": [
+  {
+   "id": "A1",
+   "name": "INCLUDES: two kinds take the seats of a FORM, and the declarations are two",
+   "source": "DEFINE LANGUAGE medium AS (VERSION \"0.33\", GRAMMAR \"0.33\", COURT \"x\", EXTENSION \".medium\") RATIONALE \"x\"\nDEFINE MENU intents AS (WORDS [confirm, cancel, zoom, read], CODE \"UNKNOWN_INTENT\") RATIONALE \"x\"\nDEFINE FORM guarantees AS (SEATS [satisfies: [intents]?, always_reachable: [intents]?, actor: name?]) RATIONALE \"x\"\nDEFINE DECLARATION screen AS (VERB \"SCREEN\", INCLUDES [guarantees], SEATS []) RATIONALE \"x\"\nDEFINE DECLARATION vibe AS (VERB \"VIBE\", INCLUDES [guarantees], SEATS [density: name?]) RATIONALE \"x\"\n",
+   "expect": {
+    "language": "medium",
+    "counts": {
+     "declarations": 2,
+     "forms": 1,
+     "constraints": 0
+    }
+   }
+  },
+  {
+   "id": "A2",
+   "name": "a seat an included FORM gives is a seat of the kind: a constraint ON the kind may read it (actor)",
+   "source": "DEFINE LANGUAGE medium AS (VERSION \"0.33\", GRAMMAR \"0.33\", COURT \"x\", EXTENSION \".medium\") RATIONALE \"x\"\nDEFINE MENU intents AS (WORDS [confirm, cancel, zoom, read], CODE \"UNKNOWN_INTENT\") RATIONALE \"x\"\nDEFINE FORM guarantees AS (SEATS [satisfies: [intents]?, always_reachable: [intents]?, actor: name?]) RATIONALE \"x\"\nDEFINE DECLARATION screen AS (VERB \"SCREEN\", INCLUDES [guarantees], SEATS []) RATIONALE \"x\"\nDEFINE DECLARATION vibe AS (VERB \"VIBE\", INCLUDES [guarantees], SEATS [density: name?]) RATIONALE \"x\"\nDEFINE CONSTRAINT c AS (ON vibe, WHEN \"actor present\", MESSAGE \"m\") RATIONALE \"x\"\n",
+   "expect": {
+    "language": "medium",
+    "counts": {
+     "constraints": 1
+    }
+   }
+  },
+  {
+   "id": "A3",
+   "name": "ON a FORM is made once for each kind that includes it: two kinds, two constraints",
+   "source": "DEFINE LANGUAGE medium AS (VERSION \"0.33\", GRAMMAR \"0.33\", COURT \"x\", EXTENSION \".medium\") RATIONALE \"x\"\nDEFINE MENU intents AS (WORDS [confirm, cancel, zoom, read], CODE \"UNKNOWN_INTENT\") RATIONALE \"x\"\nDEFINE FORM guarantees AS (SEATS [satisfies: [intents]?, always_reachable: [intents]?, actor: name?]) RATIONALE \"x\"\nDEFINE DECLARATION screen AS (VERB \"SCREEN\", INCLUDES [guarantees], SEATS []) RATIONALE \"x\"\nDEFINE DECLARATION vibe AS (VERB \"VIBE\", INCLUDES [guarantees], SEATS [density: name?]) RATIONALE \"x\"\nDEFINE CONSTRAINT c AS (ON guarantees, WHEN \"satisfies contains confirm\", MESSAGE \"m\") RATIONALE \"x\"\n",
+   "expect": {
+    "language": "medium",
+    "counts": {
+     "constraints": 2
+    }
+   }
+  },
+  {
+   "id": "A4",
+   "name": "some over a FORM ranges over the kinds that include it, two lists in one where (S14)",
+   "source": "DEFINE LANGUAGE medium AS (VERSION \"0.33\", GRAMMAR \"0.33\", COURT \"x\", EXTENSION \".medium\") RATIONALE \"x\"\nDEFINE MENU intents AS (WORDS [confirm, cancel, zoom, read], CODE \"UNKNOWN_INTENT\") RATIONALE \"x\"\nDEFINE FORM guarantees AS (SEATS [satisfies: [intents]?, always_reachable: [intents]?, actor: name?]) RATIONALE \"x\"\nDEFINE DECLARATION screen AS (VERB \"SCREEN\", INCLUDES [guarantees], SEATS []) RATIONALE \"x\"\nDEFINE DECLARATION vibe AS (VERB \"VIBE\", INCLUDES [guarantees], SEATS [density: name?]) RATIONALE \"x\"\nDEFINE CONSTRAINT c AS (ON vibe, WHEN \"density = x and (some guarantees where satisfies contains zoom or always_reachable contains zoom)\", MESSAGE \"m\") RATIONALE \"x\"\n",
+   "expect": {
+    "language": "medium",
+    "counts": {
+     "constraints": 1
+    }
+   }
+  },
+  {
+   "id": "A5",
+   "name": "all, exists and earlier over a FORM",
+   "source": "DEFINE LANGUAGE medium AS (VERSION \"0.33\", GRAMMAR \"0.33\", COURT \"x\", EXTENSION \".medium\") RATIONALE \"x\"\nDEFINE MENU intents AS (WORDS [confirm, cancel, zoom, read], CODE \"UNKNOWN_INTENT\") RATIONALE \"x\"\nDEFINE FORM guarantees AS (SEATS [satisfies: [intents]?, always_reachable: [intents]?, actor: name?]) RATIONALE \"x\"\nDEFINE DECLARATION screen AS (VERB \"SCREEN\", INCLUDES [guarantees], SEATS []) RATIONALE \"x\"\nDEFINE DECLARATION vibe AS (VERB \"VIBE\", INCLUDES [guarantees], SEATS [density: name?]) RATIONALE \"x\"\nDEFINE CONSTRAINT c1 AS (ON vibe, WHEN \"not (all guarantees where actor present)\", MESSAGE \"m\") RATIONALE \"x\"\nDEFINE CONSTRAINT c2 AS (ON vibe, WHEN \"exists guarantees\", MESSAGE \"m\") RATIONALE \"x\"\nDEFINE CONSTRAINT c3 AS (ON vibe, WHEN \"earlier guarantees where actor present\", MESSAGE \"m\") RATIONALE \"x\"\n",
+   "expect": {
+    "language": "medium",
+    "counts": {
+     "constraints": 3
+    }
+   }
+  },
+  {
+   "id": "A6",
+   "name": "a kind adds its own seats beside the included ones, and includes two FORMs",
+   "source": "DEFINE LANGUAGE medium AS (VERSION \"0.33\", GRAMMAR \"0.33\", COURT \"x\", EXTENSION \".medium\") RATIONALE \"x\"\nDEFINE MENU intents AS (WORDS [confirm, cancel, zoom, read], CODE \"UNKNOWN_INTENT\") RATIONALE \"x\"\nDEFINE FORM guarantees AS (SEATS [satisfies: [intents]?, always_reachable: [intents]?, actor: name?]) RATIONALE \"x\"\nDEFINE FORM more AS (SEATS [note: name?]) RATIONALE \"x\"\nDEFINE DECLARATION screen AS (VERB \"SCREEN\", INCLUDES [guarantees, more], SEATS [density: name?]) RATIONALE \"x\"\n",
+   "expect": {
+    "language": "medium",
+    "counts": {
+     "declarations": 1,
+     "forms": 2
+    }
+   }
+  },
+  {
+   "id": "A7",
+   "name": "an existing reading never changes: a seat of the kind named like a FORM stays that seat, so `tag present` reads the quantified declaration's seat",
+   "source": "DEFINE LANGUAGE medium AS (VERSION \"0.33\", GRAMMAR \"0.33\", COURT \"x\", EXTENSION \".medium\") RATIONALE \"x\"\nDEFINE MENU intents AS (WORDS [confirm, cancel, zoom, read], CODE \"UNKNOWN_INTENT\") RATIONALE \"x\"\nDEFINE FORM guarantees AS (SEATS [satisfies: [intents]?, always_reachable: [intents]?, actor: name?]) RATIONALE \"x\"\nDEFINE DECLARATION step AS (VERB \"STEP\", SEATS [tag: name?]) RATIONALE \"x\"\nDEFINE DECLARATION screen AS (VERB \"SCREEN\", INCLUDES [guarantees], SEATS [guarantees: [step]?]) RATIONALE \"x\"\nDEFINE CONSTRAINT c AS (ON screen, WHEN \"some guarantees where tag present\", MESSAGE \"m\") RATIONALE \"x\"\n",
+   "expect": {
+    "language": "medium",
+    "counts": {
+     "constraints": 1
+    }
+   }
+  },
+  {
+   "id": "A8",
+   "name": "a FORM no kind includes is still a FORM: ON still names a DECLARATION, as it did, and a kind without INCLUDES is the kind it was",
+   "source": "DEFINE LANGUAGE medium AS (VERSION \"0.33\", GRAMMAR \"0.33\", COURT \"x\", EXTENSION \".medium\") RATIONALE \"x\"\nDEFINE MENU intents AS (WORDS [confirm, cancel, zoom, read], CODE \"UNKNOWN_INTENT\") RATIONALE \"x\"\nDEFINE FORM guarantees AS (SEATS [satisfies: [intents]?, always_reachable: [intents]?, actor: name?]) RATIONALE \"x\"\nDEFINE DECLARATION screen AS (VERB \"SCREEN\", SEATS [actor: name?]) RATIONALE \"x\"\nDEFINE CONSTRAINT c AS (ON screen, WHEN \"actor present\", MESSAGE \"m\") RATIONALE \"x\"\n",
+   "expect": {
+    "language": "medium",
+    "counts": {
+     "declarations": 1,
+     "constraints": 1
+    }
+   }
+  }
+ ],
+ "rejects": [
+  {
+   "id": "R1",
+   "name": "INCLUDES names nothing",
+   "source": "DEFINE LANGUAGE medium AS (VERSION \"0.33\", GRAMMAR \"0.33\", COURT \"x\", EXTENSION \".medium\") RATIONALE \"x\"\nDEFINE MENU intents AS (WORDS [confirm, cancel, zoom, read], CODE \"UNKNOWN_INTENT\") RATIONALE \"x\"\nDEFINE FORM guarantees AS (SEATS [satisfies: [intents]?, always_reachable: [intents]?, actor: name?]) RATIONALE \"x\"\nDEFINE DECLARATION screen AS (VERB \"SCREEN\", INCLUDES [ghost], SEATS []) RATIONALE \"x\"\nDEFINE DECLARATION vibe AS (VERB \"VIBE\", INCLUDES [guarantees], SEATS [density: name?]) RATIONALE \"x\"\n",
+   "refusal": "INCLUDES: 'ghost' resolves to nothing in this declaration"
+  },
+  {
+   "id": "R2",
+   "name": "INCLUDES names something that is no FORM",
+   "source": "DEFINE LANGUAGE medium AS (VERSION \"0.33\", GRAMMAR \"0.33\", COURT \"x\", EXTENSION \".medium\") RATIONALE \"x\"\nDEFINE MENU intents AS (WORDS [confirm, cancel, zoom, read], CODE \"UNKNOWN_INTENT\") RATIONALE \"x\"\nDEFINE FORM guarantees AS (SEATS [satisfies: [intents]?, always_reachable: [intents]?, actor: name?]) RATIONALE \"x\"\nDEFINE DECLARATION screen AS (VERB \"SCREEN\", INCLUDES [intents], SEATS []) RATIONALE \"x\"\nDEFINE DECLARATION vibe AS (VERB \"VIBE\", INCLUDES [guarantees], SEATS [density: name?]) RATIONALE \"x\"\n",
+   "refusal": "INCLUDES must name a FORM; 'intents' is a MENU"
+  },
+  {
+   "id": "R3",
+   "name": "INCLUDES names a FORM twice",
+   "source": "DEFINE LANGUAGE medium AS (VERSION \"0.33\", GRAMMAR \"0.33\", COURT \"x\", EXTENSION \".medium\") RATIONALE \"x\"\nDEFINE MENU intents AS (WORDS [confirm, cancel, zoom, read], CODE \"UNKNOWN_INTENT\") RATIONALE \"x\"\nDEFINE FORM guarantees AS (SEATS [satisfies: [intents]?, always_reachable: [intents]?, actor: name?]) RATIONALE \"x\"\nDEFINE DECLARATION screen AS (VERB \"SCREEN\", INCLUDES [guarantees, guarantees], SEATS []) RATIONALE \"x\"\nDEFINE DECLARATION vibe AS (VERB \"VIBE\", INCLUDES [guarantees], SEATS [density: name?]) RATIONALE \"x\"\n",
+   "refusal": "INCLUDES names 'guarantees' twice"
+  },
+  {
+   "id": "R4",
+   "name": "a seat comes twice: from the FORM and from the kind's own SEATS",
+   "source": "DEFINE LANGUAGE medium AS (VERSION \"0.33\", GRAMMAR \"0.33\", COURT \"x\", EXTENSION \".medium\") RATIONALE \"x\"\nDEFINE MENU intents AS (WORDS [confirm, cancel, zoom, read], CODE \"UNKNOWN_INTENT\") RATIONALE \"x\"\nDEFINE FORM guarantees AS (SEATS [satisfies: [intents]?, always_reachable: [intents]?, actor: name?]) RATIONALE \"x\"\nDEFINE DECLARATION screen AS (VERB \"SCREEN\", INCLUDES [guarantees], SEATS [actor: name?]) RATIONALE \"x\"\nDEFINE DECLARATION vibe AS (VERB \"VIBE\", INCLUDES [guarantees], SEATS [density: name?]) RATIONALE \"x\"\n",
+   "refusal": "seat 'actor' of screen comes twice: from the FORM 'guarantees' and from its own SEATS"
+  },
+  {
+   "id": "R5",
+   "name": "a seat comes twice: from two FORMs",
+   "source": "DEFINE LANGUAGE medium AS (VERSION \"0.33\", GRAMMAR \"0.33\", COURT \"x\", EXTENSION \".medium\") RATIONALE \"x\"\nDEFINE MENU intents AS (WORDS [confirm, cancel, zoom, read], CODE \"UNKNOWN_INTENT\") RATIONALE \"x\"\nDEFINE FORM guarantees AS (SEATS [satisfies: [intents]?, always_reachable: [intents]?, actor: name?]) RATIONALE \"x\"\nDEFINE FORM more AS (SEATS [actor: name?]) RATIONALE \"x\"\nDEFINE DECLARATION screen AS (VERB \"SCREEN\", INCLUDES [guarantees, more], SEATS []) RATIONALE \"x\"\n",
+   "refusal": "seat 'actor' of screen comes twice: from the FORM 'guarantees' and from the FORM 'more'"
+  },
+  {
+   "id": "R6",
+   "name": "ON a FORM no kind includes keeps the refusal it had",
+   "source": "DEFINE LANGUAGE medium AS (VERSION \"0.33\", GRAMMAR \"0.33\", COURT \"x\", EXTENSION \".medium\") RATIONALE \"x\"\nDEFINE MENU intents AS (WORDS [confirm, cancel, zoom, read], CODE \"UNKNOWN_INTENT\") RATIONALE \"x\"\nDEFINE FORM guarantees AS (SEATS [satisfies: [intents]?, always_reachable: [intents]?, actor: name?]) RATIONALE \"x\"\nDEFINE DECLARATION screen AS (VERB \"SCREEN\", SEATS [actor: name?]) RATIONALE \"x\"\nDEFINE CONSTRAINT c AS (ON guarantees, WHEN \"actor present\", MESSAGE \"m\") RATIONALE \"x\"\n",
+   "refusal": "ON must name a DECLARATION; 'guarantees' is a FORM"
+  },
+  {
+   "id": "R7",
+   "name": "ON a MENU keeps the refusal it had",
+   "source": "DEFINE LANGUAGE medium AS (VERSION \"0.33\", GRAMMAR \"0.33\", COURT \"x\", EXTENSION \".medium\") RATIONALE \"x\"\nDEFINE MENU intents AS (WORDS [confirm, cancel, zoom, read], CODE \"UNKNOWN_INTENT\") RATIONALE \"x\"\nDEFINE FORM guarantees AS (SEATS [satisfies: [intents]?, always_reachable: [intents]?, actor: name?]) RATIONALE \"x\"\nDEFINE DECLARATION screen AS (VERB \"SCREEN\", INCLUDES [guarantees], SEATS []) RATIONALE \"x\"\nDEFINE DECLARATION vibe AS (VERB \"VIBE\", INCLUDES [guarantees], SEATS [density: name?]) RATIONALE \"x\"\nDEFINE CONSTRAINT c AS (ON intents, WHEN \"actor present\", MESSAGE \"m\") RATIONALE \"x\"\n",
+   "refusal": "ON must name a DECLARATION; 'intents' is a MENU"
+  },
+  {
+   "id": "R8",
+   "name": "a where that reads a seat only some of the kinds have is refused, naming the kind that lacks it",
+   "source": "DEFINE LANGUAGE medium AS (VERSION \"0.33\", GRAMMAR \"0.33\", COURT \"x\", EXTENSION \".medium\") RATIONALE \"x\"\nDEFINE MENU intents AS (WORDS [confirm, cancel, zoom, read], CODE \"UNKNOWN_INTENT\") RATIONALE \"x\"\nDEFINE FORM guarantees AS (SEATS [satisfies: [intents]?, always_reachable: [intents]?, actor: name?]) RATIONALE \"x\"\nDEFINE DECLARATION screen AS (VERB \"SCREEN\", INCLUDES [guarantees], SEATS []) RATIONALE \"x\"\nDEFINE DECLARATION vibe AS (VERB \"VIBE\", INCLUDES [guarantees], SEATS [density: name?]) RATIONALE \"x\"\nDEFINE CONSTRAINT c AS (ON vibe, WHEN \"some guarantees where density present\", MESSAGE \"m\") RATIONALE \"x\"\n",
+   "refusal": "no seat 'density' on screen"
+  },
+  {
+   "id": "R9",
+   "name": "a FORM no kind includes is no quantifier head: the refusal it had",
+   "source": "DEFINE LANGUAGE medium AS (VERSION \"0.33\", GRAMMAR \"0.33\", COURT \"x\", EXTENSION \".medium\") RATIONALE \"x\"\nDEFINE MENU intents AS (WORDS [confirm, cancel, zoom, read], CODE \"UNKNOWN_INTENT\") RATIONALE \"x\"\nDEFINE FORM guarantees AS (SEATS [satisfies: [intents]?, always_reachable: [intents]?, actor: name?]) RATIONALE \"x\"\nDEFINE DECLARATION screen AS (VERB \"SCREEN\", SEATS [actor: name?]) RATIONALE \"x\"\nDEFINE CONSTRAINT c AS (ON screen, WHEN \"some guarantees where actor present\", MESSAGE \"m\") RATIONALE \"x\"\n",
+   "refusal": "'guarantees' names neither a declaration kind nor a list of references"
+  },
+  {
+   "id": "R10",
+   "name": "a constraint made ON a FORM may not take the name of a declaration: one namespace",
+   "source": "DEFINE LANGUAGE medium AS (VERSION \"0.33\", GRAMMAR \"0.33\", COURT \"x\", EXTENSION \".medium\") RATIONALE \"x\"\nDEFINE MENU intents AS (WORDS [confirm, cancel, zoom, read], CODE \"UNKNOWN_INTENT\") RATIONALE \"x\"\nDEFINE FORM guarantees AS (SEATS [satisfies: [intents]?, always_reachable: [intents]?, actor: name?]) RATIONALE \"x\"\nDEFINE DECLARATION screen AS (VERB \"SCREEN\", INCLUDES [guarantees], SEATS []) RATIONALE \"x\"\nDEFINE DECLARATION vibe AS (VERB \"VIBE\", INCLUDES [guarantees], SEATS [density: name?]) RATIONALE \"x\"\nDEFINE DECLARATION c_screen AS (VERB \"CS\", SEATS []) RATIONALE \"x\"\nDEFINE CONSTRAINT c AS (ON guarantees, WHEN \"actor present\", MESSAGE \"m\") RATIONALE \"x\"\n",
+   "refusal": "the constraint 'c_screen' that ON guarantees makes for screen is already declared -- one namespace, one name, one meaning"
+  },
+  {
+   "id": "R11",
+   "name": "INCLUDES belongs to a DECLARATION: a FORM has no such clause",
+   "source": "DEFINE LANGUAGE medium AS (VERSION \"0.33\", GRAMMAR \"0.33\", COURT \"x\", EXTENSION \".medium\") RATIONALE \"x\"\nDEFINE MENU intents AS (WORDS [confirm, cancel, zoom, read], CODE \"UNKNOWN_INTENT\") RATIONALE \"x\"\nDEFINE FORM f AS (INCLUDES [g], SEATS [a: name]) RATIONALE \"x\"\n",
+   "refusal": "Unknown clause 'INCLUDES' in FORM -- allowed: SEATS"
+  },
+  {
+   "id": "R12",
+   "name": "SEATS is still required beside INCLUDES: a kind that adds nothing writes SEATS []",
+   "source": "DEFINE LANGUAGE medium AS (VERSION \"0.33\", GRAMMAR \"0.33\", COURT \"x\", EXTENSION \".medium\") RATIONALE \"x\"\nDEFINE MENU intents AS (WORDS [confirm, cancel, zoom, read], CODE \"UNKNOWN_INTENT\") RATIONALE \"x\"\nDEFINE FORM guarantees AS (SEATS [satisfies: [intents]?, always_reachable: [intents]?, actor: name?]) RATIONALE \"x\"\nDEFINE DECLARATION screen AS (VERB \"SCREEN\", INCLUDES [guarantees]) RATIONALE \"x\"\nDEFINE DECLARATION vibe AS (VERB \"VIBE\", INCLUDES [guarantees], SEATS [density: name?]) RATIONALE \"x\"\n",
+   "refusal": "DECLARATION requires the SEATS clause"
+  },
+  {
+   "id": "R13",
+   "name": "a constraint made ON a FORM names its condition's seat for each kind: a seat the FORM does not give is refused where it is missing",
+   "source": "DEFINE LANGUAGE medium AS (VERSION \"0.33\", GRAMMAR \"0.33\", COURT \"x\", EXTENSION \".medium\") RATIONALE \"x\"\nDEFINE MENU intents AS (WORDS [confirm, cancel, zoom, read], CODE \"UNKNOWN_INTENT\") RATIONALE \"x\"\nDEFINE FORM guarantees AS (SEATS [satisfies: [intents]?, always_reachable: [intents]?, actor: name?]) RATIONALE \"x\"\nDEFINE DECLARATION screen AS (VERB \"SCREEN\", INCLUDES [guarantees], SEATS []) RATIONALE \"x\"\nDEFINE DECLARATION vibe AS (VERB \"VIBE\", INCLUDES [guarantees], SEATS [density: name?]) RATIONALE \"x\"\nDEFINE CONSTRAINT c AS (ON guarantees, WHEN \"density present\", MESSAGE \"m\") RATIONALE \"x\"\n",
+   "refusal": "no seat 'density' on screen"
+  }
+ ]
+}

@@ -1,0 +1,83 @@
+-- medium_v33.haro -- what three kinds of surface share, said once, declared for Haro v0.33: INCLUDES and ON a FORM
+-- (Central's item 4, stzzui's S5, and S14). Every kind of this language guarantees the same things -- SATISFIES,
+-- ALWAYS_REACHABLE, ACTOR -- as StzZui's ten kinds do, and the meta-language had no "on every declaration": the seats
+-- were written ten times and so were 40 of the 60 constraints. Here the shared seats are a FORM the kinds INCLUDE,
+-- a constraint is written ON that FORM once, and a condition quantifies over the FORM (`some guarantees where ...`)
+-- instead of over each kind. All three are SUGAR the meta-court resolves: the court forged from this file is
+-- byte-identical to the one forged from medium_expanded.haro, which writes every kind and every constraint out by hand
+-- (haro_forge.py --stage=38 compares them). The S14 shape is the verb_not_carried constraint: ONE where reads TWO lists
+-- of a kind, SATISFIES and ALWAYS_REACHABLE, which the condition language could always do. The sentences judged by
+-- `haro_forge.py --stage=38` are in medium/.
+
+DEFINE LANGUAGE medium AS (
+  VERSION "0.33",
+  GRAMMAR "0.33",
+  COURT "v33/court_cases.json",
+  EXTENSION ".medium"
+) RATIONALE "Three kinds of surface that share what they guarantee: declared once as a FORM they include, judged by constraints written once"
+
+-- ---- the vocabularies ------------------------------------------------------------------------
+
+DEFINE MENU intents AS (
+  WORDS [confirm, cancel, zoom, read],
+  MESSAGE "An intent is confirm, cancel, zoom or read, not '{value}'",
+  CODE "UNKNOWN_INTENT"
+) RATIONALE "The verbs a surface may guarantee"
+
+DEFINE MENU media AS (
+  WORDS [visual, print, voice],
+  MESSAGE "A surface is visual, print or voice, not '{value}'",
+  CODE "UNKNOWN_MEDIUM"
+) RATIONALE "The media a vibe may put a surface on"
+
+-- ---- what every kind shares -------------------------------------------------------------------
+
+DEFINE FORM guarantees AS (
+  SEATS [satisfies: [intents]?, always_reachable: [intents]?, actor: name?]
+) RATIONALE "What every kind of this language guarantees: why the human came, what is always within reach, who acts"
+
+-- ---- the kinds --------------------------------------------------------------------------------
+
+DEFINE DECLARATION screen AS (
+  VERB "SCREEN",
+  INCLUDES [guarantees],
+  SEATS []
+) RATIONALE "An addressable surface; it adds nothing to what every kind guarantees"
+
+DEFINE DECLARATION vibe AS (
+  VERB "VIBE",
+  INCLUDES [guarantees],
+  SEATS [surface_as: media?]
+) RATIONALE "A culture of interaction that may put the surface on a medium"
+
+DEFINE DECLARATION panel AS (
+  VERB "PANEL",
+  INCLUDES [guarantees],
+  SEATS [bound_to: name?]
+) RATIONALE "A surface bound to something else rather than restating it"
+
+-- ---- the constraints --------------------------------------------------------------------------
+
+DEFINE CONSTRAINT confirm_needs_cancel AS (
+  ON guarantees,
+  WHEN "satisfies contains confirm and not (always_reachable contains cancel)",
+  MESSAGE "{name} satisfies CONFIRM and keeps no CANCEL always reachable",
+  CODE "MISSING_CANCEL",
+  CITES ["rule:cancel"]
+) RATIONALE "Written once ON the FORM: it is made for each kind that includes it, named confirm_needs_cancel_<kind>"
+
+DEFINE CONSTRAINT verb_not_carried AS (
+  ON vibe,
+  WHEN "surface_as = print and (some guarantees where satisfies contains zoom or always_reachable contains zoom)",
+  MESSAGE "VIBE {name} puts the surface on print, which carries no ZOOM, and a declaration guarantees it",
+  CODE "VERB_NOT_CARRIED",
+  CITES ["rule:medium"]
+) RATIONALE "A verb guaranteed in EITHER list of ANY kind: one where reads two lists, and the quantifier ranges over the FORM, not over each kind"
+
+DEFINE CONSTRAINT every_actor_named AS (
+  ON vibe,
+  WHEN "not (all guarantees where actor present)",
+  MESSAGE "VIBE {name}: some declaration of the sentence names no actor",
+  CODE "NO_ACTOR",
+  SEVERITY warning
+) RATIONALE "All of a FORM's declarations: a warning, since a surface with no named actor is unusual and not wrong"

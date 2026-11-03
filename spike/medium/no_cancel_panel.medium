@@ -1,0 +1,6 @@
+-- no_cancel_panel.medium -- a sentence of medium_v33.haro: ON a FORM reaches a PANEL.
+
+DEFINE PANEL signup AS (
+  ACTOR ops,
+  SATISFIES [confirm]
+) RATIONALE "A panel that confirms with no way out"

@@ -1,0 +1,6 @@
+-- no_cancel_screen.medium -- a sentence of medium_v33.haro: ON a FORM reaches a SCREEN: it satisfies CONFIRM and keeps no CANCEL always reachable.
+
+DEFINE SCREEN home AS (
+  ACTOR ops,
+  SATISFIES [confirm]
+) RATIONALE "A screen that confirms with no way out"

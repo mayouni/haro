@@ -1,0 +1,11 @@
+-- print_zoom_second.medium -- a sentence of medium_v33.haro: S14, the second list: a VIBE on print while a PANEL keeps ZOOM always reachable.
+
+DEFINE PANEL signup AS (
+  ACTOR ops,
+  ALWAYS_REACHABLE [zoom]
+) RATIONALE "A panel that keeps zoom within reach"
+
+DEFINE VIBE loud AS (
+  ACTOR ops,
+  SURFACE_AS print
+) RATIONALE "A vibe on a medium that carries no zoom"

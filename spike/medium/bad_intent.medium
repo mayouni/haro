@@ -1,0 +1,6 @@
+-- bad_intent.medium -- a sentence of medium_v33.haro: an intent the menu lacks, in a seat a kind got from the FORM: refused by the seat's own MENU.
+
+DEFINE SCREEN home AS (
+  ACTOR ops,
+  SATISFIES [dance]
+) RATIONALE "A screen that dances"

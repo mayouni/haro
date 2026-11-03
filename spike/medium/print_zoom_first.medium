@@ -1,0 +1,11 @@
+-- print_zoom_first.medium -- a sentence of medium_v33.haro: S14, the first list: a VIBE on print while a SCREEN satisfies ZOOM.
+
+DEFINE SCREEN home AS (
+  ACTOR ops,
+  SATISFIES [zoom]
+) RATIONALE "A screen that zooms"
+
+DEFINE VIBE loud AS (
+  ACTOR ops,
+  SURFACE_AS print
+) RATIONALE "A vibe on a medium that carries no zoom"

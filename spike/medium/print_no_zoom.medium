@@ -1,0 +1,11 @@
+-- print_no_zoom.medium -- a sentence of medium_v33.haro: a VIBE on print and no declaration guarantees ZOOM: lawful.
+
+DEFINE SCREEN home AS (
+  ACTOR ops,
+  SATISFIES [read]
+) RATIONALE "A screen that reads"
+
+DEFINE VIBE loud AS (
+  ACTOR ops,
+  SURFACE_AS print
+) RATIONALE "A vibe on print"

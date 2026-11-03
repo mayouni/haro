@@ -1,0 +1,11 @@
+-- visual_zoom.medium -- a sentence of medium_v33.haro: a SCREEN satisfies ZOOM and the VIBE is on a visual surface, which carries it: lawful.
+
+DEFINE SCREEN home AS (
+  ACTOR ops,
+  SATISFIES [zoom]
+) RATIONALE "A screen that zooms"
+
+DEFINE VIBE calm AS (
+  ACTOR ops,
+  SURFACE_AS visual
+) RATIONALE "A vibe on a visual surface"

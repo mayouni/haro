@@ -1,0 +1,197 @@
+{
+ "name": "the medium world -- sentence-level cases for Haro v0.33 (INCLUDES, ON a FORM, a quantifier over a FORM; Central's item 4, stzzui's S5; S14)",
+ "comment": "Written BEFORE any code reads INCLUDES. Each case runs the court forged from medium_v33.haro on haro AND on its checked build; the two must print the same bytes, and the guard also forges v33/medium_expanded.haro, the hand-expanded twin, and requires the same court byte for byte. The sentences are in medium/. M7 and M8 are S14: one where reads two lists. A constraint ON a FORM is enforced on every kind that includes it (M3, M4, M5).",
+ "cases": [
+  {
+   "id": "M1",
+   "name": "the clean sentence: three kinds that include the shared guarantees",
+   "verb": "check",
+   "args": [
+    "medium/clean.medium"
+   ],
+   "first": "ok",
+   "counts": {
+    "SCREEN": 1,
+    "VIBE": 1,
+    "PANEL": 1
+   }
+  },
+  {
+   "id": "M2",
+   "name": "the meta-court reads the world: three declarations, one form, five constraints (ON a FORM made three)",
+   "verb": "meta",
+   "args": [
+    "medium_v33.haro"
+   ],
+   "first": "ok",
+   "contains": [
+    "declarations 3",
+    "forms 1",
+    "menus 2",
+    "constraints 5"
+   ]
+  },
+  {
+   "id": "M3",
+   "name": "ON a FORM, on a SCREEN: made once, enforced on the first kind that includes it",
+   "verb": "check",
+   "args": [
+    "medium/no_cancel_screen.medium"
+   ],
+   "refused": true,
+   "contains": [
+    "medium (line 3): home satisfies CONFIRM and keeps no CANCEL always reachable"
+   ]
+  },
+  {
+   "id": "M4",
+   "name": "ON a FORM, on a VIBE",
+   "verb": "check",
+   "args": [
+    "medium/no_cancel_vibe.medium"
+   ],
+   "refused": true,
+   "contains": [
+    "medium (line 3): calm satisfies CONFIRM and keeps no CANCEL always reachable"
+   ]
+  },
+  {
+   "id": "M5",
+   "name": "ON a FORM, on a PANEL",
+   "verb": "check",
+   "args": [
+    "medium/no_cancel_panel.medium"
+   ],
+   "refused": true,
+   "contains": [
+    "medium (line 3): signup satisfies CONFIRM and keeps no CANCEL always reachable"
+   ]
+  },
+  {
+   "id": "M6",
+   "name": "the envelope of a constraint made ON a FORM: its code and its cite, as if written by hand",
+   "verb": "diagnose",
+   "args": [
+    "medium/no_cancel_panel.medium"
+   ],
+   "diagnose": {
+    "code": "MISSING_CANCEL",
+    "cites": [
+     "rule:cancel"
+    ]
+   }
+  },
+  {
+   "id": "M7",
+   "name": "S14, the first list: a verb guaranteed in SATISFIES of any kind, read by a quantifier over the FORM",
+   "verb": "check",
+   "args": [
+    "medium/print_zoom_first.medium"
+   ],
+   "refused": true,
+   "contains": [
+    "medium (line 8): VIBE loud puts the surface on print, which carries no ZOOM, and a declaration guarantees it"
+   ]
+  },
+  {
+   "id": "M8",
+   "name": "S14, the second list: the same verb in ALWAYS_REACHABLE of another kind, read by the same where",
+   "verb": "check",
+   "args": [
+    "medium/print_zoom_second.medium"
+   ],
+   "refused": true,
+   "contains": [
+    "medium (line 8): VIBE loud puts the surface on print, which carries no ZOOM, and a declaration guarantees it"
+   ]
+  },
+  {
+   "id": "M9",
+   "name": "the envelope of S14: VERB_NOT_CARRIED, citing rule:medium",
+   "verb": "diagnose",
+   "args": [
+    "medium/print_zoom_second.medium"
+   ],
+   "diagnose": {
+    "code": "VERB_NOT_CARRIED",
+    "cites": [
+     "rule:medium"
+    ]
+   }
+  },
+  {
+   "id": "M10",
+   "name": "on print and no declaration guarantees the verb: lawful",
+   "verb": "check",
+   "args": [
+    "medium/print_no_zoom.medium"
+   ],
+   "first": "ok",
+   "counts": {
+    "SCREEN": 1,
+    "VIBE": 1
+   }
+  },
+  {
+   "id": "M11",
+   "name": "the verb is guaranteed but the surface is visual, which carries it: lawful",
+   "verb": "check",
+   "args": [
+    "medium/visual_zoom.medium"
+   ],
+   "first": "ok",
+   "counts": {
+    "SCREEN": 1,
+    "VIBE": 1
+   }
+  },
+  {
+   "id": "M12",
+   "name": "ALL over a FORM: one kind names no actor, the sentence stands and the VIBE warns, at its own line",
+   "verb": "check",
+   "args": [
+    "medium/no_actor.medium"
+   ],
+   "first": "ok",
+   "contains": [
+    "warning NO_ACTOR: VIBE calm: some declaration of the sentence names no actor (line 7)"
+   ]
+  },
+  {
+   "id": "M13",
+   "name": "a seat a kind got from the FORM is checked by its own MENU, as a hand-written one is",
+   "verb": "check",
+   "args": [
+    "medium/bad_intent.medium"
+   ],
+   "refused": true,
+   "contains": [
+    "An intent is confirm, cancel, zoom or read, not 'dance'"
+   ]
+  },
+  {
+   "id": "M14",
+   "name": "a seat the kind adds beside the included ones is lawful",
+   "verb": "check",
+   "args": [
+    "medium/own_seat.medium"
+   ],
+   "first": "ok",
+   "counts": {
+    "VIBE": 1
+   }
+  },
+  {
+   "id": "M15",
+   "name": "the expanded kinds are closed: a seat no kind has is refused",
+   "verb": "check",
+   "args": [
+    "medium/unknown_seat.medium"
+   ],
+   "refused": true,
+   "contains": [
+    "DENSITY"
+   ]
+  }
+ ]
+}

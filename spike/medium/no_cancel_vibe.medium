@@ -1,0 +1,6 @@
+-- no_cancel_vibe.medium -- a sentence of medium_v33.haro: ON a FORM reaches a VIBE.
+
+DEFINE VIBE calm AS (
+  ACTOR ops,
+  SATISFIES [confirm]
+) RATIONALE "A vibe that confirms with no way out"

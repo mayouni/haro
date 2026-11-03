@@ -1,0 +1,7 @@
+-- own_seat.medium -- a sentence of medium_v33.haro: a seat a kind adds to what it includes (SURFACE_AS) next to the included ones: lawful.
+
+DEFINE VIBE calm AS (
+  ACTOR ops,
+  SATISFIES [read],
+  SURFACE_AS voice
+) RATIONALE "A vibe on voice"
