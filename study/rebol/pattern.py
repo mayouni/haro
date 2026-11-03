@@ -20,7 +20,7 @@ from block import load, pv, Refused
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 TYPES = {'WORD': 'word', 'STRING': 'str', 'NUMBER': 'num', 'KEYWORD': 'kw', 'PATH': 'path', 'PAIR': 'pair',
-         'LIST': 'list', 'GROUP': 'group', 'ROW': 'row', 'SKIP': None}
+         'LIST': 'list', 'GROUP': 'group', 'ROW': 'row', 'OPTIONAL': 'opt', 'SKIP': None}   # OPTIONAL: Haro's `?` mark, a value of its own kind (v0.31)
 UNARY = ('OPT', 'ANY', 'SOME', 'NOT', 'AHEAD', 'INTO', 'TO', 'THRU', 'COLLECT', 'KEEP')
 REFUSED_WORDS = {
     'WHILE': 'WHILE is refused: a pattern rule is total, and WHILE is how Parse loops without consuming',
@@ -89,9 +89,9 @@ def sequence(seq, where):
             if w == 'REPEAT':
                 if pos[0] >= len(seq) or seq[pos[0]][0] != 'num':
                     raise Refused(f'pattern {where}: REPEAT takes a count, then a rule')
-                n = int(seq[pos[0]][1]); pos[0] += 1; m = n
+                n = count(seq[pos[0]][1], where); pos[0] += 1; m = n
                 if pos[0] < len(seq) and seq[pos[0]][0] == 'num':
-                    m = int(seq[pos[0]][1]); pos[0] += 1
+                    m = count(seq[pos[0]][1], where); pos[0] += 1
                 if m < n:
                     raise Refused(f'pattern {where}: REPEAT {n} {m}: its minimum is above its maximum')
                 x = item()
@@ -121,6 +121,13 @@ def sequence(seq, where):
             break
         out.append(x)
     return ('seq', out)
+
+
+def count(text, where):
+    """A REPEAT count: digits only. 1.5 and -1 are refused by name (v0.31, X29, X30); int() of '1.5' was an uncaught ValueError."""
+    if not text.isdigit():
+        raise Refused(f'pattern {where}: REPEAT takes a whole count of zero or more, found {text}')
+    return int(text)
 
 
 def children(n):
@@ -292,6 +299,8 @@ class Matcher:
                 inner = tuple(v[1])
             elif v[0] == 'pair':
                 inner = (v[1], v[2])
+            elif v[0] == 'opt':
+                inner = (v[1],)                 # the value an optional mark makes optional (v0.31)
             else:
                 return (False, i, ())
             inner = self.inner.setdefault(id(v), inner)   # one object per value, so the memo's id() key is stable
@@ -342,6 +351,8 @@ def positions(vals):
             total += positions(v[1])
         elif v[0] == 'pair':
             total += positions([v[1], v[2]])
+        elif v[0] == 'opt':
+            total += positions([v[1]])
     return total
 
 

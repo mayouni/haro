@@ -1,0 +1,144 @@
+# pattern.haro -- the pattern engine at the command line (Haro v0.31, step 2 of COMPASS-REBOL-06/07):
+#
+#   haro pattern.haro cases <file>      judge every case of a case file, one process for the lot, one line a case
+#
+# A case file is lines; a case opens with `case <id>` and holds, in any order:
+#   rule <name> <rule text>      a named rule, in declaration order, the text one line
+#   set <name> <member> ...      a set MEMBER may draw from, its members words without spaces
+#   start <name>                 the rule to match from (default main)
+#   input <text>                 the text to match (the rest of the line, possibly empty)
+#   file <path>                  the text to match, read from a file
+# A case with neither input nor file only declares. One line comes back for each case:
+#   <id> declared                          the rules are accepted
+#   <id> refused <message>                 the rules or the text are refused, in the engine's words
+#   <id> match 1|0 steps N bound B kept <the values kept, tab-separated, as C6 prints them>
+# The same program runs on the Haro VM and on its checked build and must print the same bytes (D41). The Python reference
+# (study/rebol/pattern.py) prints the same lines for the same cases: the court refuses a difference by name (D43).
+
+load "pattern_lib.haro"
+
+$aBlkToks = []
+$nBlkPos = 1
+$aPatNodes = []
+$nPatNodes = 0
+$aPatNames = []
+$aPatRoots = []
+$aPatNull = []
+$aPatState = []
+$aPatSetNames = []
+$aPatSetMembers = []
+$aPatSeqVals = []
+$aPatSeqKinds = []
+$aPatSeqLen = []
+$aPatSeqBase = []
+$aPatSeqKids = []
+$aPatMemo = []
+$nPatMemoTop = 0
+$nPatSteps = 0
+
+if len(sysargv) < 4
+	? "usage: pattern.haro cases <file>"
+else
+	if sysargv[3] = "cases"
+		PatCases(read(sysargv[4]))
+	else
+		? "usage: pattern.haro cases <file>"
+	ok
+ok
+
+# the first word of a line and the rest after one space
+func PatSplit1(cLine)
+	n = len(cLine)
+	i = 1
+	while i <= n and cLine[i] != " "
+		i++
+	end
+	if i > n return [cLine, ""] ok
+	return [left(cLine, i - 1), substr(cLine, i + 1)]
+
+func PatWords(cText)
+	aOut = []
+	cW = ""
+	for i = 1 to len(cText)
+		if cText[i] = " "
+			if len(cW) > 0
+				aOut + cW
+				cW = ""
+			ok
+		else
+			cW += cText[i]
+		ok
+	next
+	if len(cW) > 0 aOut + cW ok
+	return aOut
+
+func PatCases(cBody)
+	aLines = str2list(cBody)
+	cId = ""
+	aNames = []
+	aTexts = []
+	aSetN = []
+	aSetM = []
+	cStart = "main"
+	bInput = 0
+	cInput = ""
+	cFile = ""
+	bOpen = 0
+	for i = 1 to len(aLines)
+		cLine = aLines[i]
+		if len(cLine) > 0 and cLine[len(cLine)] = char(13)
+			cLine = left(cLine, len(cLine) - 1)
+		ok
+		aP = PatSplit1(cLine)
+		cCmd = aP[1]
+		if cCmd = "case"
+			if bOpen PatOneCase(cId, aNames, aTexts, aSetN, aSetM, cStart, bInput, cInput, cFile) ok
+			bOpen = 1
+			cId = aP[2]
+			aNames = []
+			aTexts = []
+			aSetN = []
+			aSetM = []
+			cStart = "main"
+			bInput = 0
+			cInput = ""
+			cFile = ""
+		but cCmd = "rule"
+			aQ = PatSplit1(aP[2])
+			aNames + aQ[1]
+			aTexts + aQ[2]
+		but cCmd = "set"
+			aW = PatWords(aP[2])
+			aSetN + aW[1]
+			aMem = []
+			for k = 2 to len(aW)
+				aMem + aW[k]
+			next
+			aSetM + aMem
+		but cCmd = "start"
+			cStart = aP[2]
+		but cCmd = "input"
+			bInput = 1
+			cInput = aP[2]
+		but cCmd = "file"
+			bInput = 2
+			cFile = aP[2]
+		ok
+	next
+	if bOpen PatOneCase(cId, aNames, aTexts, aSetN, aSetM, cStart, bInput, cInput, cFile) ok
+
+func PatOneCase(cId, aNames, aTexts, aSetN, aSetM, cStart, bInput, cInput, cFile)
+	try
+		PatDeclare(aNames, aTexts, aSetN, aSetM)
+		if bInput = 0
+			? cId + " declared"
+		else
+			if bInput = 2 cInput = read(cFile) ok
+			aR = PatRun(cStart, cInput)
+			cWhole = "0"
+			if aR[1] cWhole = "1" ok
+			? cId + " match " + cWhole + " steps " + aR[3] + " bound " + aR[4] + " kept " + PatPrintKept(aR[2])
+		ok
+	catch
+		? cId + " refused " + cCatchError
+	done

@@ -1,0 +1,601 @@
+# pattern_lib.haro -- pattern rules over blocks (COMPASS-REBOL-07, step 2 of BLOCKS.md 3.5; Haro v0.31).
+#
+# A rule is C6 text -- a list -- read by the one LOAD (block_lib.haro), so a grammar is data. PatDeclare compiles a set of named
+# rules and either refuses it, naming why, or yields rules that are TOTAL by construction:
+#   no recursion            the named rules form a DAG
+#   every repetition moves  ANY, SOME and TO over a rule that can match nothing are refused (a nullable analysis)
+#   no host                 a group in a rule, WHILE DO EVAL IF, and the editing words CHANGE INSERT REMOVE are refused
+#   INTO descends           into a strictly smaller value, so depth is bounded by the input's
+# PatRun matches by PEG (ordered choice that commits, greedy repetition) with a packrat memo: a (node, sequence, position) is
+# computed once, so a match costs at most (rule nodes x input positions) steps. The reference is study/rebol/pattern.py; the
+# judge is v31/fixtures.json, written first; the court runs both and refuses a difference by name (D43).
+#
+# Nodes live in $aPatNodes as [kind, a, b, c]; a sequence of values is an id into $aPatSeq*; the engine passes integer ids,
+# never lists, because a list assigned is a list copied. Functions only: the globals are born in the root file (pattern.haro).
+#   $aPatNodes $nPatNodes   $aPatNames $aPatRoots $aPatNull $aPatState   $aPatSetNames $aPatSetMembers
+#   $aPatSeqVals $aPatSeqKinds $aPatSeqLen $aPatSeqBase $aPatSeqKids   $aPatMemo $nPatMemoTop $nPatSteps
+
+load "block_lib.haro"
+
+func PatFail(cMsg)
+	raise(cMsg)
+
+func PatReset()
+	$aPatNodes = []
+	$nPatNodes = 0
+	$aPatNames = []
+	$aPatRoots = []
+	$aPatNull = []
+	$aPatState = []
+	$aPatSetNames = []
+	$aPatSetMembers = []
+	$aPatSeqVals = []
+	$aPatSeqKinds = []
+	$aPatSeqLen = []
+	$aPatSeqBase = []
+	$aPatSeqKids = []
+	$aPatMemo = []
+	$nPatMemoTop = 0
+	$nPatSteps = 0
+
+# ---- the words ---------------------------------------------------------------------------------------------------------
+
+# the value kind a type word matches; "*" is SKIP (any one value); "" is no type word
+func PatTypeOf(cW)
+	if cW = "WORD" return "word" ok
+	if cW = "STRING" return "str" ok
+	if cW = "NUMBER" return "num" ok
+	if cW = "KEYWORD" return "kw" ok
+	if cW = "PATH" return "path" ok
+	if cW = "PAIR" return "pair" ok
+	if cW = "LIST" return "list" ok
+	if cW = "GROUP" return "group" ok
+	if cW = "ROW" return "row" ok
+	if cW = "OPTIONAL" return "opt" ok
+	if cW = "SKIP" return "*" ok
+	return ""
+
+func PatRefusedMsg(cW)
+	if cW = "WHILE" return "WHILE is refused: a pattern rule is total, and WHILE is how Parse loops without consuming" ok
+	if cW = "DO" return "DO is refused: a pattern rule runs nothing" ok
+	if cW = "EVAL" return "EVAL is refused: a pattern rule runs nothing" ok
+	if cW = "IF" return "IF is refused: a condition is a rule, never host code" ok
+	if cW = "CHANGE" return "CHANGE is refused: a pattern judges and never edits" ok
+	if cW = "INSERT" return "INSERT is refused: a pattern judges and never edits" ok
+	if cW = "REMOVE" return "REMOVE is refused: a pattern judges and never edits" ok
+	return ""
+
+func PatIsUnary(cW)
+	return cW = "OPT" or cW = "ANY" or cW = "SOME" or cW = "NOT" or cW = "AHEAD" or cW = "INTO" or cW = "TO" or cW = "THRU" or cW = "COLLECT" or cW = "KEEP"
+
+func PatNew(cKind, a, b, c)
+	$aPatNodes + [cKind, a, b, c]
+	$nPatNodes++
+	return $nPatNodes
+
+# ---- compiling a rule --------------------------------------------------------------------------------------------------
+
+# a list's items, the rows spread into their values and the comments dropped
+func PatFlat(aItems)
+	aOut = []
+	for i = 1 to len(aItems)
+		v = aItems[i]
+		if v[1] = "row"
+			for j = 1 to len(v[2])
+				aOut + v[2][j]
+			next
+		but v[1] != "comment"
+			aOut + v
+		ok
+	next
+	return aOut
+
+func PatCount(cText, cWhere)
+	bOk = len(cText) > 0
+	for i = 1 to len(cText)
+		if not BlkIsDigit(cText[i]) bOk = 0 ok
+	next
+	if not bOk
+		PatFail("pattern " + cWhere + ": REPEAT takes a whole count of zero or more, found " + cText)
+	ok
+	return 0 + cText
+
+func PatCompileRule(cText, cWhere)
+	aAll = BlkLoad(cText)
+	aVals = []
+	for i = 1 to len(aAll)
+		if aAll[i][1] != "comment" aVals + aAll[i] ok
+	next
+	if len(aVals) != 1 or aVals[1][1] != "list"
+		PatFail("pattern " + cWhere + " is not a list: a rule is written [ ... ]")
+	ok
+	return PatAlt(PatFlat(aVals[1][2]), cWhere)
+
+func PatAlt(aSeq, cWhere)
+	aBranches = []
+	aCur = []
+	for i = 1 to len(aSeq)
+		v = aSeq[i]
+		if v[1] = "kw" and v[2] = "OR"
+			aBranches + aCur
+			aCur = []
+		else
+			aCur + v
+		ok
+	next
+	aBranches + aCur
+	if len(aBranches) > 1
+		for i = 1 to len(aBranches)
+			if len(aBranches[i]) = 0
+				PatFail("pattern " + cWhere + ": OR needs a rule on each side")
+			ok
+		next
+	ok
+	aNodes = []
+	for i = 1 to len(aBranches)
+		aNodes + PatSequence(aBranches[i], cWhere)
+	next
+	if len(aNodes) = 1 return aNodes[1] ok
+	return PatNew("alt", aNodes, 0, 0)
+
+func PatSequence(aSeq, cWhere)
+	aOut = []
+	nPos = 1
+	while 1
+		aR = PatItem(aSeq, nPos, cWhere)
+		if aR[1] = 0 exit ok
+		aOut + aR[1]
+		nPos = aR[2]
+	end
+	return PatNew("seq", aOut, 0, 0)
+
+# one item of a sequence: [node id, the next position], or [0, ...] when the sequence is spent
+func PatItem(aSeq, nPos, cWhere)
+	if nPos > len(aSeq) return [0, nPos] ok
+	v = aSeq[nPos]
+	nPos++
+	cK = v[1]
+	if cK = "kw"
+		cW = v[2]
+		cT = PatTypeOf(cW)
+		if cT != "" return [PatNew("type", cT, 0, 0), nPos] ok
+		if cW = "END" return [PatNew("end", 0, 0, 0), nPos] ok
+		cMsg = PatRefusedMsg(cW)
+		if cMsg != ""
+			PatFail("pattern " + cWhere + ": " + cMsg)
+		ok
+		if PatIsUnary(cW)
+			aX = PatItem(aSeq, nPos, cWhere)
+			if aX[1] = 0
+				PatFail("pattern " + cWhere + ": " + cW + " takes a rule")
+			ok
+			return [PatNew(lower(cW), aX[1], 0, 0), aX[2]]
+		ok
+		if cW = "REPEAT"
+			if nPos > len(aSeq)
+				PatFail("pattern " + cWhere + ": REPEAT takes a count, then a rule")
+			ok
+			if aSeq[nPos][1] != "num"
+				PatFail("pattern " + cWhere + ": REPEAT takes a count, then a rule")
+			ok
+			nMin = PatCount(aSeq[nPos][2], cWhere)
+			nPos++
+			nMax = nMin
+			if nPos <= len(aSeq)
+				if aSeq[nPos][1] = "num"
+					nMax = PatCount(aSeq[nPos][2], cWhere)
+					nPos++
+				ok
+			ok
+			if nMax < nMin
+				PatFail("pattern " + cWhere + ": REPEAT " + nMin + " " + nMax + ": its minimum is above its maximum")
+			ok
+			aX = PatItem(aSeq, nPos, cWhere)
+			if aX[1] = 0
+				PatFail("pattern " + cWhere + ": REPEAT takes a count, then a rule")
+			ok
+			return [PatNew("repeat", nMin, nMax, aX[1]), aX[2]]
+		ok
+		if cW = "RULE" or cW = "MEMBER"
+			if nPos > len(aSeq)
+				PatFail("pattern " + cWhere + ": " + cW + " takes a name")
+			ok
+			if aSeq[nPos][1] != "word"
+				PatFail("pattern " + cWhere + ": " + cW + " takes a name")
+			ok
+			cName = aSeq[nPos][2]
+			nPos++
+			if cW = "RULE" return [PatNew("ref", cName, 0, 0), nPos] ok
+			return [PatNew("member", cName, 0, 0), nPos]
+		ok
+		if cW = "LIT"
+			if nPos > len(aSeq)
+				PatFail("pattern " + cWhere + ": LIT takes a value")
+			ok
+			x = aSeq[nPos]
+			nPos++
+			return [PatNew("lit", x, 0, 0), nPos]
+		ok
+		PatFail("pattern " + cWhere + ": " + cW + " is not a pattern word")
+	ok
+	if cK = "list"
+		return [PatNew("sub", PatAlt(PatFlat(v[2]), cWhere), 0, 0), nPos]
+	ok
+	if cK = "group"
+		PatFail("pattern " + cWhere + ": ( ) in a rule would run the host (Parse's paren!): refused")
+	ok
+	return [PatNew("lit", v, 0, 0), nPos]
+
+# ---- declaring a set of rules: the bound is checked here, once, never at match time -------------------------------------------
+
+func PatChildren(nNode)
+	aN = $aPatNodes[nNode]
+	cK = aN[1]
+	if cK = "seq" or cK = "alt" return aN[2] ok
+	if cK = "sub" return [aN[2]] ok
+	if cK = "repeat" return [aN[4]] ok
+	if PatIsUnary(upper(cK)) return [aN[2]] ok
+	return []
+
+# the names a node refers to, as RULE (cWhat "ref") or as MEMBER ("member"), in the order the reference finds them
+func PatNamesIn(nNode, cWhat)
+	aOut = []
+	aN = $aPatNodes[nNode]
+	if aN[1] = cWhat aOut + aN[2] ok
+	aKids = PatChildren(nNode)
+	for i = 1 to len(aKids)
+		aMore = PatNamesIn(aKids[i], cWhat)
+		for j = 1 to len(aMore)
+			aOut + aMore[j]
+		next
+	next
+	return aOut
+
+func PatNullable(nNode)
+	aN = $aPatNodes[nNode]
+	cK = aN[1]
+	if cK = "type" or cK = "lit" or cK = "member" or cK = "into" return 0 ok
+	if cK = "end" or cK = "opt" or cK = "any" or cK = "not" or cK = "ahead" or cK = "to" return 1 ok
+	if cK = "some" or cK = "thru" or cK = "collect" or cK = "keep" or cK = "sub" return PatNullable(aN[2]) ok
+	if cK = "repeat"
+		if aN[2] = 0 return 1 ok
+		return PatNullable(aN[4])
+	ok
+	if cK = "seq"
+		for i = 1 to len(aN[2])
+			if not PatNullable(aN[2][i]) return 0 ok
+		next
+		return 1
+	ok
+	if cK = "alt"
+		for i = 1 to len(aN[2])
+			if PatNullable(aN[2][i]) return 1 ok
+		next
+		return 0
+	ok
+	if cK = "ref"
+		nR = find($aPatNames, aN[2])
+		if $aPatNull[nR] = 0
+			if PatNullable($aPatRoots[nR])
+				$aPatNull[nR] = 1
+			else
+				$aPatNull[nR] = 2
+			ok
+		ok
+		return $aPatNull[nR] = 1
+	ok
+	return 0
+
+func PatCheck(nNode, cName)
+	aN = $aPatNodes[nNode]
+	cK = aN[1]
+	if cK = "any" or cK = "some" or cK = "to"
+		if PatNullable(aN[2])
+			PatFail("pattern " + cName + ": " + upper(cK) + " over a rule that can match nothing: it would never move, so it is refused")
+		ok
+	ok
+	aKids = PatChildren(nNode)
+	for i = 1 to len(aKids)
+		PatCheck(aKids[i], cName)
+	next
+
+func PatVisit(nRule, aPath)
+	if $aPatState[nRule] = 1
+		cName = $aPatNames[nRule]
+		nAt = find(aPath, cName)
+		aCyc = []
+		for i = nAt to len(aPath)
+			aCyc + aPath[i]
+		next
+		aCyc + cName
+		cJoin = BlkJoin(aCyc, " -> ")
+		PatFail("pattern " + aCyc[1] + " is recursive (" + cJoin + "): a pattern rule refers only to rules that end")
+	ok
+	if $aPatState[nRule] = 2 return ok
+	$aPatState[nRule] = 1
+	aRefs = PatNamesIn($aPatRoots[nRule], "ref")
+	aNext = aPath
+	aNext + $aPatNames[nRule]
+	for i = 1 to len(aRefs)
+		PatVisit(find($aPatNames, aRefs[i]), aNext)
+	next
+	$aPatState[nRule] = 2
+
+# aNames and aTexts are the rules in declaration order; aSetNames and aSetMembers the sets the court collected
+func PatDeclare(aNames, aTexts, aSetNames, aSetMembers)
+	PatReset()
+	$aPatSetNames = aSetNames
+	$aPatSetMembers = aSetMembers
+	for i = 1 to len(aNames)
+		$aPatNames + aNames[i]
+		$aPatRoots + PatCompileRule(aTexts[i], aNames[i])
+		$aPatNull + 0
+		$aPatState + 0
+	next
+	for i = 1 to len(aNames)
+		aRefs = PatNamesIn($aPatRoots[i], "ref")
+		for j = 1 to len(aRefs)
+			if find($aPatNames, aRefs[j]) = 0
+				PatFail("pattern " + aNames[i] + ": RULE " + aRefs[j] + " names no pattern")
+			ok
+		next
+		aMems = PatNamesIn($aPatRoots[i], "member")
+		for j = 1 to len(aMems)
+			if find($aPatSetNames, aMems[j]) = 0
+				PatFail("pattern " + aNames[i] + ": MEMBER " + aMems[j] + " names no set")
+			ok
+		next
+	next
+	for i = 1 to len(aNames)
+		PatVisit(i, [])
+	next
+	for i = 1 to len(aNames)
+		PatCheck($aPatRoots[i], aNames[i])
+	next
+
+# ---- matching: PEG with a packrat memo ---------------------------------------------------------------------------------------
+
+# a sequence of values becomes an id; its memo is a block of (length + 1) x nodes slots in $aPatMemo
+func PatNewSeq(aValues)
+	n = len(aValues)
+	aKinds = []
+	for i = 1 to n
+		aKinds + aValues[i][1]
+	next
+	$aPatSeqVals + aValues
+	$aPatSeqKinds + aKinds
+	$aPatSeqLen + n
+	$aPatSeqBase + $nPatMemoTop
+	if n > 0
+		$aPatSeqKids + list(n)
+	else
+		$aPatSeqKids + []
+	ok
+	$nPatMemoTop += (n + 1) * $nPatNodes
+	return len($aPatSeqLen)
+
+func PatExtend(aKept, aMore)
+	for i = 1 to len(aMore)
+		aKept + aMore[i]
+	next
+	return aKept
+
+func PatPositions(aVals)
+	nTotal = 1
+	for i = 1 to len(aVals)
+		v = aVals[i]
+		cK = v[1]
+		if cK != "comment"
+			nTotal++
+			if cK = "list" or cK = "group" or cK = "row"
+				nTotal += PatPositions(v[2])
+			but cK = "pair"
+				nTotal += PatPositions([v[2], v[3]])
+			but cK = "opt"
+				nTotal += PatPositions([v[2]])
+			ok
+		ok
+	next
+	return nTotal
+
+func PatM(nNode, nSeq, i)
+	nIdx = $aPatSeqBase[nSeq] + i * $nPatNodes + nNode
+	aMemo = $aPatMemo[nIdx]
+	if isList(aMemo) return aMemo ok
+	$nPatSteps++
+	aR = PatBody(nNode, nSeq, i)
+	$aPatMemo[nIdx] = aR
+	return aR
+
+func PatBody(nNode, nSeq, i)
+	aN = $aPatNodes[nNode]
+	cK = aN[1]
+	nLen = $aPatSeqLen[nSeq]
+	if cK = "seq"
+		aKept = []
+		j = i
+		for c = 1 to len(aN[2])
+			aR = PatM(aN[2][c], nSeq, j)
+			if not aR[1] return [0, i, []] ok
+			j = aR[2]
+			aKept = PatExtend(aKept, aR[3])
+		next
+		return [1, j, aKept]
+	ok
+	if cK = "type"
+		if i < nLen
+			if aN[2] = "*" or $aPatSeqKinds[nSeq][i + 1] = aN[2] return [1, i + 1, []] ok
+		ok
+		return [0, i, []]
+	ok
+	if cK = "ref"
+		return PatM($aPatRoots[find($aPatNames, aN[2])], nSeq, i)
+	ok
+	if cK = "lit"
+		if i < nLen
+			if $aPatSeqKinds[nSeq][i + 1] = aN[2][1]
+				if BlkDump($aPatSeqVals[nSeq][i + 1]) = BlkDump(aN[2]) return [1, i + 1, []] ok
+			ok
+		ok
+		return [0, i, []]
+	ok
+	if cK = "alt"
+		for c = 1 to len(aN[2])
+			aR = PatM(aN[2][c], nSeq, i)
+			if aR[1] return aR ok
+		next
+		return [0, i, []]
+	ok
+	if cK = "sub"
+		return PatM(aN[2], nSeq, i)
+	ok
+	if cK = "any" or cK = "some"
+		aKept = []
+		j = i
+		nCount = 0
+		while 1
+			aR = PatM(aN[2], nSeq, j)
+			if not aR[1] exit ok
+			if aR[2] = j exit ok
+			aKept = PatExtend(aKept, aR[3])
+			j = aR[2]
+			nCount++
+		end
+		if cK = "some" and nCount = 0 return [0, i, []] ok
+		return [1, j, aKept]
+	ok
+	if cK = "into"
+		if i >= nLen return [0, i, []] ok
+		cKind = $aPatSeqKinds[nSeq][i + 1]
+		if not (cKind = "list" or cKind = "group" or cKind = "row" or cKind = "pair" or cKind = "opt") return [0, i, []] ok
+		nKid = $aPatSeqKids[nSeq][i + 1]
+		if nKid = 0
+			v = $aPatSeqVals[nSeq][i + 1]
+			aInner = []
+			if cKind = "list" or cKind = "group"
+				for q = 1 to len(v[2])
+					if v[2][q][1] != "comment" aInner + v[2][q] ok
+				next
+			but cKind = "row"
+				aInner = v[2]
+			but cKind = "pair"
+				aInner = [v[2], v[3]]
+			else
+				aInner = [v[2]]
+			ok
+			nKid = PatNewSeq(aInner)
+			$aPatSeqKids[nSeq][i + 1] = nKid
+		ok
+		aR = PatM(aN[2], nKid, 0)
+		if aR[1] and aR[2] = $aPatSeqLen[nKid] return [1, i + 1, aR[3]] ok
+		return [0, i, []]
+	ok
+	if cK = "end"
+		if i = nLen return [1, i, []] ok
+		return [0, i, []]
+	ok
+	if cK = "member"
+		if i < nLen
+			cKind = $aPatSeqKinds[nSeq][i + 1]
+			if cKind = "word" or cKind = "str" or cKind = "kw" or cKind = "num"
+				nSet = find($aPatSetNames, aN[2])
+				if find($aPatSetMembers[nSet], $aPatSeqVals[nSeq][i + 1][2]) > 0 return [1, i + 1, []] ok
+			ok
+		ok
+		return [0, i, []]
+	ok
+	if cK = "opt"
+		aR = PatM(aN[2], nSeq, i)
+		if aR[1] return aR ok
+		return [1, i, []]
+	ok
+	if cK = "repeat"
+		aKept = []
+		j = i
+		nCount = 0
+		while nCount < aN[3]
+			aR = PatM(aN[4], nSeq, j)
+			if not aR[1] exit ok
+			aKept = PatExtend(aKept, aR[3])
+			j = aR[2]
+			nCount++
+		end
+		if nCount >= aN[2] return [1, j, aKept] ok
+		return [0, i, []]
+	ok
+	if cK = "not"
+		aR = PatM(aN[2], nSeq, i)
+		if aR[1] return [0, i, []] ok
+		return [1, i, []]
+	ok
+	if cK = "ahead"
+		aR = PatM(aN[2], nSeq, i)
+		if aR[1] return [1, i, []] ok
+		return [0, i, []]
+	ok
+	if cK = "to" or cK = "thru"
+		for p = i to nLen
+			aR = PatM(aN[2], nSeq, p)
+			if aR[1]
+				if cK = "to" return [1, p, []] ok
+				return [1, aR[2], aR[3]]
+			ok
+		next
+		return [0, i, []]
+	ok
+	if cK = "keep"
+		aR = PatM(aN[2], nSeq, i)
+		if not aR[1] return [0, i, []] ok
+		aKept = []
+		for p = i + 1 to aR[2]
+			aKept + $aPatSeqVals[nSeq][p]
+		next
+		return [1, aR[2], aKept]
+	ok
+	if cK = "collect"
+		aR = PatM(aN[2], nSeq, i)
+		if not aR[1] return [0, i, []] ok
+		return [1, aR[2], [["list", aR[3]]]]
+	ok
+	PatFail("pattern: no node of kind " + cK)
+
+# match the text against the rule named cStart (the rules declared by PatDeclare); returns
+# [whole, [the values kept], steps, bound]
+func PatRun(cStart, cText)
+	nRule = find($aPatNames, cStart)
+	if nRule = 0
+		PatFail("pattern " + cStart + " names no pattern")
+	ok
+	aAll = BlkLoad(cText)
+	aVals = []
+	for i = 1 to len(aAll)
+		if aAll[i][1] != "comment" aVals + aAll[i] ok
+	next
+	nBound = $nPatNodes * PatPositions(aVals)
+	$aPatMemo = list(nBound)
+	$aPatSeqVals = []
+	$aPatSeqKinds = []
+	$aPatSeqLen = []
+	$aPatSeqBase = []
+	$aPatSeqKids = []
+	$nPatMemoTop = 0
+	$nPatSteps = 0
+	nSeq = PatNewSeq(aVals)
+	nRoot = $aPatRoots[nRule]
+	aR = PatM(nRoot, nSeq, 0)
+	bWhole = aR[1] and aR[2] = len(aVals)
+	aKept = aR[3]
+	aRoot = $aPatNodes[nRoot]
+	if bWhole and aRoot[1] = "seq" and len(aRoot[2]) = 1 and len(aKept) = 1
+		if $aPatNodes[aRoot[2][1]][1] = "collect"
+			aKept = aKept[1][2]
+		ok
+	ok
+	return [bWhole, aKept, $nPatSteps, nBound]
+
+func PatPrintKept(aKept)
+	aP = []
+	for i = 1 to len(aKept)
+		aP + BlkPrint(aKept[i], 0)
+	next
+	return BlkJoin(aP, char(9))
