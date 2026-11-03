@@ -3363,7 +3363,7 @@ GRANTS_STZU = os.path.join(HERE, 'grants_v32.haro')
 GRANTS_CASES = os.path.join(HERE, 'v32', 'court_cases.json')
 def stage37():
     """DEFINE PATTERN (v32/GRAMMAR.md; BLOCKS.md 4.3; Central's item 3, the value join): grants_v32.haro, a world of zones and uses with four
-    patterns, forged on both runtimes byte-identical, and its fourteen cases over the ten sentences of grants/ -- the value join on a list and on
+    patterns, forged on both runtimes byte-identical, and its sixteen cases over the twelve sentences of grants/ -- the value join on a list and on
     one value (a rule another pattern uses by name), a set that is the UNION of every zone's rights and a set with no member, a list judged
     against a MENU's words, CITES none in the envelope, SEVERITY warning speaking after the verdict, a seat the sentence does not write left
     unjudged, two patterns refusing at once, each finding at the line of its clause."""

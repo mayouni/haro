@@ -117,7 +117,7 @@ def plants():
     add('OVER names a DECLARATION (R2)', H, '\t\t\tif cK != "DECLARATION" StzuFail(aP[7], "OVER must name', '\t\t\tif 0 StzuFail(aP[7], "OVER must name')
     add('OVER names a seat the declaration has (R3)', H, '\t\t\tif isNull(StzuSeatNamed(StzuSeatsOf(aDeclarations, aP[2]), aP[3]))', '\t\t\tif 0')
     add('SETS resolves to a declaration (R13)', H, '\t\t\t\tif cK = "" StzuFail(aPS[j][4], "SETS:', '\t\t\t\tif 0 StzuFail(aPS[j][4], "SETS:')
-    add('SETS names a seat the declaration has (R14)', H, '\t\t\t\tif isNull(StzuSeatNamed(StzuSeatsOf(aDeclarations, aPS[j][1]), aPS[j][2]))', '\t\t\t\tif 0')
+    add('SETS names a seat the declaration has (R14)', H, '\t\t\t\tif isNull(aSetSeat)', '\t\t\t\tif 0')
     add('a set is not named like a MENU or a kind (R15)', H, '\t\t\t\tif cSK != "" StzuFail(', '\t\t\t\tif 0 StzuFail(')
     add('a set has one declaration (R16)', H, '\t\t\t\tif InStrList(aPS[j][3], aSetSeen) StzuFail(', '\t\t\t\tif 0 StzuFail(')
     add("the pattern engine judges the rules: the bound and the names (R7-R12)", H, '\t\t\tPatDeclare(aPN, aPT, aPSN, aPSM)', '\t\t\tcPErr = ""')

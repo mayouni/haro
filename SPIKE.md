@@ -1646,6 +1646,27 @@ fails the stage; the whole guard passes, 36 stages in 1,189 s on haro and its ch
 rules had not met; the plants found four missing fixtures; three quirks of the VM. **Not done, named**: `DEFINE PATTERN` in the
 meta-language and the court's collection of sets (BLOCKS.md 4.3), the next rung.
 
+## The thirty-second rung -- Haro v0.32, DEFINE PATTERN: the value join, said once as a rule over a seat -- 2026-11-03
+
+**BLOCKS.md 4.3 and Central's item 3** (stzzui's S7), on the author's word to start the rung, built by the haro-charter desk (D46). A fact across
+declarations that no clause of a language's own grammar could say -- "every right a use asks for is a right some zone grants" -- is a PATTERN:
+a rule over a seat, the sets it draws from collected by the court, judged by the engine of v0.31.
+
+    v32/fixtures.json                   33 meta fixtures, written before any code read a PATTERN (c1f6d95; R26, R27 added after the code): 6 accepts and 27 rejects --
+                                        the bound and the names in the engine's words, a rule never closed or holding both quote marks, a set named twice, Art. 1
+    grants_v32.haro, grants/            a world of zones and uses with four patterns, and its twelve sentences
+    v32/court_cases.json                16 cases (G15 and G16 added after the code), judged by guard stage 37
+    haro_lib.haro                       the kind PATTERN, the clause shapes `rule` and `path`, the resolution of OVER and SETS, the bound through the engine, Art. 1
+    forge.haro                          the patterns as the language entry's 24th element, and the loads, only where a language declares one
+    pattern_judge.haro                  the court's half: the sets, the value as written, the finding at the clause's line
+    v32/plants.py                       the protections of the rung switched off in turn
+
+**Results.** 33 of 33 meta fixtures and 16 of 16 cases, `haro` and its checked build byte-identical; the rung's 40 protections, each switched off in turn, load-bearing;
+the full 37-stage guard passed 36 stages and failed stage 6 only, in its last full run, under the load of other sessions (169.7 ms, median 324), and stage 6 passes alone, five times, 136.5 to 147.8 ms against its 150 ceiling; the committed pattern-less courts byte-identical to HEAD. Stage 6 otherwise: 142.0 ms in the first full run, the sentence-edited path 14.7 to 18.7 ms -- the court library
+grew by 7 lines and the judge lives apart. **What building found** (HF-137): the first placement of the court's code cost 6.6 ms and the move
+1.3; plants found four missing fixtures and two decisions; a global first assigned in a function is global on this VM. **Not done, named**: a whole
+declaration as the judged value; sets from a world's symbols or a kind's seat names; stzzui's own declaration.
+
 ## The names -- `.haro`, not `.stzu` -- corrected 2026-10-02
 
 **At the author's word ("we agreed to use .haro instead of .stzu, no?").** D1 was ratified
@@ -1801,3 +1822,6 @@ whole guard re-run on the renamed tree: 28 + 30 + 27 + 23, 117 of 120, 32 of 32,
    `DEFINE PATTERN` in the meta-language, judged by the meta-court, with the court collecting its sets -- stzzui's value join (Central's
    item 3) its first customer; it changes the forge's prologue, so every forged court regenerates and stage 6's ceiling is measured.
    Step 3, the memo spelling, still waits for Q-B2's amendments at Ringua.
+28. ~~DEFINE PATTERN~~ -- built 2026-11-03 as Haro v0.32, the thirty-second rung above: a rule over a seat, its sets collected by the court,
+   judged by the pattern engine; Central's item 3, the value join, answered. Next: Central's items 4 (a seat shared by ten kinds) and S14 (a
+   second list read in one constraint form), each owed, then step 3 of BLOCKS.md 3.5 (the memo spelling) when Q-B2's text lands at Ringua.

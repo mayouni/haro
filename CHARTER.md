@@ -1288,6 +1288,21 @@ states principle 14.
   reason the clause exists; the cold compile is untouched because no court loads the engine yet. *Not done, named:* the declaration
   `DEFINE PATTERN name AS (MATCH [...], OVER ...)` in the meta-language and the court's collection of sets (BLOCKS.md 4.3) -- the
   next rung, which changes the forge's prologue and so every forged court.
+- **D46 -- DEFINE PATTERN: a rule over a seat, its sets collected by the court, judged by the pattern engine** (BLOCKS.md 4.3, on the author's
+  word to start the rung, 2026-11-03: "DEFINE PATTERN"; Central's item 3 of 2026-10-31, stzzui's S7, the value join; `haro/spike/v32/GRAMMAR.md`;
+  HF-137; the thirty-second rung; guard stage 37). `DEFINE PATTERN name AS (OVER kind.seat, MATCH [ rule ], SETS [kind.seat: set], MESSAGE, CODE,
+  CITES, SEVERITY) RATIONALE`: a CONSTRAINT whose condition is a pattern. The value judged is the seat's value **as the sentence writes it**, read
+  by the one LOAD (D44); the rule is a C6 list written in the declaration, judged by the engine's own declaration (D45) in its own words; a set
+  is data the court collects from the sentence's own declarations (`zone.rights: granted` is the values of that seat across every ZONE) or a
+  MENU's words under its name, never code; the patterns of a language are one set of named rules, so one may use another by RULE name. A
+  pattern refuses or warns as a CONSTRAINT does, at the line of the seat's clause, with its declared code and cites, and joins Art. 1
+  explainability (a CODE). *Readings taken by the desk, within the rung, for the author to refuse:* OVER names a seat, not a whole declaration
+  (the court already judges a declaration's form); a set is drawn from words, strings and numbers, and a list of pairs is refused by name;
+  a seat the sentence does not write is not judged; a declaration the structural court refused is not judged again. *Cost:* a language that
+  declares a pattern loads the engine and the court's judge (`pattern_lib.haro`, `pattern_judge.haro`) and a court that declares none loads
+  nothing more -- the court library grew by 7 lines (+1.3 ms of cold compile); the meta-court loads the engine for the bound, +15.1 ms of cold start (116.2 to 131.3 ms).
+  *Not done, named:* a whole declaration as the judged value; sets from a world's symbols or a kind's seat names (BLOCKS.md 4.2); stzzui's
+  own declaration is stzzui's to rewrite.
 - **D23 -- `rnxc fmt` is a Ring++ feature, not held for Haro** (CODEGRAPH Q4, ruled on the author's delegation, 2026-10-05: "take
   whatever decision you think is wiser on my behalf"). It is a verb of the one binary (commitment 5), depends on nothing of Haro's, is
   judged against the oracle and refuses what Ring refuses (58 of 6,061 Softanza files, 57 of them Ring's own refusals). It ships inside

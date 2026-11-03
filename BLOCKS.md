@@ -222,6 +222,8 @@ asks for it.
 
 ## Files
 
+- **4.3, built** (Haro v0.32, 2026-11-03): `DEFINE PATTERN` in the meta-language -- `spike/grants_v32.haro` the world, `spike/pattern_judge.haro` the court's half, `spike/v32/` (fixtures first, the court cases, the plants, GRAMMAR.md).
+
 - **Step 2, built** (Haro v0.31, 2026-11-03): `spike/pattern_lib.haro`, `spike/pattern.haro`, `spike/v31/` (fixtures first, the court, the plants, GRAMMAR.md); the reference `pattern.py` fixed and extended.
 
 - **Step 1, built** (Haro v0.30, 2026-11-03): `spike/block_lib.haro`, `spike/block.haro`, `spike/v30/` (fixtures first, the court, the plants, GRAMMAR.md).

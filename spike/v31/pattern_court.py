@@ -25,7 +25,7 @@ from block import Refused
 
 HARO_VM, TWIN = paths.need_bins()
 FIXTURES = os.path.join(HERE, 'fixtures.json')
-SENTENCE_EXT = ('.z', '.f', '.a', '.n', '.stzv', '.machine', '.fleet', '.ledger', '.bank', '.clinic', '.notice', '.w')
+SENTENCE_EXT = ('.z', '.f', '.a', '.n', '.stzv', '.machine', '.fleet', '.ledger', '.bank', '.clinic', '.notice', '.grant', '.w')
 CWD = SPIKE                                       # where pattern.haro and pattern_lib.haro are run from; plants.py points it at a planted copy
 PLANT = '--plant' in sys.argv
 

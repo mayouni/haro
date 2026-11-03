@@ -1,7 +1,7 @@
 """Haro v0.32 -- DEFINE PATTERN (BLOCKS.md 4.3), fixtures first.
 
 Writes fixtures.json (the meta-court's: what a declaration with a PATTERN must be accepted for and refused for) and court_cases.json (the
-forged court's: the grants world, grants_v32.haro, and its nine sentences in spike/grants/) BEFORE any code reads a PATTERN. The world and
+forged court's: the grants world, grants_v32.haro, and its twelve sentences in spike/grants/ (ten at first; shape_broken and zone_primary were added after the code)) BEFORE any code reads a PATTERN. The world and
 the sentences are committed with them: they are fixtures too.
 
 The design this file pins (the desk's, within the author's word to start the rung; D46 records it for him to refuse):

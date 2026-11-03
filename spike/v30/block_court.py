@@ -25,7 +25,7 @@ import paths
 HARO_VM, TWIN = paths.need_bins()
 FIXTURES = os.path.join(HERE, 'fixtures.json')
 REFERENCE = os.path.join(ROOT, 'study', 'rebol', 'block.py')
-SENTENCE_EXT = ('.z', '.f', '.a', '.n', '.stzv', '.machine', '.fleet', '.ledger', '.bank', '.clinic', '.notice', '.w')
+SENTENCE_EXT = ('.z', '.f', '.a', '.n', '.stzv', '.machine', '.fleet', '.ledger', '.bank', '.clinic', '.notice', '.grant', '.w')
 # the texts of the family written to be refused: a reader that reads them is wrong
 REFUSED_BY_DESIGN = {'f/operator-in-guard.f'}
 PLANT = '--plant' in sys.argv
