@@ -2,7 +2,7 @@
  "grammar": "haro",
  "version": "0.31",
  "name": "pattern rules over blocks of typed values, in Haro (step 2 of COMPASS-REBOL-06/07), fixtures first",
- "comment": "Written BEFORE pattern_lib.haro. P01-P37 and X01-X16 are the study's 53, verbatim (study/rebol/pattern_fixtures.json); P38-P61 and X17-X34 are Haro's, each because no fixture pinned what it pins (the module docstring of gen_fixtures.py says which and why). A rule is C6 text, a list, read by the one LOAD (block_lib.haro); a grammar is data. Pattern words are UPPER_SNAKE keywords: the types WORD STRING NUMBER KEYWORD PATH PAIR LIST GROUP ROW OPTIONAL and SKIP (any one value); END; OPT ANY SOME REPEAT; OR (ordered choice); NOT AHEAD; INTO (a list, a group, a row, a pair read as its key then its value, an optional read as the value it marks); TO THRU; COLLECT KEEP; RULE name; MEMBER name (a value drawn from a SET the court collects, never code); LIT v. A lower_snake word, a string or a number in a rule matches itself. A rule matches only when it consumes its whole input. THE BOUND, refused at declaration and never at match time: recursion, a repetition or TO over a rule that can match nothing, a group in a rule, WHILE DO EVAL IF, and the editing words CHANGE INSERT REMOVE. Matching is PEG with a packrat memo: at most (rule nodes x input positions) steps, held on every match fixture. \"matches\" are judged by the verdict and the values kept; \"refusals\" by the fragment of why the declaration is refused. \"family\" is judged over every declaration and sentence of the spike, by the number that match and the six that do not, by name. Every fixture is judged on haro and its checked build, byte-identical, and beside the Python reference (study/rebol/pattern.py), the two refusing a difference by name (D43).",
+ "comment": "Written BEFORE pattern_lib.haro. P01-P37 and X01-X16 are the study's 53, verbatim (study/rebol/pattern_fixtures.json); P38-P62 and X17-X37 are Haro's, each because no fixture pinned what it pins (the module docstring of gen_fixtures.py says which and why). A rule is C6 text, a list, read by the one LOAD (block_lib.haro); a grammar is data. Pattern words are UPPER_SNAKE keywords: the types WORD STRING NUMBER KEYWORD PATH PAIR LIST GROUP ROW OPTIONAL and SKIP (any one value); END; OPT ANY SOME REPEAT; OR (ordered choice); NOT AHEAD; INTO (a list, a group, a row, a pair read as its key then its value, an optional read as the value it marks); TO THRU; COLLECT KEEP; RULE name; MEMBER name (a value drawn from a SET the court collects, never code); LIT v. A lower_snake word, a string or a number in a rule matches itself. A rule matches only when it consumes its whole input. THE BOUND, refused at declaration and never at match time: recursion, a repetition or TO over a rule that can match nothing, a group in a rule, WHILE DO EVAL IF, and the editing words CHANGE INSERT REMOVE. Matching is PEG with a packrat memo: at most (rule nodes x input positions) steps, held on every match fixture. \"matches\" are judged by the verdict and the values kept; \"refusals\" by the fragment of why the declaration is refused. \"family\" is judged over every declaration and sentence of the spike, by the number that match and the six that do not, by name. Every fixture is judged on haro and its checked build, byte-identical, and beside the Python reference (study/rebol/pattern.py), the two refusing a difference by name (D43).",
  "matches": [
   {
    "id": "P01",
@@ -792,6 +792,18 @@
    "expect": {
     "match": true
    }
+  },
+  {
+   "id": "P62",
+   "name": "REPEAT 2 needs its two: one word is too few (added after the engine, found by a plant)",
+   "rules": {
+    "main": "[REPEAT 2 WORD END]"
+   },
+   "start": "main",
+   "input": "a",
+   "expect": {
+    "match": false
+   }
   }
  ],
  "refusals": [
@@ -1107,6 +1119,33 @@
    },
    "start": "main",
    "refusal": "RULE nope names no pattern"
+  },
+  {
+   "id": "X35",
+   "name": "REPEAT with a count and no rule after it (added after the engine, found by a plant)",
+   "rules": {
+    "main": "[REPEAT 2]"
+   },
+   "start": "main",
+   "refusal": "REPEAT takes a count, then a rule"
+  },
+  {
+   "id": "X36",
+   "name": "RULE followed by a number, which is no name (added after the engine, found by a plant)",
+   "rules": {
+    "main": "[RULE 5]"
+   },
+   "start": "main",
+   "refusal": "RULE takes a name"
+  },
+  {
+   "id": "X37",
+   "name": "MEMBER followed by a string, which is no name (added after the engine, found by a plant)",
+   "rules": {
+    "main": "[MEMBER \"x\"]"
+   },
+   "start": "main",
+   "refusal": "MEMBER takes a name"
   }
  ],
  "family": {

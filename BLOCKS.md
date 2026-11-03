@@ -125,7 +125,7 @@ the three rules and keeps every text it reads today: on all 138 (109 + 11 + 18) 
 | step | what | cost | why in this order |
 |---|---|---|---|
 | **1** | **C6 declarations become the canonical text**: one reader in Ring (`block_lib.ring`, replacing `StzuTokenize` and `CtTokenize` -- one LOAD for the meta-court and every forged court), a canonical printer (`haro.ring fmt <file>`), and the printing court as a guard stage over every `.haro` and sentence | one rung of the spike; nothing visible changes (every court prints the same verdicts) | it is 99% true already; the rest is two instruments | **BUILT 2026-11-03 as Haro v0.30** (`spike/v30/GRAMMAR.md`, guard stage 35, D44): `block_lib.haro` is the one lexer, loader and printer; `haro.haro <file> fmt` the printer at the command line; every court prints the bytes it printed. Written before the cut, this row says `.ring` and `haro.ring`: read `.haro` and `haro.haro` (CLAUDE.md, "The cut").
-| 2 | **pattern rules** (07, section 4) over the blocks step 1 reads | one rung | 07's rules are data only when they are read by the one LOAD |
+| 2 | **pattern rules** (07, section 4) over the blocks step 1 reads | one rung | 07's rules are data only when they are read by the one LOAD | **BUILT 2026-11-03 as Haro v0.31** (`spike/v31/GRAMMAR.md`, guard stage 36, D45): the engine in Haro, `spike/pattern_lib.haro`, judged beside the Python reference down to the step; what remains of 4.3 -- the declaration `DEFINE PATTERN` in the meta-language and the court collecting its sets -- is the next rung. Written before the cut, this row says `.ring`: read `.haro`.
 | 3 | **the memo spelling**: the house rules in C9's reader, a memo printer, and two C6 amendments -- the doubled quote and a string as a pair's key -- at Ringua, C6's owner | an amendment of C6 and a change to stzlib's reader; every desk's memos then read by one reader | the amendments are another desk's to make; nothing in steps 1 and 2 waits on them |
 | 4 | **programs**: a block printing of the L1 graph (an export, so tools read programs with the one LOAD), the Ring++ face staying the human spelling under its rung-3 court | small for the export; the rest is Q-B3 | a program is not C6 text, and whether it becomes one is the author's |
 | -- | **the elders** (`.zql`, `.zui`, `.wflow`) read by the one LOAD | their owners' changes | each diverges lexically; until one converges it is a spelling, read by its own reader |
@@ -221,6 +221,8 @@ asks for it.
 - **Q-B4** the elders: converge on C6's lexis, or stay spellings with their own readers -- their owners', on the author's word.
 
 ## Files
+
+- **Step 2, built** (Haro v0.31, 2026-11-03): `spike/pattern_lib.haro`, `spike/pattern.haro`, `spike/v31/` (fixtures first, the court, the plants, GRAMMAR.md); the reference `pattern.py` fixed and extended.
 
 - **Step 1, built** (Haro v0.30, 2026-11-03): `spike/block_lib.haro`, `spike/block.haro`, `spike/v30/` (fixtures first, the court, the plants, GRAMMAR.md).
 

@@ -77,7 +77,7 @@ def haro_lines(cases_file, builds):
 def judge_reference():
     failures = 0
     for label, path in (('its own 53 (study/rebol/pattern_fixtures.json)', os.path.join(ROOT, 'study', 'rebol', 'pattern_fixtures.json')),
-                        ('the 95 of v31/fixtures.json', None)):
+                        ('the fixtures of v31/fixtures.json', None)):
         if path is None:
             doc = json.load(open(FIXTURES, encoding='utf-8'))
             tmp = os.path.join(tempfile.gettempdir(), 'haro_v31_ref.json')
@@ -118,6 +118,7 @@ def judge_fixtures(builds=(('haro', None), ('checked', None)), quiet=False):
     first = builds[0][0]
     ok_n = 0
     diff = []
+    worst = 0.0
     for n, (kind, f, ref) in enumerate(expect):
         got = lines[first][n] if n < len(lines[first]) else 'NO OUTPUT'
         if any((lines[l][n] if n < len(lines[l]) else None) != got for l, _ in builds):
@@ -139,6 +140,8 @@ def judge_fixtures(builds=(('haro', None), ('checked', None)), quiet=False):
                 ok, why = False, f'kept {kept}, expected {e["kept"]}'
             elif steps > bound:
                 ok, why = False, f'{steps} steps over the bound {bound}'
+            else:
+                worst = max(worst, steps / bound)
         else:
             if not (got.startswith(f['id'] + ' refused ') and f['refusal'] in got):
                 ok, why = False, ('declared, must be refused' if got.endswith('declared') else f'refused for another reason: {got[:160]}')
@@ -151,7 +154,7 @@ def judge_fixtures(builds=(('haro', None), ('checked', None)), quiet=False):
             failures += 1
             failed_ids.append(f['id'])
             say(f'  FAIL {f["id"]}: {f["name"][:80]} -- {why}')
-    say(f'PATTERN COURT (haro): {ok_n} of {len(expect)} fixtures hold, each the reference\'s own line to the step; {dt:.2f} s per build for all')
+    say(f'PATTERN COURT (haro): {ok_n} of {len(expect)} fixtures hold, each the reference\'s own line to the step; the most a match spent was {worst:.0%} of its step bound; {dt:.2f} s per build for all')
     if len(builds) > 1:
         if diff:
             failures += 1

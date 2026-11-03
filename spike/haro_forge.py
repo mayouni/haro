@@ -3357,6 +3357,24 @@ def stage35():
         return 1
     return 0
 
+PATTERN_COURT = os.path.join(HERE, 'v31', 'pattern_court.py')
+def stage36():
+    """Haro v0.31, step 2 of COMPASS-REBOL-06/07 (v31/GRAMMAR.md): the pattern engine, pattern_lib.haro, judged by v31/pattern_court.py --
+    the Python reference holding its 53 and the 99 of v31/fixtures.json (written first); every fixture on haro and its checked build,
+    byte-identical, and each the reference's own line to the step (verdict, values kept, steps, bound, the words of a refusal: a
+    difference refused by name, D43); and FAM1, the declaration form written once as a pattern over every declaration and sentence of
+    the spike, 85 of 91 matching, the six that do not named."""
+    print('stage 36 -- the pattern engine: v31/pattern_court.py on haro and its checked build, beside the Python reference')
+    p = subprocess.run([sys.executable, PATTERN_COURT] + (['--plant'] if PLANT else []), capture_output=True, cwd=HERE, timeout=1800)
+    out = p.stdout.decode('utf-8', 'replace').replace(chr(13) + chr(10), chr(10))
+    for line in out.splitlines():
+        if line.startswith('  ') or line.startswith('PATTERN COURT') or line.startswith('FAMILY') or line.startswith('pattern_court'):
+            print(line)
+    if p.returncode != 0:
+        print(f'  FAIL the pattern court exited {p.returncode}' + ('' if out.strip() else ': ' + p.stderr.decode('utf-8', 'replace')[-400:]))
+        return 1
+    return 0
+
 SENTENCE_TARGET = 50.0     # D42: a sentence edited, its court's image reused -- what a person editing a sentence waits for
 COLD_CEILING = 150.0       # D42: the court compiled from scratch -- a ceiling that catches the court library growing
 
@@ -3511,5 +3529,7 @@ if __name__ == '__main__':
         failures += stage34()
     if stage in (None, 35) and os.path.exists(BLOCK_COURT):
         failures += stage35()
+    if stage in (None, 36) and os.path.exists(PATTERN_COURT):
+        failures += stage36()
     print(f'haro_forge: {"FAIL" if failures else "PASS"} ({failures} failure(s), {time.perf_counter()-t0:.1f} s)')
     sys.exit(1 if failures else 0)

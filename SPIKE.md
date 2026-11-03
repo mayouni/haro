@@ -1621,6 +1621,31 @@ drifted in four places and no fixture had stood on any of them; the round trip r
 the fixtures; 107 working-copy files carry CRLF that the repository does not. **Not done, named**: the two parsers stay two over the one
 lexer's tokens; the memo spelling is step 3; the elders stay spellings (Q-B4), the round-trip court they waited for now existing.
 
+## The thirty-first rung -- Haro v0.31, pattern rules over blocks, in Haro -- 2026-11-03
+
+**Step 2 of COMPASS-REBOL-06 and 07** (BLOCKS.md 3.5 and section 4), on the author's word to start it, built by the haro-charter desk (D45).
+Red's Parse without the escape into the host and without the documented infinite loop: a rule is a C6 list read by the one LOAD of
+v0.30, declared total by construction, matched by PEG with a packrat memo. The Python model stays as the second evaluator and the court
+refuses a difference by name (D43). **Nothing visible changes**: no court loads the engine yet.
+
+    v31/fixtures.json                   99 fixtures, written before any engine code (b4c40d9; four added after the engine, each found by a
+                                        plant): the study's 53 verbatim, OPTIONAL and INTO an optional (Q-B1 meeting step 2), what the 53
+                                        left to a reading, the packrat, the protections left to chance, and FAM1 (the declaration form over
+                                        the spike)
+    pattern_lib.haro                    the engine: PatDeclare (the bound, at declaration), PatRun (PEG, packrat), integer ids for nodes and
+                                        sequences because a list assigned is a list copied
+    pattern.haro                        `haro pattern.haro cases <file>`: a case file in one process
+    study/rebol/pattern.py              the reference, fixed (REPEAT 1.5 was a crash) and extended (OPTIONAL)
+    v31/pattern_court.py, v31/plants.py the court (guard stage 36) and the 45 protections switched off in turn
+    v31/GRAMMAR.md                      the rule language, the bound, the court, what building found
+
+**Results.** 99 of 99 on `haro` and its checked build, byte-identical, each equal to the reference's own line -- verdict, values kept,
+steps, bound, the words of a refusal; the most a match spent was 100% of its step bound (the empty input); FAM1: 85 of 91 texts match the
+declaration form in 11,390 steps (the reference's own total), the six that do not named; 45 of 45 protections load-bearing; `--plant`
+fails the stage; the whole guard passes, 36 stages in 1,189 s on haro and its checked build. **What building found** (HF-136): the reference crashed on `REPEAT 1.5`; step 1's `?` and step 2's
+rules had not met; the plants found four missing fixtures; three quirks of the VM. **Not done, named**: `DEFINE PATTERN` in the
+meta-language and the court's collection of sets (BLOCKS.md 4.3), the next rung.
+
 ## The names -- `.haro`, not `.stzu` -- corrected 2026-10-02
 
 **At the author's word ("we agreed to use .haro instead of .stzu, no?").** D1 was ratified
@@ -1771,3 +1796,8 @@ whole guard re-run on the renamed tree: 28 + 30 + 27 + 23, 117 of 120, 32 of 32,
    every court prints the bytes it printed. Next in BLOCKS.md 3.5: step 2, the pattern rules (COMPASS-REBOL-07) over the blocks step 1
    reads -- `study/rebol/pattern.py` the reference, `pattern_fixtures.json` (53) the start; step 3, the memo spelling, waits for Q-B2's
    amendments at Ringua; Q-B4's question to the elders' owners is Central's to carry now that the round-trip court exists.
+27. ~~Step 2 of COMPASS-REBOL-06 and 07~~ -- built 2026-11-03 as Haro v0.31, the thirty-first rung above: the pattern engine in Haro,
+   judged beside its Python reference by guard stage 36, nothing yet loaded by a court. Next in BLOCKS.md 3.5 and 4.3: the declaration
+   `DEFINE PATTERN` in the meta-language, judged by the meta-court, with the court collecting its sets -- stzzui's value join (Central's
+   item 3) its first customer; it changes the forge's prologue, so every forged court regenerates and stage 6's ceiling is measured.
+   Step 3, the memo spelling, still waits for Q-B2's amendments at Ringua.

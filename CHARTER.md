@@ -1273,6 +1273,21 @@ states principle 14.
   more file and loses a lexer; the cold compile of stage 6 is the measurement (SPIKE.md). *Not done, named:* the two parsers stay
   two (a declaration's and a sentence's, over the one lexer's tokens); the memo spelling is step 3; the elders stay spellings (Q-B4),
   the round-trip court they waited for now existing.
+- **D45 -- pattern rules over blocks are an engine in Haro judged beside its reference: the twin-court clause (D43) put to work**
+  (step 2 of COMPASS-REBOL-06 and 07, on the author's word to start it, 2026-11-03; `haro/spike/v31/GRAMMAR.md`; HF-136; the
+  thirty-first rung; guard stage 36). `pattern_lib.haro` compiles named rules -- C6 lists, read by the one LOAD of D44 -- and either
+  refuses them at declaration (recursion; ANY, SOME or TO over a rule that can match nothing; a group, WHILE, DO, EVAL, IF; CHANGE,
+  INSERT, REMOVE; a REPEAT count that is no whole number; a name that names nothing) or yields rules that are total by construction,
+  and matches by PEG with a packrat memo, within (rule nodes x input positions) steps. The Python model (`study/rebol/pattern.py`)
+  stays as the second evaluator and **the court runs both on the same fixtures and refuses a difference by name**: 99 of 99 cases
+  agree down to the step count and the words of a refusal, on `haro` and on its checked build. FAM1 writes the declaration form once
+  as a pattern and judges it over every declaration and sentence of the spike: 85 of 91 match, the six that do not written to lack
+  something. *Readings taken by the desk, within step 2, for the author to refuse:* the type word `OPTIONAL` and `INTO` an optional
+  (Q-B1 made `?` a C6 value, and a rule language that cannot see it cannot describe Haro's own text); a whole-number REPEAT count
+  (the reference crashed on `REPEAT 1.5`). *Cost:* two evaluators of the pattern graph to keep equal, which is D43's price and the
+  reason the clause exists; the cold compile is untouched because no court loads the engine yet. *Not done, named:* the declaration
+  `DEFINE PATTERN name AS (MATCH [...], OVER ...)` in the meta-language and the court's collection of sets (BLOCKS.md 4.3) -- the
+  next rung, which changes the forge's prologue and so every forged court.
 - **D23 -- `rnxc fmt` is a Ring++ feature, not held for Haro** (CODEGRAPH Q4, ruled on the author's delegation, 2026-10-05: "take
   whatever decision you think is wiser on my behalf"). It is a verb of the one binary (commitment 5), depends on nothing of Haro's, is
   judged against the oracle and refuses what Ring refuses (58 of 6,061 Softanza files, 57 of them Ring's own refusals). It ships inside

@@ -8,6 +8,8 @@ reading the reference or composing step 1 with step 2 showed that no fixture pin
             OPTIONAL, and INTO descending into the value an optional mark makes optional. P43 is the real shape: a declaration's seat list
   P44-P60   what the 53 left to a reading: a TO and a THRU that find nothing, LIT on a number, REPEAT 0, INTO on what holds nothing, a
             nested COLLECT, a MEMBER that reads a text and not a list, PEG's greedy ANY that never gives back, the empty rule
+  P62, X35-X37  added AFTER the engine, each found by a plant (v31/plants.py): REPEAT 2 needs its two, REPEAT 2 needs a rule after it, and RULE
+            or MEMBER followed by a value that is no word. The engine's protection was switched off and every fixture still held
   P61       the packrat: six rules each evaluating the one below twice. Within its step bound only because a (rule, sequence, position)
             is computed once -- the memo is load-bearing, and until now no fixture said so
   X17-X34   the protections the 53 left to chance: four of the seven refused words (EVAL, IF, INSERT, REMOVE) had no fixture, nor RULE/
@@ -77,6 +79,7 @@ matches = list(study['matches']) + [
     m('P60', 'a pair is one value; its key is read as a word', {'main': '[PAIR END]'}, 'name: text', True),
     m('P61', 'the packrat: six rules each evaluating the one below twice stay within nodes x positions, because a (rule, sequence, position) is computed once',
       chain, 'a', True),
+    m('P62', 'REPEAT 2 needs its two: one word is too few (added after the engine, found by a plant)', {'main': '[REPEAT 2 WORD END]'}, 'a', False),
 ]
 refusals = list(study['refusals']) + [
     x('X17', 'MEMBER without a name', {'main': '[MEMBER]'}, 'MEMBER takes a name'),
@@ -97,6 +100,9 @@ refusals = list(study['refusals']) + [
     x('X32', 'recursion through INTO: a smaller value does not excuse a rule that refers to itself', {'main': '[INTO [RULE main]]'}, 'recursive'),
     x('X33', 'a set that names nothing, found inside an INTO', {'main': '[INTO [ANY MEMBER nope]]'}, 'MEMBER nope names no set'),
     x('X34', 'a rule that names no pattern, found inside an INTO', {'main': '[INTO [ANY RULE nope]]'}, 'RULE nope names no pattern'),
+    x('X35', 'REPEAT with a count and no rule after it (added after the engine, found by a plant)', {'main': '[REPEAT 2]'}, 'REPEAT takes a count, then a rule'),
+    x('X36', 'RULE followed by a number, which is no name (added after the engine, found by a plant)', {'main': '[RULE 5]'}, 'RULE takes a name'),
+    x('X37', 'MEMBER followed by a string, which is no name (added after the engine, found by a plant)', {'main': '[MEMBER "x"]'}, 'MEMBER takes a name'),
 ]
 family = {
     'id': 'FAM1',
@@ -117,8 +123,8 @@ family = {
 doc = {
     'grammar': 'haro', 'version': '0.31',
     'name': 'pattern rules over blocks of typed values, in Haro (step 2 of COMPASS-REBOL-06/07), fixtures first',
-    'comment': ('Written BEFORE pattern_lib.haro. P01-P37 and X01-X16 are the study\'s 53, verbatim (study/rebol/pattern_fixtures.json); P38-P61 and '
-                'X17-X34 are Haro\'s, each because no fixture pinned what it pins (the module docstring of gen_fixtures.py says which and why). A rule is C6 '
+    'comment': ('Written BEFORE pattern_lib.haro. P01-P37 and X01-X16 are the study\'s 53, verbatim (study/rebol/pattern_fixtures.json); P38-P62 and '
+                'X17-X37 are Haro\'s, each because no fixture pinned what it pins (the module docstring of gen_fixtures.py says which and why). A rule is C6 '
                 'text, a list, read by the one LOAD (block_lib.haro); a grammar is data. Pattern words are UPPER_SNAKE keywords: the types WORD STRING NUMBER '
                 'KEYWORD PATH PAIR LIST GROUP ROW OPTIONAL and SKIP (any one value); END; OPT ANY SOME REPEAT; OR (ordered choice); NOT AHEAD; INTO (a list, a '
                 'group, a row, a pair read as its key then its value, an optional read as the value it marks); TO THRU; COLLECT KEEP; RULE name; MEMBER name '
