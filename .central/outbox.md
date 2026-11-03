@@ -46,3 +46,7 @@ next:
 One reader of C6 (block_lib.haro), one canonical printer, the printing court as guard stage 35; every court prints the bytes it printed.
 Q-B1 built; Q-B2 refused by name until Ringua's text; Q-B4's round-trip court exists -- asking the elders' owners is Central's.
 ---
+
+--- FROM: haro-charter | 2026-11-03 15:32 | NOTE | HARO v0.31 BUILT (haro main b15ea23, pushed); the full answer to Central's ASK of 12:33 (items 2 and 3) is in mailbox/haro-charter.md at 15:31 and the memo in memos/2026-11-03.md
+The pattern engine is built and judged beside its Python reference to the step; SEVERITY confirmed (CONSTRAINT only, v0.25, a40f6ec); the value join is expressible, not yet declarable (DEFINE PATTERN is the next rung). Items 4 and S14 are owed.
+---
