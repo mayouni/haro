@@ -390,7 +390,10 @@ func LangSource(aLang)
 	aAsk = LangGet(aLang, "ask")
 	cAsk = "NULL"
 	if not isNull(aAsk)
-		cAsk = "[" + RingStr(aAsk[1]) + ", " + NamesSource(aAsk[2]) + ", " + RingStr(aAsk[3]) + ", " + NamesSource(aAsk[4]) + "]"
+		cAsk = "[" + RingStr(aAsk[1]) + ", " + NamesSource(aAsk[2]) + ", " + RingStr(aAsk[3]) + ", " + NamesSource(aAsk[4])
+		# v0.34: the schema path, only where one is declared -- so a court forged from a language without FIELDS keeps the bytes it had
+		if aAsk[7] != "" cAsk += ", " + RingStr(aAsk[7]) ok
+		cAsk += "]"
 	ok
 	aRun = LangGet(aLang, "run")
 	cRun = "NULL"

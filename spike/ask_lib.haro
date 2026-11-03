@@ -3,7 +3,7 @@
 #
 # A court FORGED from a .haro declaration that holds an ASK loads this file
 # beside court_lib.haro and expr_lib.haro, and carries the ASK as
-# $aCourtAsk = [name, from kinds, where expression, clauses]. The question
+# $aCourtAsk = [name, from kinds, where expression, clauses] (v0.34: a fifth, FIELDS seat.seat, where a language declares one). The question
 # grammar is ZQL's SELECT (StzZql GRAMMAR.md 6; zing cli/src/zql.zig
 # parseQuery and query_cmd.zig), the one question shape the estate pins:
 #
@@ -240,7 +240,96 @@ func AskParse(aDecls, cQ)
 			if len(aLW) > 2 AskFail("Unexpected '" + aLW[3] + "' after the question") ok
 		ok
 	next
+	AskCheckFields(aDecls, aFromDecl, aWhere, cField)
 	return [cFrom, aWhere, cField, bDesc, nLim]
+
+# v0.34 (COMPASS-KERN-03): the field names a question may use for a declaration, read from the schema the language declares (the ASK's FIELDS
+# seat.seat) -- the keys of that pair list in the declaration the first seat refers to, then the names the walk's steps COMPUTE into a record of
+# the declaration. [] when no schema is declared (the language has no FIELDS, or this declaration does not write the seat): a missing field is
+# then missing, as zing reads it, and nothing is checked. NULL is never returned.
+func AskSchemaNames(aDecls, aFromDecl)
+	aAsk = $aCourtAsk
+	if len(aAsk) < 5 return [] ok
+	nDot = substr(aAsk[5], ".")
+	cSeat1 = upper(left(aAsk[5], nDot - 1))
+	cSeat2 = upper(substr(aAsk[5], nDot + 1))
+	cEntity = ""
+	aC = aFromDecl[4]
+	for i = 1 to len(aC)
+		if aC[i][1] = cSeat1 cEntity = aC[i][3][2] ok
+	next
+	if cEntity = "" return [] ok
+	aNames = []
+	for d = 1 to len(aDecls)
+		if aDecls[d][2] != cEntity loop ok
+		aEC = aDecls[d][4]
+		for i = 1 to len(aEC)
+			if aEC[i][1] != cSeat2 or aEC[i][3][1] != "pairlist" loop ok
+			aItems = aEC[i][3][2]
+			for j = 1 to len(aItems)
+				if not CtInList(aItems[j][1], aNames) aNames + aItems[j][1] ok
+			next
+		next
+	next
+	# what the steps of the flow compute into its records: a record of the flow has the name, as zing overlays a computed value by name
+	for w = 1 to len($aCourtWalks)
+		aKS = CtKindByDeclName($aCourtWalks[w][3])
+		if isNull(aKS) loop ok
+		cThr = upper($aCourtWalks[w][4])
+		cCmp = upper($aCourtWalks[w][7])
+		if cCmp = "" loop ok
+		for d = 1 to len(aDecls)
+			if aDecls[d][1] != aKS[1] loop ok
+			bThis = 0
+			cComputed = ""
+			aSC = aDecls[d][4]
+			for i = 1 to len(aSC)
+				if aSC[i][1] = cThr and aSC[i][3][2] = aFromDecl[2] bThis = 1 ok
+				if aSC[i][1] = cCmp cComputed = aSC[i][3][2] ok
+			next
+			if bThis and cComputed != "" and not CtInList(cComputed, aNames) aNames + cComputed ok
+		next
+	next
+	return aNames
+
+# every field a condition names, in the order the text names them
+func AskRefsOf(aNode)
+	if not isList(aNode) return 0 ok
+	if len(aNode) = 0 or not isString(aNode[1]) return 0 ok
+	if aNode[1] = "ref" and len(aNode) >= 2
+		$aAskRefsFound + aNode[2]
+		return 0
+	ok
+	if aNode[1] = "agg" and len(aNode) >= 3
+		$aAskRefsFound + aNode[3]
+		return 0
+	ok
+	for i = 2 to len(aNode)
+		AskRefsOf(aNode[i])
+	next
+
+# the head of a dotted name: member.first names member
+func AskHead(cPath)
+	nDot = substr(cPath, ".")
+	if nDot = 0 return cPath ok
+	return left(cPath, nDot - 1)
+
+func AskCheckFields(aDecls, aFromDecl, aWhere, cField)
+	aNames = AskSchemaNames(aDecls, aFromDecl)
+	if len(aNames) = 0 return ok
+	$aAskRefsFound = []
+	AskRefsOf(aWhere)
+	aRefs = $aAskRefsFound
+	for i = 1 to len(aRefs)
+		if not CtInList(AskHead(aRefs[i]), aNames) AskFieldFail("WHERE", AskHead(aRefs[i]), aFromDecl[2], aNames) ok
+	next
+	if cField != "" and not CtInList(AskHead(cField), aNames) AskFieldFail("ORDER BY", AskHead(cField), aFromDecl[2], aNames) ok
+
+func AskFieldFail(cClause, cName, cDecl, aNames)
+	cOut = cClause + " names '" + cName + "', which " + cDecl + " does not declare (its fields: " + CtJoin(aNames, ", ") + ")"
+	cMsg = CtRefusalMessage("unknown_seat")
+	if cMsg != "" cOut += " -- " + cMsg ok
+	AskFail(cOut)
 
 # the order of two records on a field: -1, 0, 1 (zql.zig orderValues)
 func AskOrder(aA, aB, cField)

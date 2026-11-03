@@ -1156,8 +1156,8 @@
    "main": "[SOME RULE decl END]"
   },
   "start": "main",
-  "texts": 121,
-  "matching": 115,
+  "texts": 124,
+  "matching": 118,
   "unmatched": {
    "f/missing-rationale.f": "a sentence written to lack its RATIONALE (its second declaration)",
    "f/operator-in-guard.f": "unreadable: an operator is not C6 (a text written to be refused)",

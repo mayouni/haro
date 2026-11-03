@@ -84,11 +84,13 @@ cases = [
     {'id': 'f06', 'sentence': 'tontine/records.z', 'query': 'SELECT * FROM collect ORDER BY member.first', 'expect': by['q01']['expect'],
      'name': 'a dotted name is judged by its head: member is declared, so member.first is lawful, and orders by what the rows hold (nothing: their own order)'},
     {'id': 'f07', 'sentence': 'tontine/records.z', 'query': 'SELECT * FROM collect WHERE ammount > 1', 'haro_only': True,
-     'refusal': f"WHERE names 'ammount', which collect does not declare (its fields: {FIELDS})", 'name': 'a typo in WHERE: refused before the question runs, naming the field, the flow and what it has'},
+     'refusal': f"WHERE names 'ammount', which collect does not declare (its fields: {FIELDS})",
+     'speaks': "A question names only the fields its flow's records declare", 'name': 'a typo in WHERE: refused before the question runs, naming the field, the flow and what it has'},
     {'id': 'f08', 'sentence': 'tontine/records.z', 'query': 'SELECT * FROM collect WHERE round = 1 AND nope CONTAINS "x"', 'haro_only': True,
      'refusal': "WHERE names 'nope', which collect does not declare", 'name': 'an undeclared field deep in a WHERE, beside a declared one'},
     {'id': 'f09', 'sentence': 'tontine/records.z', 'query': 'SELECT * FROM collect ORDER BY nope', 'haro_only': True,
-     'refusal': "ORDER BY names 'nope', which collect does not declare (its fields: " + FIELDS + ")", 'name': 'ORDER BY an undeclared field'},
+     'refusal': "ORDER BY names 'nope', which collect does not declare (its fields: " + FIELDS + ")",
+     'speaks': "A question names only the fields its flow's records declare", 'name': 'ORDER BY an undeclared field'},
     {'id': 'f10', 'sentence': 'tontine/records.z', 'query': 'SELECT * FROM collect WHERE SUM(nope) > 1', 'haro_only': True,
      'refusal': "WHERE names 'nope', which collect does not declare", 'name': 'an aggregate names a field too'},
     {'id': 'f11', 'sentence': 'tontine/records.z', 'query': 'SELECT * FROM collect ORDER BY nope.sub', 'haro_only': True,
@@ -99,13 +101,24 @@ cases = [
      'refusal': "WHERE names 'total', which indice does not declare (its fields: reponses, score)", 'name': 'the fields of a flow are its entity\'s and what its steps compute, and no others'},
     {'id': 'f14', 'sentence': 'tontine.z', 'query': 'SELECT * FROM collect WHERE nope = 1', 'expect': [],
      'name': 'a flow that writes no RECORDS is not field-checked: zing\'s reading stands, a missing field is missing, and no rows match'},
+    {'id': 'f16', 'sentence': 'tontine/records.z', 'query': 'SELECT * FROM collect WHERE score > 1', 'haro_only': True,
+     'refusal': "WHERE names 'score', which collect does not declare (its fields: " + FIELDS + ")",
+     'name': "a name another flow's step computes is that flow's field and not this one's"},
+    {'id': 'f17', 'sentence': 'tontine/records.z', 'rows': [{'reponses': '5,5,5', 'score': 100}], 'query': 'SELECT * FROM indice WHERE amount > 1', 'haro_only': True,
+     'refusal': "WHERE names 'amount', which indice does not declare (its fields: reponses, score)", 'name': "a field of another flow's entity is not this flow's"},
+    {'id': 'f18', 'sentence': 'tontine/records.z', 'rows': [], 'query': 'SELECT * FROM collect WHERE ammount > 1', 'haro_only': True,
+     'refusal': "WHERE names 'ammount', which collect does not declare", 'name': 'refused before the question runs: with no row to run it on, a typo is still refused'},
+    {'id': 'f19', 'sentence': 'tontine/records.z', 'query': 'SELECT * FROM collect WHERE member.first = "x"', 'expect': [],
+     'name': 'a dotted name is judged by its head in a WHERE too: member is declared, so member.first is lawful, and reads as missing'},
     {'id': 'f15', 'sentence': 'tontine/records.z', 'query': 'SELECT * FROM collect WHERE round = 1 ORDER BY amount LIMIT 0', 'expect': [], 'name': 'LIMIT 0 on declared fields: unchanged'},
 ]
 wr(os.path.join(HERE, 'q_cases.json'), json.dumps({
     'grammar': 'Q', 'version': '0.34', 'ask': 'questions', 'rows': q['rows'],
     'comment': ('Written BEFORE the check (the W discipline). The rows are zing\'s ledger (v07/q_cases.json); a case may carry its own. f01-f04 are zing\'s own questions (q02, q08, q03, q10) with their answers, '
                 'asked of a sentence that declares its records: the check must change no answer. f05, f06, f12 and f14 are lawful and say what the check does NOT refuse; f07-f11 and f13 are '
-                'the new refusals, marked haro_only: zing reads a missing field as missing and answers no rows. All 25 of zing\'s pinned questions are asked again, unchanged, on tontine.z by stage 10.'),
+                'the new refusals, marked haro_only: zing reads a missing field as missing and answers no rows. All 25 of zing\'s pinned questions are asked again, unchanged, on tontine.z by stage 10. '
+                'f16, f17, f18, f19 and the speaks fragments were added AFTER the check was written, found by the plants (a computed name leaking between flows, an entity leaking '
+                'between flows, the check run only against rows, the language words dropped): said so here, not silently.'),
     'cases': cases}, indent=1, ensure_ascii=False) + '\n')
 
 # ---- the meta-court's fixtures --------------------------------------------------------------------------------------------------------------

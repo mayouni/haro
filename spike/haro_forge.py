@@ -83,6 +83,7 @@ STZU27_FIXTURES = os.path.join(HERE, 'v27', 'fixtures.json')
 STZU28_FIXTURES = os.path.join(HERE, 'v28', 'fixtures.json')
 STZU32_FIXTURES = os.path.join(HERE, 'v32', 'fixtures.json')
 STZU33_FIXTURES = os.path.join(HERE, 'v33', 'fixtures.json')
+STZU34_FIXTURES = os.path.join(HERE, 'v34', 'fixtures.json')
 
 
 def judge_stzu(exe, label, fixtures=STZU_FIXTURES):
@@ -177,7 +178,8 @@ def stage1():
                             ("v0.27, the field tag: a pair form's optional mark, PERSONAL reaching it, SAFEGUARDS on the ask and the voice (ZTAG)", STZU27_FIXTURES),
                             ('v0.28, CITES on every element that carries a CODE, and the word none (HARO-MENU-CITES-01)', STZU28_FIXTURES),
                             ('v0.32, PATTERN: a rule over a seat, its sets collected by the court (BLOCKS.md 4.3)', STZU32_FIXTURES),
-                            ("v0.33, INCLUDES, ON a FORM and a quantifier over a FORM: the sugar of a shared seat (Central's item 4, S5)", STZU33_FIXTURES)):
+                            ("v0.33, INCLUDES, ON a FORM and a quantifier over a FORM: the sugar of a shared seat (Central's item 4, S5)", STZU33_FIXTURES),
+                            ("v0.34, FIELDS on an ASK: where the schema of a kind asked lives (COMPASS-KERN-03)", STZU34_FIXTURES)):
         print(f'stage 1 -- the Haro meta-court in pure Ring, judged by its fixtures ({label})')
         f1, o1 = judge_stzu(HARO_VM, 'haro', fixtures)
         f2, o2 = judge_stzu(TWIN, 'haro checked', fixtures)
@@ -794,7 +796,7 @@ def stage8():
 
 # ---- stage 9: Z, a WORLD forged whole -- court AND runtime -- judged by zing's 16 cases
 
-Z_STZU = os.path.join(HERE, 'z_v27.haro')   # z_v26.haro with the field tag (the twenty-seventh rung, ZTAG); the 16 cases and 25 questions are unchanged, tontine.z marks member personal
+Z_STZU = os.path.join(HERE, 'z_v34.haro')   # z_v27.haro with the schema a question is checked against (the thirty-fourth rung, COMPASS-KERN-03): RECORDS on the flow, FIELDS on the ASK; the 16 cases and 25 questions are unchanged
 Z26_CASES = os.path.join(HERE, 'v26', 'court_cases.json')
 Z27_CASES = os.path.join(HERE, 'v27', 'court_cases.json')
 Z_SENTENCE = 'tontine.z'
@@ -3434,6 +3436,28 @@ def stage36():
         return 1
     return 0
 
+ASK_COURT = os.path.join(HERE, 'v34', 'ask_court.py')
+def stage39():
+    """Haro v0.34, COMPASS-KERN-03's field check (v34/GRAMMAR.md): a question is judged against the schema the language declares before it runs. z_v34.haro gives the
+    flow `records: entity?` and the ASK `FIELDS records.fields`; the forged court's `ask` verb then refuses a WHERE or ORDER BY that names a field the flow's entity does
+    not declare (or its steps do not compute), in the declaring language's words. v34/ask_court.py judges it: the 19 cases written first, on haro and its checked build, the
+    two printing the same bytes; a twin that reads the sentence with regular expressions and decides 84 more questions by itself; and the dangling RECORDS the references
+    pass refuses. zing's 25 questions are stage 10's, still asked of tontine.z and unchanged."""
+    print('stage 39 -- the field check: v34/ask_court.py on haro and its checked build, beside a twin that reads the sentence by regular expressions')
+    out = run_args(HARO_VM, ['forge.haro', Z_STZU, '.'], HERE).strip()
+    if not out.startswith('forged z'):
+        print(f'  FAIL the forge did not forge Z: {out[:160]}')
+        return 1
+    p = subprocess.run([sys.executable, ASK_COURT] + (['--plant'] if PLANT else []), capture_output=True, cwd=HERE, timeout=1800)
+    out = p.stdout.decode('utf-8', 'replace').replace(chr(13) + chr(10), chr(10))
+    for line in out.splitlines():
+        if line.startswith('  ') or line.startswith('ASK COURT'):
+            print(line)
+    if p.returncode != 0:
+        print(f'  FAIL the ask court exited {p.returncode}' + ('' if out.strip() else ': ' + p.stderr.decode('utf-8', 'replace')[-400:]))
+        return 1
+    return 0
+
 SENTENCE_TARGET = 50.0     # D42: a sentence edited, its court's image reused -- what a person editing a sentence waits for
 COLD_CEILING = 150.0       # D42: the court compiled from scratch -- a ceiling that catches the court library growing
 
@@ -3594,5 +3618,7 @@ if __name__ == '__main__':
         failures += stage37()
     if stage in (None, 38) and os.path.exists(MEDIUM_STZU) and os.path.exists(MEDIUM_CASES):
         failures += stage38()
+    if stage in (None, 39) and os.path.exists(ASK_COURT):
+        failures += stage39()
     print(f'haro_forge: {"FAIL" if failures else "PASS"} ({failures} failure(s), {time.perf_counter()-t0:.1f} s)')
     sys.exit(1 if failures else 0)

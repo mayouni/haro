@@ -131,7 +131,7 @@ func StzuClauses(cKind)
 	but cKind = "WALK"
 		return [["COMPUTE", "ident"], ["FAIL", "ident"], ["FORMULA", "ident"], ["GUARDS", "pathlist"], ["OF", "ident"], ["ORDER", "ident"], ["STEPS", "ident"], ["THROUGH", "ident"]]
 	but cKind = "ASK"
-		return [["CLAUSES", "namelist"], ["FROM", "namelist"], ["WHERE", "ident"]]
+		return [["CLAUSES", "namelist"], ["FIELDS", "path"], ["FROM", "namelist"], ["WHERE", "ident"]]
 	but cKind = "RUN"
 		return [["BRANCH", "namelist"], ["COLLECT", "namelist"], ["COMPUTE", "namelist"], ["GROUP", "namelist"], ["ITERATE", "namelist"], ["OF", "namelist"]]
 	but cKind = "PATTERN"
@@ -822,9 +822,14 @@ func StzuParseRule()
 	return cOut
 
 # v0.32: a seat named as declaration.seat
-func StzuParsePath()
+func StzuParsePath(cClause)
 	t1 = StzuExpect("ident", "a declaration name")
-	StzuExpect("dot", "'.' after the declaration: OVER names a seat as declaration.seat")
+	if cClause = "FIELDS"
+		# v0.34: the seat of the kind asked, then the seat of the declaration it refers to
+		StzuExpect("dot", "'.' after the seat: FIELDS is written seat.seat")
+	else
+		StzuExpect("dot", "'.' after the declaration: OVER names a seat as declaration.seat")
+	ok
 	t2 = StzuExpect("ident", "a seat name after '.'")
 	return t1[2] + "." + t2[2]
 
@@ -970,7 +975,7 @@ func StzuParseDeclaration()
 		but cShape = "rule"
 			aClauses + [ct[2], StzuParseRule()]
 		but cShape = "path"
-			aClauses + [ct[2], StzuParsePath()]
+			aClauses + [ct[2], StzuParsePath(ct[2])]
 		else
 			aClauses + [ct[2], StzuParsePointList()]
 		ok
@@ -1431,7 +1436,9 @@ func StzuDeclare(cSrc)
 					if HasClause(aClauses, "WHERE") cWhere = ClauseValue(aClauses, "WHERE") ok
 					aCl = []
 					if HasClause(aClauses, "CLAUSES") aCl = ClauseValue(aClauses, "CLAUSES") ok
-					aAsk = [cName, ClauseValue(aClauses, "FROM"), cWhere, aCl, cRationale, nLine]
+					cAskFields = ""
+					if HasClause(aClauses, "FIELDS") cAskFields = ClauseValue(aClauses, "FIELDS") ok
+					aAsk = [cName, ClauseValue(aClauses, "FROM"), cWhere, aCl, cRationale, nLine, cAskFields]
 				but cKind = "WALK"
 					aGuards = []
 					if HasClause(aClauses, "GUARDS") aGuards = ClauseValue(aClauses, "GUARDS") ok
@@ -2012,6 +2019,26 @@ func StzuDeclare(cSrc)
 			ok
 			if aAsk[3] != "" and not InStrList("where", aCl)
 				StzuFail(nL, "WHERE names an expression no clause admits: add where to CLAUSES, or drop WHERE")
+			ok
+			# v0.34: FIELDS seat.seat -- where the schema of a kind asked lives: a seat of every kind asked that refers to ONE declaration, and a
+			# list of name: type pairs of that declaration. The court then refuses a question that names a field the declaration does not declare
+			if aAsk[7] != ""
+				nFD = substr(aAsk[7], ".")
+				cFS1 = left(aAsk[7], nFD - 1)
+				cFS2 = substr(aAsk[7], nFD + 1)
+				for i = 1 to len(aFrom)
+					aFSeat = StzuSeatNamed(StzuSeatsOf(aDeclarations, aFrom[i]), cFS1)
+					if isNull(aFSeat) StzuFail(nL, "FIELDS: '" + cFS1 + "' is not a seat of " + aFrom[i]) ok
+					if aFSeat[3] StzuFail(nL, "FIELDS: '" + cFS1 + "' of " + aFrom[i] + " must be one reference to a declaration") ok
+					if DeclaredKind(aDeclared, aFSeat[2]) != "DECLARATION"
+						StzuFail(nL, "FIELDS: '" + cFS1 + "' of " + aFrom[i] + " must refer to a declaration, not to '" + aFSeat[2] + "'")
+					ok
+					aFSeat2 = StzuSeatNamed(StzuSeatsOf(aDeclarations, aFSeat[2]), cFS2)
+					if isNull(aFSeat2) StzuFail(nL, "FIELDS: '" + cFS2 + "' is not a seat of " + aFSeat[2]) ok
+					if not StzuIsPairListSeat(aFSeat2, aDeclared, aForms)
+						StzuFail(nL, "FIELDS: '" + cFS2 + "' of " + aFSeat[2] + " is not a list of name: type pairs")
+					ok
+				next
 			ok
 		catch
 			StzuNote(cCatchError)
