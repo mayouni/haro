@@ -389,8 +389,8 @@ The records: `CHARTER.md` (section 13 the decisions, D1 to D42; section 15 the v
   resolves. **v0.34 is built** (D48, HF-139, stage 39): COMPASS-KERN-03's field check -- `FIELDS seat.seat` on an ASK, `records: entity?` on Z's flow, and the forged court's `ask` verb refuses
   a `WHERE` or `ORDER BY` that names a field the flow's entity does not declare or its steps do not compute, before the question runs, in the language's own words; a flow that writes no
   `RECORDS` is not checked and zing's 25 questions hold. Haro refuses where zing answers no rows (the desk's reading, for the author to refuse). Central's items 2, 3, 4, S14 and KERN-03 are answered.
-  **Stage 6 did not pass on 2026-11-03 and is not changed:** the cold compile read 160 to 194 ms against the 150 ms ceiling on four runs, the court it measures byte-identical to v0.33's, the machine
-  slow (the full guard 4,452 s against 1,766 s). Stage 6 is D42's wall-clock gate on a machine other sessions share; it flaked at v0.32 too, and the author is asked whether it wants the better of two runs.
+  **Stage 6** read 160 to 194 ms against its 150 ms ceiling on a slow day (the full guard 4,452 s against 1,766 s), its court byte-identical to v0.33's. On the author's word ("Yes, better of two") D42 is amended: a gate over its
+  limit is measured once more and the better of the two runs stands, both printed; it passed at 148.3 ms on a quieter run, and a real regression still fails on both runs (tried with the ceiling at 100 ms).
 - D43 is the twin-court clause. Of BLOCKS.md's four questions: Q-B1 is built (`?` is C6, and `OPTIONAL` sees it in a rule); Q-B2's two amendments are refused by name until Ringua's text
   lands; Q-B3 the block export of a program is not started; Q-B4 the round-trip court the elders waited for exists -- asking their owners is Central's.
 - **Next: the constitution desk's ask for a per-seat severity design**, owed; which of zql's sentences declare `RECORDS` is the stzzql desk's. stzzui rewrites its declaration with the forms (its

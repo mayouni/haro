@@ -3491,11 +3491,22 @@ def stage6(lang, court=None, n=15):
             subprocess.run(cmd, capture_output=True, env=env, cwd=cwd, timeout=120)
             ts.append(time.perf_counter() - t0)
         return min(ts) * 1000, sorted(ts)[n // 2] * 1000
-    h = best([HARB, 'check', MAKEEN], os.path.dirname(HARB), False)
-    r = best([HARO_VM, court, 'check', MAKEEN], HERE, False)
-    subprocess.run([HARO_VM, court, 'check', MAKEEN], capture_output=True, cwd=HERE, timeout=120)    # the image, written once
-    rc = best([HARO_VM, court, 'check', edited], HERE, True, edit=True)
-    o = best([TWIN, court, 'check', MAKEEN], HERE, False)
+    def measure():
+        h = best([HARB, 'check', MAKEEN], os.path.dirname(HARB), False)
+        r = best([HARO_VM, court, 'check', MAKEEN], HERE, False)
+        subprocess.run([HARO_VM, court, 'check', MAKEEN], capture_output=True, cwd=HERE, timeout=120)    # the image, written once
+        rc = best([HARO_VM, court, 'check', edited], HERE, True, edit=True)
+        o = best([TWIN, court, 'check', MAKEEN], HERE, False)
+        return h, r, rc, o
+    h, r, rc, o = measure()
+    if rc[0] > SENTENCE_TARGET or r[0] > COLD_CEILING:
+        # D42 amended 2026-11-03 (the author: "Yes, better of two"): a gate over its limit on a machine other sessions share is measured ONCE more,
+        # and each figure is the better of the two runs. Both runs are printed, so a slow machine is seen and a regression is not hidden: a court
+        # that really grew loads more on both runs and fails on both.
+        print(f'  over a limit on the first run (edit {rc[0]:.1f} ms, cold {r[0]:.1f} ms): measured once more, the better of the two stands')
+        h2, r2, rc2, o2 = measure()
+        print(f'  second run: harb {h2[0]:.1f} ms, edit {rc2[0]:.1f} ms, cold {r2[0]:.1f} ms')
+        h, r, rc, o = (min(h, h2), min(r, r2), min(rc, rc2), min(o, o2))
     print(f'  harb check (Zig, the native court)                   min {h[0]:7.1f} ms   median {h[1]:7.1f} ms')
     print(f'  the sentence edited, the court\'s image reused       min {rc[0]:7.1f} ms   median {rc[1]:7.1f} ms   target {SENTENCE_TARGET:.0f}')
     print(f'  the court compiled from scratch                      min {r[0]:7.1f} ms   median {r[1]:7.1f} ms   ceiling {COLD_CEILING:.0f}')

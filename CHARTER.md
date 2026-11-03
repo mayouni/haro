@@ -1248,6 +1248,9 @@ states principle 14.
   *Not done, named:* moving the code today's constitution rungs added out of the court library -- its ten new functions are called
   from the court's generic paths (validation, `diagnose`, cites, the voice), so a split needs stand-ins in every court: a rung, taken
   when the ceiling is first hit.
+  *Amended 2026-11-03 (the author, "Yes, better of two", asked at v0.34):* a gate over its limit on the first run is measured once more and each figure is the
+  better of the two runs; both are printed. The gate flaked at v0.32 and read 160 to 194 ms on a slow day at v0.34 with its court byte-identical to v0.33's. A court
+  that really grew loads more on both runs and still fails (checked with the ceiling set to 100 ms: the second run was printed and the gate failed).
 - **D43 -- the twin-court clause: no second evaluator of the graph without a court that runs both on the same fixtures and
   refuses a difference, a difference refused by name as its test** (COMPASS-REBOL-03, ruled by the Principal 2026-11-03, LEDGER.md
   line 161, on this desk's answer of 2026-11-02 11:52; carried by Central 2026-11-03 01:46: "haro-charter writes it"). Worded as the
