@@ -1,0 +1,239 @@
+{
+ "grammar": "haro",
+ "version": "0.30",
+ "name": "the one reader of C6 and its canonical printer (step 1 of COMPASS-REBOL-06), fixtures first",
+ "comment": "Written BEFORE block_lib.haro and block.haro. Carried verbatim from study/rebol/printing_fixtures.json: the sixteen C6 fixtures (L01-L04, L07; D01-D03, D05; K01, K02; F01-F04, F06). Added for Haro: H01-H04 and D06-D08 (Haro's `?` is C6 by Q-B1, paths, numbers, comments), K04-K07 (the printer on those), F07-F12 (Q-B2's two amendments refused by name until Ringua's text lands; a path with spaces; a `?` on nothing; mixed case; a pair with no value). \"same\" pairs must read to equal blocks, \"differ\" pairs must not; \"canonical\" gives the one printing; \"refused\" a text the reader refuses, with a fragment of why. Every fixture is judged on haro and on its checked build, byte-identical. left_to_step_3 names the five memo-spelling fixtures the guard skips, so a scoped run prints what it skipped.",
+ "same": [
+  {
+   "id": "L01",
+   "name": "one declaration, one line and many lines",
+   "a": "DEFINE MENU tones AS (WORDS [plain, formal], CODE \"X\") RATIONALE \"the tones\"",
+   "b": "DEFINE MENU tones AS (\n  WORDS [\n    plain,\n    formal,\n  ],\n  CODE \"X\",\n) RATIONALE \"the tones\"\n"
+  },
+  {
+   "id": "L02",
+   "name": "a trailing comma is layout",
+   "a": "[a, b]",
+   "b": "[a, b,]"
+  },
+  {
+   "id": "L03",
+   "name": "a string across lines folds its continuation indent to one space (C6 3.2)",
+   "a": "DEFINE X y AS () RATIONALE \"a long\n    rationale\"",
+   "b": "DEFINE X y AS () RATIONALE \"a long rationale\""
+  },
+  {
+   "id": "L04",
+   "name": "CRLF and LF are the same text (C6 3.10)",
+   "a": "DEFINE MENU tones AS (\r\nWORDS [plain, formal], CODE \"X\") RATIONALE \"the tones\"",
+   "b": "DEFINE MENU tones AS (\nWORDS [plain, formal], CODE \"X\") RATIONALE \"the tones\""
+  },
+  {
+   "id": "L07",
+   "name": "a comment survives as a value of the block, in its place",
+   "a": "(A 1, -- why\n B 2)",
+   "b": "(\n  A 1,\n  -- why\n  B 2\n)"
+  },
+  {
+   "id": "H01",
+   "name": "Haro's `?` is C6 (Q-B1): an optional seat, on one line and on many",
+   "a": "DEFINE DECLARATION deposit AS (SEATS [amount: number, note: text?, tags: [tag]?]) RATIONALE \"a deposit\"",
+   "b": "DEFINE DECLARATION deposit AS (\n  SEATS [\n    amount: number,\n    note: text?,\n    tags: [tag]?,\n  ],\n) RATIONALE \"a deposit\"\n"
+  },
+  {
+   "id": "H02",
+   "name": "a path is one value, however the layout around it",
+   "a": "(POINTS [deposit.amount: trusted])",
+   "b": "(\n  POINTS [\n    deposit.amount:   trusted\n  ]\n)"
+  },
+  {
+   "id": "H03",
+   "name": "a negative and a decimal number, spaced or not",
+   "a": "[-1, 2.5]",
+   "b": "[ -1 ,2.5 ]"
+  },
+  {
+   "id": "H04",
+   "name": "a comment at the end of a line and on its own line are one block: a comment is a value, layout is not",
+   "a": "DEFINE X y AS () RATIONALE \"r\" -- why",
+   "b": "DEFINE X y AS () RATIONALE \"r\"\n-- why\n"
+  }
+ ],
+ "differ": [
+  {
+   "id": "D01",
+   "name": "two items are not one row of two values",
+   "a": "[a, b]",
+   "b": "[a b]"
+  },
+  {
+   "id": "D02",
+   "name": "a string is not a word",
+   "a": "\"a\"",
+   "b": "a"
+  },
+  {
+   "id": "D03",
+   "name": "a keyword is not a word: case is meaning (C6 3.4, 3.5)",
+   "a": "CODE",
+   "b": "code"
+  },
+  {
+   "id": "D05",
+   "name": "a comment is a value of the block: a text with it is not the text without it (added after the reader: L07 compared two texts that both held the comment, so it could not see a reader that drops comments)",
+   "a": "(A 1, -- why\n B 2)",
+   "b": "(A 1, B 2)"
+  },
+  {
+   "id": "D06",
+   "name": "a path is not two words",
+   "a": "[deposit.amount]",
+   "b": "[deposit, amount]"
+  },
+  {
+   "id": "D07",
+   "name": "an optional value is not the value (Q-B1)",
+   "a": "[tags: [tag]?]",
+   "b": "[tags: [tag]]"
+  },
+  {
+   "id": "D08",
+   "name": "a group is not a list",
+   "a": "(a, b)",
+   "b": "[a, b]"
+  }
+ ],
+ "canonical": [
+  {
+   "id": "K01",
+   "name": "a declaration: its clauses one a line, a list inline, no trailing comma",
+   "text": "DEFINE MENU tones AS (\n  WORDS [\n    plain,\n    formal,\n  ],\n  CODE \"X\",\n) RATIONALE \"the tones\"\n",
+   "canonical": "DEFINE MENU tones AS (\n  WORDS [plain, formal],\n  CODE \"X\"\n) RATIONALE \"the tones\"\n"
+  },
+  {
+   "id": "K02",
+   "name": "two declarations: a blank line between them",
+   "text": "DEFINE MENU tones AS (WORDS [plain, formal], CODE \"X\") RATIONALE \"the tones\" DEFINE MENU moods AS (WORDS [plain, formal], CODE \"X\") RATIONALE \"the moods\"",
+   "canonical": "DEFINE MENU tones AS (\n  WORDS [plain, formal],\n  CODE \"X\"\n) RATIONALE \"the tones\"\n\nDEFINE MENU moods AS (\n  WORDS [plain, formal],\n  CODE \"X\"\n) RATIONALE \"the moods\"\n"
+  },
+  {
+   "id": "K04",
+   "name": "an optional seat keeps its `?`, a path its dots; a list of pairs prints inline",
+   "text": "DEFINE DECLARATION deposit AS (SEATS [amount: number, note: text?], POINTS [deposit.amount: trusted]) RATIONALE \"a deposit\"",
+   "canonical": "DEFINE DECLARATION deposit AS (\n  SEATS [amount: number, note: text?],\n  POINTS [deposit.amount: trusted]\n) RATIONALE \"a deposit\"\n"
+  },
+  {
+   "id": "K05",
+   "name": "a comment stands on its own line; a list holding a comment, and a list holding a group, print one item a line",
+   "text": "(A 1, -- why\n B [x, -- here\n y], C (D 2))",
+   "canonical": "(\n  A 1,\n  -- why\n  B [\n    x,\n    -- here\n    y\n  ],\n  C (\n    D 2\n  )\n)\n"
+  },
+  {
+   "id": "K06",
+   "name": "a comment ends its line; two declarations keep a blank line between them",
+   "text": "DEFINE MENU tones AS (WORDS [plain, formal], CODE \"X\") RATIONALE \"the tones\" -- after\n-- alone\nDEFINE MENU moods AS (WORDS [calm]) RATIONALE \"the moods\"",
+   "canonical": "DEFINE MENU tones AS (\n  WORDS [plain, formal],\n  CODE \"X\"\n) RATIONALE \"the tones\"\n\n-- after\n\n-- alone\n\nDEFINE MENU moods AS (\n  WORDS [calm]\n) RATIONALE \"the moods\"\n"
+  },
+  {
+   "id": "K07",
+   "name": "a number prints as written",
+   "text": "[-1,   2.50]",
+   "canonical": "[-1, 2.50]\n"
+  }
+ ],
+ "refused": [
+  {
+   "id": "F01",
+   "name": "single quotes are .zql's divergence (D-ZQL-1), not C6",
+   "text": "x 'a'",
+   "why": "single quote"
+  },
+  {
+   "id": "F02",
+   "name": "a string never closed",
+   "text": "x \"a",
+   "why": "not closed"
+  },
+  {
+   "id": "F03",
+   "name": "a list never closed",
+   "text": "[a, b",
+   "why": "not closed"
+  },
+  {
+   "id": "F04",
+   "name": "a comma outside a list or a group",
+   "text": "a, b",
+   "why": "comma"
+  },
+  {
+   "id": "F06",
+   "name": "an empty item between two commas (added after the reader: no fixture pinned the refusal, found by switching it off)",
+   "text": "[a, , b]",
+   "why": "an empty item"
+  },
+  {
+   "id": "F07",
+   "name": "a string as a pair's key waits for C6's amendment (Q-B2, Ringua writes it): refused by name until its text lands",
+   "text": "(\"the page\": 1)",
+   "why": "pair's key waits for C6's amendment (Q-B2)"
+  },
+  {
+   "id": "F08",
+   "name": "a doubled quote inside a string waits for C6's amendment (Q-B2): a C6 string has no escape today",
+   "text": "x \"a \"\"b\"\" c\"",
+   "why": "doubled quote inside a string waits for C6's amendment (Q-B2)"
+  },
+  {
+   "id": "F09",
+   "name": "a path is written without spaces",
+   "text": "[a . b]",
+   "why": "'.'"
+  },
+  {
+   "id": "F10",
+   "name": "a `?` marks the value before it; here nothing stands before it",
+   "text": "[?]",
+   "why": "'?'"
+  },
+  {
+   "id": "F11",
+   "name": "mixed case is neither a word nor a keyword (C6 3.4, 3.5; the study reader read it as a word -- Haro refuses it, as both its lexers did)",
+   "text": "Foo",
+   "why": "neither a lower_snake identifier nor an UPPER_SNAKE keyword"
+  },
+  {
+   "id": "F12",
+   "name": "a pair with no value",
+   "text": "(a:)",
+   "why": "no value"
+  }
+ ],
+ "left_to_step_3": [
+  {
+   "id": "L05",
+   "section": "same",
+   "why": "the memo spelling: step 3 of BLOCKS.md 3.5, not this rung"
+  },
+  {
+   "id": "L06",
+   "section": "same",
+   "why": "the memo spelling: step 3 of BLOCKS.md 3.5, not this rung"
+  },
+  {
+   "id": "D04",
+   "section": "differ",
+   "why": "the memo spelling: step 3 of BLOCKS.md 3.5, not this rung"
+  },
+  {
+   "id": "K03",
+   "section": "canonical",
+   "why": "the memo spelling: step 3 of BLOCKS.md 3.5, not this rung"
+  },
+  {
+   "id": "F05",
+   "section": "refused",
+   "why": "the memo spelling: step 3 of BLOCKS.md 3.5, not this rung"
+  }
+ ]
+}
