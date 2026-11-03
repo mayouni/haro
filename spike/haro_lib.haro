@@ -119,7 +119,7 @@ func StzuClauses(cKind)
 	but cKind = "VIEW"
 		return [["NAMED", "string"], ["ON", "ident"], ["ONE", "string"], ["WHERE", "string"]]
 	but cKind = "CONSTRAINT"
-		return [["CITES", "citelist"], ["CODE", "string"], ["MESSAGE", "string"], ["ON", "ident"], ["SEVERITY", "ident"], ["THEN", "string"], ["WHEN", "string"]]
+		return [["CITES", "citelist"], ["CODE", "string"], ["EXCEPT", "namelist"], ["MESSAGE", "string"], ["ON", "ident"], ["SEVERITY", "ident"], ["THEN", "string"], ["WHEN", "string"]]
 	but cKind = "WORLD"
 		return [["ENTRY", "namelist"], ["FIRST", "ident"], ["ONE", "namelist"], ["PUBLISH", "pairlist"]]
 	but cKind = "REFINE"
@@ -1474,7 +1474,10 @@ func StzuDeclare(cSrc)
 					if cCnSev != "error" and cCnSev != "warning"
 						StzuFail(nLine, "'" + cCnSev + "' is not a SEVERITY of a CONSTRAINT: error or warning")
 					ok
-					aConstraints + [cName, ClauseValue(aClauses, "ON"), ClauseValue(aClauses, "WHEN"), cThen, ClauseValue(aClauses, "MESSAGE"), nLine, StzuCodeOf(aClauses, nLine, cName), StzuCitesOf(aClauses, nLine, cName), cCnSev]
+					# v0.33: EXCEPT [kind, ...] -- the kinds a constraint ON a FORM is not made for (form_expand.haro)
+					aCnExc = []
+					if HasClause(aClauses, "EXCEPT") aCnExc = ClauseValue(aClauses, "EXCEPT") ok
+					aConstraints + [cName, ClauseValue(aClauses, "ON"), ClauseValue(aClauses, "WHEN"), cThen, ClauseValue(aClauses, "MESSAGE"), nLine, StzuCodeOf(aClauses, nLine, cName), StzuCitesOf(aClauses, nLine, cName), cCnSev, aCnExc]
 				ok
 			ok
 		catch
@@ -1488,7 +1491,7 @@ func StzuDeclare(cSrc)
 
 	# v0.33: INCLUDES, ON a FORM and a quantifier over a FORM are sugar: resolved here, before any pass reads a kind's seats (form_expand.haro)
 	aDeclarations = StzuExpandIncludes(aDeclarations, aForms, aDeclared)
-	aFormTab = StzuFormTable(aDeclarations)
+	aFormTab = StzuFormTable(aDeclarations, aDeclared)
 	aConstraints = StzuExpandConstraints(aConstraints, aFormTab, aDeclarations, aDeclared)
 	aViews = StzuExpandViews(aViews, aFormTab, aDeclarations)
 

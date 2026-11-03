@@ -1,0 +1,42 @@
+# cond_rt.haro -- the round trip of the condition printer (Haro v0.33), in one process:
+#
+#   haro cond_rt.haro <file>        one condition a line; for each, parse -> print -> parse must give the same tree, and print -> parse -> print the same text
+#
+# A line is `ok <the canonical text>` when the printer loses nothing a second reading can see, `DIFFERS <condition> => <printed>` when it does, and
+# `unreadable <condition>` when the condition language refuses the text (a condition written to be refused). The meta-court prints a condition back only
+# where it expanded a quantifier over a FORM, so the printer is a risk only there; this court proves it on every condition the repository holds.
+
+load "cond_lib.haro"
+load "form_expand.haro"
+
+$aCondToks = []
+$nCondPos = 1
+
+if len(sysargv) < 3
+	? "usage: cond_rt.haro <file>"
+else
+	CondRtRun(read(sysargv[3]))
+ok
+
+func CondRtRun(cBody)
+	aLines = str2list(cBody)
+	for i = 1 to len(aLines)
+		cLine = aLines[i]
+		if len(cLine) > 0 and cLine[len(cLine)] = char(13) cLine = left(cLine, len(cLine) - 1) ok
+		if len(cLine) = 0 loop ok
+		cOne = ""
+		try
+			aA = CondParse(cLine)
+			cP = CondPrint(aA)
+			aB = CondParse(cP)
+			cP2 = CondPrint(aB)
+			if CondDump(aA) = CondDump(aB) and cP = cP2
+				cOne = "ok " + cP
+			else
+				cOne = "DIFFERS " + cLine + " => " + cP
+			ok
+		catch
+			cOne = "unreadable " + cLine
+		done
+		? cOne
+	next

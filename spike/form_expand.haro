@@ -84,13 +84,14 @@ func CondDump(x)
 
 # ---- the kinds that include a FORM ---------------------------------------------------------------------------------------------
 
-# [[form, [kind, ...]], ...] in the order the kinds are declared; only a FORM some kind includes is in it
-func StzuFormTable(aDecls)
+# [[form, [kind, ...]], ...] in the order the kinds are declared; only a name that resolves to a FORM, and that some kind includes, is in it
+func StzuFormTable(aDecls, aDeclared)
 	aTab = []
 	for i = 1 to len(aDecls)
 		if len(aDecls[i]) < 9 loop ok
 		aInc = aDecls[i][9]
 		for j = 1 to len(aInc)
+			if DeclaredKind(aDeclared, aInc[j]) != "FORM" loop ok
 			nAt = StzuFormAt(aTab, aInc[j])
 			if nAt = 0
 				aNew = [aInc[j], [aDecls[i][1]]]
@@ -257,9 +258,33 @@ func StzuExpandConstraints(aCons, aTab, aDecls, aDeclared)
 	aOut = []
 	for i = 1 to len(aCons)
 		aC = aCons[i]
+		aExc = []
+		if len(aC) >= 10 aExc = aC[10] ok
 		nF = StzuFormAt(aTab, aC[2])
-		if nF > 0 and DeclaredKind(aDeclared, aC[2]) = "FORM"
+		cOnKind = DeclaredKind(aDeclared, aC[2])
+		if nF > 0
 			aKinds = aTab[nF][2]
+			# EXCEPT: the kinds the constraint is not made for, each a kind that includes the FORM, named once, and not all of them
+			bErr = 0
+			aKept = []
+			try
+				for e = 1 to len(aExc)
+					if DeclaredKind(aDeclared, aExc[e]) = "" StzuFail(aC[6], "EXCEPT: '" + aExc[e] + "' resolves to nothing in this declaration") ok
+					if not InStrList(aExc[e], aKinds) StzuFail(aC[6], "EXCEPT names '" + aExc[e] + "', which does not include the FORM '" + aC[2] + "'") ok
+					for m = 1 to e - 1
+						if aExc[m] = aExc[e] StzuFail(aC[6], "EXCEPT names '" + aExc[e] + "' twice") ok
+					next
+				next
+				for k = 1 to len(aKinds)
+					if not InStrList(aKinds[k], aExc) aKept + aKinds[k] ok
+				next
+				if len(aKept) = 0 StzuFail(aC[6], "EXCEPT leaves no kind for ON " + aC[2]) ok
+			catch
+				bErr = 1
+				StzuNote(cCatchError)
+			done
+			if bErr loop ok
+			aKinds = aKept
 			for k = 1 to len(aKinds)
 				cNm = aC[1] + "_" + aKinds[k]
 				if DeclaredKind(aDeclared, cNm) != "" or StzuNameIn(cNm, aOut)
@@ -278,6 +303,16 @@ func StzuExpandConstraints(aCons, aTab, aDecls, aDeclared)
 				aOut + aR
 			next
 		else
+			# EXCEPT has something to except only ON a FORM some kind includes; ON anything else it is refused (an unknown ON is the ON check's to speak of)
+			if len(aExc) > 0 and cOnKind != ""
+				cWhy = "and '" + aC[2] + "' is a " + cOnKind
+				if cOnKind = "FORM" cWhy = "and no DECLARATION includes '" + aC[2] + "'" ok
+				try
+					StzuFail(aC[6], "EXCEPT belongs to a constraint ON a FORM, " + cWhy)
+				catch
+					StzuNote(cCatchError)
+				done
+			ok
 			aR = aC
 			aR[3] = StzuExpandCond(aC[3], aC[2], aTab, aDecls)
 			if aC[4] != "" aR[4] = StzuExpandCond(aC[4], aC[2], aTab, aDecls) ok

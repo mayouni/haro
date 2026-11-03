@@ -3374,6 +3374,7 @@ def stage37():
 MEDIUM_STZU = os.path.join(HERE, 'medium_v33.haro')
 MEDIUM_TWIN = os.path.join(HERE, 'v33', 'medium_expanded.haro')
 MEDIUM_CASES = os.path.join(HERE, 'v33', 'court_cases.json')
+COND_COURT = os.path.join(HERE, 'v33', 'cond_court.py')
 def stage38():
     """INCLUDES, ON a FORM and a quantifier over a FORM (v33/GRAMMAR.md; Central's item 4, stzzui's S5; S14): medium_v33.haro, a language written with the sugar,
     forged on both runtimes byte-identical and judged on its fifteen cases over medium/ -- a constraint ON a FORM enforced on every kind that includes it, one where
@@ -3401,6 +3402,15 @@ def stage38():
                 print(f'  FAIL {art}: the sugar and its hand-expanded twin differ on {label} ({len(a)} vs {len(b)} bytes)')
             else:
                 print(f'  ok   {art}: the sugar and its hand-expanded twin are byte-identical on {label} ({len(a)} bytes)')
+    # the printer that writes an expanded condition back: proved on every condition the repository holds (v33/cond_court.py)
+    p = subprocess.run([sys.executable, COND_COURT] + (['--plant'] if PLANT else []), capture_output=True, cwd=HERE, timeout=1800)
+    out = p.stdout.decode('utf-8', 'replace').replace(chr(13) + chr(10), chr(10))
+    for line in out.splitlines():
+        if line.startswith('  ') or line.startswith('CONDITION PRINTER') or line.startswith('cond_court'):
+            print(line)
+    if p.returncode != 0:
+        failures += 1
+        print(f'  FAIL the condition printer court exited {p.returncode}')
     if PLANT:
         failures += 1
         print('  FAIL the twin -- PLANTED')
