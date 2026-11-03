@@ -1689,6 +1689,26 @@ origin/main 870c45c): 1,169 lines become 883 and 136 constraints written become 
 (HF-138): S14 was already expressible; EXCEPT came from the data; the plants found three fixtures and a dead guard; the family's extension list drifted a second time and is now
 one copy with a check. **Not done, named**: StzZui's rewrite and its fixtures against it.
 
+## The thirty-fourth rung -- Haro v0.34, a question judged against the schema the language declares: FIELDS on an ASK, RECORDS on Z's flow -- 2026-11-03
+
+**COMPASS-KERN-03's field check**, on the author's word "KERN-03 field check", built by the haro-charter desk (D48). Reading the Q world found no schema to check a question against: `FROM`
+names a flow, a flow had `SEATS []`, the fields are on an entity. The rung is the link (`records: entity?` on Z's flow; `FIELDS seat.seat` on an ASK) and then the check: the forged court's
+`ask` verb refuses a `WHERE` or `ORDER BY` that names a field the flow's entity does not declare or its steps do not compute, before the question runs, in the language's own words. A flow
+that writes no `RECORDS` is not checked, and zing's 25 questions hold unchanged. **For a flow whose records are declared Haro refuses where zing answers no rows**: the desk's reading, within the rung.
+
+    v34/fixtures.json                   10 meta fixtures, written before any code read a FIELDS (3d97769): 3 accepts and 7 rejects
+    v34/q_cases.json                    19 questions on tontine/records.z and tontine.z (f16 to f19 and the `speaks` fragments added after the code, said so)
+    z_v34.haro, tontine/records.z       Z with `records: entity?` and `FIELDS records.fields`, and the tontine that declares its records (+ records_dangling.z)
+    v34/ask_court.py                    the cases on haro and its checked build, and a twin that reads the sentence with regular expressions and decides 84 more
+    v34/plants.py                       the protections of the rung switched off in turn
+    v34/GRAMMAR.md                      the finding, the forms, what a question may name, the divergence from zing, what is not decided
+
+**Results.** 10 of 10 meta fixtures; 19 of 19 cases on `haro` and on its checked build, the two printing the same bytes; the twin agrees on 84 of 84; the rung's 21 protections, each switched off in turn,
+load-bearing; the committed courts of every language without FIELDS byte-identical to HEAD (Z's court and grammar change, as its world did). Z's cold start 165.0 ms before and 161.6 ms after (alternating A/B,
+minima of 25). **The full 39-stage guard: every stage passes except stage 6**, whose cold compile read 160 to 194 ms against the 150 ms ceiling on four runs (the edit, 18 to 29 ms, passed): the court it
+measures is byte-identical to v0.33's, the full guard took 4,452 s against 1,766 s, and the gate is reported as not passed, unchanged. The family's pinned count moved to 124 texts, 118 matching. **Not done, named**:
+which of zql's sentences declare `RECORDS` (the stzzql desk's); a type-aware comparison.
+
 ## The names -- `.haro`, not `.stzu` -- corrected 2026-10-02
 
 **At the author's word ("we agreed to use .haro instead of .stzu, no?").** D1 was ratified
@@ -1848,5 +1868,7 @@ whole guard re-run on the renamed tree: 28 + 30 + 27 + 23, 117 of 120, 32 of 32,
    judged by the pattern engine; Central's item 3, the value join, answered. Next: Central's items 4 (a seat shared by ten kinds) and S14 (a
    second list read in one constraint form), each owed, then step 3 of BLOCKS.md 3.5 (the memo spelling) when Q-B2's text lands at Ringua.
 29. ~~Central's items 4 and S14~~ -- built 2026-11-03 as Haro v0.33, the thirty-third rung above: INCLUDES, ON a FORM, EXCEPT and a quantifier over a FORM, resolved by the
-   meta-court; S14 answered. Next: COMPASS-KERN-03's field check (`spike/ask_lib.haro`) and the constitution desk's ask for a per-seat severity design, each owed; stzzui rewrites
-   its declaration with the forms (its own); step 3 of BLOCKS.md 3.5, the memo spelling, when Q-B2's text lands at Ringua.
+   meta-court; S14 answered. Next: the constitution desk's ask for a per-seat severity design, owed; stzzui rewrites its declaration with the forms (its own); step 3 of BLOCKS.md 3.5,
+   the memo spelling, when Q-B2's text lands at Ringua.
+30. ~~COMPASS-KERN-03's field check~~ -- built 2026-11-03 as Haro v0.34, the thirty-fourth rung above: FIELDS on an ASK, RECORDS on Z's flow, a question judged against the declared schema
+   before it runs. Next: the constitution desk's ask for a per-seat severity design, owed; which of zql's sentences declare RECORDS is the stzzql desk's.

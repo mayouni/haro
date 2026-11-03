@@ -1316,6 +1316,18 @@ states principle 14.
   start, alternating A/B); no court pays anything; the printer that writes an expanded condition back is proved on 217 conditions. *Measured on StzZui's own declaration* (read-only,
   origin/main 870c45c): 1,169 lines become 883 and 136 constraints written become 93; the forged court holds the same 136 constraint rows (in another order for the two `EXCEPT`
   stems) plus one form row, and the grammar is byte-identical. *Not done, named:* StzZui's rewrite and its 57 fixtures against it are StzZui's.
+- **D48 -- a question is judged against the schema the language declares, before it runs: `FIELDS` on an ASK, `RECORDS` on Z's flow** (COMPASS-KERN-03, "a court that judges a Q or
+  zql query against the declared schema before it runs"; on the author's word "KERN-03 field check", 2026-11-03; `haro/spike/v34/GRAMMAR.md`; HF-139; the thirty-fourth rung; guard
+  stage 39). Reading the Q world found **no schema to check against**: `FROM` names a flow, a flow had `SEATS []`, the fields live on an entity, and nothing said whose records a
+  flow's are. So the rung is the link, then the check. `FIELDS seat.seat` on an ASK names a seat of every kind asked that refers to one declaration, then a list of `name: type` pairs
+  of that declaration (generic; the meta-court judges both seats, R1 to R7); Z's `flow` gains `records: entity?`; the forged court's `ask` verb then refuses a `WHERE` or `ORDER BY`
+  that names a field the entity does not declare or the flow's steps do not `COMPUTE`, before the question runs, naming the clause, the name, the declaration and what it has, and
+  ending in the language's own `unknown_seat` words. A name is the head of a dotted path; another flow's computed names and another entity's fields are not this flow's. **A flow that
+  writes no `RECORDS` is not checked** and zing's reading stands (a missing field is missing): all 25 pinned questions hold on the unchanged `tontine.z`. *The reading taken by the
+  desk, within the rung, for the author to refuse:* **for a flow whose records are declared, Haro refuses where zing answers no rows** (the new refusals are `haro_only`, as q20's is);
+  the cost of reversing it is one line, `FIELDS`, in the ASK. *Cost:* `ask_lib.haro` +91 lines (only a court with an ASK loads it); Z's cold start 165.0 ms before and 161.6 ms after
+  (alternating A/B, minima of 25: nothing measurable); the forge writes the fifth element of `$aCourtAsk` only where `FIELDS` is declared, so every other court is byte-identical.
+  *Not done, named:* which of zql's sentences declare `RECORDS` is the stzzql desk's; a type-aware comparison (`amount > "x"`) is another rung.
 - **D23 -- `rnxc fmt` is a Ring++ feature, not held for Haro** (CODEGRAPH Q4, ruled on the author's delegation, 2026-10-05: "take
   whatever decision you think is wiser on my behalf"). It is a verb of the one binary (commitment 5), depends on nothing of Haro's, is
   judged against the oracle and refuses what Ring refuses (58 of 6,061 Softanza files, 57 of them Ring's own refusals). It ships inside

@@ -194,6 +194,7 @@ asks for it.
 - **NOT COMPASS-KERN-03's field check, and this corrects what this desk said on 2026-11-02:** a Q question (`SELECT * FROM deposits WHERE
   amount > 10`) is not C6 text -- `*` and `>` are not in its lexis -- so a pattern cannot read it until Q's question is a block. Resolving
   WHERE's names against the FROM kind's fields directly in `ask_lib.ring` is the cheaper rung, and stays the proposal.
+  *Built 2026-11-03 as v0.34 (D48), with one more correction: the FROM kind had no fields to resolve against -- a flow has none, the entity holds them, and nothing linked the two -- so the rung began with the link (`FIELDS` on an ASK, `RECORDS` on Z's flow).*
 - **NOT Central's item 4** (a seat shared by ten kinds): that is composition of declarations, not a pattern over a block.
 - **NOT the conditions and expressions** inside `WHEN "..."` strings: they have their own lexers (`CondTokenize`, `ExTokenize`) and stay
   strings. Making them blocks would put operators into C6's lexis; not proposed.

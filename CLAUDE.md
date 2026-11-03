@@ -382,16 +382,18 @@ The records: `CHARTER.md` (section 13 the decisions, D1 to D42; section 15 the v
   Get-Content/Set-Content; every checkout is LF (`.gitattributes`); commit explicit paths, never `git add -A`.
 - **Versions**: take the next free version number and say so -- the constitution desk takes them too (it holds v0.29).
 
-## Where it stands -- 2026-11-03, after v0.33
+## Where it stands -- 2026-11-03, after v0.34
 
 - The cut is done and proved (SPIKE.md "The cut"; D39-D41; HF-134). **v0.30** (D44, stage 35): one reader of C6. **v0.31** (D45, stage 36): the pattern engine, judged beside its Python
-  reference. **v0.32** (D46, stage 37): `DEFINE PATTERN`, the value join. **v0.33 is built** (D47, HF-138, stage 38): `INCLUDES`, `ON` a FORM with `EXCEPT`, and a quantifier over a
-  FORM -- sugar the meta-court resolves (`spike/form_expand.haro`), so the court is unchanged and the court forged from the language with the forms is byte-identical to its
-  hand-expanded twin; S14 answered (one `where` reads two lists). Central's items 2, 3, 4 and S14 are answered. Stage 6 is judged by D42: a sentence edit under 50 ms (16.2 ms today), the
-  cold compile under a 150 ms ceiling (145.6 ms today; no court changed in v0.32 or v0.33); it is a wall-clock gate on a machine other sessions share, and flaked once (v0.32).
+  reference. **v0.32** (D46, stage 37): `DEFINE PATTERN`, the value join. **v0.33** (D47, stage 38): `INCLUDES`, `ON` a FORM with `EXCEPT`, and a quantifier over a FORM -- sugar the meta-court
+  resolves. **v0.34 is built** (D48, HF-139, stage 39): COMPASS-KERN-03's field check -- `FIELDS seat.seat` on an ASK, `records: entity?` on Z's flow, and the forged court's `ask` verb refuses
+  a `WHERE` or `ORDER BY` that names a field the flow's entity does not declare or its steps do not compute, before the question runs, in the language's own words; a flow that writes no
+  `RECORDS` is not checked and zing's 25 questions hold. Haro refuses where zing answers no rows (the desk's reading, for the author to refuse). Central's items 2, 3, 4, S14 and KERN-03 are answered.
+  **Stage 6 did not pass on 2026-11-03 and is not changed:** the cold compile read 160 to 194 ms against the 150 ms ceiling on four runs, the court it measures byte-identical to v0.33's, the machine
+  slow (the full guard 4,452 s against 1,766 s). Stage 6 is D42's wall-clock gate on a machine other sessions share; it flaked at v0.32 too, and the author is asked whether it wants the better of two runs.
 - D43 is the twin-court clause. Of BLOCKS.md's four questions: Q-B1 is built (`?` is C6, and `OPTIONAL` sees it in a rule); Q-B2's two amendments are refused by name until Ringua's text
   lands; Q-B3 the block export of a program is not started; Q-B4 the round-trip court the elders waited for exists -- asking their owners is Central's.
-- **Next: COMPASS-KERN-03's field check (`spike/ask_lib.haro`) and the constitution desk's ask for a per-seat severity design**, each owed. stzzui rewrites its declaration with the forms (its
+- **Next: the constitution desk's ask for a per-seat severity design**, owed; which of zql's sentences declare `RECORDS` is the stzzql desk's. stzzui rewrites its declaration with the forms (its
   own; `runtime/zui/rewrite.py` of this desk showed the way: 1,169 lines to 883). Then step 3 of BLOCKS.md 3.5, the memo spelling, when Q-B2's text lands at Ringua. A rung with the pattern in a
   world's symbols or a kind's seat names, or a whole declaration as the judged value, waits for a customer.
 - A language's declared EXTENSION is counted by the family of the round trip and of FAM1, or ignored for a stated reason, and a check fails when it is neither (`v30/block_court.py`).
