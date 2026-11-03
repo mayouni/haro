@@ -21,11 +21,12 @@ sys.path.insert(0, ROOT)
 sys.path.insert(0, os.path.join(ROOT, 'study', 'rebol'))
 import paths
 import pattern as reference                       # the Python model; imports block.py beside it
+sys.path.insert(0, os.path.join(ROOT, 'spike', 'v30'))
+import block_court                                # the one family of texts, and the one list of the sentence extensions
 from block import Refused
 
 HARO_VM, TWIN = paths.need_bins()
 FIXTURES = os.path.join(HERE, 'fixtures.json')
-SENTENCE_EXT = ('.z', '.f', '.a', '.n', '.stzv', '.machine', '.fleet', '.ledger', '.bank', '.clinic', '.notice', '.grant', '.w')
 CWD = SPIKE                                       # where pattern.haro and pattern_lib.haro are run from; plants.py points it at a planted copy
 PLANT = '--plant' in sys.argv
 
@@ -165,16 +166,8 @@ def judge_fixtures(builds=(('haro', None), ('checked', None)), quiet=False):
 
 
 def family_files():
-    out = []
-    for dirpath, dirs, files in os.walk(SPIKE):
-        dirs[:] = [d for d in dirs if d not in ('__pycache__', 'scratch')]
-        for fn in files:
-            if fn.startswith('zz_'):
-                continue                              # stage 18's mutation scratch, written and removed by the guard
-            p = os.path.join(dirpath, fn)
-            if (fn.endswith('.haro') and paths.is_declaration(p)) or os.path.splitext(fn)[1] in SENTENCE_EXT:
-                out.append(os.path.relpath(p, SPIKE).replace(os.sep, '/'))
-    return sorted(out)
+    """Every declaration and every sentence of the spike: v30/block_court.py's family, the one copy."""
+    return block_court.family()
 
 
 def same_reader_refusal(got, ref):

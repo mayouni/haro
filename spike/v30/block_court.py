@@ -25,7 +25,9 @@ import paths
 HARO_VM, TWIN = paths.need_bins()
 FIXTURES = os.path.join(HERE, 'fixtures.json')
 REFERENCE = os.path.join(ROOT, 'study', 'rebol', 'block.py')
-SENTENCE_EXT = ('.z', '.f', '.a', '.n', '.stzv', '.machine', '.fleet', '.ledger', '.bank', '.clinic', '.notice', '.grant', '.w')
+SENTENCE_EXT = ('.z', '.f', '.a', '.n', '.stzv', '.machine', '.fleet', '.ledger', '.bank', '.clinic', '.notice', '.grant', '.medium', '.w')
+# an extension a language of the spike declares, carried by files that are not sentences of a letter, and why they are not counted
+IGNORED_EXT = {'.rfn': 'refinement requests, a different text from a declaration', '.x': 'the v15 test languages, which have no files'}
 # the texts of the family written to be refused: a reader that reads them is wrong
 REFUSED_BY_DESIGN = {'f/operator-in-guard.f'}
 PLANT = '--plant' in sys.argv
@@ -129,6 +131,33 @@ def family():
     return sorted(out)
 
 
+def declared_extensions(folder=None):
+    """{extension: how many files in the spike carry it} for every EXTENSION a declaration of the spike declares."""
+    import re
+    folder = folder or SPIKE
+    declared = {}
+    for dirpath, dirs, files in os.walk(folder):
+        dirs[:] = [d for d in dirs if d not in ('__pycache__', 'scratch')]
+        for fn in files:
+            if fn.endswith('.haro') and not fn.startswith('zz_'):
+                for m in re.finditer(r'EXTENSION\s+"(\.\w+)"', open(os.path.join(dirpath, fn), encoding='utf-8', errors='replace').read()):
+                    declared[m.group(1)] = 0
+    for dirpath, dirs, files in os.walk(folder):
+        dirs[:] = [d for d in dirs if d not in ('__pycache__', 'scratch')]
+        for fn in files:
+            ext = os.path.splitext(fn)[1]
+            if ext in declared:
+                declared[ext] += 1
+    return declared
+
+
+def extension_check(sent_ext=None):
+    """A letter declares its extension; a file carrying it must be counted in the family or ignored for a stated reason -- so a new letter cannot be forgotten
+    (v0.31's FAM1 pinned 85 of 91 texts and the spike grew twice behind its back). Returns the extensions that have files and are neither."""
+    sent_ext = SENTENCE_EXT if sent_ext is None else sent_ext
+    return sorted(e for e, n in declared_extensions().items() if n and e not in sent_ext and e not in IGNORED_EXT)
+
+
 def roundtrip():
     files = family()
     decls = [f for f in files if f.endswith('.haro')]
@@ -186,6 +215,18 @@ def meta_fmt(decl='machine_v03.haro'):
 def court():
     print('printing court -- Haro v0.30: block_lib.haro judged by v30/fixtures.json and the family round trip, on haro and its checked build')
     failures = reference()
+    missing = extension_check()
+    if missing:
+        failures += 1
+        print(f'  FAIL a language declares {missing} and files carry it, and the family neither counts nor ignores it: add it to SENTENCE_EXT, or to IGNORED_EXT with the reason')
+    else:
+        print(f'  ok   every extension a declaration declares is counted in the family or ignored for a stated reason ({len(declared_extensions())} declared, {len(IGNORED_EXT)} ignored)')
+    # made to fail first: with .medium taken out of the list, the check must name it
+    if extension_check(tuple(e for e in SENTENCE_EXT if e != '.medium')) != ['.medium']:
+        failures += 1
+        print('  FAIL the extension check does not name a letter that is left out of the family')
+    else:
+        print('  ok   the extension check names a letter left out of the family (.medium taken out, named)')
     failures += fixtures()[0]
     failures += roundtrip()
     failures += meta_fmt()

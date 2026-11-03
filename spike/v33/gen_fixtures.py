@@ -172,6 +172,10 @@ accepts = [
     accept('A9', 'EXCEPT [kind]: a constraint ON a FORM is made for the including kinds but the ones it excepts', BASE + con('c', 'guarantees', 'actor present', exc='[vibe]'), constraints=1),
     accept('A10', 'the excepted kind has its own constraint beside the one made for the others: two constraints, no collision',
            BASE + con('c', 'guarantees', 'actor present', exc='[vibe]') + con('c_vibe', 'vibe', 'actor present and density present'), constraints=2),
+    accept('A11', 'a quantifier over a FORM inside the where of another is expanded too (added after the code, found by planting it off)',
+           BASE + con('c', 'vibe', 'some guarantees where (some guarantees where actor present)'), constraints=1),
+    accept('A12', "a VIEW's WHERE may quantify over a FORM as a constraint's WHEN may (added after the code, found by planting it off)",
+           BASE + 'DEFINE VIEW v AS (ONE "screen", WHERE "some guarantees where actor present") RATIONALE "x"\n', views=1),
 ]
 rejects = [
     reject('R1', 'INCLUDES names nothing', BASE.replace('INCLUDES [guarantees], SEATS []', 'INCLUDES [ghost], SEATS []'), "INCLUDES: 'ghost' resolves to nothing in this declaration"),
@@ -201,6 +205,8 @@ rejects = [
     reject('R16', 'EXCEPT names a kind that does not include the FORM', BASE + decl('plain', 'PLAIN', incl='', seats='[actor: name?]') + con('c', 'guarantees', 'actor present', exc='[plain]'),
            "EXCEPT names 'plain', which does not include the FORM 'guarantees'"),
     reject('R17', 'EXCEPT names a kind twice', BASE + con('c', 'guarantees', 'actor present', exc='[vibe, vibe]'), "EXCEPT names 'vibe' twice"),
+    reject('R19', "an unreadable condition in a language that has forms is the validator's to speak of, quoting the text as written (added after the code, found by planting it off)",
+           BASE + con('c', 'vibe', 'some guarantees where ('), "condition: expected a seat, found '' -- in 'some guarantees where ('"),
     reject('R18', 'EXCEPT may not leave the constraint without a kind', BASE + con('c', 'guarantees', 'actor present', exc='[screen, vibe]'), "EXCEPT leaves no kind for ON guarantees"),
 ]
 doc = {
@@ -208,10 +214,10 @@ doc = {
     'comment': ('Written BEFORE any code reads INCLUDES (the W discipline). v0.33 answers Central\'s item 4 (stzzui\'s S5: four seats and 40 of 60 constraints written ten times) and S14. '
                 'INCLUDES [form] on a DECLARATION; ON a FORM, and a quantifier (some, all, earlier, exists) over a FORM, expand over the kinds that include it. All of it is sugar '
                 'the meta-court resolves: the court never sees it, which the guard proves by forging the hand-expanded twin and comparing the courts byte for byte. '
-                'A1-A10 accept (A7 and A8 pin that no existing reading changes); R1-R18 refuse, each by the fragment of why. R6, R7 and R9 keep refusals the language already spoke.'),
+                'A1-A12 accept (A7 and A8 pin that no existing reading changes); R1-R19 refuse, each by the fragment of why. R6, R7 and R9 keep refusals the language already spoke.'),
     'accepts': accepts, 'rejects': rejects,
 }
 with open(os.path.join(HERE, 'fixtures.json'), 'w', encoding='utf-8', newline='\n') as fh:
     json.dump(doc, fh, indent=1, ensure_ascii=False)
     fh.write('\n')
-print(f'{len(accepts)} accepts, {len(rejects)} rejects; {len(cases)} court cases; 12 sentences')
+print(f'{len(accepts)} accepts, {len(rejects)} rejects; {len(cases)} court cases; 15 sentences')

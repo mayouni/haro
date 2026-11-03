@@ -1667,6 +1667,28 @@ grew by 7 lines and the judge lives apart. **What building found** (HF-137): the
 1.3; plants found four missing fixtures and two decisions; a global first assigned in a function is global on this VM. **Not done, named**: a whole
 declaration as the judged value; sets from a world's symbols or a kind's seat names; stzzui's own declaration.
 
+## The thirty-third rung -- Haro v0.33, what a family of kinds shares, said once: INCLUDES, ON a FORM, EXCEPT and a quantifier over a FORM -- 2026-11-03
+
+**Central's item 4 and S14** (stzzui's seam S5: four seats written on ten kinds and 40 of 60 constraints written ten times), on the author's word "Items 4 and S14", built by the
+haro-charter desk (D47). `INCLUDES [form]` on a kind, a constraint `ON` a FORM (with `EXCEPT [kind]`), and `some | all | earlier | exists` over a FORM are **sugar the meta-court
+resolves**: the court, the forge and `cond_lib.haro` never see them. S14 is answered by what the condition language always did: one `where` reads two lists.
+
+    v33/fixtures.json                   31 meta fixtures, written before any code read an INCLUDES (ec856e3, 686c6f5; A11, A12 and R19 added after the code): 12 accepts and 19 rejects
+    medium_v33.haro, v33/medium_expanded.haro   the world written with the forms, and the same world written out by hand: the definition of the sugar
+    medium/                             fifteen sentences; v33/court_cases.json: 18 cases, judged by guard stage 38
+    form_expand.haro                    (the meta-court only) INCLUDES, the form table, ON a FORM and EXCEPT, the quantifier over a FORM, and CondPrint, the canonical text
+    cond_rt.haro, v33/cond_court.py     the printer proved on every condition the repository holds, on haro and its checked build
+    v33/plants.py                       the protections of the rung switched off in turn
+    v30/block_court.py                  the family's one list of sentence extensions, and a check that a language's declared extension is counted or ignored for a reason
+    v33/GRAMMAR.md                      the forms, the definition, S14, the real test on StzZui's declaration, what building found
+
+**Results.** 31 of 31 meta fixtures and 18 of 18 cases, `haro` and its checked build byte-identical; **the court forged from the language with the forms is byte-identical to the one
+forged from its hand-expanded twin**; the printer round-trips 213 of 217 conditions (the 4 are written to be refused); the rung's 34 protections, each switched off in turn,
+load-bearing; the whole 38-stage guard passes (1,766 s on haro and its checked build); the committed courts byte-identical to HEAD. Stage 6: the cold compile 145.6 ms, the edit 16.2 ms -- no court changed. **On StzZui's own declaration** (a read-only copy of
+origin/main 870c45c): 1,169 lines become 883 and 136 constraints written become 93; the forged court holds the same 136 constraint rows plus one form row. **What building found**
+(HF-138): S14 was already expressible; EXCEPT came from the data; the plants found three fixtures and a dead guard; the family's extension list drifted a second time and is now
+one copy with a check. **Not done, named**: StzZui's rewrite and its fixtures against it.
+
 ## The names -- `.haro`, not `.stzu` -- corrected 2026-10-02
 
 **At the author's word ("we agreed to use .haro instead of .stzu, no?").** D1 was ratified
@@ -1825,3 +1847,6 @@ whole guard re-run on the renamed tree: 28 + 30 + 27 + 23, 117 of 120, 32 of 32,
 28. ~~DEFINE PATTERN~~ -- built 2026-11-03 as Haro v0.32, the thirty-second rung above: a rule over a seat, its sets collected by the court,
    judged by the pattern engine; Central's item 3, the value join, answered. Next: Central's items 4 (a seat shared by ten kinds) and S14 (a
    second list read in one constraint form), each owed, then step 3 of BLOCKS.md 3.5 (the memo spelling) when Q-B2's text lands at Ringua.
+29. ~~Central's items 4 and S14~~ -- built 2026-11-03 as Haro v0.33, the thirty-third rung above: INCLUDES, ON a FORM, EXCEPT and a quantifier over a FORM, resolved by the
+   meta-court; S14 answered. Next: COMPASS-KERN-03's field check (`spike/ask_lib.haro`) and the constitution desk's ask for a per-seat severity design, each owed; stzzui rewrites
+   its declaration with the forms (its own); step 3 of BLOCKS.md 3.5, the memo spelling, when Q-B2's text lands at Ringua.

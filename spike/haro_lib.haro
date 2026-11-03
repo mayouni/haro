@@ -1491,7 +1491,7 @@ func StzuDeclare(cSrc)
 
 	# v0.33: INCLUDES, ON a FORM and a quantifier over a FORM are sugar: resolved here, before any pass reads a kind's seats (form_expand.haro)
 	aDeclarations = StzuExpandIncludes(aDeclarations, aForms, aDeclared)
-	aFormTab = StzuFormTable(aDeclarations, aDeclared)
+	aFormTab = StzuFormTable(aDeclarations)
 	aConstraints = StzuExpandConstraints(aConstraints, aFormTab, aDeclarations, aDeclared)
 	aViews = StzuExpandViews(aViews, aFormTab, aDeclarations)
 

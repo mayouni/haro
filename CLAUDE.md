@@ -344,7 +344,7 @@ the cut say `haro/X`, `X.ring`, `rnxc` and "the oracle"**: read them as this rep
                      (one heavy job each: the grammar's parser is 21 MB of C). vm/NOTES.md: what the fork kept and why
     spike/           the meta-court (haro.haro, haro_lib.haro), the forge (forge.haro), the libraries, the forged courts and grammars,
                      the letters' declarations (*_vNN.haro) and sentences, and vNN/ per rung: fixtures.json (written FIRST),
-                     GRAMMAR.md (prose second), court cases. spike/haro_forge.py is THE GUARD: 37 stages, --stage=N runs one,
+                     GRAMMAR.md (prose second), court cases. spike/haro_forge.py is THE GUARD: 38 stages, --stage=N runs one,
                      --plant must fail it. spike/f/ringflex_record.json: RingFlex's own court's answers, recorded (D41)
     study/           the measurements behind design memos (codegraph, phase15, rebol). Studies and probes OF Ring keep Ring 1.27 as
                      their subject (paths.RING_ORACLE), never as a judge
@@ -382,19 +382,17 @@ The records: `CHARTER.md` (section 13 the decisions, D1 to D42; section 15 the v
   Get-Content/Set-Content; every checkout is LF (`.gitattributes`); commit explicit paths, never `git add -A`.
 - **Versions**: take the next free version number and say so -- the constitution desk takes them too (it holds v0.29).
 
-## Where it stands -- 2026-11-03, after v0.32
+## Where it stands -- 2026-11-03, after v0.33
 
-- The cut is done and proved (SPIKE.md "The cut"; D39-D41; HF-134). **v0.30** (D44, HF-135, stage 35): one reader of C6, `spike/block_lib.haro`.
-  **v0.31** (D45, HF-136, stage 36): the pattern engine, `spike/pattern_lib.haro`, judged beside its Python reference, the two refusing a difference
-  by name (D43). **v0.32 is built** (D46, HF-137, stage 37): `DEFINE PATTERN` -- a rule over a seat, its sets collected by the court, judged by the
-  engine; `spike/grants_v32.haro` the world, `spike/pattern_judge.haro` the court's half, loaded only by a language that declares a pattern. Central's
-  item 3, the value join, is answered. Stage 6 is judged by D42: a sentence edit under 50 ms (14.7 to 18.7 ms today), the cold compile under a 150 ms ceiling (136.5 to
-  147.8 ms in five quiet runs today, and 169.7 once under the load of other sessions): **the margin is thin and the gate flaked once**; every other stage passes.
-- D43 is the twin-court clause (COMPASS-REBOL-03, ruled 2026-11-03). Of BLOCKS.md's four questions: Q-B1 is built (`?` is C6, and `OPTIONAL` sees it in a
-  rule); Q-B2's two amendments are refused by name until Ringua's text lands (then v30's F07 and F08 move from `refused` to `same`); Q-B3 the block
-  export of a program is not started; Q-B4 the round-trip court the elders waited for exists -- asking their owners is Central's.
-- **Next: Central's items 4 (one seat shared by ten kinds) and S14 (a second list read in one constraint form)**, each owed and not yet examined;
-  COMPASS-KERN-03's field check (`spike/ask_lib.haro`); the constitution desk's ask for a per-seat severity design. Then step 3 of BLOCKS.md 3.5, the memo
-  spelling, when Q-B2's text lands at Ringua. A rung with the pattern in a world's symbols or a kind's seat names, or a whole declaration as the judged
-  value, waits for a customer.
+- The cut is done and proved (SPIKE.md "The cut"; D39-D41; HF-134). **v0.30** (D44, stage 35): one reader of C6. **v0.31** (D45, stage 36): the pattern engine, judged beside its Python
+  reference. **v0.32** (D46, stage 37): `DEFINE PATTERN`, the value join. **v0.33 is built** (D47, HF-138, stage 38): `INCLUDES`, `ON` a FORM with `EXCEPT`, and a quantifier over a
+  FORM -- sugar the meta-court resolves (`spike/form_expand.haro`), so the court is unchanged and the court forged from the language with the forms is byte-identical to its
+  hand-expanded twin; S14 answered (one `where` reads two lists). Central's items 2, 3, 4 and S14 are answered. Stage 6 is judged by D42: a sentence edit under 50 ms (16.2 ms today), the
+  cold compile under a 150 ms ceiling (145.6 ms today; no court changed in v0.32 or v0.33); it is a wall-clock gate on a machine other sessions share, and flaked once (v0.32).
+- D43 is the twin-court clause. Of BLOCKS.md's four questions: Q-B1 is built (`?` is C6, and `OPTIONAL` sees it in a rule); Q-B2's two amendments are refused by name until Ringua's text
+  lands; Q-B3 the block export of a program is not started; Q-B4 the round-trip court the elders waited for exists -- asking their owners is Central's.
+- **Next: COMPASS-KERN-03's field check (`spike/ask_lib.haro`) and the constitution desk's ask for a per-seat severity design**, each owed. stzzui rewrites its declaration with the forms (its
+  own; `runtime/zui/rewrite.py` of this desk showed the way: 1,169 lines to 883). Then step 3 of BLOCKS.md 3.5, the memo spelling, when Q-B2's text lands at Ringua. A rung with the pattern in a
+  world's symbols or a kind's seat names, or a whole declaration as the judged value, waits for a customer.
+- A language's declared EXTENSION is counted by the family of the round trip and of FAM1, or ignored for a stated reason, and a check fails when it is neither (`v30/block_court.py`).
 - This working copy carries CRLF in 107 tracked files while the repository holds LF (HF-135): normalise a file before an exact-text edit; a fresh clone is clean.

@@ -109,8 +109,8 @@ family = {
     'name': "the declaration form, written once as a pattern, over every declaration and sentence of the spike: a keyword, a name, AS, a group, RATIONALE and its string",
     'rules': {'decl': '[LIT DEFINE KEYWORD WORD LIT AS GROUP LIT RATIONALE STRING]', 'main': '[SOME RULE decl END]'},
     'start': 'main',
-    'texts': 104,   # 91 at v0.31; v0.32 added grants_v32.haro and the twelve .grant sentences, and the family follows the spike (changed after the court spoke)
-    'matching': 98,   # 85 at v0.31; the thirteen new texts each match the declaration form
+    'texts': 121,   # 91 at v0.31; v0.32 added grants_v32.haro and the twelve .grant sentences (104), v0.33 medium_v33.haro, its twin and the fifteen .medium sentences (121): the family follows the spike (changed after the court spoke, twice)
+    'matching': 115,   # 85 at v0.31, 98 at v0.32; the seventeen texts of v0.33 each match the declaration form
     'unmatched': {
         'f/missing-rationale.f': 'a sentence written to lack its RATIONALE (its second declaration)',
         'f/operator-in-guard.f': 'unreadable: an operator is not C6 (a text written to be refused)',

@@ -84,14 +84,13 @@ func CondDump(x)
 
 # ---- the kinds that include a FORM ---------------------------------------------------------------------------------------------
 
-# [[form, [kind, ...]], ...] in the order the kinds are declared; only a name that resolves to a FORM, and that some kind includes, is in it
-func StzuFormTable(aDecls, aDeclared)
+# [[form, [kind, ...]], ...] in the order the kinds are declared; only a FORM some kind includes is in it (a name that is no FORM is a finding of INCLUDES, and the language is refused)
+func StzuFormTable(aDecls)
 	aTab = []
 	for i = 1 to len(aDecls)
 		if len(aDecls[i]) < 9 loop ok
 		aInc = aDecls[i][9]
 		for j = 1 to len(aInc)
-			if DeclaredKind(aDeclared, aInc[j]) != "FORM" loop ok
 			nAt = StzuFormAt(aTab, aInc[j])
 			if nAt = 0
 				aNew = [aInc[j], [aDecls[i][1]]]

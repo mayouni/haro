@@ -1,7 +1,7 @@
 {
  "grammar": "haro",
  "version": "0.33",
- "comment": "Written BEFORE any code reads INCLUDES (the W discipline). v0.33 answers Central's item 4 (stzzui's S5: four seats and 40 of 60 constraints written ten times) and S14. INCLUDES [form] on a DECLARATION; ON a FORM, and a quantifier (some, all, earlier, exists) over a FORM, expand over the kinds that include it. All of it is sugar the meta-court resolves: the court never sees it, which the guard proves by forging the hand-expanded twin and comparing the courts byte for byte. A1-A10 accept (A7 and A8 pin that no existing reading changes); R1-R18 refuse, each by the fragment of why. R6, R7 and R9 keep refusals the language already spoke.",
+ "comment": "Written BEFORE any code reads INCLUDES (the W discipline). v0.33 answers Central's item 4 (stzzui's S5: four seats and 40 of 60 constraints written ten times) and S14. INCLUDES [form] on a DECLARATION; ON a FORM, and a quantifier (some, all, earlier, exists) over a FORM, expand over the kinds that include it. All of it is sugar the meta-court resolves: the court never sees it, which the guard proves by forging the hand-expanded twin and comparing the courts byte for byte. A1-A12 accept (A7 and A8 pin that no existing reading changes); R1-R19 refuse, each by the fragment of why. R6, R7 and R9 keep refusals the language already spoke.",
  "accepts": [
   {
    "id": "A1",
@@ -116,6 +116,28 @@
      "constraints": 2
     }
    }
+  },
+  {
+   "id": "A11",
+   "name": "a quantifier over a FORM inside the where of another is expanded too (added after the code, found by planting it off)",
+   "source": "DEFINE LANGUAGE medium AS (VERSION \"0.33\", GRAMMAR \"0.33\", COURT \"x\", EXTENSION \".medium\") RATIONALE \"x\"\nDEFINE MENU intents AS (WORDS [confirm, cancel, zoom, read], CODE \"UNKNOWN_INTENT\") RATIONALE \"x\"\nDEFINE FORM guarantees AS (SEATS [satisfies: [intents]?, always_reachable: [intents]?, actor: name?]) RATIONALE \"x\"\nDEFINE DECLARATION screen AS (VERB \"SCREEN\", INCLUDES [guarantees], SEATS []) RATIONALE \"x\"\nDEFINE DECLARATION vibe AS (VERB \"VIBE\", INCLUDES [guarantees], SEATS [density: name?]) RATIONALE \"x\"\nDEFINE CONSTRAINT c AS (ON vibe, WHEN \"some guarantees where (some guarantees where actor present)\", MESSAGE \"m\") RATIONALE \"x\"\n",
+   "expect": {
+    "language": "medium",
+    "counts": {
+     "constraints": 1
+    }
+   }
+  },
+  {
+   "id": "A12",
+   "name": "a VIEW's WHERE may quantify over a FORM as a constraint's WHEN may (added after the code, found by planting it off)",
+   "source": "DEFINE LANGUAGE medium AS (VERSION \"0.33\", GRAMMAR \"0.33\", COURT \"x\", EXTENSION \".medium\") RATIONALE \"x\"\nDEFINE MENU intents AS (WORDS [confirm, cancel, zoom, read], CODE \"UNKNOWN_INTENT\") RATIONALE \"x\"\nDEFINE FORM guarantees AS (SEATS [satisfies: [intents]?, always_reachable: [intents]?, actor: name?]) RATIONALE \"x\"\nDEFINE DECLARATION screen AS (VERB \"SCREEN\", INCLUDES [guarantees], SEATS []) RATIONALE \"x\"\nDEFINE DECLARATION vibe AS (VERB \"VIBE\", INCLUDES [guarantees], SEATS [density: name?]) RATIONALE \"x\"\nDEFINE VIEW v AS (ONE \"screen\", WHERE \"some guarantees where actor present\") RATIONALE \"x\"\n",
+   "expect": {
+    "language": "medium",
+    "counts": {
+     "views": 1
+    }
+   }
   }
  ],
  "rejects": [
@@ -220,6 +242,12 @@
    "name": "EXCEPT names a kind twice",
    "source": "DEFINE LANGUAGE medium AS (VERSION \"0.33\", GRAMMAR \"0.33\", COURT \"x\", EXTENSION \".medium\") RATIONALE \"x\"\nDEFINE MENU intents AS (WORDS [confirm, cancel, zoom, read], CODE \"UNKNOWN_INTENT\") RATIONALE \"x\"\nDEFINE FORM guarantees AS (SEATS [satisfies: [intents]?, always_reachable: [intents]?, actor: name?]) RATIONALE \"x\"\nDEFINE DECLARATION screen AS (VERB \"SCREEN\", INCLUDES [guarantees], SEATS []) RATIONALE \"x\"\nDEFINE DECLARATION vibe AS (VERB \"VIBE\", INCLUDES [guarantees], SEATS [density: name?]) RATIONALE \"x\"\nDEFINE CONSTRAINT c AS (ON guarantees, EXCEPT [vibe, vibe], WHEN \"actor present\", MESSAGE \"m\") RATIONALE \"x\"\n",
    "refusal": "EXCEPT names 'vibe' twice"
+  },
+  {
+   "id": "R19",
+   "name": "an unreadable condition in a language that has forms is the validator's to speak of, quoting the text as written (added after the code, found by planting it off)",
+   "source": "DEFINE LANGUAGE medium AS (VERSION \"0.33\", GRAMMAR \"0.33\", COURT \"x\", EXTENSION \".medium\") RATIONALE \"x\"\nDEFINE MENU intents AS (WORDS [confirm, cancel, zoom, read], CODE \"UNKNOWN_INTENT\") RATIONALE \"x\"\nDEFINE FORM guarantees AS (SEATS [satisfies: [intents]?, always_reachable: [intents]?, actor: name?]) RATIONALE \"x\"\nDEFINE DECLARATION screen AS (VERB \"SCREEN\", INCLUDES [guarantees], SEATS []) RATIONALE \"x\"\nDEFINE DECLARATION vibe AS (VERB \"VIBE\", INCLUDES [guarantees], SEATS [density: name?]) RATIONALE \"x\"\nDEFINE CONSTRAINT c AS (ON vibe, WHEN \"some guarantees where (\", MESSAGE \"m\") RATIONALE \"x\"\n",
+   "refusal": "condition: expected a seat, found '' -- in 'some guarantees where ('"
   },
   {
    "id": "R18",

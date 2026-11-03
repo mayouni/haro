@@ -1303,6 +1303,19 @@ states principle 14.
   nothing more -- the court library grew by 7 lines (+1.3 ms of cold compile); the meta-court loads the engine for the bound, +15.1 ms of cold start (116.2 to 131.3 ms).
   *Not done, named:* a whole declaration as the judged value; sets from a world's symbols or a kind's seat names (BLOCKS.md 4.2); stzzui's
   own declaration is stzzui's to rewrite.
+- **D47 -- what a family of kinds shares is said once: INCLUDES, ON a FORM, EXCEPT and a quantifier over a FORM, sugar the meta-court resolves** (Central's item 4 of
+  2026-10-31, stzzui's S5, and S14; on the author's word "Items 4 and S14", 2026-11-03; `haro/spike/v33/GRAMMAR.md`; HF-138; the thirty-third rung; guard stage 38).
+  `INCLUDES [form, ...]` on a DECLARATION puts the seats of the FORMs first and its own `SEATS` after; `ON form` on a CONSTRAINT makes it once for each kind that includes the
+  FORM, named `<constraint>_<kind>`; `EXCEPT [kind, ...]` there skips the kinds it names; `some | all | earlier | exists` over a FORM ranges over the including kinds (`or`, and
+  `and` for `all`). **The court never sees any of it**: the meta-court resolves it, the forge, the court and `cond_lib.haro` are unchanged, and the definition is a test -- a language
+  written with the forms forges a court and a grammar byte-identical to its hand-expanded twin, on `haro` and on its checked build. An existing reading never changes (a seat of the
+  constraint's kind named like a FORM wins; a FORM nobody includes is no quantifier head and `ON` it keeps its refusal). **S14 is answered**: reading two lists in one `where`
+  was always expressible (`some K where a contains V or b contains V`). *Readings taken by the desk, within the rung, for the author to refuse:* `EXCEPT` (found by rewriting
+  StzZui's real declaration: two of its five repeated stems differ for one kind); `SEATS` stays required, so a kind that adds nothing writes `SEATS []`; the FORM's seats come
+  first; a FORM has no `INCLUDES`; a `VIEW`'s `ON` is a kind and only its `WHERE` ranges over a FORM. *Cost:* the meta-court loads `form_expand.haro` (331 lines, +6.1 ms of cold
+  start, alternating A/B); no court pays anything; the printer that writes an expanded condition back is proved on 217 conditions. *Measured on StzZui's own declaration* (read-only,
+  origin/main 870c45c): 1,169 lines become 883 and 136 constraints written become 93; the forged court holds the same 136 constraint rows (in another order for the two `EXCEPT`
+  stems) plus one form row, and the grammar is byte-identical. *Not done, named:* StzZui's rewrite and its 57 fixtures against it are StzZui's.
 - **D23 -- `rnxc fmt` is a Ring++ feature, not held for Haro** (CODEGRAPH Q4, ruled on the author's delegation, 2026-10-05: "take
   whatever decision you think is wiser on my behalf"). It is a verb of the one binary (commitment 5), depends on nothing of Haro's, is
   judged against the oracle and refuses what Ring refuses (58 of 6,061 Softanza files, 57 of them Ring's own refusals). It ships inside
