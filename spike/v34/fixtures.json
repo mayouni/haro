@@ -1,0 +1,84 @@
+{
+ "grammar": "haro",
+ "version": "0.34",
+ "comment": "Written BEFORE any code reads FIELDS (the W discipline). v0.34 is COMPASS-KERN-03's field check: an ASK may name where the schema of the kind asked lives, FIELDS seat.seat, and the forged court's ask verb then refuses a WHERE or ORDER BY that names a field the declaration does not declare. The module docstring of gen_fixtures.py states the finding the rung started from (the world declared no schema) and the divergence from zing. A1-A3 accept; R1-R7 refuse, each by the fragment of why. A2 pins that nothing existing changes.",
+ "accepts": [
+  {
+   "id": "A1",
+   "name": "FIELDS records.fields: a seat of the kind asked that refers to a declaration, and a list of name: type pairs of that declaration",
+   "source": "DEFINE LANGUAGE q AS (VERSION \"0.34\", GRAMMAR \"0.34\", COURT \"x\", EXTENSION \".q\") RATIONALE \"x\"\nDEFINE EXPRESSION zexpr AS (OPERATORS [or, and, not, cmp, contains, add, sub, mul, div, round, neg], OPERANDS [number, text, flag, ref, agg], AGGREGATES [sum, count], ABSENT missing, DIVISION calm, EQUALITY value) RATIONALE \"x\"\nDEFINE FORM field AS (SEATS [name: name, type: name]) RATIONALE \"x\"\nDEFINE DECLARATION entity AS (VERB \"ENTITY\", SEATS [fields: [field]]) RATIONALE \"x\"\nDEFINE DECLARATION flow AS (VERB \"FLOW\", SEATS [records: entity?]) RATIONALE \"x\"\nDEFINE ASK questions AS (FROM [flow], WHERE zexpr, CLAUSES [where, order, limit], FIELDS records.fields) RATIONALE \"x\"\n",
+   "expect": {
+    "language": "q",
+    "counts": {
+     "asks": 1
+    }
+   }
+  },
+  {
+   "id": "A2",
+   "name": "an ASK without FIELDS is the ASK it was: nothing existing changes",
+   "source": "DEFINE LANGUAGE q AS (VERSION \"0.34\", GRAMMAR \"0.34\", COURT \"x\", EXTENSION \".q\") RATIONALE \"x\"\nDEFINE EXPRESSION zexpr AS (OPERATORS [or, and, not, cmp, contains, add, sub, mul, div, round, neg], OPERANDS [number, text, flag, ref, agg], AGGREGATES [sum, count], ABSENT missing, DIVISION calm, EQUALITY value) RATIONALE \"x\"\nDEFINE FORM field AS (SEATS [name: name, type: name]) RATIONALE \"x\"\nDEFINE DECLARATION entity AS (VERB \"ENTITY\", SEATS [fields: [field]]) RATIONALE \"x\"\nDEFINE DECLARATION flow AS (VERB \"FLOW\", SEATS [records: entity?]) RATIONALE \"x\"\nDEFINE ASK questions AS (FROM [flow], WHERE zexpr, CLAUSES [where, order, limit]) RATIONALE \"x\"\n",
+   "expect": {
+    "language": "q",
+    "counts": {
+     "asks": 1
+    }
+   }
+  },
+  {
+   "id": "A3",
+   "name": "two kinds may be asked, each with the seat",
+   "source": "DEFINE LANGUAGE q AS (VERSION \"0.34\", GRAMMAR \"0.34\", COURT \"x\", EXTENSION \".q\") RATIONALE \"x\"\nDEFINE EXPRESSION zexpr AS (OPERATORS [or, and, not, cmp, contains, add, sub, mul, div, round, neg], OPERANDS [number, text, flag, ref, agg], AGGREGATES [sum, count], ABSENT missing, DIVISION calm, EQUALITY value) RATIONALE \"x\"\nDEFINE FORM field AS (SEATS [name: name, type: name]) RATIONALE \"x\"\nDEFINE DECLARATION entity AS (VERB \"ENTITY\", SEATS [fields: [field]]) RATIONALE \"x\"\nDEFINE DECLARATION flow AS (VERB \"FLOW\", SEATS [records: entity?]) RATIONALE \"x\"\nDEFINE DECLARATION stream AS (VERB \"STREAM\", SEATS [records: entity?]) RATIONALE \"x\"\nDEFINE ASK questions AS (FROM [flow, stream], WHERE zexpr, CLAUSES [where, order, limit], FIELDS records.fields) RATIONALE \"x\"\n",
+   "expect": {
+    "language": "q",
+    "counts": {
+     "asks": 1
+    }
+   }
+  }
+ ],
+ "rejects": [
+  {
+   "id": "R1",
+   "name": "FIELDS names a seat the kind asked lacks",
+   "source": "DEFINE LANGUAGE q AS (VERSION \"0.34\", GRAMMAR \"0.34\", COURT \"x\", EXTENSION \".q\") RATIONALE \"x\"\nDEFINE EXPRESSION zexpr AS (OPERATORS [or, and, not, cmp, contains, add, sub, mul, div, round, neg], OPERANDS [number, text, flag, ref, agg], AGGREGATES [sum, count], ABSENT missing, DIVISION calm, EQUALITY value) RATIONALE \"x\"\nDEFINE FORM field AS (SEATS [name: name, type: name]) RATIONALE \"x\"\nDEFINE DECLARATION entity AS (VERB \"ENTITY\", SEATS [fields: [field]]) RATIONALE \"x\"\nDEFINE DECLARATION flow AS (VERB \"FLOW\", SEATS [records: entity?]) RATIONALE \"x\"\nDEFINE ASK questions AS (FROM [flow], WHERE zexpr, CLAUSES [where, order, limit], FIELDS ghost.fields) RATIONALE \"x\"\n",
+   "refusal": "FIELDS: 'ghost' is not a seat of flow"
+  },
+  {
+   "id": "R2",
+   "name": "the first seat is a list: a question's FROM declaration has one entity",
+   "source": "DEFINE LANGUAGE q AS (VERSION \"0.34\", GRAMMAR \"0.34\", COURT \"x\", EXTENSION \".q\") RATIONALE \"x\"\nDEFINE EXPRESSION zexpr AS (OPERATORS [or, and, not, cmp, contains, add, sub, mul, div, round, neg], OPERANDS [number, text, flag, ref, agg], AGGREGATES [sum, count], ABSENT missing, DIVISION calm, EQUALITY value) RATIONALE \"x\"\nDEFINE FORM field AS (SEATS [name: name, type: name]) RATIONALE \"x\"\nDEFINE DECLARATION entity AS (VERB \"ENTITY\", SEATS [fields: [field]]) RATIONALE \"x\"\nDEFINE DECLARATION flow AS (VERB \"FLOW\", SEATS [records: [entity]?]) RATIONALE \"x\"\nDEFINE ASK questions AS (FROM [flow], WHERE zexpr, CLAUSES [where, order, limit], FIELDS records.fields) RATIONALE \"x\"\n",
+   "refusal": "FIELDS: 'records' of flow must be one reference to a declaration"
+  },
+  {
+   "id": "R3",
+   "name": "the first seat is no reference to a declaration",
+   "source": "DEFINE LANGUAGE q AS (VERSION \"0.34\", GRAMMAR \"0.34\", COURT \"x\", EXTENSION \".q\") RATIONALE \"x\"\nDEFINE EXPRESSION zexpr AS (OPERATORS [or, and, not, cmp, contains, add, sub, mul, div, round, neg], OPERANDS [number, text, flag, ref, agg], AGGREGATES [sum, count], ABSENT missing, DIVISION calm, EQUALITY value) RATIONALE \"x\"\nDEFINE FORM field AS (SEATS [name: name, type: name]) RATIONALE \"x\"\nDEFINE DECLARATION entity AS (VERB \"ENTITY\", SEATS [fields: [field]]) RATIONALE \"x\"\nDEFINE DECLARATION flow AS (VERB \"FLOW\", SEATS [records: name?]) RATIONALE \"x\"\nDEFINE ASK questions AS (FROM [flow], WHERE zexpr, CLAUSES [where, order, limit], FIELDS records.fields) RATIONALE \"x\"\n",
+   "refusal": "FIELDS: 'records' of flow must refer to a declaration, not to 'name'"
+  },
+  {
+   "id": "R4",
+   "name": "the second seat is not a seat of the declaration the first refers to",
+   "source": "DEFINE LANGUAGE q AS (VERSION \"0.34\", GRAMMAR \"0.34\", COURT \"x\", EXTENSION \".q\") RATIONALE \"x\"\nDEFINE EXPRESSION zexpr AS (OPERATORS [or, and, not, cmp, contains, add, sub, mul, div, round, neg], OPERANDS [number, text, flag, ref, agg], AGGREGATES [sum, count], ABSENT missing, DIVISION calm, EQUALITY value) RATIONALE \"x\"\nDEFINE FORM field AS (SEATS [name: name, type: name]) RATIONALE \"x\"\nDEFINE DECLARATION entity AS (VERB \"ENTITY\", SEATS [fields: [field]]) RATIONALE \"x\"\nDEFINE DECLARATION flow AS (VERB \"FLOW\", SEATS [records: entity?]) RATIONALE \"x\"\nDEFINE ASK questions AS (FROM [flow], WHERE zexpr, CLAUSES [where, order, limit], FIELDS records.ghost) RATIONALE \"x\"\n",
+   "refusal": "FIELDS: 'ghost' is not a seat of entity"
+  },
+  {
+   "id": "R5",
+   "name": "the second seat is no list of name: type pairs",
+   "source": "DEFINE LANGUAGE q AS (VERSION \"0.34\", GRAMMAR \"0.34\", COURT \"x\", EXTENSION \".q\") RATIONALE \"x\"\nDEFINE EXPRESSION zexpr AS (OPERATORS [or, and, not, cmp, contains, add, sub, mul, div, round, neg], OPERANDS [number, text, flag, ref, agg], AGGREGATES [sum, count], ABSENT missing, DIVISION calm, EQUALITY value) RATIONALE \"x\"\nDEFINE FORM field AS (SEATS [name: name, type: name]) RATIONALE \"x\"\nDEFINE DECLARATION entity AS (VERB \"ENTITY\", SEATS [fields: name]) RATIONALE \"x\"\nDEFINE DECLARATION flow AS (VERB \"FLOW\", SEATS [records: entity?]) RATIONALE \"x\"\nDEFINE ASK questions AS (FROM [flow], WHERE zexpr, CLAUSES [where, order, limit], FIELDS records.fields) RATIONALE \"x\"\n",
+   "refusal": "FIELDS: 'fields' of entity is not a list of name: type pairs"
+  },
+  {
+   "id": "R6",
+   "name": "FIELDS is written seat.seat",
+   "source": "DEFINE LANGUAGE q AS (VERSION \"0.34\", GRAMMAR \"0.34\", COURT \"x\", EXTENSION \".q\") RATIONALE \"x\"\nDEFINE EXPRESSION zexpr AS (OPERATORS [or, and, not, cmp, contains, add, sub, mul, div, round, neg], OPERANDS [number, text, flag, ref, agg], AGGREGATES [sum, count], ABSENT missing, DIVISION calm, EQUALITY value) RATIONALE \"x\"\nDEFINE FORM field AS (SEATS [name: name, type: name]) RATIONALE \"x\"\nDEFINE DECLARATION entity AS (VERB \"ENTITY\", SEATS [fields: [field]]) RATIONALE \"x\"\nDEFINE DECLARATION flow AS (VERB \"FLOW\", SEATS [records: entity?]) RATIONALE \"x\"\nDEFINE ASK questions AS (FROM [flow], WHERE zexpr, CLAUSES [where, order, limit], FIELDS records) RATIONALE \"x\"\n",
+   "refusal": "FIELDS is written seat.seat"
+  },
+  {
+   "id": "R7",
+   "name": "every kind asked has the seat: the second lacks it",
+   "source": "DEFINE LANGUAGE q AS (VERSION \"0.34\", GRAMMAR \"0.34\", COURT \"x\", EXTENSION \".q\") RATIONALE \"x\"\nDEFINE EXPRESSION zexpr AS (OPERATORS [or, and, not, cmp, contains, add, sub, mul, div, round, neg], OPERANDS [number, text, flag, ref, agg], AGGREGATES [sum, count], ABSENT missing, DIVISION calm, EQUALITY value) RATIONALE \"x\"\nDEFINE FORM field AS (SEATS [name: name, type: name]) RATIONALE \"x\"\nDEFINE DECLARATION entity AS (VERB \"ENTITY\", SEATS [fields: [field]]) RATIONALE \"x\"\nDEFINE DECLARATION flow AS (VERB \"FLOW\", SEATS [records: entity?]) RATIONALE \"x\"\nDEFINE DECLARATION stream AS (VERB \"STREAM\", SEATS [tag: name?]) RATIONALE \"x\"\nDEFINE ASK questions AS (FROM [flow, stream], WHERE zexpr, CLAUSES [where, order, limit], FIELDS records.fields) RATIONALE \"x\"\n",
+   "refusal": "FIELDS: 'records' is not a seat of stream"
+  }
+ ]
+}

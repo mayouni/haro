@@ -1,0 +1,305 @@
+{
+ "grammar": "Q",
+ "version": "0.34",
+ "ask": "questions",
+ "rows": [
+  {
+   "member": "Aminata",
+   "amount": 5000,
+   "round": 1
+  },
+  {
+   "member": "Moussa",
+   "amount": 2500,
+   "round": 1
+  },
+  {
+   "member": "Fatima",
+   "amount": 7500,
+   "round": 2
+  },
+  {
+   "member": "Aminata",
+   "amount": 5000,
+   "round": 1
+  },
+  {
+   "member": "Moussa",
+   "amount": 2500,
+   "round": 1
+  },
+  {
+   "member": "Fatima",
+   "amount": 7500,
+   "round": 2
+  },
+  {
+   "member": "Sanda",
+   "amount": "7500",
+   "round": 3
+  },
+  {
+   "member": "amina",
+   "amount": 100
+  },
+  {
+   "member": "Boubacar",
+   "amount": 12000,
+   "round": 2
+  },
+  {
+   "member": "Zeinab",
+   "amount": 5000,
+   "round": 3
+  }
+ ],
+ "comment": "Written BEFORE the check (the W discipline). The rows are zing's ledger (v07/q_cases.json); a case may carry its own. f01-f04 are zing's own questions (q02, q08, q03, q10) with their answers, asked of a sentence that declares its records: the check must change no answer. f05, f06, f12 and f14 are lawful and say what the check does NOT refuse; f07-f11 and f13 are the new refusals, marked haro_only: zing reads a missing field as missing and answers no rows. All 25 of zing's pinned questions are asked again, unchanged, on tontine.z by stage 10.",
+ "cases": [
+  {
+   "id": "f01",
+   "sentence": "tontine/records.z",
+   "query": "SELECT * FROM collect WHERE round = 1",
+   "expect": [
+    {
+     "member": "Aminata",
+     "amount": 5000,
+     "round": 1
+    },
+    {
+     "member": "Moussa",
+     "amount": 2500,
+     "round": 1
+    },
+    {
+     "member": "Aminata",
+     "amount": 5000,
+     "round": 1
+    },
+    {
+     "member": "Moussa",
+     "amount": 2500,
+     "round": 1
+    }
+   ],
+   "name": "zing's q02 on a flow whose records are declared: the same four rows, the check changes no answer"
+  },
+  {
+   "id": "f02",
+   "sentence": "tontine/records.z",
+   "query": "SELECT * FROM collect WHERE amount >= 7500 AND round = 2",
+   "expect": [
+    {
+     "member": "Fatima",
+     "amount": 7500,
+     "round": 2
+    },
+    {
+     "member": "Fatima",
+     "amount": 7500,
+     "round": 2
+    },
+    {
+     "member": "Boubacar",
+     "amount": 12000,
+     "round": 2
+    }
+   ],
+   "name": "zing's q08, declared"
+  },
+  {
+   "id": "f03",
+   "sentence": "tontine/records.z",
+   "query": "SELECT * FROM collect ORDER BY amount DESC LIMIT 1",
+   "expect": [
+    {
+     "member": "Boubacar",
+     "amount": 12000,
+     "round": 2
+    }
+   ],
+   "name": "zing's q03, declared: ORDER BY a declared field"
+  },
+  {
+   "id": "f04",
+   "sentence": "tontine/records.z",
+   "query": "SELECT * FROM collect WHERE round = 1 ORDER BY member DESC",
+   "expect": [
+    {
+     "member": "Moussa",
+     "amount": 2500,
+     "round": 1
+    },
+    {
+     "member": "Moussa",
+     "amount": 2500,
+     "round": 1
+    },
+    {
+     "member": "Aminata",
+     "amount": 5000,
+     "round": 1
+    },
+    {
+     "member": "Aminata",
+     "amount": 5000,
+     "round": 1
+    }
+   ],
+   "name": "zing's q10, declared: WHERE and ORDER BY together"
+  },
+  {
+   "id": "f05",
+   "sentence": "tontine/records.z",
+   "query": "SELECT * FROM collect WHERE status = \"active\"",
+   "expect": [],
+   "name": "a field the entity declares and the rows lack is lawful, and matches nothing: a declared field is not a field every row has"
+  },
+  {
+   "id": "f06",
+   "sentence": "tontine/records.z",
+   "query": "SELECT * FROM collect ORDER BY member.first",
+   "expect": [
+    {
+     "member": "Aminata",
+     "amount": 5000,
+     "round": 1
+    },
+    {
+     "member": "Moussa",
+     "amount": 2500,
+     "round": 1
+    },
+    {
+     "member": "Fatima",
+     "amount": 7500,
+     "round": 2
+    },
+    {
+     "member": "Aminata",
+     "amount": 5000,
+     "round": 1
+    },
+    {
+     "member": "Moussa",
+     "amount": 2500,
+     "round": 1
+    },
+    {
+     "member": "Fatima",
+     "amount": 7500,
+     "round": 2
+    },
+    {
+     "member": "Sanda",
+     "amount": "7500",
+     "round": 3
+    },
+    {
+     "member": "amina",
+     "amount": 100
+    },
+    {
+     "member": "Boubacar",
+     "amount": 12000,
+     "round": 2
+    },
+    {
+     "member": "Zeinab",
+     "amount": 5000,
+     "round": 3
+    }
+   ],
+   "name": "a dotted name is judged by its head: member is declared, so member.first is lawful, and orders by what the rows hold (nothing: their own order)"
+  },
+  {
+   "id": "f07",
+   "sentence": "tontine/records.z",
+   "query": "SELECT * FROM collect WHERE ammount > 1",
+   "haro_only": true,
+   "refusal": "WHERE names 'ammount', which collect does not declare (its fields: id, member, amount, round, status)",
+   "name": "a typo in WHERE: refused before the question runs, naming the field, the flow and what it has"
+  },
+  {
+   "id": "f08",
+   "sentence": "tontine/records.z",
+   "query": "SELECT * FROM collect WHERE round = 1 AND nope CONTAINS \"x\"",
+   "haro_only": true,
+   "refusal": "WHERE names 'nope', which collect does not declare",
+   "name": "an undeclared field deep in a WHERE, beside a declared one"
+  },
+  {
+   "id": "f09",
+   "sentence": "tontine/records.z",
+   "query": "SELECT * FROM collect ORDER BY nope",
+   "haro_only": true,
+   "refusal": "ORDER BY names 'nope', which collect does not declare (its fields: id, member, amount, round, status)",
+   "name": "ORDER BY an undeclared field"
+  },
+  {
+   "id": "f10",
+   "sentence": "tontine/records.z",
+   "query": "SELECT * FROM collect WHERE SUM(nope) > 1",
+   "haro_only": true,
+   "refusal": "WHERE names 'nope', which collect does not declare",
+   "name": "an aggregate names a field too"
+  },
+  {
+   "id": "f11",
+   "sentence": "tontine/records.z",
+   "query": "SELECT * FROM collect ORDER BY nope.sub",
+   "haro_only": true,
+   "refusal": "ORDER BY names 'nope', which collect does not declare",
+   "name": "a dotted name whose head is not declared is refused by its head"
+  },
+  {
+   "id": "f12",
+   "sentence": "tontine/records.z",
+   "rows": [
+    {
+     "reponses": "5,5,5",
+     "score": 100
+    },
+    {
+     "reponses": "1",
+     "score": 20
+    }
+   ],
+   "query": "SELECT * FROM indice WHERE score > 50",
+   "expect": [
+    {
+     "reponses": "5,5,5",
+     "score": 100
+    }
+   ],
+   "name": "a name a step of the flow COMPUTEs is a field of its records, though no entity declares it"
+  },
+  {
+   "id": "f13",
+   "sentence": "tontine/records.z",
+   "rows": [
+    {
+     "reponses": "5,5,5",
+     "score": 100
+    }
+   ],
+   "query": "SELECT * FROM indice WHERE total > 1",
+   "haro_only": true,
+   "refusal": "WHERE names 'total', which indice does not declare (its fields: reponses, score)",
+   "name": "the fields of a flow are its entity's and what its steps compute, and no others"
+  },
+  {
+   "id": "f14",
+   "sentence": "tontine.z",
+   "query": "SELECT * FROM collect WHERE nope = 1",
+   "expect": [],
+   "name": "a flow that writes no RECORDS is not field-checked: zing's reading stands, a missing field is missing, and no rows match"
+  },
+  {
+   "id": "f15",
+   "sentence": "tontine/records.z",
+   "query": "SELECT * FROM collect WHERE round = 1 ORDER BY amount LIMIT 0",
+   "expect": [],
+   "name": "LIMIT 0 on declared fields: unchanged"
+  }
+ ]
+}

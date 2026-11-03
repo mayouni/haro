@@ -1,0 +1,73 @@
+-- records.z -- tontine.z with the schema declared (z_v34.haro, COMPASS-KERN-03's field check): `collect` says RECORDS deposit, `indice` says RECORDS survey, and a new
+-- ENTITY survey declares the one field its records carry besides the score the flow computes. Everything else is tontine.z as it stands.
+-- tontine.z -- zing's "tontine conformance fixtures v1" source, re-expressed in the
+-- Grammar Commons' shape as a sentence of Z (z_v06.haro). Every declaration of the
+-- original is here with its words; what moved is notation: a field list is FIELDS
+-- [name: type], an enum is its own declaration, a flow's steps are STEP declarations
+-- that name their FLOW and their ORDER, FORMULA's target is COMPUTE, and the landing
+-- zone's AS JSON INTO is FORMAT and INTO. The cases of the fixture file are judged on
+-- this sentence unadapted. Under the constitution (z_v26.haro, ZC5) the landing zone gained one
+-- line, HELD_BY the_commons: who holds the deposits (Art. 5). tontine/tontine_unheld.z keeps the
+-- sentence as zing wrote it, which the court now refuses, naming the article.
+-- Under the field tag (z_v27.haro, ZTAG) the member field gained one word, `personal`: what a question
+-- tells of it leaves the circle redacted; the treasurer's own question is answered whole, by consent.
+
+DEFINE ENUM deposit_status AS (
+  WORDS [staged, audited, active]
+) RATIONALE "The states a deposit passes through: staged by the collector, audited by the treasurer, active in the round"
+
+DEFINE ENTITY deposit AS (
+  FIELDS [id: uuid, member: text personal, amount: currency, round: int, status: deposit_status]
+) RATIONALE "One member's contribution to one round of the circle"
+
+DEFINE ENTITY survey AS (
+  FIELDS [reponses: text]
+) RATIONALE "One answered satisfaction survey; the score is computed in-flow and is not a declared field"
+
+DEFINE NORM positive_deposit AS (
+  RULE "amount > 0",
+  MESSAGE "A deposit must bring something to the circle"
+) RATIONALE "A deposit of nothing is not a deposit"
+
+DEFINE FLOW collect AS (RECORDS ghost) RATIONALE "The collector records; the treasurer audits"
+
+DEFINE STEP record AS (
+  FLOW collect, ORDER 1, ACTOR collector,
+  VALIDATE "member != ''",
+  ON_FAIL "NO_MEMBER"
+) RATIONALE "A deposit is somebody's"
+
+DEFINE STEP audit AS (
+  FLOW collect, ORDER 2, ACTOR treasurer,
+  ENFORCING positive_deposit,
+  ON_SUCCESS commit_to_bedrock
+) RATIONALE "The treasurer holds the deposit to the norm and commits it"
+
+DEFINE FLOW indice AS (RECORDS survey) RATIONALE "The satisfaction survey computes its index in-flow"
+
+DEFINE STEP saisie AS (
+  FLOW indice, ORDER 1, ACTOR collector,
+  VALIDATE "COUNT(reponses) >= 1",
+  ON_FAIL "VIDE"
+) RATIONALE "An empty survey is refused before computing"
+
+DEFINE STEP calcul AS (
+  FLOW indice, ORDER 2, ACTOR system,
+  COMPUTE score,
+  FORMULA "ROUND((SUM(reponses) / (COUNT(reponses) * 5)) * 100)"
+) RATIONALE "The index is the mean answer over five, as a percentage, rounded"
+
+DEFINE STEP controle AS (
+  FLOW indice, ORDER 3, ACTOR treasurer,
+  ENFORCING indice_plafond,
+  ON_SUCCESS commit_to_bedrock
+) RATIONALE "The index is held to its ceiling and committed"
+
+DEFINE NORM indice_plafond AS (
+  RULE "score >= 0 AND score <= 100",
+  MESSAGE "An index lives between 0 and 100"
+) RATIONALE "A percentage"
+
+DEFINE LANDING_ZONE cotisations AS (
+  FORMAT json, INTO collect, HELD_BY the_commons
+) RATIONALE "Deposits exported by the mobile collector land here; every record walks the flow, and the circle itself holds them"

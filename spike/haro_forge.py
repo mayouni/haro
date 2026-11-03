@@ -92,7 +92,7 @@ def judge_stzu(exe, label, fixtures=STZU_FIXTURES):
     counts), world and points."""
     doc = json.load(open(fixtures, encoding='utf-8'))
     # the pinned v0.1 judge is stzu's; everything since is Haro's (D1)
-    assert doc['grammar'] in ('stzu', 'haro') and doc['version'] in ('0.1', '0.2', '0.3', '0.4', '0.5', '0.6', '0.7', '0.8', '0.9', '0.10', '0.11', '0.12', '0.13', '0.16', '0.17', '0.23', '0.24', '0.25', '0.26', '0.27', '0.28', '0.32', '0.33')
+    assert doc['grammar'] in ('stzu', 'haro') and doc['version'] in ('0.1', '0.2', '0.3', '0.4', '0.5', '0.6', '0.7', '0.8', '0.9', '0.10', '0.11', '0.12', '0.13', '0.16', '0.17', '0.23', '0.24', '0.25', '0.26', '0.27', '0.28', '0.32', '0.33', '0.34')
     passed = failed = 0
     outputs = {}
     with tempfile.TemporaryDirectory() as td:
