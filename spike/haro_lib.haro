@@ -54,6 +54,7 @@
 load "cond_lib.haro"
 load "block_lib.haro"
 load "pattern_lib.haro"
+load "form_expand.haro"
 
 # ---- the closed menus -------------------------------------------------------
 
@@ -100,7 +101,7 @@ func StzuClauses(cKind)
 	if cKind = "LANGUAGE"
 		return [["COURT", "string"], ["EXTENSION", "string"], ["GRAMMAR", "string"], ["VERSION", "string"]]
 	but cKind = "DECLARATION"
-		return [["CODES", "messagelist"], ["MESSAGES", "messagelist"], ["NAMES", "ident"], ["SEATS", "seatlist"], ["VERB", "string"]]
+		return [["CODES", "messagelist"], ["INCLUDES", "namelist"], ["MESSAGES", "messagelist"], ["NAMES", "ident"], ["SEATS", "seatlist"], ["VERB", "string"]]
 	but cKind = "FORM"
 		return [["SEATS", "seatlist"]]
 	but cKind = "EXPRESSION"
@@ -1170,7 +1171,10 @@ func StzuDeclare(cSrc)
 					if HasClause(aClauses, "MESSAGES") aMsgs = ClauseValue(aClauses, "MESSAGES") ok
 					# v0.11: a code per seat, for the envelope
 					aCodes = StzuCodesOf(aClauses, nLine, cName)
-					aDeclarations + [cName, cVerb, ClauseValue(aClauses, "SEATS"), cRationale, nLine, cNames, aMsgs, aCodes]
+					# v0.33: INCLUDES [form, ...] -- the seats of the FORMs come first; resolved after the whole file is read (form_expand.haro)
+					aInc = []
+					if HasClause(aClauses, "INCLUDES") aInc = ClauseValue(aClauses, "INCLUDES") ok
+					aDeclarations + [cName, cVerb, ClauseValue(aClauses, "SEATS"), cRationale, nLine, cNames, aMsgs, aCodes, aInc]
 				but cKind = "FORM"
 					aForms + [cName, ClauseValue(aClauses, "SEATS"), cRationale, nLine]
 				but cKind = "EXPRESSION"
@@ -1481,6 +1485,12 @@ func StzuDeclare(cSrc)
 			StzuBreak(bParsed, nStart, cErr)
 		done
 	end
+
+	# v0.33: INCLUDES, ON a FORM and a quantifier over a FORM are sugar: resolved here, before any pass reads a kind's seats (form_expand.haro)
+	aDeclarations = StzuExpandIncludes(aDeclarations, aForms, aDeclared)
+	aFormTab = StzuFormTable(aDeclarations)
+	aConstraints = StzuExpandConstraints(aConstraints, aFormTab, aDeclarations, aDeclared)
+	aViews = StzuExpandViews(aViews, aFormTab, aDeclarations)
 
 	# the resolution pass (order-free; a name resolving to nothing is refused now)
 	$aStzuUnions = aUnions

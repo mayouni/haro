@@ -82,6 +82,7 @@ STZU26_FIXTURES = os.path.join(HERE, 'v26', 'fixtures.json')
 STZU27_FIXTURES = os.path.join(HERE, 'v27', 'fixtures.json')
 STZU28_FIXTURES = os.path.join(HERE, 'v28', 'fixtures.json')
 STZU32_FIXTURES = os.path.join(HERE, 'v32', 'fixtures.json')
+STZU33_FIXTURES = os.path.join(HERE, 'v33', 'fixtures.json')
 
 
 def judge_stzu(exe, label, fixtures=STZU_FIXTURES):
@@ -91,7 +92,7 @@ def judge_stzu(exe, label, fixtures=STZU_FIXTURES):
     counts), world and points."""
     doc = json.load(open(fixtures, encoding='utf-8'))
     # the pinned v0.1 judge is stzu's; everything since is Haro's (D1)
-    assert doc['grammar'] in ('stzu', 'haro') and doc['version'] in ('0.1', '0.2', '0.3', '0.4', '0.5', '0.6', '0.7', '0.8', '0.9', '0.10', '0.11', '0.12', '0.13', '0.16', '0.17', '0.23', '0.24', '0.25', '0.26', '0.27', '0.28', '0.32')
+    assert doc['grammar'] in ('stzu', 'haro') and doc['version'] in ('0.1', '0.2', '0.3', '0.4', '0.5', '0.6', '0.7', '0.8', '0.9', '0.10', '0.11', '0.12', '0.13', '0.16', '0.17', '0.23', '0.24', '0.25', '0.26', '0.27', '0.28', '0.32', '0.33')
     passed = failed = 0
     outputs = {}
     with tempfile.TemporaryDirectory() as td:
@@ -175,7 +176,8 @@ def stage1():
                             ('v0.26, Z under the whole constitution -- the refusals Z met on its way (ZC5); no new clause', STZU26_FIXTURES),
                             ("v0.27, the field tag: a pair form's optional mark, PERSONAL reaching it, SAFEGUARDS on the ask and the voice (ZTAG)", STZU27_FIXTURES),
                             ('v0.28, CITES on every element that carries a CODE, and the word none (HARO-MENU-CITES-01)', STZU28_FIXTURES),
-                            ('v0.32, PATTERN: a rule over a seat, its sets collected by the court (BLOCKS.md 4.3)', STZU32_FIXTURES)):
+                            ('v0.32, PATTERN: a rule over a seat, its sets collected by the court (BLOCKS.md 4.3)', STZU32_FIXTURES),
+                            ("v0.33, INCLUDES, ON a FORM and a quantifier over a FORM: the sugar of a shared seat (Central's item 4, S5)", STZU33_FIXTURES)):
         print(f'stage 1 -- the Haro meta-court in pure Ring, judged by its fixtures ({label})')
         f1, o1 = judge_stzu(HARO_VM, 'haro', fixtures)
         f2, o2 = judge_stzu(TWIN, 'haro checked', fixtures)
@@ -3369,6 +3371,41 @@ def stage37():
     unjudged, two patterns refusing at once, each finding at the line of its clause."""
     return ledger_stage(37, GRANTS_STZU, GRANTS_CASES, 'grants', 'G1')
 
+MEDIUM_STZU = os.path.join(HERE, 'medium_v33.haro')
+MEDIUM_TWIN = os.path.join(HERE, 'v33', 'medium_expanded.haro')
+MEDIUM_CASES = os.path.join(HERE, 'v33', 'court_cases.json')
+def stage38():
+    """INCLUDES, ON a FORM and a quantifier over a FORM (v33/GRAMMAR.md; Central's item 4, stzzui's S5; S14): medium_v33.haro, a language written with the sugar,
+    forged on both runtimes byte-identical and judged on its fifteen cases over medium/ -- a constraint ON a FORM enforced on every kind that includes it, one where
+    reading two lists (S14), ALL over a FORM warning, a seat got from the FORM checked by its own MENU. And the definition of the sugar: v33/medium_expanded.haro, the
+    same language with every kind's seats and every constraint written out by hand, forges a court and a grammar BYTE-IDENTICAL to the sugar's, on both runtimes."""
+    failures = ledger_stage(38, MEDIUM_STZU, MEDIUM_CASES, 'medium', 'M1')
+    print('  the twin: v33/medium_expanded.haro, written out by hand, against the sugar')
+    twin_abs = os.path.join(paths.OUT, 'stage38-twin')
+    twin_rel = paths.rel(twin_abs, HERE)
+    os.makedirs(twin_abs, exist_ok=True)
+    for label, exe in (('haro', HARO_VM), ('checked', TWIN)):
+        for art in ('medium_court.haro', 'medium.gbnf'):
+            if os.path.exists(os.path.join(twin_abs, art)):
+                os.remove(os.path.join(twin_abs, art))
+        out = run_args(exe, ['forge.haro', MEDIUM_TWIN, twin_rel], HERE).strip()
+        if not out.startswith('forged medium'):
+            failures += 1
+            print(f'  FAIL the twin did not forge on {label}: {out[:120]}')
+            continue
+        for art in ('medium_court.haro', 'medium.gbnf'):
+            a = open(os.path.join(HERE, art), 'rb').read()
+            b = open(os.path.join(twin_abs, art), 'rb').read() if os.path.exists(os.path.join(twin_abs, art)) else b''
+            if a != b:
+                failures += 1
+                print(f'  FAIL {art}: the sugar and its hand-expanded twin differ on {label} ({len(a)} vs {len(b)} bytes)')
+            else:
+                print(f'  ok   {art}: the sugar and its hand-expanded twin are byte-identical on {label} ({len(a)} bytes)')
+    if PLANT:
+        failures += 1
+        print('  FAIL the twin -- PLANTED')
+    return failures
+
 PATTERN_COURT = os.path.join(HERE, 'v31', 'pattern_court.py')
 def stage36():
     """Haro v0.31, step 2 of COMPASS-REBOL-06/07 (v31/GRAMMAR.md): the pattern engine, pattern_lib.haro, judged by v31/pattern_court.py --
@@ -3545,5 +3582,7 @@ if __name__ == '__main__':
         failures += stage36()
     if stage in (None, 37) and os.path.exists(GRANTS_STZU) and os.path.exists(GRANTS_CASES):
         failures += stage37()
+    if stage in (None, 38) and os.path.exists(MEDIUM_STZU) and os.path.exists(MEDIUM_CASES):
+        failures += stage38()
     print(f'haro_forge: {"FAIL" if failures else "PASS"} ({failures} failure(s), {time.perf_counter()-t0:.1f} s)')
     sys.exit(1 if failures else 0)

@@ -1,0 +1,297 @@
+# form_expand.haro -- INCLUDES, ON a FORM and a quantifier over a FORM, resolved by the meta-court (Haro v0.33; Central's item 4, stzzui's S5, and S14).
+#
+# All three are SUGAR with a definition: the court, the forge and cond_lib.haro never see them, and the court forged from a language written with them is
+# byte-identical to the one forged from the same language written out by hand (haro_forge.py --stage=38 compares the two). This file is loaded by the
+# meta-court only (haro_lib.haro), so the court library every court loads does not grow.
+#
+#   INCLUDES [form, ...]  on a DECLARATION: the seats of the FORMs first, in order, then the kind's own SEATS; a seat may come once
+#   ON form               on a CONSTRAINT: made once for each kind that includes the FORM, named <constraint>_<kind>
+#   some | all | earlier | exists FORM  in a condition: the `or` (`and` for all) of the quantifier over each kind that includes the FORM; a name that is already a seat of
+#                         the constraint's kind keeps its meaning, so no reading that existed changes
+#
+# The expansion of a condition is made on its parse and printed back by CondPrint, the canonical text: tokens joined by single spaces, a quantifier always in
+# parentheses, an `or` under an `and` (or either under a `not`) in parentheses. A condition with nothing to expand is never parsed or printed: it is stored as written.
+# Functions only. $bFormChanged is born by StzuExpandCond.
+
+# ---- the canonical text of a condition ----------------------------------------------------------------------------------------
+
+func CondIsBareWord(cV)
+	if len(cV) = 0 return 0 ok
+	for i = 1 to len(cV)
+		if not CondIsWordChar(cV[i]) return 0 ok
+	next
+	return 1
+
+# a value: a number, or a bare word where a bare word is a value (the right of = and != and a quantifier's named, and after contains), else quoted
+func CondPrintVal(cV, bBare)
+	if CondIsNumberText(cV) return cV ok
+	if bBare and CondIsBareWord(cV) and cV != "this" and cV != "self" return cV ok
+	return "'" + cV + "'"
+
+func CondPrintRight(aR, bBare)
+	if aR[1] = "path" return CondPathText(aR) ok
+	return CondPrintVal(aR[2], bBare)
+
+func CondPrint(aAst)
+	return CondPrintP(aAst, 0)
+
+# nCtx is the precedence the context needs: or 1, and 2, not 3, an atom 4; a node of lower precedence is parenthesised
+func CondPrintP(aAst, nCtx)
+	k = aAst[1]
+	if k = "or"
+		c = CondPrintP(aAst[2], 1) + " or " + CondPrintP(aAst[3], 2)
+		if nCtx > 1 return "(" + c + ")" ok
+		return c
+	ok
+	if k = "and"
+		c = CondPrintP(aAst[2], 2) + " and " + CondPrintP(aAst[3], 3)
+		if nCtx > 2 return "(" + c + ")" ok
+		return c
+	ok
+	if k = "not" return "not " + CondPrintP(aAst[2], 3) ok
+	if k = "exists" return "exists " + aAst[2] ok
+	if k = "quant"
+		c = "(" + aAst[2] + " " + CondPathText(aAst[3])
+		if not isNull(aAst[4]) c += " named " + CondPrintRight(aAst[4], 1) ok
+		if not isNull(aAst[5]) c += " where " + CondPrintP(aAst[5], 0) ok
+		return c + ")"
+	ok
+	if k = "cmp"
+		if aAst[2] = ">" or aAst[2] = "<" return CondPathText(aAst[3]) + " " + aAst[2] + " " + aAst[4][2] ok
+		return CondPathText(aAst[3]) + " " + aAst[2] + " " + CondPrintRight(aAst[4], 1)
+	ok
+	if k = "has" return CondPathText(aAst[3]) + " " + aAst[2] ok
+	if k = "contains" return CondPathText(aAst[2]) + " contains " + CondPrintVal(aAst[3], 1) ok
+	if k = "rel" return CondPathText(aAst[3]) + " " + aAst[2] + " " + CondPrintRight(aAst[4], 0) ok
+	if k = "cyclic" return CondPathText(aAst[2]) + " cyclic" ok
+	if k = "matches" return CondPathText(aAst[2]) + " matches " + aAst[3] ok
+	if k = "is" return "self is " + aAst[2] ok
+	if k = "reach" return CondPathText(aAst[2]) + " reachable" ok
+	if k = "refd" return CondPathText(aAst[2]) + " referenced" ok
+	if k = "keyed" return CondPathText(aAst[2]) + " keyed_by " + CondPrintRight(aAst[3], 0) ok
+	raise("condition: no printing for a node of kind '" + k + "'")
+
+# a parsed condition as one line, every string length-free and quoted: two conditions are one when their dumps are
+func CondDump(x)
+	if isNull(x) return "NULL" ok
+	if isString(x) return '"' + x + '"' ok
+	cOut = "["
+	for i = 1 to len(x)
+		if i > 1 cOut += " " ok
+		cOut += CondDump(x[i])
+	next
+	return cOut + "]"
+
+# ---- the kinds that include a FORM ---------------------------------------------------------------------------------------------
+
+# [[form, [kind, ...]], ...] in the order the kinds are declared; only a FORM some kind includes is in it
+func StzuFormTable(aDecls)
+	aTab = []
+	for i = 1 to len(aDecls)
+		if len(aDecls[i]) < 9 loop ok
+		aInc = aDecls[i][9]
+		for j = 1 to len(aInc)
+			nAt = StzuFormAt(aTab, aInc[j])
+			if nAt = 0
+				aNew = [aInc[j], [aDecls[i][1]]]
+				aTab + aNew
+			else
+				aTab[nAt][2] + aDecls[i][1]
+			ok
+		next
+	next
+	return aTab
+
+func StzuFormAt(aTab, cName)
+	for i = 1 to len(aTab)
+		if aTab[i][1] = cName return i ok
+	next
+	return 0
+
+# ---- INCLUDES -----------------------------------------------------------------------------------------------------------------
+
+func StzuSeatSource(cForm)
+	if cForm = "" return "its own SEATS" ok
+	return "the FORM '" + cForm + "'"
+
+# each declaration that includes FORMs gets the seats of the FORMs first, then its own; a refusal marks the declaration unresolved
+func StzuExpandIncludes(aDecls, aForms, aDeclared)
+	for i = 1 to len(aDecls)
+		if len(aDecls[i]) < 9 loop ok
+		aInc = aDecls[i][9]
+		if len(aInc) = 0 loop ok
+		try
+			aNew = []
+			aSrc = []
+			for j = 1 to len(aInc)
+				cF = aInc[j]
+				cK = DeclaredKind(aDeclared, cF)
+				if cK = "" StzuFail(aDecls[i][5], "INCLUDES: '" + cF + "' resolves to nothing in this declaration") ok
+				if cK != "FORM" StzuFail(aDecls[i][5], "INCLUDES must name a FORM; '" + cF + "' is a " + cK) ok
+				for m = 1 to j - 1
+					if aInc[m] = cF StzuFail(aDecls[i][5], "INCLUDES names '" + cF + "' twice") ok
+				next
+				aFS = []
+				for m = 1 to len(aForms)
+					if aForms[m][1] = cF aFS = aForms[m][2] ok
+				next
+				for m = 1 to len(aFS)
+					for q = 1 to len(aNew)
+						if aNew[q][1] = aFS[m][1]
+							StzuFail(aDecls[i][5], "seat '" + aFS[m][1] + "' of " + aDecls[i][1] + " comes twice: from " + StzuSeatSource(aSrc[q]) + " and from " + StzuSeatSource(cF))
+						ok
+					next
+					aNew + aFS[m]
+					aSrc + cF
+				next
+			next
+			aOwn = aDecls[i][3]
+			for m = 1 to len(aOwn)
+				for q = 1 to len(aNew)
+					if aNew[q][1] = aOwn[m][1]
+						StzuFail(aDecls[i][5], "seat '" + aOwn[m][1] + "' of " + aDecls[i][1] + " comes twice: from " + StzuSeatSource(aSrc[q]) + " and from " + StzuSeatSource(""))
+					ok
+				next
+				aNew + aOwn[m]
+				aSrc + ""
+			next
+			aDecls[i][3] = aNew
+		catch
+			StzuNote(cCatchError)
+			$aStzuUnresolved + aDecls[i][1]
+		done
+	next
+	return aDecls
+
+# ---- a quantifier over a FORM, and ON a FORM -----------------------------------------------------------------------------------
+
+# the fold of one node per kind: or (and, for all) in the order the kinds are declared
+func StzuFoldNodes(cOp, aNodes)
+	aR = aNodes[1]
+	for j = 2 to len(aNodes)
+		aN = [cOp, aR, aNodes[j]]
+		aR = aN
+	next
+	return aR
+
+func StzuFormAst(aAst, cOn, aTab, aDecls)
+	k = aAst[1]
+	if k = "or" or k = "and"
+		aL = StzuFormAst(aAst[2], cOn, aTab, aDecls)
+		aR = StzuFormAst(aAst[3], cOn, aTab, aDecls)
+		aN = [k, aL, aR]
+		return aN
+	ok
+	if k = "not"
+		aC = StzuFormAst(aAst[2], cOn, aTab, aDecls)
+		aN = ["not", aC]
+		return aN
+	ok
+	if k = "exists"
+		nF = StzuFormAt(aTab, aAst[2])
+		if nF > 0
+			$bFormChanged = 1
+			aNodes = []
+			for j = 1 to len(aTab[nF][2])
+				aE = ["exists", aTab[nF][2][j]]
+				aNodes + aE
+			next
+			return StzuFoldNodes("or", aNodes)
+		ok
+		return aAst
+	ok
+	if k = "quant"
+		aCond = aAst[5]
+		if not isNull(aCond) aCond = StzuFormAst(aCond, cOn, aTab, aDecls) ok
+		cHead = ""
+		if len(aAst[3][2]) = 1 cHead = aAst[3][2][1] ok
+		nF = 0
+		if cHead != "" nF = StzuFormAt(aTab, cHead) ok
+		# a name that is a seat of the constraint's kind keeps the meaning it had
+		if nF > 0 and cOn != ""
+			if not isNull(StzuSeatNamed(StzuSeatsOf(aDecls, cOn), cHead)) nF = 0 ok
+		ok
+		if nF > 0
+			$bFormChanged = 1
+			aNodes = []
+			for j = 1 to len(aTab[nF][2])
+				aP = ["path", [aTab[nF][2][j]]]
+				aQ = ["quant", aAst[2], aP, aAst[4], aCond]
+				aNodes + aQ
+			next
+			cOp = "or"
+			if aAst[2] = "all" cOp = "and" ok
+			return StzuFoldNodes(cOp, aNodes)
+		ok
+		aQ = ["quant", aAst[2], aAst[3], aAst[4], aCond]
+		return aQ
+	ok
+	return aAst
+
+# a condition as written, or its expansion in the canonical text when it quantifies over a FORM some kind includes
+func StzuExpandCond(cCond, cOn, aTab, aDecls)
+	if len(aTab) = 0 return cCond ok
+	$bFormChanged = 0
+	aAst = NULL
+	cErr = ""
+	try
+		aAst = CondParse(cCond)
+	catch
+		cErr = cCatchError
+	done
+	# an unreadable condition is the validator's to speak of, in its own words
+	if cErr != "" return cCond ok
+	aNew = StzuFormAst(aAst, cOn, aTab, aDecls)
+	if not $bFormChanged return cCond ok
+	return CondPrint(aNew)
+
+func StzuNameIn(cName, aRecs)
+	for i = 1 to len(aRecs)
+		if aRecs[i][1] = cName return 1 ok
+	next
+	return 0
+
+# the CONSTRAINTs, each ON a FORM made once for each including kind, every condition expanded
+func StzuExpandConstraints(aCons, aTab, aDecls, aDeclared)
+	if len(aTab) = 0 return aCons ok
+	aOut = []
+	for i = 1 to len(aCons)
+		aC = aCons[i]
+		nF = StzuFormAt(aTab, aC[2])
+		if nF > 0 and DeclaredKind(aDeclared, aC[2]) = "FORM"
+			aKinds = aTab[nF][2]
+			for k = 1 to len(aKinds)
+				cNm = aC[1] + "_" + aKinds[k]
+				if DeclaredKind(aDeclared, cNm) != "" or StzuNameIn(cNm, aOut)
+					try
+						StzuFail(aC[6], "the constraint '" + cNm + "' that ON " + aC[2] + " makes for " + aKinds[k] + " is already declared -- one namespace, one name, one meaning")
+					catch
+						StzuNote(cCatchError)
+					done
+					loop
+				ok
+				aR = aC
+				aR[1] = cNm
+				aR[2] = aKinds[k]
+				aR[3] = StzuExpandCond(aC[3], aKinds[k], aTab, aDecls)
+				if aC[4] != "" aR[4] = StzuExpandCond(aC[4], aKinds[k], aTab, aDecls) ok
+				aOut + aR
+			next
+		else
+			aR = aC
+			aR[3] = StzuExpandCond(aC[3], aC[2], aTab, aDecls)
+			if aC[4] != "" aR[4] = StzuExpandCond(aC[4], aC[2], aTab, aDecls) ok
+			aOut + aR
+		ok
+	next
+	return aOut
+
+# the VIEWs' WHERE, [name, on, one, named, where, line]
+func StzuExpandViews(aViews, aTab, aDecls)
+	if len(aTab) = 0 return aViews ok
+	for i = 1 to len(aViews)
+		if aViews[i][5] != ""
+			aViews[i][5] = StzuExpandCond(aViews[i][5], aViews[i][2], aTab, aDecls)
+		ok
+	next
+	return aViews
