@@ -1,0 +1,10 @@
+-- two.grant -- a sentence of grants_v32.haro: two patterns refuse at once, a right no zone grants (line 8) and a channel the menu lacks (line 9).
+
+DEFINE ZONE ops AS (
+  RIGHTS [read]
+) RATIONALE "The operations zone grants reading"
+
+DEFINE USE report AS (
+  WANTS [read, delete],
+  VIA [telegram]
+) RATIONALE "A report that is wrong twice"

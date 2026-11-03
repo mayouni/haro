@@ -1,0 +1,9 @@
+-- absent.grant -- a sentence of grants_v32.haro: PRIMARY and VIA are optional seats this use leaves out; a seat that is not written is not judged.
+
+DEFINE ZONE ops AS (
+  RIGHTS [read]
+) RATIONALE "The operations zone grants reading"
+
+DEFINE USE report AS (
+  WANTS [read]
+) RATIONALE "A report that names no primary right and no channel"

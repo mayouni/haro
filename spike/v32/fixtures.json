@@ -1,0 +1,243 @@
+{
+ "grammar": "haro",
+ "version": "0.32",
+ "comment": "Written BEFORE any code reads a PATTERN (the W discipline). v0.32 is BLOCKS.md 4.3 and Central's item 3, the value join: a fact across declarations, said once as a pattern over a seat, judged by the pattern engine of v0.31. DEFINE PATTERN name AS (OVER kind.seat, MATCH [ rule ], SETS [kind.seat: set], MESSAGE, CODE, CITES, SEVERITY). The module docstring of gen_fixtures.py states the design each fixture pins. A1-A6 accept; R1-R25 refuse, each by the fragment of why. R7-R12 are the bound and the names, the pattern engine's own words in the meta-court's mouth; R25 is the pattern joining Art. 1.",
+ "accepts": [
+  {
+   "id": "A1",
+   "name": "a pattern over a seat, its set the values of another declaration's seat: the value join (OVER, SETS, MATCH, MESSAGE, CODE, CITES)",
+   "source": "DEFINE LANGUAGE grants AS (VERSION \"0.32\", GRAMMAR \"0.32\", COURT \"x\", EXTENSION \".grant\") RATIONALE \"x\"\nDEFINE FORM word AS (SEATS [value: name]) RATIONALE \"x\"\nDEFINE MENU channels AS (WORDS [mail, chat, call], CODE \"UNKNOWN_CHANNEL\") RATIONALE \"x\"\nDEFINE DECLARATION zone AS (VERB \"ZONE\", SEATS [rights: [word]]) RATIONALE \"x\"\nDEFINE DECLARATION use AS (VERB \"USE\", SEATS [wants: [word], primary: name?, via: [word]?]) RATIONALE \"x\"\nDEFINE PATTERN wants_granted AS (OVER use.wants, MATCH [INTO [ANY MEMBER granted]], MESSAGE \"m\", SETS [zone.rights: granted], CODE \"RIGHT_NOT_GRANTED\", CITES [\"right:granted-by-a-zone\"]) RATIONALE \"x\"\n",
+   "expect": {
+    "language": "grants",
+    "counts": {
+     "declarations": 2,
+     "forms": 1,
+     "menus": 1,
+     "patterns": 1
+    }
+   }
+  },
+  {
+   "id": "A2",
+   "name": "a MENU is a set under its own name, and CITES none is the same word as on a CONSTRAINT",
+   "source": "DEFINE LANGUAGE grants AS (VERSION \"0.32\", GRAMMAR \"0.32\", COURT \"x\", EXTENSION \".grant\") RATIONALE \"x\"\nDEFINE FORM word AS (SEATS [value: name]) RATIONALE \"x\"\nDEFINE MENU channels AS (WORDS [mail, chat, call], CODE \"UNKNOWN_CHANNEL\") RATIONALE \"x\"\nDEFINE DECLARATION zone AS (VERB \"ZONE\", SEATS [rights: [word]]) RATIONALE \"x\"\nDEFINE DECLARATION use AS (VERB \"USE\", SEATS [wants: [word], primary: name?, via: [word]?]) RATIONALE \"x\"\nDEFINE PATTERN via_channel AS (OVER use.via, MATCH [INTO [ANY MEMBER channels]], MESSAGE \"m\", CODE \"NOT_A_CHANNEL\", CITES none) RATIONALE \"x\"\n",
+   "expect": {
+    "language": "grants",
+    "counts": {
+     "declarations": 2,
+     "forms": 1,
+     "menus": 1,
+     "patterns": 1
+    }
+   }
+  },
+  {
+   "id": "A3",
+   "name": "a pattern uses another by RULE name: the patterns of a language are one set of named rules",
+   "source": "DEFINE LANGUAGE grants AS (VERSION \"0.32\", GRAMMAR \"0.32\", COURT \"x\", EXTENSION \".grant\") RATIONALE \"x\"\nDEFINE FORM word AS (SEATS [value: name]) RATIONALE \"x\"\nDEFINE MENU channels AS (WORDS [mail, chat, call], CODE \"UNKNOWN_CHANNEL\") RATIONALE \"x\"\nDEFINE DECLARATION zone AS (VERB \"ZONE\", SEATS [rights: [word]]) RATIONALE \"x\"\nDEFINE DECLARATION use AS (VERB \"USE\", SEATS [wants: [word], primary: name?, via: [word]?]) RATIONALE \"x\"\nDEFINE PATTERN granted_right AS (OVER use.primary, MATCH [MEMBER granted], MESSAGE \"m\", SETS [zone.rights: granted], CODE \"PRIMARY_NOT_GRANTED\") RATIONALE \"x\"\nDEFINE PATTERN wants_granted AS (OVER use.wants, MATCH [INTO [ANY RULE granted_right]], MESSAGE \"m\", CODE \"RIGHT_NOT_GRANTED\") RATIONALE \"x\"\n",
+   "expect": {
+    "language": "grants",
+    "counts": {
+     "declarations": 2,
+     "forms": 1,
+     "menus": 1,
+     "patterns": 2
+    }
+   }
+  },
+  {
+   "id": "A4",
+   "name": "SEVERITY warning is a CONSTRAINT's word, and a rule may be written across lines with a comment in it",
+   "source": "DEFINE LANGUAGE grants AS (VERSION \"0.32\", GRAMMAR \"0.32\", COURT \"x\", EXTENSION \".grant\") RATIONALE \"x\"\nDEFINE FORM word AS (SEATS [value: name]) RATIONALE \"x\"\nDEFINE MENU channels AS (WORDS [mail, chat, call], CODE \"UNKNOWN_CHANNEL\") RATIONALE \"x\"\nDEFINE DECLARATION zone AS (VERB \"ZONE\", SEATS [rights: [word]]) RATIONALE \"x\"\nDEFINE DECLARATION use AS (VERB \"USE\", SEATS [wants: [word], primary: name?, via: [word]?]) RATIONALE \"x\"\nDEFINE PATTERN few AS (\n  OVER use.wants,\n  MATCH [INTO [REPEAT 0 3 SKIP] -- at most three\n  ],\n  MESSAGE \"m\", CODE \"MANY_RIGHTS\", SEVERITY warning\n) RATIONALE \"x\"\n",
+   "expect": {
+    "language": "grants",
+    "counts": {
+     "declarations": 2,
+     "forms": 1,
+     "menus": 1,
+     "patterns": 1
+    }
+   }
+  },
+  {
+   "id": "A5",
+   "name": "a rule that needs no set: types alone",
+   "source": "DEFINE LANGUAGE grants AS (VERSION \"0.32\", GRAMMAR \"0.32\", COURT \"x\", EXTENSION \".grant\") RATIONALE \"x\"\nDEFINE FORM word AS (SEATS [value: name]) RATIONALE \"x\"\nDEFINE MENU channels AS (WORDS [mail, chat, call], CODE \"UNKNOWN_CHANNEL\") RATIONALE \"x\"\nDEFINE DECLARATION zone AS (VERB \"ZONE\", SEATS [rights: [word]]) RATIONALE \"x\"\nDEFINE DECLARATION use AS (VERB \"USE\", SEATS [wants: [word], primary: name?, via: [word]?]) RATIONALE \"x\"\nDEFINE PATTERN words_only AS (OVER use.wants, MATCH [INTO [ANY WORD]], MESSAGE \"m\") RATIONALE \"x\"\n",
+   "expect": {
+    "language": "grants",
+    "counts": {
+     "declarations": 2,
+     "forms": 1,
+     "menus": 1,
+     "patterns": 1
+    }
+   }
+  },
+  {
+   "id": "A6",
+   "name": "two patterns over one seat are two patterns",
+   "source": "DEFINE LANGUAGE grants AS (VERSION \"0.32\", GRAMMAR \"0.32\", COURT \"x\", EXTENSION \".grant\") RATIONALE \"x\"\nDEFINE FORM word AS (SEATS [value: name]) RATIONALE \"x\"\nDEFINE MENU channels AS (WORDS [mail, chat, call], CODE \"UNKNOWN_CHANNEL\") RATIONALE \"x\"\nDEFINE DECLARATION zone AS (VERB \"ZONE\", SEATS [rights: [word]]) RATIONALE \"x\"\nDEFINE DECLARATION use AS (VERB \"USE\", SEATS [wants: [word], primary: name?, via: [word]?]) RATIONALE \"x\"\nDEFINE PATTERN a_words AS (OVER use.wants, MATCH [INTO [ANY WORD]], MESSAGE \"m\") RATIONALE \"x\"\nDEFINE PATTERN b_few AS (OVER use.wants, MATCH [INTO [REPEAT 0 3 SKIP]], MESSAGE \"m\", SEVERITY warning) RATIONALE \"x\"\n",
+   "expect": {
+    "language": "grants",
+    "counts": {
+     "declarations": 2,
+     "forms": 1,
+     "menus": 1,
+     "patterns": 2
+    }
+   }
+  }
+ ],
+ "rejects": [
+  {
+   "id": "R1",
+   "name": "OVER names a declaration the language does not have",
+   "source": "DEFINE LANGUAGE grants AS (VERSION \"0.32\", GRAMMAR \"0.32\", COURT \"x\", EXTENSION \".grant\") RATIONALE \"x\"\nDEFINE FORM word AS (SEATS [value: name]) RATIONALE \"x\"\nDEFINE MENU channels AS (WORDS [mail, chat, call], CODE \"UNKNOWN_CHANNEL\") RATIONALE \"x\"\nDEFINE DECLARATION zone AS (VERB \"ZONE\", SEATS [rights: [word]]) RATIONALE \"x\"\nDEFINE DECLARATION use AS (VERB \"USE\", SEATS [wants: [word], primary: name?, via: [word]?]) RATIONALE \"x\"\nDEFINE PATTERN p AS (OVER ghost.wants, MATCH [INTO [ANY WORD]], MESSAGE \"m\") RATIONALE \"x\"\n",
+   "refusal": "OVER: 'ghost' resolves to nothing in this declaration"
+  },
+  {
+   "id": "R2",
+   "name": "OVER names something that is no DECLARATION",
+   "source": "DEFINE LANGUAGE grants AS (VERSION \"0.32\", GRAMMAR \"0.32\", COURT \"x\", EXTENSION \".grant\") RATIONALE \"x\"\nDEFINE FORM word AS (SEATS [value: name]) RATIONALE \"x\"\nDEFINE MENU channels AS (WORDS [mail, chat, call], CODE \"UNKNOWN_CHANNEL\") RATIONALE \"x\"\nDEFINE DECLARATION zone AS (VERB \"ZONE\", SEATS [rights: [word]]) RATIONALE \"x\"\nDEFINE DECLARATION use AS (VERB \"USE\", SEATS [wants: [word], primary: name?, via: [word]?]) RATIONALE \"x\"\nDEFINE PATTERN p AS (OVER channels.wants, MATCH [INTO [ANY WORD]], MESSAGE \"m\") RATIONALE \"x\"\n",
+   "refusal": "OVER must name a DECLARATION; 'channels' is a MENU"
+  },
+  {
+   "id": "R3",
+   "name": "OVER names a seat the declaration lacks",
+   "source": "DEFINE LANGUAGE grants AS (VERSION \"0.32\", GRAMMAR \"0.32\", COURT \"x\", EXTENSION \".grant\") RATIONALE \"x\"\nDEFINE FORM word AS (SEATS [value: name]) RATIONALE \"x\"\nDEFINE MENU channels AS (WORDS [mail, chat, call], CODE \"UNKNOWN_CHANNEL\") RATIONALE \"x\"\nDEFINE DECLARATION zone AS (VERB \"ZONE\", SEATS [rights: [word]]) RATIONALE \"x\"\nDEFINE DECLARATION use AS (VERB \"USE\", SEATS [wants: [word], primary: name?, via: [word]?]) RATIONALE \"x\"\nDEFINE PATTERN p AS (OVER use.ghost, MATCH [INTO [ANY WORD]], MESSAGE \"m\") RATIONALE \"x\"\n",
+   "refusal": "OVER names a seat of use; 'ghost' is not one"
+  },
+  {
+   "id": "R4",
+   "name": "OVER names a seat as declaration.seat, not as a bare word",
+   "source": "DEFINE LANGUAGE grants AS (VERSION \"0.32\", GRAMMAR \"0.32\", COURT \"x\", EXTENSION \".grant\") RATIONALE \"x\"\nDEFINE FORM word AS (SEATS [value: name]) RATIONALE \"x\"\nDEFINE MENU channels AS (WORDS [mail, chat, call], CODE \"UNKNOWN_CHANNEL\") RATIONALE \"x\"\nDEFINE DECLARATION zone AS (VERB \"ZONE\", SEATS [rights: [word]]) RATIONALE \"x\"\nDEFINE DECLARATION use AS (VERB \"USE\", SEATS [wants: [word], primary: name?, via: [word]?]) RATIONALE \"x\"\nDEFINE PATTERN p AS (OVER wants, MATCH [INTO [ANY WORD]], MESSAGE \"m\") RATIONALE \"x\"\n",
+   "refusal": "OVER names a seat as declaration.seat"
+  },
+  {
+   "id": "R5",
+   "name": "MATCH is a rule between brackets, not a string",
+   "source": "DEFINE LANGUAGE grants AS (VERSION \"0.32\", GRAMMAR \"0.32\", COURT \"x\", EXTENSION \".grant\") RATIONALE \"x\"\nDEFINE FORM word AS (SEATS [value: name]) RATIONALE \"x\"\nDEFINE MENU channels AS (WORDS [mail, chat, call], CODE \"UNKNOWN_CHANNEL\") RATIONALE \"x\"\nDEFINE DECLARATION zone AS (VERB \"ZONE\", SEATS [rights: [word]]) RATIONALE \"x\"\nDEFINE DECLARATION use AS (VERB \"USE\", SEATS [wants: [word], primary: name?, via: [word]?]) RATIONALE \"x\"\nDEFINE PATTERN p AS (OVER use.wants, MATCH \"x\", MESSAGE \"m\") RATIONALE \"x\"\n",
+   "refusal": "a rule is written [ ... ]"
+  },
+  {
+   "id": "R6",
+   "name": "a rule that is never closed",
+   "source": "DEFINE LANGUAGE grants AS (VERSION \"0.32\", GRAMMAR \"0.32\", COURT \"x\", EXTENSION \".grant\") RATIONALE \"x\"\nDEFINE FORM word AS (SEATS [value: name]) RATIONALE \"x\"\nDEFINE MENU channels AS (WORDS [mail, chat, call], CODE \"UNKNOWN_CHANNEL\") RATIONALE \"x\"\nDEFINE DECLARATION zone AS (VERB \"ZONE\", SEATS [rights: [word]]) RATIONALE \"x\"\nDEFINE DECLARATION use AS (VERB \"USE\", SEATS [wants: [word], primary: name?, via: [word]?]) RATIONALE \"x\"\nDEFINE PATTERN p AS (OVER use.wants, MATCH [INTO [ANY WORD], MESSAGE \"m\") RATIONALE \"x\"\n",
+   "refusal": "a rule is not closed"
+  },
+  {
+   "id": "R7",
+   "name": "the bound: ANY over a rule that can match nothing would never move, and the engine's words are the meta-court's",
+   "source": "DEFINE LANGUAGE grants AS (VERSION \"0.32\", GRAMMAR \"0.32\", COURT \"x\", EXTENSION \".grant\") RATIONALE \"x\"\nDEFINE FORM word AS (SEATS [value: name]) RATIONALE \"x\"\nDEFINE MENU channels AS (WORDS [mail, chat, call], CODE \"UNKNOWN_CHANNEL\") RATIONALE \"x\"\nDEFINE DECLARATION zone AS (VERB \"ZONE\", SEATS [rights: [word]]) RATIONALE \"x\"\nDEFINE DECLARATION use AS (VERB \"USE\", SEATS [wants: [word], primary: name?, via: [word]?]) RATIONALE \"x\"\nDEFINE PATTERN p AS (OVER use.wants, MATCH [INTO [ANY OPT WORD]], MESSAGE \"m\") RATIONALE \"x\"\n",
+   "refusal": "ANY over a rule that can match nothing"
+  },
+  {
+   "id": "R8",
+   "name": "the bound: a group in a rule is the host escape",
+   "source": "DEFINE LANGUAGE grants AS (VERSION \"0.32\", GRAMMAR \"0.32\", COURT \"x\", EXTENSION \".grant\") RATIONALE \"x\"\nDEFINE FORM word AS (SEATS [value: name]) RATIONALE \"x\"\nDEFINE MENU channels AS (WORDS [mail, chat, call], CODE \"UNKNOWN_CHANNEL\") RATIONALE \"x\"\nDEFINE DECLARATION zone AS (VERB \"ZONE\", SEATS [rights: [word]]) RATIONALE \"x\"\nDEFINE DECLARATION use AS (VERB \"USE\", SEATS [wants: [word], primary: name?, via: [word]?]) RATIONALE \"x\"\nDEFINE PATTERN p AS (OVER use.wants, MATCH [WORD (print \"x\")], MESSAGE \"m\") RATIONALE \"x\"\n",
+   "refusal": "would run the host"
+  },
+  {
+   "id": "R9",
+   "name": "the bound: WHILE is refused",
+   "source": "DEFINE LANGUAGE grants AS (VERSION \"0.32\", GRAMMAR \"0.32\", COURT \"x\", EXTENSION \".grant\") RATIONALE \"x\"\nDEFINE FORM word AS (SEATS [value: name]) RATIONALE \"x\"\nDEFINE MENU channels AS (WORDS [mail, chat, call], CODE \"UNKNOWN_CHANNEL\") RATIONALE \"x\"\nDEFINE DECLARATION zone AS (VERB \"ZONE\", SEATS [rights: [word]]) RATIONALE \"x\"\nDEFINE DECLARATION use AS (VERB \"USE\", SEATS [wants: [word], primary: name?, via: [word]?]) RATIONALE \"x\"\nDEFINE PATTERN p AS (OVER use.wants, MATCH [WHILE WORD], MESSAGE \"m\") RATIONALE \"x\"\n",
+   "refusal": "WHILE is refused"
+  },
+  {
+   "id": "R10",
+   "name": "the bound: two patterns that refer to each other are recursive, and the cycle is named",
+   "source": "DEFINE LANGUAGE grants AS (VERSION \"0.32\", GRAMMAR \"0.32\", COURT \"x\", EXTENSION \".grant\") RATIONALE \"x\"\nDEFINE FORM word AS (SEATS [value: name]) RATIONALE \"x\"\nDEFINE MENU channels AS (WORDS [mail, chat, call], CODE \"UNKNOWN_CHANNEL\") RATIONALE \"x\"\nDEFINE DECLARATION zone AS (VERB \"ZONE\", SEATS [rights: [word]]) RATIONALE \"x\"\nDEFINE DECLARATION use AS (VERB \"USE\", SEATS [wants: [word], primary: name?, via: [word]?]) RATIONALE \"x\"\nDEFINE PATTERN a AS (OVER use.wants, MATCH [RULE b], MESSAGE \"m\") RATIONALE \"x\"\nDEFINE PATTERN b AS (OVER use.wants, MATCH [RULE a], MESSAGE \"m\") RATIONALE \"x\"\n",
+   "refusal": "is recursive (a -> b -> a)"
+  },
+  {
+   "id": "R11",
+   "name": "a MEMBER that names no set and no MENU",
+   "source": "DEFINE LANGUAGE grants AS (VERSION \"0.32\", GRAMMAR \"0.32\", COURT \"x\", EXTENSION \".grant\") RATIONALE \"x\"\nDEFINE FORM word AS (SEATS [value: name]) RATIONALE \"x\"\nDEFINE MENU channels AS (WORDS [mail, chat, call], CODE \"UNKNOWN_CHANNEL\") RATIONALE \"x\"\nDEFINE DECLARATION zone AS (VERB \"ZONE\", SEATS [rights: [word]]) RATIONALE \"x\"\nDEFINE DECLARATION use AS (VERB \"USE\", SEATS [wants: [word], primary: name?, via: [word]?]) RATIONALE \"x\"\nDEFINE PATTERN p AS (OVER use.wants, MATCH [INTO [ANY MEMBER nope]], MESSAGE \"m\") RATIONALE \"x\"\n",
+   "refusal": "MEMBER nope names no set"
+  },
+  {
+   "id": "R12",
+   "name": "a RULE that names no pattern",
+   "source": "DEFINE LANGUAGE grants AS (VERSION \"0.32\", GRAMMAR \"0.32\", COURT \"x\", EXTENSION \".grant\") RATIONALE \"x\"\nDEFINE FORM word AS (SEATS [value: name]) RATIONALE \"x\"\nDEFINE MENU channels AS (WORDS [mail, chat, call], CODE \"UNKNOWN_CHANNEL\") RATIONALE \"x\"\nDEFINE DECLARATION zone AS (VERB \"ZONE\", SEATS [rights: [word]]) RATIONALE \"x\"\nDEFINE DECLARATION use AS (VERB \"USE\", SEATS [wants: [word], primary: name?, via: [word]?]) RATIONALE \"x\"\nDEFINE PATTERN p AS (OVER use.wants, MATCH [INTO [ANY RULE nope]], MESSAGE \"m\") RATIONALE \"x\"\n",
+   "refusal": "RULE nope names no pattern"
+  },
+  {
+   "id": "R13",
+   "name": "SETS names a declaration the language does not have",
+   "source": "DEFINE LANGUAGE grants AS (VERSION \"0.32\", GRAMMAR \"0.32\", COURT \"x\", EXTENSION \".grant\") RATIONALE \"x\"\nDEFINE FORM word AS (SEATS [value: name]) RATIONALE \"x\"\nDEFINE MENU channels AS (WORDS [mail, chat, call], CODE \"UNKNOWN_CHANNEL\") RATIONALE \"x\"\nDEFINE DECLARATION zone AS (VERB \"ZONE\", SEATS [rights: [word]]) RATIONALE \"x\"\nDEFINE DECLARATION use AS (VERB \"USE\", SEATS [wants: [word], primary: name?, via: [word]?]) RATIONALE \"x\"\nDEFINE PATTERN p AS (OVER use.wants, MATCH [INTO [ANY WORD]], MESSAGE \"m\", SETS [ghost.rights: granted]) RATIONALE \"x\"\n",
+   "refusal": "SETS: 'ghost' resolves to nothing in this declaration"
+  },
+  {
+   "id": "R14",
+   "name": "SETS names a seat the declaration lacks",
+   "source": "DEFINE LANGUAGE grants AS (VERSION \"0.32\", GRAMMAR \"0.32\", COURT \"x\", EXTENSION \".grant\") RATIONALE \"x\"\nDEFINE FORM word AS (SEATS [value: name]) RATIONALE \"x\"\nDEFINE MENU channels AS (WORDS [mail, chat, call], CODE \"UNKNOWN_CHANNEL\") RATIONALE \"x\"\nDEFINE DECLARATION zone AS (VERB \"ZONE\", SEATS [rights: [word]]) RATIONALE \"x\"\nDEFINE DECLARATION use AS (VERB \"USE\", SEATS [wants: [word], primary: name?, via: [word]?]) RATIONALE \"x\"\nDEFINE PATTERN p AS (OVER use.wants, MATCH [INTO [ANY WORD]], MESSAGE \"m\", SETS [zone.ghost: granted]) RATIONALE \"x\"\n",
+   "refusal": "SETS names a seat of zone; 'ghost' is not one"
+  },
+  {
+   "id": "R15",
+   "name": "a set named like a MENU: one name, one meaning",
+   "source": "DEFINE LANGUAGE grants AS (VERSION \"0.32\", GRAMMAR \"0.32\", COURT \"x\", EXTENSION \".grant\") RATIONALE \"x\"\nDEFINE FORM word AS (SEATS [value: name]) RATIONALE \"x\"\nDEFINE MENU channels AS (WORDS [mail, chat, call], CODE \"UNKNOWN_CHANNEL\") RATIONALE \"x\"\nDEFINE DECLARATION zone AS (VERB \"ZONE\", SEATS [rights: [word]]) RATIONALE \"x\"\nDEFINE DECLARATION use AS (VERB \"USE\", SEATS [wants: [word], primary: name?, via: [word]?]) RATIONALE \"x\"\nDEFINE PATTERN p AS (OVER use.wants, MATCH [INTO [ANY WORD]], MESSAGE \"m\", SETS [zone.rights: channels]) RATIONALE \"x\"\n",
+   "refusal": "set 'channels' is already a MENU: one name, one meaning"
+  },
+  {
+   "id": "R16",
+   "name": "a set declared by two patterns",
+   "source": "DEFINE LANGUAGE grants AS (VERSION \"0.32\", GRAMMAR \"0.32\", COURT \"x\", EXTENSION \".grant\") RATIONALE \"x\"\nDEFINE FORM word AS (SEATS [value: name]) RATIONALE \"x\"\nDEFINE MENU channels AS (WORDS [mail, chat, call], CODE \"UNKNOWN_CHANNEL\") RATIONALE \"x\"\nDEFINE DECLARATION zone AS (VERB \"ZONE\", SEATS [rights: [word]]) RATIONALE \"x\"\nDEFINE DECLARATION use AS (VERB \"USE\", SEATS [wants: [word], primary: name?, via: [word]?]) RATIONALE \"x\"\nDEFINE PATTERN p AS (OVER use.wants, MATCH [INTO [ANY WORD]], MESSAGE \"m\", SETS [zone.rights: granted]) RATIONALE \"x\"\nDEFINE PATTERN q AS (OVER use.wants, MATCH [INTO [ANY WORD]], MESSAGE \"m\", SETS [zone.rights: granted]) RATIONALE \"x\"\n",
+   "refusal": "set 'granted' is declared twice"
+  },
+  {
+   "id": "R17",
+   "name": "a PATTERN without OVER",
+   "source": "DEFINE LANGUAGE grants AS (VERSION \"0.32\", GRAMMAR \"0.32\", COURT \"x\", EXTENSION \".grant\") RATIONALE \"x\"\nDEFINE FORM word AS (SEATS [value: name]) RATIONALE \"x\"\nDEFINE MENU channels AS (WORDS [mail, chat, call], CODE \"UNKNOWN_CHANNEL\") RATIONALE \"x\"\nDEFINE DECLARATION zone AS (VERB \"ZONE\", SEATS [rights: [word]]) RATIONALE \"x\"\nDEFINE DECLARATION use AS (VERB \"USE\", SEATS [wants: [word], primary: name?, via: [word]?]) RATIONALE \"x\"\nDEFINE PATTERN p AS (MATCH [WORD], MESSAGE \"m\") RATIONALE \"x\"\n",
+   "refusal": "PATTERN requires the OVER clause"
+  },
+  {
+   "id": "R18",
+   "name": "a PATTERN without MATCH",
+   "source": "DEFINE LANGUAGE grants AS (VERSION \"0.32\", GRAMMAR \"0.32\", COURT \"x\", EXTENSION \".grant\") RATIONALE \"x\"\nDEFINE FORM word AS (SEATS [value: name]) RATIONALE \"x\"\nDEFINE MENU channels AS (WORDS [mail, chat, call], CODE \"UNKNOWN_CHANNEL\") RATIONALE \"x\"\nDEFINE DECLARATION zone AS (VERB \"ZONE\", SEATS [rights: [word]]) RATIONALE \"x\"\nDEFINE DECLARATION use AS (VERB \"USE\", SEATS [wants: [word], primary: name?, via: [word]?]) RATIONALE \"x\"\nDEFINE PATTERN p AS (OVER use.wants, MESSAGE \"m\") RATIONALE \"x\"\n",
+   "refusal": "PATTERN requires the MATCH clause"
+  },
+  {
+   "id": "R19",
+   "name": "a SEVERITY that is neither error nor warning",
+   "source": "DEFINE LANGUAGE grants AS (VERSION \"0.32\", GRAMMAR \"0.32\", COURT \"x\", EXTENSION \".grant\") RATIONALE \"x\"\nDEFINE FORM word AS (SEATS [value: name]) RATIONALE \"x\"\nDEFINE MENU channels AS (WORDS [mail, chat, call], CODE \"UNKNOWN_CHANNEL\") RATIONALE \"x\"\nDEFINE DECLARATION zone AS (VERB \"ZONE\", SEATS [rights: [word]]) RATIONALE \"x\"\nDEFINE DECLARATION use AS (VERB \"USE\", SEATS [wants: [word], primary: name?, via: [word]?]) RATIONALE \"x\"\nDEFINE PATTERN p AS (OVER use.wants, MATCH [INTO [ANY WORD]], MESSAGE \"m\", SEVERITY fatal) RATIONALE \"x\"\n",
+   "refusal": "'fatal' is not a SEVERITY of a PATTERN: error or warning"
+  },
+  {
+   "id": "R20",
+   "name": "a CODE outside the Diagnostic Contract's format",
+   "source": "DEFINE LANGUAGE grants AS (VERSION \"0.32\", GRAMMAR \"0.32\", COURT \"x\", EXTENSION \".grant\") RATIONALE \"x\"\nDEFINE FORM word AS (SEATS [value: name]) RATIONALE \"x\"\nDEFINE MENU channels AS (WORDS [mail, chat, call], CODE \"UNKNOWN_CHANNEL\") RATIONALE \"x\"\nDEFINE DECLARATION zone AS (VERB \"ZONE\", SEATS [rights: [word]]) RATIONALE \"x\"\nDEFINE DECLARATION use AS (VERB \"USE\", SEATS [wants: [word], primary: name?, via: [word]?]) RATIONALE \"x\"\nDEFINE PATTERN p AS (OVER use.wants, MATCH [INTO [ANY WORD]], MESSAGE \"m\", CODE \"bad code\") RATIONALE \"x\"\n",
+   "refusal": "is not a code in the Diagnostic Contract's format"
+  },
+  {
+   "id": "R21",
+   "name": "a pattern named like a declaration: one namespace",
+   "source": "DEFINE LANGUAGE grants AS (VERSION \"0.32\", GRAMMAR \"0.32\", COURT \"x\", EXTENSION \".grant\") RATIONALE \"x\"\nDEFINE FORM word AS (SEATS [value: name]) RATIONALE \"x\"\nDEFINE MENU channels AS (WORDS [mail, chat, call], CODE \"UNKNOWN_CHANNEL\") RATIONALE \"x\"\nDEFINE DECLARATION zone AS (VERB \"ZONE\", SEATS [rights: [word]]) RATIONALE \"x\"\nDEFINE DECLARATION use AS (VERB \"USE\", SEATS [wants: [word], primary: name?, via: [word]?]) RATIONALE \"x\"\nDEFINE PATTERN zone AS (OVER use.wants, MATCH [INTO [ANY WORD]], MESSAGE \"m\") RATIONALE \"x\"\n",
+   "refusal": "'zone' is already declared -- one namespace, one name, one meaning"
+  },
+  {
+   "id": "R22",
+   "name": "a rule that holds a double quote and a single quote cannot ride into a court",
+   "source": "DEFINE LANGUAGE grants AS (VERSION \"0.32\", GRAMMAR \"0.32\", COURT \"x\", EXTENSION \".grant\") RATIONALE \"x\"\nDEFINE FORM word AS (SEATS [value: name]) RATIONALE \"x\"\nDEFINE MENU channels AS (WORDS [mail, chat, call], CODE \"UNKNOWN_CHANNEL\") RATIONALE \"x\"\nDEFINE DECLARATION zone AS (VERB \"ZONE\", SEATS [rights: [word]]) RATIONALE \"x\"\nDEFINE DECLARATION use AS (VERB \"USE\", SEATS [wants: [word], primary: name?, via: [word]?]) RATIONALE \"x\"\nDEFINE PATTERN p AS (OVER use.wants, MATCH [INTO [ANY LIT \"it's\"]], MESSAGE \"m\") RATIONALE \"x\"\n",
+   "refusal": "a rule that holds a double quote and a single quote"
+  },
+  {
+   "id": "R23",
+   "name": "an empty CITES says nothing, on a PATTERN as on every element that cites",
+   "source": "DEFINE LANGUAGE grants AS (VERSION \"0.32\", GRAMMAR \"0.32\", COURT \"x\", EXTENSION \".grant\") RATIONALE \"x\"\nDEFINE FORM word AS (SEATS [value: name]) RATIONALE \"x\"\nDEFINE MENU channels AS (WORDS [mail, chat, call], CODE \"UNKNOWN_CHANNEL\") RATIONALE \"x\"\nDEFINE DECLARATION zone AS (VERB \"ZONE\", SEATS [rights: [word]]) RATIONALE \"x\"\nDEFINE DECLARATION use AS (VERB \"USE\", SEATS [wants: [word], primary: name?, via: [word]?]) RATIONALE \"x\"\nDEFINE PATTERN p AS (OVER use.wants, MATCH [INTO [ANY WORD]], MESSAGE \"m\", CITES []) RATIONALE \"x\"\n",
+   "refusal": "an empty CITES says nothing"
+  },
+  {
+   "id": "R24",
+   "name": "an unknown clause lists the allowed ones, sorted",
+   "source": "DEFINE LANGUAGE grants AS (VERSION \"0.32\", GRAMMAR \"0.32\", COURT \"x\", EXTENSION \".grant\") RATIONALE \"x\"\nDEFINE FORM word AS (SEATS [value: name]) RATIONALE \"x\"\nDEFINE MENU channels AS (WORDS [mail, chat, call], CODE \"UNKNOWN_CHANNEL\") RATIONALE \"x\"\nDEFINE DECLARATION zone AS (VERB \"ZONE\", SEATS [rights: [word]]) RATIONALE \"x\"\nDEFINE DECLARATION use AS (VERB \"USE\", SEATS [wants: [word], primary: name?, via: [word]?]) RATIONALE \"x\"\nDEFINE PATTERN p AS (OVER use.wants, MATCH [INTO [ANY WORD]], MESSAGE \"m\", WHEN \"x\") RATIONALE \"x\"\n",
+   "refusal": "Unknown clause 'WHEN' in PATTERN -- allowed: CITES, CODE, MATCH, MESSAGE, OVER, SETS, SEVERITY"
+  },
+  {
+   "id": "R25",
+   "name": "Art. 1 explainability: a refusal is traceable by a stable identifier, so a PATTERN carries a CODE",
+   "source": "DEFINE LANGUAGE grants AS (VERSION \"0.32\", GRAMMAR \"0.32\", COURT \"x\", EXTENSION \".grant\") RATIONALE \"x\"\nDEFINE FORM word AS (SEATS [value: name]) RATIONALE \"x\"\nDEFINE MENU channels AS (WORDS [mail, chat, call], CODE \"UNKNOWN_CHANNEL\") RATIONALE \"x\"\nDEFINE DECLARATION zone AS (VERB \"ZONE\", SEATS [rights: [word]]) RATIONALE \"x\"\nDEFINE DECLARATION use AS (VERB \"USE\", SEATS [wants: [word], primary: name?, via: [word]?]) RATIONALE \"x\"\nDEFINE NARRATE voice AS (SAYS [use: \"{name} wants {wants}.\"], REFUSES \"Stopped at line {line}: {message} ({cites})\") RATIONALE \"x\"\nDEFINE PATTERN p AS (OVER use.wants, MATCH [INTO [ANY WORD]], MESSAGE \"m\") RATIONALE \"x\"\nDEFINE CONSTITUTION charter AS (ARTICLES [explainability]) RATIONALE \"x\"\n",
+   "refusal": "Art. 1 explainability: PATTERN 'p' carries no CODE"
+  }
+ ]
+}

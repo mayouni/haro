@@ -1,0 +1,71 @@
+-- grants_v32.haro -- a world of zones and uses, declared for Haro v0.32: the first language with a PATTERN
+-- (BLOCKS.md 4.3). A zone grants rights; a use asks for them, names the one it needs most, and goes through
+-- channels. What the court's own grammar cannot say is a fact ACROSS declarations -- "every right a use asks for
+-- is a right some zone grants" -- the value join stzzui met (Central's item 3, 2026-10-31). A PATTERN says it
+-- once, over a seat, as a rule the pattern engine judges (v0.31): the rights granted are a SET the court
+-- collects from the sentence's own ZONEs, never code. The sentences judged by `haro_forge.py --stage=37` are
+-- in grants/.
+
+DEFINE LANGUAGE grants AS (
+  VERSION "0.32",
+  GRAMMAR "0.32",
+  COURT "v32/court_cases.json",
+  EXTENSION ".grant"
+) RATIONALE "Rights a zone grants and the uses that ask for them: a value join across declarations, said once as a pattern"
+
+-- ---- the menu and the kinds -------------------------------------------------------------------
+
+DEFINE MENU channels AS (
+  WORDS [mail, chat, call],
+  MESSAGE "CHANNEL is mail, chat or call, not '{value}'",
+  CODE "UNKNOWN_CHANNEL"
+) RATIONALE "The channels a use may go through; a use names them in a list, so a pattern judges them against this menu"
+
+DEFINE FORM word AS (
+  SEATS [value: name]
+) RATIONALE "One word of a list, a lower_snake name"
+
+DEFINE DECLARATION zone AS (
+  VERB "ZONE",
+  SEATS [rights: [word]]
+) RATIONALE "A zone and the rights it grants"
+
+DEFINE DECLARATION use AS (
+  VERB "USE",
+  SEATS [wants: [word], primary: name?, via: [word]?]
+) RATIONALE "A use: the rights it asks for, the one it needs most, and the channels it goes through"
+
+-- ---- the patterns -----------------------------------------------------------------------------
+
+DEFINE PATTERN granted_right AS (
+  OVER use.primary,
+  SETS [zone.rights: granted],
+  MATCH [MEMBER granted],
+  MESSAGE "USE {name} needs a right most, and no ZONE grants it",
+  CODE "PRIMARY_NOT_GRANTED",
+  CITES ["right:granted-by-a-zone"]
+) RATIONALE "The value join, on one value: the right a use needs most is a right some zone of the sentence grants. The set `granted` is the union of every ZONE's rights"
+
+DEFINE PATTERN wants_are_granted AS (
+  OVER use.wants,
+  MATCH [INTO [ANY RULE granted_right]],
+  MESSAGE "USE {name} wants a right no ZONE grants",
+  CODE "RIGHT_NOT_GRANTED",
+  CITES ["right:granted-by-a-zone"]
+) RATIONALE "The value join, on a list: every right a use asks for is one the sentence grants. It reuses the rule above, by name, as a pattern may reuse a pattern"
+
+DEFINE PATTERN via_is_a_channel AS (
+  OVER use.via,
+  MATCH [INTO [ANY MEMBER channels]],
+  MESSAGE "USE {name} goes through something that is no channel",
+  CODE "NOT_A_CHANNEL",
+  CITES none
+) RATIONALE "A list judged against a MENU's words: the contract binds no channel, so the refusal cites nothing"
+
+DEFINE PATTERN wants_are_few AS (
+  OVER use.wants,
+  MATCH [INTO [REPEAT 0 3 SKIP]],
+  MESSAGE "USE {name} asks for more than three rights",
+  CODE "MANY_RIGHTS",
+  SEVERITY warning
+) RATIONALE "Good sense, not law: a use that asks for a great many rights is worth a second look, so the pattern warns and the sentence stands"

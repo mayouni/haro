@@ -1,0 +1,9 @@
+-- many.grant -- a sentence of grants_v32.haro: four rights asked for, every one granted; the sentence stands and the pattern warns (line 8).
+
+DEFINE ZONE ops AS (
+  RIGHTS [read, write, share, audit]
+) RATIONALE "The operations zone grants four rights"
+
+DEFINE USE report AS (
+  WANTS [read, write, share, audit]
+) RATIONALE "A report that asks for everything"

@@ -1,0 +1,10 @@
+-- ungranted.grant -- a sentence of grants_v32.haro: a use asks for a right no zone grants; refused at its WANTS clause (line 8).
+
+DEFINE ZONE ops AS (
+  RIGHTS [read, write]
+) RATIONALE "The operations zone grants reading and writing"
+
+DEFINE USE report AS (
+  WANTS [read, delete],
+  PRIMARY read
+) RATIONALE "A report that wants to delete"

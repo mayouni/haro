@@ -1,0 +1,5 @@
+-- no_zone.grant -- a sentence of grants_v32.haro: no zone grants anything, so the set is empty and the use's right is granted by no one (line 4).
+
+DEFINE USE report AS (
+  WANTS [read]
+) RATIONALE "A report in a sentence with no zone"

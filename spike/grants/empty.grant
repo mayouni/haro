@@ -1,0 +1,9 @@
+-- empty.grant -- a sentence of grants_v32.haro: a use that asks for nothing; every right it asks for (none) is granted.
+
+DEFINE ZONE ops AS (
+  RIGHTS [read]
+) RATIONALE "The operations zone grants reading"
+
+DEFINE USE idle AS (
+  WANTS []
+) RATIONALE "A use that asks for nothing"

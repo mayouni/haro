@@ -1,0 +1,10 @@
+-- bad_channel.grant -- a sentence of grants_v32.haro: a channel the menu does not list; refused at its VIA clause (line 9), citing nothing.
+
+DEFINE ZONE ops AS (
+  RIGHTS [read, write]
+) RATIONALE "The operations zone grants reading and writing"
+
+DEFINE USE report AS (
+  WANTS [read],
+  VIA [telegram]
+) RATIONALE "A report that goes by telegram"

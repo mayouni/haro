@@ -1,0 +1,13 @@
+-- union.grant -- a sentence of grants_v32.haro: two zones each grant one right; the set is their union, so a use may ask for both.
+
+DEFINE ZONE reading AS (
+  RIGHTS [read]
+) RATIONALE "A zone that grants reading"
+
+DEFINE ZONE writing AS (
+  RIGHTS [write]
+) RATIONALE "A zone that grants writing"
+
+DEFINE USE report AS (
+  WANTS [read, write]
+) RATIONALE "A report that reads and writes"

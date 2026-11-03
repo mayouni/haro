@@ -1,0 +1,190 @@
+{
+ "name": "the grants world -- sentence-level cases for Haro v0.32 (DEFINE PATTERN, BLOCKS.md 4.3; Central's item 3, the value join)",
+ "comment": "Written BEFORE any court code reads a PATTERN. Each case runs the court forged from grants_v32.haro on haro AND on its checked build; the two must print the same bytes. The sentences are in grants/: clean, ungranted, primary_ungranted, no_zone, bad_channel, many, union, absent, empty, two. A refusal is at the line of the clause it is about (WANTS line 8, PRIMARY line 9, VIA line 9, and line 4 in the zoneless sentence), not at the declaration's.",
+ "cases": [
+  {
+   "id": "G1",
+   "name": "the clean sentence: one zone, one use, every right asked for is granted",
+   "verb": "check",
+   "args": [
+    "grants/clean.grant"
+   ],
+   "first": "ok",
+   "counts": {
+    "ZONE": 1,
+    "USE": 1
+   }
+  },
+  {
+   "id": "G2",
+   "name": "the meta-court reads the world: four patterns, a menu, a form, two declarations",
+   "verb": "meta",
+   "args": [
+    "grants_v32.haro"
+   ],
+   "first": "ok",
+   "contains": [
+    "patterns 4",
+    "menus 1",
+    "forms 1",
+    "declarations 2"
+   ]
+  },
+  {
+   "id": "G3",
+   "name": "the value join on a list: a right no zone grants is refused at its WANTS clause, in the declared words",
+   "verb": "check",
+   "args": [
+    "grants/ungranted.grant"
+   ],
+   "refused": true,
+   "contains": [
+    "grants (line 8): USE report wants a right no ZONE grants"
+   ]
+  },
+  {
+   "id": "G4",
+   "name": "the envelope: the pattern's code and the cite it declares",
+   "verb": "diagnose",
+   "args": [
+    "grants/ungranted.grant"
+   ],
+   "diagnose": {
+    "code": "RIGHT_NOT_GRANTED",
+    "cites": [
+     "right:granted-by-a-zone"
+    ]
+   }
+  },
+  {
+   "id": "G5",
+   "name": "the value join on one value, a rule another pattern uses by name: the primary right is refused at its PRIMARY clause (line 9)",
+   "verb": "check",
+   "args": [
+    "grants/primary_ungranted.grant"
+   ],
+   "refused": true,
+   "contains": [
+    "grants (line 9): USE report needs a right most, and no ZONE grants it"
+   ]
+  },
+  {
+   "id": "G6",
+   "name": "a set with no member: no zone, so the right asked for is granted by no one",
+   "verb": "check",
+   "args": [
+    "grants/no_zone.grant"
+   ],
+   "refused": true,
+   "contains": [
+    "grants (line 4): USE report wants a right no ZONE grants"
+   ]
+  },
+  {
+   "id": "G7",
+   "name": "a list judged against a MENU's words: a channel the menu lacks is refused at its VIA clause (line 9)",
+   "verb": "check",
+   "args": [
+    "grants/bad_channel.grant"
+   ],
+   "refused": true,
+   "contains": [
+    "grants (line 9): USE report goes through something that is no channel"
+   ]
+  },
+  {
+   "id": "G8",
+   "name": "CITES none: the envelope carries the code and no cite",
+   "verb": "diagnose",
+   "args": [
+    "grants/bad_channel.grant"
+   ],
+   "diagnose": {
+    "code": "NOT_A_CHANNEL",
+    "cites": []
+   }
+  },
+  {
+   "id": "G9",
+   "name": "SEVERITY warning: the sentence stands and the pattern speaks after the verdict, with its code and line",
+   "verb": "check",
+   "args": [
+    "grants/many.grant"
+   ],
+   "first": "ok",
+   "counts": {
+    "ZONE": 1,
+    "USE": 1
+   },
+   "contains": [
+    "warning MANY_RIGHTS: USE report asks for more than three rights (line 8)"
+   ]
+  },
+  {
+   "id": "G10",
+   "name": "a warning is a warning in the envelope too",
+   "verb": "diagnose",
+   "args": [
+    "grants/many.grant"
+   ],
+   "diagnose": {
+    "code": "MANY_RIGHTS",
+    "cites": [],
+    "severity": "warning"
+   }
+  },
+  {
+   "id": "G11",
+   "name": "a set is the UNION of every zone's rights: two zones grant one right each, and a use may ask for both",
+   "verb": "check",
+   "args": [
+    "grants/union.grant"
+   ],
+   "first": "ok",
+   "counts": {
+    "ZONE": 2,
+    "USE": 1
+   }
+  },
+  {
+   "id": "G12",
+   "name": "a seat the sentence does not write is not judged",
+   "verb": "check",
+   "args": [
+    "grants/absent.grant"
+   ],
+   "first": "ok",
+   "counts": {
+    "ZONE": 1,
+    "USE": 1
+   }
+  },
+  {
+   "id": "G13",
+   "name": "an empty list asks for nothing, and every right it asks for is granted",
+   "verb": "check",
+   "args": [
+    "grants/empty.grant"
+   ],
+   "first": "ok",
+   "counts": {
+    "ZONE": 1,
+    "USE": 1
+   }
+  },
+  {
+   "id": "G14",
+   "name": "two patterns refuse at once: diagnose carries both findings, each at its own line",
+   "verb": "diagnose",
+   "args": [
+    "grants/two.grant"
+   ],
+   "contains": [
+    "RIGHT_NOT_GRANTED",
+    "NOT_A_CHANNEL",
+    "\"line\": 8",
+    "\"line\": 9"
+   ]
+  }
+ ]
+}

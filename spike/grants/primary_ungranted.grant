@@ -1,0 +1,10 @@
+-- primary_ungranted.grant -- a sentence of grants_v32.haro: the right a use needs most is granted by no zone; refused at its PRIMARY clause (line 9).
+
+DEFINE ZONE ops AS (
+  RIGHTS [read, write]
+) RATIONALE "The operations zone grants reading and writing"
+
+DEFINE USE report AS (
+  WANTS [read],
+  PRIMARY delete
+) RATIONALE "A report that needs deleting most"

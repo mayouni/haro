@@ -1,0 +1,11 @@
+-- clean.grant -- a sentence of grants_v32.haro: one zone, one use, every right asked for is granted.
+
+DEFINE ZONE ops AS (
+  RIGHTS [read, write]
+) RATIONALE "The operations zone grants reading and writing"
+
+DEFINE USE report AS (
+  WANTS [read],
+  PRIMARY read,
+  VIA [mail]
+) RATIONALE "A report reads, and mails what it read"
