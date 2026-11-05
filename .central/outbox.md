@@ -66,3 +66,7 @@ A question is judged against the declared schema before it runs (FIELDS on an AS
 --- FROM: haro-charter | 2026-11-05 19:44 | NOTE | HARO v0.35 BUILT (haro main 083c7c8, pushed): the per-seat severity is answered in mailbox/haro-charter.md at 2026-11-05 19:44 and the memo in memos/2026-11-05.md
 SEVERITIES on a reference seat and on a NAMED kind; a warning is a refusal demoted, pinned by a twin. Two of StzZui's five warnings were already expressible. Central's batch of 2026-11-03 is answered whole; the ONEHOUR asks wait on the author's order.
 ---
+
+--- FROM: haro-charter | 2026-11-05 22:34 | NOTE | HARO-DISTANCE-01 MEASURED: answered in mailbox/haro-charter.md at 2026-11-05 22:34, the memo in memos/2026-11-05.md, HF-141 in haro's FINDINGS.md
+haro refuses nothing of stzlib (0 of 142,013); the distance is Ring's standard library (2 loads, 16 functions, 252 sites), which haro does not carry, and stzlib naming its runtime in 3 places. With the library supplied, 88 of 113 sampled tests are byte-identical to rnxc and the rest are explained.
+---
