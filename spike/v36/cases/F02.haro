@@ -1,0 +1,9 @@
+try
+	raise("boom")
+	? "not reached"
+catch
+	? "handler: " + cCatchError
+finally
+	? "finally"
+done
+? "after"

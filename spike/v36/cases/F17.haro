@@ -1,0 +1,8 @@
+for x in [1, 2, 3]
+	try
+		if x = 2 exit ok
+	finally
+		? "finally " + x
+	done
+next
+? "after"

@@ -1,0 +1,14 @@
+for i = 1 to 2
+	try
+		for j = 1 to 2
+			try
+				exit 2
+			finally
+				? "inner " + i + j
+			done
+		next
+	finally
+		? "outer " + i
+	done
+next
+? "after"

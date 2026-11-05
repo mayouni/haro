@@ -1,0 +1,11 @@
+? f()
+? "after"
+func f
+	n = 1
+	try
+		return n
+	finally
+		? "finally " + n + " " + upper("x")
+		n = 2
+	done
+	return 99

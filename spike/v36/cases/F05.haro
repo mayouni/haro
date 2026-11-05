@@ -1,0 +1,10 @@
+? g()
+func g
+	try
+		raise("in g")
+	catch
+		return "from handler"
+	finally
+		? "finally"
+	done
+	return "fell through"

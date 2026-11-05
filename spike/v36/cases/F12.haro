@@ -1,0 +1,12 @@
+try
+	? k()
+catch
+	? "caught: " + cCatchError
+done
+func k
+	try
+		return "value"
+	finally
+		? "finally"
+		raise("from finally")
+	done

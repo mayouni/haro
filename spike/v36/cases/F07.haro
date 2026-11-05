@@ -1,0 +1,9 @@
+for i = 1 to 3
+	try
+		if i = 2 exit ok
+		? "body " + i
+	finally
+		? "finally " + i
+	done
+next
+? "after"

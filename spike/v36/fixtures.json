@@ -1,0 +1,174 @@
+{
+ "rung": "v0.36",
+ "decision": "D52 rung (1): A1 completed",
+ "lines": {
+  "S1": "finally runs exactly once per entry of the try",
+  "S2": "a return inside the body or the handler is held, the block runs, then the held exit resumes",
+  "S3": "a raise inside the body or the handler is held, the block runs, then the held exit resumes",
+  "S4": "a raise (or a return) inside finally replaces a held exit",
+  "S5": "exit and loop crossing a try run its finally first"
+ },
+ "cases": [
+  {
+   "id": "F01",
+   "line": "S1",
+   "why": "the normal path: the body, the finally, then on",
+   "file": "cases/F01.haro",
+   "stdout": "body\nfinally\nafter\n"
+  },
+  {
+   "id": "F02",
+   "line": "S3",
+   "why": "a raise in the body, caught: the handler, then the finally",
+   "file": "cases/F02.haro",
+   "stdout": "handler: boom\nfinally\nafter\n"
+  },
+  {
+   "id": "F03",
+   "line": "S3",
+   "why": "a raise in the body with no catch: the finally, then the raise resumes outward",
+   "file": "cases/F03.haro",
+   "stdout": "finally\nouter: only\n"
+  },
+  {
+   "id": "F04",
+   "line": "S2",
+   "why": "a return in the body: the value is taken, the finally runs (computing as it likes), the value returned is the one taken",
+   "file": "cases/F04.haro",
+   "stdout": "finally 1 X\n1\nafter\n"
+  },
+  {
+   "id": "F05",
+   "line": "S2",
+   "why": "a return in the handler: the finally runs, then the return resumes",
+   "file": "cases/F05.haro",
+   "stdout": "finally\nfrom handler\n"
+  },
+  {
+   "id": "F06",
+   "line": "S3",
+   "why": "a raise in the handler: the finally runs, then the raise resumes outward",
+   "file": "cases/F06.haro",
+   "stdout": "finally after handler raise\nouter: in handler\n"
+  },
+  {
+   "id": "F07",
+   "line": "S5",
+   "why": "`exit` crossing a try in a for loop runs its finally first",
+   "file": "cases/F07.haro",
+   "stdout": "body 1\nfinally 1\nfinally 2\nafter\n"
+  },
+  {
+   "id": "F08",
+   "line": "S5",
+   "why": "`loop` crossing a try in a for loop runs its finally first, and the loop goes on",
+   "file": "cases/F08.haro",
+   "stdout": "body 1\nfinally 1\nend 1\nfinally 2\nbody 3\nfinally 3\nend 3\n"
+  },
+  {
+   "id": "F09",
+   "line": "S5",
+   "why": "`exit` crossing a try with a catch, in a while loop",
+   "file": "cases/F09.haro",
+   "stdout": "finally 1\nfinally 2\nfinally 3\nafter 3\n"
+  },
+  {
+   "id": "F10",
+   "line": "S2",
+   "why": "a return crossing two trys runs the inner finally, then the outer",
+   "file": "cases/F10.haro",
+   "stdout": "inner finally\nouter finally\nvalue\n"
+  },
+  {
+   "id": "F11",
+   "line": "S5",
+   "why": "`exit 2` crossing two loops and two trys runs both finallys, inner first, once each",
+   "file": "cases/F11.haro",
+   "stdout": "inner 11\nouter 1\nafter\n"
+  },
+  {
+   "id": "F12",
+   "line": "S1",
+   "why": "a raise in the finally on the return path goes outward: the finally does not run twice",
+   "file": "cases/F12.haro",
+   "stdout": "finally\ncaught: from finally\n"
+  },
+  {
+   "id": "F13",
+   "line": "S1",
+   "why": "a raise in the finally on the exit path never lands in the same try's catch",
+   "file": "cases/F13.haro",
+   "stdout": "finally 1\nouter: from finally\n"
+  },
+  {
+   "id": "F14",
+   "line": "S3",
+   "why": "a try inside the finally does not overwrite the error the finally holds",
+   "file": "cases/F14.haro",
+   "stdout": "outer caught: outer\n"
+  },
+  {
+   "id": "F15",
+   "line": "S4",
+   "why": "a return in the finally replaces a held return",
+   "file": "cases/F15.haro",
+   "stdout": "from finally\n"
+  },
+  {
+   "id": "F16",
+   "line": "S4",
+   "why": "a return in the finally replaces a held raise",
+   "file": "cases/F16.haro",
+   "stdout": "from finally\n"
+  },
+  {
+   "id": "F17",
+   "line": "S5",
+   "why": "`exit` crossing a try in a for-in loop",
+   "file": "cases/F17.haro",
+   "stdout": "finally 1\nfinally 2\nafter\n"
+  },
+  {
+   "id": "F18",
+   "line": "S5",
+   "why": "`loop` crossing a try in a do-again loop",
+   "file": "cases/F18.haro",
+   "stdout": "body 1\nfinally 1\nfinally 2\nbody 3\nfinally 3\n"
+  },
+  {
+   "id": "F19",
+   "line": "S2",
+   "why": "a return from a loop inside the try body runs the finally once",
+   "file": "cases/F19.haro",
+   "stdout": "finally once\nat 2\n"
+  },
+  {
+   "id": "F20",
+   "line": "S2",
+   "why": "a return crossing a try without finally inside one with: both handlers are left, and a later raise lands where it is raised",
+   "file": "cases/F20.haro",
+   "stdout": "finally\nv\nlater caught at top: later\n"
+  },
+  {
+   "id": "F21",
+   "line": "S5",
+   "why": "`loop` from the handler crosses the finally",
+   "file": "cases/F21.haro",
+   "stdout": "caught e1\nfinally 1\ncaught e2\nfinally 2\n"
+  },
+  {
+   "id": "F22",
+   "line": "S2",
+   "why": "a return from a `catch(e)` handler uses e, then the finally runs before it resumes",
+   "file": "cases/F22.haro",
+   "stdout": "finally\nhandled why\n"
+  },
+  {
+   "id": "F23",
+   "line": "S2",
+   "why": "a return in an eval string runs the finally of the eval's try",
+   "file": "cases/F23.haro",
+   "stdout": "f\n6\n"
+  }
+ ]
+}

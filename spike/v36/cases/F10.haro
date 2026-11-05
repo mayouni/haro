@@ -1,0 +1,11 @@
+? h()
+func h
+	try
+		try
+			return "value"
+		finally
+			? "inner finally"
+		done
+	finally
+		? "outer finally"
+	done

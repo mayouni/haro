@@ -1,0 +1,14 @@
+try
+	for i = 1 to 3
+		try
+			exit
+		catch
+			? "own catch: " + cCatchError
+		finally
+			? "finally " + i
+			raise("from finally")
+		done
+	next
+catch
+	? "outer: " + cCatchError
+done

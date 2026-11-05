@@ -1,0 +1,11 @@
+for i = 1 to 2
+	try
+		raise("e" + i)
+	catch
+		? "caught " + cCatchError
+		loop
+	finally
+		? "finally " + i
+	done
+	? "not reached " + i
+next

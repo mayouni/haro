@@ -1,0 +1,12 @@
+d()
+func d
+	n = 0
+	do
+		n++
+		try
+			if n = 2 loop ok
+			? "body " + n
+		finally
+			? "finally " + n
+		done
+	again n < 3

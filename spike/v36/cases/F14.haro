@@ -1,0 +1,12 @@
+try
+	try
+		raise("outer")
+	finally
+		try
+			raise("inner")
+		catch
+		done
+	done
+catch
+	? "outer caught: " + cCatchError
+done

@@ -1,0 +1,9 @@
+? t()
+func t
+	try
+		raise("why")
+	catch(e)
+		return "handled " + e
+	finally
+		? "finally"
+	done

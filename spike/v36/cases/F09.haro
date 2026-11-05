@@ -1,0 +1,14 @@
+w()
+func w
+	n = 0
+	while true
+		n++
+		try
+			if n = 3 exit ok
+		catch
+			? "no"
+		finally
+			? "finally " + n
+		done
+	end
+	? "after " + n

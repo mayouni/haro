@@ -1,0 +1,11 @@
+try
+	try
+		raise("in body")
+	catch
+		raise("in handler")
+	finally
+		? "finally after handler raise"
+	done
+catch
+	? "outer: " + cCatchError
+done

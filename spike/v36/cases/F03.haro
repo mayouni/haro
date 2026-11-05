@@ -1,0 +1,10 @@
+try
+	try
+		raise("only")
+	finally
+		? "finally"
+	done
+	? "not reached"
+catch
+	? "outer: " + cCatchError
+done

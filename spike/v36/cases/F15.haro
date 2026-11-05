@@ -1,0 +1,7 @@
+? m()
+func m
+	try
+		return "from body"
+	finally
+		return "from finally"
+	done

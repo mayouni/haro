@@ -1,0 +1,16 @@
+? s()
+try
+	raise("later")
+catch
+	? "later caught at top: " + cCatchError
+done
+func s
+	try
+		try
+			return "v"
+		catch
+			? "no"
+		done
+	finally
+		? "finally"
+	done
