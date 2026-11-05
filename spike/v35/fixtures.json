@@ -1,0 +1,165 @@
+{
+ "grammar": "haro",
+ "version": "0.35",
+ "comment": "Written BEFORE any code reads SEVERITIES (the W discipline). v0.35 is the per-seat severity: SEVERITIES [seat: warning] on a DECLARATION, for a seat whose value is a reference (a DECLARATION, a UNION of declarations, a SYMBOL); SEVERITIES [word: warning] on unknown_declaration, for a NAMED word. A1-A8 accept; R1-R11 refuse, each by the fragment of why. A7 pins that nothing existing changes. The module docstring of gen_fixtures.py states the ask, the five warnings and Zin's granularity.",
+ "accepts": [
+  {
+   "id": "A1",
+   "name": "a reference to a declaration at warning",
+   "source": "DEFINE LANGUAGE q AS (VERSION \"0.35\", GRAMMAR \"0.35\", COURT \"x\", EXTENSION \".q\") RATIONALE \"x\"\nDEFINE MENU roles AS (WORDS [primary, secondary], MESSAGE \"a role\") RATIONALE \"x\"\nDEFINE SYMBOL entity AS (KIND \"entity\", MESSAGE \"x\") RATIONALE \"x\"\nDEFINE UNION target AS (OF [flow, form]) RATIONALE \"x\"\nDEFINE DECLARATION flow AS (VERB \"FLOW\", SEATS []) RATIONALE \"x\"\nDEFINE DECLARATION form AS (VERB \"FORM\", SEATS [flow: flow?, flows: [flow]?, role: roles?, entity: entity?, target: target?, title: text?], SEVERITIES [flow: warning]) RATIONALE \"x\"\n",
+   "expect": {
+    "language": "q",
+    "counts": {
+     "declarations": 2
+    }
+   }
+  },
+  {
+   "id": "A2",
+   "name": "a list of references at warning",
+   "source": "DEFINE LANGUAGE q AS (VERSION \"0.35\", GRAMMAR \"0.35\", COURT \"x\", EXTENSION \".q\") RATIONALE \"x\"\nDEFINE MENU roles AS (WORDS [primary, secondary], MESSAGE \"a role\") RATIONALE \"x\"\nDEFINE SYMBOL entity AS (KIND \"entity\", MESSAGE \"x\") RATIONALE \"x\"\nDEFINE UNION target AS (OF [flow, form]) RATIONALE \"x\"\nDEFINE DECLARATION flow AS (VERB \"FLOW\", SEATS []) RATIONALE \"x\"\nDEFINE DECLARATION form AS (VERB \"FORM\", SEATS [flow: flow?, flows: [flow]?, role: roles?, entity: entity?, target: target?, title: text?], SEVERITIES [flows: warning]) RATIONALE \"x\"\n",
+   "expect": {
+    "language": "q",
+    "counts": {
+     "declarations": 2
+    }
+   }
+  },
+  {
+   "id": "A3",
+   "name": "a UNION of declarations at warning",
+   "source": "DEFINE LANGUAGE q AS (VERSION \"0.35\", GRAMMAR \"0.35\", COURT \"x\", EXTENSION \".q\") RATIONALE \"x\"\nDEFINE MENU roles AS (WORDS [primary, secondary], MESSAGE \"a role\") RATIONALE \"x\"\nDEFINE SYMBOL entity AS (KIND \"entity\", MESSAGE \"x\") RATIONALE \"x\"\nDEFINE UNION target AS (OF [flow, form]) RATIONALE \"x\"\nDEFINE DECLARATION flow AS (VERB \"FLOW\", SEATS []) RATIONALE \"x\"\nDEFINE DECLARATION form AS (VERB \"FORM\", SEATS [flow: flow?, flows: [flow]?, role: roles?, entity: entity?, target: target?, title: text?], SEVERITIES [target: warning]) RATIONALE \"x\"\n",
+   "expect": {
+    "language": "q",
+    "counts": {
+     "declarations": 2
+    }
+   }
+  },
+  {
+   "id": "A4",
+   "name": "a SYMBOL at warning: resolved against a world",
+   "source": "DEFINE LANGUAGE q AS (VERSION \"0.35\", GRAMMAR \"0.35\", COURT \"x\", EXTENSION \".q\") RATIONALE \"x\"\nDEFINE MENU roles AS (WORDS [primary, secondary], MESSAGE \"a role\") RATIONALE \"x\"\nDEFINE SYMBOL entity AS (KIND \"entity\", MESSAGE \"x\") RATIONALE \"x\"\nDEFINE UNION target AS (OF [flow, form]) RATIONALE \"x\"\nDEFINE DECLARATION flow AS (VERB \"FLOW\", SEATS []) RATIONALE \"x\"\nDEFINE DECLARATION form AS (VERB \"FORM\", SEATS [flow: flow?, flows: [flow]?, role: roles?, entity: entity?, target: target?, title: text?], SEVERITIES [entity: warning]) RATIONALE \"x\"\n",
+   "expect": {
+    "language": "q",
+    "counts": {
+     "declarations": 2,
+     "symbols": 1
+    }
+   }
+  },
+  {
+   "id": "A5",
+   "name": "error written out is the default, accepted as SEVERITY error is on a CONSTRAINT",
+   "source": "DEFINE LANGUAGE q AS (VERSION \"0.35\", GRAMMAR \"0.35\", COURT \"x\", EXTENSION \".q\") RATIONALE \"x\"\nDEFINE MENU roles AS (WORDS [primary, secondary], MESSAGE \"a role\") RATIONALE \"x\"\nDEFINE SYMBOL entity AS (KIND \"entity\", MESSAGE \"x\") RATIONALE \"x\"\nDEFINE UNION target AS (OF [flow, form]) RATIONALE \"x\"\nDEFINE DECLARATION flow AS (VERB \"FLOW\", SEATS []) RATIONALE \"x\"\nDEFINE DECLARATION form AS (VERB \"FORM\", SEATS [flow: flow?, flows: [flow]?, role: roles?, entity: entity?, target: target?, title: text?], SEVERITIES [flow: error, flows: warning]) RATIONALE \"x\"\n",
+   "expect": {
+    "language": "q",
+    "counts": {
+     "declarations": 2
+    }
+   }
+  },
+  {
+   "id": "A6",
+   "name": "a NAMED kind at warning",
+   "source": "DEFINE LANGUAGE q AS (VERSION \"0.35\", GRAMMAR \"0.35\", COURT \"x\", EXTENSION \".q\") RATIONALE \"x\"\nDEFINE MENU roles AS (WORDS [primary, secondary], MESSAGE \"a role\") RATIONALE \"x\"\nDEFINE SYMBOL entity AS (KIND \"entity\", MESSAGE \"x\") RATIONALE \"x\"\nDEFINE UNION target AS (OF [flow, form]) RATIONALE \"x\"\nDEFINE DECLARATION flow AS (VERB \"FLOW\", SEATS []) RATIONALE \"x\"\nDEFINE DECLARATION form AS (VERB \"FORM\", SEATS [flow: flow?, flows: [flow]?, role: roles?, entity: entity?, target: target?, title: text?]) RATIONALE \"x\"\nDEFINE REFUSAL unknown_declaration AS (MESSAGE \"x\", NAMED [widget: \"w\", user: \"u\"], SEVERITIES [widget: warning]) RATIONALE \"x\"\n",
+   "expect": {
+    "language": "q",
+    "counts": {
+     "refusals": 1
+    }
+   }
+  },
+  {
+   "id": "A7",
+   "name": "without SEVERITIES nothing changes",
+   "source": "DEFINE LANGUAGE q AS (VERSION \"0.35\", GRAMMAR \"0.35\", COURT \"x\", EXTENSION \".q\") RATIONALE \"x\"\nDEFINE MENU roles AS (WORDS [primary, secondary], MESSAGE \"a role\") RATIONALE \"x\"\nDEFINE SYMBOL entity AS (KIND \"entity\", MESSAGE \"x\") RATIONALE \"x\"\nDEFINE UNION target AS (OF [flow, form]) RATIONALE \"x\"\nDEFINE DECLARATION flow AS (VERB \"FLOW\", SEATS []) RATIONALE \"x\"\nDEFINE DECLARATION form AS (VERB \"FORM\", SEATS [flow: flow?, flows: [flow]?, role: roles?, entity: entity?, target: target?, title: text?]) RATIONALE \"x\"\nDEFINE REFUSAL unknown_declaration AS (MESSAGE \"x\", NAMED [widget: \"w\", user: \"u\"]) RATIONALE \"x\"\n",
+   "expect": {
+    "language": "q",
+    "counts": {
+     "declarations": 2,
+     "refusals": 1
+    }
+   }
+  },
+  {
+   "id": "A8",
+   "name": "beside MESSAGES and CODES, in any order",
+   "source": "DEFINE LANGUAGE q AS (VERSION \"0.35\", GRAMMAR \"0.35\", COURT \"x\", EXTENSION \".q\") RATIONALE \"x\"\nDEFINE MENU roles AS (WORDS [primary, secondary], MESSAGE \"a role\") RATIONALE \"x\"\nDEFINE SYMBOL entity AS (KIND \"entity\", MESSAGE \"x\") RATIONALE \"x\"\nDEFINE UNION target AS (OF [flow, form]) RATIONALE \"x\"\nDEFINE DECLARATION flow AS (VERB \"FLOW\", SEATS []) RATIONALE \"x\"\nDEFINE DECLARATION form AS (VERB \"FORM\", SEATS [flow: flow?, flows: [flow]?, role: roles?, entity: entity?, target: target?, title: text?], SEVERITIES [flow: warning], MESSAGES [flow: \"m {value}\"], CODES [flow: \"NO_FLOW\"]) RATIONALE \"x\"\n",
+   "expect": {
+    "language": "q",
+    "counts": {
+     "declarations": 2
+    }
+   }
+  }
+ ],
+ "rejects": [
+  {
+   "id": "R1",
+   "name": "SEVERITIES names a seat the kind lacks",
+   "source": "DEFINE LANGUAGE q AS (VERSION \"0.35\", GRAMMAR \"0.35\", COURT \"x\", EXTENSION \".q\") RATIONALE \"x\"\nDEFINE MENU roles AS (WORDS [primary, secondary], MESSAGE \"a role\") RATIONALE \"x\"\nDEFINE SYMBOL entity AS (KIND \"entity\", MESSAGE \"x\") RATIONALE \"x\"\nDEFINE UNION target AS (OF [flow, form]) RATIONALE \"x\"\nDEFINE DECLARATION flow AS (VERB \"FLOW\", SEATS []) RATIONALE \"x\"\nDEFINE DECLARATION form AS (VERB \"FORM\", SEATS [flow: flow?, flows: [flow]?, role: roles?, entity: entity?, target: target?, title: text?], SEVERITIES [ghost: warning]) RATIONALE \"x\"\n",
+   "refusal": "SEVERITIES: no seat 'ghost' on form"
+  },
+  {
+   "id": "R2",
+   "name": "a severity is error or warning",
+   "source": "DEFINE LANGUAGE q AS (VERSION \"0.35\", GRAMMAR \"0.35\", COURT \"x\", EXTENSION \".q\") RATIONALE \"x\"\nDEFINE MENU roles AS (WORDS [primary, secondary], MESSAGE \"a role\") RATIONALE \"x\"\nDEFINE SYMBOL entity AS (KIND \"entity\", MESSAGE \"x\") RATIONALE \"x\"\nDEFINE UNION target AS (OF [flow, form]) RATIONALE \"x\"\nDEFINE DECLARATION flow AS (VERB \"FLOW\", SEATS []) RATIONALE \"x\"\nDEFINE DECLARATION form AS (VERB \"FORM\", SEATS [flow: flow?, flows: [flow]?, role: roles?, entity: entity?, target: target?, title: text?], SEVERITIES [flow: loud]) RATIONALE \"x\"\n",
+   "refusal": "'loud' is not a SEVERITY of a seat: error or warning"
+  },
+  {
+   "id": "R3",
+   "name": "a MENU seat is no reference: a wrong word is never a warning",
+   "source": "DEFINE LANGUAGE q AS (VERSION \"0.35\", GRAMMAR \"0.35\", COURT \"x\", EXTENSION \".q\") RATIONALE \"x\"\nDEFINE MENU roles AS (WORDS [primary, secondary], MESSAGE \"a role\") RATIONALE \"x\"\nDEFINE SYMBOL entity AS (KIND \"entity\", MESSAGE \"x\") RATIONALE \"x\"\nDEFINE UNION target AS (OF [flow, form]) RATIONALE \"x\"\nDEFINE DECLARATION flow AS (VERB \"FLOW\", SEATS []) RATIONALE \"x\"\nDEFINE DECLARATION form AS (VERB \"FORM\", SEATS [flow: flow?, flows: [flow]?, role: roles?, entity: entity?, target: target?, title: text?], SEVERITIES [role: warning]) RATIONALE \"x\"\n",
+   "refusal": "SEVERITIES: 'role' of form is not a reference: only a reference that resolves to nothing may be a warning"
+  },
+  {
+   "id": "R4",
+   "name": "a plain value is no reference",
+   "source": "DEFINE LANGUAGE q AS (VERSION \"0.35\", GRAMMAR \"0.35\", COURT \"x\", EXTENSION \".q\") RATIONALE \"x\"\nDEFINE MENU roles AS (WORDS [primary, secondary], MESSAGE \"a role\") RATIONALE \"x\"\nDEFINE SYMBOL entity AS (KIND \"entity\", MESSAGE \"x\") RATIONALE \"x\"\nDEFINE UNION target AS (OF [flow, form]) RATIONALE \"x\"\nDEFINE DECLARATION flow AS (VERB \"FLOW\", SEATS []) RATIONALE \"x\"\nDEFINE DECLARATION form AS (VERB \"FORM\", SEATS [flow: flow?, flows: [flow]?, role: roles?, entity: entity?, target: target?, title: text?], SEVERITIES [title: warning]) RATIONALE \"x\"\n",
+   "refusal": "SEVERITIES: 'title' of form is not a reference"
+  },
+  {
+   "id": "R5",
+   "name": "a seat is named once",
+   "source": "DEFINE LANGUAGE q AS (VERSION \"0.35\", GRAMMAR \"0.35\", COURT \"x\", EXTENSION \".q\") RATIONALE \"x\"\nDEFINE MENU roles AS (WORDS [primary, secondary], MESSAGE \"a role\") RATIONALE \"x\"\nDEFINE SYMBOL entity AS (KIND \"entity\", MESSAGE \"x\") RATIONALE \"x\"\nDEFINE UNION target AS (OF [flow, form]) RATIONALE \"x\"\nDEFINE DECLARATION flow AS (VERB \"FLOW\", SEATS []) RATIONALE \"x\"\nDEFINE DECLARATION form AS (VERB \"FORM\", SEATS [flow: flow?, flows: [flow]?, role: roles?, entity: entity?, target: target?, title: text?], SEVERITIES [flow: warning, flow: error]) RATIONALE \"x\"\n",
+   "refusal": "'flow' is named twice in SEVERITIES"
+  },
+  {
+   "id": "R6",
+   "name": "a REFUSAL's SEVERITIES belongs to unknown_declaration",
+   "source": "DEFINE LANGUAGE q AS (VERSION \"0.35\", GRAMMAR \"0.35\", COURT \"x\", EXTENSION \".q\") RATIONALE \"x\"\nDEFINE MENU roles AS (WORDS [primary, secondary], MESSAGE \"a role\") RATIONALE \"x\"\nDEFINE SYMBOL entity AS (KIND \"entity\", MESSAGE \"x\") RATIONALE \"x\"\nDEFINE UNION target AS (OF [flow, form]) RATIONALE \"x\"\nDEFINE DECLARATION flow AS (VERB \"FLOW\", SEATS []) RATIONALE \"x\"\nDEFINE DECLARATION form AS (VERB \"FORM\", SEATS [flow: flow?, flows: [flow]?, role: roles?, entity: entity?, target: target?, title: text?]) RATIONALE \"x\"\nDEFINE REFUSAL unknown_seat AS (MESSAGE \"x\", NAMED [widget: \"w\"], SEVERITIES [widget: warning]) RATIONALE \"x\"\n",
+   "refusal": "SEVERITIES belongs to unknown_declaration: a NAMED kind can be read past and said; 'unknown_seat' cannot be a warning"
+  },
+  {
+   "id": "R7",
+   "name": "the word is a NAMED word",
+   "source": "DEFINE LANGUAGE q AS (VERSION \"0.35\", GRAMMAR \"0.35\", COURT \"x\", EXTENSION \".q\") RATIONALE \"x\"\nDEFINE MENU roles AS (WORDS [primary, secondary], MESSAGE \"a role\") RATIONALE \"x\"\nDEFINE SYMBOL entity AS (KIND \"entity\", MESSAGE \"x\") RATIONALE \"x\"\nDEFINE UNION target AS (OF [flow, form]) RATIONALE \"x\"\nDEFINE DECLARATION flow AS (VERB \"FLOW\", SEATS []) RATIONALE \"x\"\nDEFINE DECLARATION form AS (VERB \"FORM\", SEATS [flow: flow?, flows: [flow]?, role: roles?, entity: entity?, target: target?, title: text?]) RATIONALE \"x\"\nDEFINE REFUSAL unknown_declaration AS (MESSAGE \"x\", NAMED [widget: \"w\"], SEVERITIES [gadget: warning]) RATIONALE \"x\"\n",
+   "refusal": "SEVERITIES: 'gadget' is not a NAMED word of unknown_declaration"
+  },
+  {
+   "id": "R8",
+   "name": "without NAMED there is no word to name",
+   "source": "DEFINE LANGUAGE q AS (VERSION \"0.35\", GRAMMAR \"0.35\", COURT \"x\", EXTENSION \".q\") RATIONALE \"x\"\nDEFINE MENU roles AS (WORDS [primary, secondary], MESSAGE \"a role\") RATIONALE \"x\"\nDEFINE SYMBOL entity AS (KIND \"entity\", MESSAGE \"x\") RATIONALE \"x\"\nDEFINE UNION target AS (OF [flow, form]) RATIONALE \"x\"\nDEFINE DECLARATION flow AS (VERB \"FLOW\", SEATS []) RATIONALE \"x\"\nDEFINE DECLARATION form AS (VERB \"FORM\", SEATS [flow: flow?, flows: [flow]?, role: roles?, entity: entity?, target: target?, title: text?]) RATIONALE \"x\"\nDEFINE REFUSAL unknown_declaration AS (MESSAGE \"x\", SEVERITIES [widget: warning]) RATIONALE \"x\"\n",
+   "refusal": "SEVERITIES: 'widget' is not a NAMED word of unknown_declaration"
+  },
+  {
+   "id": "R9",
+   "name": "a NAMED word's severity is error or warning",
+   "source": "DEFINE LANGUAGE q AS (VERSION \"0.35\", GRAMMAR \"0.35\", COURT \"x\", EXTENSION \".q\") RATIONALE \"x\"\nDEFINE MENU roles AS (WORDS [primary, secondary], MESSAGE \"a role\") RATIONALE \"x\"\nDEFINE SYMBOL entity AS (KIND \"entity\", MESSAGE \"x\") RATIONALE \"x\"\nDEFINE UNION target AS (OF [flow, form]) RATIONALE \"x\"\nDEFINE DECLARATION flow AS (VERB \"FLOW\", SEATS []) RATIONALE \"x\"\nDEFINE DECLARATION form AS (VERB \"FORM\", SEATS [flow: flow?, flows: [flow]?, role: roles?, entity: entity?, target: target?, title: text?]) RATIONALE \"x\"\nDEFINE REFUSAL unknown_declaration AS (MESSAGE \"x\", NAMED [widget: \"w\"], SEVERITIES [widget: soft]) RATIONALE \"x\"\n",
+   "refusal": "'soft' is not a SEVERITY of a NAMED word: error or warning"
+  },
+  {
+   "id": "R10",
+   "name": "a word is named once",
+   "source": "DEFINE LANGUAGE q AS (VERSION \"0.35\", GRAMMAR \"0.35\", COURT \"x\", EXTENSION \".q\") RATIONALE \"x\"\nDEFINE MENU roles AS (WORDS [primary, secondary], MESSAGE \"a role\") RATIONALE \"x\"\nDEFINE SYMBOL entity AS (KIND \"entity\", MESSAGE \"x\") RATIONALE \"x\"\nDEFINE UNION target AS (OF [flow, form]) RATIONALE \"x\"\nDEFINE DECLARATION flow AS (VERB \"FLOW\", SEATS []) RATIONALE \"x\"\nDEFINE DECLARATION form AS (VERB \"FORM\", SEATS [flow: flow?, flows: [flow]?, role: roles?, entity: entity?, target: target?, title: text?]) RATIONALE \"x\"\nDEFINE REFUSAL unknown_declaration AS (MESSAGE \"x\", NAMED [widget: \"w\"], SEVERITIES [widget: warning, widget: warning]) RATIONALE \"x\"\n",
+   "refusal": "'widget' is named twice in SEVERITIES"
+  },
+  {
+   "id": "R11",
+   "name": "unknown_verb cannot be a warning either: an unknown verb stops the parse",
+   "source": "DEFINE LANGUAGE q AS (VERSION \"0.35\", GRAMMAR \"0.35\", COURT \"x\", EXTENSION \".q\") RATIONALE \"x\"\nDEFINE MENU roles AS (WORDS [primary, secondary], MESSAGE \"a role\") RATIONALE \"x\"\nDEFINE SYMBOL entity AS (KIND \"entity\", MESSAGE \"x\") RATIONALE \"x\"\nDEFINE UNION target AS (OF [flow, form]) RATIONALE \"x\"\nDEFINE DECLARATION flow AS (VERB \"FLOW\", SEATS []) RATIONALE \"x\"\nDEFINE DECLARATION form AS (VERB \"FORM\", SEATS [flow: flow?, flows: [flow]?, role: roles?, entity: entity?, target: target?, title: text?]) RATIONALE \"x\"\nDEFINE REFUSAL unknown_verb AS (MESSAGE \"x\", SEVERITIES [widget: warning]) RATIONALE \"x\"\n",
+   "refusal": "SEVERITIES belongs to unknown_declaration"
+  }
+ ]
+}

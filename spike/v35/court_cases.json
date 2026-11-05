@@ -1,0 +1,326 @@
+{
+ "grammar": "panel",
+ "version": "0.35",
+ "comment": "Written BEFORE any code reads SEVERITIES. Each case runs the court forged from panel_v35.haro on a sentence of panel/ (with panel/world.json unless world is false). first: a fragment of the first line; contains / lacks: fragments of the whole output; counts: the verdict's counts per verb; diagnose: the first warning of the envelope. twin: the code of a warning the TWIN (v35/panel_errors.haro, the same language without SEVERITIES) must refuse with, in exactly the words the warning carries.",
+ "cases": [
+  {
+   "id": "P1",
+   "name": "a clean sentence: no warning at all",
+   "verb": "check",
+   "args": [
+    "panel/clean.panel",
+    "panel/world.json"
+   ],
+   "first": "ok",
+   "lacks": [
+    "warning"
+   ]
+  },
+  {
+   "id": "P2",
+   "name": "a FORM walks a flow declared elsewhere: ok, and the warning in the seat's own MESSAGES and CODES",
+   "verb": "check",
+   "args": [
+    "panel/flow_elsewhere.panel",
+    "panel/world.json"
+   ],
+   "first": "ok",
+   "contains": [
+    "warning UNRESOLVED_INTENT_FLOW: FORM search walks the INTENT_FLOW 'checkout', and no flow of that name is declared (line 2)"
+   ],
+   "twin": "UNRESOLVED_INTENT_FLOW"
+  },
+  {
+   "id": "P3",
+   "name": "the seat beside it is not held: a missing NEXT is refused as it always was",
+   "verb": "check",
+   "args": [
+    "panel/next_missing.panel",
+    "panel/world.json"
+   ],
+   "first": "panel (line 2): FORM search hands on to 'checkout', and no flow of that name is declared"
+  },
+  {
+   "id": "P4",
+   "name": "both: the error refuses, and a refused sentence speaks no warning",
+   "verb": "check",
+   "args": [
+    "panel/both_missing.panel",
+    "panel/world.json"
+   ],
+   "first": "panel (line 2): FORM search hands on to 'payment'",
+   "lacks": [
+    "warning"
+   ]
+  },
+  {
+   "id": "P5",
+   "name": "two forms, two warnings, in the order of the sentence",
+   "verb": "check",
+   "args": [
+    "panel/two_forms.panel",
+    "panel/world.json"
+   ],
+   "first": "ok",
+   "contains": [
+    "warning UNRESOLVED_INTENT_FLOW: FORM search walks the INTENT_FLOW 'checkout'",
+    "warning UNRESOLVED_INTENT_FLOW: FORM pay walks the INTENT_FLOW 'payment'"
+   ]
+  },
+  {
+   "id": "P6",
+   "name": "a list seat not held: refused by its first missing element",
+   "verb": "check",
+   "args": [
+    "panel/flows_missing.panel",
+    "panel/world.json"
+   ],
+   "first": "panel (line 2): WORLD_VIEW members lists the INTENT_FLOW 'checkout'"
+  },
+  {
+   "id": "P7",
+   "name": "the warning in the envelope: severity warning, the seat's code, cited as the code it would have refused with",
+   "verb": "diagnose",
+   "args": [
+    "panel/flow_elsewhere.panel",
+    "panel/world.json"
+   ],
+   "diagnose": {
+    "code": "UNRESOLVED_INTENT_FLOW",
+    "severity": "warning",
+    "line": 2
+   }
+  },
+  {
+   "id": "P8",
+   "name": "a view shows an entity the world lacks: ok, and the warning in the SYMBOL's words and code",
+   "verb": "check",
+   "args": [
+    "panel/entity_missing.panel",
+    "panel/world.json"
+   ],
+   "first": "ok",
+   "contains": [
+    "warning UNRESOLVED_ENTITY: WORLD_VIEW members shows the entity 'ghost', and the world declares no entity:ghost (line 2)"
+   ],
+   "twin": "UNRESOLVED_ENTITY"
+  },
+  {
+   "id": "P9",
+   "name": "without a world the entity is NO_WORLD, as before: not resolved, so not a warning of its own",
+   "verb": "check",
+   "args": [
+    "panel/entity_missing.panel"
+   ],
+   "first": "ok",
+   "contains": [
+    "warning NO_WORLD"
+   ],
+   "lacks": [
+    "UNRESOLVED_ENTITY"
+   ]
+  },
+  {
+   "id": "P10",
+   "name": "the entity the world has: clean",
+   "verb": "check",
+   "args": [
+    "panel/clean.panel",
+    "panel/world.json"
+   ],
+   "first": "ok",
+   "contains": [
+    "ok"
+   ],
+   "lacks": [
+    "warning"
+   ]
+  },
+  {
+   "id": "P11",
+   "name": "WIDGET is read past and said: ok, counted nowhere, the warning in the NAMED words and code",
+   "verb": "check",
+   "args": [
+    "panel/widget.panel",
+    "panel/world.json"
+   ],
+   "first": "ok",
+   "contains": [
+    "warning UNSPECIFIED_DECLARATION: WIDGET names a rendering, and a declaration that needs to say card has stopped describing intent (line 2)"
+   ],
+   "counts": {
+    "INTENT_FLOW": 1,
+    "INTERACTION": 1
+   },
+   "twin": "UNSPECIFIED_DECLARATION"
+  },
+  {
+   "id": "P12",
+   "name": "WIDGET and USER, each said, in order; what follows a skipped kind is read",
+   "verb": "check",
+   "args": [
+    "panel/widget_user.panel",
+    "panel/world.json"
+   ],
+   "first": "ok",
+   "contains": [
+    "warning UNSPECIFIED_DECLARATION: WIDGET names a rendering",
+    "warning UNSPECIFIED_DECLARATION: USER is not a kind this language defines (line 3)"
+   ],
+   "counts": {
+    "INTENT_FLOW": 1
+   }
+  },
+  {
+   "id": "P13",
+   "name": "GADGET is NAMED and not held: refused, as it always was",
+   "verb": "check",
+   "args": [
+    "panel/gadget.panel",
+    "panel/world.json"
+   ],
+   "first": "panel (line 2): GADGET was retired"
+  },
+  {
+   "id": "P14",
+   "name": "a kind read past is not declared: a reference to it dangles",
+   "verb": "check",
+   "args": [
+    "panel/widget_referenced.panel",
+    "panel/world.json"
+   ],
+   "first": "panel (line 3): FORM search hands on to 'checkout', and no flow of that name is declared"
+  },
+  {
+   "id": "P15",
+   "name": "what is read past must still be a declaration: an unclosed body is refused",
+   "verb": "check",
+   "args": [
+    "panel/widget_unclosed.panel",
+    "panel/world.json"
+   ],
+   "first": "panel (line 2)",
+   "lacks": [
+    "warning"
+   ]
+  },
+  {
+   "id": "P16",
+   "name": "and it carries its RATIONALE",
+   "verb": "check",
+   "args": [
+    "panel/widget_no_rationale.panel",
+    "panel/world.json"
+   ],
+   "first": "panel (line 3)",
+   "lacks": [
+    "warning UNSPECIFIED"
+   ]
+  },
+  {
+   "id": "P17",
+   "name": "a sentence of nothing but a kind read past declares nothing",
+   "verb": "check",
+   "args": [
+    "panel/only_widget.panel",
+    "panel/world.json"
+   ],
+   "first": "panel (line 1)"
+  },
+  {
+   "id": "P18",
+   "name": "the NAMED warning in the envelope, with the refusal's cites",
+   "verb": "diagnose",
+   "args": [
+    "panel/widget.panel",
+    "panel/world.json"
+   ],
+   "diagnose": {
+    "code": "UNSPECIFIED_DECLARATION",
+    "severity": "warning",
+    "line": 2,
+    "cites": [
+     "article:intent"
+    ]
+   }
+  },
+  {
+   "id": "P19",
+   "name": "INTENT_FLOW_NO_SATISFIES: absent and empty each said, the flow with intents not",
+   "verb": "check",
+   "args": [
+    "panel/no_satisfies.panel",
+    "panel/world.json"
+   ],
+   "first": "ok",
+   "contains": [
+    "warning INTENT_FLOW_NO_SATISFIES: INTENT_FLOW browse declares no intents (line 1)",
+    "warning INTENT_FLOW_NO_SATISFIES: INTENT_FLOW idle declares no intents (line 2)"
+   ],
+   "lacks": [
+    "INTENT_FLOW work"
+   ]
+  },
+  {
+   "id": "P20",
+   "name": "ROLE_UNDECLARED: said once, on the first interaction",
+   "verb": "check",
+   "args": [
+    "panel/no_roles.panel",
+    "panel/world.json"
+   ],
+   "first": "ok",
+   "contains": [
+    "warning ROLE_UNDECLARED: the surface declares interactions and gives none of them a role (line 1)"
+   ],
+   "lacks": [
+    "(line 2)",
+    "(line 3)"
+   ]
+  },
+  {
+   "id": "P21",
+   "name": "one role is enough",
+   "verb": "check",
+   "args": [
+    "panel/one_role.panel",
+    "panel/world.json"
+   ],
+   "first": "ok",
+   "lacks": [
+    "warning"
+   ]
+  },
+  {
+   "id": "P22",
+   "name": "all five in one sentence, and one error-free verdict",
+   "verb": "check",
+   "args": [
+    "panel/all_five.panel",
+    "panel/world.json"
+   ],
+   "first": "ok",
+   "contains": [
+    "ok",
+    "warning UNSPECIFIED_DECLARATION",
+    "warning INTENT_FLOW_NO_SATISFIES",
+    "warning ROLE_UNDECLARED",
+    "warning UNRESOLVED_INTENT_FLOW",
+    "warning UNRESOLVED_ENTITY"
+   ]
+  },
+  {
+   "id": "P23",
+   "name": "a wrong word in a seat is never a warning",
+   "verb": "check",
+   "args": [
+    "panel/wrong_role.panel",
+    "panel/world.json"
+   ],
+   "first": "panel (line 1)",
+   "lacks": [
+    "warning"
+   ]
+  }
+ ]
+}

@@ -1,0 +1,76 @@
+-- panel_v35.haro -- a small surface language that declares all five of StzZui's warnings (Haro v0.35, the per-seat severity). Not StzZui's language: its
+-- shape, cut to what the five need. Two are constraints of SEVERITY warning (v0.25, already expressible); two are reference seats held at warning by
+-- SEVERITIES (one to a declaration, one to a SYMBOL the world resolves); one is a NAMED kind held at warning, read past and said. Beside each warning
+-- seat stands one that is NOT held, so a sentence shows the grain: per seat, per word. v35/panel_errors.haro is this file with the SEVERITIES lines removed.
+
+DEFINE LANGUAGE panel AS (
+  VERSION "0.35", GRAMMAR "0.35",
+  COURT "spike/v35/court_cases.json",
+  EXTENSION ".panel"
+) RATIONALE "What a person is doing on a surface, declared before it is drawn: flows of intents, forms that walk them, views of the world's entities, interactions with roles"
+
+DEFINE MENU intents AS (
+  WORDS [read, act, undo],
+  MESSAGE "An intent is read, act or undo",
+  CODE "UNKNOWN_INTENT"
+) RATIONALE "Three verbs are enough to show a flow that has some and one that has none"
+
+DEFINE MENU roles AS (
+  WORDS [primary, secondary],
+  MESSAGE "A role is primary or secondary",
+  CODE "UNKNOWN_ROLE"
+) RATIONALE "What an interaction is to the person: the act they came for, or one beside it"
+
+DEFINE SYMBOL entity AS (
+  KIND "entity",
+  MESSAGE "WORLD_VIEW {name} shows the entity '{value}', and the world declares no entity:{value}",
+  CODE "UNRESOLVED_ENTITY"
+) RATIONALE "The entities a view shows are the host world's; a view never declares one"
+
+DEFINE DECLARATION intent_flow AS (
+  VERB "INTENT_FLOW",
+  SEATS [satisfies: [intents]?]
+) RATIONALE "The intents a surface serves, in the order a person meets them"
+
+DEFINE DECLARATION form AS (
+  VERB "FORM",
+  SEATS [satisfies: [intents]?, intent_flow: intent_flow?, next: intent_flow?],
+  MESSAGES [intent_flow: "FORM {name} walks the INTENT_FLOW '{value}', and no flow of that name is declared", next: "FORM {name} hands on to '{value}', and no flow of that name is declared"],
+  CODES [intent_flow: "UNRESOLVED_INTENT_FLOW", next: "UNRESOLVED_NEXT"],
+  SEVERITIES [intent_flow: warning]
+) RATIONALE "A form walks a flow, which may be declared in another pillar (a warning when it is not here), and hands on to a flow that must be here (an error)"
+
+DEFINE DECLARATION world_view AS (
+  VERB "WORLD_VIEW",
+  SEATS [shows: entity?, flows: [intent_flow]?],
+  MESSAGES [flows: "WORLD_VIEW {name} lists the INTENT_FLOW '{value}', and no flow of that name is declared"],
+  CODES [flows: "UNRESOLVED_FLOWS"],
+  SEVERITIES [shows: warning]
+) RATIONALE "A view shows an entity of the host world (a warning when the world lacks it) and lists flows of this sentence (an error when one is missing)"
+
+DEFINE DECLARATION interaction AS (
+  VERB "INTERACTION",
+  SEATS [role: roles?]
+) RATIONALE "One thing a person can do on the surface"
+
+DEFINE CONSTRAINT no_satisfies AS (
+  ON intent_flow, WHEN "satisfies absent or satisfies empty",
+  MESSAGE "INTENT_FLOW {name} declares no intents",
+  CODE "INTENT_FLOW_NO_SATISFIES",
+  SEVERITY warning
+) RATIONALE "A flow with no intents serves nobody; said, never refused (violations.json, level 2)"
+
+DEFINE CONSTRAINT role_undeclared AS (
+  ON interaction, WHEN "not (earlier interaction) and (all interaction where role absent)",
+  MESSAGE "the surface declares interactions and gives none of them a role",
+  CODE "ROLE_UNDECLARED",
+  SEVERITY warning
+) RATIONALE "Said once for the sentence, on its first interaction: the counter-check of an expression without intent, reported and never refusing"
+
+DEFINE REFUSAL unknown_declaration AS (
+  MESSAGE "The kinds are INTENT_FLOW, FORM, WORLD_VIEW and INTERACTION.",
+  NAMED [widget: "WIDGET names a rendering, and a declaration that needs to say card has stopped describing intent", user: "USER is not a kind this language defines", gadget: "GADGET was retired: say what the person does, with an INTERACTION"],
+  CODES [widget: "UNSPECIFIED_DECLARATION", user: "UNSPECIFIED_DECLARATION", gadget: "RETIRED_KIND"],
+  SEVERITIES [widget: warning, user: warning],
+  CITES ["article:intent"]
+) RATIONALE "WIDGET and USER are kinds another implementation reads, so they are said and read past; GADGET was this language's and is refused"

@@ -1,0 +1,2 @@
+DEFINE INTENT_FLOW browse AS (SATISFIES [read]) RATIONALE "x"
+DEFINE FORM search AS (INTENT_FLOW checkout, NEXT browse) RATIONALE "x"

@@ -1,0 +1,2 @@
+DEFINE INTENT_FLOW browse AS (SATISFIES [read]) RATIONALE "x"
+DEFINE WORLD_VIEW members AS (SHOWS member, FLOWS [browse, checkout]) RATIONALE "x"
