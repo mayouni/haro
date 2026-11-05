@@ -1354,6 +1354,25 @@ states principle 14.
   at 252 call sites. **The desk offered shipping Ring's library as a choice, first, and that was wrong**: the cut had already ruled it out. The fix is stzlib's -- drop the
   two loads, define in stzlib what it uses (`zip_addfile` over the twelve zip natives haro already has built in, `vm/src/zip.zig`) -- and is routed by a prompt the author
   launches in a stzlib session; this desk never edits stzlib.
+- **D51 -- a language declares the doors its worlds may open: `NEEDS [capability, ...]` on the LANGUAGE, `OPENS` on a kind; ADOPTED, with the
+  altitude each half holds at** (stzlib-security's HARO-ONEHOUR-01, 2026-11-05 14:48, section 3 A6 of stzlib's SOFTANZA_ONE_HOUR.md read at origin/main 0a311d01b;
+  the desk's decision, the author having left the order and the answers to it: "Chose the order yourself", 2026-11-05). The principle is Harobanda's, one floor up:
+  what nothing declared in is out by construction. **The words are the closed catalog of nine** that Harobanda's machine file and stzlib's `stzSystemCapabilities`
+  already use, unchanged: filesystem, process, network, environment, dynamic_load, gpio, threads, clock, inference. **The design:** (1) `NEEDS [..]` on `DEFINE
+  LANGUAGE` names every capability any world of the language may reach; (2) `OPENS capability` on a DECLARATION says a kind's declarations open that door in
+  whatever consumes them (a NETWORK, a SERVICE), and `OPENS seat` says each declaration opens what that seat lists (a SERVICE's `needs`); (3) the meta-court refuses a
+  kind that OPENS a capability the LANGUAGE does not NEED -- so its production never reaches the grammar, which is A6's gate, "a world in a language without network
+  cannot parse a listener" -- and refuses a NEEDS word no kind opens (least authority; Harobanda's "declared AND granted"); the forged court refuses a sentence whose
+  OPENS seat names a capability outside NEEDS; (4) silence refuses: a language with a kind that OPENS and no NEEDS is refused, and a language with neither opens nothing
+  and is exactly what it was -- no existing language changes. **What it is not**, named: the COURT's own reading of a sentence, its SENTENCE seats and a world file, and
+  its writing of a refinement and the audit chain, are the judge's doors, not a world's, and stay outside NEEDS. **Enforcement is the consumer's**: Haro judges the
+  declaration and publishes each declaration's opened capabilities with its rows, so Harobanda's PID 1 (COMPASS-KERN-02's generated filter) enforces what Haro proved
+  declared; Haro never claims to enforce what it does not run. **The second altitude**, Haro programs on the VM, is where an agent's code reaches a listener: `NEEDS`
+  on a program unit, refused at compile against the natives it calls (the census already lists every native name and site: 2,277 and 6,352 in stzlib). It needs a
+  map from native families to the nine, and that map waits on W7's measurement (the document's ruling 3); designed here, built after it. *Local facts the ask could
+  not see:* ZC4, which the ask said the build waits for, was built on 2026-11-02 (ZC5 followed), so the declared half is unblocked; and the machine language in this
+  repository already gates per machine (`capability` declarations, "PIN needs gpio, and no declaration grants gpio"), which NEEDS bounds from above. *Next:* the
+  declared half as a rung, fixtures first, its gate the ask's own sentence.
 - **D23 -- `rnxc fmt` is a Ring++ feature, not held for Haro** (CODEGRAPH Q4, ruled on the author's delegation, 2026-10-05: "take
   whatever decision you think is wiser on my behalf"). It is a verb of the one binary (commitment 5), depends on nothing of Haro's, is
   judged against the oracle and refuses what Ring refuses (58 of 6,061 Softanza files, 57 of them Ring's own refusals). It ships inside
