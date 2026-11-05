@@ -1346,6 +1346,14 @@ states principle 14.
   `unknown_seat`); warnings are spoken in the order the passes meet them, not sorted by line, so v0.25's order is kept. *Cost:* `severity_lib.haro` (75 lines) loads only
   where a severity is held; `court_lib.haro` +17 lines, `world_lib.haro` +8; the machine court's cold compile 135.5 ms before and 135.2 after, Z's 163.6 and 160.1 (alternating
   A/B, minima of 25): nothing measurable; every committed court byte-identical. *Not done, named:* a list of SYMBOLs (StzZui's `VISIBLE_ENTITIES`); StzZui adopting it.
+- **D50 -- no part of Ring is carried with Haro but the surface Ring++'s VM already gives it: Ring's standard library and its extensions are never shipped,
+  and a Softanza dependency on them is Softanza's to remove** (the author, 2026-11-05, answering HARO-DISTANCE-01: "NO RING HAS TO BE CARRIED WITH US IN HARO AT ALL
+  OTHER THEN THE SURFACE WE ALREADY HAVE IN RING++ VM THAT HARO IS BASED ON"; "we should not have use it at all in Softanza! And if we would, we should fix it"). It
+  restates the cut (vm/NOTES.md, "Not carried: Ring's standard library and its zip extension") as a rule for every future reading. The measurement it answers (HF-141):
+  stzlib compiles whole under haro, 0 refused, and its only distance is two loads of Ring's distribution (`stdlibcore.ring`, `ziplib.ring`) and 16 functions they define,
+  at 252 call sites. **The desk offered shipping Ring's library as a choice, first, and that was wrong**: the cut had already ruled it out. The fix is stzlib's -- drop the
+  two loads, define in stzlib what it uses (`zip_addfile` over the twelve zip natives haro already has built in, `vm/src/zip.zig`) -- and is routed by a prompt the author
+  launches in a stzlib session; this desk never edits stzlib.
 - **D23 -- `rnxc fmt` is a Ring++ feature, not held for Haro** (CODEGRAPH Q4, ruled on the author's delegation, 2026-10-05: "take
   whatever decision you think is wiser on my behalf"). It is a verb of the one binary (commitment 5), depends on nothing of Haro's, is
   judged against the oracle and refuses what Ring refuses (58 of 6,061 Softanza files, 57 of them Ring's own refusals). It ships inside
