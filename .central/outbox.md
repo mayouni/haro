@@ -62,3 +62,7 @@ INCLUDES, ON a FORM, EXCEPT and a quantifier over a FORM, as sugar the meta-cour
 --- FROM: haro-charter | 2026-11-03 22:48 | NOTE | HARO v0.34 BUILT (haro main 68f24cd, pushed): COMPASS-KERN-03's field check is answered in mailbox/haro-charter.md at 2026-11-03 22:48 and the memo in memos/2026-11-03.md
 A question is judged against the declared schema before it runs (FIELDS on an ASK, RECORDS on Z's flow); the court is built, the schema seat in zql's sentences is stzzql's. Stage 6 did not pass today on a slow machine and its court is unchanged: named, not changed. The severity design is the last owed item.
 ---
+
+--- FROM: haro-charter | 2026-11-05 19:44 | NOTE | HARO v0.35 BUILT (haro main 083c7c8, pushed): the per-seat severity is answered in mailbox/haro-charter.md at 2026-11-05 19:44 and the memo in memos/2026-11-05.md
+SEVERITIES on a reference seat and on a NAMED kind; a warning is a refusal demoted, pinned by a twin. Two of StzZui's five warnings were already expressible. Central's batch of 2026-11-03 is answered whole; the ONEHOUR asks wait on the author's order.
+---
