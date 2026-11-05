@@ -1709,6 +1709,24 @@ minima of 25). **The full 39-stage guard: every stage passes except stage 6**, w
 measures is byte-identical to v0.33's, the full guard took 4,452 s against 1,766 s, and the gate is reported as not passed, unchanged. The family's pinned count moved to 124 texts, 118 matching. **Not done, named**:
 which of zql's sentences declare `RECORDS` (the stzzql desk's); a type-aware comparison.
 
+## The thirty-fifth rung -- Haro v0.35, the per-seat severity: a reference that resolves to nothing, and a kind a REFUSAL names, may be a warning -- 2026-11-05
+
+**The constitution desk's ask**, owed since 2026-11-02, on the author's word "continue" (D49). Read first against its customer, StzZui's five warnings: two were already
+expressible (a CONSTRAINT of `SEVERITY warning`, v0.25), so the rung builds the three the grammar makes. `SEVERITIES [seat: warning]` on a DECLARATION holds a reference seat;
+`SEVERITIES [word: warning]` on `unknown_declaration` reads a NAMED kind past. A warning is the refusal demoted: same words, code, cites and line; the verdict stays ok.
+
+    v35/fixtures.json                   19 meta fixtures, written before any code read a SEVERITIES (fe49473): 8 accepts and 11 rejects
+    panel_v35.haro, panel/              a surface language declaring all five warnings, 20 sentences and a world; v35/court_cases.json: 24 cases (P24 and three tightenings added after the code, said so)
+    v35/panel_errors.haro               the twin: the same language without SEVERITIES, which must refuse with each warning's words
+    severity_lib.haro                   (loaded only where a severity is held) the seat held at warning, the NAMED kind read past
+    v35/plants.py                       the protections of the rung switched off in turn
+    v35/GRAMMAR.md                      the five read, Zin's granularity beside it, the forms, what a warning is, what is not decided
+
+**Results.** 19 of 19 meta fixtures; 24 of 24 cases on `haro` and its checked build, the same bytes; **the twin agrees on all 6 marked warnings on both builds** -- words, line, and in the
+envelope code, cites and span; the rung's 28 protections, each switched off in turn, load-bearing; **the whole 40-stage guard passes** (1,254 s); every committed court byte-identical. Stage 6:
+the cold compile 130.1 ms, the edit 14.3 ms. The machine court's cold compile 135.5 ms before the hooks and 135.2 after (alternating A/B, minima of 25). The family moves to 146 texts, 138 matching.
+**Not done, named**: a list of SYMBOLs; `unknown_seat` at warning; StzZui adopting it.
+
 ## The names -- `.haro`, not `.stzu` -- corrected 2026-10-02
 
 **At the author's word ("we agreed to use .haro instead of .stzu, no?").** D1 was ratified
@@ -1872,3 +1890,6 @@ whole guard re-run on the renamed tree: 28 + 30 + 27 + 23, 117 of 120, 32 of 32,
    the memo spelling, when Q-B2's text lands at Ringua.
 30. ~~COMPASS-KERN-03's field check~~ -- built 2026-11-03 as Haro v0.34, the thirty-fourth rung above: FIELDS on an ASK, RECORDS on Z's flow, a question judged against the declared schema
    before it runs. Next: the constitution desk's ask for a per-seat severity design, owed; which of zql's sentences declare RECORDS is the stzzql desk's.
+31. ~~The per-seat severity~~ -- built 2026-11-05 as Haro v0.35, the thirty-fifth rung above: SEVERITIES on a reference seat and on a NAMED kind, a warning a refusal demoted.
+   Central's batch of 2026-11-03 is answered whole. Next, in an order the author sets: stzlib-security's HARO-ONEHOUR-01 (NEEDS on a LANGUAGE) and HARO-ONEHOUR-02 (finally,
+   within, using, catch e and five checker rules), HARO-DISTANCE-01 (the refusal count of stzlib under haro, a heavy sweep); and the Zui-to-Zane rename of this repository.

@@ -344,7 +344,7 @@ the cut say `haro/X`, `X.ring`, `rnxc` and "the oracle"**: read them as this rep
                      (one heavy job each: the grammar's parser is 21 MB of C). vm/NOTES.md: what the fork kept and why
     spike/           the meta-court (haro.haro, haro_lib.haro), the forge (forge.haro), the libraries, the forged courts and grammars,
                      the letters' declarations (*_vNN.haro) and sentences, and vNN/ per rung: fixtures.json (written FIRST),
-                     GRAMMAR.md (prose second), court cases. spike/haro_forge.py is THE GUARD: 38 stages, --stage=N runs one,
+                     GRAMMAR.md (prose second), court cases. spike/haro_forge.py is THE GUARD: 40 stages, --stage=N runs one,
                      --plant must fail it. spike/f/ringflex_record.json: RingFlex's own court's answers, recorded (D41)
     study/           the measurements behind design memos (codegraph, phase15, rebol). Studies and probes OF Ring keep Ring 1.27 as
                      their subject (paths.RING_ORACLE), never as a judge
@@ -382,18 +382,19 @@ The records: `CHARTER.md` (section 13 the decisions, D1 to D42; section 15 the v
   Get-Content/Set-Content; every checkout is LF (`.gitattributes`); commit explicit paths, never `git add -A`.
 - **Versions**: take the next free version number and say so -- the constitution desk takes them too (it holds v0.29).
 
-## Where it stands -- 2026-11-03, after v0.34
+## Where it stands -- 2026-11-05, after v0.35
 
-- The cut is done and proved (SPIKE.md "The cut"; D39-D41; HF-134). **v0.30** (D44, stage 35): one reader of C6. **v0.31** (D45, stage 36): the pattern engine, judged beside its Python
-  reference. **v0.32** (D46, stage 37): `DEFINE PATTERN`, the value join. **v0.33** (D47, stage 38): `INCLUDES`, `ON` a FORM with `EXCEPT`, and a quantifier over a FORM -- sugar the meta-court
-  resolves. **v0.34 is built** (D48, HF-139, stage 39): COMPASS-KERN-03's field check -- `FIELDS seat.seat` on an ASK, `records: entity?` on Z's flow, and the forged court's `ask` verb refuses
-  a `WHERE` or `ORDER BY` that names a field the flow's entity does not declare or its steps do not compute, before the question runs, in the language's own words; a flow that writes no
-  `RECORDS` is not checked and zing's 25 questions hold. Haro refuses where zing answers no rows (the desk's reading, for the author to refuse). Central's items 2, 3, 4, S14 and KERN-03 are answered.
-  **Stage 6** read 160 to 194 ms against its 150 ms ceiling on a slow day (the full guard 4,452 s against 1,766 s), its court byte-identical to v0.33's. On the author's word ("Yes, better of two") D42 is amended: a gate over its
-  limit is measured once more and the better of the two runs stands, both printed; it passed at 148.3 ms on a quieter run, and a real regression still fails on both runs (tried with the ceiling at 100 ms).
+- The cut is done and proved (SPIKE.md "The cut"; D39-D41; HF-134). **v0.30** (D44, stage 35): one reader of C6. **v0.31** (D45, stage 36): the pattern engine. **v0.32** (D46,
+  stage 37): `DEFINE PATTERN`. **v0.33** (D47, stage 38): `INCLUDES`, `ON` a FORM with `EXCEPT`, a quantifier over a FORM. **v0.34** (D48, stage 39): COMPASS-KERN-03's field check,
+  `FIELDS` on an ASK and `RECORDS` on Z's flow. **v0.35 is built** (D49, HF-140, stage 40): the per-seat severity -- `SEVERITIES [seat: warning]` on a reference seat and
+  `SEVERITIES [word: warning]` on `unknown_declaration`'s NAMED words; a warning is a refusal demoted (same words, code, cites, line), pinned by a twin language without
+  `SEVERITIES`. **Central's batch of 2026-11-03 is answered whole.** Stage 6 (D42, amended 2026-11-03: the better of two runs when a first is over) read 130.1 ms cold and 14.3 ms
+  for an edit at v0.35.
 - D43 is the twin-court clause. Of BLOCKS.md's four questions: Q-B1 is built (`?` is C6, and `OPTIONAL` sees it in a rule); Q-B2's two amendments are refused by name until Ringua's text
   lands; Q-B3 the block export of a program is not started; Q-B4 the round-trip court the elders waited for exists -- asking their owners is Central's.
-- **Next: the constitution desk's ask for a per-seat severity design**, owed; which of zql's sentences declare `RECORDS` is the stzzql desk's. stzzui rewrites its declaration with the forms (its
+- **Next, in an order the author sets** (mailbox 2026-11-05): stzlib-security's HARO-ONEHOUR-01 (NEEDS on a LANGUAGE) and HARO-ONEHOUR-02 (finally, within, using,
+  catch e, five checker rules) and HARO-DISTANCE-01 (stzlib's refusal count under haro, a heavy sweep); the Zui-to-Zane rename of this repository in a quiet turn.
+  Which of zql's sentences declare `RECORDS` is the stzzql desk's. stzzui rewrites its declaration with the forms (its
   own; `runtime/zui/rewrite.py` of this desk showed the way: 1,169 lines to 883). Then step 3 of BLOCKS.md 3.5, the memo spelling, when Q-B2's text lands at Ringua. A rung with the pattern in a
   world's symbols or a kind's seat names, or a whole declaration as the judged value, waits for a customer.
 - A language's declared EXTENSION is counted by the family of the round trip and of FAM1, or ignored for a stated reason, and a check fails when it is neither (`v30/block_court.py`).

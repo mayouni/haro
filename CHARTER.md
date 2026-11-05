@@ -1331,6 +1331,21 @@ states principle 14.
   the cost of reversing it is one line, `FIELDS`, in the ASK. *Cost:* `ask_lib.haro` +91 lines (only a court with an ASK loads it); Z's cold start 165.0 ms before and 161.6 ms after
   (alternating A/B, minima of 25: nothing measurable); the forge writes the fifth element of `$aCourtAsk` only where `FIELDS` is declared, so every other court is byte-identical.
   *Not done, named:* which of zql's sentences declare `RECORDS` is the stzzql desk's; a type-aware comparison (`amount > "x"`) is another rung.
+- **D49 -- a reference that resolves to nothing, and a kind a REFUSAL names, may be a warning: `SEVERITIES` on a seat and on a NAMED word; a warning is a
+  refusal demoted and nothing else** (the constitution desk's ask of 2026-11-02, "the per-seat severity design, with Zin's per-rule granularity beside it"; on the
+  author's word "continue", the last owed item of Central's batch of 2026-11-03; `haro/spike/v35/GRAMMAR.md`; HF-140; the thirty-fifth rung; guard stage 40). Its
+  customer, StzZui's five warnings (seam S1 and D2), are three mechanisms: two were **already** expressible as CONSTRAINTs of `SEVERITY warning` (v0.25) and were proved
+  so before any fixture -- `INTENT_FLOW_NO_SATISFIES` and `ROLE_UNDECLARED`, the second said once through `not (earlier interaction)`; the other three are rules the
+  GRAMMAR makes, which have no CONSTRAINT to carry a severity, so it goes where those rules are written. `SEVERITIES [seat: warning]` on a DECLARATION holds a REFERENCE
+  seat -- a DECLARATION, a UNION holding one, a SYMBOL, a list of pairs with references -- and nothing else may be held (a value of the wrong shape is never a warning).
+  `SEVERITIES [word: warning]` on `unknown_declaration` holds a NAMED word: the kind is read past -- a name, `AS`, a body whose parentheses balance, `RATIONALE` and its
+  string -- and declares nothing. A warning carries the code, cites, line and words its refusal would have; the verdict stays ok; a list held at warning speaks each element
+  that resolves to nothing. **The twin pins it**: the same language without `SEVERITIES` refuses each marked sentence with exactly the warning's words, line, code, cites and
+  span. `error` is the default and may be written. Zin's granularity: per rule is the CONSTRAINT's `SEVERITY`, per weave the constitution's, and per seat and per word this;
+  Zin's `SUPPRESS ... BECAUSE` is not a severity. *Readings taken by the desk, within the rung, for the author to refuse:* only `unknown_declaration` can be read past (not
+  `unknown_seat`); warnings are spoken in the order the passes meet them, not sorted by line, so v0.25's order is kept. *Cost:* `severity_lib.haro` (75 lines) loads only
+  where a severity is held; `court_lib.haro` +17 lines, `world_lib.haro` +8; the machine court's cold compile 135.5 ms before and 135.2 after, Z's 163.6 and 160.1 (alternating
+  A/B, minima of 25): nothing measurable; every committed court byte-identical. *Not done, named:* a list of SYMBOLs (StzZui's `VISIBLE_ENTITIES`); StzZui adopting it.
 - **D23 -- `rnxc fmt` is a Ring++ feature, not held for Haro** (CODEGRAPH Q4, ruled on the author's delegation, 2026-10-05: "take
   whatever decision you think is wiser on my behalf"). It is a verb of the one binary (commitment 5), depends on nothing of Haro's, is
   judged against the oracle and refuses what Ring refuses (58 of 6,061 Softanza files, 57 of them Ring's own refusals). It ships inside
