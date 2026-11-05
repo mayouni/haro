@@ -109,13 +109,15 @@ family = {
     'name': "the declaration form, written once as a pattern, over every declaration and sentence of the spike: a keyword, a name, AS, a group, RATIONALE and its string",
     'rules': {'decl': '[LIT DEFINE KEYWORD WORD LIT AS GROUP LIT RATIONALE STRING]', 'main': '[SOME RULE decl END]'},
     'start': 'main',
-    'texts': 124,   # 91 at v0.31; v0.32 added grants_v32.haro and the twelve .grant sentences (104), v0.33 medium_v33.haro, its twin and the fifteen .medium sentences (121), v0.34 z_v34.haro and the two Z sentences that declare their records (124): the family follows the spike (changed after the court spoke, three times)
-    'matching': 118,   # 85 at v0.31, 98 at v0.32, 115 at v0.33; the three texts of v0.34 each match the declaration form
+    'texts': 146,   # 91 at v0.31; v0.32 added grants_v32.haro and the twelve .grant sentences (104), v0.33 medium_v33.haro, its twin and the fifteen .medium sentences (121), v0.34 z_v34.haro and the two Z sentences that declare their records (124), v0.35 panel_v35.haro, its twin and the twenty .panel sentences (146): the family follows the spike (changed after the court spoke, four times)
+    'matching': 138,   # 85 at v0.31, 98 at v0.32, 115 at v0.33, 118 at v0.34; of v0.35's twenty-two, the two written to be refused do not match
     'unmatched': {
         'f/missing-rationale.f': 'a sentence written to lack its RATIONALE (its second declaration)',
         'f/operator-in-guard.f': 'unreadable: an operator is not C6 (a text written to be refused)',
         'ledger/bank_no_rationale.ledger': 'a LIMIT written to lack its RATIONALE (refused under Art. 1)',
         'notice/unknown_verb.notice': 'a declaration without DEFINE: a verb the language does not know',
+        'panel/widget_no_rationale.panel': 'a kind read past at warning, written to lack its RATIONALE (refused, v0.35)',
+        'panel/widget_unclosed.panel': 'unreadable: a kind read past whose body never closes (a text written to be refused, v0.35)',
         'tontine/drop.z': 'DROP TABLE: not a declaration at all',
         'v15/four.haro': 'a declaration written to lack its RATIONALE, among four other defects',
     },

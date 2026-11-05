@@ -36,10 +36,10 @@ DEFINE DECLARATION intent_flow AS (
 
 DEFINE DECLARATION form AS (
   VERB "FORM",
-  SEATS [satisfies: [intents]?, intent_flow: intent_flow?, next: intent_flow?],
-  MESSAGES [intent_flow: "FORM {name} walks the INTENT_FLOW '{value}', and no flow of that name is declared", next: "FORM {name} hands on to '{value}', and no flow of that name is declared"],
-  CODES [intent_flow: "UNRESOLVED_INTENT_FLOW", next: "UNRESOLVED_NEXT"]
-) RATIONALE "A form walks a flow, which may be declared in another pillar (a warning when it is not here), and hands on to a flow that must be here (an error)"
+  SEATS [satisfies: [intents]?, intent_flow: intent_flow?, next: intent_flow?, also: [intent_flow]?],
+  MESSAGES [intent_flow: "FORM {name} walks the INTENT_FLOW '{value}', and no flow of that name is declared", next: "FORM {name} hands on to '{value}', and no flow of that name is declared", also: "FORM {name} also serves '{value}', and no flow of that name is declared"],
+  CODES [intent_flow: "UNRESOLVED_INTENT_FLOW", next: "UNRESOLVED_NEXT", also: "UNRESOLVED_ALSO"]
+) RATIONALE "A form walks a flow, which may be declared in another pillar (a warning when it is not here), hands on to a flow that must be here (an error, written out), and also serves flows that may be elsewhere (a warning for each)"
 
 DEFINE DECLARATION world_view AS (
   VERB "WORLD_VIEW",

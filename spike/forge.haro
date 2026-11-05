@@ -225,7 +225,12 @@ func LangSource(aLang)
 	for i = 1 to len(aD)
 		aCodes = []
 		if len(aD[i]) >= 8 aCodes = aD[i][8] ok
-		aRows + ("[" + RingStr(aD[i][2]) + ", " + RingStr(aD[i][1]) + ", " + SeatsSource(aLang, aD[i][3]) + ", " + RingStr(aD[i][6]) + ", " + MessagesSource(aD[i][7]) + ", " + MessagesSource(aCodes) + "]")
+		# v0.35: the seat severities, a 7th element only where declared -- so every other court keeps its bytes
+		cSevs = ""
+		if len(aD[i]) >= 10
+			if len(aD[i][10]) > 0 cSevs = ", " + MessagesSource(aD[i][10]) ok
+		ok
+		aRows + ("[" + RingStr(aD[i][2]) + ", " + RingStr(aD[i][1]) + ", " + SeatsSource(aLang, aD[i][3]) + ", " + RingStr(aD[i][6]) + ", " + MessagesSource(aD[i][7]) + ", " + MessagesSource(aCodes) + cSevs + "]")
 	next
 	cKinds = RowsSource(aRows, nl)
 	aRows = []
@@ -247,7 +252,11 @@ func LangSource(aLang)
 			aRCodes = aR[i][7]
 			aRCites = aR[i][8]
 		ok
-		aRows + ("[" + RingStr(aR[i][1]) + ", " + RingStr(aR[i][2]) + ", " + MessagesSource(aNamed) + ", " + RingStr(cRCode) + ", " + MessagesSource(aRCodes) + ", " + CitesSource(aRCites) + "]")
+		cRSevs = ""
+		if len(aR[i]) >= 9
+			if len(aR[i][9]) > 0 cRSevs = ", " + MessagesSource(aR[i][9]) ok
+		ok
+		aRows + ("[" + RingStr(aR[i][1]) + ", " + RingStr(aR[i][2]) + ", " + MessagesSource(aNamed) + ", " + RingStr(cRCode) + ", " + MessagesSource(aRCodes) + ", " + CitesSource(aRCites) + cRSevs + "]")
 	next
 	cRefusals = RowsSource(aRows, nl)
 	aRows = []
@@ -541,6 +550,23 @@ func ForgeCourt(aLang)
 		c += 'load "pattern_lib.haro"' + nl
 		c += 'load "pattern_judge.haro"' + nl
 	ok
+	# v0.35: the severity library rides along only where a language the court carries holds a seat or a NAMED word at a severity
+	bSev = 0
+	for i = 1 to len(aPatRecs)
+		aSvD = LangGet(aPatRecs[i], "declarations")
+		for j = 1 to len(aSvD)
+			if len(aSvD[j]) >= 10
+				if len(aSvD[j][10]) > 0 bSev = 1 ok
+			ok
+		next
+		aSvR = LangGet(aPatRecs[i], "refusals")
+		for j = 1 to len(aSvR)
+			if len(aSvR[j]) >= 9
+				if len(aSvR[j][9]) > 0 bSev = 1 ok
+			ok
+		next
+	next
+	if bSev c += 'load "severity_lib.haro"' + nl ok
 	c += nl
 	c += "$cCourtLang = " + '""' + nl + "$cCourtExt = " + '""' + nl + "$cCourtDir = " + '""' + nl
 	c += "$aCourtToks = []" + nl + "$nCourtPos = 1" + nl

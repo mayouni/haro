@@ -84,6 +84,7 @@ STZU28_FIXTURES = os.path.join(HERE, 'v28', 'fixtures.json')
 STZU32_FIXTURES = os.path.join(HERE, 'v32', 'fixtures.json')
 STZU33_FIXTURES = os.path.join(HERE, 'v33', 'fixtures.json')
 STZU34_FIXTURES = os.path.join(HERE, 'v34', 'fixtures.json')
+STZU35_FIXTURES = os.path.join(HERE, 'v35', 'fixtures.json')
 
 
 def judge_stzu(exe, label, fixtures=STZU_FIXTURES):
@@ -179,7 +180,8 @@ def stage1():
                             ('v0.28, CITES on every element that carries a CODE, and the word none (HARO-MENU-CITES-01)', STZU28_FIXTURES),
                             ('v0.32, PATTERN: a rule over a seat, its sets collected by the court (BLOCKS.md 4.3)', STZU32_FIXTURES),
                             ("v0.33, INCLUDES, ON a FORM and a quantifier over a FORM: the sugar of a shared seat (Central's item 4, S5)", STZU33_FIXTURES),
-                            ("v0.34, FIELDS on an ASK: where the schema of a kind asked lives (COMPASS-KERN-03)", STZU34_FIXTURES)):
+                            ("v0.34, FIELDS on an ASK: where the schema of a kind asked lives (COMPASS-KERN-03)", STZU34_FIXTURES),
+                            ("v0.35, SEVERITIES: a reference seat and a NAMED kind held at warning (the per-seat severity)", STZU35_FIXTURES)):
         print(f'stage 1 -- the Haro meta-court in pure Ring, judged by its fixtures ({label})')
         f1, o1 = judge_stzu(HARO_VM, 'haro', fixtures)
         f2, o2 = judge_stzu(TWIN, 'haro checked', fixtures)
@@ -3458,6 +3460,56 @@ def stage39():
         return 1
     return 0
 
+PANEL_STZU = os.path.join(HERE, 'panel_v35.haro')
+PANEL_TWIN = os.path.join(HERE, 'v35', 'panel_errors.haro')
+PANEL_CASES = os.path.join(HERE, 'v35', 'court_cases.json')
+def stage40():
+    """Haro v0.35, the per-seat severity (v35/GRAMMAR.md): panel_v35.haro declares all five of StzZui's warnings -- two constraints of SEVERITY
+    warning (v0.25), a reference seat and a SYMBOL seat held at warning by SEVERITIES, and NAMED kinds held at warning, read past and said. Its 23
+    cases on both runtimes, byte-identical. And the twin: v35/panel_errors.haro, the same language without SEVERITIES, forged on both runtimes, must
+    REFUSE every sentence a case marks with exactly the words, code, cites and line of the warning: a warning is a refusal demoted and nothing else."""
+    failures = ledger_stage(40, PANEL_STZU, PANEL_CASES, 'panel', 'P1')
+    print('  the twin: v35/panel_errors.haro, the same language without SEVERITIES, refuses with the words of each warning')
+    twin_abs = os.path.join(paths.OUT, 'stage40-twin')
+    os.makedirs(twin_abs, exist_ok=True)
+    for f in os.listdir(HERE):
+        if f.endswith('.haro'):
+            shutil.copyfile(os.path.join(HERE, f), os.path.join(twin_abs, f))
+    if os.path.isdir(os.path.join(twin_abs, 'panel')):
+        shutil.rmtree(os.path.join(twin_abs, 'panel'))
+    shutil.copytree(os.path.join(HERE, 'panel'), os.path.join(twin_abs, 'panel'))
+    shutil.copyfile(PANEL_TWIN, os.path.join(twin_abs, 'panel_errors.haro'))
+    doc = json.load(open(PANEL_CASES, encoding='utf-8'))
+    judged = 0
+    for label, exe in (('haro', HARO_VM), ('checked', TWIN)):
+        out = run_args(exe, ['forge.haro', 'panel_errors.haro', '.'], twin_abs).strip()
+        if not out.startswith('forged panel'):
+            failures += 1
+            print(f'  FAIL the twin did not forge on {label}: {out[:120]}')
+            continue
+        for c in doc['cases']:
+            if 'twin' not in c:
+                continue
+            args = c['args']
+            warn = run_args(exe, ['panel_court.haro', 'check'] + args, HERE)
+            line = next((l for l in warn.splitlines() if l.startswith('warning ' + c['twin'] + ':')), '')
+            m = re.match(r'warning ([A-Z_]+): (.*) \(line (\d+)\)$', line)
+            refused = run_args(exe, ['panel_court.haro', 'check'] + args, twin_abs).strip().splitlines()
+            want = f'panel (line {m.group(3)}): {m.group(2)}' if m else None
+            wd = json.loads(run_args(exe, ['panel_court.haro', 'diagnose'] + args, HERE))['diagnostics']
+            td = json.loads(run_args(exe, ['panel_court.haro', 'diagnose'] + args, twin_abs))['diagnostics']
+            wd = [d for d in wd if d.get('code') == c['twin']][:1]
+            same_env = bool(wd) and bool(td) and all(wd[0].get(k) == td[0].get(k) for k in ('code', 'cites', 'span', 'message')) and wd[0].get('severity') == 'warning' and td[0].get('severity') == 'error'
+            if PLANT and c['id'] == 'P2':
+                same_env = False
+            if not m or not refused or refused[0] != want or not same_env:
+                failures += 1
+                print(f'  FAIL {label} {c["id"]}: the warning {line[:120]!r} and the refusal of the twin {(refused[0] if refused else "")[:120]!r} differ, or their envelopes do')
+            else:
+                judged += 1
+    print(f'  {"ok  " if judged == 2 * sum(1 for c in doc["cases"] if "twin" in c) else "FAIL"} {judged} warnings each equal to the refusal of the twin: the words, the line, and in the envelope the code, the cites and the line; only the severity differs')
+    return failures
+
 SENTENCE_TARGET = 50.0     # D42: a sentence edited, its court's image reused -- what a person editing a sentence waits for
 COLD_CEILING = 150.0       # D42: the court compiled from scratch -- a ceiling that catches the court library growing
 
@@ -3631,5 +3683,7 @@ if __name__ == '__main__':
         failures += stage38()
     if stage in (None, 39) and os.path.exists(ASK_COURT):
         failures += stage39()
+    if stage in (None, 40) and os.path.exists(PANEL_STZU) and os.path.exists(PANEL_CASES):
+        failures += stage40()
     print(f'haro_forge: {"FAIL" if failures else "PASS"} ({failures} failure(s), {time.perf_counter()-t0:.1f} s)')
     sys.exit(1 if failures else 0)

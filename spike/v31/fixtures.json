@@ -1156,13 +1156,15 @@
    "main": "[SOME RULE decl END]"
   },
   "start": "main",
-  "texts": 124,
-  "matching": 118,
+  "texts": 146,
+  "matching": 138,
   "unmatched": {
    "f/missing-rationale.f": "a sentence written to lack its RATIONALE (its second declaration)",
    "f/operator-in-guard.f": "unreadable: an operator is not C6 (a text written to be refused)",
    "ledger/bank_no_rationale.ledger": "a LIMIT written to lack its RATIONALE (refused under Art. 1)",
    "notice/unknown_verb.notice": "a declaration without DEFINE: a verb the language does not know",
+   "panel/widget_no_rationale.panel": "a kind read past at warning, written to lack its RATIONALE (refused, v0.35)",
+   "panel/widget_unclosed.panel": "unreadable: a kind read past whose body never closes (a text written to be refused, v0.35)",
    "tontine/drop.z": "DROP TABLE: not a declaration at all",
    "v15/four.haro": "a declaration written to lack its RATIONALE, among four other defects"
   }

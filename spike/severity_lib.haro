@@ -1,0 +1,75 @@
+# severity_lib.haro -- the per-seat severity (Haro v0.35, v35/GRAMMAR.md): a reference that resolves to nothing, and a kind a REFUSAL
+# names, may be a WARNING. Loaded by a forged court only where a language it carries holds a seat or a NAMED word at a severity, so every
+# other court keeps its bytes and its cold compile.
+#
+# A warning is a refusal DEMOTED and nothing else: the same code, the same cites, the same line and the same words its refusal would have
+# carried (the twin, v35/panel_errors.haro, pins it); the verdict stays ok and the warning is spoken after it, as a CONSTRAINT's of SEVERITY
+# warning is (v0.25), and enters the envelope as "warning". Only a reference may be one: a value of the wrong shape is refused before the
+# references pass, and this library is never reached for it.
+#
+#   the kind row's 7th element    [[seat, severity], ...]   SEVERITIES of a DECLARATION
+#   the refusal row's 7th element [[word, severity], ...]   SEVERITIES of unknown_declaration, its NAMED words
+#
+# Functions only; the globals are the generated court's.
+
+# the severity a kind holds a seat at: "warning", "error", or "" (an error, as every seat is)
+func SevSeatIs(aKind, cSeat)
+	if len(aKind) < 7 return "" ok
+	for i = 1 to len(aKind[7])
+		if aKind[7][i][1] = cSeat return aKind[7][i][2] ok
+	next
+	return ""
+
+# a reference clause of a seat held at warning: each element that resolves to nothing is spoken, one warning per element, in the order
+# written -- where the refusal stops at the first, a warning has no reason to
+func SevWarnClause(aDecl, aSeat, aClause)
+	aV = aClause[3]
+	if aV[1] = "namelist" or aV[1] = "pairlist" or aV[1] = "stringlist"
+		for i = 1 to len(aV[2])
+			aSubV = [aV[1], [aV[2][i]], aV[3], aV[4]]
+			SevWarnOne(aDecl, aSeat, [aClause[1], aClause[2], aSubV, aClause[4], aClause[5]])
+		next
+	else
+		SevWarnOne(aDecl, aSeat, aClause)
+	ok
+
+func SevWarnOne(aDecl, aSeat, aClause)
+	CtSetCode("PARSE", [])
+	cWhy = CtCheckSeatValue(aDecl, aSeat, aClause, 1)
+	if cWhy != "" $aCourtWarnings + [$cCourtCode, $aCourtCites, aClause[2], cWhy] ok
+	CtSetCode("PARSE", [])
+
+# a NAMED kind held at warning: its declaration is read past -- the name, AS, a body whose parentheses balance, RATIONALE and its string --
+# and said in the NAMED words, with the refusal's code and cites. 1 when read past; 0 leaves the refusal to the court. What is read past is
+# not declared: it counts nowhere and a reference to it resolves to nothing
+func SevSkipNamed(aRow, tK)
+	cWord = lower(CtShown(tK))
+	cSev = ""
+	for i = 1 to len(aRow[7])
+		if aRow[7][i][1] = cWord cSev = aRow[7][i][2] ok
+	next
+	if cSev != "warning" return 0 ok
+	cNamed = CtRefusalNamed("unknown_declaration", cWord)
+	aCC = CtRefusalCode("unknown_declaration", cWord, "UNKNOWN_KIND")
+	tName = CtExpect("ident", "a lower_snake name")
+	tAs = CtNext()
+	if not (tAs[1] = "keyword" and tAs[2] = "AS")
+		CtFail(tAs[3], "Expected AS after the name, found '" + CtShown(tAs) + "'")
+	ok
+	CtExpect("lparen", "'('")
+	nDepth = 1
+	while nDepth > 0
+		t = CtNext()
+		if t[1] = "eof"
+			CtFail(tK[3], upper(cWord) + " " + tName[2] + " opens '(' and never closes it: a kind read past is still a declaration")
+		ok
+		if t[1] = "lparen" nDepth++ ok
+		if t[1] = "rparen" nDepth-- ok
+	end
+	tR = CtNext()
+	if not (tR[1] = "keyword" and tR[2] = "RATIONALE")
+		CtFail(tR[3], "RATIONALE is mandatory on every declaration (" + upper(cWord) + " " + tName[2] + " has none)")
+	ok
+	CtExpect("string", "the RATIONALE string")
+	$aCourtWarnings + [aCC[1], aCC[2], tK[3], cNamed]
+	return 1

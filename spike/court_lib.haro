@@ -1076,6 +1076,13 @@ func CtParseDecl()
 	aKind = NULL
 	if tK[1] = "keyword" aKind = CtKindByVerb(tK[2]) ok
 	if isNull(aKind)
+		# v0.35: a NAMED kind held at warning is read past and said (severity_lib.haro, loaded only where one is held)
+		aSevR = CtRefusalRow("unknown_declaration")
+		if not isNull(aSevR)
+			if len(aSevR) >= 7
+				if SevSkipNamed(aSevR, tK) return NULL ok
+			ok
+		ok
 		cNamed = CtRefusalNamed("unknown_declaration", lower(CtShown(tK)))
 		if cNamed != ""
 			aCC = CtRefusalCode("unknown_declaration", lower(CtShown(tK)), "UNKNOWN_KIND")
@@ -1184,7 +1191,9 @@ func CtDeclare(cSrc)
 	$nCourtPos = 1
 	aDecls = []
 	while CtPeek()[1] != "eof"
-		aDecls + CtParseDecl()
+		# v0.35: a NAMED kind held at warning is read past, and declares nothing
+		aPD = CtParseDecl()
+		if not isNull(aPD) aDecls + aPD ok
 	end
 	if len(aDecls) = 0
 		CtFail(1, "A " + $cCourtLang + " file declares nothing")
@@ -1428,6 +1437,13 @@ func CtCheckValues(aDecls, bRefs)
 					CtNote(cCatchError)
 				done
 				loop
+			ok
+			# v0.35: a reference seat held at warning speaks each element that resolves to nothing as a warning (severity_lib.haro)
+			if bRefs and len(aKind) >= 7
+				if SevSeatIs(aKind, aSeat[1]) = "warning"
+					SevWarnClause(aD, aSeat, aC[j])
+					loop
+				ok
 			ok
 			cWhy = CtCheckSeatValue(aD, aSeat, aC[j], bRefs)
 			if cWhy != ""

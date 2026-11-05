@@ -101,13 +101,13 @@ func StzuClauses(cKind)
 	if cKind = "LANGUAGE"
 		return [["COURT", "string"], ["EXTENSION", "string"], ["GRAMMAR", "string"], ["VERSION", "string"]]
 	but cKind = "DECLARATION"
-		return [["CODES", "messagelist"], ["INCLUDES", "namelist"], ["MESSAGES", "messagelist"], ["NAMES", "ident"], ["SEATS", "seatlist"], ["VERB", "string"]]
+		return [["CODES", "messagelist"], ["INCLUDES", "namelist"], ["MESSAGES", "messagelist"], ["NAMES", "ident"], ["SEATS", "seatlist"], ["SEVERITIES", "pairlist"], ["VERB", "string"]]
 	but cKind = "FORM"
 		return [["SEATS", "seatlist"]]
 	but cKind = "EXPRESSION"
 		return [["ABSENT", "ident"], ["AGGREGATES", "namelist"], ["CONTEXTS", "contextlist"], ["DIVISION", "ident"], ["EQUALITY", "ident"], ["OPERANDS", "namelist"], ["OPERATORS", "namelist"], ["VARIABLES", "namelist"]]
 	but cKind = "REFUSAL"
-		return [["CITES", "citelist"], ["CODE", "string"], ["CODES", "messagelist"], ["MESSAGE", "string"], ["NAMED", "messagelist"]]
+		return [["CITES", "citelist"], ["CODE", "string"], ["CODES", "messagelist"], ["MESSAGE", "string"], ["NAMED", "messagelist"], ["SEVERITIES", "pairlist"]]
 	but cKind = "MENU"
 		return [["CITES", "citelist"], ["CODE", "string"], ["MESSAGE", "string"], ["WORDS", "namelist"]]
 	but cKind = "RANGE"
@@ -332,6 +332,41 @@ func StzuWantCites(aCites, nLine, cWhere)
 			StzuFail(nLine, "'" + aCites[i] + "' on " + cWhere + " is not a cite: kind:value with kind rule, article, right or pattern")
 		ok
 	next
+
+# v0.35: a SEVERITIES list -- each entry named once, each error or warning
+func StzuWantSeverities(aSv, cWhat)
+	for i = 1 to len(aSv)
+		for j = 1 to i - 1
+			if aSv[j][1] = aSv[i][1] StzuFail(aSv[i][3], "'" + aSv[i][1] + "' is named twice in SEVERITIES") ok
+		next
+		if aSv[i][2] != "error" and aSv[i][2] != "warning"
+			StzuFail(aSv[i][3], "'" + aSv[i][2] + "' is not a SEVERITY of " + cWhat + ": error or warning")
+		ok
+	next
+
+# v0.35: a seat whose value is a reference the court resolves -- to a DECLARATION, a UNION holding one, a SYMBOL the world resolves, or a
+# list of pairs whose keys or values are references
+func StzuIsReferenceSeat(aSeat, aDeclared, aForms, aUnions)
+	cK = DeclaredKind(aDeclared, aSeat[2])
+	if cK = "DECLARATION" or cK = "SYMBOL" return 1 ok
+	if cK = "UNION"
+		for i = 1 to len(aUnions)
+			if aUnions[i][1] = aSeat[2]
+				for j = 1 to len(aUnions[i][2])
+					if DeclaredKind(aDeclared, aUnions[i][2][j][1]) = "DECLARATION" and not aUnions[i][2][j][2] return 1 ok
+				next
+			ok
+		next
+		return 0
+	ok
+	if cK = "FORM" and aSeat[3]
+		for i = 1 to len(aForms)
+			if aForms[i][1] = aSeat[2] and StzuIsPairForm(aForms[i][2], aDeclared)
+				if StzuPairRefs(aForms[i][2], aDeclared) return 1 ok
+			ok
+		next
+	ok
+	return 0
 
 func StzuCodesOf(aClauses, nLine, cWhere)
 	aCodes = []
@@ -1179,7 +1214,10 @@ func StzuDeclare(cSrc)
 					# v0.33: INCLUDES [form, ...] -- the seats of the FORMs come first; resolved after the whole file is read (form_expand.haro)
 					aInc = []
 					if HasClause(aClauses, "INCLUDES") aInc = ClauseValue(aClauses, "INCLUDES") ok
-					aDeclarations + [cName, cVerb, ClauseValue(aClauses, "SEATS"), cRationale, nLine, cNames, aMsgs, aCodes, aInc]
+					# v0.35: a severity per reference seat -- judged after the whole file is read, beside MESSAGES
+					aSevs = []
+					if HasClause(aClauses, "SEVERITIES") aSevs = ClauseValue(aClauses, "SEVERITIES") ok
+					aDeclarations + [cName, cVerb, ClauseValue(aClauses, "SEATS"), cRationale, nLine, cNames, aMsgs, aCodes, aInc, aSevs]
 				but cKind = "FORM"
 					aForms + [cName, ClauseValue(aClauses, "SEATS"), cRationale, nLine]
 				but cKind = "EXPRESSION"
@@ -1273,7 +1311,24 @@ func StzuDeclare(cSrc)
 						if not bNamed StzuFail(aRCodes[i][3], "CODES: '" + aRCodes[i][1] + "' is not a NAMED word of " + cName) ok
 					next
 					aRCites = StzuCitesOf(aClauses, nLine, cName)
-					aRefusals + [cName, ClauseValue(aClauses, "MESSAGE"), cRationale, nLine, aNamedMsgs, cRCode, aRCodes, aRCites]
+					# v0.35: a NAMED kind may be a warning -- read past and said. An unknown verb stops the parse, an unknown clause has no
+					# declaration to belong to, a dangling reference is the seat's: only unknown_declaration's NAMED words can be read past
+					aRSevs = []
+					if HasClause(aClauses, "SEVERITIES")
+						if cName != "unknown_declaration"
+							StzuFail(nLine, "SEVERITIES belongs to unknown_declaration: a NAMED kind can be read past and said; '" + cName + "' cannot be a warning")
+						ok
+						aRSevs = ClauseValue(aClauses, "SEVERITIES")
+						StzuWantSeverities(aRSevs, "a NAMED word")
+						for i = 1 to len(aRSevs)
+							bNamed = 0
+							for j = 1 to len(aNamedMsgs)
+								if aNamedMsgs[j][1] = aRSevs[i][1] bNamed = 1 ok
+							next
+							if not bNamed StzuFail(aRSevs[i][3], "SEVERITIES: '" + aRSevs[i][1] + "' is not a NAMED word of " + cName) ok
+						next
+					ok
+					aRefusals + [cName, ClauseValue(aClauses, "MESSAGE"), cRationale, nLine, aNamedMsgs, cRCode, aRCodes, aRCites, aRSevs]
 				but cKind = "MENU"
 					aWords = ClauseValue(aClauses, "WORDS")
 					if len(aWords) = 0
@@ -1626,6 +1681,25 @@ func StzuDeclare(cSrc)
 			for j = 1 to len(aCd)
 				if isNull(StzuSeatNamed(aDeclarations[i][3], aCd[j][1]))
 					StzuFail(aCd[j][3], "CODES: no seat '" + aCd[j][1] + "' on " + aDeclarations[i][1])
+				ok
+			next
+		catch
+			StzuNote(cCatchError)
+		done
+	next
+	# v0.35: SEVERITIES holds a reference seat at warning: a seat of the kind, named once, error or warning, and a REFERENCE -- only a
+	# reference that resolves to nothing may be a warning; a value of the wrong shape never is
+	for i = 1 to len(aDeclarations)
+		try
+			if len(aDeclarations[i]) < 10 loop ok
+			if StzuIsUnresolved(aDeclarations[i][1]) or StzuSeatsTouchUnresolved(aDeclarations[i][3]) loop ok
+			aSv = aDeclarations[i][10]
+			StzuWantSeverities(aSv, "a seat")
+			for j = 1 to len(aSv)
+				aSvSeat = StzuSeatNamed(aDeclarations[i][3], aSv[j][1])
+				if isNull(aSvSeat) StzuFail(aSv[j][3], "SEVERITIES: no seat '" + aSv[j][1] + "' on " + aDeclarations[i][1]) ok
+				if not StzuIsReferenceSeat(aSvSeat, aDeclared, aForms, aUnions)
+					StzuFail(aSv[j][3], "SEVERITIES: '" + aSv[j][1] + "' of " + aDeclarations[i][1] + " is not a reference: only a reference that resolves to nothing may be a warning")
 				ok
 			next
 		catch

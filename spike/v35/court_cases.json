@@ -1,7 +1,7 @@
 {
  "grammar": "panel",
  "version": "0.35",
- "comment": "Written BEFORE any code reads SEVERITIES. Each case runs the court forged from panel_v35.haro on a sentence of panel/ (with panel/world.json unless world is false). first: a fragment of the first line; contains / lacks: fragments of the whole output; counts: the verdict's counts per verb; diagnose: the first warning of the envelope. twin: the code of a warning the TWIN (v35/panel_errors.haro, the same language without SEVERITIES) must refuse with, in exactly the words the warning carries.",
+ "comment": "Written BEFORE any code reads SEVERITIES. Each case runs the court forged from panel_v35.haro on a sentence of panel/ (with panel/world.json unless world is false). first: a fragment of the first line; contains / lacks: fragments of the whole output; counts: the verdict's counts per verb; diagnose: the first warning of the envelope. P24, the ALSO seat and the explicit error on NEXT and GADGET, and the words of P15 and P16, were added after the code, found by designing the plants; (the cites of P7 were added after the code: the reader in the guard of a diagnose case requires them). twin: the code of a warning the TWIN (v35/panel_errors.haro, the same language without SEVERITIES) must refuse with, in exactly the words the warning carries.",
  "cases": [
   {
    "id": "P1",
@@ -88,7 +88,10 @@
    "diagnose": {
     "code": "UNRESOLVED_INTENT_FLOW",
     "severity": "warning",
-    "line": 2
+    "line": 2,
+    "cites": [
+     "rule:UNRESOLVED_INTENT_FLOW"
+    ]
    }
   },
   {
@@ -199,7 +202,7 @@
     "panel/widget_unclosed.panel",
     "panel/world.json"
    ],
-   "first": "panel (line 2)",
+   "first": "panel (line 2): WIDGET card opens '(' and never closes it",
    "lacks": [
     "warning"
    ]
@@ -212,7 +215,7 @@
     "panel/widget_no_rationale.panel",
     "panel/world.json"
    ],
-   "first": "panel (line 3)",
+   "first": "panel (line 3): RATIONALE is mandatory on every declaration (WIDGET card has none)",
    "lacks": [
     "warning UNSPECIFIED"
    ]
@@ -320,6 +323,22 @@
    "first": "panel (line 1)",
    "lacks": [
     "warning"
+   ]
+  },
+  {
+   "id": "P24",
+   "name": "a list held at warning: one warning per element that resolves to nothing, in the order written",
+   "verb": "check",
+   "args": [
+    "panel/also_two.panel",
+    "panel/world.json"
+   ],
+   "first": "ok",
+   "contains": [
+    "warning UNRESOLVED_ALSO: FORM search also serves 'checkout', and no flow of that name is declared (line 2)\nwarning UNRESOLVED_ALSO: FORM search also serves 'payment'"
+   ],
+   "lacks": [
+    "'browse', and no flow"
    ]
   }
  ]

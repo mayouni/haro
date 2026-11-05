@@ -25,11 +25,11 @@ import paths
 HARO_VM, TWIN = paths.need_bins()
 FIXTURES = os.path.join(HERE, 'fixtures.json')
 REFERENCE = os.path.join(ROOT, 'study', 'rebol', 'block.py')
-SENTENCE_EXT = ('.z', '.f', '.a', '.n', '.stzv', '.machine', '.fleet', '.ledger', '.bank', '.clinic', '.notice', '.grant', '.medium', '.w')
+SENTENCE_EXT = ('.z', '.f', '.a', '.n', '.stzv', '.machine', '.fleet', '.ledger', '.bank', '.clinic', '.notice', '.grant', '.medium', '.panel', '.w')
 # an extension a language of the spike declares, carried by files that are not sentences of a letter, and why they are not counted
 IGNORED_EXT = {'.rfn': 'refinement requests, a different text from a declaration', '.x': 'the v15 test languages, which have no files'}
 # the texts of the family written to be refused: a reader that reads them is wrong
-REFUSED_BY_DESIGN = {'f/operator-in-guard.f'}
+REFUSED_BY_DESIGN = {'f/operator-in-guard.f', 'panel/widget_unclosed.panel'}
 PLANT = '--plant' in sys.argv
 
 

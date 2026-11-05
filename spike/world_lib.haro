@@ -63,6 +63,14 @@ func CtResolveWorld(aDecls)
 		cMsg = aSy[4]
 		if cMsg = "" cMsg = "{VERB} {name} names '{value}', and the world declares no " + aSy[2] + ":{value}" ok
 		aCC = CtSymbolCode(aSy)
+		# v0.35: a SYMBOL seat held at warning is spoken after the verdict (severity_lib.haro)
+		aKW = CtKindByVerb(aSites[i][1][1])
+		if len(aKW) >= 7
+			if SevSeatIs(aKW, aSites[i][2][1]) = "warning"
+				$aCourtWarnings + [aCC[1], aCC[2], aSites[i][4], CtFill(cMsg, aSites[i][1], aSites[i][3])]
+				loop
+			ok
+		ok
 		try
 			CtFailC(aSites[i][4], aCC[1], aCC[2], CtFill(cMsg, aSites[i][1], aSites[i][3]))
 		catch
