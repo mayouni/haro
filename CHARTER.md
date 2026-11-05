@@ -1373,6 +1373,28 @@ states principle 14.
   not see:* ZC4, which the ask said the build waits for, was built on 2026-11-02 (ZC5 followed), so the declared half is unblocked; and the machine language in this
   repository already gates per machine (`capability` declarations, "PIN needs gpio, and no declaration grants gpio"), which NEEDS bounds from above. *Next:* the
   declared half as a rung, fixtures first, its gate the ask's own sentence.
+- **D52 -- `finally`, `within`, `using` and `catch e` land in the surface Haro compiles today, with the semantics of A1 kept whole, A3 and A4 amended
+  for a dynamic surface, and the five checker rules respelled; ADOPTED, in an order** (stzlib-security's HARO-ONEHOUR-02, 2026-11-05 17:47, section 3 A1-A5 of
+  stzlib's SOFTANZA_ONE_HOUR.md at origin/main 0a311d01b, and its ruling 1, which leaves the spellings to Haro "provided every semantics line of A1 holds"; the desk's
+  design, the author having left the order to it). **Where:** the surface haro compiles today (Ring++'s, which Haro owns since the cut, D39, D50), because that is
+  the surface stzlib's restore sites are written in; Haro's own syntax (GRAMMAR-SKETCH 7, BLOCKS Q-B3, not built) carries the same four with `end` for `done`. The
+  vendored parser is NOT regenerated: `within`, `using` and `catch e` are rewritten before parsing onto forms it already reads, as `lift.zig` already does for `not`.
+  **Measured first, on haro 52d53b9:** the compiler already has half of A1 -- `finally` runs on the normal path, after the handler, and rethrows when there is no
+  `catch`; a raise inside `finally` replaces the held one -- and `catch(e)` already binds the message text. **Missing**, each probed: `finally` does NOT run on
+  `return` from the body or the handler, on `exit`, or on `loop`; a replaced error keeps no cause; `catch e` without parentheses reads `e` (R24) instead of binding it.
+  **The spellings:** `try ... catch e ... finally ... done` (`catch(e)` keeps working); `within $global = value ... done` (a global only: a local needs no restore);
+  `using name = expression ... done`. **A1:** every semantics line, unamended. **A2:** a save, the body, a `finally` that restores, unamended. **A3, amended:** a value
+  that answers to none of `Release`, `Destroy`, `Close` is a compile error WHERE ITS CLASS IS KNOWN AT COMPILE TIME (`new stzX`), and otherwise is refused at the block's
+  ENTRY, before the body runs -- never a silent no-op; the surface is dynamic and a compile error cannot be promised for every expression. **A4, amended:** `e` is the
+  error VALUE, which in a text context IS its message byte for byte -- so `"caught: " + e`, `? e` and the 517 reads of `cCatchError` in stzlib (counted on 0a311d01b, the
+  number A4 said was owed) migrate by a rename -- and which answers `Message()`, `Code()`, `Span()`, `Cause()`. `cCatchError` outside a handler stays readable until
+  stzlib's sweep reads 0 (ruling 2), then is refused. **A5:** `haro/global-restored-by-hand` warn, `haro/listener-binds-all` warn (on a literal `0.0.0.0`, `::` or `""`
+  given to a listening native the checker is told of), `haro/text-run-as-code` err (a non-literal to `eval`, unless it passed a validator named to the checker --
+  `StzIsQueryCondition` is stzlib's, so the checker takes the name, it does not know it), `haro/last-error-read` note NOW (`catch(e)` already ships) and err when the
+  sweep reads 0, `haro/handle-held-across-raise` warn. **The order**, each a rung, fixtures first, a guard per semantics line on both builds: (1) A1 completed --
+  `return`, `exit`, `loop` run `finally`; (2) A4's error value, which A1's cause line needs; (3) A2 and A3, rewritten onto (1); (4) the five rules, `last-error-read`
+  first. Ring++ gets none of it (the document's own correction, SECURITY-HAROVM-01). *Found in passing:* stzlib's recovered plugin code writes `catch cError` in 4
+  files, a binding the surface never gave it -- each of those handlers reads an unset name today.
 - **D23 -- `rnxc fmt` is a Ring++ feature, not held for Haro** (CODEGRAPH Q4, ruled on the author's delegation, 2026-10-05: "take
   whatever decision you think is wiser on my behalf"). It is a verb of the one binary (commitment 5), depends on nothing of Haro's, is
   judged against the oracle and refuses what Ring refuses (58 of 6,061 Softanza files, 57 of them Ring's own refusals). It ships inside
