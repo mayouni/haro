@@ -1,0 +1,9 @@
+f()
+g()
+func f
+	nH = StzEngineCacheCreate(8)
+	return nH
+func g
+	$nCache = StzEngineCacheCreate(8)
+func StzEngineCacheCreate n
+	return 1

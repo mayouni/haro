@@ -1,0 +1,11 @@
+f()
+func f
+	nH = StzEngineSecretHold("k")
+	use(nH)
+	StzEngineSecretRelease(nH)
+func StzEngineSecretHold c
+	return 1
+func StzEngineSecretRelease n
+	return 0
+func use n
+	return 0

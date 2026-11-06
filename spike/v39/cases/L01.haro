@@ -1,0 +1,7 @@
+f()
+func f
+	try
+		raise("x")
+	catch
+		? cCatchError
+	done

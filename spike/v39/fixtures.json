@@ -1,0 +1,201 @@
+{
+ "rung": "v0.39",
+ "decision": "D52 rung (4): A5, the five checker rules",
+ "lines": {
+  "R1": "last-error-read: every read of cCatchError is a note, worded in its handler or outside one",
+  "R2": "text-run-as-code: eval of non-literal text is an error unless a named validator is called in the same body",
+  "R3": "listener-binds-all: a literal 0.0.0.0, :: or \"\" given to a named listener is a warning; told of none, it says so",
+  "R4": "global-restored-by-hand: a $global saved in a local and written back from it outside a finally is a warning",
+  "R5": "handle-held-across-raise: a local engine handle no finally releases, and the body does not return, is a warning"
+ },
+ "cases": [
+  {
+   "id": "L01",
+   "kind": "check",
+   "line": "R1",
+   "why": "a read of cCatchError in its handler is a note",
+   "file": "cases/L01.haro",
+   "args": [],
+   "stdout": "L01.haro\n  6:5  note   haro/last-error-read\n          cCatchError read in its handler -- bind the error instead (`catch e`) and read e\n\n  0 error, 0 warn, 0 perf, 1 note   in 1 file(s)\n  listener-binds-all: no listening native named (--listeners=), so no call was looked at\n"
+  },
+  {
+   "id": "L02",
+   "kind": "check",
+   "line": "R1",
+   "why": "a read of cCatchError outside a handler is a note, worded for it",
+   "file": "cases/L02.haro",
+   "args": [],
+   "stdout": "L02.haro\n  8:4  note   haro/last-error-read\n          cCatchError read outside a handler -- it is the last error of whoever raised, not this code's\n\n  0 error, 0 warn, 0 perf, 1 note   in 1 file(s)\n  listener-binds-all: no listening native named (--listeners=), so no call was looked at\n"
+  },
+  {
+   "id": "L03",
+   "kind": "check",
+   "line": "R1",
+   "why": "a binding, a write and a member of that name are not reads; `catch e` reads e",
+   "file": "cases/L03.haro",
+   "args": [],
+   "stdout": "\n  0 error, 0 warn, 0 perf, 0 note   in 1 file(s)\n  listener-binds-all: no listening native named (--listeners=), so no call was looked at\n"
+  },
+  {
+   "id": "L04",
+   "kind": "check",
+   "line": "R1",
+   "why": "every read is counted: two reads in one handler are two notes",
+   "file": "cases/L04.haro",
+   "args": [],
+   "stdout": "L04.haro\n  6:5  note   haro/last-error-read\n          cCatchError read in its handler -- bind the error instead (`catch e`) and read e\n  7:7  note   haro/last-error-read\n          cCatchError read in its handler -- bind the error instead (`catch e`) and read e\n\n  0 error, 0 warn, 0 perf, 2 note   in 1 file(s)\n  listener-binds-all: no listening native named (--listeners=), so no call was looked at\n"
+  },
+  {
+   "id": "T01",
+   "kind": "check",
+   "line": "R2",
+   "why": "eval of text built at run time is an error",
+   "file": "cases/T01.haro",
+   "args": [],
+   "stdout": "T01.haro\n  4:2  error  haro/text-run-as-code\n          eval() runs text that is not a literal, and nothing in this body passed it to a validator\n\n  1 error, 0 warn, 0 perf, 0 note   in 1 file(s)\n  undefined-function, unknown-class/-package: NOT checked -- the unit calls loadlib() or eval()\n  uninitialized-variable: NOT checked -- the unit calls loadlib() or eval()\n  listener-binds-all: no listening native named (--listeners=), so no call was looked at\n"
+  },
+  {
+   "id": "T02",
+   "kind": "check",
+   "line": "R2",
+   "why": "eval of literal text, a `+` of literals included, is not",
+   "file": "cases/T02.haro",
+   "args": [],
+   "stdout": "\n  0 error, 0 warn, 0 perf, 0 note   in 1 file(s)\n  undefined-function, unknown-class/-package: NOT checked -- the unit calls loadlib() or eval()\n  uninitialized-variable: NOT checked -- the unit calls loadlib() or eval()\n  listener-binds-all: no listening native named (--listeners=), so no call was looked at\n"
+  },
+  {
+   "id": "T03",
+   "kind": "check",
+   "line": "R2",
+   "why": "a validator the checker was told of, called in the same body, clears it",
+   "file": "cases/T03.haro",
+   "args": [
+    "--validators=IsSafe"
+   ],
+   "stdout": "\n  0 error, 0 warn, 0 perf, 0 note   in 1 file(s)\n  undefined-function, unknown-class/-package: NOT checked -- the unit calls loadlib() or eval()\n  uninitialized-variable: NOT checked -- the unit calls loadlib() or eval()\n  listener-binds-all: no listening native named (--listeners=), so no call was looked at\n"
+  },
+  {
+   "id": "T04",
+   "kind": "check",
+   "line": "R2",
+   "why": "the same body, the checker told of no validator: an error",
+   "file": "cases/T04.haro",
+   "args": [],
+   "stdout": "T04.haro\n  5:3  error  haro/text-run-as-code\n          eval() runs text that is not a literal, and nothing in this body passed it to a validator\n\n  1 error, 0 warn, 0 perf, 0 note   in 1 file(s)\n  undefined-function, unknown-class/-package: NOT checked -- the unit calls loadlib() or eval()\n  uninitialized-variable: NOT checked -- the unit calls loadlib() or eval()\n  listener-binds-all: no listening native named (--listeners=), so no call was looked at\n"
+  },
+  {
+   "id": "T05",
+   "kind": "check",
+   "line": "R2",
+   "why": "a validator called in the caller does not clear the helper's eval",
+   "file": "cases/T05.haro",
+   "args": [
+    "--validators=IsSafe"
+   ],
+   "stdout": "T05.haro\n  6:2  error  haro/text-run-as-code\n          eval() runs text that is not a literal, and nothing in this body passed it to a validator\n\n  1 error, 0 warn, 0 perf, 0 note   in 1 file(s)\n  undefined-function, unknown-class/-package: NOT checked -- the unit calls loadlib() or eval()\n  uninitialized-variable: NOT checked -- the unit calls loadlib() or eval()\n  listener-binds-all: no listening native named (--listeners=), so no call was looked at\n"
+  },
+  {
+   "id": "N01",
+   "kind": "check",
+   "line": "R3",
+   "why": "\"0.0.0.0\", \"::\" and \"\" given to a listener the checker was told of are warnings; 127.0.0.1 is not",
+   "file": "cases/N01.haro",
+   "args": [
+    "--listeners=Serve"
+   ],
+   "stdout": "N01.haro\n  1:7  warn   haro/listener-binds-all\n          Serve() given \"0.0.0.0\" -- a listener bound to every interface\n  2:7  warn   haro/listener-binds-all\n          Serve() given \"::\" -- a listener bound to every interface\n  3:7  warn   haro/listener-binds-all\n          Serve() given \"\" -- a listener bound to every interface\n\n  0 error, 3 warn, 0 perf, 0 note   in 1 file(s)\n"
+  },
+  {
+   "id": "N02",
+   "kind": "check",
+   "line": "R3",
+   "why": "told of no listener, the checker looks at none and says so",
+   "file": "cases/N02.haro",
+   "args": [],
+   "stdout": "\n  0 error, 0 warn, 0 perf, 0 note   in 1 file(s)\n  listener-binds-all: no listening native named (--listeners=), so no call was looked at\n"
+  },
+  {
+   "id": "N03",
+   "kind": "check",
+   "line": "R3",
+   "why": "only a literal given directly: an address through a variable, or to another call, is not followed",
+   "file": "cases/N03.haro",
+   "args": [
+    "--listeners=Serve"
+   ],
+   "stdout": "\n  0 error, 0 warn, 0 perf, 0 note   in 1 file(s)\n"
+  },
+  {
+   "id": "G01",
+   "kind": "check",
+   "line": "R4",
+   "why": "saved, set, and written back by hand with nothing on a raise: a warning at the save",
+   "file": "cases/G01.haro",
+   "args": [],
+   "stdout": "G01.haro\n  4:2  warn   haro/global-restored-by-hand\n          $g is saved in cOld here and written back by hand at line 7, and a raise between leaves it set -- write `within $g = ...`\n\n  0 error, 1 warn, 0 perf, 0 note   in 1 file(s)\n  listener-binds-all: no listening native named (--listeners=), so no call was looked at\n"
+  },
+  {
+   "id": "G02",
+   "kind": "check",
+   "line": "R4",
+   "why": "written back in a catch and after it: still by hand, worded for it",
+   "file": "cases/G02.haro",
+   "args": [],
+   "stdout": "G02.haro\n  4:2  warn   haro/global-restored-by-hand\n          $g is saved in cOld here and written back by hand at line 9, in a catch too -- `within $g = ...` is this shape, written once\n\n  0 error, 1 warn, 0 perf, 0 note   in 1 file(s)\n  listener-binds-all: no listening native named (--listeners=), so no call was looked at\n"
+  },
+  {
+   "id": "G03",
+   "kind": "check",
+   "line": "R4",
+   "why": "written back in a finally, or with within: not by hand",
+   "file": "cases/G03.haro",
+   "args": [],
+   "stdout": "\n  0 error, 0 warn, 0 perf, 0 note   in 1 file(s)\n  listener-binds-all: no listening native named (--listeners=), so no call was looked at\n"
+  },
+  {
+   "id": "G04",
+   "kind": "check",
+   "line": "R4",
+   "why": "a global read into a local and never written back from it is no save",
+   "file": "cases/G04.haro",
+   "args": [],
+   "stdout": "\n  0 error, 0 warn, 0 perf, 0 note   in 1 file(s)\n  listener-binds-all: no listening native named (--listeners=), so no call was looked at\n"
+  },
+  {
+   "id": "H01",
+   "kind": "check",
+   "line": "R5",
+   "why": "a handle released on the normal path only: a warning where it is taken",
+   "file": "cases/H01.haro",
+   "args": [],
+   "stdout": "H01.haro\n  3:2  warn   haro/handle-held-across-raise\n          nH holds an engine handle from StzEngineSecretHold() and no finally releases it -- a raise between leaves it held\n\n  0 error, 1 warn, 0 perf, 0 note   in 1 file(s)\n  listener-binds-all: no listening native named (--listeners=), so no call was looked at\n"
+  },
+  {
+   "id": "H02",
+   "kind": "check",
+   "line": "R5",
+   "why": "a handle a finally releases is not held across a raise",
+   "file": "cases/H02.haro",
+   "args": [],
+   "stdout": "\n  0 error, 0 warn, 0 perf, 0 note   in 1 file(s)\n  listener-binds-all: no listening native named (--listeners=), so no call was looked at\n"
+  },
+  {
+   "id": "H03",
+   "kind": "check",
+   "line": "R5",
+   "why": "a handle the body returns, or holds in a global, is not this body's to release",
+   "file": "cases/H03.haro",
+   "args": [],
+   "stdout": "\n  0 error, 0 warn, 0 perf, 0 note   in 1 file(s)\n  listener-binds-all: no listening native named (--listeners=), so no call was looked at\n"
+  },
+  {
+   "id": "H04",
+   "kind": "check",
+   "line": "R5",
+   "why": "a handle never released is held too; a Create that is not the engine's is no handle",
+   "file": "cases/H04.haro",
+   "args": [],
+   "stdout": "H04.haro\n  3:2  warn   haro/handle-held-across-raise\n          nH holds an engine handle from StzEngineCacheCreate() and no finally releases it -- a raise between leaves it held\n\n  0 error, 1 warn, 0 perf, 0 note   in 1 file(s)\n  listener-binds-all: no listening native named (--listeners=), so no call was looked at\n"
+  }
+ ]
+}
