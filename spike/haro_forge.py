@@ -3471,7 +3471,22 @@ def stage45():
     opens what its NEEDS seat lists, a NOTE opens nothing. The forged court refuses a sentence whose SERVICE lists a door the language does not
     NEED (CAPABILITY_NOT_NEEDED) and publishes each declaration's opened doors in its world rows, for the consumer that enforces them. Its cases
     on both runtimes, byte-identical; one case reads panel_court.haro, a language that needs nothing, whose world must carry no opens."""
-    return ledger_stage(45, DOOR_STZU, DOOR_CASES, 'door', 'D1')
+    failures = ledger_stage(45, DOOR_STZU, DOOR_CASES, 'door', 'D1')
+    # D51 (4): a language that says nothing of doors is exactly what it was -- panel_v35.haro forges its court and grammar byte for byte as
+    # committed (git HEAD), so the doors library and the 25th element reach no court whose language does not NEED
+    with tempfile.TemporaryDirectory() as td:
+        run_args(HARO_VM, ['forge.haro', PANEL_STZU, td], HERE)
+        for art in ('panel_court.haro', 'panel.gbnf'):
+            want = subprocess.run(['git', 'show', 'HEAD:spike/' + art], cwd=HERE, capture_output=True).stdout
+            got = open(os.path.join(td, art), 'rb').read() if os.path.exists(os.path.join(td, art)) else b''
+            if not want:
+                print(f'  NOT RUN the byte check of {art}: git HEAD has no spike/{art}')
+            elif got.replace(b'\r\n', b'\n') != want.replace(b'\r\n', b'\n'):
+                failures += 1
+                print(f'  FAIL {art}, forged from a language that NEEDS nothing, differs from the committed one ({len(got)} vs {len(want)} bytes)')
+            else:
+                print(f'  ok   {art}, forged from a language that NEEDS nothing, is the committed one byte for byte ({len(got)} bytes)')
+    return failures
 
 PANEL_STZU = os.path.join(HERE, 'panel_v35.haro')
 PANEL_TWIN = os.path.join(HERE, 'v35', 'panel_errors.haro')
