@@ -46,6 +46,15 @@
    "stdout": "L04.haro\n  6:5  note   haro/last-error-read\n          cCatchError read in its handler -- bind the error instead (`catch e`) and read e\n  7:7  note   haro/last-error-read\n          cCatchError read in its handler -- bind the error instead (`catch e`) and read e\n\n  0 error, 0 warn, 0 perf, 2 note   in 1 file(s)\n  listener-binds-all: no listening native named (--listeners=), so no call was looked at\n"
   },
   {
+   "id": "L05",
+   "kind": "check",
+   "line": "R1",
+   "why": "a read on a line the lift rewrote is named at the file's own column",
+   "file": "cases/L05.haro",
+   "args": [],
+   "stdout": "L05.haro\n  4:14  note   haro/last-error-read\n          cCatchError read outside a handler -- it is the last error of whoever raised, not this code's\n\n  0 error, 0 warn, 0 perf, 1 note   in 1 file(s)\n  listener-binds-all: no listening native named (--listeners=), so no call was looked at\n"
+  },
+  {
    "id": "T01",
    "kind": "check",
    "line": "R2",
@@ -158,6 +167,15 @@
    "line": "R4",
    "why": "a global read into a local and never written back from it is no save",
    "file": "cases/G04.haro",
+   "args": [],
+   "stdout": "\n  0 error, 0 warn, 0 perf, 0 note   in 1 file(s)\n  listener-binds-all: no listening native named (--listeners=), so no call was looked at\n"
+  },
+  {
+   "id": "G05",
+   "kind": "check",
+   "line": "R4",
+   "why": "a write-back before its save, a compound write, and two locals swapped, are no restore",
+   "file": "cases/G05.haro",
    "args": [],
    "stdout": "\n  0 error, 0 warn, 0 perf, 0 note   in 1 file(s)\n  listener-binds-all: no listening native named (--listeners=), so no call was looked at\n"
   },

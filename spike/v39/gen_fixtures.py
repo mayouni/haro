@@ -92,6 +92,11 @@ CASES = [
     ('L04', 'R1', 'every read is counted: two reads in one handler are two notes', [
         'f()', 'func f', T + 'try', T * 2 + 'raise("x")', T + 'catch', T * 2 + '? cCatchError + "!"', T * 2 + 'see cCatchError', T + 'done'], [],
      lambda c: report(c, [('6:5', 'note', 'haro/last-error-read', M_IN), ('7:7', 'note', 'haro/last-error-read', M_IN)], (0, 0, 2), [NO_LISTEN])),
+    # WRITTEN AFTER THE CODE (a plant of the column mapping found no case on a line the lift rewrote): `within` gains `try ` on its line,
+    # and the note must still name the file's column, 14, not the lifted text's, 18.
+    ('L05', 'R1', 'a read on a line the lift rewrote is named at the file\'s own column', [
+        '$g = ""', 'f()', 'func f', T + 'within $g = cCatchError', T * 2 + '? $g', T + 'done'], [],
+     lambda c: report(c, [('4:14', 'note', 'haro/last-error-read', M_OUT)], (0, 0, 1), [NO_LISTEN])),
 
     # ---- R2 text-run-as-code
     ('T01', 'R2', 'eval of text built at run time is an error', [
@@ -141,6 +146,11 @@ CASES = [
      lambda c: report(c, [], (0, 0, 0), [NO_LISTEN])),
     ('G04', 'R4', 'a global read into a local and never written back from it is no save', [
         '$g = "a"', 'f()', 'func f', T + 'x = $g', T + '$g = "b"', T + '$g = x + "!"', T + 'y = $g', T + '$g = "c"'], [],
+     lambda c: report(c, [], (0, 0, 0), [NO_LISTEN])),
+    # WRITTEN AFTER THE CODE (plants of R4's order, its `=` and its `$` found no case): a write-back before the save is no restore, nor is
+    # a compound write, and two locals swapped are no global.
+    ('G05', 'R4', 'a write-back before its save, a compound write, and two locals swapped, are no restore', [
+        '$g = "a"', 'f()', 'func f', T + 'cOld = "x"', T + '$g = cOld', T + 'cOld = $g', T + '$g += cOld', T + 'a = 1', T + 'b = a', T + 'a = b'], [],
      lambda c: report(c, [], (0, 0, 0), [NO_LISTEN])),
 
     # ---- R5 handle-held-across-raise
