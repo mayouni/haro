@@ -1831,6 +1831,15 @@ pub const DaState = struct {
     }
 };
 
+/// An open region whose `finally` a jump leaving it runs first (D52, A1).
+pub const FinRegion = struct {
+    /// the `finally` clause
+    node: ts.Node,
+    /// `try_open` and the open catches OUTSIDE the region: the state its `finally` is compiled in, wherever it is compiled
+    try_level: u32,
+    catch_len: u32,
+};
+
 pub const Compiler = struct {
     alloc: std.mem.Allocator,
     /// Set while compiling an eval string (see EvalCtx); null otherwise.
@@ -1960,6 +1969,20 @@ pub const Compiler = struct {
     /// probes ran on the ReleaseSafe binary for the first time). The handler
     /// ends those borrows the normal path's way, first thing at landing.
     try_borrows: std.ArrayListUnmanaged([4]u64) = .{},
+    /// Per open region whose `finally` a `return`, `exit` or `loop` leaving it
+    /// must run first, innermost last (D52, A1): a `try` body, and the handler
+    /// of a `try` that has a `finally`. The jump compiles that `finally` again
+    /// at itself (unwind).
+    fin_regions: std.ArrayListUnmanaged(FinRegion) = .{},
+    /// `fin_regions.items.len` at the entry of each open loop, parallel to `loop_try`.
+    loop_fin: std.ArrayListUnmanaged(u32) = .{},
+    /// `try` statements open around the one being compiled, in any of their
+    /// parts: it names each handler's error register. Naming by the open
+    /// CATCHES gave a `try` inside a `finally` its enclosing try's register,
+    /// because a `finally` is compiled outside its catch -- so the inner catch
+    /// overwrote the error the `finally` was holding, and the wrong one was
+    /// raised again (v36 F14: "outer caught: inner").
+    try_depth: u32 = 0,
     /// `x = new K(args)` on Ring stores the new object into x BEFORE the
     /// arguments are evaluated (F-91): `o = new K([1] + o)` appends the
     /// object itself, and `q = new K(q)` hands init the object. The
@@ -2406,11 +2429,83 @@ pub const Compiler = struct {
         while (i < k) : (i += 1) _ = try self.emit(.pend, 0, 0, 0, 0);
     }
 
-    /// The `try` bodies a jump to the loop `lv` levels out leaves.
-    fn triesInLoops(self: *Compiler, lv: usize) u32 {
+    /// An `exit` or `loop` to the loop `lv` levels out: it leaves the `try`
+    /// bodies opened inside that loop, and runs the `finally` of every region
+    /// it crosses (F-90, D52).
+    fn leaveLoops(self: *Compiler, lv: usize) Error!void {
         const lt = self.loop_try.items;
-        if (lv == 0 or lv > lt.len) return 0;
-        return self.try_open - lt[lt.len - lv];
+        if (lv == 0 or lv > lt.len) return;
+        try self.unwind(lt[lt.len - lv], self.loop_fin.items[self.loop_fin.items.len - lv]);
+    }
+
+    /// A `return` leaves every open region of its function. Its value is in
+    /// `keep`, which the `finally` blocks compiled on the way out must not
+    /// reuse: they run after the value is taken, and the value taken is the
+    /// one returned (v36 F04).
+    fn leaveAll(self: *Compiler, keep: u8) Error!void {
+        const saved = self.floor;
+        defer self.floor = saved;
+        self.floor = @max(self.floor, keep + 1);
+        try self.unwind(0, 0);
+    }
+
+    /// The way out of open regions (D52, A1), innermost first: leave the `try`
+    /// bodies down to each region whose `finally` the jump crosses, run that
+    /// `finally`, and last leave the bodies down to `to_try`. Each `finally`
+    /// runs with its own handler already left, so a raise in it goes outward
+    /// and it runs once (F12, F13).
+    fn unwind(self: *Compiler, to_try: u32, to_fin: usize) Error!void {
+        var cur = self.try_open;
+        var j = self.fin_regions.items.len;
+        while (j > to_fin) {
+            j -= 1;
+            const r = self.fin_regions.items[j];
+            try self.leaveTries(cur - r.try_level);
+            cur = r.try_level;
+            try self.inlineFinally(j, r);
+        }
+        try self.leaveTries(cur - to_try);
+    }
+
+    /// Compile region `j`'s `finally` here, in the state of its own `try`'s
+    /// outside: the regions from `j` up, their open bodies and their catches
+    /// set aside, so a jump inside the `finally` does not cross it again (F15)
+    /// and a borrow in it is ended by the handlers that are still open.
+    fn inlineFinally(self: *Compiler, j: usize, r: FinRegion) Error!void {
+        const a = self.alloc;
+        const fins = try a.dupe(FinRegion, self.fin_regions.items[j..]);
+        defer a.free(fins);
+        const bors = try a.dupe([4]u64, self.try_borrows.items[r.try_level..]);
+        defer a.free(bors);
+        const cats = try a.dupe(u8, self.catch_regs.items[r.catch_len..]);
+        defer a.free(cats);
+        const open = self.try_open;
+        self.fin_regions.shrinkRetainingCapacity(j);
+        self.try_borrows.shrinkRetainingCapacity(r.try_level);
+        self.catch_regs.shrinkRetainingCapacity(r.catch_len);
+        self.try_open = r.try_level;
+        try self.body(r.node, 0);
+        self.try_open = open;
+        try self.fin_regions.appendSlice(a, fins);
+        try self.try_borrows.appendSlice(a, bors);
+        try self.catch_regs.appendSlice(a, cats);
+    }
+
+    /// At a handler's landing: end every borrow its body may have left open
+    /// (try_borrows). Each is a temporary, dead at the handler, so `loadi`
+    /// with b = 1 -- the raw store that releases nothing, as the normal path's
+    /// end of a borrow is (every other `loadi` releases what it overwrites
+    /// since 2026-10-14) -- forgets it; at worst a register a later statement
+    /// had filled with an OWNED value is forgotten too, a leak on the error
+    /// path only.
+    fn forgetBorrows(self: *Compiler, borrowed: [4]u64) Error!void {
+        for (borrowed, 0..) |word, w| {
+            var bits = word;
+            while (bits != 0) : (bits &= bits - 1) {
+                const r: u8 = @intCast(w * 64 + @ctz(bits));
+                _ = try self.emit(.loadi, r, 1, 0, 0);
+            }
+        }
     }
 
     fn reg(self: *Compiler, r: u8) u8 {
@@ -6760,7 +6855,7 @@ pub const Compiler = struct {
         try self.expr(e, t);
         // an eval string's `return v` is the VALUE of the eval: it halts
         // the nested run rather than popping a frame that was never pushed
-        if (self.eval == null) try self.leaveTries(self.try_open);
+        if (self.eval == null or self.fin_regions.items.len > 0) try self.leaveAll(t);
         _ = try self.emit(if (self.eval != null) .halt else .ret, t, 0, 0, 0);
     }
 
@@ -7262,7 +7357,7 @@ pub const Compiler = struct {
         }
         if (std.mem.eql(u8, k, "loop_statement")) {
             const lv = try self.loopLevel(n, self.continues.items.len);
-            try self.leaveTries(self.triesInLoops(lv));
+            try self.leaveLoops(lv);
             const j = try self.emit(.jmp, 0, 0, 0, 0);
             try self.continues.items[self.continues.items.len - lv].append(self.alloc, j);
             return;
@@ -7415,6 +7510,9 @@ pub const Compiler = struct {
                 } else {
                     _ = try self.emit(.loadk, t0, 0, 0, try self.konstIndex("\"\""));
                 }
+                // its handlers die with the nested run, so only a `finally`
+                // makes the way out worth compiling (v36 F23)
+                if (self.fin_regions.items.len > 0) try self.leaveAll(t0);
                 _ = try self.emit(.halt, t0, 0, 0, 0);
                 return;
             }
@@ -7441,7 +7539,7 @@ pub const Compiler = struct {
                 defer self.temp = save0;
                 const t0 = try self.tmp();
                 _ = try self.emit(.loadk, t0, 0, 0, try self.konstIndex("\"\""));
-                try self.leaveTries(self.try_open);
+                try self.leaveAll(t0);
                 _ = try self.emit(.ret, t0, 0, 0, 0);
                 return;
             };
@@ -7449,7 +7547,8 @@ pub const Compiler = struct {
             try self.expr(rv, t);
             // the value is evaluated INSIDE the try -- an error in it is the
             // try's to catch -- and only then are the handlers left (F-90)
-            try self.leaveTries(self.try_open);
+            // and the `finally` blocks run (D52)
+            try self.leaveAll(t);
             // NO COPY HERE. Ring copies at the ASSIGNMENT and never at the
             // return: `P().Bump()` on a `return $o` mutates the global, and
             // `o.Me().Bump()` on a `return This` mutates o -- probed on 1.27
@@ -7472,7 +7571,7 @@ pub const Compiler = struct {
 
         if (std.mem.eql(u8, k, "exit_statement")) {
             const lv = try self.loopLevel(n, self.breaks.items.len);
-            try self.leaveTries(self.triesInLoops(lv));
+            try self.leaveLoops(lv);
             const j = try self.emit(.jmp, 0, 0, 0, 0);
             try self.breaks.items[self.breaks.items.len - lv].append(self.alloc, j);
             return;
@@ -7679,52 +7778,36 @@ pub const Compiler = struct {
     /// global, `vm.catch_last`, since C-15 (2026-09-24): every landing
     /// records the error, and the estate reads it through a function.
     ///
-    /// Still waiting on a front-end change, priced with multi-value `on`:
-    /// `finally` is not a keyword the grammar knows, and `catch e` parses
-    /// as a statement that READS `e` rather than as a binding -- so the
-    /// typed-catch half of §2.17 cannot be expressed yet.
+    /// `finally` runs on EVERY exit of the try: the normal path, a raise in
+    /// the body or the handler, and a `return`, `exit` or `loop` crossing
+    /// it (D52, A1; spike/v36). Still waiting: `catch e` parses as a
+    /// statement that READS `e` rather than as a binding (D52 rung 2).
     fn tryStmt(self: *Compiler, n: ts.Node) Error!void {
         // A FRESH binding per try. `define` returns an existing local of
         // the same name, so naming them all "cCatchError" made nested
         // handlers share one register -- an inner catch then overwrote the
         // outer's error, which is the very defect this construct exists to
-        // remove, reproduced one scope down.
+        // remove, reproduced one scope down. Named by the open TRYS, not the
+        // open catches: a `finally` holds its error outside its catch (D52).
+        self.try_depth += 1;
+        defer self.try_depth -= 1;
+        const depth = self.try_depth - 1;
         var buf: [24]u8 = undefined;
-        const nm = std.fmt.bufPrint(&buf, "cCatchError${d}", .{self.catch_regs.items.len}) catch
+        const nm = std.fmt.bufPrint(&buf, "cCatchError${d}", .{depth}) catch
             return Error.OutOfMemory;
         const owned = self.alloc.dupe(u8, nm) catch return Error.OutOfMemory;
         const errl = try self.define(owned);
 
-        const arm = try self.emit(.ptry, errl.reg, 0, 0, 0);
-        // definite assignment (F-89): the handler can be entered from any
-        // point of the try body, so it starts from what held BEFORE it
-        const da_in = self.da;
-
-        // the try body runs until the catch clause begins
-        var i: u32 = 0;
-        var borrowed: [4]u64 = .{ 0, 0, 0, 0 };
-        {
-            var list = std.ArrayListUnmanaged(ts.Node){};
-            defer list.deinit(self.alloc);
-            while (i < n.namedChildCount()) : (i += 1) {
-                const ch = n.namedChild(i);
-                // stop at EITHER clause -- a try may have only a finally
-                if (std.mem.eql(u8, ch.kind(), "catch_clause") or
-                    std.mem.eql(u8, ch.kind(), "finally_clause")) break;
-                list.append(self.alloc, ch) catch return Error.OutOfMemory;
-            }
-            self.try_open += 1;
-            defer self.try_open -= 1;
-            try self.try_borrows.append(self.alloc, .{ 0, 0, 0, 0 });
-            defer borrowed = self.try_borrows.pop().?;
-            try self.stmtSeq(list.items);
-        }
-
-        _ = try self.emit(.pend, 0, 0, 0, 0);
-
         // Find the clauses. `catch` is optional when `finally` is present:
         // cleanup without recovery is a real shape, and the error path is
         // exactly where cleanup must be guaranteed (§2.17).
+        var i: u32 = 0;
+        while (i < n.namedChildCount()) : (i += 1) {
+            const ch = n.namedChild(i);
+            // stop at EITHER clause -- a try may have only a finally
+            if (std.mem.eql(u8, ch.kind(), "catch_clause") or
+                std.mem.eql(u8, ch.kind(), "finally_clause")) break;
+        }
         var cc: ?ts.Node = null;
         var fc: ?ts.Node = null;
         var q: u32 = i;
@@ -7734,6 +7817,32 @@ pub const Compiler = struct {
             if (std.mem.eql(u8, ch.kind(), "finally_clause")) fc = ch;
         }
 
+        const arm = try self.emit(.ptry, errl.reg, 0, 0, 0);
+        // definite assignment (F-89): the handler can be entered from any
+        // point of the try body, so it starts from what held BEFORE it
+        const da_in = self.da;
+
+        // the try body runs until the catch clause begins; a jump out of it
+        // runs the finally first (D52)
+        var borrowed: [4]u64 = .{ 0, 0, 0, 0 };
+        {
+            var list = std.ArrayListUnmanaged(ts.Node){};
+            defer list.deinit(self.alloc);
+            var k: u32 = 0;
+            while (k < i) : (k += 1) list.append(self.alloc, n.namedChild(k)) catch return Error.OutOfMemory;
+            if (fc) |f| try self.fin_regions.append(self.alloc, .{ .node = f, .try_level = self.try_open, .catch_len = @intCast(self.catch_regs.items.len) });
+            defer if (fc != null) {
+                _ = self.fin_regions.pop();
+            };
+            self.try_open += 1;
+            defer self.try_open -= 1;
+            try self.try_borrows.append(self.alloc, .{ 0, 0, 0, 0 });
+            defer borrowed = self.try_borrows.pop().?;
+            try self.stmtSeq(list.items);
+        }
+
+        _ = try self.emit(.pend, 0, 0, 0, 0);
+
         // ---- the normal path: finally, then past the handler ----------
         if (fc) |f| try self.body(f, 0);
         const da_norm = self.da;
@@ -7741,20 +7850,7 @@ pub const Compiler = struct {
 
         // ---- the handler ----------------------------------------------
         self.land(arm);
-        // End every borrow the body may have left open (try_borrows). Each
-        // is a temporary, dead at the handler, so `loadi` with b = 1 -- the
-        // raw store that releases nothing, as the normal path's end of a
-        // borrow is (every other `loadi` releases what it overwrites since
-        // 2026-10-14) -- forgets it; at worst a register a later statement
-        // had filled with an OWNED value is forgotten too, a leak on the
-        // error path only.
-        for (borrowed, 0..) |word, w| {
-            var bits = word;
-            while (bits != 0) : (bits &= bits - 1) {
-                const r: u8 = @intCast(w * 64 + @ctz(bits));
-                _ = try self.emit(.loadi, r, 1, 0, 0);
-            }
-        }
+        try self.forgetBorrows(borrowed);
         self.da = da_in;
         self.daWrite(errl.reg);
         if (cc) |c| {
@@ -7769,12 +7865,48 @@ pub const Compiler = struct {
                 self.daWrite(bl.reg);
                 body_from = 1;
             }
-            try self.catch_regs.append(self.alloc, errl.reg);
-            try self.body(c, body_from);
-            _ = self.catch_regs.pop();
-            // finally runs after the catch too
-            if (fc) |f| try self.body(f, 0);
-            self.da = DaState.meet(da_norm, self.da);
+            if (fc) |f| {
+                // With a finally, the handler is a protected region of its
+                // own: a raise in it is held while the finally runs, then
+                // raised again (A1 S3, v36 F06), and a jump out of it runs
+                // the finally first (F05, F21).
+                const hn = std.fmt.bufPrint(&buf, "cCatchHeld${d}", .{depth}) catch
+                    return Error.OutOfMemory;
+                const held = try self.define(self.alloc.dupe(u8, hn) catch return Error.OutOfMemory);
+                const arm2 = try self.emit(.ptry, held.reg, 0, 0, 0);
+                const da_h = self.da;
+                var borrowed2: [4]u64 = .{ 0, 0, 0, 0 };
+                {
+                    try self.fin_regions.append(self.alloc, .{ .node = f, .try_level = self.try_open, .catch_len = @intCast(self.catch_regs.items.len) });
+                    defer _ = self.fin_regions.pop();
+                    self.try_open += 1;
+                    defer self.try_open -= 1;
+                    try self.try_borrows.append(self.alloc, .{ 0, 0, 0, 0 });
+                    defer borrowed2 = self.try_borrows.pop().?;
+                    try self.catch_regs.append(self.alloc, errl.reg);
+                    defer _ = self.catch_regs.pop();
+                    try self.body(c, body_from);
+                }
+                _ = try self.emit(.pend, 0, 0, 0, 0);
+                // finally runs after the catch too
+                try self.body(f, 0);
+                const da_c = self.da;
+                const over2 = try self.emit(.jmp, 0, 0, 0, 0);
+                // the handler raised: the finally, then the held raise
+                self.land(arm2);
+                try self.forgetBorrows(borrowed2);
+                self.da = da_h;
+                self.daWrite(held.reg);
+                try self.body(f, 0);
+                _ = try self.emit(.trap, held.reg, 1, 0, 0);
+                self.land(over2);
+                self.da = DaState.meet(da_norm, da_c);
+            } else {
+                try self.catch_regs.append(self.alloc, errl.reg);
+                try self.body(c, body_from);
+                _ = self.catch_regs.pop();
+                self.da = DaState.meet(da_norm, self.da);
+            }
         } else if (fc) |f| {
             // finally with no catch: run the cleanup, then let the error
             // continue outward. Swallowing it here would turn a `finally`
@@ -7979,6 +8111,7 @@ pub const Compiler = struct {
     fn whileStmt(self: *Compiler, n: ts.Node) Error!void {
         try self.breaks.append(self.alloc, .{});
         try self.loop_try.append(self.alloc, self.try_open);
+        try self.loop_fin.append(self.alloc, @intCast(self.fin_regions.items.len));
         try self.continues.append(self.alloc, .{});
         const top = self.here();
         var nofire = std.ArrayListUnmanaged(u32){};
@@ -7995,6 +8128,7 @@ pub const Compiler = struct {
         _ = try self.emit(.jmp, 0, 0, 0, @intCast(top));
         for (nofire.items) |p| self.land(p);
         _ = self.loop_try.pop();
+        _ = self.loop_fin.pop();
         var brk = self.breaks.pop().?;
         for (brk.items) |p| self.land(p);
         brk.deinit(self.alloc);
@@ -8021,6 +8155,7 @@ pub const Compiler = struct {
         if (nc == 0) return self.nope(n);
         try self.breaks.append(self.alloc, .{});
         try self.loop_try.append(self.alloc, self.try_open);
+        try self.loop_fin.append(self.alloc, @intCast(self.fin_regions.items.len));
         try self.continues.append(self.alloc, .{});
         const top = self.here();
         // the body runs once at least, but an `exit` in it can leave early;
@@ -8043,6 +8178,7 @@ pub const Compiler = struct {
         cont.deinit(self.alloc);
         _ = retest;
         _ = self.loop_try.pop();
+        _ = self.loop_fin.pop();
         var brk = self.breaks.pop().?;
         for (brk.items) |p| self.land(p);
         brk.deinit(self.alloc);
@@ -8154,6 +8290,7 @@ pub const Compiler = struct {
         };
         try self.breaks.append(self.alloc, .{});
         try self.loop_try.append(self.alloc, self.try_open);
+        try self.loop_fin.append(self.alloc, @intCast(self.fin_regions.items.len));
         try self.continues.append(self.alloc, .{});
         const fj = try self.emit(.jmp, 0, 0, 0, 0);
         const bodyat = self.here();
@@ -8185,6 +8322,7 @@ pub const Compiler = struct {
         if (var_is_global) _ = try self.emit(.gset, ctr, 0, 0, gslot);
         if (var_is_attr) _ = try self.emit(.sattr, 0, ctr, 0, @intCast(aslot));
         _ = self.loop_try.pop();
+        _ = self.loop_fin.pop();
         var brk = self.breaks.pop().?;
         for (brk.items) |p| self.land(p);
         brk.deinit(self.alloc);
@@ -8270,6 +8408,7 @@ pub const Compiler = struct {
         defer _ = self.active_loops.pop();
         try self.breaks.append(self.alloc, .{});
         try self.loop_try.append(self.alloc, self.try_open);
+        try self.loop_fin.append(self.alloc, @intCast(self.fin_regions.items.len));
         try self.continues.append(self.alloc, .{});
         // (a step of 0 leaves at once: `forloops` tests it, after the
         // container's own check below, in Ring's order)
@@ -8297,6 +8436,7 @@ pub const Compiler = struct {
             _ = try self.emit(.forloop, idx, lim, 0, @intCast(bodyat));
         }
         _ = self.loop_try.pop();
+        _ = self.loop_fin.pop();
         var brk = self.breaks.pop().?;
         for (brk.items) |p| self.land(p);
         brk.deinit(self.alloc);
@@ -11279,7 +11419,10 @@ pub fn compileEval(c: *Compiler, src: []const u8, ev: *EvalCtx, locals: []const 
     c.breaks.clearRetainingCapacity();
     c.continues.clearRetainingCapacity();
     c.loop_try.clearRetainingCapacity();
+    c.loop_fin.clearRetainingCapacity();
+    c.fin_regions.clearRetainingCapacity();
     c.try_open = 0;
+    c.try_depth = 0;
     c.try_borrows.clearRetainingCapacity();
     c.depth = 0;
     c.reread_src = null;

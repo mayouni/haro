@@ -169,6 +169,13 @@
    "why": "a return in an eval string runs the finally of the eval's try",
    "file": "cases/F23.haro",
    "stdout": "f\n6\n"
+  },
+  {
+   "id": "F24",
+   "line": "S1",
+   "why": "`exit` from a loop inside the try body stays inside it: the finally runs once, at the end of the try",
+   "file": "cases/F24.haro",
+   "stdout": "body 1\nafter loop\nfinally\n"
   }
  ]
 }

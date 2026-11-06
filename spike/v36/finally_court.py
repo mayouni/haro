@@ -11,7 +11,7 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 ROOT = os.path.dirname(os.path.dirname(HERE))
 sys.path.insert(0, ROOT)
 PLANT = '--plant' in sys.argv
-VM = sys.argv[sys.argv.index('--vm') + 1] if '--vm' in sys.argv else None
+VM = os.path.abspath(sys.argv[sys.argv.index('--vm') + 1]) if '--vm' in sys.argv else None
 sys.argv = [sys.argv[0]]
 import paths
 

@@ -3510,6 +3510,22 @@ def stage40():
     print(f'  {"ok  " if judged == 2 * sum(1 for c in doc["cases"] if "twin" in c) else "FAIL"} {judged} warnings each equal to the refusal of the twin: the words, the line, and in the envelope the code, the cites and the line; only the severity differs')
     return failures
 
+FINALLY_COURT = os.path.join(HERE, 'v36', 'finally_court.py')
+def stage41():
+    """Haro v0.36, D52 rung (1), A1 completed: `finally` runs on every exit of a `try` -- the normal path, a raise in the body or the handler, and a
+    `return`, `exit` or `loop` crossing it, once, innermost first. v36/finally_court.py runs the 23 programs of v36/fixtures.json, written first, on haro
+    and its checked build: each must print exactly its fixture's bytes, exit 0, and the two builds the same bytes. The court is the VM itself."""
+    print('stage 41 -- finally on every exit: v36/finally_court.py on haro and its checked build')
+    p = subprocess.run([sys.executable, FINALLY_COURT] + (['--plant'] if PLANT else []), capture_output=True, cwd=HERE, timeout=600)
+    out = p.stdout.decode('utf-8', 'replace').replace(chr(13) + chr(10), chr(10))
+    for line in out.splitlines():
+        if line.startswith('  FAIL') or line.startswith('       ') or line.startswith('FINALLY COURT'):
+            print(line)
+    if p.returncode != 0:
+        print(f'  FAIL the finally court exited {p.returncode}' + ('' if out.strip() else ': ' + p.stderr.decode('utf-8', 'replace')[-400:]))
+        return 1
+    return 0
+
 SENTENCE_TARGET = 50.0     # D42: a sentence edited, its court's image reused -- what a person editing a sentence waits for
 COLD_CEILING = 150.0       # D42: the court compiled from scratch -- a ceiling that catches the court library growing
 
@@ -3685,5 +3701,7 @@ if __name__ == '__main__':
         failures += stage39()
     if stage in (None, 40) and os.path.exists(PANEL_STZU) and os.path.exists(PANEL_CASES):
         failures += stage40()
+    if stage in (None, 41) and os.path.exists(FINALLY_COURT):
+        failures += stage41()
     print(f'haro_forge: {"FAIL" if failures else "PASS"} ({failures} failure(s), {time.perf_counter()-t0:.1f} s)')
     sys.exit(1 if failures else 0)

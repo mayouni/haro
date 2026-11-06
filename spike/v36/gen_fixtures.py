@@ -111,6 +111,12 @@ CASES = [
     ('F23', 'S2', 'a return in an eval string runs the finally of the eval\'s try', [
         '? eval("try" + nl + "return 6" + nl + "finally" + nl + "? :f" + nl + "done")'],
      ['f', '6']),
+    # F24 was written AFTER the compiler change, found by designing the plants (plants.py P9): no case had a loop INSIDE a try body, so a loop
+    # that forgot which regions were open at its entry would have run the enclosing finally at every exit, and no fixture would have said so.
+    ('F24', 'S1', '`exit` from a loop inside the try body stays inside it: the finally runs once, at the end of the try', [
+        'try', T + 'for i = 1 to 3', T * 2 + 'if i = 2 exit ok', T * 2 + '? "body " + i', T + 'next', T + '? "after loop"', 'finally',
+        T + '? "finally"', 'done'],
+     ['body 1', 'after loop', 'finally']),
 ]
 
 os.makedirs(os.path.join(HERE, 'cases'), exist_ok=True)
