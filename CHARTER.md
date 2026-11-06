@@ -1388,6 +1388,14 @@ states principle 14.
   not see:* ZC4, which the ask said the build waits for, was built on 2026-11-02 (ZC5 followed), so the declared half is unblocked; and the machine language in this
   repository already gates per machine (`capability` declarations, "PIN needs gpio, and no declaration grants gpio"), which NEEDS bounds from above. *Next:* the
   declared half as a rung, fixtures first, its gate the ask's own sentence.
+  **The declared half built 2026-11-06, Haro v0.40** (the author: "D51 declared half"): `NEEDS [..]` on DEFINE LANGUAGE, words of the nine, each once;
+  `OPENS word` on a DECLARATION, a capability or a seat typed by a MENU of capabilities. The meta-court refuses a kind opening a door the LANGUAGE does
+  not NEED (A6's gate: the language is refused, its grammar never forged), a kind that OPENS in a language that NEEDS nothing, and a NEEDS word no kind
+  can open; the forged court refuses a sentence whose OPENS seat lists a door outside NEEDS (`CAPABILITY_NOT_NEEDED`) and publishes each declaration's
+  doors in its world rows. A language that NEEDS nothing forges its court and grammar byte for byte as before (stage 45 checks it). 13 meta fixtures
+  and 7 court cases on both builds, 24 of 24 plants. *The desk's readings, recorded as its own*: OPENS takes one word; a word that is both a capability
+  and a seat is the capability; an OPENS seat's MENU may list a door the language does not NEED, refused per sentence (HF-147). The second altitude,
+  NEEDS on a program unit, still waits on W7's map.
 - **D52 -- `finally`, `within`, `using` and `catch e` land in the surface Haro compiles today, with the semantics of A1 kept whole, A3 and A4 amended
   for a dynamic surface, and the five checker rules respelled; ADOPTED, in an order** (stzlib-security's HARO-ONEHOUR-02, 2026-11-05 17:47, section 3 A1-A5 of
   stzlib's SOFTANZA_ONE_HOUR.md at origin/main 0a311d01b, and its ruling 1, which leaves the spellings to Haro "provided every semantics line of A1 holds"; the desk's

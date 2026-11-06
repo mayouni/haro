@@ -344,14 +344,14 @@ the cut say `haro/X`, `X.ring`, `rnxc` and "the oracle"**: read them as this rep
                      (one heavy job each: the grammar's parser is 21 MB of C). vm/NOTES.md: what the fork kept and why
     spike/           the meta-court (haro.haro, haro_lib.haro), the forge (forge.haro), the libraries, the forged courts and grammars,
                      the letters' declarations (*_vNN.haro) and sentences, and vNN/ per rung: fixtures.json (written FIRST),
-                     GRAMMAR.md (prose second), court cases. spike/haro_forge.py is THE GUARD: 44 stages, --stage=N runs one,
+                     GRAMMAR.md (prose second), court cases. spike/haro_forge.py is THE GUARD: 45 stages, --stage=N runs one,
                      --plant must fail it. spike/f/ringflex_record.json: RingFlex's own court's answers, recorded (D41)
     study/           the measurements behind design memos (codegraph, phase15, rebol). Studies and probes OF Ring keep Ring 1.27 as
                      their subject (paths.RING_ORACLE), never as a judge
     runtime/         gitignored: what runs write (the second judge's forge folder, scratch)
 
 The records: `CHARTER.md` (section 13 the decisions, D1 to D52; section 15 the v0.3 amendments), `PRINCIPLES.md`,
-`GRAMMAR-SKETCH.md`, `FINDINGS.md` (HF-1 to HF-146, each measured), `SPIKE.md` (every rung, one section each, and "Next"),
+`GRAMMAR-SKETCH.md`, `FINDINGS.md` (HF-1 to HF-147, each measured), `SPIKE.md` (every rung, one section each, and "Next"),
 `CODEGRAPH.md` (the code-graph memo), `BLOCKS.md` (one format and pattern rules, REBOL-06/07: its four questions RULED 2026-11-02),
 `FROM-RINGPP.md`.
 
@@ -382,7 +382,7 @@ The records: `CHARTER.md` (section 13 the decisions, D1 to D52; section 15 the v
   Get-Content/Set-Content; every checkout is LF (`.gitattributes`); commit explicit paths, never `git add -A`.
 - **Versions**: take the next free version number and say so -- the constitution desk takes them too (it holds v0.29).
 
-## Where it stands -- 2026-11-06, after v0.39
+## Where it stands -- 2026-11-06, after v0.40
 
 - The cut is done and proved (SPIKE.md "The cut"; D39-D41; HF-134). **v0.30** (D44, stage 35): one reader of C6. **v0.31** (D45, stage 36): the pattern engine. **v0.32** (D46,
   stage 37): `DEFINE PATTERN`. **v0.33** (D47, stage 38): `INCLUDES`, `ON` a FORM with `EXCEPT`, a quantifier over a FORM. **v0.34** (D48, stage 39): COMPASS-KERN-03's field check,
@@ -396,12 +396,14 @@ The records: `CHARTER.md` (section 13 the decisions, D1 to D52; section 15 the v
   3 times (stkPointer.ring): those handlers now run under haro and still raise R24 under Ring++. **v0.38** (D52 rung 3, HF-145, stage 43): `within $g = v ... done`
   and `using name = v ... done`, rewritten by the lift onto `try ... finally` on their own lines; the global restored, or the first of Release, Destroy, Close called, on
   every exit; a `within` of a non-`$` name, `new K` answering none, a rebound using name and a block without its parts refused by name. stzlib writes neither.
-  **v0.39 is built** (D52 rung 4, HF-146, stage 44), and with it D52 whole: A5's five rules in `haro check` (`--listeners=`, `--validators=`), the checker reading the
+  **v0.39** (D52 rung 4, HF-146, stage 44), and with it D52 whole: A5's five rules in `haro check` (`--listeners=`, `--validators=`), the checker reading the
   lifted tree at the file's own columns. On stzlib: 41 last-error-read, 112 text-run-as-code, 9 global-restored-by-hand (3 bare), 4 handle-held (none a handle).
+  **v0.40 is built** (D51's declared half, HF-147, stage 45): `NEEDS [..]` on a LANGUAGE (the nine), `OPENS` on a kind; the meta-court holds A6's gate, the forged court
+  refuses a door beyond NEEDS (CAPABILITY_NOT_NEEDED) and publishes each declaration's doors in its world rows; a language that NEEDS nothing is byte for byte what it was.
 - D43 is the twin-court clause. Of BLOCKS.md's four questions: Q-B1 is built (`?` is C6, and `OPTIONAL` sees it in a rule); Q-B2's two amendments are refused by name until Ringua's text
   lands; Q-B3 the block export of a program is not started; Q-B4 the round-trip court the elders waited for exists -- asking their owners is Central's.
-- **Answered 2026-11-05**: HARO-DISTANCE-01 (HF-141; D50, the author's ruling: no part of Ring is carried with Haro), HARO-ONEHOUR-01 (D51) and -02 (D52). **Next**: the declared
-  half of D51; the Zui-to-Zane rename of this repository in a quiet turn; stzlib-security's moves on HF-146's counts are theirs.
+- **Answered 2026-11-05**: HARO-DISTANCE-01 (HF-141; D50, the author's ruling: no part of Ring is carried with Haro), HARO-ONEHOUR-01 (D51) and -02 (D52). **Next**: the Zui-to-Zane
+  rename of this repository in a quiet turn; D51's second altitude when W7's map lands; stzlib-security's moves on HF-146's counts are theirs.
   Which of zql's sentences declare `RECORDS` is the stzzql desk's. stzzui rewrites its declaration with the forms (its
   own; `runtime/zui/rewrite.py` of this desk showed the way: 1,169 lines to 883). Then step 3 of BLOCKS.md 3.5, the memo spelling, when Q-B2's text lands at Ringua. A rung with the pattern in a
   world's symbols or a kind's seat names, or a whole declaration as the judged value, waits for a customer.

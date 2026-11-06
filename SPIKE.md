@@ -1810,6 +1810,22 @@ rebinds inside `using` is raised at the exit and the first value is not released
 checker's other 9,180 findings are unchanged line for line, and the five rules count 41, 112, 9 and 4 (HF-146). **D52 is built whole.** **Not done,
 named**: `last-error-read` at error tier waits on stzlib's sweep reading 0; a validator in the caller, and an address through a variable, are not followed.
 
+## The fortieth rung -- Haro v0.40, the doors a language's worlds may open: NEEDS on a LANGUAGE, OPENS on a kind -- 2026-11-06
+
+**D51's declared half**, on the author's "D51 declared half". `NEEDS [..]` on the LANGUAGE names the doors any world of it may open, from the closed
+catalog of nine; `OPENS` on a kind says its declarations open a door, or what a seat lists. The meta-court holds A6's gate; the forged court judges
+a door a sentence lists and publishes the doors in its world rows, for Harobanda's PID 1 to enforce.
+
+    v40/fixtures.json                   13 meta fixtures, 4 accepts and 9 rejects (written first, 661f41b: 1 held before)
+    door_v40.haro, door/, v40/court_cases.json   a language that NEEDS network and process; 7 court cases (D3 changed after the court spoke, said so)
+    needs_lib.haro                      the court's half, loaded only where a language NEEDS
+    v40/plants.py                       24 protections across haro_lib, forge, court_lib and needs_lib switched off in turn
+    v40/GRAMMAR.md                      what a declaration says, how it is built, the desk's readings, what is not covered
+
+**Results.** 13 of 13 meta fixtures and 7 of 7 court cases on both builds; 24 of 24 plants caught; a language that NEEDS nothing forges its court and
+grammar byte for byte as committed (stage 45). **The 45-stage guard** (1,759 s) failed twice and neither was a defect of the rung: stage 36's family count, which follows the spike (door_v40.haro: 147 texts, 139 match), updated and rerun green; and stage 6's cold compile at 164.9 ms over its 150 ms ceiling -- alternating A/B on court_lib.haro before and after the rung reads 142.2 ms before and 137.0 ms after, so the machine, not the change; an edit 17.9 ms against 50. **Not done, named**: the second altitude, NEEDS on a program unit, waits on W7's map from native
+families to the nine; the enforcement is Harobanda's.
+
 ## The names -- `.haro`, not `.stzu` -- corrected 2026-10-02
 
 **At the author's word ("we agreed to use .haro instead of .stzu, no?").** D1 was ratified
@@ -1985,3 +2001,5 @@ whole guard re-run on the renamed tree: 28 + 30 + 27 + 23, 117 of 120, 32 of 32,
    `haro/last-error-read` first; the declared half of D51; the Zui-to-Zane rename of this repository.
 35. ~~D52 rung (4), the five checker rules~~ -- built 2026-11-06 as Haro v0.39, the thirty-ninth rung above; D52 is built whole. Next: the declared half
    of D51 (NEEDS on a LANGUAGE, OPENS on a kind); the Zui-to-Zane rename of this repository; stzlib's own moves on the counts of HF-146.
+36. ~~The declared half of D51~~ -- built 2026-11-06 as Haro v0.40, the fortieth rung above. Next: the Zui-to-Zane rename of this repository in a quiet
+   turn; D51's second altitude when W7's map lands; stzlib-security's moves on HF-146's counts.
