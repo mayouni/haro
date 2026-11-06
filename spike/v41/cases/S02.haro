@@ -1,0 +1,9 @@
+f()
+func f
+	If = "a name"
+	NULL = 5
+	? If
+	? NULL + 1
+	if isNull(null)
+		? "null is the keyword"
+	ok

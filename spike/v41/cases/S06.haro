@@ -1,0 +1,5 @@
+? "before"
+f()
+func f
+	aL = [:a = 1]
+	? len(aL)

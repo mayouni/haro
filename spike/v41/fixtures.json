@@ -1,0 +1,120 @@
+{
+ "rung": "v0.41",
+ "decision": "HARO-SURFACE-01: a .haro file read by Haro's rules, a .ring file by Ring's",
+ "lines": {
+  "S1": "in a .haro file a keyword is lowercase, exactly; any other spelling is a name",
+  "S2": "in a .ring file a keyword is Ring's, in any case",
+  "S3": "a symbol keeps its spelling in a .haro file, and is lowered in a .ring file",
+  "S4": "`:key = value` is refused by name in a .haro file, and Ring's pair in a .ring file",
+  "S5": "an eval reads by the rules of the program's root file",
+  "S6": "each loaded file is read by its own rules",
+  "S7": "haro fmt reads each file by its rules"
+ },
+ "cases": [
+  {
+   "id": "S01",
+   "kind": "run",
+   "line": "S1",
+   "why": "in a .haro file a word in no single case is a name: aNd, oK, oN",
+   "file": "cases/S01.haro",
+   "stdout": "3\nan object\n"
+  },
+  {
+   "id": "S02",
+   "kind": "run",
+   "line": "S1",
+   "why": "in a .haro file a Capital or UPPER keyword is a name too; the lowercase word is the keyword",
+   "file": "cases/S02.haro",
+   "stdout": "a name\n6\nnull is the keyword\n"
+  },
+  {
+   "id": "S03",
+   "kind": "run",
+   "line": "S2",
+   "why": "in a .ring file the keywords are Ring's in any case: If, See, Ok -- and oK, as Ring reads it",
+   "file": "cases/S03.ring",
+   "stdout": "yes\n"
+  },
+  {
+   "id": "S04",
+   "kind": "run",
+   "line": "S3",
+   "why": "in a .haro file a symbol keeps its spelling",
+   "file": "cases/S04.haro",
+   "stdout": "Name\nname\n1\n"
+  },
+  {
+   "id": "S05",
+   "kind": "run",
+   "line": "S3",
+   "why": "in a .ring file a symbol is lowered, as Ring lowers it",
+   "file": "cases/S05.ring",
+   "stdout": "name\n1\n"
+  },
+  {
+   "id": "S06",
+   "kind": "run",
+   "line": "S4",
+   "why": "in a .haro file `:key = value` is refused by name",
+   "file": "cases/S06.haro",
+   "stdout": "before\n\nLine 4 Haro refused this statement (`:key = value` is no pair in a .haro file: write [:key, value] (HARO-SURFACE-01) `:a = 1`, line 4 of S06.haro) and did not compile it -- running past it would give a wrong answer \nIn function f() in file S06.haro\n\nCalled from line 2 in file S06.haro ",
+   "exit": 1
+  },
+  {
+   "id": "S07",
+   "kind": "run",
+   "line": "S4",
+   "why": "in a .haro file the pair is written as a list",
+   "file": "cases/S07.haro",
+   "stdout": "Key\n2\n"
+  },
+  {
+   "id": "S08",
+   "kind": "run",
+   "line": "S4",
+   "why": "in a .ring file `:key = value` is Ring's pair, and its key lowered",
+   "file": "cases/S08.ring",
+   "stdout": "key\n2\n"
+  },
+  {
+   "id": "S09",
+   "kind": "run",
+   "line": "S5",
+   "why": "an eval in a .haro program reads by Haro's rules",
+   "file": "cases/S09.haro",
+   "stdout": "Name\n4\n"
+  },
+  {
+   "id": "S10",
+   "kind": "run",
+   "line": "S5",
+   "why": "an eval in a .ring program reads by Ring's",
+   "file": "cases/S10.ring",
+   "stdout": "name\nring\n"
+  },
+  {
+   "id": "S11",
+   "kind": "run",
+   "line": "S6",
+   "why": "a .haro program loads a .ring file: each file is read by its own rules",
+   "file": "cases/S11.haro",
+   "stdout": "name\nName\n"
+  },
+  {
+   "id": "K01",
+   "kind": "fmt",
+   "line": "S7",
+   "why": "`haro fmt` on a .haro file: a word in no single case is a name, printed as written",
+   "file": "cases/K01.haro",
+   "stdout": "f()\n\nfunc f()\n\taNd = 1\n\toK = :Name\n\t? aNd\n"
+  },
+  {
+   "id": "K02",
+   "kind": "fmt",
+   "line": "S7",
+   "why": "`haro fmt` on a .ring file: its keywords are Ring's in any case, printed in lowercase as before",
+   "file": "cases/K02.ring",
+   "stdout": "f()\n\nfunc f()\n\tx = 1\n\tif x = 1\n\t\tsee \"yes\" + nl\n\tok\n\t? :Name\n"
+  }
+ ]
+}

@@ -1,0 +1,4 @@
+f()
+func f
+	eval("? :Name")
+	eval("aNd = 4  ? aNd")

@@ -1,0 +1,6 @@
+f()
+func f
+	? :Name
+	? :name
+	x = :Name
+	? x = "Name"

@@ -1,0 +1,5 @@
+f()
+func f
+	aNd = 1
+	oK = :Name
+	? aNd

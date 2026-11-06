@@ -1,0 +1,5 @@
+f()
+func f
+	aL = [[:a, 1], [:Key, 2]]
+	? aL[2][1]
+	? len(aL)
