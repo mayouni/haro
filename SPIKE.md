@@ -1795,6 +1795,21 @@ lift, the compiler and the printer change; no VM instruction is new.
 removed. **The 43-stage guard passes whole** (1,182 s, before the rebase onto v0.29; after it stage 1, the one v0.29 grew, and stages 41-43 pass again), stage 6 included: the cold compile's minimum is 127.5 ms against its 150 ms ceiling, back under it on a quieter machine (v0.37 read 145-157 ms). stzlib has no statement-form `within` or `using`, and its census is the same line for line (HF-145). **Not done, named**: a global a callee
 rebinds inside `using` is raised at the exit and the first value is not released; a class that gains Release by `addmethod` is judged as compiled.
 
+## The thirty-ninth rung -- Haro v0.39, A5's five checker rules in `haro check` -- 2026-11-06
+
+**D52's rung (4)**, on the author's "Rung 4: checker rules", the last of D52's order. `haro/last-error-read` (note), `haro/text-run-as-code` (error),
+`haro/listener-binds-all`, `haro/global-restored-by-hand` and `haro/handle-held-across-raise` (warn), with the two lists the checker is told
+(`--listeners=`, `--validators=`). The checker now reads the lifted tree -- the program the compiler reads -- and names the file's own columns.
+
+    v39/fixtures.json, cases/           24 check cases (20 written first, 5383b89: 1 held on haro before); L05, G05, H05, H06 after the code, T01-T05 changed after it, each said so
+    v39/rule_court.py                   each case's report on haro and its checked build: every line but the detail prose exactly, the two builds equal (stage 44)
+    v39/plants.py                       29 protections across check.zig, types.zig, lift.zig and haro.zig switched off in turn, each a rebuilt VM
+    v39/GRAMMAR.md                      the five rules, how the checker reads the lifted tree, the stzlib counts, the desk's readings, what is not covered
+
+**Results.** 24 of 24 on both builds; v36's, v37's and v38's courts still pass; 29 of 29 plants caught. **The 44-stage guard passes whole** (1,362 s), stage 6 included: the cold compile 128.9 ms against its 150 ms ceiling, an edit 13.9 ms against 50 ms. On stzlib f77486b5a the
+checker's other 9,180 findings are unchanged line for line, and the five rules count 41, 112, 9 and 4 (HF-146). **D52 is built whole.** **Not done,
+named**: `last-error-read` at error tier waits on stzlib's sweep reading 0; a validator in the caller, and an address through a variable, are not followed.
+
 ## The names -- `.haro`, not `.stzu` -- corrected 2026-10-02
 
 **At the author's word ("we agreed to use .haro instead of .stzu, no?").** D1 was ratified
@@ -1968,3 +1983,5 @@ whole guard re-run on the renamed tree: 28 + 30 + 27 + 23, 117 of 120, 32 of 32,
    `finally`; then rung (4), the five checker rules, `haro/last-error-read` first; the declared half of D51; the Zui-to-Zane rename of this repository.
 34. ~~D52 rung (3), `within` and `using`~~ -- built 2026-11-06 as Haro v0.38, the thirty-eighth rung above. Next: D52 rung (4), the five checker rules,
    `haro/last-error-read` first; the declared half of D51; the Zui-to-Zane rename of this repository.
+35. ~~D52 rung (4), the five checker rules~~ -- built 2026-11-06 as Haro v0.39, the thirty-ninth rung above; D52 is built whole. Next: the declared half
+   of D51 (NEEDS on a LANGUAGE, OPENS on a kind); the Zui-to-Zane rename of this repository; stzlib's own moves on the counts of HF-146.

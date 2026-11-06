@@ -1429,6 +1429,14 @@ states principle 14.
   plants. *The desk's readings, recorded as its own*: the value is computed after the save, so it may read the global; a global with no value is R24
   at the `within` line; the using name cannot be rebound in its block (rebound, its end would release the new value and leak the old); only `new K` is
   judged at compile time, a literal at the entry like any other value; the refusal at the entry is the VM's error, not a raise() (HF-145).
+  **Rung (4) built 2026-11-06, Haro v0.39** (the author: "Rung 4: checker rules"): A5's five rules in `haro check` -- `haro/last-error-read` note,
+  every read of cCatchError; `haro/text-run-as-code` error, `eval` of non-literal text unless a validator named with `--validators=` is called in the
+  same body; `haro/listener-binds-all` warn, a literal 0.0.0.0, :: or "" given to a listener named with `--listeners=`; `haro/global-restored-by-hand`
+  warn; `haro/handle-held-across-raise` warn. The checker reads the LIFTED tree, what the compiler reads, each finding at the file's own column --
+  which ends v0.37's and v0.38's misreading of `catch e`, `within` and `done` as names nothing assigns. 24 cases on both builds (stage 44), 29 of 29
+  plants. *The desk's readings, recorded as its own*: a read of cCatchError in its handler is reported too (ruling 2's sweep counts every read);
+  "passed a validator" is a validator called in the same body, as stzlib's own rule reads it; a by-hand restore a catch also makes is still reported;
+  A5's name pattern for a handle is kept as written, though on stzlib it catches 4 values that are not handles (HF-146).
 - **D23 -- `rnxc fmt` is a Ring++ feature, not held for Haro** (CODEGRAPH Q4, ruled on the author's delegation, 2026-10-05: "take
   whatever decision you think is wiser on my behalf"). It is a verb of the one binary (commitment 5), depends on nothing of Haro's, is
   judged against the oracle and refuses what Ring refuses (58 of 6,061 Softanza files, 57 of them Ring's own refusals). It ships inside
