@@ -7829,12 +7829,13 @@ pub const Compiler = struct {
         const using = std.ascii.eqlIgnoreCase(w.text(), "using");
         if (!using) {
             const t = name.text();
-            if (!(((t.len > 1 and t[0] == '$') or self.topGlobal(t)) and self.paramLocal(t) == null))
-                return self.nopeKind(name, R_GLOBAL);
+            // Rule A: a global is written with its `$`, from any scope, and only a global is
+            if (!(t.len > 1 and t[0] == '$')) return self.nopeKind(name, R_GLOBAL);
             return .{ .using = false, .name = name };
         }
         const rhs = a.namedChild(1);
-        if (self.eval == null and std.mem.eql(u8, rhs.kind(), "new_expression") and rhs.namedChildCount() > 0) {
+        // in an eval the compiler's own class table is empty (the classes are the VM's), so findClass answers null there (v38 P20)
+        if (std.mem.eql(u8, rhs.kind(), "new_expression") and rhs.namedChildCount() > 0) {
             var cn = rhs.namedChild(0);
             if (std.mem.eql(u8, cn.kind(), "call_expression")) cn = cn.namedChild(0);
             if (self.findClass(cn.text())) |ci| {
@@ -7966,8 +7967,8 @@ pub const Compiler = struct {
                 const sn = std.fmt.bufPrint(&buf, "cWithin${d}", .{depth}) catch
                     return Error.OutOfMemory;
                 const sv = try self.define(self.alloc.dupe(u8, sn) catch return Error.OutOfMemory);
+                // no copy: the VM copies a shared list before writing it (v38 P11 found nothing that needed one)
                 try self.expr(b.name, sv.reg);
-                if (self.needsCopyAssign(b.name)) _ = try self.emit(.copyv, sv.reg, 0, 0, 0);
                 self.daWrite(sv.reg);
                 b.save = sv.reg;
             }
