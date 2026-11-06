@@ -23,13 +23,14 @@
   },
   {
    "id": "D3",
-   "name": "the refusal in the envelope: its code and line",
+   "name": "the refusal in the envelope: its code, no cites, an error",
    "verb": "diagnose",
    "args": [
     "door/files.door"
    ],
    "diagnose": {
     "code": "CAPABILITY_NOT_NEEDED",
+    "cites": [],
     "severity": "error",
     "line": 2
    }

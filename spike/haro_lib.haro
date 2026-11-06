@@ -99,9 +99,9 @@ func StzuSeverities()
 # (sorted by clause name, as Luau's table.sort gives, for the allowed-list text)
 func StzuClauses(cKind)
 	if cKind = "LANGUAGE"
-		return [["COURT", "string"], ["EXTENSION", "string"], ["GRAMMAR", "string"], ["VERSION", "string"]]
+		return [["COURT", "string"], ["EXTENSION", "string"], ["GRAMMAR", "string"], ["NEEDS", "namelist"], ["VERSION", "string"]]
 	but cKind = "DECLARATION"
-		return [["CODES", "messagelist"], ["INCLUDES", "namelist"], ["MESSAGES", "messagelist"], ["NAMES", "ident"], ["SEATS", "seatlist"], ["SEVERITIES", "pairlist"], ["VERB", "string"]]
+		return [["CODES", "messagelist"], ["INCLUDES", "namelist"], ["MESSAGES", "messagelist"], ["NAMES", "ident"], ["OPENS", "ident"], ["SEATS", "seatlist"], ["SEVERITIES", "pairlist"], ["VERB", "string"]]
 	but cKind = "FORM"
 		return [["SEATS", "seatlist"]]
 	but cKind = "EXPRESSION"
@@ -548,6 +548,26 @@ func IsUpperSnake(cW)
 		if not IsUpperChar(cW[i]) return 0 ok
 	next
 	return 1
+
+# v0.40: the closed catalog of nine (D51) -- the words Harobanda's machine file and stzlib's stzSystemCapabilities already use
+func StzuCapabilities()
+	return ["filesystem", "process", "network", "environment", "dynamic_load", "gpio", "threads", "clock", "inference"]
+
+func StzuCapabilityList()
+	aC = StzuCapabilities()
+	c = ""
+	for i = 1 to len(aC)
+		if i > 1 c += ", " ok
+		c += aC[i]
+	next
+	return c
+
+# v0.40: the words of a MENU, or NULL when the name is not a MENU
+func StzuMenuWords(aMenus, cName)
+	for i = 1 to len(aMenus)
+		if aMenus[i][1] = cName return aMenus[i][2] ok
+	next
+	return NULL
 
 func StzuFail(nLine, cMsg)
 	raise("haro (line " + nLine + "): " + cMsg)
@@ -1094,6 +1114,9 @@ func StzuDeclare(cSrc)
 
 	bHaveLang = 0
 	cLName = "" cLVersion = "" cLGrammar = "" cLCourt = "" cLExtension = "" cLRationale = ""
+	# v0.40: the doors the language NEEDS (D51), or NULL when it says nothing -- and what each kind OPENS, [verb, word, by seat]
+	aLNeeds = NULL nLNeedsLine = 0
+	aOpensOut = []
 	aDeclarations = []
 	aForms = []
 	aExpressions = []
@@ -1143,6 +1166,10 @@ func StzuDeclare(cSrc)
 				cLCourt = ClauseValue(aClauses, "COURT")
 				cLExtension = ClauseValue(aClauses, "EXTENSION")
 				cLRationale = cRationale
+				if HasClause(aClauses, "NEEDS")
+					aLNeeds = ClauseValue(aClauses, "NEEDS")
+					nLNeedsLine = nLine
+				ok
 			but cKind = "WORLD"
 				if not isNull(aWorld)
 					StzuFail(nLine, "a .haro file declares at most one WORLD")
@@ -1217,7 +1244,10 @@ func StzuDeclare(cSrc)
 					# v0.35: a severity per reference seat -- judged after the whole file is read, beside MESSAGES
 					aSevs = []
 					if HasClause(aClauses, "SEVERITIES") aSevs = ClauseValue(aClauses, "SEVERITIES") ok
-					aDeclarations + [cName, cVerb, ClauseValue(aClauses, "SEATS"), cRationale, nLine, cNames, aMsgs, aCodes, aInc, aSevs]
+					# v0.40: OPENS -- a capability, or a seat whose MENU lists capabilities; judged after the whole file is read
+					cOpens = ""
+					if HasClause(aClauses, "OPENS") cOpens = ClauseValue(aClauses, "OPENS") ok
+					aDeclarations + [cName, cVerb, ClauseValue(aClauses, "SEATS"), cRationale, nLine, cNames, aMsgs, aCodes, aInc, aSevs, cOpens]
 				but cKind = "FORM"
 					aForms + [cName, ClauseValue(aClauses, "SEATS"), cRationale, nLine]
 				but cKind = "EXPRESSION"
@@ -1706,6 +1736,67 @@ func StzuDeclare(cSrc)
 			StzuNote(cCatchError)
 		done
 	next
+	# v0.40: NEEDS and OPENS (D51) -- the doors a language's worlds may open. NEEDS names words of the nine, each once; a kind OPENS a
+	# capability the LANGUAGE NEEDS, or a seat whose MENU lists capabilities; a kind that OPENS in a language that NEEDS nothing is refused
+	# (silence refuses); a NEEDS word no kind can open is refused (least authority) -- a word of an OPENS seat's MENU counts as one a kind
+	# can open. A language with neither clause is exactly what it was.
+	try
+		if not isNull(aLNeeds)
+			for i = 1 to len(aLNeeds)
+				if not InStrList(aLNeeds[i], StzuCapabilities())
+					StzuFail(nLNeedsLine, "NEEDS: '" + aLNeeds[i] + "' is not a capability; the nine are " + StzuCapabilityList())
+				ok
+				for j = 1 to i - 1
+					if aLNeeds[j] = aLNeeds[i] StzuFail(nLNeedsLine, "NEEDS: '" + aLNeeds[i] + "' is named twice") ok
+				next
+			next
+		ok
+	catch
+		StzuNote(cCatchError)
+	done
+	aOpened = []
+	for i = 1 to len(aDeclarations)
+		try
+			if len(aDeclarations[i]) < 11 loop ok
+			cOp = aDeclarations[i][11]
+			if cOp = "" loop ok
+			cKn = aDeclarations[i][1]
+			bBySeat = 0
+			if InStrList(cOp, StzuCapabilities())
+				aCanOpen = [cOp]
+			else
+				aOs = StzuSeatNamed(aDeclarations[i][3], cOp)
+				if isNull(aOs) StzuFail(aDeclarations[i][5], "OPENS: '" + cOp + "' is neither a capability nor a seat of " + cKn) ok
+				aCanOpen = StzuMenuWords(aMenus, aOs[2])
+				if isNull(aCanOpen) StzuFail(aDeclarations[i][5], "OPENS: the seat '" + cOp + "' of " + cKn + " is not a MENU of capabilities") ok
+				for j = 1 to len(aCanOpen)
+					if not InStrList(aCanOpen[j], StzuCapabilities())
+						StzuFail(aDeclarations[i][5], "OPENS: the seat '" + cOp + "' of " + cKn + " is a MENU holding '" + aCanOpen[j] + "', which is not a capability")
+					ok
+				next
+				bBySeat = 1
+			ok
+			if isNull(aLNeeds)
+				StzuFail(aDeclarations[i][5], cKn + " OPENS " + cOp + ", and the LANGUAGE " + cLName + " NEEDS nothing: a door a kind opens is NEEDED first")
+			ok
+			if not bBySeat and not InStrList(cOp, aLNeeds)
+				StzuFail(aDeclarations[i][5], cKn + " OPENS " + cOp + ", and the LANGUAGE " + cLName + " does not NEED it")
+			ok
+			for j = 1 to len(aCanOpen) aOpened + aCanOpen[j] next
+			aOpensOut + [aDeclarations[i][2], cOp, bBySeat]
+		catch
+			StzuNote(cCatchError)
+		done
+	next
+	try
+		if not isNull(aLNeeds)
+			for i = 1 to len(aLNeeds)
+				if not InStrList(aLNeeds[i], aOpened) StzuFail(nLNeedsLine, "NEEDS " + aLNeeds[i] + ", and no kind OPENS it") ok
+			next
+		ok
+	catch
+		StzuNote(cCatchError)
+	done
 	# v0.3: MESSAGES speaks for a reference seat
 	for i = 1 to len(aDeclarations)
 		try
@@ -1855,7 +1946,8 @@ func StzuDeclare(cSrc)
 	         ["unions", aUnions], ["sentences", aSentences], ["views", aViews],
 	         ["walks", aWalks], ["ask", aAsk], ["run", aRun], ["symbols", aSymbols],
 	         ["formset", aFormset], ["narrate", aNarrate], ["understand", aUnderstand],
-	         ["constitution", aConstitution], ["patterns", aPatterns] ]
+	         ["constitution", aConstitution], ["patterns", aPatterns],
+	         ["needs", aLNeeds], ["opens", aOpensOut] ]
 	$cCondLang = cLName
 	$aCondLangs = StzuCondLangs(aRec, [])
 	$aCondFormats = []
@@ -3043,6 +3135,23 @@ func StzuPrintLanguage(aLang)
 		? "judged " + cJudged
 		? "held " + cHeld
 		? "carried " + cCarried
+	ok
+	# v0.40: the doors, printed only for a language that NEEDS -- so every other verdict keeps its bytes
+	aDoors = LangGet(aLang, "needs")
+	if not isNull(aDoors)
+		cNd = ""
+		for i = 1 to len(aDoors)
+			if i > 1 cNd += "," ok
+			cNd += aDoors[i]
+		next
+		? "needs " + cNd
+		aOpn = LangGet(aLang, "opens")
+		cOpn = ""
+		for i = 1 to len(aOpn)
+			if i > 1 cOpn += "," ok
+			cOpn += aOpn[i][1] + ":" + aOpn[i][2]
+		next
+		? "opens " + cOpn
 	ok
 	aD = LangGet(aLang, "declarations")
 	aV = []

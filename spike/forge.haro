@@ -458,10 +458,25 @@ func LangSource(aLang)
 	c += "    " + cSymbols + "," + nl
 	c += "    " + cFormset + "," + nl
 	c += "    " + cNarrate + "," + nl
+	# v0.40: the doors -- a 25th element only where the language NEEDS, after the patterns (written empty when it has none), so every other
+	# court keeps its bytes: [[needs...], [[verb, word, by seat], ...]]
+	cNeeds = ""
+	aDoors = LangGet(aLang, "needs")
+	if not isNull(aDoors)
+		aOpn = LangGet(aLang, "opens")
+		aOpRows = []
+		for i = 1 to len(aOpn)
+			aOpRows + ("[" + RingStr(aOpn[i][1]) + ", " + RingStr(aOpn[i][2]) + ", " + aOpn[i][3] + "]")
+		next
+		cNeeds = "[" + NamesSource(aDoors) + ", " + RowsSource(aOpRows, nl) + "]"
+		if cPatterns = "" cPatterns = "[]" ok
+	ok
 	if cPatterns = ""
 		c += "    " + cUnderstand + nl
-	else
+	but cNeeds = ""
 		c += "    " + cUnderstand + "," + nl + "    " + cPatterns + nl
+	else
+		c += "    " + cUnderstand + "," + nl + "    " + cPatterns + "," + nl + "    " + cNeeds + nl
 	ok
 	c += "  ]"
 	return c
@@ -512,12 +527,14 @@ func ForgeCourt(aLang)
 			if len(LangGet(aLang, "world")[5]) > 0 bSym = 1 ok
 		ok
 	ok
+	# v0.40: a language that NEEDS publishes the doors its declarations open in its world rows, a world or not (D51)
+	bDoors = not isNull(LangGet(aLang, "needs"))
 	# v0.10: a world is JSON, read and written with expr_lib's reader
-	if len(LangGet(aLang, "expressions")) > 0 or bAsk or bRun or bSym
+	if len(LangGet(aLang, "expressions")) > 0 or bAsk or bRun or bSym or bDoors
 		c += 'load "expr_lib.haro"' + nl
 	ok
 	# v0.14: the world functions load only where the language declares a world; a stub stands elsewhere
-	if bSym
+	if bSym or bDoors
 		c += 'load "world_lib.haro"' + nl
 	else
 		c += 'load "world_stub.haro"' + nl
@@ -567,6 +584,12 @@ func ForgeCourt(aLang)
 		next
 	next
 	if bSev c += 'load "severity_lib.haro"' + nl ok
+	# v0.40: the doors library rides along only where a language the court carries NEEDS a door (D51)
+	bNeeds = 0
+	for i = 1 to len(aPatRecs)
+		if not isNull(LangGet(aPatRecs[i], "needs")) bNeeds = 1 ok
+	next
+	if bNeeds c += 'load "needs_lib.haro"' + nl ok
 	c += nl
 	c += "$cCourtLang = " + '""' + nl + "$cCourtExt = " + '""' + nl + "$cCourtDir = " + '""' + nl
 	c += "$aCourtToks = []" + nl + "$nCourtPos = 1" + nl

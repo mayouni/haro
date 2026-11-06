@@ -1371,11 +1371,19 @@ func CtDeclare(cSrc)
 	# (pattern_judge.haro, loaded by a court whose language declares a PATTERN: the language entry has a 24th element)
 	aEPat = CtLangEntry($cCourtLang)
 	if not isNull(aEPat)
-		if len(aEPat) >= 24 CtCheckPatterns(aDecls, cSrc) ok
+		# (v0.40: a language that NEEDS writes the 24th element empty when it declares no PATTERN)
+		if len(aEPat) >= 24
+			if len(aEPat[24]) > 0 CtCheckPatterns(aDecls, cSrc) ok
+		ok
 	ok
 
 	# the references, last
 	CtCheckValues(aDecls, 1)
+	# v0.40: a door a sentence opens must be one its language NEEDS (needs_lib.haro, loaded where a language NEEDS: the entry has a 25th element)
+	aENd = CtLangEntry($cCourtLang)
+	if not isNull(aENd)
+		if len(aENd) >= 25 NdCheck(aDecls, aENd[25]) ok
+	ok
 	# v0.9: an algorithm's step tree is a tree
 	if not isNull($aCourtRun)
 		try
@@ -2254,7 +2262,13 @@ func CtMain()
 		cSrc = read(sysargv[4])
 		try
 			aDecls = CtDeclare(cSrc)
-			? ExJson(CtWorldRows(aDecls, CtWorldStem(sysargv[4]) + $cCourtExt))
+			aWRows = CtWorldRows(aDecls, CtWorldStem(sysargv[4]) + $cCourtExt)
+			# v0.40: the doors each declaration opens, published for the consumer that enforces them -- only where the language NEEDS (D51)
+			aEW = CtLangEntry($cCourtLang)
+			if not isNull(aEW)
+				if len(aEW) >= 25 aWRows + ["opens", NdRows(aDecls, aEW[25], CtWorldStem(sysargv[4]) + $cCourtExt)] ok
+			ok
+			? ExJson(aWRows)
 		catch
 			? cCatchError
 		done

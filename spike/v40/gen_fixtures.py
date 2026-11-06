@@ -142,8 +142,10 @@ cases = [
     {'id': 'D1', 'name': 'a sentence that opens only what the language needs', 'verb': 'check', 'args': ['door/clean.door'], 'first': 'ok'},
     {'id': 'D2', 'name': 'a SERVICE that lists a door the language does not NEED is refused', 'verb': 'check', 'args': ['door/files.door'],
      'first': NOT_NEEDED},
-    {'id': 'D3', 'name': 'the refusal in the envelope: its code and line', 'verb': 'diagnose', 'args': ['door/files.door'],
-     'diagnose': {'code': 'CAPABILITY_NOT_NEEDED', 'severity': 'error', 'line': 2}},
+    # D3 CHANGED after the court spoke: the stage's diagnose check requires `cites` (it reads code, cites and severity, not the line, which D2's
+    # first line pins); the refusal cites nothing, the door being the language's own NEEDS.
+    {'id': 'D3', 'name': 'the refusal in the envelope: its code, no cites, an error', 'verb': 'diagnose', 'args': ['door/files.door'],
+     'diagnose': {'code': 'CAPABILITY_NOT_NEEDED', 'cites': [], 'severity': 'error', 'line': 2}},
     {'id': 'D4', 'name': 'a word outside the MENU is the MENU\'s refusal, as it always was', 'verb': 'check', 'args': ['door/gpio.door'],
      'first': 'A capability is network, process or filesystem'},
     {'id': 'D5', 'name': 'the world publishes what each declaration opens: a LISTENER its door, a SERVICE what it lists; a NOTE nothing',

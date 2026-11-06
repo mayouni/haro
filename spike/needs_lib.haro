@@ -1,0 +1,68 @@
+# needs_lib.haro -- D51's declared half in a forged court (Haro v0.40, v40/GRAMMAR.md): the doors a language's worlds may open. Loaded by a
+# forged court only where a language it carries NEEDS a door, so every other court keeps its bytes and its cold compile.
+#
+#   the language entry's 25th element   [[needs, ...], [[verb, word, by seat], ...]]
+#
+# A kind that OPENS a capability opens that door in each of its declarations; a kind that OPENS a seat opens what that seat lists. The meta-court
+# proved the first is NEEDED; the second the court judges here, sentence by sentence (CAPABILITY_NOT_NEEDED). Enforcement is the consumer's: the
+# world rows publish what each declaration opens, and Haro claims nothing about a door it does not run.
+#
+# Functions only; the globals are the generated court's.
+
+# the doors a declaration opens, in the order written; NULL for a kind that opens nothing
+func NdOpens(aDoors, aD)
+	for i = 1 to len(aDoors[2])
+		if aDoors[2][i][1] != aD[1] loop ok
+		if not aDoors[2][i][3] return [aDoors[2][i][2]] ok
+		aOut = []
+		for j = 1 to len(aD[4])
+			if aD[4][j][1] != upper(aDoors[2][i][2]) loop ok
+			aV = aD[4][j][3]
+			if aV[1] = "namelist"
+				for k = 1 to len(aV[2]) aOut + aV[2][k] next
+			else
+				aOut + aV[2]
+			ok
+		next
+		return aOut
+	next
+	return NULL
+
+# a declaration whose OPENS seat lists a door the language does not NEED is refused
+func NdCheck(aDecls, aDoors)
+	for i = 1 to len(aDecls)
+		aD = aDecls[i]
+		for k = 1 to len(aDoors[2])
+			if aDoors[2][k][1] != aD[1] or not aDoors[2][k][3] loop ok
+			for j = 1 to len(aD[4])
+				if aD[4][j][1] != upper(aDoors[2][k][2]) loop ok
+				aV = aD[4][j][3]
+				aW = []
+				if aV[1] = "namelist" aW = aV[2] else aW = [aV[2]] ok
+				for m = 1 to len(aW)
+					bNeeded = 0
+					for n = 1 to len(aDoors[1])
+						if aDoors[1][n] = aW[m] bNeeded = 1 ok
+					next
+					if not bNeeded
+						try
+							CtFailC(aD[4][j][2], "CAPABILITY_NOT_NEEDED", [], aD[1] + " " + aD[2] + " opens '" + aW[m] + "', and the language " + $cCourtLang + " does not NEED it")
+						catch
+							CtNote(cCatchError)
+						done
+					ok
+				next
+			next
+		next
+	next
+
+# the world rows: each declaration of a kind that opens, with what it opens -- [] when it lists nothing
+func NdRows(aDecls, aDoors, cFile)
+	aRows = []
+	for i = 1 to len(aDecls)
+		aD = aDecls[i]
+		aO = NdOpens(aDoors, aD)
+		if isNull(aO) loop ok
+		aRows + [ExObjMark(), ["verb", aD[1]], ["name", aD[2]], ["opens", aO], ["span", [ExObjMark(), ["file", cFile], ["line", aD[3]]]]]
+	next
+	return aRows
