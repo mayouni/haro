@@ -1,0 +1,10 @@
+try
+	try
+		raise("a")
+	finally
+		raise(cCatchError)
+	done
+catch e
+	? e
+	? "[" + e.Cause() + "]"
+done

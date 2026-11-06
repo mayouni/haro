@@ -123,6 +123,24 @@ CASES = [
     ('G26', 'E2', 'cCatchError read after the handler is the last error, still its message', [
         'try', T + 'raise("last one")', 'catch e', 'done', '? cCatchError'],
      ['last one']),
+    # G27-G30 were written AFTER the VM change, found by designing the plants (plants.py): no case raised a string a variable still held, made a
+    # cause point back at its own error, called a method with an argument, or let a rethrown VM error go uncaught.
+    ('G27', 'E6', 'raising a variable\'s string makes the ERROR, not the variable, answer the methods', [
+        'g()', 'func g', T + 'm = "held"', T + 'try', T * 2 + 'raise(m)', T + 'catch e', T * 2 + '? e.Message()', T + 'done', T + 'try',
+        T * 2 + '? m.Message()', T + 'catch e2', T * 2 + '? e2', T + 'done'],
+     ['held', 'Bad parameter type!']),
+    ('G28', 'E5', 'a finally that raises the held error again gives it no cause: a cause never points back at its own error', [
+        'try', T + 'try', T * 2 + 'raise("a")', T + 'finally', T * 2 + 'raise(cCatchError)', T + 'done', 'catch e', T + '? e',
+        T + '? "[" + e.Cause() + "]"', 'done'],
+     ['a', '[]']),
+    ('G29', 'E3', 'the four methods take no argument: given one, the error refuses as a string does', [
+        'g()', 'func g', T + 'try', T * 2 + 'raise("x")', T + 'catch e', T * 2 + 'try', T * 3 + '? e.Message(1)', T * 2 + 'catch e2', T * 3 + '? e2',
+        T * 2 + 'done', T + 'done'],
+     ['Bad parameter type!']),
+    ('G30', 'E4', 'a VM error a finally raises again, uncaught, is reported as the VM error it is -- not as a raise()', [
+        'h()', 'func h', T + 'aL = []', T + 'try', T * 2 + '? aL[2]', T + 'finally', T * 2 + '? "cleanup"', T + 'done'],
+     ['cleanup', '', 'Line 7 Error (R2) : Array Access (Index out of range) ', 'In function h() in file G30.haro', '',
+      'Called from line 1 in file G30.haro '], 1),
 ]
 
 FMT = [
@@ -134,11 +152,17 @@ FMT = [
 os.makedirs(os.path.join(HERE, 'cases'), exist_ok=True)
 out = []
 for kind, rows in (('run', CASES), ('fmt', FMT)):
-    for cid, line, why, prog, want in rows:
+    for row in rows:
+        cid, line, why, prog, want = row[:5]
         name = f'cases/{cid}.haro'
         with open(os.path.join(HERE, name), 'w', encoding='utf-8', newline='\n') as fh:
             fh.write('\n'.join(prog) + '\n')
-        out.append({'id': cid, 'kind': kind, 'line': line, 'why': why, 'file': name, 'stdout': '\n'.join(want) + '\n'})
+        case = {'id': cid, 'kind': kind, 'line': line, 'why': why, 'file': name, 'stdout': '\n'.join(want) + '\n'}
+        if len(row) > 5:
+            # an uncaught report: its last line ends without a newline, and the exit is the one named
+            case['stdout'] = '\n'.join(want)
+            case['exit'] = row[5]
+        out.append(case)
 doc = {'rung': 'v0.37', 'decision': 'D52 rung (2): A4 the error value, catch e, A1 the cause',
        'lines': {'E1': '`catch e` binds e, only when e is on the line of catch',
                  'E2': 'in a text context the error is its message, byte for byte',

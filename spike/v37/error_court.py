@@ -1,5 +1,5 @@
 """Haro v0.37, D52 rung (2): every case of v37/fixtures.json on haro and on its checked build. A `run` case runs the program, a `fmt` case runs
-`haro fmt` on it. A case passes when both builds print exactly the bytes the fixture says, exit 0, and print the same bytes as each other (D41).
+`haro fmt` on it. A case passes when both builds print exactly the bytes the fixture says, exit as it says (0 unless it names another), and print the same bytes as each other (D41).
 
   python spike/v37/error_court.py              haro and the checked build, as paths.py finds them
   python spike/v37/error_court.py --vm X.exe   one build only (the plants)
@@ -38,7 +38,7 @@ def main():
         want = c['stdout'] + ('doctored\n' if PLANT and c['id'] == 'G15' else '')
         path = os.path.join(HERE, c['file'])
         got = [run(exe, path, c['kind']) for _, exe in builds]
-        bad = [f'{label}: {o!r} (exit {rc})' for (label, _), (o, rc) in zip(builds, got) if o != want or rc != 0]
+        bad = [f'{label}: {o!r} (exit {rc})' for (label, _), (o, rc) in zip(builds, got) if o != want or rc != c.get('exit', 0)]
         if len({o for o, _ in got}) > 1:
             bad.append('the builds differ')
         if bad:

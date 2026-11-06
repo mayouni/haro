@@ -25,6 +25,8 @@ pub var files: u32 = 0;
 pub var ns: u64 = 0;
 /// the part of `ns` spent parsing the rewritten text
 pub var ns_reparse: u64 = 0;
+/// the `catch e` lifted to `catch(e)` (D52 rung 2)
+pub var catch_sites: u32 = 0;
 /// RNXC_LIFT_TRACE=1: every site, as file:line and the chain it covers, on stderr (set by rnxc.zig)
 pub var trace: bool = false;
 var file_name: []const u8 = "";
@@ -228,12 +230,79 @@ fn order(_: void, a: Edit, b: Edit) bool {
 
 /// `tree` is the parse of `src`. Returns the tree the compiler should read and the text its offsets index: the same two when no `not`
 /// leads a chain, and the parse of the rewritten text when one does. The old tree is freed when it is replaced.
+/// `catch e`, e on catch's own line (D52, A4): the grammar reads the name as a STATEMENT of the handler, which reads e; Haro's spelling
+/// makes it the binding, so it gets the parentheses of `catch(e)`, the form the grammar reads as one. A name on the NEXT line is the
+/// statement it always was, and is left alone (v37 G03). A comment after the name stays outside the parentheses.
+fn findCatch(alloc: std.mem.Allocator, n: ts.Node, out: *std.ArrayListUnmanaged(Edit)) !void {
+    if (eq(n.kind(), "catch_clause") and n.childCount() > 0) {
+        const kw = n.child(0);
+        if (firstOperand(n)) |st| {
+            if (eq(st.kind(), "expression_statement") and st.start().row == kw.start().row) {
+                var named: u32 = 0;
+                var id: ?ts.Node = null;
+                var i: u32 = 0;
+                while (i < st.namedChildCount()) : (i += 1) {
+                    const ch = st.namedChild(i);
+                    if (eq(ch.kind(), "comment")) continue;
+                    named += 1;
+                    id = ch;
+                }
+                if (named == 1 and eq(id.?.kind(), "identifier") and id.?.startByte() == st.startByte()) {
+                    try out.append(alloc, .{ .pos = id.?.startByte(), .close = false });
+                    try out.append(alloc, .{ .pos = id.?.endByte(), .close = true });
+                }
+            }
+        }
+    }
+    var i: u32 = 0;
+    while (i < n.namedChildCount()) : (i += 1) try findCatch(alloc, n.namedChild(i), out);
+}
+
+/// The text with each edit's parenthesis put in, parsed again. Null when it does not parse, or when a file that parsed no longer does:
+/// a rewrite that breaks a file is no fix, so the grammar's reading is kept and nothing worse than before is said.
+fn splice(alloc: std.mem.Allocator, parser: ts.Parser, tree: ts.Tree, src: []const u8, edits: []Edit) ?Lifted {
+    std.mem.sort(Edit, edits, {}, order);
+    const text = alloc.alloc(u8, src.len + edits.len) catch return null;
+    var w: usize = 0;
+    var r: usize = 0;
+    for (edits) |e| {
+        const n = e.pos - r;
+        @memcpy(text[w .. w + n], src[r .. r + n]);
+        w += n;
+        r += n;
+        text[w] = if (e.close) ')' else '(';
+        w += 1;
+    }
+    @memcpy(text[w .. w + (src.len - r)], src[r..]);
+    var tr = std.time.Timer.start() catch return null;
+    const again = parser.parse(text) orelse return null;
+    ns_reparse += tr.read();
+    if (again.root().hasError() and !tree.root().hasError()) {
+        again.deinit();
+        return null;
+    }
+    return .{ .tree = again, .src = text };
+}
+
 pub fn apply(alloc: std.mem.Allocator, parser: ts.Parser, tree_in: ts.Tree, src_in: []const u8, name: []const u8) Lifted {
     file_name = name;
     var t0 = std.time.Timer.start() catch return .{ .tree = tree_in, .src = src_in };
     defer ns += t0.read();
     var tree = tree_in;
     var src = src_in;
+    if (std.ascii.indexOfIgnoreCase(src, "catch") != null) {
+        var edits = std.ArrayListUnmanaged(Edit){};
+        defer edits.deinit(alloc);
+        findCatch(alloc, tree.root(), &edits) catch {};
+        if (edits.items.len > 0) {
+            if (splice(alloc, parser, tree, src, edits.items)) |r| {
+                tree.deinit();
+                tree = r.tree;
+                src = r.src;
+                catch_sites += @intCast(edits.items.len / 2);
+            }
+        }
+    }
     // `not` and `!` are the only words that matter, and most files hold neither
     if (std.ascii.indexOfIgnoreCase(src, "not") == null and std.mem.indexOfScalar(u8, src, '!') == null)
         return .{ .tree = tree, .src = src };
@@ -246,30 +315,10 @@ pub fn apply(alloc: std.mem.Allocator, parser: ts.Parser, tree_in: ts.Tree, src_
         defer edits.deinit(alloc);
         findSites(alloc, tree.root(), &edits) catch break;
         if (edits.items.len == 0) break;
-        std.mem.sort(Edit, edits.items, {}, order);
-        const text = alloc.alloc(u8, src.len + edits.items.len) catch break;
-        var w: usize = 0;
-        var r: usize = 0;
-        for (edits.items) |e| {
-            const n = e.pos - r;
-            @memcpy(text[w .. w + n], src[r .. r + n]);
-            w += n;
-            r += n;
-            text[w] = if (e.close) ')' else '(';
-            w += 1;
-        }
-        @memcpy(text[w .. w + (src.len - r)], src[r..]);
-        var tr = std.time.Timer.start() catch break;
-        const again = parser.parse(text) orelse break;
-        ns_reparse += tr.read();
-        // a rewrite that breaks a file that parsed is no fix: keep the grammar's reading, and say nothing worse than before
-        if (again.root().hasError() and !tree.root().hasError()) {
-            again.deinit();
-            break;
-        }
+        const r = splice(alloc, parser, tree, src, edits.items) orelse break;
         tree.deinit();
-        tree = again;
-        src = text;
+        tree = r.tree;
+        src = r.src;
         lifted_here += @intCast(edits.items.len / 2);
     }
     if (lifted_here > 0) {

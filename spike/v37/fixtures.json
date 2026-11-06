@@ -220,6 +220,39 @@
    "stdout": "last one\n"
   },
   {
+   "id": "G27",
+   "kind": "run",
+   "line": "E6",
+   "why": "raising a variable's string makes the ERROR, not the variable, answer the methods",
+   "file": "cases/G27.haro",
+   "stdout": "held\nBad parameter type!\n"
+  },
+  {
+   "id": "G28",
+   "kind": "run",
+   "line": "E5",
+   "why": "a finally that raises the held error again gives it no cause: a cause never points back at its own error",
+   "file": "cases/G28.haro",
+   "stdout": "a\n[]\n"
+  },
+  {
+   "id": "G29",
+   "kind": "run",
+   "line": "E3",
+   "why": "the four methods take no argument: given one, the error refuses as a string does",
+   "file": "cases/G29.haro",
+   "stdout": "Bad parameter type!\n"
+  },
+  {
+   "id": "G30",
+   "kind": "run",
+   "line": "E4",
+   "why": "a VM error a finally raises again, uncaught, is reported as the VM error it is -- not as a raise()",
+   "file": "cases/G30.haro",
+   "stdout": "cleanup\n\nLine 7 Error (R2) : Array Access (Index out of range) \nIn function h() in file G30.haro\n\nCalled from line 1 in file G30.haro ",
+   "exit": 1
+  },
+  {
    "id": "K01",
    "kind": "fmt",
    "line": "E7",

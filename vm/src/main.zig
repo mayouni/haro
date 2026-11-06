@@ -1400,7 +1400,13 @@ pub const RAISE: Op = .raise;
 /// ours at all" -- which is every constant, since those point into the source
 /// text. Only the self-append path below ever sets it, so a constant can
 /// never be grown in place.
-pub const Str = struct { ptr: [*]const u8, len: u32, rc: u32 = 0, cap: u32 = 0 };
+/// `err` is 1 + the index of the string's ERROR RECORD (D52, A4) when it is an error a handler caught, and 0 for every other string: the
+/// header's four spare bytes, so a Str is 24 bytes as it was. Only `landErr` sets it, on a string nobody else holds.
+pub const Str = struct { ptr: [*]const u8, len: u32, rc: u32 = 0, cap: u32 = 0, err: u32 = 0 };
+
+/// What an error knows besides its message (D52, A4): where it was raised, and the held error a raise in `finally` replaced.
+/// `raised`: Ring's raise() made it, which an uncaught report says (`In raise()`) -- kept so a rethrow reports as the error first did.
+pub const ErrInfo = struct { fi: u16 = 0, line: u32 = 0, cause: Value = Value.nil(), raised: bool = false };
 
 /// A CONSTANT IS PINNED, not merely expected to balance. The free path says
 /// a constant "never reaches zero and this line never sees it" -- which was
@@ -2070,6 +2076,9 @@ pub const VM = struct {
     /// Softanza reads it through `CatchError()` in stkRingFuncs.ring, a
     /// function, from inside its handlers. nil until the first catch.
     catch_last: Value = Value.nil(),
+    /// The error records (Str.err), and the free slots among them. A record lives as long as its string.
+    errs: std.ArrayListUnmanaged(ErrInfo) = .{},
+    errs_free: std.ArrayListUnmanaged(u32) = .{},
     /// RING'S OPERATOR OVERLOADING, measured on 1.27 (F-69, bench/exec/
     /// operator.ring, 36 rows): an object on the LEFT of any operator --
     /// `+ - * / % & | ^ << >> = != < <= > >= []` -- calls its class's
@@ -2484,6 +2493,87 @@ pub const VM = struct {
         self.vecPushB(o.extra.?, Value.str(self.newStr("NULL")), true);
     }
 
+    /// THE ERROR VALUE (D52, A4). A handler receives the error as a STRING -- its message, so every text use of it is the bytes it was --
+    /// whose record says where it was raised and what it replaced. A string already an error (a rethrow, `raise(e)`) keeps its record and so its
+    /// origin; any other string becomes one here, at the landing, with the place of `pc` (read before the unwind moves `fsp`). A fresh string
+    /// nobody holds is marked in place; one held elsewhere (a constant, a variable's) is copied, so the mark never reaches another holder.
+    noinline fn landErr(self: *VM, err: Value, pc: u32, fsp: u32, raised: bool) Value {
+        if (err.tag != .str or err.p.s.err != 0) return err;
+        const sp = if (err.p.s.rc == 0) err.p.s else self.newStr(strOf(err));
+        const at = self.sitePc(pc, fsp);
+        const info = ErrInfo{
+            .fi = if (at < self.files.len) self.files[at] else 0,
+            .line = self.reportRow(at, fsp),
+            .raised = raised,
+        };
+        if (self.errs_free.pop()) |i| {
+            self.errs.items[i] = info;
+            sp.err = i + 1;
+        } else {
+            self.errs.append(self.alloc, info) catch @panic("oom");
+            sp.err = @intCast(self.errs.items.len);
+        }
+        return Value.str(sp);
+    }
+
+    noinline fn dropErr(self: *VM, e: u32) void {
+        const c = self.errs.items[e - 1].cause;
+        self.errs.items[e - 1] = .{};
+        self.errs_free.append(self.alloc, e - 1) catch @panic("oom");
+        self.release(c);
+    }
+
+    /// A raise inside a `finally` that held an error (A1): the held one becomes the new one's cause, unless the new one has a cause
+    /// already or the held one leads back to it -- a cause never forms a loop.
+    noinline fn withCause(self: *VM, new: Value, held: Value) Value {
+        if (new.tag != .str or new.p.s.err == 0 or held.tag != .str) return new;
+        const info = &self.errs.items[new.p.s.err - 1];
+        if (info.cause.tag != .nil) return new;
+        var k = held;
+        while (k.tag == .str and k.p.s.err != 0) : (k = self.errs.items[k.p.s.err - 1].cause) {
+            if (k.p.s == new.p.s) return new;
+        }
+        retain(held);
+        info.cause = held;
+        return new;
+    }
+
+    /// `e.Message()`, `e.Code()`, `e.Span()`, `e.Cause()` on an error (D52, A4), any case, no arguments: the answer in the call's window.
+    /// False for anything else, which then refuses as a string always has.
+    noinline fn errMethod(self: *VM, win: u32, argc: u8, name: i32) bool {
+        const rv = self.regs[win];
+        if (rv.tag != .str or rv.p.s.err == 0 or argc != 0 or name < 0 or name >= self.names.len) return false;
+        const nm = self.names[@intCast(name)];
+        const info = self.errs.items[rv.p.s.err - 1];
+        const msg = strOf(rv);
+        var out: Value = undefined;
+        if (std.ascii.eqlIgnoreCase(nm, "message")) {
+            out = Value.str(self.newStr(msg));
+        } else if (std.ascii.eqlIgnoreCase(nm, "code")) {
+            // Ring's own code, as the VM writes it: "Error (R14) : ..." -> R14; a raise() carries none
+            var code: []const u8 = "";
+            if (std.mem.startsWith(u8, msg, "Error (")) {
+                if (std.mem.indexOfScalarPos(u8, msg, 7, ')')) |close| code = msg[7..close];
+            }
+            out = Value.str(self.newStr(code));
+        } else if (std.ascii.eqlIgnoreCase(nm, "span")) {
+            const v = self.newVec(2);
+            const f = self.newVec(2);
+            self.vecPush(f, Value.str(self.newStr("file")));
+            self.vecPush(f, Value.str(self.newStr(self.fileName(info.fi))));
+            const l = self.newVec(2);
+            self.vecPush(l, Value.str(self.newStr("line")));
+            self.vecPush(l, Value.int(info.line));
+            self.vecPush(v, Value.vec(f));
+            self.vecPush(v, Value.vec(l));
+            out = Value.vec(v);
+        } else if (std.ascii.eqlIgnoreCase(nm, "cause")) {
+            out = if (info.cause.tag == .nil) Value.str(self.newStr("")) else info.cause;
+        } else return false;
+        self.setRegB(win, out, true);
+        return true;
+    }
+
     /// Every handler landing records the error it caught (see catch_last).
     fn noteCaught(self: *VM, err: Value) void {
         retain(err);
@@ -2539,6 +2629,7 @@ pub const VM = struct {
                     // string has room to spare -- handing an allocator a
                     // different length than it gave out is a bug even when
                     // it happens to survive.
+                    if (o.err != 0) self.dropErr(o.err);
                     const owned = if (o.cap > o.len) o.cap else o.len;
                     if (owned > 0) self.alloc.free(@constCast(o.ptr[0..owned]));
                     self.alloc.destroy(o);
@@ -4341,13 +4432,14 @@ pub const VM = struct {
                     if (self.addSlow(base + in.a, base + in.b, x, y, in.d)) |e| {
                         const err = Value.str(self.newStr(e));
                         if (hsp == self.hsp_floor) { if (self.hsp_floor != 0) return self.escape(e, pc, fsp, base, false); self.dieRing(e, pc, fsp); }
+                        const ev = self.landErr(err, pc, fsp, false);
                         hsp -= 1;
                         const h = self.handlers[hsp];
                         self.forgetUnwound(h, fsp, base);
                         fsp = h.fsp;
                         base = h.base;
-                        self.setRegB(base + h.errreg, err, true);
-                        self.noteCaught(err);
+                        self.setRegB(base + h.errreg, ev, true);
+                        self.noteCaught(ev);
                         pc = h.catch_pc;
                         continue :dispatch code[pc].op;
                     }
@@ -4366,13 +4458,14 @@ pub const VM = struct {
                 } else if (self.arithSlow(base + in.a, .div, x, y)) |e| {
                     const err = Value.str(self.newStr(e));
                     if (hsp == self.hsp_floor) { if (self.hsp_floor != 0) return self.escape(e, pc, fsp, base, false); self.dieRing(e, pc, fsp); }
+                    const ev = self.landErr(err, pc, fsp, false);
                     hsp -= 1;
                     const h = self.handlers[hsp];
                     self.forgetUnwound(h, fsp, base);
                     fsp = h.fsp;
                     base = h.base;
-                    self.setRegB(base + h.errreg, err, true);
-                    self.noteCaught(err);
+                    self.setRegB(base + h.errreg, ev, true);
+                    self.noteCaught(ev);
                     pc = h.catch_pc;
                     continue :dispatch code[pc].op;
                 }
@@ -4403,13 +4496,14 @@ pub const VM = struct {
                 } else if (self.arithSlow(base + in.a, .sub, x, y)) |e| {
                     const err = Value.str(self.newStr(e));
                     if (hsp == self.hsp_floor) { if (self.hsp_floor != 0) return self.escape(e, pc, fsp, base, false); self.dieRing(e, pc, fsp); }
+                    const ev = self.landErr(err, pc, fsp, false);
                     hsp -= 1;
                     const h = self.handlers[hsp];
                     self.forgetUnwound(h, fsp, base);
                     fsp = h.fsp;
                     base = h.base;
-                    self.setRegB(base + h.errreg, err, true);
-                    self.noteCaught(err);
+                    self.setRegB(base + h.errreg, ev, true);
+                    self.noteCaught(ev);
                     pc = h.catch_pc;
                     continue :dispatch code[pc].op;
                 }
@@ -4447,13 +4541,14 @@ pub const VM = struct {
                 } else if (self.arithSlow(base + in.a, aop, x, y)) |e| {
                     const err = Value.str(self.newStr(e));
                     if (hsp == self.hsp_floor) { if (self.hsp_floor != 0) return self.escape(e, pc, fsp, base, false); self.dieRing(e, pc, fsp); }
+                    const ev = self.landErr(err, pc, fsp, false);
                     hsp -= 1;
                     const h = self.handlers[hsp];
                     self.forgetUnwound(h, fsp, base);
                     fsp = h.fsp;
                     base = h.base;
-                    self.setRegB(base + h.errreg, err, true);
-                    self.noteCaught(err);
+                    self.setRegB(base + h.errreg, ev, true);
+                    self.noteCaught(ev);
                     pc = h.catch_pc;
                     continue :dispatch code[pc].op;
                 }
@@ -4479,13 +4574,14 @@ pub const VM = struct {
                 } else if (self.arithSlow(base + in.a, .mul, x, y)) |e| {
                     const err = Value.str(self.newStr(e));
                     if (hsp == self.hsp_floor) { if (self.hsp_floor != 0) return self.escape(e, pc, fsp, base, false); self.dieRing(e, pc, fsp); }
+                    const ev = self.landErr(err, pc, fsp, false);
                     hsp -= 1;
                     const h = self.handlers[hsp];
                     self.forgetUnwound(h, fsp, base);
                     fsp = h.fsp;
                     base = h.base;
-                    self.setRegB(base + h.errreg, err, true);
-                    self.noteCaught(err);
+                    self.setRegB(base + h.errreg, ev, true);
+                    self.noteCaught(ev);
                     pc = h.catch_pc;
                     continue :dispatch code[pc].op;
                 }
@@ -4576,13 +4672,14 @@ pub const VM = struct {
                                 outFlush();
                                 std.process.exit(1);
                             }
+                            const ev = self.landErr(err, pc, fsp, false);
                             hsp -= 1;
                             const h = self.handlers[hsp];
                             self.forgetUnwound(h, fsp, base);
                             fsp = h.fsp;
                             base = h.base;
-                            self.setRegB(base + h.errreg, err, true);
-                            self.noteCaught(err);
+                            self.setRegB(base + h.errreg, ev, true);
+                            self.noteCaught(ev);
                             pc = h.catch_pc;
                             continue :dispatch code[pc].op;
                         }
@@ -5444,21 +5541,24 @@ pub const VM = struct {
                 self.pending = "";
                 self.native_raise = false;
                 self.eval_c_err = false;
+                const ev = self.landErr(err, pc, fsp, false);
                 hsp -= 1;
                 const h = self.handlers[hsp];
                 self.forgetUnwound(h, fsp, base);
                 fsp = h.fsp;
                 base = h.base;
-                self.setRegB(base + h.errreg, err, true);
-                self.noteCaught(err);
+                self.setRegB(base + h.errreg, ev, true);
+                self.noteCaught(ev);
                 pc = h.catch_pc;
                 continue :dispatch code[pc].op;
             },
             .trap => {
                 const in = code[pc];
-                const err = regs[base + in.a];
+                const err = if (in.d > 0) self.withCause(regs[base + in.a], regs[base + @as(u32, @intCast(in.d - 1))]) else regs[base + in.a];
+                // a rethrow reports as the error first did (`In raise()` only for raise()'s own)
+                const rz = if (err.tag == .str and err.p.s.err != 0) self.errs.items[err.p.s.err - 1].raised else in.b == 1;
                 if (hsp == self.hsp_floor) {
-                    if (self.hsp_floor != 0) return self.escape(if (err.tag == .str) strOf(err) else "raised", pc, fsp, base, in.b == 1);
+                    if (self.hsp_floor != 0) return self.escape(if (err.tag == .str) strOf(err) else "raised", pc, fsp, base, rz);
                     // Nothing is handling it -- Ring's behaviour when
                     // nothing catches, plus the origin, which Ring prints
                     // for an uncaught error and withholds from a handler.
@@ -5472,8 +5572,9 @@ pub const VM = struct {
                     // louder origin. Every error the COMPILER builds --
                     // R19/R20, a refusal, the auto-Main arity check --
                     // passes 0 now.
-                    self.dieRingFrom(if (err.tag == .str) strOf(err) else "raised", pc, fsp, in.b == 1);
+                    self.dieRingFrom(if (err.tag == .str) strOf(err) else "raised", pc, fsp, rz);
                 }
+                const ev = self.landErr(err, pc, fsp, in.b == 1);
                 hsp -= 1;
                 const h = self.handlers[hsp];
                 self.forgetUnwound(h, fsp, base);
@@ -5482,8 +5583,8 @@ pub const VM = struct {
                 // releases nothing -- only the boxed slots are cleared.
                 fsp = h.fsp;
                 base = h.base;
-                self.setRegB(base + h.errreg, err, err.tag == .str or err.tag == .vec);
-                self.noteCaught(err);
+                self.setRegB(base + h.errreg, ev, ev.tag == .str or ev.tag == .vec);
+                self.noteCaught(ev);
                 pc = h.catch_pc;
                 continue :dispatch code[pc].op;
             },
@@ -5517,13 +5618,14 @@ pub const VM = struct {
                     if (self.hsp_floor != 0) return self.escape(if (err.tag == .str) strOf(err) else "raised", pc, fsp, base, false);
                     self.dieRingFrom(if (err.tag == .str) strOf(err) else "raised", pc, fsp, false);
                 }
+                const ev = self.landErr(err, pc, fsp, false);
                 hsp -= 1;
                 const h = self.handlers[hsp];
                 self.forgetUnwound(h, fsp, base);
                 fsp = h.fsp;
                 base = h.base;
-                self.setRegB(base + h.errreg, err, err.tag == .str or err.tag == .vec);
-                self.noteCaught(err);
+                self.setRegB(base + h.errreg, ev, ev.tag == .str or ev.tag == .vec);
+                self.noteCaught(ev);
                 pc = h.catch_pc;
                 continue :dispatch code[pc].op;
             },
@@ -5548,13 +5650,14 @@ pub const VM = struct {
                     if (self.hsp_floor != 0) return self.escape(if (err.tag == .str) strOf(err) else "raised", pc, fsp, base, false);
                     self.dieRingFrom(if (err.tag == .str) strOf(err) else "raised", pc, fsp, false);
                 }
+                const ev = self.landErr(err, pc, fsp, false);
                 hsp -= 1;
                 const h = self.handlers[hsp];
                 self.forgetUnwound(h, fsp, base);
                 fsp = h.fsp;
                 base = h.base;
-                self.setRegB(base + h.errreg, err, err.tag == .str or err.tag == .vec);
-                self.noteCaught(err);
+                self.setRegB(base + h.errreg, ev, ev.tag == .str or ev.tag == .vec);
+                self.noteCaught(ev);
                 pc = h.catch_pc;
                 continue :dispatch code[pc].op;
             },
@@ -8287,6 +8390,10 @@ pub const VM = struct {
                 const win = base + in.a;
                 const rv = regs[win];
                 if (rv.tag != .obj) {
+                    if (self.errMethod(win, in.b, in.d)) {
+                        pc += 1;
+                        continue :dispatch code[pc].op;
+                    }
                     self.pending = BADPARAM;
                     continue :dispatch .raise;
                 }

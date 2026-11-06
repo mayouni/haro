@@ -7780,8 +7780,8 @@ pub const Compiler = struct {
     ///
     /// `finally` runs on EVERY exit of the try: the normal path, a raise in
     /// the body or the handler, and a `return`, `exit` or `loop` crossing
-    /// it (D52, A1; spike/v36). Still waiting: `catch e` parses as a
-    /// statement that READS `e` rather than as a binding (D52 rung 2).
+    /// it (D52, A1; spike/v36). `catch e` reaches here as `catch(e)`: the
+    /// lift makes it so before the parse (lift.zig, D52 rung 2).
     fn tryStmt(self: *Compiler, n: ts.Node) Error!void {
         // A FRESH binding per try. `define` returns an existing local of
         // the same name, so naming them all "cCatchError" made nested
@@ -7897,8 +7897,7 @@ pub const Compiler = struct {
                 try self.forgetBorrows(borrowed2);
                 self.da = da_h;
                 self.daWrite(held.reg);
-                try self.body(f, 0);
-                _ = try self.emit(.trap, held.reg, 1, 0, 0);
+                try self.heldFinally(f, held.reg, depth);
                 self.land(over2);
                 self.da = DaState.meet(da_norm, da_c);
             } else {
@@ -7912,16 +7911,45 @@ pub const Compiler = struct {
             // continue outward. Swallowing it here would turn a `finally`
             // into an accidental `catch`, which is the one thing this
             // construct must never do.
-            try self.body(f, 0);
-            // A RETHROW, and `finally` is ours, not Ring's, so there is
-            // no Ring answer to match. It keeps the origin it had.
-            _ = try self.emit(.trap, errl.reg, 1, 0, 0);
+            try self.heldFinally(f, errl.reg, depth);
             // the error path ends in the rethrow: only the normal one goes on
             self.da = da_norm;
         } else {
             self.da = da_norm;
         }
         self.land(over);
+    }
+
+    /// A `finally` on an ERROR path, holding the error in `held`: it runs,
+    /// then the held error is raised again, keeping its origin (a rethrow,
+    /// and `finally` is ours, not Ring's, so there is no Ring answer to
+    /// match). A raise inside it REPLACES the held error, which becomes the
+    /// new one's cause (A1; D52 rung 2): so it runs under a handler of its
+    /// own, whose landing raises on with `trap` d = 1 + the held register.
+    /// That handler is an open `try` body like any other, so a jump out of
+    /// the `finally` leaves it (v37 G22).
+    fn heldFinally(self: *Compiler, f: ts.Node, held: u8, depth: u32) Error!void {
+        var buf: [24]u8 = undefined;
+        const nm = std.fmt.bufPrint(&buf, "cCatchNext${d}", .{depth}) catch
+            return Error.OutOfMemory;
+        const nxt = try self.define(self.alloc.dupe(u8, nm) catch return Error.OutOfMemory);
+        const arm = try self.emit(.ptry, nxt.reg, 0, 0, 0);
+        const da0 = self.da;
+        var borrowed: [4]u64 = .{ 0, 0, 0, 0 };
+        {
+            self.try_open += 1;
+            defer self.try_open -= 1;
+            try self.try_borrows.append(self.alloc, .{ 0, 0, 0, 0 });
+            defer borrowed = self.try_borrows.pop().?;
+            try self.body(f, 0);
+        }
+        _ = try self.emit(.pend, 0, 0, 0, 0);
+        _ = try self.emit(.trap, held, 1, 0, 0);
+        self.land(arm);
+        try self.forgetBorrows(borrowed);
+        self.da = da0;
+        self.daWrite(nxt.reg);
+        _ = try self.emit(.trap, nxt.reg, 1, 0, @as(i32, held) + 1);
     }
 
     /// `switch x / on v ... / other ... / off`. No fallthrough on 1.27 --

@@ -1,0 +1,11 @@
+g()
+func g
+	try
+		raise("x")
+	catch e
+		try
+			? e.Message(1)
+		catch e2
+			? e2
+		done
+	done

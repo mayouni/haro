@@ -1,0 +1,8 @@
+h()
+func h
+	aL = []
+	try
+		? aL[2]
+	finally
+		? "cleanup"
+	done

@@ -1195,6 +1195,13 @@ const Abs = struct {
                 if (rest.len > 0 and eq(rest[0].kind, "(")) {
                     cg.name = try leaf(try kid2(rest, 1));
                     rest = tail(rest, 3);
+                } else if (rest.len > 0 and eq(rest[0].kind, "expression_statement") and rest[0].kids.len == 1 and
+                    eq(rest[0].kids[0].kind, "identifier") and self.line(rest[0].start) == self.line(cl.kids[0].start))
+                {
+                    // `catch e`, e on catch's own line, is the BINDING (D52 rung 2): printed as `catch(e)`. Printed as a statement
+                    // on the next line, as it was, it would read e instead of binding it.
+                    cg.name = try leaf(rest[0].kids[0]);
+                    rest = tail(rest, 1);
                 }
                 cg.items = try self.body(rest);
                 g.catch_ = cg;

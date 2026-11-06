@@ -3526,6 +3526,23 @@ def stage41():
         return 1
     return 0
 
+ERROR_COURT = os.path.join(HERE, 'v37', 'error_court.py')
+def stage42():
+    """Haro v0.37, D52 rung (2): the error value. `catch e` binds (lifted to `catch(e)` before the parse, only when e is on catch's line); the error
+    is its message in every text use and answers Message(), Code(), Span() and Cause(); a raise in a `finally` that held an error carries it as
+    its cause; `haro fmt` prints `catch e` as `catch(e)`. v37/error_court.py runs the 31 cases of v37/fixtures.json on haro and its checked build:
+    each must print exactly its bytes and exit as it says, and the two builds the same bytes."""
+    print('stage 42 -- the error value: v37/error_court.py on haro and its checked build')
+    p = subprocess.run([sys.executable, ERROR_COURT] + (['--plant'] if PLANT else []), capture_output=True, cwd=HERE, timeout=600)
+    out = p.stdout.decode('utf-8', 'replace').replace(chr(13) + chr(10), chr(10))
+    for line in out.splitlines():
+        if line.startswith('  FAIL') or line.startswith('       ') or line.startswith('ERROR COURT'):
+            print(line)
+    if p.returncode != 0:
+        print(f'  FAIL the error court exited {p.returncode}' + ('' if out.strip() else ': ' + p.stderr.decode('utf-8', 'replace')[-400:]))
+        return 1
+    return 0
+
 SENTENCE_TARGET = 50.0     # D42: a sentence edited, its court's image reused -- what a person editing a sentence waits for
 COLD_CEILING = 150.0       # D42: the court compiled from scratch -- a ceiling that catches the court library growing
 
@@ -3703,5 +3720,7 @@ if __name__ == '__main__':
         failures += stage40()
     if stage in (None, 41) and os.path.exists(FINALLY_COURT):
         failures += stage41()
+    if stage in (None, 42) and os.path.exists(ERROR_COURT):
+        failures += stage42()
     print(f'haro_forge: {"FAIL" if failures else "PASS"} ({failures} failure(s), {time.perf_counter()-t0:.1f} s)')
     sys.exit(1 if failures else 0)

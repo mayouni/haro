@@ -1,0 +1,13 @@
+g()
+func g
+	m = "held"
+	try
+		raise(m)
+	catch e
+		? e.Message()
+	done
+	try
+		? m.Message()
+	catch e2
+		? e2
+	done
