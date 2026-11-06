@@ -1,0 +1,231 @@
+{
+ "rung": "v0.37",
+ "decision": "D52 rung (2): A4 the error value, catch e, A1 the cause",
+ "lines": {
+  "E1": "`catch e` binds e, only when e is on the line of catch",
+  "E2": "in a text context the error is its message, byte for byte",
+  "E3": "Message() is the plain message; Code() is Ring's code of a VM error, \"\" for raise()",
+  "E4": "Span() is the file and line where it was raised; a rethrow keeps its origin",
+  "E5": "Cause() is the held error a raise in finally replaced, \"\" when nothing was held",
+  "E6": "the methods belong to the error: a plain string, or one made from an error, refuses them",
+  "E7": "haro fmt prints catch e as catch(e)"
+ },
+ "cases": [
+  {
+   "id": "G01",
+   "kind": "run",
+   "line": "E1",
+   "why": "`catch e` binds the error to e",
+   "file": "cases/G01.haro",
+   "stdout": "e=x1\n"
+  },
+  {
+   "id": "G02",
+   "kind": "run",
+   "line": "E1",
+   "why": "`catch e` with a finally; cCatchError still reads the same error",
+   "file": "cases/G02.haro",
+   "stdout": "x2\nx2\nf\n"
+  },
+  {
+   "id": "G03",
+   "kind": "run",
+   "line": "E1",
+   "why": "a name on the line AFTER `catch` stays a statement: it does not bind",
+   "file": "cases/G03.haro",
+   "stdout": "e is still outer\n"
+  },
+  {
+   "id": "G04",
+   "kind": "run",
+   "line": "E1",
+   "why": "`Catch err` in another case, with a comment after it, binds",
+   "file": "cases/G04.haro",
+   "stdout": "err=x4\n"
+  },
+  {
+   "id": "G05",
+   "kind": "run",
+   "line": "E1",
+   "why": "the shape of stzlib's recovered plugin code: `catch cError` in a function binds cError",
+   "file": "cases/G05.haro",
+   "stdout": "handled: plugin failed\n"
+  },
+  {
+   "id": "G06",
+   "kind": "run",
+   "line": "E2",
+   "why": "in a text context the error is its message, byte for byte",
+   "file": "cases/G06.haro",
+   "stdout": "caught: boom\nboom!\n4\nSTRING\n1\n1\n"
+  },
+  {
+   "id": "G07",
+   "kind": "run",
+   "line": "E3",
+   "why": "Message() is the message, a plain string",
+   "file": "cases/G07.haro",
+   "stdout": "boom\nSTRING\n1\n"
+  },
+  {
+   "id": "G08",
+   "kind": "run",
+   "line": "E3",
+   "why": "Code() of an error the VM raised is Ring's code",
+   "file": "cases/G08.haro",
+   "stdout": "R2\nError (R2) : Array Access (Index out of range)\nR1\n"
+  },
+  {
+   "id": "G09",
+   "kind": "run",
+   "line": "E3",
+   "why": "Code() of a raise() is empty",
+   "file": "cases/G09.haro",
+   "stdout": "[]\n"
+  },
+  {
+   "id": "G10",
+   "kind": "run",
+   "line": "E3",
+   "why": "the four names are Ring names: any case reaches them",
+   "file": "cases/G10.haro",
+   "stdout": "cased\ncased\n[]\n"
+  },
+  {
+   "id": "G11",
+   "kind": "run",
+   "line": "E4",
+   "why": "Span() is the file and the line where the error was raised",
+   "file": "cases/G11.haro",
+   "stdout": "5\nG11.haro\n"
+  },
+  {
+   "id": "G12",
+   "kind": "run",
+   "line": "E4",
+   "why": "Span() of a VM error inside a called function is the line of the fault",
+   "file": "cases/G12.haro",
+   "stdout": "10\n"
+  },
+  {
+   "id": "G13",
+   "kind": "run",
+   "line": "E4",
+   "why": "a finally with no catch raises the held error again, and its Span is still where it began",
+   "file": "cases/G13.haro",
+   "stdout": "cleanup\n5\n"
+  },
+  {
+   "id": "G14",
+   "kind": "run",
+   "line": "E4",
+   "why": "raise(e) of an error value is a rethrow: it keeps the origin it had",
+   "file": "cases/G14.haro",
+   "stdout": "orig 5\n"
+  },
+  {
+   "id": "G15",
+   "kind": "run",
+   "line": "E5",
+   "why": "a raise in finally replaces the held raise of the body, which is its cause",
+   "file": "cases/G15.haro",
+   "stdout": "second\nfirst\nfirst\n"
+  },
+  {
+   "id": "G16",
+   "kind": "run",
+   "line": "E5",
+   "why": "a raise in finally replaces the held raise of the HANDLER, which is its cause",
+   "file": "cases/G16.haro",
+   "stdout": "cleanup\nhandler\n"
+  },
+  {
+   "id": "G17",
+   "kind": "run",
+   "line": "E5",
+   "why": "causes chain: each finally that replaces an error holds the one before",
+   "file": "cases/G17.haro",
+   "stdout": "c <- b <- a\n"
+  },
+  {
+   "id": "G18",
+   "kind": "run",
+   "line": "E5",
+   "why": "a raise in finally on the normal path has no cause: nothing was held",
+   "file": "cases/G18.haro",
+   "stdout": "ok\nlate\n[]\n"
+  },
+  {
+   "id": "G19",
+   "kind": "run",
+   "line": "E5",
+   "why": "an error the handler HANDLED is not a cause",
+   "file": "cases/G19.haro",
+   "stdout": "handled it\nafter\n[]\n"
+  },
+  {
+   "id": "G20",
+   "kind": "run",
+   "line": "E5",
+   "why": "a raise in finally replacing a held RETURN has no cause",
+   "file": "cases/G20.haro",
+   "stdout": "instead\n[]\n"
+  },
+  {
+   "id": "G21",
+   "kind": "run",
+   "line": "E5",
+   "why": "a VM error in finally replaces the held raise too, and the cause is a whole error value",
+   "file": "cases/G21.haro",
+   "stdout": "R2\nheld 6\n"
+  },
+  {
+   "id": "G22",
+   "kind": "run",
+   "line": "E5",
+   "why": "a return from the finally of an error path leaves its handler: a later raise lands where it is raised",
+   "file": "cases/G22.haro",
+   "stdout": "from finally\nlater caught at top: later\n"
+  },
+  {
+   "id": "G23",
+   "kind": "run",
+   "line": "E6",
+   "why": "a plain string refuses a method, as it did",
+   "file": "cases/G23.haro",
+   "stdout": "Bad parameter type!\n"
+  },
+  {
+   "id": "G24",
+   "kind": "run",
+   "line": "E6",
+   "why": "a string made from an error is a plain string",
+   "file": "cases/G24.haro",
+   "stdout": "Bad parameter type!\nBad parameter type!\n"
+  },
+  {
+   "id": "G25",
+   "kind": "run",
+   "line": "E2",
+   "why": "the error value is assigned, passed and returned as itself",
+   "file": "cases/G25.haro",
+   "stdout": "travels\ntravels from 4\n"
+  },
+  {
+   "id": "G26",
+   "kind": "run",
+   "line": "E2",
+   "why": "cCatchError read after the handler is the last error, still its message",
+   "file": "cases/G26.haro",
+   "stdout": "last one\n"
+  },
+  {
+   "id": "K01",
+   "kind": "fmt",
+   "line": "E7",
+   "why": "`haro fmt` prints `catch e` as `catch(e)`, and a name on the next line as a statement",
+   "file": "cases/K01.haro",
+   "stdout": "try\n\traise(\"x\")\ncatch(e)\n\t? e\ndone\ntry\n\traise(\"y\")\ncatch\n\te\ndone\n"
+  }
+ ]
+}

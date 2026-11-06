@@ -1,0 +1,10 @@
+try
+	raise("x")
+catch e
+	? e
+done
+try
+	raise("y")
+catch
+	e
+done

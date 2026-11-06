@@ -1,0 +1,13 @@
+try
+	try
+		try
+			raise("a")
+		finally
+			raise("b")
+		done
+	finally
+		raise("c")
+	done
+catch e
+	? e + " <- " + e.Cause() + " <- " + e.Cause().Cause()
+done

@@ -1,0 +1,12 @@
+try
+	try
+		raise("body")
+	catch
+		raise("handler")
+	finally
+		raise("cleanup")
+	done
+catch e
+	? e
+	? e.Cause()
+done

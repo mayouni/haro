@@ -1,0 +1,5 @@
+try
+	raise("x4")
+Catch err   # the error
+	? "err=" + err
+done

@@ -1,0 +1,14 @@
+g()
+func g
+	aL = [1]
+	try
+		? aL[5]
+	catch e
+		? e.Code()
+		? e
+	done
+	try
+		x = 1 / 0
+	catch e2
+		? e2.Code()
+	done

@@ -1,0 +1,10 @@
+try
+	raise("boom")
+catch e
+	? "caught: " + e
+	? e + "!"
+	? len(e)
+	? type(e)
+	? e = "boom"
+	? isString(e)
+done

@@ -1,0 +1,11 @@
+h()
+func h
+	try
+		try
+			raise("origin")
+		finally
+			? "cleanup"
+		done
+	catch e
+		? e.Span()[:line]
+	done

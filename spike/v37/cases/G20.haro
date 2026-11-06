@@ -1,0 +1,12 @@
+try
+	? k()
+catch e
+	? e
+	? "[" + e.Cause() + "]"
+done
+func k
+	try
+		return "value"
+	finally
+		raise("instead")
+	done

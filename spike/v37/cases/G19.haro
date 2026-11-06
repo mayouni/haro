@@ -1,0 +1,12 @@
+try
+	try
+		raise("handled")
+	catch
+		? "handled it"
+	finally
+		raise("after")
+	done
+catch e
+	? e
+	? "[" + e.Cause() + "]"
+done

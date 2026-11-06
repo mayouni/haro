@@ -1,0 +1,13 @@
+h()
+func h
+	aL = []
+	try
+		try
+			raise("held")
+		finally
+			? aL[3]
+		done
+	catch e
+		? e.Code()
+		? e.Cause() + " " + e.Cause().Span()[:line]
+	done

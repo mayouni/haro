@@ -1,0 +1,9 @@
+f()
+func f
+	e = "outer"
+	try
+		raise("z")
+	catch
+		e
+		? "e is still " + e
+	done

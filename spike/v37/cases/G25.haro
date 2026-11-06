@@ -1,0 +1,11 @@
+g()
+func g
+	try
+		raise("travels")
+	catch e
+		f = e
+		? f.Message()
+		? show(e)
+	done
+func show x
+	return x.Message() + " from " + x.Span()[:line]

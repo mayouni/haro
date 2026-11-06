@@ -1,0 +1,7 @@
+p()
+func p
+	try
+		raise("plugin failed")
+	catch cError
+		? "handled: " + cError
+	done

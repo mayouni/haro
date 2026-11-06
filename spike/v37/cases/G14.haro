@@ -1,0 +1,11 @@
+h()
+func h
+	try
+		try
+			raise("orig")
+		catch e
+			raise(e)
+		done
+	catch e2
+		? e2 + " " + e2.Span()[:line]
+	done

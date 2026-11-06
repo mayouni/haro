@@ -1,0 +1,17 @@
+g()
+func g
+	try
+		raise("orig")
+	catch e
+		t = e + ""
+		try
+			? t.Message()
+		catch e2
+			? e2
+		done
+		try
+			? e.Message().Message()
+		catch e3
+			? e3
+		done
+	done

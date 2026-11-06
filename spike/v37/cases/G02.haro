@@ -1,0 +1,8 @@
+try
+	raise("x2")
+catch e
+	? e
+	? cCatchError
+finally
+	? "f"
+done

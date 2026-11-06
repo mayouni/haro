@@ -1,0 +1,7 @@
+try
+	raise("boom")
+catch e
+	? e.Message()
+	? type(e.Message())
+	? e.Message() = e
+done

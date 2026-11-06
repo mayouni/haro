@@ -1,0 +1,10 @@
+try
+	try
+		? "ok"
+	finally
+		raise("late")
+	done
+catch e
+	? e
+	? "[" + e.Cause() + "]"
+done

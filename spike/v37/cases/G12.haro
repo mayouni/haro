@@ -1,0 +1,10 @@
+h()
+func h
+	try
+		deep()
+	catch e
+		? e.Span()[:line]
+	done
+func deep
+	aL = []
+	? aL[1]

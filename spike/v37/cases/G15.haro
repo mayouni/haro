@@ -1,0 +1,11 @@
+try
+	try
+		raise("first")
+	finally
+		raise("second")
+	done
+catch e
+	? e
+	? e.Cause()
+	? e.Cause().Message()
+done

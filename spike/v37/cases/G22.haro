@@ -1,0 +1,12 @@
+? m()
+try
+	raise("later")
+catch e
+	? "later caught at top: " + e
+done
+func m
+	try
+		raise("dropped")
+	finally
+		return "from finally"
+	done
