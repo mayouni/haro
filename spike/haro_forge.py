@@ -81,6 +81,7 @@ STZU25_FIXTURES = os.path.join(HERE, 'v25', 'fixtures.json')
 STZU26_FIXTURES = os.path.join(HERE, 'v26', 'fixtures.json')
 STZU27_FIXTURES = os.path.join(HERE, 'v27', 'fixtures.json')
 STZU28_FIXTURES = os.path.join(HERE, 'v28', 'fixtures.json')
+STZU29_FIXTURES = os.path.join(HERE, 'v29', 'fixtures.json')
 STZU32_FIXTURES = os.path.join(HERE, 'v32', 'fixtures.json')
 STZU33_FIXTURES = os.path.join(HERE, 'v33', 'fixtures.json')
 STZU34_FIXTURES = os.path.join(HERE, 'v34', 'fixtures.json')
@@ -94,7 +95,7 @@ def judge_stzu(exe, label, fixtures=STZU_FIXTURES):
     counts), world and points."""
     doc = json.load(open(fixtures, encoding='utf-8'))
     # the pinned v0.1 judge is stzu's; everything since is Haro's (D1)
-    assert doc['grammar'] in ('stzu', 'haro') and doc['version'] in ('0.1', '0.2', '0.3', '0.4', '0.5', '0.6', '0.7', '0.8', '0.9', '0.10', '0.11', '0.12', '0.13', '0.16', '0.17', '0.23', '0.24', '0.25', '0.26', '0.27', '0.28', '0.32', '0.33', '0.34', '0.35')
+    assert doc['grammar'] in ('stzu', 'haro') and doc['version'] in ('0.1', '0.2', '0.3', '0.4', '0.5', '0.6', '0.7', '0.8', '0.9', '0.10', '0.11', '0.12', '0.13', '0.16', '0.17', '0.23', '0.24', '0.25', '0.26', '0.27', '0.28', '0.29', '0.32', '0.33', '0.34', '0.35')
     passed = failed = 0
     outputs = {}
     with tempfile.TemporaryDirectory() as td:
@@ -178,6 +179,7 @@ def stage1():
                             ('v0.26, Z under the whole constitution -- the refusals Z met on its way (ZC5); no new clause', STZU26_FIXTURES),
                             ("v0.27, the field tag: a pair form's optional mark, PERSONAL reaching it, SAFEGUARDS on the ask and the voice (ZTAG)", STZU27_FIXTURES),
                             ('v0.28, CITES on every element that carries a CODE, and the word none (HARO-MENU-CITES-01)', STZU28_FIXTURES),
+                            ('v0.29, the six carried weaves the court judges with no new seat: W1.5, W2.2, W2.3, W5.2, W7.4, W8.5 (WC1)', STZU29_FIXTURES),
                             ('v0.32, PATTERN: a rule over a seat, its sets collected by the court (BLOCKS.md 4.3)', STZU32_FIXTURES),
                             ("v0.33, INCLUDES, ON a FORM and a quantifier over a FORM: the sugar of a shared seat (Central's item 4, S5)", STZU33_FIXTURES),
                             ("v0.34, FIELDS on an ASK: where the schema of a kind asked lives (COMPASS-KERN-03)", STZU34_FIXTURES),

@@ -1,0 +1,160 @@
+{
+  "grammar": "haro",
+  "version": "0.29",
+  "comment": "The Haro v0.29 conformance floor, written BEFORE the court that passes it (the W discipline: fixtures first, prose second). v0.29 is WC1 of the second charge of the constitution desk (the six carried weaves, 2026-11-02): five of the six -- resilience (W1.5), observability (W2.2, W2.3), temporal_integrity (W5.2), learnability (W7.4) and structural_integrity (W8.5) -- are judged at the declaring altitude with no new seat, each rule an article's condition read at the weave's severity; W1.2 and W7.1 hold by construction; cost_awareness stays refused by name. The rules, their sort and the readings are in ZIN-WEAVES-INVENTORY.md; the account is GRAMMAR.md. A6 is v0.25's A1 unchanged: nothing v0.28 accepted is refused here but a weave name this rung now judges.",
+  "accepts": [
+    {
+      "id": "A1",
+      "name": "the five weaves the court now judges, all constitutional, in a world that satisfies each: a chain, a voice with codes, a gate whose policy points are no model's",
+      "source": "DEFINE LANGUAGE clinic AS (VERSION \"0.29\", GRAMMAR \"0.29\", COURT \"x\", EXTENSION \".clinic\") RATIONALE \"x\"\nDEFINE DECLARATION patient AS (VERB \"PATIENT\", SEATS [file_no: text, ward: text]) RATIONALE \"x\"\nDEFINE NARRATE voice AS (SAYS [patient: \"{name}, file {file_no}.\"]) RATIONALE \"x\"\nDEFINE REFUSAL unknown_verb AS (MESSAGE \"The verb set is closed\", CODE \"UNKNOWN_VERB\") RATIONALE \"x\"\nDEFINE CONSTRAINT one_file AS (ON patient, WHEN \"earlier patient where file_no = this.file_no\", MESSAGE \"two patients share a file\", CODE \"ONE_FILE\") RATIONALE \"x\"\nDEFINE REFINE clinic AS (POINTS [patient.ward: knob, patient.file_no: policy], FLOOR [patient.ward: llm, patient.file_no: trusted]) RATIONALE \"x\"\nDEFINE CONSTITUTION charter AS (ARTICLES [explainability, visible_state, predictable_authority], WEAVES [resilience: constitutional, observability: constitutional, temporal_integrity: constitutional, learnability: constitutional, structural_integrity: constitutional]) RATIONALE \"x\"\n",
+      "expect": {
+        "language": "clinic",
+        "weaves": "resilience:constitutional,observability:constitutional,temporal_integrity:constitutional,learnability:constitutional,structural_integrity:constitutional",
+        "judged": "W1.5,W2.2,W2.3,W5.2,W7.4,W8.5",
+        "held": "W1.2,W7.1",
+        "carried": "W1.1,W1.3,W1.4,W1.6,W1.7,W2.1,W2.4,W2.5,W2.6,W5.1,W5.3,W5.4,W5.5,W7.2,W7.3,W7.5,W7.6,W8.1,W8.2,W8.3,W8.4"
+      }
+    },
+    {
+      "id": "A2",
+      "name": "nothing to trace: a world with no REFINE names observability and temporal_integrity at constitutional and is accepted -- a rule judged finds nothing without a gate",
+      "source": "DEFINE LANGUAGE clinic AS (VERSION \"0.29\", GRAMMAR \"0.29\", COURT \"x\", EXTENSION \".clinic\") RATIONALE \"x\"\nDEFINE DECLARATION patient AS (VERB \"PATIENT\", SEATS [file_no: text, ward: text]) RATIONALE \"x\"\nDEFINE NARRATE voice AS (SAYS [patient: \"{name}, file {file_no}.\"]) RATIONALE \"x\"\nDEFINE CONSTITUTION charter AS (ARTICLES [explainability], WEAVES [observability: constitutional, temporal_integrity: constitutional]) RATIONALE \"x\"\n",
+      "expect": {
+        "language": "clinic",
+        "weaves": "observability:constitutional,temporal_integrity:constitutional",
+        "judged": "W2.2,W2.3,W5.2",
+        "held": "",
+        "carried": "W2.1,W2.4,W2.5,W2.6,W5.1,W5.3,W5.4,W5.5"
+      }
+    },
+    {
+      "id": "A3",
+      "name": "structural_integrity at governance: a policy point floored llm and no predictable_authority is accepted with a warning that names the rule, the point and the article",
+      "source": "DEFINE LANGUAGE clinic AS (VERSION \"0.29\", GRAMMAR \"0.29\", COURT \"x\", EXTENSION \".clinic\") RATIONALE \"x\"\nDEFINE DECLARATION patient AS (VERB \"PATIENT\", SEATS [file_no: text, ward: text]) RATIONALE \"x\"\nDEFINE NARRATE voice AS (SAYS [patient: \"{name}, file {file_no}.\"]) RATIONALE \"x\"\nDEFINE REFINE clinic AS (POINTS [patient.ward: knob, patient.file_no: policy], FLOOR [patient.ward: trusted, patient.file_no: llm]) RATIONALE \"x\"\nDEFINE CONSTITUTION charter AS (ARTICLES [trust_hierarchy], WEAVES [structural_integrity: governance]) RATIONALE \"x\"\n",
+      "expect": {
+        "language": "clinic",
+        "weaves": "structural_integrity:governance",
+        "judged": "W8.5",
+        "held": "",
+        "carried": "W8.1,W8.2,W8.3,W8.4",
+        "warning": "W8.5 structural_integrity: policy point 'patient.file_no' has FLOOR llm -- a model-composed proposal could replace a rule the court proved [Art. 4 predictable_authority]"
+      }
+    },
+    {
+      "id": "A4",
+      "name": "learnability at advisory: a CONSTRAINT with no CODE is accepted with a note that names the rule, the constraint and Art. 1",
+      "source": "DEFINE LANGUAGE clinic AS (VERSION \"0.29\", GRAMMAR \"0.29\", COURT \"x\", EXTENSION \".clinic\") RATIONALE \"x\"\nDEFINE DECLARATION patient AS (VERB \"PATIENT\", SEATS [file_no: text, ward: text]) RATIONALE \"x\"\nDEFINE NARRATE voice AS (SAYS [patient: \"{name}, file {file_no}.\"]) RATIONALE \"x\"\nDEFINE CONSTRAINT one_file AS (ON patient, WHEN \"earlier patient where file_no = this.file_no\", MESSAGE \"two patients share a file\") RATIONALE \"x\"\nDEFINE CONSTITUTION charter AS (ARTICLES [visible_state], WEAVES [learnability: advisory]) RATIONALE \"x\"\n",
+      "expect": {
+        "language": "clinic",
+        "weaves": "learnability:advisory",
+        "judged": "W7.4",
+        "held": "W7.1",
+        "carried": "W7.2,W7.3,W7.5,W7.6",
+        "note": "W7.4 learnability: CONSTRAINT 'one_file' carries no CODE -- a denial is explained to its reader by a stable identifier (C2 2.1) [Art. 1 explainability]"
+      }
+    },
+    {
+      "id": "A5",
+      "name": "a degradation that cites a law the world does not stand under is no breach: a warning CONSTRAINT citing article:visible_state, in a world under trust_hierarchy alone, is accepted at constitutional",
+      "source": "DEFINE LANGUAGE clinic AS (VERSION \"0.29\", GRAMMAR \"0.29\", COURT \"x\", EXTENSION \".clinic\") RATIONALE \"x\"\nDEFINE DECLARATION patient AS (VERB \"PATIENT\", SEATS [file_no: text, ward: text]) RATIONALE \"x\"\nDEFINE NARRATE voice AS (SAYS [patient: \"{name}, file {file_no}.\"]) RATIONALE \"x\"\nDEFINE CONSTRAINT one_file AS (ON patient, WHEN \"earlier patient where file_no = this.file_no\", MESSAGE \"two patients share a file\", CODE \"ONE_FILE\", CITES [\"article:visible_state\"], SEVERITY warning) RATIONALE \"x\"\nDEFINE REFINE clinic AS (POINTS [patient.ward: knob, patient.file_no: policy], FLOOR [patient.ward: trusted, patient.file_no: trusted]) RATIONALE \"x\"\nDEFINE CONSTITUTION charter AS (ARTICLES [trust_hierarchy], WEAVES [resilience: constitutional]) RATIONALE \"x\"\n",
+      "expect": {
+        "language": "clinic",
+        "weaves": "resilience:constitutional",
+        "judged": "W1.5",
+        "held": "W1.2",
+        "carried": "W1.1,W1.3,W1.4,W1.6,W1.7"
+      }
+    },
+    {
+      "id": "A6",
+      "name": "v0.25's A1 unchanged: the clinic under all six articles and both original weaves is accepted as before, and prints none of the new lines",
+      "source": "DEFINE LANGUAGE clinic AS (VERSION \"0.25\", GRAMMAR \"0.25\", COURT \"x\", EXTENSION \".clinic\") RATIONALE \"x\"\nDEFINE MENU holders AS (WORDS [the_clinic, the_ministry, the_insurer]) RATIONALE \"x\"\nDEFINE MENU wards AS (WORDS [maternity, surgery, outpatients]) RATIONALE \"x\"\nDEFINE DECLARATION patient AS (VERB \"PATIENT\", SEATS [full_name: text, file_no: text, ward: wards]) RATIONALE \"x\"\nDEFINE DECLARATION flow AS (VERB \"FLOW\", SEATS []) RATIONALE \"x\"\nDEFINE DECLARATION registry AS (VERB \"REGISTRY\", SEATS [held_by: holders, entered_through: flow]) RATIONALE \"x\"\nDEFINE REFUSAL unknown_verb AS (MESSAGE \"The verb set is closed\", CODE \"UNKNOWN_VERB\") RATIONALE \"x\"\nDEFINE REFINE clinic AS (POINTS [patient.full_name: field, patient.ward: knob], FLOOR [patient.full_name: external, patient.ward: trusted]) RATIONALE \"x\"\nDEFINE NARRATE voice AS (SAYS [patient: \"{name} (file {file_no}) is on {ward}.\", flow: \"{name} is a flow.\", registry: \"{name} is held by {held_by}, entered through {entered_through}.\"], REFUSES \"Stopped at line {line}: {message} ({cites})\") RATIONALE \"x\"\nDEFINE CONSTITUTION charter AS (ARTICLES [explainability, reversibility, visible_state, predictable_authority, organizational_sovereignty, trust_hierarchy], ZONE registry, SOVEREIGN held_by, MOVEMENT entered_through, WEAVES [sovereignty: constitutional, privacy: constitutional], REGIME gdpr, PERSONAL [patient.full_name]) RATIONALE \"the whole constitution, with its first two weaves\"\n",
+      "expect": {
+        "language": "clinic",
+        "counts": {
+          "declarations": 3,
+          "menus": 2
+        },
+        "constitution": 1,
+        "zone": "registry",
+        "regime": "gdpr",
+        "weaves": "sovereignty:constitutional,privacy:constitutional",
+        "personal": "patient.full_name"
+      }
+    },
+    {
+      "id": "A7",
+      "name": "W1.2 held by construction: a world that refines and stands under no article but the trust floor is accepted under resilience -- the gate writes the inverse before a change lands",
+      "source": "DEFINE LANGUAGE clinic AS (VERSION \"0.29\", GRAMMAR \"0.29\", COURT \"x\", EXTENSION \".clinic\") RATIONALE \"x\"\nDEFINE DECLARATION patient AS (VERB \"PATIENT\", SEATS [file_no: text, ward: text]) RATIONALE \"x\"\nDEFINE REFINE clinic AS (POINTS [patient.ward: knob, patient.file_no: policy], FLOOR [patient.ward: trusted, patient.file_no: trusted]) RATIONALE \"x\"\nDEFINE CONSTITUTION charter AS (ARTICLES [trust_hierarchy], WEAVES [resilience: constitutional]) RATIONALE \"x\"\n",
+      "expect": {
+        "language": "clinic",
+        "weaves": "resilience:constitutional",
+        "judged": "W1.5",
+        "held": "W1.2",
+        "carried": "W1.1,W1.3,W1.4,W1.6,W1.7"
+      }
+    }
+  ],
+  "rejects": [
+    {
+      "id": "R1",
+      "name": "W1.5 resilience, constitutional: a CONSTRAINT held at warning that cites an article the world stands under is a degradation past a law -- refused with the rule, the constraint, the cite and the article",
+      "source": "DEFINE LANGUAGE clinic AS (VERSION \"0.29\", GRAMMAR \"0.29\", COURT \"x\", EXTENSION \".clinic\") RATIONALE \"x\"\nDEFINE DECLARATION patient AS (VERB \"PATIENT\", SEATS [file_no: text, ward: text]) RATIONALE \"x\"\nDEFINE NARRATE voice AS (SAYS [patient: \"{name}, file {file_no}.\"]) RATIONALE \"x\"\nDEFINE CONSTRAINT one_file AS (ON patient, WHEN \"earlier patient where file_no = this.file_no\", MESSAGE \"two patients share a file\", CODE \"ONE_FILE\", CITES [\"article:3\"], SEVERITY warning) RATIONALE \"x\"\nDEFINE CONSTITUTION charter AS (ARTICLES [visible_state], WEAVES [resilience: constitutional]) RATIONALE \"x\"\n",
+      "refusal": "W1.5 resilience: CONSTRAINT 'one_file' is SEVERITY warning and cites article:3, and the world stands under visible_state -- a degradation must not pass a law the world declares [Art. 3 visible_state]"
+    },
+    {
+      "id": "R2",
+      "name": "W2.2 observability, constitutional: a point a model may propose (FLOOR llm) and no visible_state -- no chain keeps the proposal or its refusal",
+      "source": "DEFINE LANGUAGE clinic AS (VERSION \"0.29\", GRAMMAR \"0.29\", COURT \"x\", EXTENSION \".clinic\") RATIONALE \"x\"\nDEFINE DECLARATION patient AS (VERB \"PATIENT\", SEATS [file_no: text, ward: text]) RATIONALE \"x\"\nDEFINE REFINE clinic AS (POINTS [patient.ward: knob, patient.file_no: policy], FLOOR [patient.ward: llm, patient.file_no: trusted]) RATIONALE \"x\"\nDEFINE CONSTITUTION charter AS (ARTICLES [trust_hierarchy], WEAVES [observability: constitutional]) RATIONALE \"x\"\n",
+      "refusal": "W2.2 observability: point 'patient.ward' has FLOOR llm -- a model may propose it -- and visible_state is not among ARTICLES: no chain keeps the model's proposal or its refusal [Art. 3 visible_state]"
+    },
+    {
+      "id": "R3",
+      "name": "W2.3 observability, constitutional: a REFINE whose gate denies and no visible_state -- a denial enters no audit chain",
+      "source": "DEFINE LANGUAGE clinic AS (VERSION \"0.29\", GRAMMAR \"0.29\", COURT \"x\", EXTENSION \".clinic\") RATIONALE \"x\"\nDEFINE DECLARATION patient AS (VERB \"PATIENT\", SEATS [file_no: text, ward: text]) RATIONALE \"x\"\nDEFINE REFINE clinic AS (POINTS [patient.ward: knob, patient.file_no: policy], FLOOR [patient.ward: trusted, patient.file_no: trusted]) RATIONALE \"x\"\nDEFINE CONSTITUTION charter AS (ARTICLES [trust_hierarchy], WEAVES [observability: constitutional]) RATIONALE \"x\"\n",
+      "refusal": "W2.3 observability: 'clinic' declares a REFINE, whose gate denies, and visible_state is not among ARTICLES: a denial enters no audit chain [Art. 3 visible_state]"
+    },
+    {
+      "id": "R4",
+      "name": "W5.2 temporal_integrity, constitutional: a REFINE changes points that have a history and no visible_state numbers the changes",
+      "source": "DEFINE LANGUAGE clinic AS (VERSION \"0.29\", GRAMMAR \"0.29\", COURT \"x\", EXTENSION \".clinic\") RATIONALE \"x\"\nDEFINE DECLARATION patient AS (VERB \"PATIENT\", SEATS [file_no: text, ward: text]) RATIONALE \"x\"\nDEFINE REFINE clinic AS (POINTS [patient.ward: knob, patient.file_no: policy], FLOOR [patient.ward: trusted, patient.file_no: trusted]) RATIONALE \"x\"\nDEFINE CONSTITUTION charter AS (ARTICLES [trust_hierarchy], WEAVES [temporal_integrity: constitutional]) RATIONALE \"x\"\n",
+      "refusal": "W5.2 temporal_integrity: 'clinic' declares a REFINE, which changes points that have a history, and visible_state is not among ARTICLES: no numbered chain versions the changes [Art. 3 visible_state]"
+    },
+    {
+      "id": "R5",
+      "name": "W7.4 learnability, constitutional: a world that denies (a CONSTRAINT) and declares no NARRATE -- a denial no voice tells is not explained",
+      "source": "DEFINE LANGUAGE clinic AS (VERSION \"0.29\", GRAMMAR \"0.29\", COURT \"x\", EXTENSION \".clinic\") RATIONALE \"x\"\nDEFINE DECLARATION patient AS (VERB \"PATIENT\", SEATS [file_no: text, ward: text]) RATIONALE \"x\"\nDEFINE CONSTRAINT one_file AS (ON patient, WHEN \"earlier patient where file_no = this.file_no\", MESSAGE \"two patients share a file\", CODE \"ONE_FILE\") RATIONALE \"x\"\nDEFINE CONSTITUTION charter AS (ARTICLES [trust_hierarchy], WEAVES [learnability: constitutional]) RATIONALE \"x\"\n",
+      "refusal": "W7.4 learnability: 'clinic' declares 1 denial(s) (CONSTRAINT or REFUSAL) and no NARRATE -- a denial no voice tells is not explained [Art. 1 explainability]"
+    },
+    {
+      "id": "R6",
+      "name": "W7.4 learnability, constitutional: a REFUSAL with no CODE -- the stable identifier is how a reader meets a denial",
+      "source": "DEFINE LANGUAGE clinic AS (VERSION \"0.29\", GRAMMAR \"0.29\", COURT \"x\", EXTENSION \".clinic\") RATIONALE \"x\"\nDEFINE DECLARATION patient AS (VERB \"PATIENT\", SEATS [file_no: text, ward: text]) RATIONALE \"x\"\nDEFINE NARRATE voice AS (SAYS [patient: \"{name}, file {file_no}.\"]) RATIONALE \"x\"\nDEFINE REFUSAL unknown_verb AS (MESSAGE \"The verb set is closed\") RATIONALE \"x\"\nDEFINE CONSTITUTION charter AS (ARTICLES [visible_state], WEAVES [learnability: constitutional]) RATIONALE \"x\"\n",
+      "refusal": "W7.4 learnability: REFUSAL 'unknown_verb' carries no CODE -- a denial is explained to its reader by a stable identifier (C2 2.1) [Art. 1 explainability]"
+    },
+    {
+      "id": "R7",
+      "name": "W8.5 structural_integrity, constitutional: a policy point a model may propose and no predictable_authority -- a synthesis could replace a rule the court proved",
+      "source": "DEFINE LANGUAGE clinic AS (VERSION \"0.29\", GRAMMAR \"0.29\", COURT \"x\", EXTENSION \".clinic\") RATIONALE \"x\"\nDEFINE DECLARATION patient AS (VERB \"PATIENT\", SEATS [file_no: text, ward: text]) RATIONALE \"x\"\nDEFINE REFINE clinic AS (POINTS [patient.ward: knob, patient.file_no: policy], FLOOR [patient.ward: trusted, patient.file_no: llm]) RATIONALE \"x\"\nDEFINE CONSTITUTION charter AS (ARTICLES [trust_hierarchy], WEAVES [structural_integrity: constitutional]) RATIONALE \"x\"\n",
+      "refusal": "W8.5 structural_integrity: policy point 'patient.file_no' has FLOOR llm -- a model-composed proposal could replace a rule the court proved [Art. 4 predictable_authority]"
+    },
+    {
+      "id": "R8",
+      "name": "where the article is declared its own refusal comes first, constitutional, and the weave does not say it twice: predictable_authority refuses the llm policy point before W8.5 can",
+      "source": "DEFINE LANGUAGE clinic AS (VERSION \"0.29\", GRAMMAR \"0.29\", COURT \"x\", EXTENSION \".clinic\") RATIONALE \"x\"\nDEFINE DECLARATION patient AS (VERB \"PATIENT\", SEATS [file_no: text, ward: text]) RATIONALE \"x\"\nDEFINE REFINE clinic AS (POINTS [patient.ward: knob, patient.file_no: policy], FLOOR [patient.ward: trusted, patient.file_no: llm]) RATIONALE \"x\"\nDEFINE CONSTITUTION charter AS (ARTICLES [predictable_authority], WEAVES [structural_integrity: governance]) RATIONALE \"x\"\n",
+      "refusal": "Art. 4 predictable_authority: policy point 'patient.file_no' has FLOOR llm"
+    },
+    {
+      "id": "R9",
+      "name": "cost_awareness is still refused by name: none of its 13 rules is judged, a budget needing a seat the world does not declare yet",
+      "source": "DEFINE LANGUAGE clinic AS (VERSION \"0.29\", GRAMMAR \"0.29\", COURT \"x\", EXTENSION \".clinic\") RATIONALE \"x\"\nDEFINE DECLARATION patient AS (VERB \"PATIENT\", SEATS [file_no: text, ward: text]) RATIONALE \"x\"\nDEFINE NARRATE voice AS (SAYS [patient: \"{name}, file {file_no}.\"]) RATIONALE \"x\"\nDEFINE CONSTITUTION charter AS (ARTICLES [visible_state], WEAVES [cost_awareness: constitutional]) RATIONALE \"x\"\n",
+      "refusal": "WEAVES names 'cost_awareness', and none of its 13 rules is judged in Haro v0.29 -- they are Zin's design, carried, not built"
+    },
+    {
+      "id": "R10",
+      "name": "W7.1 held by construction: a declaration with no RATIONALE is refused whatever the weaves say",
+      "source": "DEFINE LANGUAGE clinic AS (VERSION \"0.29\", GRAMMAR \"0.29\", COURT \"x\", EXTENSION \".clinic\") RATIONALE \"x\"\nDEFINE DECLARATION patient AS (VERB \"PATIENT\", SEATS [file_no: text])\nDEFINE CONSTITUTION charter AS (ARTICLES [trust_hierarchy], WEAVES [learnability: advisory]) RATIONALE \"x\"\n",
+      "refusal": "carries its RATIONALE"
+    }
+  ]
+}
