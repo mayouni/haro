@@ -5034,7 +5034,7 @@ pub fn main() !void {
             @as(f64, @floatFromInt(t_census_ns)) / 1e9,
         });
         // C-32: the `not`s that led a chain and were read as Ring reads them, and what looking for them cost (it is inside "other" above)
-        try w.print("lift: {d} `not` site(s) in {d} file(s), {d:.2} s (of it {d:.2} s parsing the rewritten files)\n", .{ lift.sites, lift.files, @as(f64, @floatFromInt(lift.ns)) / 1e9, @as(f64, @floatFromInt(lift.ns_reparse)) / 1e9 });
+        try w.print("lift: {d} `not` site(s) in {d} file(s), {d} `catch e` bound, {d:.2} s (of it {d:.2} s parsing the rewritten files)\n", .{ lift.sites, lift.files, lift.catch_sites, @as(f64, @floatFromInt(lift.ns)) / 1e9, @as(f64, @floatFromInt(lift.ns_reparse)) / 1e9 });
         try w.print("scans: knownGlobal {d}  globalSlot {d}  nameIndex {d}  findClass {d}  funcIndex {d}  findFunc {d}  attrSlotOf {d}  konstIndex {d}  methodOf {d}  lookup {d}   tables: globals {d} names {d} funcs {d} konst {d}\n", .{
             co.scans[0], co.scans[1], co.scans[2], co.scans[3], co.scans[4], co.scans[5], co.scans[6], co.scans[7], co.scans[8], co.scans[9],
             co.sizes[0], co.sizes[1], co.sizes[2], co.sizes[3],

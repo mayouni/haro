@@ -1,4 +1,7 @@
-? m()
+for i = 1 to 300
+	m()
+next
+? "300 returns from a finally"
 try
 	raise("later")
 catch e

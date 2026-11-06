@@ -105,10 +105,13 @@ CASES = [
         'h()', 'func h', T + 'aL = []', T + 'try', T * 2 + 'try', T * 3 + 'raise("held")', T * 2 + 'finally', T * 3 + '? aL[3]', T * 2 + 'done',
         T + 'catch e', T * 2 + '? e.Code()', T * 2 + '? e.Cause() + " " + e.Cause().Span()[:line]', T + 'done'],
      ['R2', 'held 6']),
-    ('G22', 'E5', 'a return from the finally of an error path leaves its handler: a later raise lands where it is raised', [
-        '? m()', 'try', T + 'raise("later")', 'catch e', T + '? "later caught at top: " + e', 'done', 'func m', T + 'try', T * 2 + 'raise("dropped")',
-        T + 'finally', T * 2 + 'return "from finally"', T + 'done'],
-     ['from finally', 'later caught at top: later']),
+    # G22 CHANGED after the court spoke: plant P13 left the finally's handler armed at a return and this case still passed, because its later raise
+    # sat inside a newer try. It now returns 300 times from that finally -- past the VM's 256 handlers, so a handler left armed each time overflows.
+    ('G22', 'E5', 'a return from the finally of an error path leaves its handler: 300 of them leave none armed', [
+        'for i = 1 to 300', T + 'm()', 'next', '? "300 returns from a finally"', 'try', T + 'raise("later")', 'catch e',
+        T + '? "later caught at top: " + e', 'done', 'func m', T + 'try', T * 2 + 'raise("dropped")', T + 'finally', T * 2 + 'return "from finally"',
+        T + 'done'],
+     ['300 returns from a finally', 'later caught at top: later']),
     ('G23', 'E6', 'a plain string refuses a method, as it did', [
         'g()', 'func g', T + 'try', T * 2 + 's = "abc"', T * 2 + '? s.Message()', T + 'catch e', T * 2 + '? e', T + 'done'],
      ['Bad parameter type!']),

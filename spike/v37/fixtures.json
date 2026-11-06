@@ -183,9 +183,9 @@
    "id": "G22",
    "kind": "run",
    "line": "E5",
-   "why": "a return from the finally of an error path leaves its handler: a later raise lands where it is raised",
+   "why": "a return from the finally of an error path leaves its handler: 300 of them leave none armed",
    "file": "cases/G22.haro",
-   "stdout": "from finally\nlater caught at top: later\n"
+   "stdout": "300 returns from a finally\nlater caught at top: later\n"
   },
   {
    "id": "G23",
