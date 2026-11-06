@@ -1838,7 +1838,27 @@ pub const FinRegion = struct {
     /// `try_open` and the open catches OUTSIDE the region: the state its `finally` is compiled in, wherever it is compiled
     try_level: u32,
     catch_len: u32,
+    /// the block whose end the `finally` is, when the lift made it from `within` or `using`
+    site: ?BlockSite = null,
 };
+
+/// A `within` or `using` block (D52 rung 3, A2 and A3): a try the lift made, `try within $g = v ... finally done`, whose empty `finally` this
+/// fills -- the restore of the global, or the release of the value -- wherever that `finally` is compiled.
+pub const BlockSite = struct {
+    using: bool,
+    /// the name the header assigns
+    name: ts.Node,
+    /// `within`: the local holding the value saved, and the global's slot
+    save: u8 = 0,
+    slot: i32 = 0,
+};
+
+const R_GLOBAL = "within needs a global (D52 A2)";
+const R_BARE = "within or using without its block (D52)";
+const R_CLAUSE = "within or using with a catch of its own (D52)";
+const R_CLASS = "using a class that answers none of Release, Destroy, Close (D52 A3)";
+const R_REBIND = "using rebinds its name inside its block (D52 A3)";
+const USING_VERBS = [_][]const u8{ "release", "destroy", "close" };
 
 pub const Compiler = struct {
     alloc: std.mem.Allocator,
@@ -2484,7 +2504,7 @@ pub const Compiler = struct {
         self.try_borrows.shrinkRetainingCapacity(r.try_level);
         self.catch_regs.shrinkRetainingCapacity(r.catch_len);
         self.try_open = r.try_level;
-        try self.body(r.node, 0);
+        try self.finBody(r.node, r.site);
         self.try_open = open;
         try self.fin_regions.appendSlice(a, fins);
         try self.try_borrows.appendSlice(a, bors);
@@ -6865,6 +6885,11 @@ pub const Compiler = struct {
         // assignment it is read as is the one statement compiled
         if (misreadEq(n) != null) return self.misreadStmt(n);
         self.lnStmtStart(n);
+        // a bare word is a block the lift could not close (B04, B05)
+        if (lift.isMarker(n)) {
+            self.atNode(n);
+            return self.nopeKind(lift.blockWord(n).?, R_BARE);
+        }
         const ln_need = self.ln_has_next or self.ln_block_quirk;
         self.ln_has_next = false;
         self.ln_block_quirk = false;
@@ -7782,7 +7807,120 @@ pub const Compiler = struct {
     /// the body or the handler, and a `return`, `exit` or `loop` crossing
     /// it (D52, A1; spike/v36). `catch e` reaches here as `catch(e)`: the
     /// lift makes it so before the parse (lift.zig, D52 rung 2).
+    /// A try the lift made from `within` or `using`, checked before anything of it is emitted: null for any other try. The header is
+    /// on the try's line; a block has no catch and no finally of its own (B06); `within` names a global (W4); `using` of `new K`, a class
+    /// the unit defines, answers one of the three (U3); and its name is not rebound in the block (U4).
+    fn blockSite(self: *Compiler, n: ts.Node) Error!?BlockSite {
+        if (n.namedChildCount() == 0) return null;
+        const m = n.namedChild(0);
+        const w = lift.blockWord(m) orelse return null;
+        if (m.start().row != n.start().row) return null;
+        if (n.namedChildCount() < 2 or !lift.isHeader(m, n.namedChild(1))) return self.nopeKind(w, R_BARE);
+        const a = lift.soleChild(n.namedChild(1)).?;
+        const name = a.namedChild(0);
+        var fin = false;
+        var k: u32 = 2;
+        while (k < n.namedChildCount()) : (k += 1) {
+            const ch = n.namedChild(k);
+            if (std.mem.eql(u8, ch.kind(), "catch_clause")) return self.nopeKind(ch.child(0), R_CLAUSE);
+            if (std.mem.eql(u8, ch.kind(), "finally_clause")) fin = true;
+        }
+        if (!fin) return self.nopeKind(w, R_BARE);
+        const using = std.ascii.eqlIgnoreCase(w.text(), "using");
+        if (!using) {
+            const t = name.text();
+            if (!(((t.len > 1 and t[0] == '$') or self.topGlobal(t)) and self.paramLocal(t) == null))
+                return self.nopeKind(name, R_GLOBAL);
+            return .{ .using = false, .name = name };
+        }
+        const rhs = a.namedChild(1);
+        if (self.eval == null and std.mem.eql(u8, rhs.kind(), "new_expression") and rhs.namedChildCount() > 0) {
+            var cn = rhs.namedChild(0);
+            if (std.mem.eql(u8, cn.kind(), "call_expression")) cn = cn.namedChild(0);
+            if (self.findClass(cn.text())) |ci| {
+                var answers = false;
+                for (USING_VERBS) |v| {
+                    if (self.methodOf(ci.id, v) != null) answers = true;
+                }
+                if (!answers) return self.nopeKind(cn, R_CLASS);
+            }
+        }
+        k = 2;
+        while (k < n.namedChildCount()) : (k += 1) {
+            if (rebinds(n.namedChild(k), name.text())) |at| return self.nopeKind(at, R_REBIND);
+        }
+        return .{ .using = true, .name = name };
+    }
+
+    /// An assignment to `name` anywhere in `n`: the using name rebound (U4).
+    fn rebinds(n: ts.Node, name: []const u8) ?ts.Node {
+        if (std.mem.eql(u8, n.kind(), "assignment_expression") and n.namedChildCount() > 0 and
+            std.mem.eql(u8, n.namedChild(0).kind(), "identifier") and std.ascii.eqlIgnoreCase(n.namedChild(0).text(), name)) return n;
+        var i: u32 = 0;
+        while (i < n.namedChildCount()) : (i += 1) {
+            if (rebinds(n.namedChild(i), name)) |at| return at;
+        }
+        return null;
+    }
+
+    /// A block's `finally`: the restore or the release, then the clause's own statements (a block has none).
+    fn finBody(self: *Compiler, f: ts.Node, site: ?BlockSite) Error!void {
+        if (site) |b| {
+            if (b.using) {
+                try self.usingVerb(b, true);
+            } else _ = try self.emit(.gset, b.save, 0, 0, b.slot);
+        }
+        try self.body(f, 0);
+    }
+
+    /// The value of a using name, tried for Release, Destroy, Close in that order: at the exit the first it answers is called (U1); at the
+    /// entry (`at_exit` false) nothing is called. Answering none -- or not an object -- raises "using: <name> answers none of ..." there (U3),
+    /// the VM's error and not a raise(), so the report names the block's line and no raise() (U08).
+    fn usingVerb(self: *Compiler, b: BlockSite, at_exit: bool) Error!void {
+        const save = self.temp;
+        defer self.temp = save;
+        const v = try self.tmp();
+        try self.expr(b.name, v);
+        const t = try self.tmp();
+        const a0 = try self.tmp();
+        const a1 = try self.tmp();
+        const win = try self.tmp();
+        _ = self.reg(win + 8);
+        _ = try self.emit(.move, a0, v, 1, 0);
+        _ = try self.emit(.bcall, t, a0, 1, @intFromEnum(vm.Builtin.isobject));
+        const not_obj = try self.emit(.jfalsy, t, 0, 0, 0);
+        var done_at: [USING_VERBS.len]u32 = undefined;
+        var nd: usize = 0;
+        var next: ?u32 = null;
+        for (USING_VERBS) |verb| {
+            // an eval may not name what the program never names -- and then no class answers it, dispatch being by name
+            const ni = self.nameIndex(verb) catch |e| {
+                if (self.eval != null) continue;
+                return e;
+            };
+            if (next) |j| self.land(j);
+            _ = try self.emit(.move, a0, v, 1, 0);
+            _ = try self.emit(.loadk, a1, 0, 0, try self.konstIndex(verb));
+            _ = try self.emit(.bcall, t, a0, 2, @intFromEnum(vm.Builtin.ismethod));
+            next = try self.emit(.jfalsy, t, 0, 0, 0);
+            if (at_exit) {
+                _ = try self.emit(.move, win, v, 1, 0);
+                _ = try self.emit(.callm, win, 0, 0, ni);
+            }
+            done_at[nd] = try self.emit(.jmp, 0, 0, 0, 0);
+            nd += 1;
+        }
+        if (next) |j| self.land(j);
+        self.land(not_obj);
+        const msg = std.fmt.allocPrint(self.alloc, "using: {s} answers none of Release, Destroy, Close", .{b.name.text()}) catch
+            return Error.OutOfMemory;
+        _ = try self.emit(.loadk, t, 0, 0, try self.konstIndex(msg));
+        _ = try self.emit(.trap, t, 0, 0, 0);
+        for (done_at[0..nd]) |j| self.land(j);
+    }
+
     fn tryStmt(self: *Compiler, n: ts.Node) Error!void {
+        const site0 = try self.blockSite(n);
         // A FRESH binding per try. `define` returns an existing local of
         // the same name, so naming them all "cCatchError" made nested
         // handlers share one register -- an inner catch then overwrote the
@@ -7817,6 +7955,25 @@ pub const Compiler = struct {
             if (std.mem.eql(u8, ch.kind(), "finally_clause")) fc = ch;
         }
 
+        // A block's header runs before the handler is armed: a value that
+        // raises has changed nothing and leaves nothing to restore or
+        // release (W07). `within` saves the global first, so the value may
+        // read it (W06) and a global with no value is R24 here (W08).
+        var site = site0;
+        if (site) |*b| {
+            if (!b.using) {
+                b.slot = try self.globalSlot(b.name.text());
+                const sn = std.fmt.bufPrint(&buf, "cWithin${d}", .{depth}) catch
+                    return Error.OutOfMemory;
+                const sv = try self.define(self.alloc.dupe(u8, sn) catch return Error.OutOfMemory);
+                try self.expr(b.name, sv.reg);
+                if (self.needsCopyAssign(b.name)) _ = try self.emit(.copyv, sv.reg, 0, 0, 0);
+                self.daWrite(sv.reg);
+                b.save = sv.reg;
+            }
+            try self.stmt(n.namedChild(1));
+            if (b.using) try self.usingVerb(b.*, false);
+        }
         const arm = try self.emit(.ptry, errl.reg, 0, 0, 0);
         // definite assignment (F-89): the handler can be entered from any
         // point of the try body, so it starts from what held BEFORE it
@@ -7828,9 +7985,9 @@ pub const Compiler = struct {
         {
             var list = std.ArrayListUnmanaged(ts.Node){};
             defer list.deinit(self.alloc);
-            var k: u32 = 0;
+            var k: u32 = if (site != null) 2 else 0;
             while (k < i) : (k += 1) list.append(self.alloc, n.namedChild(k)) catch return Error.OutOfMemory;
-            if (fc) |f| try self.fin_regions.append(self.alloc, .{ .node = f, .try_level = self.try_open, .catch_len = @intCast(self.catch_regs.items.len) });
+            if (fc) |f| try self.fin_regions.append(self.alloc, .{ .node = f, .try_level = self.try_open, .catch_len = @intCast(self.catch_regs.items.len), .site = site });
             defer if (fc != null) {
                 _ = self.fin_regions.pop();
             };
@@ -7844,7 +8001,7 @@ pub const Compiler = struct {
         _ = try self.emit(.pend, 0, 0, 0, 0);
 
         // ---- the normal path: finally, then past the handler ----------
-        if (fc) |f| try self.body(f, 0);
+        if (fc) |f| try self.finBody(f, site);
         const da_norm = self.da;
         const over = try self.emit(.jmp, 0, 0, 0, 0);
 
@@ -7877,7 +8034,7 @@ pub const Compiler = struct {
                 const da_h = self.da;
                 var borrowed2: [4]u64 = .{ 0, 0, 0, 0 };
                 {
-                    try self.fin_regions.append(self.alloc, .{ .node = f, .try_level = self.try_open, .catch_len = @intCast(self.catch_regs.items.len) });
+                    try self.fin_regions.append(self.alloc, .{ .node = f, .try_level = self.try_open, .catch_len = @intCast(self.catch_regs.items.len), .site = site });
                     defer _ = self.fin_regions.pop();
                     self.try_open += 1;
                     defer self.try_open -= 1;
@@ -7889,7 +8046,7 @@ pub const Compiler = struct {
                 }
                 _ = try self.emit(.pend, 0, 0, 0, 0);
                 // finally runs after the catch too
-                try self.body(f, 0);
+                try self.finBody(f, site);
                 const da_c = self.da;
                 const over2 = try self.emit(.jmp, 0, 0, 0, 0);
                 // the handler raised: the finally, then the held raise
@@ -7897,7 +8054,7 @@ pub const Compiler = struct {
                 try self.forgetBorrows(borrowed2);
                 self.da = da_h;
                 self.daWrite(held.reg);
-                try self.heldFinally(f, held.reg, depth);
+                try self.heldFinally(f, held.reg, depth, site);
                 self.land(over2);
                 self.da = DaState.meet(da_norm, da_c);
             } else {
@@ -7911,7 +8068,7 @@ pub const Compiler = struct {
             // continue outward. Swallowing it here would turn a `finally`
             // into an accidental `catch`, which is the one thing this
             // construct must never do.
-            try self.heldFinally(f, errl.reg, depth);
+            try self.heldFinally(f, errl.reg, depth, site);
             // the error path ends in the rethrow: only the normal one goes on
             self.da = da_norm;
         } else {
@@ -7928,7 +8085,7 @@ pub const Compiler = struct {
     /// own, whose landing raises on with `trap` d = 1 + the held register.
     /// That handler is an open `try` body like any other, so a jump out of
     /// the `finally` leaves it (v37 G22).
-    fn heldFinally(self: *Compiler, f: ts.Node, held: u8, depth: u32) Error!void {
+    fn heldFinally(self: *Compiler, f: ts.Node, held: u8, depth: u32, site: ?BlockSite) Error!void {
         var buf: [24]u8 = undefined;
         const nm = std.fmt.bufPrint(&buf, "cCatchNext${d}", .{depth}) catch
             return Error.OutOfMemory;
@@ -7941,7 +8098,7 @@ pub const Compiler = struct {
             defer self.try_open -= 1;
             try self.try_borrows.append(self.alloc, .{ 0, 0, 0, 0 });
             defer borrowed = self.try_borrows.pop().?;
-            try self.body(f, 0);
+            try self.finBody(f, site);
         }
         _ = try self.emit(.pend, 0, 0, 0, 0);
         _ = try self.emit(.trap, held, 1, 0, 0);

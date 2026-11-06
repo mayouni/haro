@@ -1,0 +1,11 @@
+f()
+func f
+	try
+		using o = boom()
+			? "body ran"
+		done
+	catch e
+		? "caught " + e
+	done
+func boom
+	raise("no value")

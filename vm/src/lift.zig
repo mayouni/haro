@@ -27,13 +27,20 @@ pub var ns: u64 = 0;
 pub var ns_reparse: u64 = 0;
 /// the `catch e` lifted to `catch(e)` (D52 rung 2)
 pub var catch_sites: u32 = 0;
+/// the `within` and `using` blocks rewritten onto `try ... finally` (D52 rung 3)
+pub var block_sites: u32 = 0;
 /// RNXC_LIFT_TRACE=1: every site, as file:line and the chain it covers, on stderr (set by rnxc.zig)
 pub var trace: bool = false;
 var file_name: []const u8 = "";
 
 pub const Lifted = struct { tree: ts.Tree, src: []const u8 };
 
-const Edit = struct { pos: u32, close: bool };
+/// A parenthesis to put in at `pos`, or, when `text` is given, that text.
+const Edit = struct { pos: u32, close: bool, text: []const u8 = "" };
+
+fn piece(e: Edit) []const u8 {
+    return if (e.text.len > 0) e.text else if (e.close) ")" else "(";
+}
 
 fn eq(a: []const u8, b: []const u8) bool {
     return std.mem.eql(u8, a, b);
@@ -258,11 +265,133 @@ fn findCatch(alloc: std.mem.Allocator, n: ts.Node, out: *std.ArrayListUnmanaged(
     while (i < n.namedChildCount()) : (i += 1) try findCatch(alloc, n.namedChild(i), out);
 }
 
+/// `within` and `using` (D52 rung 3, A2 and A3). `within $g = v ... done` is rewritten, on the same lines, to `try within $g = v ... finally
+/// done`, and `using` alike: a try whose body opens with the word and its header, and whose empty `finally` the compiler fills -- the restore,
+/// the release (compile.zig, `blockSite`). The grammar reads both words as bare names, and reads a `done` as a bare name too, except inside a
+/// try's catch or finally, where it ends that try (v38 B01). So the tree cannot say which `done` closes which block; the tokens can. In
+/// document order every `try` and every block opens, and every `done` -- keyword or bare name -- and every other end of a try closes,
+/// innermost first. A word with no header on its line, or with no `done`, is left as it was, and the compiler refuses it by name (B04, B05).
+pub fn soleChild(n: ts.Node) ?ts.Node {
+    var one: ?ts.Node = null;
+    var i: u32 = 0;
+    while (i < n.namedChildCount()) : (i += 1) {
+        const ch = n.namedChild(i);
+        if (eq(ch.kind(), "comment")) continue;
+        if (one != null) return null;
+        one = ch;
+    }
+    return one;
+}
+
+/// The word of a statement that is a bare `within` or `using`, wherever it stands.
+pub fn blockWord(n: ts.Node) ?ts.Node {
+    if (!eq(n.kind(), "expression_statement")) return null;
+    const id = soleChild(n) orelse return null;
+    if (!eq(id.kind(), "identifier")) return null;
+    return if (std.ascii.eqlIgnoreCase(id.text(), "within") or std.ascii.eqlIgnoreCase(id.text(), "using")) id else null;
+}
+
+/// A statement that is a bare `within` or `using`: the head of a block -- or, left bare, a block the compiler refuses.
+pub fn isMarker(n: ts.Node) bool {
+    return blockWord(n) != null;
+}
+
+/// `name = value` on the marker's line: one `=`, a name on its left -- the header a block needs.
+pub fn isHeader(marker: ts.Node, n: ts.Node) bool {
+    if (!eq(n.kind(), "expression_statement") or n.start().row != marker.start().row) return false;
+    const a = soleChild(n) orelse return false;
+    if (!eq(a.kind(), "assignment_expression") or a.namedChildCount() < 2 or !eq(a.namedChild(0).kind(), "identifier")) return false;
+    var i: u32 = 0;
+    while (i < a.childCount()) : (i += 1) {
+        if (eq(a.child(i).kind(), "=")) return true;
+    }
+    return false;
+}
+
+/// The statement after `n` in document order: its next sibling, or its parent's, and so on up -- the grammar can end a function's body right
+/// after a bare word, and the header then stands one level up (v38 U01).
+fn nextStatement(n: ts.Node) ?ts.Node {
+    var cur = n;
+    while (true) {
+        var s = cur.nextNamedSibling();
+        while (!s.isNull() and eq(s.kind(), "comment")) s = s.nextNamedSibling();
+        if (!s.isNull()) return s;
+        const p = cur.parent();
+        if (p.isNull()) return null;
+        cur = p;
+    }
+}
+
+fn isBareDone(n: ts.Node) bool {
+    if (!eq(n.kind(), "expression_statement")) return false;
+    const id = soleChild(n) orelse return false;
+    return eq(id.kind(), "identifier") and std.ascii.eqlIgnoreCase(id.text(), "done");
+}
+
+const Tok = struct { pos: u32, what: enum { block, try_, close } };
+
+fn blockTokens(alloc: std.mem.Allocator, n: ts.Node, out: *std.ArrayListUnmanaged(Tok)) !void {
+    const cnt = n.childCount();
+    var i: u32 = 0;
+    while (i < cnt) : (i += 1) {
+        const ch = n.child(i);
+        const k = ch.kind();
+        if (ch.isNamed()) {
+            if (isMarker(ch)) {
+                if (nextStatement(ch)) |h| if (isHeader(ch, h)) {
+                    try out.append(alloc, .{ .pos = ch.startByte(), .what = .block });
+                    continue;
+                };
+            }
+            if (isBareDone(ch)) {
+                try out.append(alloc, .{ .pos = ch.startByte(), .what = .close });
+                continue;
+            }
+            try blockTokens(alloc, ch, out);
+        } else if (eq(k, "try")) {
+            try out.append(alloc, .{ .pos = ch.startByte(), .what = .try_ });
+        } else if (eq(k, "done") or ((eq(k, "end") or eq(k, "endtry") or eq(k, "}")) and eq(n.kind(), "try_statement") and i + 1 == cnt)) {
+            try out.append(alloc, .{ .pos = ch.startByte(), .what = .close });
+        }
+    }
+}
+
+fn findBlocks(alloc: std.mem.Allocator, root: ts.Node, out: *std.ArrayListUnmanaged(Edit)) !void {
+    var toks = std.ArrayListUnmanaged(Tok){};
+    defer toks.deinit(alloc);
+    try blockTokens(alloc, root, &toks);
+    var open = std.ArrayListUnmanaged(Tok){};
+    defer open.deinit(alloc);
+    for (toks.items) |t| switch (t.what) {
+        .block, .try_ => try open.append(alloc, t),
+        .close => if (open.pop()) |o| if (o.what == .block) {
+            try out.append(alloc, .{ .pos = o.pos, .close = false, .text = "try " });
+            try out.append(alloc, .{ .pos = t.pos, .close = true, .text = "finally " });
+        },
+    };
+}
+
+/// The blocks pass alone, for `haro fmt`, which prints the blocks back as they were written (fmt.zig, `sTry`).
+pub fn blocks(alloc: std.mem.Allocator, parser: ts.Parser, tree: ts.Tree, src: []const u8) Lifted {
+    if (std.ascii.indexOfIgnoreCase(src, "within") == null and std.ascii.indexOfIgnoreCase(src, "using") == null)
+        return .{ .tree = tree, .src = src };
+    var edits = std.ArrayListUnmanaged(Edit){};
+    defer edits.deinit(alloc);
+    findBlocks(alloc, tree.root(), &edits) catch return .{ .tree = tree, .src = src };
+    if (edits.items.len == 0) return .{ .tree = tree, .src = src };
+    const r = splice(alloc, parser, tree, src, edits.items) orelse return .{ .tree = tree, .src = src };
+    tree.deinit();
+    block_sites += @intCast(edits.items.len / 2);
+    return r;
+}
+
 /// The text with each edit's parenthesis put in, parsed again. Null when it does not parse, or when a file that parsed no longer does:
 /// a rewrite that breaks a file is no fix, so the grammar's reading is kept and nothing worse than before is said.
 fn splice(alloc: std.mem.Allocator, parser: ts.Parser, tree: ts.Tree, src: []const u8, edits: []Edit) ?Lifted {
     std.mem.sort(Edit, edits, {}, order);
-    const text = alloc.alloc(u8, src.len + edits.len) catch return null;
+    var extra: usize = 0;
+    for (edits) |e| extra += piece(e).len;
+    const text = alloc.alloc(u8, src.len + extra) catch return null;
     var w: usize = 0;
     var r: usize = 0;
     for (edits) |e| {
@@ -270,8 +399,9 @@ fn splice(alloc: std.mem.Allocator, parser: ts.Parser, tree: ts.Tree, src: []con
         @memcpy(text[w .. w + n], src[r .. r + n]);
         w += n;
         r += n;
-        text[w] = if (e.close) ')' else '(';
-        w += 1;
+        const pc = piece(e);
+        @memcpy(text[w .. w + pc.len], pc);
+        w += pc.len;
     }
     @memcpy(text[w .. w + (src.len - r)], src[r..]);
     var tr = std.time.Timer.start() catch return null;
@@ -288,8 +418,9 @@ pub fn apply(alloc: std.mem.Allocator, parser: ts.Parser, tree_in: ts.Tree, src_
     file_name = name;
     var t0 = std.time.Timer.start() catch return .{ .tree = tree_in, .src = src_in };
     defer ns += t0.read();
-    var tree = tree_in;
-    var src = src_in;
+    const bl = blocks(alloc, parser, tree_in, src_in);
+    var tree = bl.tree;
+    var src = bl.src;
     if (std.ascii.indexOfIgnoreCase(src, "catch") != null) {
         var edits = std.ArrayListUnmanaged(Edit){};
         defer edits.deinit(alloc);

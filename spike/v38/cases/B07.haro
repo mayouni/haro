@@ -1,0 +1,8 @@
+? "before"
+f()
+func f
+	try
+		within $g = 1
+		? "x"
+	catch
+	done

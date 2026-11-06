@@ -21,6 +21,7 @@
 //! no node for -- both are named, never papered over. `fmt` prints the whole file or nothing.
 const std = @import("std");
 const ts = @import("ts.zig");
+const lift = @import("lift.zig");
 
 const Alloc = std.mem.Allocator;
 pub const Err = error{ Shape, Unsupported, Unprintable, TooDeep } || Alloc.Error;
@@ -1188,6 +1189,19 @@ const Abs = struct {
     fn sTry(self: *Abs, n: *CN) Err!*G {
         const g = try self.mk(.try_);
         const sp = try self.sections(tail(n.kids, 1), &.{ "catch_clause", "finally_clause" });
+        // `within` or `using` (D52 rung 3): the lift made this try from a block, its word and header on the try's line and its finally
+        // empty. It is printed as the block it was: printed as a try, or as the flat statements the grammar reads, it would be another
+        // program (v38 K01).
+        if (sp.head.len >= 2 and eq(sp.head[0].kind, "expression_statement") and sp.head[0].kids.len == 1 and
+            eq(sp.head[0].kids[0].kind, "identifier") and self.line(sp.head[0].start) == self.line(n.start) and
+            (lowerIs(sp.head[0].kids[0].text, "within") or lowerIs(sp.head[0].kids[0].text, "using")) and
+            eq(sp.head[1].kind, "expression_statement") and self.line(sp.head[1].start) == self.line(n.start))
+        {
+            g.op = if (lowerIs(sp.head[0].kids[0].text, "within")) "within" else "using";
+            g.e = (try self.sExpression(sp.head[1])).e;
+            g.items = try self.body(sp.head[2..]);
+            return g;
+        }
         for (sp.clauses) |cl| {
             if (eq(cl.k.kind, "catch_clause")) {
                 const cg = try self.mk(.catch_);
@@ -1822,6 +1836,16 @@ const Printer = struct {
                 try self.w("off");
             },
             .try_ => {
+                if (it.op) |word| {
+                    try self.line(d);
+                    try self.w(word);
+                    try self.w(" ");
+                    try self.e(try req(it.e), d);
+                    try self.body(sl(it.items), d);
+                    try self.line(d);
+                    try self.w("done");
+                    return;
+                }
                 try self.line(d);
                 try self.w("try");
                 try self.body(sl(it.items), d);
@@ -1882,18 +1906,21 @@ const Printer = struct {
 /// formatter, it is a file that is not Ring yet.
 pub fn format(a: Alloc, parser: ts.Parser, src: []const u8) Err!?[]const u8 {
     why = "";
-    const tree = parser.parse(src) orelse {
+    const tree0 = parser.parse(src) orelse {
         why = "the parser gave nothing";
         return null;
     };
-    defer tree.deinit();
-    const root = tree.root();
-    if (root.hasError()) {
+    if (tree0.root().hasError()) {
+        tree0.deinit();
         why = "the parser reports an error in the file";
         return null;
     }
+    // `within` and `using` are read as the lift reads them (D52 rung 3), and sTry prints them back
+    const lb = lift.blocks(a, parser, tree0, src);
+    defer lb.tree.deinit();
+    const root = lb.tree.root();
     const cn = try buildTree(a, root, 0);
-    var ab = try Abs.init(a, parser, src);
+    var ab = try Abs.init(a, parser, lb.src);
     const g = try ab.file(cn);
     var p = Printer{ .a = a };
     try p.items(sl(g.items), 0);

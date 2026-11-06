@@ -58,7 +58,9 @@ def refused(cid, line, why, text, at, called):
 
 R_GLOBAL = 'within needs a global (D52 A2)'
 R_BARE = 'within or using without its block (D52)'
-R_CLAUSE = 'within or using with a catch or finally of its own (D52)'
+# CHANGED after the court spoke: it read "with a catch or finally of its own" until a finally of the block's own -- which only a hand-written
+# `try within` can have -- was let run after the restore instead of refused; B06's bytes changed with it.
+R_CLAUSE = 'within or using with a catch of its own (D52)'
 R_CLASS = 'using a class that answers none of Release, Destroy, Close (D52 A3)'
 R_REBIND = 'using rebinds its name inside its block (D52 A3)'
 
@@ -172,6 +174,28 @@ CASES = [
     ('B06', 'B2', 'a block with a catch of its own is refused', [
         '? "before"', 'f()', 'func f', T + 'within $g = 1', T * 2 + '? "body"', T + 'catch', T * 2 + '? "c"', T + 'done'],
      refused('B06', 4, R_CLAUSE, 'catch', 6, 2), 1),
+
+    # WRITTEN AFTER THE CODE, each found by designing a plant that no case above could catch: a using whose value raises has nothing to release
+    # (the header is compiled before the handler is armed); both blocks in an eval string (the release failed there: an eval may not name a
+    # verb the program never names); a try closed by `end` inside a block (the other ends of a try close too); a header on the line after its
+    # word, and a bare word as a try's first statement (each refused as a block without its parts, and not as a try's own catch).
+    ('U11', 'U3', 'a using whose value raises releases nothing: the raise is the one caught', [
+        'f()', 'func f', T + 'try', T * 2 + 'using o = boom()', T * 3 + '? "body ran"', T * 2 + 'done', T + 'catch e', T * 2 + '? "caught " + e',
+        T + 'done', 'func boom', T + 'raise("no value")'],
+     ['caught no value']),
+    ('U12', 'U1', 'both blocks inside an eval string: the release runs, though the program never names Destroy or Close', [
+        'f()', 'func f', T + 'eval("using o = new Res(" + char(34) + "e" + char(34) + ")" + nl + "? " + char(34) + "in eval " + char(34) + " + o.cName" + nl + "done")',
+        T + '$g = "a"', T + 'eval("within $g = " + char(34) + "b" + char(34) + nl + "? $g" + nl + "done")', T + '? $g'] + RES,
+     ['in eval e', 'release e', 'b', 'a']),
+    ('B07', 'B2', 'a bare word as the first statement of a try, its block unclosed, is refused as a block without its parts', [
+        '? "before"', 'f()', 'func f', T + 'try', T * 2 + 'within $g = 1', T * 2 + '? "x"', T + 'catch', T + 'done'],
+     refused('B07', 5, R_BARE, 'within', 5, 2), 1),
+    ('B08', 'B2', 'a header on the line after its word is no header', [
+        '? "before"', 'f()', 'func f', T + 'within', T * 2 + '$g = 1', T * 2 + '? "body"', T + 'done'],
+     refused('B08', 4, R_BARE, 'within', 4, 2), 1),
+    ('B10', 'B1', 'a try closed by `end` inside a block', [
+        '$g = "a"', 'within $g = "b"', T + 'try', T * 2 + 'raise("x")', T + 'catch', T * 2 + '? "caught in " + $g', T + 'end', 'done', '? $g'],
+     ['caught in b', 'a']),
 ]
 
 FMT = [

@@ -1,0 +1,9 @@
+$g = "a"
+within $g = "b"
+	try
+		raise("x")
+	catch
+		? "caught in " + $g
+	end
+done
+? $g

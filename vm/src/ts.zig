@@ -111,6 +111,10 @@ pub const Node = struct {
     pub fn prevNamedSibling(self: Node) Node {
         return .{ .raw = c.ts_node_prev_named_sibling(self.raw), .src = self.src };
     }
+
+    pub fn nextNamedSibling(self: Node) Node {
+        return .{ .raw = c.ts_node_next_named_sibling(self.raw), .src = self.src };
+    }
 };
 
 pub const Tree = struct {

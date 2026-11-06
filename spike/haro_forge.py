@@ -3545,6 +3545,24 @@ def stage42():
         return 1
     return 0
 
+BLOCK_COURT = os.path.join(HERE, 'v38', 'block_court.py')
+def stage43():
+    """Haro v0.38, D52 rung (3): `within $global = value ... done` and `using name = value ... done`, rewritten by the lift onto `try ... finally`
+    on the same lines; the compiler saves and restores the global, or calls the first of Release, Destroy, Close the value answers, on every exit,
+    and refuses by name a local `within`, a `new K` answering none of the three, a rebound using name and a block without its parts; `haro fmt`
+    prints both. v38/block_court.py runs the 28 cases of v38/fixtures.json on haro and its checked build: each must print exactly its bytes and
+    exit as it says, and the two builds the same bytes."""
+    print('stage 43 -- within and using: v38/block_court.py on haro and its checked build')
+    p = subprocess.run([sys.executable, BLOCK_COURT] + (['--plant'] if PLANT else []), capture_output=True, cwd=HERE, timeout=600)
+    out = p.stdout.decode('utf-8', 'replace').replace(chr(13) + chr(10), chr(10))
+    for line in out.splitlines():
+        if line.startswith('  FAIL') or line.startswith('       ') or line.startswith('BLOCK COURT'):
+            print(line)
+    if p.returncode != 0:
+        print(f'  FAIL the block court exited {p.returncode}' + ('' if out.strip() else ': ' + p.stderr.decode('utf-8', 'replace')[-400:]))
+        return 1
+    return 0
+
 SENTENCE_TARGET = 50.0     # D42: a sentence edited, its court's image reused -- what a person editing a sentence waits for
 COLD_CEILING = 150.0       # D42: the court compiled from scratch -- a ceiling that catches the court library growing
 
@@ -3724,5 +3742,7 @@ if __name__ == '__main__':
         failures += stage41()
     if stage in (None, 42) and os.path.exists(ERROR_COURT):
         failures += stage42()
+    if stage in (None, 43) and os.path.exists(BLOCK_COURT):
+        failures += stage43()
     print(f'haro_forge: {"FAIL" if failures else "PASS"} ({failures} failure(s), {time.perf_counter()-t0:.1f} s)')
     sys.exit(1 if failures else 0)

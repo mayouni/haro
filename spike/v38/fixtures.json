@@ -237,8 +237,50 @@
    "line": "B2",
    "why": "a block with a catch of its own is refused",
    "file": "cases/B06.haro",
-   "stdout": "before\n\nLine 4 Haro refused this statement (within or using with a catch or finally of its own (D52) `catch`, line 6 of B06.haro) and did not compile it -- running past it would give a wrong answer \nIn function f() in file B06.haro\n\nCalled from line 2 in file B06.haro ",
+   "stdout": "before\n\nLine 4 Haro refused this statement (within or using with a catch of its own (D52) `catch`, line 6 of B06.haro) and did not compile it -- running past it would give a wrong answer \nIn function f() in file B06.haro\n\nCalled from line 2 in file B06.haro ",
    "exit": 1
+  },
+  {
+   "id": "U11",
+   "kind": "run",
+   "line": "U3",
+   "why": "a using whose value raises releases nothing: the raise is the one caught",
+   "file": "cases/U11.haro",
+   "stdout": "caught no value\n"
+  },
+  {
+   "id": "U12",
+   "kind": "run",
+   "line": "U1",
+   "why": "both blocks inside an eval string: the release runs, though the program never names Destroy or Close",
+   "file": "cases/U12.haro",
+   "stdout": "in eval e\nrelease e\nb\na\n"
+  },
+  {
+   "id": "B07",
+   "kind": "run",
+   "line": "B2",
+   "why": "a bare word as the first statement of a try, its block unclosed, is refused as a block without its parts",
+   "file": "cases/B07.haro",
+   "stdout": "before\n\nLine 5 Haro refused this statement (within or using without its block (D52) `within`, line 5 of B07.haro) and did not compile it -- running past it would give a wrong answer \nIn function f() in file B07.haro\n\nCalled from line 2 in file B07.haro ",
+   "exit": 1
+  },
+  {
+   "id": "B08",
+   "kind": "run",
+   "line": "B2",
+   "why": "a header on the line after its word is no header",
+   "file": "cases/B08.haro",
+   "stdout": "before\n\nLine 4 Haro refused this statement (within or using without its block (D52) `within`, line 4 of B08.haro) and did not compile it -- running past it would give a wrong answer \nIn function f() in file B08.haro\n\nCalled from line 2 in file B08.haro ",
+   "exit": 1
+  },
+  {
+   "id": "B10",
+   "kind": "run",
+   "line": "B1",
+   "why": "a try closed by `end` inside a block",
+   "file": "cases/B10.haro",
+   "stdout": "caught in b\na\n"
   },
   {
    "id": "K01",
