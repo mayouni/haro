@@ -1421,6 +1421,14 @@ states principle 14.
   a list with :file and :line. *Corrected*: "`catch cError` in 4 recovered plugin files" above was 10 sites in 4 files, and 3 of them are in stzlib's CORE
   (`core/system/stkPointer.ring`), which `max/stzMax.ring` loads -- each handler raised R24 on its own first line, so two fallbacks never ran; under haro they
   now run as written, under Ring++ they still raise (HF-143).
+  **Rung (3) built 2026-11-06, Haro v0.38** (the author: "Rung 3: within, using"): the lift rewrites `within $g = v ... done` and `using name = v ... done`,
+  on their own lines, to a `try` whose `finally` the compiler fills wherever rung (1) compiles it -- the global saved before the value and written back,
+  or the first of Release, Destroy, Close the value answers called -- and the compiler refuses by name a `within` of a name without `$` (Rule A makes
+  every global one), `new K` of a class of the unit answering none of the three, a using name rebound in its block, a block without its `done` or its
+  `= value`, and a block with a catch. A value answering none is raised at the entry, before the body. 33 cases on both builds (stage 43), 25 of 25
+  plants. *The desk's readings, recorded as its own*: the value is computed after the save, so it may read the global; a global with no value is R24
+  at the `within` line; the using name cannot be rebound in its block (rebound, its end would release the new value and leak the old); only `new K` is
+  judged at compile time, a literal at the entry like any other value; the refusal at the entry is the VM's error, not a raise() (HF-145).
 - **D23 -- `rnxc fmt` is a Ring++ feature, not held for Haro** (CODEGRAPH Q4, ruled on the author's delegation, 2026-10-05: "take
   whatever decision you think is wiser on my behalf"). It is a verb of the one binary (commitment 5), depends on nothing of Haro's, is
   judged against the oracle and refuses what Ring refuses (58 of 6,061 Softanza files, 57 of them Ring's own refusals). It ships inside

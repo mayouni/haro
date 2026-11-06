@@ -1779,6 +1779,22 @@ compile read 156.6 ms once; alternating A/B it is 146.9 ms before the rung and 1
 3 `catch cError` in its core that now bind -- fallbacks that never ran now run under haro (HF-143). **Not done, named**: an error crossing an eval string arrives as its
 message; `catch e` inside an eval string is not lifted; an uncaught rethrow's report line is where it was raised again.
 
+## The thirty-eighth rung -- Haro v0.38, `within` and `using`, onto `finally` -- 2026-11-06
+
+**D52's rung (3)**, on the author's "Rung 3: within, using". A2 and A3: an ambient global with an end, and a lifetime for what has no destructor.
+`within $g = v ... done` and `using name = v ... done` are rewritten by the lift, on their own lines, to a `try` whose empty `finally` the compiler
+fills -- the restore, or the first of Release, Destroy, Close -- wherever rung (1) compiles it, so every exit is covered by what v0.36 built. The
+lift, the compiler and the printer change; no VM instruction is new.
+
+    v38/fixtures.json, cases/           33 cases (28 written first, 4e9b2af: 1 held on haro before); U11, U12, B07, B08, B10 after the code, B06's words changed after it, each said so
+    v38/block_court.py                  each case on haro and its checked build: exactly its bytes and exit, the two builds equal (stage 43); `fmt` cases run `haro fmt`
+    v38/plants.py                       25 protections across compile.zig, lift.zig and fmt.zig switched off in turn, each a rebuilt VM
+    v38/GRAMMAR.md                      what a program sees, how it is built, the refusals, the desk's readings, what is not covered
+
+**Results.** 33 of 33 on both builds, byte-identical; v36's 24 and v37's 31 still pass; 25 of 25 plants caught, after four conditions nothing depended on were
+removed. **The 43-stage guard passes whole** (1,182 s, before the rebase onto v0.29; after it stage 1, the one v0.29 grew, and stages 41-43 pass again), stage 6 included: the cold compile's minimum is 127.5 ms against its 150 ms ceiling, back under it on a quieter machine (v0.37 read 145-157 ms). stzlib has no statement-form `within` or `using`, and its census is the same line for line (HF-145). **Not done, named**: a global a callee
+rebinds inside `using` is raised at the exit and the first value is not released; a class that gains Release by `addmethod` is judged as compiled.
+
 ## The names -- `.haro`, not `.stzu` -- corrected 2026-10-02
 
 **At the author's word ("we agreed to use .haro instead of .stzu, no?").** D1 was ratified
@@ -1950,3 +1966,5 @@ whole guard re-run on the renamed tree: 28 + 30 + 27 + 23, 117 of 120, 32 of 32,
    (NEEDS on a LANGUAGE, OPENS on a kind); the Zui-to-Zane rename of this repository; stzlib removing its use of Ring's standard library, by its own prompt.
 33. ~~D52 rung (2), the error value~~ -- built 2026-11-06 as Haro v0.37, the thirty-seventh rung above. Next: D52 rung (3), `within` and `using`, rewritten onto
    `finally`; then rung (4), the five checker rules, `haro/last-error-read` first; the declared half of D51; the Zui-to-Zane rename of this repository.
+34. ~~D52 rung (3), `within` and `using`~~ -- built 2026-11-06 as Haro v0.38, the thirty-eighth rung above. Next: D52 rung (4), the five checker rules,
+   `haro/last-error-read` first; the declared half of D51; the Zui-to-Zane rename of this repository.
