@@ -1,0 +1,12 @@
+? "before"
+f()
+func f
+	using o = new Res("a")
+		o = new Res("b")
+	done
+class Res
+	cName = ""
+	func init n
+		cName = n
+	func release
+		? "release " + cName

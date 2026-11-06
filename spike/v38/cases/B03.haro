@@ -1,0 +1,12 @@
+f()
+func f
+	within = "a word"
+	using = 2
+	? within + " " + using
+	o = new App
+	? o.Within
+	Using(5)
+func Using n
+	? "Using called with " + n
+class App
+	Within = "attribute"

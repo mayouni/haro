@@ -1,0 +1,214 @@
+"""Haro v0.38, D52 rung (3): A2 `within` and A3 `using`, rewritten onto rung (1)'s `finally`. Written FIRST, before the lift, the compiler or the
+printer is touched.
+
+What D52 decided (CHARTER.md D52): `within $global = value ... done` -- a global only, a local needs no restore -- compiles to a save, the body, and a
+`finally` that restores (A2, unamended). `using name = expression ... done` calls the first of `Release`, `Destroy`, `Close` the value answers to, on
+every exit (A3); a value that answers none is refused at compile time WHERE ITS CLASS IS KNOWN THERE (`new K`), and otherwise at the block's ENTRY,
+before the body runs -- never a silent no-op (A3, amended for a dynamic surface). The vendored parser is not regenerated: both are rewritten before the
+parse onto forms it already reads, as `not` and `catch e` are.
+
+The lines this rung pins, each by the cases that name it:
+
+  W1  inside `within`, the global holds the value -- in the body and in everything the body calls -- and after the block it holds what it held before
+  W2  the global is restored on EVERY exit: a raise, a return, an exit or a loop crossing the block, a raise in a function it calls; a write the body
+      or a callee makes to the global is undone
+  W3  the old value is saved FIRST, then the value is computed (it may read the global), then the body runs; if the value raises, the global is
+      unchanged and the body never runs; a global with no value yet cannot be saved (R24 at the `within` line)
+  W4  `within` names a global (`$name`); a local or a parameter is refused at compile time
+  U1  inside `using`, the name holds the value; at the end the first of Release, Destroy, Close the value answers to is called, once -- in any
+      case of the name, and an inherited method counts
+  U2  it is called on EVERY exit: a raise, a return, an exit, a loop; a raise in it replaces a held raise, which becomes its cause (A1)
+  U3  `new K` of a class the unit defines, answering none of the three, is refused at compile time; any other value answering none -- an object or
+      not an object -- is raised at the block's entry, before the body, and can be caught; a value rebound by a callee is raised at the exit
+  U4  the name of a `using` cannot be rebound inside its block: refused at compile time
+  B1  the blocks nest with `try` in every shape the grammar mis-reads (inside a try body, inside a catch clause, around a try) and with each other,
+      and every line keeps its number
+  B2  only the statement form is a block: `within` or `using` assigned, called or read as a name is what it was; a block with no `done`, no
+      `= value` on its line, or a `catch` of its own is refused at compile time
+  B3  `haro fmt` prints both blocks, the header on one line and the body a level in: before this rung it printed them as flat statements, which
+      would now change what the program means
+
+Measured on haro 00e0794 before this rung (runtime/v38): `within $g = 2` reads `within` as a variable and raises R24 ("Using uninitialized
+variable: within") at its line; the census compiles all six statements of that program and refuses none; the parser reads `within`, `using` and a
+`done` outside a try's clauses as bare identifiers, and reads a `done` INSIDE a try's catch clause as that try's end.
+
+The desk's readings, written here before the code so the cases can hold them: the value is computed after the save, so it may read the global
+(W3); a global with no value cannot be saved and is R24, as reading it is (A2: an ambient value "must exist"); the using name cannot be rebound in
+its block -- a rebound name would release the new value and leak the old, so it is refused, not followed (U4); a literal (`using n = 42`) is
+judged at entry like any value whose class the compiler does not know (U3); the refusal at entry is the VM's error, not a raise(), so its report
+names no raise().
+
+  python spike/v38/gen_fixtures.py      writes v38/cases/*.haro and v38/fixtures.json
+"""
+import json, os
+
+HERE = os.path.dirname(os.path.abspath(__file__))
+T = '\t'
+
+RES = ['class Res', T + 'cName = ""', T + 'func init n', T * 2 + 'cName = n', T + 'func release', T * 2 + '? "release " + cName']
+PLAIN = ['class Plain', T + 'x = 1']
+REFUSED = 'and did not compile it -- running past it would give a wrong answer '
+
+
+def refused(cid, line, why, text, at, called):
+    """the report of a refused statement in f(), called from line `called`; the trap is at the statement's line `line`, the refusal at `at`"""
+    return ['before', '', f'Line {line} Haro refused this statement ({why} `{text}`, line {at} of {cid}.haro) ' + REFUSED,
+            f'In function f() in file {cid}.haro', '', f'Called from line {called} in file {cid}.haro ']
+
+
+R_GLOBAL = 'within needs a global (D52 A2)'
+R_BARE = 'within or using without its block (D52)'
+R_CLAUSE = 'within or using with a catch or finally of its own (D52)'
+R_CLASS = 'using a class that answers none of Release, Destroy, Close (D52 A3)'
+R_REBIND = 'using rebinds its name inside its block (D52 A3)'
+
+CASES = [
+    ('W01', 'W1', 'the global holds the value in the body and in what the body calls; after the block, what it held before', [
+        '$cCaller = "nobody"', 'within $cCaller = "agent-x"', T + '? "in: " + $cCaller', T + 'who()', 'done', '? "after: " + $cCaller',
+        'func who', T + '? "who: " + $cCaller'],
+     ['in: agent-x', 'who: agent-x', 'after: nobody']),
+    ('W02', 'W2', 'a raise out of the block restores the global before the handler runs', [
+        '$g = 1', 'try', T + 'within $g = 2', T * 2 + '? $g', T * 2 + 'raise("boom")', T + 'done', 'catch e', T + '? "caught " + e + ", g=" + $g',
+        'done'],
+     ['2', 'caught boom, g=1']),
+    ('W03', 'W2', 'a return out of the block restores the global; the value returned was computed inside it', [
+        '$g = "a"', '? f()', '? $g', 'func f', T + 'within $g = "b"', T * 2 + 'return "returned " + $g', T + 'done'],
+     ['returned b', 'a']),
+    ('W04', 'W2', 'a loop and an exit crossing the block restore the global', [
+        '$g = 0', 'for i = 1 to 3', T + '? "top g=" + $g', T + 'within $g = i * 10', T * 2 + 'if i = 1 loop ok', T * 2 + '? "i=" + i + " g=" + $g',
+        T * 2 + 'if i = 2 exit ok', T + 'done', 'next', '? "g=" + $g'],
+     ['top g=0', 'top g=0', 'i=2 g=20', 'g=0']),
+    ('W05', 'W2', 'a write by the body and by a callee is undone; a callee\'s raise restores too', [
+        '$g = "start"', 'try', T + 'within $g = "mid"', T * 2 + '$g = "changed in body"', T * 2 + 'setG()', T + 'done', 'catch e', T + '? e', 'done',
+        '? $g', 'func setG', T + '$g = "changed by callee"', T + 'raise("from callee " + $g)'],
+     ['from callee changed by callee', 'start']),
+    ('W06', 'W3', 'the value may read the global: a depth that counts its own recursion and ends where it began', [
+        '$depth = 0', 'nest(3)', '? "depth after: " + $depth', 'func nest n', T + 'within $depth = $depth + 1', T * 2 + '? "depth " + $depth',
+        T * 2 + 'if n > 1 nest(n - 1) ok', T + 'done'],
+     ['depth 1', 'depth 2', 'depth 3', 'depth after: 0']),
+    ('W07', 'W3', 'a value that raises leaves the global unchanged and the body unrun', [
+        '$g = "kept"', 'try', T + 'within $g = boom()', T * 2 + '? "body ran"', T + 'done', 'catch e', T + '? "caught " + e', 'done', '? $g',
+        'func boom', T + 'raise("no value")'],
+     ['caught no value', 'kept']),
+    ('W08', 'W3', 'a global with no value yet cannot be saved: R24 at the within line, the body unrun', [
+        '? "before"', 'f()', 'func f', T + 'within $never = 1', T * 2 + '? "body ran"', T + 'done'],
+     ['before', '', 'Line 4 Error (R24) : Using uninitialized variable: $never ', 'In function f() in file W08.haro', '',
+      'Called from line 2 in file W08.haro '], 1),
+    ('W09', 'W4', 'a local is refused: it needs no restore', [
+        '? "before"', 'f()', 'func f', T + 'x = 1', T + 'within x = 2', T * 2 + '? x', T + 'done'],
+     refused('W09', 5, R_GLOBAL, 'x', 5, 2), 1),
+    ('W10', 'W4', 'a parameter is refused', [
+        '? "before"', 'f(1)', 'func f p', T + 'within p = 2', T * 2 + '? p', T + 'done'],
+     refused('W10', 4, R_GLOBAL, 'p', 4, 2), 1),
+    ('W11', 'W2', 'a list global grown in place inside the block is the old list after it', [
+        '$aL = [1, 2]', 'within $aL = $aL', T + 'add($aL, 3)', T + '? len($aL)', 'done', '? len($aL)'],
+     ['3', '2']),
+
+    ('U01', 'U1', 'the name holds the value in the body; Release at the end, once', [
+        'f()', 'func f', T + 'using o = new Res("a")', T * 2 + '? "in: " + o.cName', T + 'done', T + '? "after"'] + RES,
+     ['in: a', 'release a', 'after']),
+    ('U02', 'U1', 'the first of Release, Destroy, Close the value answers to, in any case, an inherited one counting', [
+        'f()', 'func f', T + 'using a = new OnlyClose', T * 2 + '? "body a"', T + 'done', T + 'using b = new DestroyAndClose', T * 2 + '? "body b"',
+        T + 'done', T + 'using c = new Child', T * 2 + '? "body c"', T + 'done', T + 'using d = new All', T * 2 + '? "body d"', T + 'done',
+        'class OnlyClose', T + 'func close', T * 2 + '? "close"',
+        'class DestroyAndClose', T + 'func Close', T * 2 + '? "close (wrong)"', T + 'func DESTROY', T * 2 + '? "destroy"',
+        'class Base', T + 'func release', T * 2 + '? "release (inherited)"',
+        'class Child from Base', T + 'func close', T * 2 + '? "close (wrong)"',
+        'class All', T + 'func close', T * 2 + '? "close (wrong)"', T + 'func destroy', T * 2 + '? "destroy (wrong)"', T + 'func Release',
+        T * 2 + '? "release"'],
+     ['body a', 'close', 'body b', 'destroy', 'body c', 'release (inherited)', 'body d', 'release']),
+    ('U03', 'U2', 'a raise out of the block releases before the handler runs', [
+        'f()', 'func f', T + 'try', T * 2 + 'using o = new Res("r")', T * 3 + 'raise("boom")', T * 2 + 'done', T + 'catch e',
+        T * 2 + '? "caught " + e', T + 'done'] + RES,
+     ['release r', 'caught boom']),
+    ('U04', 'U2', 'a return, a loop and an exit release, once each', [
+        '? g()', 'h()', '? "end"', 'func g', T + 'using o = new Res("g")', T * 2 + 'return "returned " + o.cName', T + 'done', 'func h',
+        T + 'for i = 1 to 3', T * 2 + 'using o = new Res("i" + i)', T * 3 + 'if i = 1 loop ok', T * 3 + 'if i = 3 exit ok', T * 3 + '? "body " + i',
+        T * 2 + 'done', T + 'next'] + RES,
+     ['release g', 'returned g', 'release i1', 'body 2', 'release i2', 'release i3', 'end']),
+    ('U05', 'U2', 'a raise in the release replaces the held raise, which is its cause', [
+        'f()', 'func f', T + 'try', T * 2 + 'using o = new Bad', T * 3 + 'raise("in body")', T * 2 + 'done', T + 'catch e',
+        T * 2 + '? "caught " + e', T * 2 + '? "cause " + e.Cause()', T + 'done', 'class Bad', T + 'func release', T * 2 + 'raise("in release")'],
+     ['caught in release', 'cause in body']),
+    ('U06', 'U3', '`new K` of a class the unit defines with none of the three is refused at compile time', [
+        '? "before"', 'f()', 'func f', T + 'using o = new Plain', T * 2 + '? "body"', T + 'done'] + PLAIN,
+     refused('U06', 4, R_CLASS, 'Plain', 4, 2), 1),
+    ('U07', 'U3', 'any other value with none -- an object, a number -- is raised at entry, before the body, and caught', [
+        'f()', 'func f', T + 'try', T * 2 + 'using o = make()', T * 3 + '? "body ran"', T * 2 + 'done', T + 'catch e', T * 2 + '? "caught: " + e',
+        T * 2 + '? "line " + e.Span()[:line] + ", code [" + e.Code() + "]"', T + 'done', T + 'try', T * 2 + 'using n = 42', T * 3 + '? "body ran"',
+        T * 2 + 'done', T + 'catch e', T * 2 + '? "caught: " + e', T + 'done', 'func make', T + 'return new Plain'] + PLAIN,
+     ['caught: using: o answers none of Release, Destroy, Close', 'line 4, code []', 'caught: using: n answers none of Release, Destroy, Close']),
+    ('U08', 'U3', 'uncaught, the refusal at entry is reported at the using line, and names no raise()', [
+        '? "before"', 'f()', 'func f', T + 'using o = make()', T * 2 + '? "body"', T + 'done', 'func make', T + 'return new Plain'] + PLAIN,
+     ['before', '', 'Line 4 using: o answers none of Release, Destroy, Close ', 'In function f() in file U08.haro', '',
+      'Called from line 2 in file U08.haro '], 1),
+    ('U09', 'U4', 'the name rebound in the block is refused at compile time', [
+        '? "before"', 'f()', 'func f', T + 'using o = new Res("a")', T * 2 + 'o = new Res("b")', T + 'done'] + RES,
+     refused('U09', 4, R_REBIND, 'o = new Res("b")', 5, 2), 1),
+    ('U10', 'U3', 'a global using name a callee rebinds to a value with none is raised at the exit', [
+        'f()', 'func f', T + 'try', T * 2 + 'using $r = new Res("a")', T * 3 + 'swap()', T * 2 + 'done', T + 'catch e', T * 2 + '? "caught: " + e',
+        T + 'done', 'func swap', T + '$r = 5'] + RES,
+     ['caught: using: $r answers none of Release, Destroy, Close']),
+
+    ('B01', 'B1', 'within inside a try body, inside a catch clause, inside itself; a try inside within', [
+        '$g = 0', 'try', T + 'within $g = 1', T * 2 + 'within $g = 2', T * 3 + '? "inner " + $g', T * 2 + 'done', T * 2 + '? "outer " + $g', T + 'done',
+        T + 'raise("go")', 'catch', T + 'within $g = 3', T * 2 + 'try', T * 3 + '? "in catch " + $g', T * 3 + 'raise("again")', T * 2 + 'catch',
+        T * 3 + '? "nested catch " + $g', T * 2 + 'done', T + 'done', T + '? "after catch block " + $g', 'done', '? "end " + $g'],
+     ['inner 2', 'outer 1', 'in catch 3', 'nested catch 3', 'after catch block 0', 'end 0']),
+    ('B02', 'B1', 'using inside within, a try inside both; a raise keeps its own line', [
+        '$g = "a"', 'f()', 'func f', T + 'within $g = "b"', T * 2 + 'using o = new Res("r")', T * 3 + 'try', T * 4 + 'raise("x")', T * 3 + 'catch e',
+        T * 4 + '? "span line " + e.Span()[:line]', T * 3 + 'done', T * 3 + '? "g " + $g', T * 2 + 'done', T + 'done', T + '? "g " + $g'] + RES,
+     ['span line 7', 'g b', 'release r', 'g a']),
+    ('B03', 'B2', '`within` and `using` assigned, called, or an attribute, are what they were', [
+        'f()', 'func f', T + 'within = "a word"', T + 'using = 2', T + '? within + " " + using', T + 'o = new App', T + '? o.Within', T + 'Using(5)',
+        'func Using n', T + '? "Using called with " + n', 'class App', T + 'Within = "attribute"'],
+     ['a word 2', 'attribute', 'Using called with 5']),
+    ('B04', 'B2', 'a block with no `done` is refused', [
+        '? "before"', 'f()', 'func f', T + 'within $g = 1', T * 2 + '? "body"'],
+     refused('B04', 4, R_BARE, 'within', 4, 2), 1),
+    ('B05', 'B2', 'a block with no `= value` on its line is refused', [
+        '? "before"', 'f()', 'func f', T + 'within $g', T * 2 + '? "body"', T + 'done'],
+     refused('B05', 4, R_BARE, 'within', 4, 2), 1),
+    ('B06', 'B2', 'a block with a catch of its own is refused', [
+        '? "before"', 'f()', 'func f', T + 'within $g = 1', T * 2 + '? "body"', T + 'catch', T * 2 + '? "c"', T + 'done'],
+     refused('B06', 4, R_CLAUSE, 'catch', 6, 2), 1),
+]
+
+FMT = [
+    ('K01', 'B3', '`haro fmt` prints both blocks, the header on one line and the body a level in, inside a try and its catch', [
+        'within $g = 1', '? $g', 'done', 'try', 'within $h = 2', '$x = 1', 'done', 'catch', 'using $o   =   new K', '? $o', 'done', 'done'],
+     ['within $g = 1', T + '? $g', 'done', 'try', T + 'within $h = 2', T * 2 + '$x = 1', T + 'done', 'catch', T + 'using $o = new K', T * 2 + '? $o',
+      T + 'done', 'done']),
+]
+
+os.makedirs(os.path.join(HERE, 'cases'), exist_ok=True)
+out = []
+for kind, rows in (('run', CASES), ('fmt', FMT)):
+    for row in rows:
+        cid, line, why, prog, want = row[:5]
+        name = f'cases/{cid}.haro'
+        with open(os.path.join(HERE, name), 'w', encoding='utf-8', newline='\n') as fh:
+            fh.write('\n'.join(prog) + '\n')
+        case = {'id': cid, 'kind': kind, 'line': line, 'why': why, 'file': name, 'stdout': '\n'.join(want) + '\n'}
+        if len(row) > 5:
+            # an uncaught report: its last line ends without a newline, and the exit is the one named
+            case['stdout'] = '\n'.join(want)
+            case['exit'] = row[5]
+        out.append(case)
+doc = {'rung': 'v0.38', 'decision': 'D52 rung (3): A2 within and A3 using, rewritten onto finally',
+       'lines': {'W1': 'inside within the global holds the value, in the body and its callees; after it, what it held before',
+                 'W2': 'the global is restored on every exit, and a write by the body or a callee is undone',
+                 'W3': 'saved first, then the value computed (it may read the global); a raising value changes nothing; no value yet is R24',
+                 'W4': 'within names a global: a local or a parameter is refused at compile time',
+                 'U1': 'the first of Release, Destroy, Close the value answers to is called at the end, once, in any case, inherited',
+                 'U2': 'it is called on every exit; a raise in it replaces a held raise, which becomes its cause',
+                 'U3': 'none of the three: refused at compile time for new K of a known class, else raised at entry (or at exit if rebound by a callee)',
+                 'U4': 'the using name cannot be rebound inside its block',
+                 'B1': 'the blocks nest with try in every shape, and every line keeps its number',
+                 'B2': 'only the statement form is a block; no done, no = value, or a catch of its own is refused',
+                 'B3': 'haro fmt prints both blocks'},
+       'cases': out}
+with open(os.path.join(HERE, 'fixtures.json'), 'w', encoding='utf-8', newline='\n') as fh:
+    json.dump(doc, fh, indent=1)
+    fh.write('\n')
+print(f'wrote {len(out)} cases')

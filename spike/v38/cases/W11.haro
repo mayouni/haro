@@ -1,0 +1,6 @@
+$aL = [1, 2]
+within $aL = $aL
+	add($aL, 3)
+	? len($aL)
+done
+? len($aL)

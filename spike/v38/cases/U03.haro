@@ -1,0 +1,15 @@
+f()
+func f
+	try
+		using o = new Res("r")
+			raise("boom")
+		done
+	catch e
+		? "caught " + e
+	done
+class Res
+	cName = ""
+	func init n
+		cName = n
+	func release
+		? "release " + cName

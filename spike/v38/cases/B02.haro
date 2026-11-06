@@ -1,0 +1,20 @@
+$g = "a"
+f()
+func f
+	within $g = "b"
+		using o = new Res("r")
+			try
+				raise("x")
+			catch e
+				? "span line " + e.Span()[:line]
+			done
+			? "g " + $g
+		done
+	done
+	? "g " + $g
+class Res
+	cName = ""
+	func init n
+		cName = n
+	func release
+		? "release " + cName

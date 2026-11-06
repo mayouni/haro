@@ -1,0 +1,35 @@
+f()
+func f
+	using a = new OnlyClose
+		? "body a"
+	done
+	using b = new DestroyAndClose
+		? "body b"
+	done
+	using c = new Child
+		? "body c"
+	done
+	using d = new All
+		? "body d"
+	done
+class OnlyClose
+	func close
+		? "close"
+class DestroyAndClose
+	func Close
+		? "close (wrong)"
+	func DESTROY
+		? "destroy"
+class Base
+	func release
+		? "release (inherited)"
+class Child from Base
+	func close
+		? "close (wrong)"
+class All
+	func close
+		? "close (wrong)"
+	func destroy
+		? "destroy (wrong)"
+	func Release
+		? "release"

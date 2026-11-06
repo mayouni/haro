@@ -1,0 +1,7 @@
+$g = "a"
+? f()
+? $g
+func f
+	within $g = "b"
+		return "returned " + $g
+	done

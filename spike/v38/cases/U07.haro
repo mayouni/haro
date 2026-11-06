@@ -1,0 +1,21 @@
+f()
+func f
+	try
+		using o = make()
+			? "body ran"
+		done
+	catch e
+		? "caught: " + e
+		? "line " + e.Span()[:line] + ", code [" + e.Code() + "]"
+	done
+	try
+		using n = 42
+			? "body ran"
+		done
+	catch e
+		? "caught: " + e
+	done
+func make
+	return new Plain
+class Plain
+	x = 1

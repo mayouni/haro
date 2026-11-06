@@ -1,0 +1,10 @@
+? "before"
+f()
+func f
+	using o = make()
+		? "body"
+	done
+func make
+	return new Plain
+class Plain
+	x = 1

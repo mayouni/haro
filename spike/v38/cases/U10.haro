@@ -1,0 +1,17 @@
+f()
+func f
+	try
+		using $r = new Res("a")
+			swap()
+		done
+	catch e
+		? "caught: " + e
+	done
+func swap
+	$r = 5
+class Res
+	cName = ""
+	func init n
+		cName = n
+	func release
+		? "release " + cName

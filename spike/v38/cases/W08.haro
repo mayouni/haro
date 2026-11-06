@@ -1,0 +1,6 @@
+? "before"
+f()
+func f
+	within $never = 1
+		? "body ran"
+	done

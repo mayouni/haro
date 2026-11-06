@@ -1,0 +1,12 @@
+f()
+func f
+	using o = new Res("a")
+		? "in: " + o.cName
+	done
+	? "after"
+class Res
+	cName = ""
+	func init n
+		cName = n
+	func release
+		? "release " + cName

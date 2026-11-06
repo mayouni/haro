@@ -1,0 +1,8 @@
+? "before"
+f()
+func f
+	using o = new Plain
+		? "body"
+	done
+class Plain
+	x = 1

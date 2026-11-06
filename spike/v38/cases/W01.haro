@@ -1,0 +1,8 @@
+$cCaller = "nobody"
+within $cCaller = "agent-x"
+	? "in: " + $cCaller
+	who()
+done
+? "after: " + $cCaller
+func who
+	? "who: " + $cCaller

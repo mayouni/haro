@@ -1,0 +1,9 @@
+$g = 1
+try
+	within $g = 2
+		? $g
+		raise("boom")
+	done
+catch e
+	? "caught " + e + ", g=" + $g
+done

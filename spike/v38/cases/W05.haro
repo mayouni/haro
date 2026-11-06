@@ -1,0 +1,13 @@
+$g = "start"
+try
+	within $g = "mid"
+		$g = "changed in body"
+		setG()
+	done
+catch e
+	? e
+done
+? $g
+func setG
+	$g = "changed by callee"
+	raise("from callee " + $g)

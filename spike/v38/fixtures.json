@@ -1,0 +1,252 @@
+{
+ "rung": "v0.38",
+ "decision": "D52 rung (3): A2 within and A3 using, rewritten onto finally",
+ "lines": {
+  "W1": "inside within the global holds the value, in the body and its callees; after it, what it held before",
+  "W2": "the global is restored on every exit, and a write by the body or a callee is undone",
+  "W3": "saved first, then the value computed (it may read the global); a raising value changes nothing; no value yet is R24",
+  "W4": "within names a global: a local or a parameter is refused at compile time",
+  "U1": "the first of Release, Destroy, Close the value answers to is called at the end, once, in any case, inherited",
+  "U2": "it is called on every exit; a raise in it replaces a held raise, which becomes its cause",
+  "U3": "none of the three: refused at compile time for new K of a known class, else raised at entry (or at exit if rebound by a callee)",
+  "U4": "the using name cannot be rebound inside its block",
+  "B1": "the blocks nest with try in every shape, and every line keeps its number",
+  "B2": "only the statement form is a block; no done, no = value, or a catch of its own is refused",
+  "B3": "haro fmt prints both blocks"
+ },
+ "cases": [
+  {
+   "id": "W01",
+   "kind": "run",
+   "line": "W1",
+   "why": "the global holds the value in the body and in what the body calls; after the block, what it held before",
+   "file": "cases/W01.haro",
+   "stdout": "in: agent-x\nwho: agent-x\nafter: nobody\n"
+  },
+  {
+   "id": "W02",
+   "kind": "run",
+   "line": "W2",
+   "why": "a raise out of the block restores the global before the handler runs",
+   "file": "cases/W02.haro",
+   "stdout": "2\ncaught boom, g=1\n"
+  },
+  {
+   "id": "W03",
+   "kind": "run",
+   "line": "W2",
+   "why": "a return out of the block restores the global; the value returned was computed inside it",
+   "file": "cases/W03.haro",
+   "stdout": "returned b\na\n"
+  },
+  {
+   "id": "W04",
+   "kind": "run",
+   "line": "W2",
+   "why": "a loop and an exit crossing the block restore the global",
+   "file": "cases/W04.haro",
+   "stdout": "top g=0\ntop g=0\ni=2 g=20\ng=0\n"
+  },
+  {
+   "id": "W05",
+   "kind": "run",
+   "line": "W2",
+   "why": "a write by the body and by a callee is undone; a callee's raise restores too",
+   "file": "cases/W05.haro",
+   "stdout": "from callee changed by callee\nstart\n"
+  },
+  {
+   "id": "W06",
+   "kind": "run",
+   "line": "W3",
+   "why": "the value may read the global: a depth that counts its own recursion and ends where it began",
+   "file": "cases/W06.haro",
+   "stdout": "depth 1\ndepth 2\ndepth 3\ndepth after: 0\n"
+  },
+  {
+   "id": "W07",
+   "kind": "run",
+   "line": "W3",
+   "why": "a value that raises leaves the global unchanged and the body unrun",
+   "file": "cases/W07.haro",
+   "stdout": "caught no value\nkept\n"
+  },
+  {
+   "id": "W08",
+   "kind": "run",
+   "line": "W3",
+   "why": "a global with no value yet cannot be saved: R24 at the within line, the body unrun",
+   "file": "cases/W08.haro",
+   "stdout": "before\n\nLine 4 Error (R24) : Using uninitialized variable: $never \nIn function f() in file W08.haro\n\nCalled from line 2 in file W08.haro ",
+   "exit": 1
+  },
+  {
+   "id": "W09",
+   "kind": "run",
+   "line": "W4",
+   "why": "a local is refused: it needs no restore",
+   "file": "cases/W09.haro",
+   "stdout": "before\n\nLine 5 Haro refused this statement (within needs a global (D52 A2) `x`, line 5 of W09.haro) and did not compile it -- running past it would give a wrong answer \nIn function f() in file W09.haro\n\nCalled from line 2 in file W09.haro ",
+   "exit": 1
+  },
+  {
+   "id": "W10",
+   "kind": "run",
+   "line": "W4",
+   "why": "a parameter is refused",
+   "file": "cases/W10.haro",
+   "stdout": "before\n\nLine 4 Haro refused this statement (within needs a global (D52 A2) `p`, line 4 of W10.haro) and did not compile it -- running past it would give a wrong answer \nIn function f() in file W10.haro\n\nCalled from line 2 in file W10.haro ",
+   "exit": 1
+  },
+  {
+   "id": "W11",
+   "kind": "run",
+   "line": "W2",
+   "why": "a list global grown in place inside the block is the old list after it",
+   "file": "cases/W11.haro",
+   "stdout": "3\n2\n"
+  },
+  {
+   "id": "U01",
+   "kind": "run",
+   "line": "U1",
+   "why": "the name holds the value in the body; Release at the end, once",
+   "file": "cases/U01.haro",
+   "stdout": "in: a\nrelease a\nafter\n"
+  },
+  {
+   "id": "U02",
+   "kind": "run",
+   "line": "U1",
+   "why": "the first of Release, Destroy, Close the value answers to, in any case, an inherited one counting",
+   "file": "cases/U02.haro",
+   "stdout": "body a\nclose\nbody b\ndestroy\nbody c\nrelease (inherited)\nbody d\nrelease\n"
+  },
+  {
+   "id": "U03",
+   "kind": "run",
+   "line": "U2",
+   "why": "a raise out of the block releases before the handler runs",
+   "file": "cases/U03.haro",
+   "stdout": "release r\ncaught boom\n"
+  },
+  {
+   "id": "U04",
+   "kind": "run",
+   "line": "U2",
+   "why": "a return, a loop and an exit release, once each",
+   "file": "cases/U04.haro",
+   "stdout": "release g\nreturned g\nrelease i1\nbody 2\nrelease i2\nrelease i3\nend\n"
+  },
+  {
+   "id": "U05",
+   "kind": "run",
+   "line": "U2",
+   "why": "a raise in the release replaces the held raise, which is its cause",
+   "file": "cases/U05.haro",
+   "stdout": "caught in release\ncause in body\n"
+  },
+  {
+   "id": "U06",
+   "kind": "run",
+   "line": "U3",
+   "why": "`new K` of a class the unit defines with none of the three is refused at compile time",
+   "file": "cases/U06.haro",
+   "stdout": "before\n\nLine 4 Haro refused this statement (using a class that answers none of Release, Destroy, Close (D52 A3) `Plain`, line 4 of U06.haro) and did not compile it -- running past it would give a wrong answer \nIn function f() in file U06.haro\n\nCalled from line 2 in file U06.haro ",
+   "exit": 1
+  },
+  {
+   "id": "U07",
+   "kind": "run",
+   "line": "U3",
+   "why": "any other value with none -- an object, a number -- is raised at entry, before the body, and caught",
+   "file": "cases/U07.haro",
+   "stdout": "caught: using: o answers none of Release, Destroy, Close\nline 4, code []\ncaught: using: n answers none of Release, Destroy, Close\n"
+  },
+  {
+   "id": "U08",
+   "kind": "run",
+   "line": "U3",
+   "why": "uncaught, the refusal at entry is reported at the using line, and names no raise()",
+   "file": "cases/U08.haro",
+   "stdout": "before\n\nLine 4 using: o answers none of Release, Destroy, Close \nIn function f() in file U08.haro\n\nCalled from line 2 in file U08.haro ",
+   "exit": 1
+  },
+  {
+   "id": "U09",
+   "kind": "run",
+   "line": "U4",
+   "why": "the name rebound in the block is refused at compile time",
+   "file": "cases/U09.haro",
+   "stdout": "before\n\nLine 4 Haro refused this statement (using rebinds its name inside its block (D52 A3) `o = new Res(\"b\")`, line 5 of U09.haro) and did not compile it -- running past it would give a wrong answer \nIn function f() in file U09.haro\n\nCalled from line 2 in file U09.haro ",
+   "exit": 1
+  },
+  {
+   "id": "U10",
+   "kind": "run",
+   "line": "U3",
+   "why": "a global using name a callee rebinds to a value with none is raised at the exit",
+   "file": "cases/U10.haro",
+   "stdout": "caught: using: $r answers none of Release, Destroy, Close\n"
+  },
+  {
+   "id": "B01",
+   "kind": "run",
+   "line": "B1",
+   "why": "within inside a try body, inside a catch clause, inside itself; a try inside within",
+   "file": "cases/B01.haro",
+   "stdout": "inner 2\nouter 1\nin catch 3\nnested catch 3\nafter catch block 0\nend 0\n"
+  },
+  {
+   "id": "B02",
+   "kind": "run",
+   "line": "B1",
+   "why": "using inside within, a try inside both; a raise keeps its own line",
+   "file": "cases/B02.haro",
+   "stdout": "span line 7\ng b\nrelease r\ng a\n"
+  },
+  {
+   "id": "B03",
+   "kind": "run",
+   "line": "B2",
+   "why": "`within` and `using` assigned, called, or an attribute, are what they were",
+   "file": "cases/B03.haro",
+   "stdout": "a word 2\nattribute\nUsing called with 5\n"
+  },
+  {
+   "id": "B04",
+   "kind": "run",
+   "line": "B2",
+   "why": "a block with no `done` is refused",
+   "file": "cases/B04.haro",
+   "stdout": "before\n\nLine 4 Haro refused this statement (within or using without its block (D52) `within`, line 4 of B04.haro) and did not compile it -- running past it would give a wrong answer \nIn function f() in file B04.haro\n\nCalled from line 2 in file B04.haro ",
+   "exit": 1
+  },
+  {
+   "id": "B05",
+   "kind": "run",
+   "line": "B2",
+   "why": "a block with no `= value` on its line is refused",
+   "file": "cases/B05.haro",
+   "stdout": "before\n\nLine 4 Haro refused this statement (within or using without its block (D52) `within`, line 4 of B05.haro) and did not compile it -- running past it would give a wrong answer \nIn function f() in file B05.haro\n\nCalled from line 2 in file B05.haro ",
+   "exit": 1
+  },
+  {
+   "id": "B06",
+   "kind": "run",
+   "line": "B2",
+   "why": "a block with a catch of its own is refused",
+   "file": "cases/B06.haro",
+   "stdout": "before\n\nLine 4 Haro refused this statement (within or using with a catch or finally of its own (D52) `catch`, line 6 of B06.haro) and did not compile it -- running past it would give a wrong answer \nIn function f() in file B06.haro\n\nCalled from line 2 in file B06.haro ",
+   "exit": 1
+  },
+  {
+   "id": "K01",
+   "kind": "fmt",
+   "line": "B3",
+   "why": "`haro fmt` prints both blocks, the header on one line and the body a level in, inside a try and its catch",
+   "file": "cases/K01.haro",
+   "stdout": "within $g = 1\n\t? $g\ndone\ntry\n\twithin $h = 2\n\t\t$x = 1\n\tdone\ncatch\n\tusing $o = new K\n\t\t? $o\n\tdone\ndone\n"
+  }
+ ]
+}

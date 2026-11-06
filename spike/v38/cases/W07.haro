@@ -1,0 +1,11 @@
+$g = "kept"
+try
+	within $g = boom()
+		? "body ran"
+	done
+catch e
+	? "caught " + e
+done
+? $g
+func boom
+	raise("no value")

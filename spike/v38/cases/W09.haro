@@ -1,0 +1,7 @@
+? "before"
+f()
+func f
+	x = 1
+	within x = 2
+		? x
+	done

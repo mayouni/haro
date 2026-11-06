@@ -1,0 +1,13 @@
+f()
+func f
+	try
+		using o = new Bad
+			raise("in body")
+		done
+	catch e
+		? "caught " + e
+		? "cause " + e.Cause()
+	done
+class Bad
+	func release
+		raise("in release")

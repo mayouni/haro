@@ -1,0 +1,5 @@
+? "before"
+f()
+func f
+	within $g = 1
+		? "body"

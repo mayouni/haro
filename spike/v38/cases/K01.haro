@@ -1,0 +1,12 @@
+within $g = 1
+? $g
+done
+try
+within $h = 2
+$x = 1
+done
+catch
+using $o   =   new K
+? $o
+done
+done

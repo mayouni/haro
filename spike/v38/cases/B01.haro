@@ -1,0 +1,21 @@
+$g = 0
+try
+	within $g = 1
+		within $g = 2
+			? "inner " + $g
+		done
+		? "outer " + $g
+	done
+	raise("go")
+catch
+	within $g = 3
+		try
+			? "in catch " + $g
+			raise("again")
+		catch
+			? "nested catch " + $g
+		done
+	done
+	? "after catch block " + $g
+done
+? "end " + $g

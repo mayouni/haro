@@ -1,0 +1,6 @@
+? "before"
+f(1)
+func f p
+	within p = 2
+		? p
+	done

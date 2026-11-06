@@ -1,0 +1,21 @@
+? g()
+h()
+? "end"
+func g
+	using o = new Res("g")
+		return "returned " + o.cName
+	done
+func h
+	for i = 1 to 3
+		using o = new Res("i" + i)
+			if i = 1 loop ok
+			if i = 3 exit ok
+			? "body " + i
+		done
+	next
+class Res
+	cName = ""
+	func init n
+		cName = n
+	func release
+		? "release " + cName
