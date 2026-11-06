@@ -128,9 +128,9 @@
     },
     {
       "id": "R7",
-      "name": "a weave not built is still refused by name: the five others are carried, not judged",
-      "source": "DEFINE LANGUAGE clinic AS (VERSION \"0.25\", GRAMMAR \"0.25\", COURT \"x\", EXTENSION \".clinic\") RATIONALE \"x\"\nDEFINE DECLARATION patient AS (VERB \"PATIENT\", SEATS [full_name: text, file_no: text]) RATIONALE \"x\"\nDEFINE NARRATE voice AS (SAYS [patient: \"{name}, file {file_no}.\"]) RATIONALE \"x\"\nDEFINE CONSTITUTION charter AS (ARTICLES [visible_state], WEAVES [resilience: constitutional], REGIME gdpr) RATIONALE \"x\"\n",
-      "refusal": "WEAVES names 'resilience', and no weave but sovereignty (W3) and privacy (W4) is judged in Haro v0.25 -- the five others are Zin's design, carried, not built"
+      "name": "a weave not built is still refused by name: a weave none of whose rules is judged is carried, not judged (amended 2026-11-06 at v0.29: the weave named is cost_awareness, resilience being judged now, and the message counts the rules instead of the weaves -- recorded in v29/GRAMMAR.md)",
+      "source": "DEFINE LANGUAGE clinic AS (VERSION \"0.25\", GRAMMAR \"0.25\", COURT \"x\", EXTENSION \".clinic\") RATIONALE \"x\"\nDEFINE DECLARATION patient AS (VERB \"PATIENT\", SEATS [full_name: text, file_no: text]) RATIONALE \"x\"\nDEFINE NARRATE voice AS (SAYS [patient: \"{name}, file {file_no}.\"]) RATIONALE \"x\"\nDEFINE CONSTITUTION charter AS (ARTICLES [visible_state], WEAVES [cost_awareness: constitutional], REGIME gdpr) RATIONALE \"x\"\n",
+      "refusal": "WEAVES names 'cost_awareness', and none of its 13 rules is judged in Haro v0.29 -- they are Zin's design, carried, not built"
     },
     {
       "id": "R8",

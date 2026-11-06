@@ -93,6 +93,18 @@
         "held": "W1.2",
         "carried": "W1.1,W1.3,W1.4,W1.6,W1.7"
       }
+    },
+    {
+      "id": "A8",
+      "name": "only an article's cite is a law: a warning CONSTRAINT whose cite is of another kind but spells the article's name after the same eight characters (pattern:visible_state) is no breach",
+      "source": "DEFINE LANGUAGE clinic AS (VERSION \"0.29\", GRAMMAR \"0.29\", COURT \"x\", EXTENSION \".clinic\") RATIONALE \"x\"\nDEFINE DECLARATION patient AS (VERB \"PATIENT\", SEATS [file_no: text, ward: text]) RATIONALE \"x\"\nDEFINE NARRATE voice AS (SAYS [patient: \"{name}, file {file_no}.\"]) RATIONALE \"x\"\nDEFINE CONSTRAINT one_file AS (ON patient, WHEN \"earlier patient where file_no = this.file_no\", MESSAGE \"two patients share a file\", CODE \"ONE_FILE\", CITES [\"pattern:visible_state\"], SEVERITY warning) RATIONALE \"x\"\nDEFINE CONSTITUTION charter AS (ARTICLES [visible_state], WEAVES [resilience: constitutional]) RATIONALE \"x\"\n",
+      "expect": {
+        "language": "clinic",
+        "weaves": "resilience:constitutional",
+        "judged": "W1.5",
+        "held": "W1.2",
+        "carried": "W1.1,W1.3,W1.4,W1.6,W1.7"
+      }
     }
   ],
   "rejects": [

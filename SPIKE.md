@@ -1593,6 +1593,27 @@ on `haro` and on its own checked build** -- no Ring runs in a court (D41).
     stage 6, after       D42 (2026-11-03): a sentence edited, its court's image reused, 14.9 ms against 50; the court compiled from
                          scratch, 128.1 ms against a 150 ms ceiling -- every stage of the guard passes
 
+## The twenty-ninth rung -- Haro v0.29, five of the six carried weaves judge what they can with no new seat -- 2026-11-06
+
+**WC1 of the constitution desk's second charge** (the six carried weaves, filed by the compass on the author's word of 2026-11-02; WC0 is
+`v29/ZIN-WEAVES-INVENTORY.md`, D53, HF-144). The guard has been green from this repository since 2026-11-02 22:29; the desk took the number this
+repository's CLAUDE.md holds for it. Fixtures first (15 of 17 failing on the court of the day, 2 holding), the court second, the plants third.
+
+    v29/gen_fixtures.py, fixtures.json   18 meta fixtures: 8 accepts, 10 rejects -- W1.5, W2.2, W2.3, W5.2, W7.4, W8.5, W1.2 and W7.1 held,
+                                         cost_awareness still refused by name, v0.25's A1 unchanged
+    haro_lib.haro                        the weave loop of the constitution block: StzuWeaveRules, StzuCitedArticle, StzuArtTail, the six
+                                         judgements; the refusal by name counts rules; judged / held / carried printed when a new weave is named
+    v23/fixtures.json R13, v25/fixtures.json R7   amended: the weave they name is cost_awareness, said so in their names
+    v29/plants.py                        fifteen protections switched off in turn: every one caught, haro_lib.haro restored byte for byte
+    v29/apply_court.py                   the court edit as one reviewable, reproducible script
+    haro_forge.py                        stage 1 grows by v0.29
+
+**Results.** 18 of 18 on haro; stage 1 passes on haro and its checked build, byte-identical (0 failures, 155.7 s). What building found is in HF-144:
+six of the eight sorted rules can be refused and two are held by construction; W5.2 rests on Art. 3 alone; a plant showed a protection no fixture
+pinned (A8, added after the court spoke); W1.5 is a stated reading. **Not built:** the twenty rules that need a seat (WC2), the record plane (WC3),
+the proof world and the author's own reading of its refusals (WC4). **Parked by the author (2026-11-06, "Raise at WC2"):** whether a world must say
+which weaves it leaves out.
+
 ## The thirtieth rung -- Haro v0.30, the one reader of C6 and its canonical printer -- 2026-11-03
 
 **Step 1 of COMPASS-REBOL-06** (BLOCKS.md 3.5), on the Principal's word of 2026-11-02 as Central read it and prompt 56 carried it, built

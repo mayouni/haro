@@ -153,9 +153,9 @@
     },
     {
       "id": "R13",
-      "name": "WEAVES: in v0.23 this pinned 'no weave is judged yet'; since v0.25 (ZC4) sovereignty and privacy are, and it pins that the five others are still refused by name (amended 2026-11-02, recorded in v25/GRAMMAR.md)",
-      "source": "DEFINE LANGUAGE bank AS (VERSION \"0.23\", GRAMMAR \"0.23\", COURT \"x\", EXTENSION \".bank\") RATIONALE \"x\"\nDEFINE DECLARATION account AS (VERB \"ACCOUNT\", SEATS [holder: text]) RATIONALE \"x\"\nDEFINE REFINE bank AS (POINTS [account.holder: field]) RATIONALE \"x\"\nDEFINE CONSTITUTION charter AS (ARTICLES [reversibility], WEAVES [resilience: governance]) RATIONALE \"x\"\n",
-      "refusal": "WEAVES names 'resilience', and no weave but sovereignty (W3) and privacy (W4) is judged in Haro v0.25"
+      "name": "WEAVES: in v0.23 this pinned 'no weave is judged yet'; since v0.25 (ZC4) sovereignty and privacy are, and it pins that a weave none of whose rules is judged is still refused by name (amended 2026-11-02, recorded in v25/GRAMMAR.md; amended again 2026-11-06 at v0.29: the weave named is cost_awareness, resilience being judged now -- recorded in v29/GRAMMAR.md)",
+      "source": "DEFINE LANGUAGE bank AS (VERSION \"0.23\", GRAMMAR \"0.23\", COURT \"x\", EXTENSION \".bank\") RATIONALE \"x\"\nDEFINE DECLARATION account AS (VERB \"ACCOUNT\", SEATS [holder: text]) RATIONALE \"x\"\nDEFINE REFINE bank AS (POINTS [account.holder: field]) RATIONALE \"x\"\nDEFINE CONSTITUTION charter AS (ARTICLES [reversibility], WEAVES [cost_awareness: governance]) RATIONALE \"x\"\n",
+      "refusal": "WEAVES names 'cost_awareness', and none of its 13 rules is judged in Haro v0.29"
     },
     {
       "id": "R14",

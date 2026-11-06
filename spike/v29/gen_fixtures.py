@@ -98,6 +98,13 @@ accepts = [
         'expect': {'language': 'clinic', 'weaves': 'resilience:constitutional', 'judged': 'W1.5', 'held': 'W1.2',
                    'carried': 'W1.1,W1.3,W1.4,W1.6,W1.7'},
     },
+    {
+        'id': 'A8',
+        'name': 'only an article\'s cite is a law: a warning CONSTRAINT whose cite is of another kind but spells the article\'s name after the same eight characters (pattern:visible_state) is no breach',
+        'source': (LANG + KIND + VOICE + rule_warning('pattern:visible_state') + charter(['visible_state'], ['resilience: constitutional'])),
+        'expect': {'language': 'clinic', 'weaves': 'resilience:constitutional', 'judged': 'W1.5', 'held': 'W1.2',
+                   'carried': 'W1.1,W1.3,W1.4,W1.6,W1.7'},
+    },
 ]
 
 rejects = [
