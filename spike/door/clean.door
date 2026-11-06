@@ -1,0 +1,3 @@
+DEFINE LISTENER web AS (HOST "localhost") RATIONALE "x"
+DEFINE SERVICE api AS (NEEDS [network, process]) RATIONALE "x"
+DEFINE NOTE n AS (TEXT "x") RATIONALE "x"

@@ -1,0 +1,33 @@
+-- door_v40.haro -- a small language that declares the doors its worlds may open (Haro v0.40, D51's declared half). Its LANGUAGE NEEDS two of
+-- the nine; a LISTENER opens network by name; a SERVICE opens what its NEEDS seat lists, from a MENU that also holds filesystem, which the
+-- language does not NEED -- a sentence that lists it is refused by the court; a NOTE opens nothing.
+
+DEFINE LANGUAGE door AS (
+  VERSION "0.40", GRAMMAR "0.40",
+  COURT "spike/v40/court_cases.json",
+  EXTENSION ".door",
+  NEEDS [network, process]
+) RATIONALE "What a small service asks of the machine it runs on, declared before it runs"
+
+DEFINE MENU caps AS (
+  WORDS [network, process, filesystem],
+  MESSAGE "A capability is network, process or filesystem",
+  CODE "UNKNOWN_CAPABILITY"
+) RATIONALE "The doors a service may list; filesystem is here so a sentence can ask for a door the language does not need"
+
+DEFINE DECLARATION listener AS (
+  VERB "LISTENER",
+  SEATS [host: text?],
+  OPENS network
+) RATIONALE "A listener opens the network, whatever it is told"
+
+DEFINE DECLARATION service AS (
+  VERB "SERVICE",
+  SEATS [host: text?, needs: [caps]?],
+  OPENS needs
+) RATIONALE "A service opens what it lists, and nothing it does not"
+
+DEFINE DECLARATION note AS (
+  VERB "NOTE",
+  SEATS [text: text?]
+) RATIONALE "A note opens nothing"

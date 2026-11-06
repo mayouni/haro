@@ -1,0 +1,86 @@
+{
+ "grammar": "haro",
+ "version": "0.40",
+ "comment": "Written BEFORE any code reads NEEDS or OPENS. Each case runs the court forged from door_v40.haro (or, D7, panel_court.haro) on a sentence of door/.",
+ "cases": [
+  {
+   "id": "D1",
+   "name": "a sentence that opens only what the language needs",
+   "verb": "check",
+   "args": [
+    "door/clean.door"
+   ],
+   "first": "ok"
+  },
+  {
+   "id": "D2",
+   "name": "a SERVICE that lists a door the language does not NEED is refused",
+   "verb": "check",
+   "args": [
+    "door/files.door"
+   ],
+   "first": "door (line 2): SERVICE api opens 'filesystem', and the language door does not NEED it"
+  },
+  {
+   "id": "D3",
+   "name": "the refusal in the envelope: its code and line",
+   "verb": "diagnose",
+   "args": [
+    "door/files.door"
+   ],
+   "diagnose": {
+    "code": "CAPABILITY_NOT_NEEDED",
+    "severity": "error",
+    "line": 2
+   }
+  },
+  {
+   "id": "D4",
+   "name": "a word outside the MENU is the MENU's refusal, as it always was",
+   "verb": "check",
+   "args": [
+    "door/gpio.door"
+   ],
+   "first": "A capability is network, process or filesystem"
+  },
+  {
+   "id": "D5",
+   "name": "the world publishes what each declaration opens: a LISTENER its door, a SERVICE what it lists; a NOTE nothing",
+   "verb": "world",
+   "args": [
+    "door/clean.door"
+   ],
+   "contains": [
+    "\"opens\": [{\"verb\": \"LISTENER\", \"name\": \"web\", \"opens\": [\"network\"], \"span\": {\"file\": \"clean.door\", \"line\": 1}}",
+    "{\"verb\": \"SERVICE\", \"name\": \"api\", \"opens\": [\"network\", \"process\"], \"span\": {\"file\": \"clean.door\", \"line\": 2}}]"
+   ],
+   "lacks": [
+    "\"name\": \"n\""
+   ]
+  },
+  {
+   "id": "D6",
+   "name": "a SERVICE that lists nothing, or has no NEEDS seat, opens nothing, and its row says so",
+   "verb": "world",
+   "args": [
+    "door/quiet.door"
+   ],
+   "contains": [
+    "{\"verb\": \"SERVICE\", \"name\": \"quiet\", \"opens\": [], \"span\"",
+    "{\"verb\": \"SERVICE\", \"name\": \"bare\", \"opens\": [], \"span\""
+   ]
+  },
+  {
+   "id": "D7",
+   "name": "a world of a language that NEEDS nothing has no opens: every other court keeps its bytes",
+   "verb": "world",
+   "court": "panel_court.haro",
+   "args": [
+    "panel/clean.panel"
+   ],
+   "lacks": [
+    "\"opens\""
+   ]
+  }
+ ]
+}

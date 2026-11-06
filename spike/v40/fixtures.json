@@ -1,0 +1,113 @@
+{
+ "grammar": "haro",
+ "version": "0.40",
+ "comment": "Written BEFORE any code reads NEEDS or OPENS (the W discipline). v0.40 is D51's declared half: NEEDS on a LANGUAGE, OPENS on a DECLARATION, the closed catalog of nine, A6's gate at the meta-court.",
+ "accepts": [
+  {
+   "id": "A1",
+   "name": "NEEDS two doors: a kind opens one by name, a kind opens what its seat lists",
+   "source": "DEFINE LANGUAGE q AS (VERSION \"0.40\", GRAMMAR \"0.40\", COURT \"x\", EXTENSION \".q\", NEEDS [network, process]) RATIONALE \"x\"\nDEFINE MENU caps AS (WORDS [network, process, filesystem], MESSAGE \"a capability\") RATIONALE \"x\"\nDEFINE DECLARATION listener AS (VERB \"LISTENER\", SEATS [host: text?], OPENS network) RATIONALE \"x\"\nDEFINE DECLARATION service AS (VERB \"SERVICE\", SEATS [host: text?, needs: [caps]?], OPENS needs) RATIONALE \"x\"\n",
+   "expect": {
+    "language": "q",
+    "needs": "network,process",
+    "opens": "LISTENER:network,SERVICE:needs",
+    "counts": {
+     "declarations": 2
+    }
+   }
+  },
+  {
+   "id": "A2",
+   "name": "a language with neither NEEDS nor OPENS is what it was",
+   "source": "DEFINE LANGUAGE q AS (VERSION \"0.40\", GRAMMAR \"0.40\", COURT \"x\", EXTENSION \".q\") RATIONALE \"x\"\nDEFINE MENU caps AS (WORDS [network, process, filesystem], MESSAGE \"a capability\") RATIONALE \"x\"\nDEFINE DECLARATION note AS (VERB \"NOTE\", SEATS [text: text?]) RATIONALE \"x\"\n",
+   "expect": {
+    "language": "q",
+    "counts": {
+     "declarations": 1
+    },
+    "verbs": [
+     "NOTE"
+    ]
+   }
+  },
+  {
+   "id": "A3",
+   "name": "an OPENS seat's MENU may list a door the language does not NEED (the sentence that uses it is refused)",
+   "source": "DEFINE LANGUAGE q AS (VERSION \"0.40\", GRAMMAR \"0.40\", COURT \"x\", EXTENSION \".q\", NEEDS [network]) RATIONALE \"x\"\nDEFINE MENU caps AS (WORDS [network, process, filesystem], MESSAGE \"a capability\") RATIONALE \"x\"\nDEFINE DECLARATION service AS (VERB \"SERVICE\", SEATS [host: text?, needs: [caps]?], OPENS needs) RATIONALE \"x\"\n",
+   "expect": {
+    "language": "q",
+    "needs": "network",
+    "opens": "SERVICE:needs"
+   }
+  },
+  {
+   "id": "A4",
+   "name": "a kind beside them that opens nothing",
+   "source": "DEFINE LANGUAGE q AS (VERSION \"0.40\", GRAMMAR \"0.40\", COURT \"x\", EXTENSION \".q\", NEEDS [network, process]) RATIONALE \"x\"\nDEFINE MENU caps AS (WORDS [network, process, filesystem], MESSAGE \"a capability\") RATIONALE \"x\"\nDEFINE DECLARATION listener AS (VERB \"LISTENER\", SEATS [host: text?], OPENS network) RATIONALE \"x\"\nDEFINE DECLARATION service AS (VERB \"SERVICE\", SEATS [host: text?, needs: [caps]?], OPENS needs) RATIONALE \"x\"\nDEFINE DECLARATION note AS (VERB \"NOTE\", SEATS [text: text?]) RATIONALE \"x\"\n",
+   "expect": {
+    "language": "q",
+    "needs": "network,process",
+    "opens": "LISTENER:network,SERVICE:needs",
+    "counts": {
+     "declarations": 3
+    }
+   }
+  }
+ ],
+ "rejects": [
+  {
+   "id": "R1",
+   "name": "NEEDS a word outside the nine",
+   "source": "DEFINE LANGUAGE q AS (VERSION \"0.40\", GRAMMAR \"0.40\", COURT \"x\", EXTENSION \".q\", NEEDS [network, internet]) RATIONALE \"x\"\nDEFINE MENU caps AS (WORDS [network, process, filesystem], MESSAGE \"a capability\") RATIONALE \"x\"\nDEFINE DECLARATION listener AS (VERB \"LISTENER\", SEATS [host: text?], OPENS network) RATIONALE \"x\"\nDEFINE DECLARATION service AS (VERB \"SERVICE\", SEATS [host: text?, needs: [caps]?], OPENS needs) RATIONALE \"x\"\n",
+   "refusal": "NEEDS: 'internet' is not a capability; the nine are filesystem, process, network, environment, dynamic_load, gpio, threads, clock, inference"
+  },
+  {
+   "id": "R2",
+   "name": "NEEDS a word twice",
+   "source": "DEFINE LANGUAGE q AS (VERSION \"0.40\", GRAMMAR \"0.40\", COURT \"x\", EXTENSION \".q\", NEEDS [network, process, network]) RATIONALE \"x\"\nDEFINE MENU caps AS (WORDS [network, process, filesystem], MESSAGE \"a capability\") RATIONALE \"x\"\nDEFINE DECLARATION listener AS (VERB \"LISTENER\", SEATS [host: text?], OPENS network) RATIONALE \"x\"\nDEFINE DECLARATION service AS (VERB \"SERVICE\", SEATS [host: text?, needs: [caps]?], OPENS needs) RATIONALE \"x\"\n",
+   "refusal": "NEEDS: 'network' is named twice"
+  },
+  {
+   "id": "R3",
+   "name": "A6's gate: a listener in a language without network",
+   "source": "DEFINE LANGUAGE q AS (VERSION \"0.40\", GRAMMAR \"0.40\", COURT \"x\", EXTENSION \".q\", NEEDS [process]) RATIONALE \"x\"\nDEFINE MENU caps AS (WORDS [network, process, filesystem], MESSAGE \"a capability\") RATIONALE \"x\"\nDEFINE DECLARATION listener AS (VERB \"LISTENER\", SEATS [host: text?], OPENS network) RATIONALE \"x\"\nDEFINE DECLARATION service AS (VERB \"SERVICE\", SEATS [host: text?, needs: [caps]?], OPENS needs) RATIONALE \"x\"\n",
+   "refusal": "listener OPENS network, and the LANGUAGE q does not NEED it"
+  },
+  {
+   "id": "R4",
+   "name": "silence refuses: a kind OPENS and the language NEEDS nothing",
+   "source": "DEFINE LANGUAGE q AS (VERSION \"0.40\", GRAMMAR \"0.40\", COURT \"x\", EXTENSION \".q\") RATIONALE \"x\"\nDEFINE MENU caps AS (WORDS [network, process, filesystem], MESSAGE \"a capability\") RATIONALE \"x\"\nDEFINE DECLARATION listener AS (VERB \"LISTENER\", SEATS [host: text?], OPENS network) RATIONALE \"x\"\n",
+   "refusal": "listener OPENS network, and the LANGUAGE q NEEDS nothing"
+  },
+  {
+   "id": "R5",
+   "name": "least authority: a NEEDS word no kind opens",
+   "source": "DEFINE LANGUAGE q AS (VERSION \"0.40\", GRAMMAR \"0.40\", COURT \"x\", EXTENSION \".q\", NEEDS [network, process, gpio]) RATIONALE \"x\"\nDEFINE MENU caps AS (WORDS [network, process, filesystem], MESSAGE \"a capability\") RATIONALE \"x\"\nDEFINE DECLARATION listener AS (VERB \"LISTENER\", SEATS [host: text?], OPENS network) RATIONALE \"x\"\nDEFINE DECLARATION service AS (VERB \"SERVICE\", SEATS [host: text?, needs: [caps]?], OPENS needs) RATIONALE \"x\"\n",
+   "refusal": "NEEDS gpio, and no kind OPENS it"
+  },
+  {
+   "id": "R6",
+   "name": "OPENS names neither a capability nor a seat of the kind",
+   "source": "DEFINE LANGUAGE q AS (VERSION \"0.40\", GRAMMAR \"0.40\", COURT \"x\", EXTENSION \".q\", NEEDS [network, process]) RATIONALE \"x\"\nDEFINE MENU caps AS (WORDS [network, process, filesystem], MESSAGE \"a capability\") RATIONALE \"x\"\nDEFINE DECLARATION listener AS (VERB \"LISTENER\", SEATS [host: text?], OPENS network) RATIONALE \"x\"\nDEFINE DECLARATION service AS (VERB \"SERVICE\", SEATS [host: text?, needs: [caps]?], OPENS ghost) RATIONALE \"x\"\n",
+   "refusal": "OPENS: 'ghost' is neither a capability nor a seat of service"
+  },
+  {
+   "id": "R7",
+   "name": "OPENS a seat that is not a MENU",
+   "source": "DEFINE LANGUAGE q AS (VERSION \"0.40\", GRAMMAR \"0.40\", COURT \"x\", EXTENSION \".q\", NEEDS [network]) RATIONALE \"x\"\nDEFINE MENU caps AS (WORDS [network, process, filesystem], MESSAGE \"a capability\") RATIONALE \"x\"\nDEFINE DECLARATION service AS (VERB \"SERVICE\", SEATS [host: text?, needs: [caps]?], OPENS host) RATIONALE \"x\"\n",
+   "refusal": "OPENS: the seat 'host' of service is not a MENU of capabilities"
+  },
+  {
+   "id": "R8",
+   "name": "OPENS a seat whose MENU holds a word outside the nine",
+   "source": "DEFINE LANGUAGE q AS (VERSION \"0.40\", GRAMMAR \"0.40\", COURT \"x\", EXTENSION \".q\", NEEDS [network, process]) RATIONALE \"x\"\nDEFINE MENU caps AS (WORDS [network, process, internet], MESSAGE \"a capability\") RATIONALE \"x\"\nDEFINE DECLARATION listener AS (VERB \"LISTENER\", SEATS [host: text?], OPENS network) RATIONALE \"x\"\nDEFINE DECLARATION service AS (VERB \"SERVICE\", SEATS [host: text?, needs: [caps]?], OPENS needs) RATIONALE \"x\"\n",
+   "refusal": "OPENS: the seat 'needs' of service is a MENU holding 'internet', which is not a capability"
+  },
+  {
+   "id": "R9",
+   "name": "NEEDS on a kind is not a clause: a door is the language's to need",
+   "source": "DEFINE LANGUAGE q AS (VERSION \"0.40\", GRAMMAR \"0.40\", COURT \"x\", EXTENSION \".q\", NEEDS [network, process]) RATIONALE \"x\"\nDEFINE MENU caps AS (WORDS [network, process, filesystem], MESSAGE \"a capability\") RATIONALE \"x\"\nDEFINE DECLARATION listener AS (VERB \"LISTENER\", SEATS [host: text?], NEEDS [network]) RATIONALE \"x\"\nDEFINE DECLARATION service AS (VERB \"SERVICE\", SEATS [host: text?, needs: [caps]?], OPENS needs) RATIONALE \"x\"\n",
+   "refusal": "Unknown clause 'NEEDS' in DECLARATION"
+  }
+ ]
+}

@@ -86,6 +86,7 @@ STZU32_FIXTURES = os.path.join(HERE, 'v32', 'fixtures.json')
 STZU33_FIXTURES = os.path.join(HERE, 'v33', 'fixtures.json')
 STZU34_FIXTURES = os.path.join(HERE, 'v34', 'fixtures.json')
 STZU35_FIXTURES = os.path.join(HERE, 'v35', 'fixtures.json')
+STZU40_FIXTURES = os.path.join(HERE, 'v40', 'fixtures.json')
 
 
 def judge_stzu(exe, label, fixtures=STZU_FIXTURES):
@@ -95,7 +96,7 @@ def judge_stzu(exe, label, fixtures=STZU_FIXTURES):
     counts), world and points."""
     doc = json.load(open(fixtures, encoding='utf-8'))
     # the pinned v0.1 judge is stzu's; everything since is Haro's (D1)
-    assert doc['grammar'] in ('stzu', 'haro') and doc['version'] in ('0.1', '0.2', '0.3', '0.4', '0.5', '0.6', '0.7', '0.8', '0.9', '0.10', '0.11', '0.12', '0.13', '0.16', '0.17', '0.23', '0.24', '0.25', '0.26', '0.27', '0.28', '0.29', '0.32', '0.33', '0.34', '0.35')
+    assert doc['grammar'] in ('stzu', 'haro') and doc['version'] in ('0.1', '0.2', '0.3', '0.4', '0.5', '0.6', '0.7', '0.8', '0.9', '0.10', '0.11', '0.12', '0.13', '0.16', '0.17', '0.23', '0.24', '0.25', '0.26', '0.27', '0.28', '0.29', '0.32', '0.33', '0.34', '0.35', '0.40')
     passed = failed = 0
     outputs = {}
     with tempfile.TemporaryDirectory() as td:
@@ -183,7 +184,8 @@ def stage1():
                             ('v0.32, PATTERN: a rule over a seat, its sets collected by the court (BLOCKS.md 4.3)', STZU32_FIXTURES),
                             ("v0.33, INCLUDES, ON a FORM and a quantifier over a FORM: the sugar of a shared seat (Central's item 4, S5)", STZU33_FIXTURES),
                             ("v0.34, FIELDS on an ASK: where the schema of a kind asked lives (COMPASS-KERN-03)", STZU34_FIXTURES),
-                            ("v0.35, SEVERITIES: a reference seat and a NAMED kind held at warning (the per-seat severity)", STZU35_FIXTURES)):
+                            ("v0.35, SEVERITIES: a reference seat and a NAMED kind held at warning (the per-seat severity)", STZU35_FIXTURES),
+                            ("v0.40, NEEDS on a LANGUAGE and OPENS on a kind: the doors a language's worlds may open (D51's declared half)", STZU40_FIXTURES)):
         print(f'stage 1 -- the Haro meta-court in pure Ring, judged by its fixtures ({label})')
         f1, o1 = judge_stzu(HARO_VM, 'haro', fixtures)
         f2, o2 = judge_stzu(TWIN, 'haro checked', fixtures)
@@ -3462,6 +3464,15 @@ def stage39():
         return 1
     return 0
 
+DOOR_STZU = os.path.join(HERE, 'door_v40.haro')
+DOOR_CASES = os.path.join(HERE, 'v40', 'court_cases.json')
+def stage45():
+    """Haro v0.40, D51's declared half (v40/GRAMMAR.md): door_v40.haro NEEDS network and process; a LISTENER opens network by name, a SERVICE
+    opens what its NEEDS seat lists, a NOTE opens nothing. The forged court refuses a sentence whose SERVICE lists a door the language does not
+    NEED (CAPABILITY_NOT_NEEDED) and publishes each declaration's opened doors in its world rows, for the consumer that enforces them. Its cases
+    on both runtimes, byte-identical; one case reads panel_court.haro, a language that needs nothing, whose world must carry no opens."""
+    return ledger_stage(45, DOOR_STZU, DOOR_CASES, 'door', 'D1')
+
 PANEL_STZU = os.path.join(HERE, 'panel_v35.haro')
 PANEL_TWIN = os.path.join(HERE, 'v35', 'panel_errors.haro')
 PANEL_CASES = os.path.join(HERE, 'v35', 'court_cases.json')
@@ -3763,5 +3774,7 @@ if __name__ == '__main__':
         failures += stage43()
     if stage in (None, 44) and os.path.exists(RULE_COURT):
         failures += stage44()
+    if stage in (None, 45) and os.path.exists(DOOR_STZU) and os.path.exists(DOOR_CASES):
+        failures += stage45()
     print(f'haro_forge: {"FAIL" if failures else "PASS"} ({failures} failure(s), {time.perf_counter()-t0:.1f} s)')
     sys.exit(1 if failures else 0)

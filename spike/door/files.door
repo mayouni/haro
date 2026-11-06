@@ -1,0 +1,2 @@
+DEFINE LISTENER web AS (HOST "localhost") RATIONALE "x"
+DEFINE SERVICE api AS (NEEDS [network, filesystem]) RATIONALE "x"
