@@ -1394,7 +1394,11 @@ states principle 14.
   sweep reads 0, `haro/handle-held-across-raise` warn. **The order**, each a rung, fixtures first, a guard per semantics line on both builds: (1) A1 completed --
   `return`, `exit`, `loop` run `finally`; (2) A4's error value, which A1's cause line needs; (3) A2 and A3, rewritten onto (1); (4) the five rules, `last-error-read`
   first. Ring++ gets none of it (the document's own correction, SECURITY-HAROVM-01). *Found in passing:* stzlib's recovered plugin code writes `catch cError` in 4
-  files, a binding the surface never gave it -- each of those handlers reads an unset name today.
+  files, a binding the surface never gave it -- each of those handlers reads an unset name today. **Rung (1) built 2026-11-06, Haro v0.36** (the author: "Finish
+  finally first"): `finally` runs on every exit -- a `return`, `exit` or `loop` crossing it, innermost first and once, and a raise in the handler -- 24 cases on both
+  builds (stage 41). *The desk's reading, recorded as its own* (the spellings and the order were left to it): a `return` inside `finally` replaces the held exit, a
+  held return or a held raise, as a raise there does; A1 names only the raise. A held raise lost this way is the checker's to warn about (rung 4), not refused.
+  Two defects beyond D52's probes, found by the fixtures: a raise in the handler skipped `finally`, and a `try` inside a `finally` overwrote the error it held (HF-142).
 - **D23 -- `rnxc fmt` is a Ring++ feature, not held for Haro** (CODEGRAPH Q4, ruled on the author's delegation, 2026-10-05: "take
   whatever decision you think is wiser on my behalf"). It is a verb of the one binary (commitment 5), depends on nothing of Haro's, is
   judged against the oracle and refuses what Ring refuses (58 of 6,061 Softanza files, 57 of them Ring's own refusals). It ships inside

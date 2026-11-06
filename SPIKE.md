@@ -1727,6 +1727,21 @@ envelope code, cites and span; the rung's 28 protections, each switched off in t
 the cold compile 130.1 ms, the edit 14.3 ms. The machine court's cold compile 135.5 ms before the hooks and 135.2 after (alternating A/B, minima of 25). The family moves to 146 texts, 138 matching.
 **Not done, named**: a list of SYMBOLs; `unknown_seat` at warning; StzZui adopting it.
 
+## The thirty-sixth rung -- Haro v0.36, `finally` on every exit: A1 completed -- 2026-11-06
+
+**D52's rung (1)**, on the author's "Finish finally first". stzlib-security's A1, every semantics line, built in the surface `haro` compiles: a `return`, `exit`
+or `loop` crossing a `try` runs its `finally`, innermost first and once; a raise in the handler is held while it runs. Only the compiler changes
+(`vm/src/compile.zig`); no grammar, no court.
+
+    v36/fixtures.json, cases/           24 programs and the bytes each prints, written first (63b5c94): 4 held on haro before, 19 did not; F24 added after the code, said so
+    v36/finally_court.py                each case on haro and its checked build: exactly its bytes, exit 0, the two builds equal (stage 41)
+    v36/plants.py                       10 protections of compile.zig switched off in turn, each a rebuilt VM
+    v36/GRAMMAR.md                      the semantics as the VM holds them, how it is compiled, the desk's reading, what is not covered
+
+**Results.** 24 of 24 on both builds, byte-identical; 10 of 10 plants caught; stzlib's census unchanged line for line (142,013 statements, 0 refused). **The 41-stage
+guard passes every stage but 6** (2,466 s): stage 6's cold compile is over its 150 ms ceiling today on the VM before the change as after (180.1 and 185.9 ms, alternating
+A/B) -- the machine, not the rung (HF-142). **Not done, named**: the cause of a replaced error and `catch e` (rung 2); `bye`; a function whose locals share registers, unmeasured.
+
 ## The names -- `.haro`, not `.stzu` -- corrected 2026-10-02
 
 **At the author's word ("we agreed to use .haro instead of .stzu, no?").** D1 was ratified
@@ -1893,3 +1908,6 @@ whole guard re-run on the renamed tree: 28 + 30 + 27 + 23, 117 of 120, 32 of 32,
 31. ~~The per-seat severity~~ -- built 2026-11-05 as Haro v0.35, the thirty-fifth rung above: SEVERITIES on a reference seat and on a NAMED kind, a warning a refusal demoted.
    Central's batch of 2026-11-03 is answered whole. Next, in an order the author sets: stzlib-security's HARO-ONEHOUR-01 (NEEDS on a LANGUAGE) and HARO-ONEHOUR-02 (finally,
    within, using, catch e and five checker rules), HARO-DISTANCE-01 (the refusal count of stzlib under haro, a heavy sweep); and the Zui-to-Zane rename of this repository.
+32. ~~HARO-ONEHOUR-01, -02 and HARO-DISTANCE-01~~ -- answered 2026-11-05 (D50, D51, D52; HF-141). ~~D52 rung (1), A1 completed~~ -- built 2026-11-06 as Haro v0.36,
+   the thirty-sixth rung above. Next: D52 rung (2), the error value (`catch e`; Message, Code, Span, Cause; the cause of a replaced error); the declared half of D51
+   (NEEDS on a LANGUAGE, OPENS on a kind); the Zui-to-Zane rename of this repository; stzlib removing its use of Ring's standard library, by its own prompt.
