@@ -39,6 +39,7 @@
 const std = @import("std");
 const builtins = @import("builtins.zig");
 const ts = @import("ts.zig");
+const lift = @import("lift.zig");
 const chk = @import("check.zig");
 // src/project.zig held the package model of the library era and went with
 // it (52ed663). This module used exactly ONE function out of its 753
@@ -1280,10 +1281,12 @@ const Walker = struct {
                 std.mem.eql(u8, k, "brace_expression") or
                 std.mem.eql(u8, k, "class_definition") or
                 std.mem.eql(u8, k, "function_definition")) continue;
+            // a catch's binding is a write of its name (`catch e`, lifted to `catch(e)`; the checker reads the lifted tree, v0.39)
             if (std.mem.eql(u8, k, "assignment_expression") or
                 std.mem.eql(u8, k, "for_statement") or
                 std.mem.eql(u8, k, "give_statement") or
-                std.mem.eql(u8, k, "postfix_expression"))
+                std.mem.eql(u8, k, "postfix_expression") or
+                std.mem.eql(u8, k, "catch_clause"))
             {
                 var j: u32 = 0;
                 while (j < c.namedChildCount()) : (j += 1) {
@@ -1436,6 +1439,8 @@ const Walker = struct {
         _ = defined;
         const par = n.parent();
         if (!par.isNull() and (std.mem.eql(u8, par.kind(), "function_definition") or std.mem.eql(u8, par.kind(), "class_definition"))) return;
+        // a `within` or `using` block's word, where the lift put it: the head of a try, not a read (D52 rung 3)
+        if (!par.isNull() and lift.blockWord(par) != null and !par.parent().isNull() and std.mem.eql(u8, par.parent().kind(), "try_statement")) return;
         // The grammar reads `return func t { ... }` as a bare return and a BRACED definition named `t`, so the lambda's parameter arrives here as a read
         // of that definition's own name (bench/exec/lambda_return.ring). A braced definition is the lambda; its "name" is a parameter.
         if (bracedDefNamed(n, lk)) return;

@@ -52,7 +52,7 @@
    "why": "eval of text built at run time is an error",
    "file": "cases/T01.haro",
    "args": [],
-   "stdout": "T01.haro\n  4:2  error  haro/text-run-as-code\n          eval() runs text that is not a literal, and nothing in this body passed it to a validator\n\n  1 error, 0 warn, 0 perf, 0 note   in 1 file(s)\n  undefined-function, unknown-class/-package: NOT checked -- the unit calls loadlib() or eval()\n  uninitialized-variable: NOT checked -- the unit calls loadlib() or eval()\n  listener-binds-all: no listening native named (--listeners=), so no call was looked at\n"
+   "stdout": "T01.haro\n  4:2  error  haro/text-run-as-code\n          eval() runs text that is not a literal, and nothing in this body passed it to a validator\n\n  1 error, 0 warn, 0 perf, 0 note   in 1 file(s)\n  undefined-function, unknown-class/-package: NOT checked -- the unit calls loadlib() or eval()\n  listener-binds-all: no listening native named (--listeners=), so no call was looked at\n"
   },
   {
    "id": "T02",
@@ -61,7 +61,7 @@
    "why": "eval of literal text, a `+` of literals included, is not",
    "file": "cases/T02.haro",
    "args": [],
-   "stdout": "\n  0 error, 0 warn, 0 perf, 0 note   in 1 file(s)\n  undefined-function, unknown-class/-package: NOT checked -- the unit calls loadlib() or eval()\n  uninitialized-variable: NOT checked -- the unit calls loadlib() or eval()\n  listener-binds-all: no listening native named (--listeners=), so no call was looked at\n"
+   "stdout": "\n  0 error, 0 warn, 0 perf, 0 note   in 1 file(s)\n  undefined-function, unknown-class/-package: NOT checked -- the unit calls loadlib() or eval()\n  listener-binds-all: no listening native named (--listeners=), so no call was looked at\n"
   },
   {
    "id": "T03",
@@ -72,7 +72,7 @@
    "args": [
     "--validators=IsSafe"
    ],
-   "stdout": "\n  0 error, 0 warn, 0 perf, 0 note   in 1 file(s)\n  undefined-function, unknown-class/-package: NOT checked -- the unit calls loadlib() or eval()\n  uninitialized-variable: NOT checked -- the unit calls loadlib() or eval()\n  listener-binds-all: no listening native named (--listeners=), so no call was looked at\n"
+   "stdout": "\n  0 error, 0 warn, 0 perf, 0 note   in 1 file(s)\n  undefined-function, unknown-class/-package: NOT checked -- the unit calls loadlib() or eval()\n  listener-binds-all: no listening native named (--listeners=), so no call was looked at\n"
   },
   {
    "id": "T04",
@@ -81,7 +81,7 @@
    "why": "the same body, the checker told of no validator: an error",
    "file": "cases/T04.haro",
    "args": [],
-   "stdout": "T04.haro\n  5:3  error  haro/text-run-as-code\n          eval() runs text that is not a literal, and nothing in this body passed it to a validator\n\n  1 error, 0 warn, 0 perf, 0 note   in 1 file(s)\n  undefined-function, unknown-class/-package: NOT checked -- the unit calls loadlib() or eval()\n  uninitialized-variable: NOT checked -- the unit calls loadlib() or eval()\n  listener-binds-all: no listening native named (--listeners=), so no call was looked at\n"
+   "stdout": "T04.haro\n  5:3  error  haro/text-run-as-code\n          eval() runs text that is not a literal, and nothing in this body passed it to a validator\n\n  1 error, 0 warn, 0 perf, 0 note   in 1 file(s)\n  undefined-function, unknown-class/-package: NOT checked -- the unit calls loadlib() or eval()\n  listener-binds-all: no listening native named (--listeners=), so no call was looked at\n"
   },
   {
    "id": "T05",
@@ -92,7 +92,7 @@
    "args": [
     "--validators=IsSafe"
    ],
-   "stdout": "T05.haro\n  6:2  error  haro/text-run-as-code\n          eval() runs text that is not a literal, and nothing in this body passed it to a validator\n\n  1 error, 0 warn, 0 perf, 0 note   in 1 file(s)\n  undefined-function, unknown-class/-package: NOT checked -- the unit calls loadlib() or eval()\n  uninitialized-variable: NOT checked -- the unit calls loadlib() or eval()\n  listener-binds-all: no listening native named (--listeners=), so no call was looked at\n"
+   "stdout": "T05.haro\n  6:2  error  haro/text-run-as-code\n          eval() runs text that is not a literal, and nothing in this body passed it to a validator\n\n  1 error, 0 warn, 0 perf, 0 note   in 1 file(s)\n  undefined-function, unknown-class/-package: NOT checked -- the unit calls loadlib() or eval()\n  listener-binds-all: no listening native named (--listeners=), so no call was looked at\n"
   },
   {
    "id": "N01",
@@ -196,6 +196,24 @@
    "file": "cases/H04.haro",
    "args": [],
    "stdout": "H04.haro\n  3:2  warn   haro/handle-held-across-raise\n          nH holds an engine handle from StzEngineCacheCreate() and no finally releases it -- a raise between leaves it held\n\n  0 error, 1 warn, 0 perf, 0 note   in 1 file(s)\n  listener-binds-all: no listening native named (--listeners=), so no call was looked at\n"
+  },
+  {
+   "id": "H05",
+   "kind": "check",
+   "line": "R5",
+   "why": "a method writing a handle into an attribute its class declares holds it in the object, not a local",
+   "file": "cases/H05.haro",
+   "args": [],
+   "stdout": "\n  0 error, 0 warn, 0 perf, 0 note   in 1 file(s)\n  listener-binds-all: no listening native named (--listeners=), so no call was looked at\n"
+  },
+  {
+   "id": "H06",
+   "kind": "check",
+   "line": "R5",
+   "why": "the same, where the grammar ends the class early and its methods stand at the top level",
+   "file": "cases/H06.haro",
+   "args": [],
+   "stdout": "\n  0 error, 0 warn, 0 perf, 0 note   in 1 file(s)\n  listener-binds-all: no listening native named (--listeners=), so no call was looked at\n"
   }
  ]
 }

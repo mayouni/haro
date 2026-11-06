@@ -43,8 +43,9 @@ M_IN = 'cCatchError read in its handler -- bind the error instead (`catch e`) an
 M_OUT = 'cCatchError read outside a handler -- it is the last error of whoever raised, not this code\'s'
 M_EVAL = 'eval() runs text that is not a literal, and nothing in this body passed it to a validator'
 NO_LISTEN = '  listener-binds-all: no listening native named (--listeners=), so no call was looked at'
-SHUT = ['  undefined-function, unknown-class/-package: NOT checked -- the unit calls loadlib() or eval()',
-        '  uninitialized-variable: NOT checked -- the unit calls loadlib() or eval()']
+# CHANGED after the court spoke: SHUT held a second line, `uninitialized-variable: NOT checked`, which `eval("x = " + c)` never prints -- the
+# universe reads the eval's target from its literal prefix. Taken from a probe whose eval was opaque (`eval(c)`); T01-T05 changed with it.
+SHUT = ['  undefined-function, unknown-class/-package: NOT checked -- the unit calls loadlib() or eval()']
 
 
 def listen(name, lit):
@@ -159,6 +160,22 @@ CASES = [
         'f()', 'func f', T + 'nH = StzEngineCacheCreate(8)', T + 'use(nH)', T + 'nX = MakeCreate()', 'func StzEngineCacheCreate n', T + 'return 1',
         'func MakeCreate', T + 'return 1', 'func use n', T + 'return 0'], [],
      lambda c: report(c, [('3:2', 'warn', 'haro/handle-held-across-raise', held('nH', 'StzEngineCacheCreate'))], (0, 1, 0), [NO_LISTEN])),
+
+    # WRITTEN AFTER THE CODE: found on stzlib f77486b5a, where 9 of the rule's first 14 findings were a method writing a handle into its
+    # class's declared attribute -- the object's, kept on purpose for its Release().
+    ('H05', 'R5', 'a method writing a handle into an attribute its class declares holds it in the object, not a local', [
+        '$o = new Token', '$o.Open()', 'func StzEngineCancelCreate', T + 'return 1', 'func StzEngineCancelDestroy n', T + 'return 0',
+        'class Token', T + 'pHandle = 0', T + 'func Open', T * 2 + 'pHandle = StzEngineCancelCreate()', T + 'func Release',
+        T * 2 + 'StzEngineCancelDestroy(pHandle)'], [],
+     lambda c: report(c, [], (0, 0, 0), [NO_LISTEN])),
+    # WRITTEN AFTER THE CODE: stzlib's stzCancelToken.ring, where the grammar ends the class after its first attribute (a comment line follows
+    # it) and leaves the next attribute and every method at the top level, which the compiler reads as the class's.
+    ('H06', 'R5', 'the same, where the grammar ends the class early and its methods stand at the top level', [
+        '$o = MakeToken()', '$o.Open()', 'func StzEngineCancelCreate', T + 'return 1', 'func StzEngineCancelDestroy n', T + 'return 0',
+        'func MakeToken()', T + 'return new Token()', '', '# the shape of stzCancelToken.ring: a function returning the new object, a comment, the class',
+        '', 'class Token', '', T + 'nOther = 0', T + '# a comment line after an attribute', T + 'pHandle = 0', '', T + 'def Open()',
+        T * 2 + 'pHandle = StzEngineCancelCreate()', '', T + 'def Release()', T * 2 + 'StzEngineCancelDestroy(pHandle)'], [],
+     lambda c: report(c, [], (0, 0, 0), [NO_LISTEN])),
 ]
 
 os.makedirs(os.path.join(HERE, 'cases'), exist_ok=True)

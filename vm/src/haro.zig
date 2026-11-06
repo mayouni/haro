@@ -84,6 +84,8 @@ const Unit = struct {
     /// Parallel to roots: each file's bytes as they stand ON DISK. A root's `src` is the text its tree indexes, which is the file's own
     /// unless a `not` was lifted (src/lift.zig); the image stamps and anything printed for an applier are of the file.
     origs: std.ArrayListUnmanaged([]const u8) = .{},
+    /// per file, what the lift put in (lift.Insert): the checker names the file's columns from the lifted tree with it
+    inserts: std.ArrayListUnmanaged([]const lift.Insert) = .{},
     /// Read Ring's `not` as Ring does (C-32). Off for the commands that print a BYTE OFFSET into the file (migrate, attrs, shadows) and
     /// for `dump`, which shows the grammar's own tree.
     lift: bool = true,
@@ -595,6 +597,7 @@ fn loadUnit(
         try u.trees.append(alloc, tree);
         try u.roots.append(alloc, tree.root());
         try u.origs.append(alloc, src);
+        try u.inserts.append(alloc, lf.inserts);
         try u.paths.append(alloc, p);
         try u.names.append(alloc, qnames.items[qi]);
 
@@ -4114,6 +4117,8 @@ pub fn main() !void {
         try unit.trees.appendSlice(alloc, on_top.trees.items);
         for (0..nlib) |_| try unit.origs.append(alloc, "");
         try unit.origs.appendSlice(alloc, on_top.origs.items);
+        for (0..nlib) |_| try unit.inserts.append(alloc, &.{});
+        try unit.inserts.appendSlice(alloc, on_top.inserts.items);
         const srcs = try alloc.alloc([*]const u8, unit.paths.items.len);
         for (srcs) |*x| x.* = @ptrCast(&no_src);
         for (on_top.roots.items, 0..) |r, k| srcs[nlib + k] = r.src.ptr;
@@ -4920,11 +4925,22 @@ pub fn main() !void {
         var advise = false;
         var closed = false;
         var natives_path: ?[]const u8 = null;
+        // D52 rung 4: what the checker is told -- the natives that listen, the functions that validate text before it runs
+        var listeners = std.ArrayListUnmanaged([]const u8){};
+        var validators = std.ArrayListUnmanaged([]const u8){};
         if (argv.len > 3) {
             for (argv[3..]) |a| {
                 if (std.mem.eql(u8, a, "--advise")) advise = true;
                 if (std.mem.eql(u8, a, "--closed")) closed = true;
                 if (std.mem.startsWith(u8, a, "--natives=")) natives_path = a["--natives=".len..];
+                if (std.mem.startsWith(u8, a, "--listeners=")) {
+                    var it = std.mem.tokenizeScalar(u8, a["--listeners=".len..], ',');
+                    while (it.next()) |x| try listeners.append(alloc, x);
+                }
+                if (std.mem.startsWith(u8, a, "--validators=")) {
+                    var it = std.mem.tokenizeScalar(u8, a["--validators=".len..], ',');
+                    while (it.next()) |x| try validators.append(alloc, x);
+                }
             }
         }
         var report = check.Report.init(alloc);
@@ -4948,10 +4964,13 @@ pub fn main() !void {
             n_natives = names.items.len;
         }
         const ctx = uni.ctx();
-        // Each file's text as the unit READ it (origs) -- the file's bytes on disk, or the text `--subst` gave it.
-        for (unit.roots.items, 0..) |_, i| {
+        // Each file as the unit READ it (origs: the file's bytes on disk, or the text `--subst` gave it) and LIFTED it -- the tree the
+        // compiler reads (v0.39: `catch e` binds e, a `within` is a block); the findings name the file's own columns.
+        const opts = check.Opts{ .listeners = listeners.items, .validators = validators.items };
+        for (unit.roots.items, 0..) |r, i| {
+            if (unit.origs.items[i].len == 0) continue;
             const path = unit.paths.items[i];
-            check.checkSourceCtx(alloc, parser, path, unit.origs.items[i], &report, ctx) catch continue;
+            check.checkLifted(alloc, r, path, &report, ctx, opts, unit.inserts.items[i]) catch continue;
         }
         var last_file: []const u8 = "";
         for (report.findings.items) |f| {
@@ -4990,6 +5009,9 @@ pub fn main() !void {
             else
                 "an eval() in the unit assigns a name this pass cannot read"});
         }
+        // A rule told of nothing looks at nothing, and says so -- in words a gate does not take for a checker shut (v20/refine.py reads
+        // "NOT checked --" as that): this rule's silence hides nothing about a body.
+        if (listeners.items.len == 0) try w.print("  listener-binds-all: no listening native named (--listeners=), so no call was looked at\n", .{});
         try w.flush();
         return;
     }

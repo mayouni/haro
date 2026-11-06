@@ -3563,6 +3563,23 @@ def stage43():
         return 1
     return 0
 
+RULE_COURT = os.path.join(HERE, 'v39', 'rule_court.py')
+def stage44():
+    """Haro v0.39, D52 rung (4): A5's five rules in `haro check` -- last-error-read (note), text-run-as-code (err), listener-binds-all (warn),
+    global-restored-by-hand (warn), handle-held-across-raise (warn) -- over the LIFTED tree, the one the compiler reads, each finding at the file's
+    own column. v39/rule_court.py runs the 22 cases of v39/fixtures.json on haro and its checked build: each report's lines but the detail prose
+    exactly as pinned, and the two builds the same bytes."""
+    print('stage 44 -- the five checker rules: v39/rule_court.py on haro and its checked build')
+    p = subprocess.run([sys.executable, RULE_COURT] + (['--plant'] if PLANT else []), capture_output=True, cwd=HERE, timeout=600)
+    out = p.stdout.decode('utf-8', 'replace').replace(chr(13) + chr(10), chr(10))
+    for line in out.splitlines():
+        if line.startswith('  FAIL') or line.startswith('       ') or line.startswith('RULE COURT'):
+            print(line)
+    if p.returncode != 0:
+        print(f'  FAIL the rule court exited {p.returncode}' + ('' if out.strip() else ': ' + p.stderr.decode('utf-8', 'replace')[-400:]))
+        return 1
+    return 0
+
 SENTENCE_TARGET = 50.0     # D42: a sentence edited, its court's image reused -- what a person editing a sentence waits for
 COLD_CEILING = 150.0       # D42: the court compiled from scratch -- a ceiling that catches the court library growing
 
@@ -3744,5 +3761,7 @@ if __name__ == '__main__':
         failures += stage42()
     if stage in (None, 43) and os.path.exists(BLOCK_COURT):
         failures += stage43()
+    if stage in (None, 44) and os.path.exists(RULE_COURT):
+        failures += stage44()
     print(f'haro_forge: {"FAIL" if failures else "PASS"} ({failures} failure(s), {time.perf_counter()-t0:.1f} s)')
     sys.exit(1 if failures else 0)

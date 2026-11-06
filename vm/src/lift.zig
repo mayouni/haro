@@ -33,7 +33,50 @@ pub var block_sites: u32 = 0;
 pub var trace: bool = false;
 var file_name: []const u8 = "";
 
-pub const Lifted = struct { tree: ts.Tree, src: []const u8 };
+/// What the lift made of a file: the tree, the text it indexes, and what was put in to make that text from the file's.
+pub const Lifted = struct { tree: ts.Tree, src: []const u8, inserts: []const Insert = &.{} };
+
+/// `len` bytes the lift put in before byte `pos` of the FILE's text; a list of them is in text order.
+pub const Insert = struct { pos: u32, len: u32 };
+
+/// The byte of the file's text that byte `at` of the lifted text came from; a byte the lift put in is the place it was put (v0.39: the
+/// checker reads the lifted tree and names the file's own columns).
+pub fn fileByte(inserts: []const Insert, at: u32) u32 {
+    var shift: u32 = 0;
+    for (inserts) |x| {
+        const start = x.pos + shift;
+        if (at < start) break;
+        if (at < start + x.len) return x.pos;
+        shift += x.len;
+    }
+    return at - shift;
+}
+
+/// `prior` in the file's coordinates, `edits` (sorted) in those of the text `prior` made: the two in the file's, in text order. An edit at the
+/// place an earlier insert begins goes before it, as splice puts it.
+fn compose(alloc: std.mem.Allocator, prior: []const Insert, edits: []const Edit) ?[]const Insert {
+    const out = alloc.alloc(Insert, prior.len + edits.len) catch return null;
+    var i: usize = 0;
+    var j: usize = 0;
+    var k: usize = 0;
+    var shift: u32 = 0;
+    while (j < edits.len) {
+        if (i < prior.len and prior[i].pos + shift < edits[j].pos) {
+            out[k] = prior[i];
+            shift += prior[i].len;
+            i += 1;
+        } else {
+            out[k] = .{ .pos = edits[j].pos - shift, .len = @intCast(piece(edits[j]).len) };
+            j += 1;
+        }
+        k += 1;
+    }
+    while (i < prior.len) : (i += 1) {
+        out[k] = prior[i];
+        k += 1;
+    }
+    return out;
+}
 
 /// A parenthesis to put in at `pos`, or, when `text` is given, that text.
 const Edit = struct { pos: u32, close: bool, text: []const u8 = "" };
@@ -379,7 +422,7 @@ pub fn blocks(alloc: std.mem.Allocator, parser: ts.Parser, tree: ts.Tree, src: [
     defer edits.deinit(alloc);
     findBlocks(alloc, tree.root(), &edits) catch return .{ .tree = tree, .src = src };
     if (edits.items.len == 0) return .{ .tree = tree, .src = src };
-    const r = splice(alloc, parser, tree, src, edits.items) orelse return .{ .tree = tree, .src = src };
+    const r = splice(alloc, parser, tree, src, edits.items, &.{}) orelse return .{ .tree = tree, .src = src };
     tree.deinit();
     block_sites += @intCast(edits.items.len / 2);
     return r;
@@ -387,7 +430,7 @@ pub fn blocks(alloc: std.mem.Allocator, parser: ts.Parser, tree: ts.Tree, src: [
 
 /// The text with each edit's parenthesis put in, parsed again. Null when it does not parse, or when a file that parsed no longer does:
 /// a rewrite that breaks a file is no fix, so the grammar's reading is kept and nothing worse than before is said.
-fn splice(alloc: std.mem.Allocator, parser: ts.Parser, tree: ts.Tree, src: []const u8, edits: []Edit) ?Lifted {
+fn splice(alloc: std.mem.Allocator, parser: ts.Parser, tree: ts.Tree, src: []const u8, edits: []Edit, prior: []const Insert) ?Lifted {
     std.mem.sort(Edit, edits, {}, order);
     var extra: usize = 0;
     for (edits) |e| extra += piece(e).len;
@@ -411,7 +454,11 @@ fn splice(alloc: std.mem.Allocator, parser: ts.Parser, tree: ts.Tree, src: []con
         again.deinit();
         return null;
     }
-    return .{ .tree = again, .src = text };
+    const ins = compose(alloc, prior, edits) orelse {
+        again.deinit();
+        return null;
+    };
+    return .{ .tree = again, .src = text, .inserts = ins };
 }
 
 pub fn apply(alloc: std.mem.Allocator, parser: ts.Parser, tree_in: ts.Tree, src_in: []const u8, name: []const u8) Lifted {
@@ -421,22 +468,24 @@ pub fn apply(alloc: std.mem.Allocator, parser: ts.Parser, tree_in: ts.Tree, src_
     const bl = blocks(alloc, parser, tree_in, src_in);
     var tree = bl.tree;
     var src = bl.src;
+    var ins = bl.inserts;
     if (std.ascii.indexOfIgnoreCase(src, "catch") != null) {
         var edits = std.ArrayListUnmanaged(Edit){};
         defer edits.deinit(alloc);
         findCatch(alloc, tree.root(), &edits) catch {};
         if (edits.items.len > 0) {
-            if (splice(alloc, parser, tree, src, edits.items)) |r| {
+            if (splice(alloc, parser, tree, src, edits.items, ins)) |r| {
                 tree.deinit();
                 tree = r.tree;
                 src = r.src;
+                ins = r.inserts;
                 catch_sites += @intCast(edits.items.len / 2);
             }
         }
     }
     // `not` and `!` are the only words that matter, and most files hold neither
     if (std.ascii.indexOfIgnoreCase(src, "not") == null and std.mem.indexOfScalar(u8, src, '!') == null)
-        return .{ .tree = tree, .src = src };
+        return .{ .tree = tree, .src = src, .inserts = ins };
 
     var lifted_here: u32 = 0;
     // a `not not` chain gains one level of parentheses a pass; Ring refuses that shape (C28), so the bound only has to be finite
@@ -446,15 +495,16 @@ pub fn apply(alloc: std.mem.Allocator, parser: ts.Parser, tree_in: ts.Tree, src_
         defer edits.deinit(alloc);
         findSites(alloc, tree.root(), &edits) catch break;
         if (edits.items.len == 0) break;
-        const r = splice(alloc, parser, tree, src, edits.items) orelse break;
+        const r = splice(alloc, parser, tree, src, edits.items, ins) orelse break;
         tree.deinit();
         tree = r.tree;
         src = r.src;
+        ins = r.inserts;
         lifted_here += @intCast(edits.items.len / 2);
     }
     if (lifted_here > 0) {
         sites += lifted_here;
         files += 1;
     }
-    return .{ .tree = tree, .src = src };
+    return .{ .tree = tree, .src = src, .inserts = ins };
 }

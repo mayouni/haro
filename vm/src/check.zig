@@ -6,6 +6,7 @@
 const std = @import("std");
 const ts = @import("ts.zig");
 const types = @import("types.zig");
+const lift = @import("lift.zig");
 
 pub const Severity = enum {
     err,
@@ -349,6 +350,144 @@ const Walker = struct {
     pointerish: *std.StringHashMap(void),
     unparsed_reported: bool = false,
     in_class: bool = false,
+    listeners: []const []const u8 = &.{},
+    validators: []const []const u8 = &.{},
+
+    // ---- A5's five rules (D52 rung 4, Haro v0.39), each named in stzlib's SOFTANZA_ONE_HOUR.md section 3 and respelled by D52
+
+    /// `haro/last-error-read`, note (ruling 2: note from the day `catch e` ships, err when stzlib's sweep reads 0). Every READ of
+    /// cCatchError: a member of that name, a write and a binding are not reads. Worded for where it stands, because ruling 2's sweep
+    /// counts every read: in its handler it is the error to bind, outside one it is whoever raised last.
+    fn lastErrorRead(self: *Walker, n: ts.Node) !void {
+        if (!eqIgnoreCase(n.text(), "cCatchError")) return;
+        const par = n.parent();
+        if (!par.isNull()) {
+            const pk = par.kind();
+            if (std.mem.eql(u8, pk, "member_expression") and par.namedChildCount() > 0 and par.namedChild(0).startByte() != n.startByte()) return;
+            if (std.mem.eql(u8, pk, "assignment_expression") and par.namedChildCount() > 0 and par.namedChild(0).startByte() == n.startByte()) return;
+            if (std.mem.eql(u8, pk, "catch_clause")) return;
+        }
+        const in_handler = hasAncestor(n, "catch_clause");
+        try self.report.add(self.gpa, self.file, n, .note, "haro/last-error-read", "{s}", .{if (in_handler)
+            @as([]const u8, "cCatchError read in its handler -- bind the error instead (`catch e`) and read e")
+        else
+            "cCatchError read outside a handler -- it is the last error of whoever raised, not this code's"}, "cCatchError is one name for the whole process: every raise overwrites it, so outside its handler it holds whoever failed last, and inside it is a name the handler did not choose. Haro binds the error (`catch e`, v0.37), which also answers Message(), Code(), Span() and Cause(). Reported at note until stzlib's sweep reads 0, then at error (ruling 2 of SOFTANZA_ONE_HOUR.md; D52).");
+    }
+
+    /// `haro/text-run-as-code`, err. eval() of text that is not literal -- a string, or a `+` of strings -- unless a validator the checker
+    /// was told of (--validators=) is called somewhere in the same body, which is how stzlib's own rule reads "passed" (R17).
+    fn textRunAsCode(self: *Walker, n: ts.Node) !void {
+        if (!eqIgnoreCase(calleeName(n), "eval")) return;
+        const arg = argAt(n, 0) orelse return;
+        if (literalText(arg)) return;
+        if (self.validators.len > 0) {
+            var body = std.ArrayListUnmanaged(ts.Node){};
+            defer body.deinit(self.gpa);
+            if (ownerOf(n)) |f| {
+                try bodyNodes(self.gpa, f, &body);
+            } else {
+                // the top level: its statements, not the definitions after them
+                var top = n;
+                while (!top.parent().isNull()) top = top.parent();
+                var i: u32 = 0;
+                while (i < top.namedChildCount()) : (i += 1) {
+                    const k = top.namedChild(i).kind();
+                    if (!std.mem.eql(u8, k, "function_definition") and !std.mem.eql(u8, k, "class_definition")) try body.append(self.gpa, top.namedChild(i));
+                }
+            }
+            for (body.items) |b| {
+                if (callsAny(b, self.validators)) return;
+            }
+        }
+        try self.report.add(self.gpa, self.file, n, .err, "haro/text-run-as-code", "eval() runs text that is not a literal, and nothing in this body passed it to a validator", .{}, "Text built at run time and run as code is the injection shape stzlib closed at 7 sites on 2026-10-22 (R17). Pass the text through a validator in this body -- name it to the checker with --validators=Name -- or judge it with something that does not run it. A validator in the CALLER is not seen: the body that runs the text is the one that must have checked it (D52, A5).");
+    }
+
+    /// `haro/listener-binds-all`, warn. A literal "0.0.0.0", "::" or "" given directly to a listening native the checker was told of
+    /// (--listeners=): a listener whose address reaches every interface (Node-RED's shape).
+    fn listenerBindsAll(self: *Walker, n: ts.Node) !void {
+        if (self.listeners.len == 0) return;
+        const callee = calleeName(n);
+        if (callee.len == 0 or !inNames(callee, self.listeners)) return;
+        var i: u32 = 0;
+        while (argAt(n, i)) |a| : (i += 1) {
+            if (!std.mem.eql(u8, a.kind(), "string")) continue;
+            const t = a.text();
+            if (t.len < 2) continue;
+            const v = t[1 .. t.len - 1];
+            if (std.mem.eql(u8, v, "0.0.0.0") or std.mem.eql(u8, v, "::") or v.len == 0) {
+                try self.report.add(self.gpa, self.file, a, .warn, "haro/listener-binds-all", "{s}() given \"{s}\" -- a listener bound to every interface", .{ callee, v }, "A listener whose address is every interface answers whoever can reach the machine. Bind 127.0.0.1 unless the caller asked for more, and let the caller ask in a name. Only a literal given directly is seen; an address passed through a variable is not followed (D52, A5).");
+            }
+        }
+    }
+
+    /// `haro/global-restored-by-hand`, warn. A body that saves a `$global` in a local (`cOld = $g`) and later writes it back from that
+    /// local (`$g = cOld`), with no restore in a `finally`: the shape `within` replaces (A2). Worded for whether a catch restores it too.
+    fn restoredByHand(self: *Walker, f: ts.Node) !void {
+        var saves = std.ArrayListUnmanaged(ts.Node){};
+        defer saves.deinit(self.gpa);
+        var backs = std.ArrayListUnmanaged(ts.Node){};
+        defer backs.deinit(self.gpa);
+        var body = std.ArrayListUnmanaged(ts.Node){};
+        defer body.deinit(self.gpa);
+        try bodyNodes(self.gpa, f, &body);
+        for (body.items) |b| try plainAssigns(self.gpa, b, &saves, &backs);
+        // the saves and the writes back are both `name = name`: one list, read twice
+        try backs.appendSlice(self.gpa, saves.items);
+        std.mem.sort(ts.Node, backs.items, {}, byStart);
+        for (saves.items) |s| {
+            const local = s.namedChild(0).text();
+            const g = s.namedChild(1).text();
+            if (!(local.len > 0 and local[0] != '$' and local[0] != '@' and g.len > 1 and g[0] == '$')) continue;
+            var first: ?ts.Node = null;
+            var in_catch = false;
+            var in_finally = false;
+            for (backs.items) |b| {
+                if (b.startByte() <= s.startByte()) continue;
+                if (!eqIgnoreCase(b.namedChild(0).text(), g) or !eqIgnoreCase(b.namedChild(1).text(), local)) continue;
+                if (first == null) first = b;
+                if (hasAncestor(b, "catch_clause")) in_catch = true;
+                if (hasAncestor(b, "finally_clause")) in_finally = true;
+            }
+            const b = first orelse continue;
+            if (in_finally) continue;
+            const line = b.start().row + 1;
+            if (in_catch) {
+                try self.report.add(self.gpa, self.file, s, .warn, "haro/global-restored-by-hand", "{s} is saved in {s} here and written back by hand at line {d}, in a catch too -- `within {s} = ...` is this shape, written once", .{ g, local, line, g }, "The restore is written twice, once for a raise and once for the normal path, and a return between them skips both. `within $g = value ... done` saves, sets and restores on every exit (D52, A2).");
+            } else {
+                try self.report.add(self.gpa, self.file, s, .warn, "haro/global-restored-by-hand", "{s} is saved in {s} here and written back by hand at line {d}, and a raise between leaves it set -- write `within {s} = ...`", .{ g, local, line, g }, "PHP2Shell's shape: a raise or a return between the save and the restore leaves the global set for whoever runs next (8 sites in stzlib, 2 with nothing on a raise; SECURITY-AMBIENT-01). `within $g = value ... done` restores it on every exit (D52, A2).");
+            }
+        }
+    }
+
+    /// `haro/handle-held-across-raise`, warn. A LOCAL assigned an engine handle -- a call named StzEngine...Create or StzEngine...Hold --
+    /// that no `finally` of the body releases (a call naming Release, Destroy or Close with it) and that the body does not return: a
+    /// raise between leaves it held (KERN-07's residue). A handle in a `$global` or an `@attribute` is kept on purpose.
+    fn handleHeld(self: *Walker, f: ts.Node) !void {
+        var all = std.ArrayListUnmanaged(ts.Node){};
+        defer all.deinit(self.gpa);
+        var unused = std.ArrayListUnmanaged(ts.Node){};
+        defer unused.deinit(self.gpa);
+        var body = std.ArrayListUnmanaged(ts.Node){};
+        defer body.deinit(self.gpa);
+        try bodyNodes(self.gpa, f, &body);
+        for (body.items) |b| try plainAssigns(self.gpa, b, &unused, &all);
+        for (all.items) |s| {
+            const local = s.namedChild(0).text();
+            if (local.len == 0 or local[0] == '$' or local[0] == '@') continue;
+            if (classDeclares(f, local)) continue;
+            const rhs = s.namedChild(1);
+            if (!std.mem.eql(u8, rhs.kind(), "call_expression")) continue;
+            const callee = calleeName(rhs);
+            if (!(callee.len > 9 and std.ascii.startsWithIgnoreCase(callee, "stzengine") and
+                (std.ascii.endsWithIgnoreCase(callee, "create") or std.ascii.endsWithIgnoreCase(callee, "hold")))) continue;
+            var kept = false;
+            for (body.items) |b| {
+                if (returns(b, local) or releasedInFinally(b, local)) kept = true;
+            }
+            if (kept) continue;
+            try self.report.add(self.gpa, self.file, s, .warn, "haro/handle-held-across-raise", "{s} holds an engine handle from {s}() and no finally releases it -- a raise between leaves it held", .{ local, callee }, "An engine handle is a number the engine keeps a resource behind; nothing frees it when the local goes out of scope. Release it in a `finally` -- or hold it in an object with a Release() and open it with `using` (D52, A3) -- so a raise between cannot keep it (KERN-07).");
+        }
+    }
 
     /// The patch shape of examples/01: a `+` chain containing BOTH a left()
     /// and a substr() call over the same statement. Checked on the top
@@ -413,6 +552,17 @@ const Walker = struct {
 
     fn visit(self: *Walker, n: ts.Node) !void {
         const kind = n.kind();
+
+        // A5's five rules (D52 rung 4)
+        if (std.mem.eql(u8, kind, "identifier")) try self.lastErrorRead(n);
+        if (std.mem.eql(u8, kind, "call_expression")) {
+            try self.textRunAsCode(n);
+            try self.listenerBindsAll(n);
+        }
+        if (std.mem.eql(u8, kind, "function_definition")) {
+            try self.restoredByHand(n);
+            try self.handleHeld(n);
+        }
 
         // A parse failure is NEVER reported as an error about the user's code.
         // tree-sitter is a lens, not a judge (docs/DESIGN_TOOLCHAIN.md Â§5): the
@@ -787,6 +937,178 @@ fn put(gpa: std.mem.Allocator, out: *std.StringHashMap(void), name: []const u8) 
     try out.put(buf, {});
 }
 
+
+// ---- helpers of A5's rules (D52 rung 4)
+
+/// A function's statements. The grammar can end a function_definition early and leave the rest of the body as the siblings after it
+/// (v39 G01: the definition held `cOld = $g` and nothing after); the compiler, as Ring does, reads them as the function's, and so does
+/// types.zig. So a body is the definition and its siblings up to the next definition.
+fn bodyNodes(gpa: std.mem.Allocator, f: ts.Node, out: *std.ArrayListUnmanaged(ts.Node)) !void {
+    try out.append(gpa, f);
+    var s = f.nextNamedSibling();
+    while (!s.isNull()) : (s = s.nextNamedSibling()) {
+        const k = s.kind();
+        if (std.mem.eql(u8, k, "function_definition") or std.mem.eql(u8, k, "class_definition")) break;
+        try out.append(gpa, s);
+    }
+}
+
+/// The definition whose body holds `n` -- by the reading of bodyNodes -- or null for the top level and a class's own statements.
+fn ownerOf(n: ts.Node) ?ts.Node {
+    var a = n;
+    while (true) {
+        if (std.mem.eql(u8, a.kind(), "function_definition")) return a;
+        const p = a.parent();
+        if (p.isNull()) return null;
+        if (std.mem.eql(u8, p.kind(), "source_file") or std.mem.eql(u8, p.kind(), "class_definition")) break;
+        a = p;
+    }
+    var s = a.prevNamedSibling();
+    while (!s.isNull()) : (s = s.prevNamedSibling()) {
+        if (std.mem.eql(u8, s.kind(), "function_definition")) return s;
+        if (std.mem.eql(u8, s.kind(), "class_definition")) return null;
+    }
+    return null;
+}
+
+fn hasAncestor(n: ts.Node, kind: []const u8) bool {
+    var a = n.parent();
+    while (!a.isNull()) : (a = a.parent()) {
+        if (std.mem.eql(u8, a.kind(), kind)) return true;
+        if (std.mem.eql(u8, a.kind(), "function_definition")) return false;
+    }
+    return false;
+}
+
+/// Does the class `f` is a method of declare `name` -- an assignment among its statements before its first method? A method's bare write to
+/// such a name is the object's attribute (v39 H05). The grammar can end a class_definition after its first statement and leave the rest of
+/// the class -- attributes and methods -- as top-level siblings (stzlib's stzCancelToken.ring, v39 H06); the compiler reads them as the
+/// class's, and so does this: the class is the nearest class_definition before the method, and its statements run on past it.
+fn classDeclares(f: ts.Node, name: []const u8) bool {
+    var cls = f.parent();
+    if (cls.isNull()) return false;
+    if (!std.mem.eql(u8, cls.kind(), "class_definition")) {
+        cls = f.prevNamedSibling();
+        while (!cls.isNull() and !std.mem.eql(u8, cls.kind(), "class_definition")) cls = cls.prevNamedSibling();
+        if (cls.isNull()) return false;
+    }
+    var i: u32 = 0;
+    while (i < cls.namedChildCount()) : (i += 1) {
+        const ch = cls.namedChild(i);
+        if (std.mem.eql(u8, ch.kind(), "function_definition")) return false;
+        if (declares(ch, name)) return true;
+    }
+    var s = cls.nextNamedSibling();
+    while (!s.isNull()) : (s = s.nextNamedSibling()) {
+        if (std.mem.eql(u8, s.kind(), "function_definition") or std.mem.eql(u8, s.kind(), "class_definition")) return false;
+        if (declares(s, name)) return true;
+    }
+    return false;
+}
+
+fn declares(st: ts.Node, name: []const u8) bool {
+    if (!std.mem.eql(u8, st.kind(), "expression_statement") or st.namedChildCount() == 0) return false;
+    const a = st.namedChild(0);
+    return std.mem.eql(u8, a.kind(), "assignment_expression") and a.namedChildCount() > 0 and
+        std.mem.eql(u8, a.namedChild(0).kind(), "identifier") and eqIgnoreCase(a.namedChild(0).text(), name);
+}
+
+fn byStart(_: void, a: ts.Node, b: ts.Node) bool {
+    return a.startByte() < b.startByte();
+}
+
+fn inNames(name: []const u8, names: []const []const u8) bool {
+    for (names) |x| {
+        if (std.ascii.eqlIgnoreCase(x, name)) return true;
+    }
+    return false;
+}
+
+/// A string, or a `+` of literal texts.
+fn literalText(n: ts.Node) bool {
+    const k = n.kind();
+    if (std.mem.eql(u8, k, "string")) return true;
+    if (!std.mem.eql(u8, k, "binary_expression")) return false;
+    var plus = false;
+    var i: u32 = 0;
+    while (i < n.childCount()) : (i += 1) {
+        const ch = n.child(i);
+        if (!ch.isNamed()) {
+            if (std.mem.eql(u8, ch.kind(), "+")) plus = true else return false;
+        } else if (!std.mem.eql(u8, ch.kind(), "comment") and !literalText(ch)) return false;
+    }
+    return plus;
+}
+
+
+fn callsAny(n: ts.Node, names: []const []const u8) bool {
+    if (std.mem.eql(u8, n.kind(), "call_expression")) {
+        const c = calleeName(n);
+        if (c.len > 0 and inNames(c, names)) return true;
+    }
+    var i: u32 = 0;
+    while (i < n.namedChildCount()) : (i += 1) {
+        if (callsAny(n.namedChild(i), names)) return true;
+    }
+    return false;
+}
+
+/// Every `name = name` assignment under `n` (into `idents`) and every `name = <call>` (into `calls`), in document order.
+fn plainAssigns(gpa: std.mem.Allocator, n: ts.Node, idents: *std.ArrayListUnmanaged(ts.Node), calls: *std.ArrayListUnmanaged(ts.Node)) !void {
+    if (std.mem.eql(u8, n.kind(), "assignment_expression") and n.namedChildCount() >= 2 and
+        std.mem.eql(u8, n.namedChild(0).kind(), "identifier"))
+    {
+        var plain = false;
+        var i: u32 = 0;
+        while (i < n.childCount()) : (i += 1) {
+            if (std.mem.eql(u8, n.child(i).kind(), "=")) plain = true;
+        }
+        if (plain) {
+            const rk = n.namedChild(1).kind();
+            if (std.mem.eql(u8, rk, "identifier")) try idents.append(gpa, n);
+            if (std.mem.eql(u8, rk, "call_expression")) try calls.append(gpa, n);
+        }
+    }
+    var i: u32 = 0;
+    while (i < n.namedChildCount()) : (i += 1) try plainAssigns(gpa, n.namedChild(i), idents, calls);
+}
+
+fn returns(n: ts.Node, name: []const u8) bool {
+    if (std.mem.eql(u8, n.kind(), "return_statement") and n.namedChildCount() > 0 and
+        std.mem.eql(u8, n.namedChild(0).kind(), "identifier") and eqIgnoreCase(n.namedChild(0).text(), name)) return true;
+    var i: u32 = 0;
+    while (i < n.namedChildCount()) : (i += 1) {
+        if (returns(n.namedChild(i), name)) return true;
+    }
+    return false;
+}
+
+/// A call naming Release, Destroy or Close, given `name`, inside a `finally`.
+fn releasedInFinally(n: ts.Node, name: []const u8) bool {
+    if (std.mem.eql(u8, n.kind(), "call_expression") and hasAncestor(n, "finally_clause")) {
+        const c = calleeName(n);
+        if (std.ascii.indexOfIgnoreCase(c, "release") != null or std.ascii.indexOfIgnoreCase(c, "destroy") != null or
+            std.ascii.indexOfIgnoreCase(c, "close") != null)
+        {
+            var i: u32 = 0;
+            while (argAt(n, i)) |a| : (i += 1) {
+                if (std.mem.eql(u8, a.kind(), "identifier") and eqIgnoreCase(a.text(), name)) return true;
+            }
+        }
+    }
+    var i: u32 = 0;
+    while (i < n.namedChildCount()) : (i += 1) {
+        if (releasedInFinally(n.namedChild(i), name)) return true;
+    }
+    return false;
+}
+
+/// What the checker is told (D52, A5): the natives that listen, and the functions that validate text before it runs.
+pub const Opts = struct {
+    listeners: []const []const u8 = &.{},
+    validators: []const []const u8 = &.{},
+};
+
 pub fn checkSource(
     gpa: std.mem.Allocator,
     parser: ts.Parser,
@@ -807,13 +1129,50 @@ pub fn checkSourceCtx(
 ) !void {
     const tree = parser.parse(src) orelse return;
     defer tree.deinit();
+    try checkRoot(gpa, tree.root(), file, src, report, tctx, .{});
+}
 
+/// The rules over the tree the LOADER made -- the lifted one, what the compiler reads (v0.39): `catch e` binds e, a `within` block is a
+/// try, and no rule reads them as the bare names the grammar sees. Each finding's column is the FILE's: the lift keeps every row, and
+/// `inserts` says what it put in on each.
+pub fn checkLifted(
+    gpa: std.mem.Allocator,
+    root: ts.Node,
+    file: []const u8,
+    report: *Report,
+    tctx: types.Ctx,
+    opts: Opts,
+    inserts: []const lift.Insert,
+) !void {
+    const first = report.findings.items.len;
+    try checkRoot(gpa, root, file, root.src, report, tctx, opts);
+    if (inserts.len == 0) return;
+    for (report.findings.items[first..]) |*f| {
+        var ls: u32 = 0;
+        var row: u32 = 1;
+        while (row < f.row and ls < root.src.len) : (ls += 1) {
+            if (root.src[ls] == '\n') row += 1;
+        }
+        const at = lift.fileByte(inserts, ls + f.col - 1);
+        f.col = at - lift.fileByte(inserts, ls) + 1;
+    }
+}
+
+fn checkRoot(
+    gpa: std.mem.Allocator,
+    root: ts.Node,
+    file: []const u8,
+    src: []const u8,
+    report: *Report,
+    tctx: types.Ctx,
+    opts: Opts,
+) !void {
     var names = Names.init(gpa);
     defer names.deinit(gpa);
 
     // Names Ring always provides.
     for ([_][]const u8{ "self", "this", "true", "false", "null", "nl" }) |b| try put(gpa, &names.known, b);
-    try collectKnown(gpa, tree.root(), &names);
+    try collectKnown(gpa, root, &names);
 
     var w = Walker{
         .gpa = gpa,
@@ -822,13 +1181,15 @@ pub fn checkSourceCtx(
         .known = &names.known,
         .stringish = &names.stringish,
         .pointerish = &names.pointerish,
+        .listeners = opts.listeners,
+        .validators = opts.validators,
     };
-    try w.visit(tree.root());
+    try w.visit(root);
 
     // Level 1 type checking (DESIGN_TOOLCHAIN section 3). Kept in its own
     // module because it reasons about signatures across the whole file,
     // while the rules above are local to a node.
-    try types.check(gpa, tree.root(), file, src, report, tctx);
+    try types.check(gpa, root, file, src, report, tctx);
 }
 
 test "flags a varptr on a name that does not exist" {
