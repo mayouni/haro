@@ -30,7 +30,7 @@ PLANTS = [
      '                _ = try self.emit(.trap, held.reg, 1, 0, 0);'),
     ('P4', 'F12', 'a crossed finally runs with its own handler still armed',
      '            try self.leaveTries(cur - r.try_level);\n            cur = r.try_level;\n',
-     ''),
+     '            _ = &cur;\n'),
     ('P5', 'F10', 'the crossed finally blocks run outermost first',
      '''        var cur = self.try_open;
         var j = self.fin_regions.items.len;
@@ -46,7 +46,7 @@ PLANTS = [
         var j = to_fin;
         while (j < self.fin_regions.items.len) : (j += 1) try self.inlineFinally(j, self.fin_regions.items[j]);'''),
     ('P6', 'F04', 'the finally compiled at a return may reuse the register holding the value',
-     '        self.floor = @max(self.floor, keep + 1);\n', ''),
+     '        self.floor = @max(self.floor, keep + 1);\n', '        _ = keep;\n'),
     ('P7', 'F14', 'handlers are named by the open catches, so a try inside a finally shares its enclosing try\'s error',
      '        const depth = self.try_depth - 1;', '        const depth: u32 = @intCast(self.catch_regs.items.len);'),
     ('P8', 'F15', 'a finally compiled at a jump still counts itself open, so a jump inside it crosses it again',
