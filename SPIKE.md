@@ -1742,6 +1742,22 @@ or `loop` crossing a `try` runs its `finally`, innermost first and once; a raise
 guard passes every stage but 6** (2,466 s): stage 6's cold compile is over its 150 ms ceiling today on the VM before the change as after (180.1 and 185.9 ms, alternating
 A/B) -- the machine, not the rung (HF-142). **Not done, named**: the cause of a replaced error and `catch e` (rung 2); `bye`; a function whose locals share registers, unmeasured.
 
+## The thirty-seventh rung -- Haro v0.37, the error value: `catch e`, Message, Code, Span and Cause -- 2026-11-06
+
+**D52's rung (2)**, on the author's "Rung 2: error value". A4 as D52 amended it, and A1's cause. A caught error is a string -- every text use is its
+message, byte for byte, so stzlib's 517 reads of `cCatchError` migrate by a rename -- and it answers `Message()`, `Code()`, `Span()` and `Cause()`.
+`catch e` binds. A raise in a `finally` that held an error carries it as its cause. The VM, the compiler, the lift and the printer change; no court.
+
+    v37/fixtures.json, cases/           31 cases (27 written first, 4f32d59: 1 held on haro before); G27-G30 after the code, G22 changed after it, each said so
+    v37/error_court.py                  each case on haro and its checked build: exactly its bytes and exit, the two builds equal (stage 42); `fmt` cases run `haro fmt`
+    v37/plants.py                       15 protections across main.zig, compile.zig, lift.zig and fmt.zig switched off in turn, each a rebuilt VM
+    v37/GRAMMAR.md                      what a program sees, how it is held, the desk's readings, what is not covered
+
+**Results.** 31 of 31 on both builds, byte-identical; v36's 24 still pass; 15 of 15 plants caught. **The 42-stage guard passes every stage but 6** (1,403 s): its cold
+compile read 156.6 ms once; alternating A/B it is 146.9 ms before the rung and 145.2 ms after, at the ceiling both ways (HF-143). stzlib's census is the same but for
+3 `catch cError` in its core that now bind -- fallbacks that never ran now run under haro (HF-143). **Not done, named**: an error crossing an eval string arrives as its
+message; `catch e` inside an eval string is not lifted; an uncaught rethrow's report line is where it was raised again.
+
 ## The names -- `.haro`, not `.stzu` -- corrected 2026-10-02
 
 **At the author's word ("we agreed to use .haro instead of .stzu, no?").** D1 was ratified
@@ -1911,3 +1927,5 @@ whole guard re-run on the renamed tree: 28 + 30 + 27 + 23, 117 of 120, 32 of 32,
 32. ~~HARO-ONEHOUR-01, -02 and HARO-DISTANCE-01~~ -- answered 2026-11-05 (D50, D51, D52; HF-141). ~~D52 rung (1), A1 completed~~ -- built 2026-11-06 as Haro v0.36,
    the thirty-sixth rung above. Next: D52 rung (2), the error value (`catch e`; Message, Code, Span, Cause; the cause of a replaced error); the declared half of D51
    (NEEDS on a LANGUAGE, OPENS on a kind); the Zui-to-Zane rename of this repository; stzlib removing its use of Ring's standard library, by its own prompt.
+33. ~~D52 rung (2), the error value~~ -- built 2026-11-06 as Haro v0.37, the thirty-seventh rung above. Next: D52 rung (3), `within` and `using`, rewritten onto
+   `finally`; then rung (4), the five checker rules, `haro/last-error-read` first; the declared half of D51; the Zui-to-Zane rename of this repository.

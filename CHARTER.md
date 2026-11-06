@@ -1399,6 +1399,13 @@ states principle 14.
   builds (stage 41). *The desk's reading, recorded as its own* (the spellings and the order were left to it): a `return` inside `finally` replaces the held exit, a
   held return or a held raise, as a raise there does; A1 names only the raise. A held raise lost this way is the checker's to warn about (rung 4), not refused.
   Two defects beyond D52's probes, found by the fixtures: a raise in the handler skipped `finally`, and a `try` inside a `finally` overwrote the error it held (HF-142).
+  **Rung (2) built 2026-11-06, Haro v0.37** (the author: "Rung 2: error value"): `catch e` binds (lifted to `catch(e)` before the parse, only when e stands on
+  catch's line); the error is a string -- its message in every text use -- whose header indexes a record answering `Message()`, `Code()`, `Span()`, `Cause()`;
+  a raise in a `finally` that held an error carries it as its cause; `haro fmt` prints `catch(e)`. 31 cases on both builds (stage 42). *The desk's readings,
+  recorded as its own*: `raise(e)` of an error value is a rethrow and keeps its origin; `Code()` is Ring's code of a VM error and "" for `raise()`; `Span()` is
+  a list with :file and :line. *Corrected*: "`catch cError` in 4 recovered plugin files" above was 10 sites in 4 files, and 3 of them are in stzlib's CORE
+  (`core/system/stkPointer.ring`), which `max/stzMax.ring` loads -- each handler raised R24 on its own first line, so two fallbacks never ran; under haro they
+  now run as written, under Ring++ they still raise (HF-143).
 - **D23 -- `rnxc fmt` is a Ring++ feature, not held for Haro** (CODEGRAPH Q4, ruled on the author's delegation, 2026-10-05: "take
   whatever decision you think is wiser on my behalf"). It is a verb of the one binary (commitment 5), depends on nothing of Haro's, is
   judged against the oracle and refuses what Ring refuses (58 of 6,061 Softanza files, 57 of them Ring's own refusals). It ships inside
