@@ -1445,6 +1445,35 @@ states principle 14.
   plants. *The desk's readings, recorded as its own*: a read of cCatchError in its handler is reported too (ruling 2's sweep counts every read);
   "passed a validator" is a validator called in the same body, as stzlib's own rule reads it; a by-hand restore a catch also makes is still reported;
   A5's name pattern for a handle is kept as written, though on stzlib it catches 4 values that are not handles (HF-146).
+- **D54 -- the extension of a file says how it is read: a `.haro` file by Haro's rules, a `.ring` file by Ring's; ADOPTED** (HARO-SURFACE-01,
+  the desk's design under the author's two rulings of 2026-11-06, given in the session after `aNd`, a variable of v0.40, was read as the keyword `and`:
+  "I don't the aNd error to happen in Haro so fix it by design. don't feel constrained by Ring heritage since we cut wit it, and hence we are not obliged
+  to opt forcase inceseniftvity if you find the inverse moure useful and more robust to Haro langyage"; and "the same thing applies to the use of : in
+  :key = value turning it to a list and the special undocumented case (in ring) of using :str and turning str to lowercase!!! i saw some code embracing
+  this but we should not be obliged to do so!!"; `spike/v41/GRAMMAR.md`; HF-148; the forty-first rung). **In a `.haro` file** a keyword is spelled in
+  lowercase, exactly -- `aNd`, `oK`, `If`, `NULL` are names; Haro's block words `within`, `using`, `done` too -- a symbol keeps its spelling (`:Name` is
+  "Name"), and `:key = value` is refused by name (write `[:key, value]`), in a list and as an expression. **In a `.ring` file** Softanza's code reads
+  as it did: keywords in any case, symbols lowered, the pair. An eval reads by the rules of the program's root file; each loaded file by its own; `haro
+  fmt` by the file's, printing a name as written. **Built** in the grammar (`keyword()` is the lowercase word: one spelling, 22.1 MB of parser to 19.4),
+  in `lift.parse` (a `.ring` file's keyword-shaped words outside strings and comments lowered, the same length, before its one parse), in every reader,
+  and in the compiler (a `.haro` node keeps its symbol and refuses the pair). Haro's own code followed: 293 `NULL` in 31 files. *The desk's readings,
+  recorded as its own*: lowercase only, not lowercase-or-UPPER; NAMES stay case-insensitive (`aNd` and `AND` are one name, which can never be written
+  `and`) -- making them case-sensitive would change how a `.haro` program reaches Softanza's functions and is not done here; an eval follows the root
+  file, not the line that runs it; a refusal quoting a `.ring` file's text quotes the lowered text. 17 cases on both builds (stage 46), 15 of 15 plants;
+  7,125 of 7,126 stzlib files read the same tree (the other fails to parse on both). **Amended in advance, the author's ruling of 2026-11-07**
+  (TYPES.md decision (e)): a keyword written in another case in a `.haro` file is refused, as principle 2.2 reads it, not a name -- in v0.42, with
+  case-exact names; v0.41 diverged from 2.2 without saying so, found the day after it was built.
+- **D55 -- Haro's types: no coercion, a checked letter per exact type, a real boolean, exact numbers, no null in every type, judged types;
+  RULED by the author 2026-11-07** (`TYPES.md`; his words, all four quoted there: on case "what do you advise? Keep in mind that we are making a
+  language that is mainly executed by agents"; "I want Haro to be cprecise in using an expressive letter for each of it's exact types"; "Haro holds
+  no bolean type which was one of my strong critics to ring! ... redeesign a good correct typesystem for Haro"; and on the desk's proposal "Yes
+  as recommended, but think of an other letter for list"). T1 no value changes type unasked; T2 a name's first letter is its type, checked, the
+  full type written at parameters, returns and attributes; T3 `boolean`, and only a boolean decides; T4 `integer`, `decimal` (a literal with a
+  point), `float` (asked for, compared by `near`); T5 `none` in no type, `maybe T` resolved where it lands; T6 vector, map, record, object,
+  error; T7 a sentence of a declared language is a value only its court makes, text from a door is `unjudged`, a handle names its door. The
+  letters: b i d f n t x k v m r o e h s -- `v` for `vector of T`, not `l`, which a person reads as `1` (the desk's reading under his
+  delegation). Builds PRINCIPLES 1.1, 2.1, 2.4, 4.1 and 4.3, ruled in v0.1 and never built. The rungs: v0.42 case-exact names, then v0.43 to
+  v0.48. Nothing of it is built at this entry.
 - **D23 -- `rnxc fmt` is a Ring++ feature, not held for Haro** (CODEGRAPH Q4, ruled on the author's delegation, 2026-10-05: "take
   whatever decision you think is wiser on my behalf"). It is a verb of the one binary (commitment 5), depends on nothing of Haro's, is
   judged against the oracle and refuses what Ring refuses (58 of 6,061 Softanza files, 57 of them Ring's own refusals). It ships inside

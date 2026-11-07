@@ -1826,6 +1826,20 @@ a door a sentence lists and publishes the doors in its world rows, for Harobanda
 grammar byte for byte as committed (stage 45). **The 45-stage guard** (1,759 s) failed twice and neither was a defect of the rung: stage 36's family count, which follows the spike (door_v40.haro: 147 texts, 139 match), updated and rerun green; and stage 6's cold compile at 164.9 ms over its 150 ms ceiling -- alternating A/B on court_lib.haro before and after the rung reads 142.2 ms before and 137.0 ms after, so the machine, not the change; an edit 17.9 ms against 50. **Not done, named**: the second altitude, NEEDS on a program unit, waits on W7's map from native
 families to the nine; the enforcement is Harobanda's.
 
+## The forty-first rung -- Haro v0.41, one spelling per keyword: a `.haro` file read by Haro's rules, a `.ring` file by Ring's -- 2026-11-07
+
+**HARO-SURFACE-01 (D54)**, on the author's two rulings after `aNd` was read as `and`. In a `.haro` file a keyword is lowercase exactly, a symbol keeps
+its spelling and `:key = value` is refused by name; a `.ring` file reads as Ring reads it, so Softanza's code does not move.
+
+    v41/fixtures.json, cases/           17 cases (written first, dc5b731: 13; S12-S14 and K03 after the code, said so)
+    v41/surface_court.py                the cases on haro and its checked build, and the lift's keyword list against the grammar's
+    v41/plants.py                       15 protections across lift, compile, haro and fmt switched off in turn
+    v41/GRAMMAR.md                      the rulings, the table, how it is built, what was measured, the desk's readings, what is not covered
+    vm/vendor/tree-sitter-ring          keyword() is the lowercase word; the parser regenerated with tree-sitter 0.25.10 (22.1 MB -> 19.4 MB)
+
+**Results.** 17 of 17 cases on both builds; 15 of 15 plants caught (P11 and P14 missed first and were repaired: HF-148); stages 41 to 45 green on
+the migrated code; 7,125 of 7,126 stzlib files read the same tree as before the rung; the stzMax census the same. **The 46-stage guard** passed whole on haro and its checked build, 0 failures (1,330 s; a first run was cut by the session's end, and rerun): stage 6 judged a sentence edit in 18.4 ms and compiled the court cold in 137.3 ms, under its 150 ms ceiling.
+
 ## The names -- `.haro`, not `.stzu` -- corrected 2026-10-02
 
 **At the author's word ("we agreed to use .haro instead of .stzu, no?").** D1 was ratified
@@ -2003,3 +2017,6 @@ whole guard re-run on the renamed tree: 28 + 30 + 27 + 23, 117 of 120, 32 of 32,
    of D51 (NEEDS on a LANGUAGE, OPENS on a kind); the Zui-to-Zane rename of this repository; stzlib's own moves on the counts of HF-146.
 36. ~~The declared half of D51~~ -- built 2026-11-06 as Haro v0.40, the fortieth rung above. Next: the Zui-to-Zane rename of this repository in a quiet
    turn; D51's second altitude when W7's map lands; stzlib-security's moves on HF-146's counts.
+37. ~~One spelling per keyword (HARO-SURFACE-01)~~ -- built 2026-11-07 as Haro v0.41, the forty-first rung above, on the author's rulings after
+   `aNd`. Next: v0.42, case-exact names (D55, ruled 2026-11-07), a keyword in another case refused; then TYPES.md's rungs v0.43 to v0.48;
+   as 36, the Zui-to-Zane rename in a quiet turn and D51's second altitude when W7's map lands.
