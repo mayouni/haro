@@ -256,8 +256,11 @@ unrelated, and a name cannot begin with a digit, so `lNames` has one reading for
 proportional fonts of a chat, a document or this app, `l`, `I` and `1` are often the same shape, and a person is who Haro's surface is for
 (principle 8). So the letter is `v` and the type is named for what it is, `vector of T`: ordered and growable, Rust's `Vec` and C++'s `vector`,
 and the name Haro's VM already gives it (`vec`, `vm/src/main.zig:587`). "List" goes the way "array" went, as the word for a shape this value
-does not have (a list, to most of computing, is linked). *Owed*: whether Softanza names a class of its own "vector" (a numeric vector would make
-the word ambiguous at the `.ring` boundary) -- a sweep that waits until no other heavy job runs.
+does not have (a list, to most of computing, is linked). *Checked 2026-11-07* (owed until then): whether Softanza names a class of its own "vector" (a numeric vector would make
+the word ambiguous at the `.ring` boundary). On stzlib origin/main 7e92d10b1, `git grep` over every `.ring` file: **no class is named `vector`
+or `stzVector`**. One class carries the word, `stzVectorIndex` (`base/number/`, approximate nearest neighbours over embeddings), and 17
+functions (`VectorFor`, `VectorsOf`, `OraIsIntegerVector`, ...); in every one a vector is a numeric embedding, which is a Haro `vector of
+float`. The word agrees at the boundary instead of colliding with it, and `v` stands.
 
 **Amendment RULED by the author 2026-11-07 22:23, "Yes, as recommended" (HARO-TYPES-SYSTEM-01, CHARTER D56).** SG0 named eight seats the system grain lacks (X1 to X8:
 wrapping and unsigned integers, fixed-width traps, buffers, layouts, a reference to a slot, an allocator). Under the author's ruling of
