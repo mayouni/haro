@@ -1840,6 +1840,19 @@ its spelling and `:key = value` is refused by name; a `.ring` file reads as Ring
 **Results.** 17 of 17 cases on both builds; 15 of 15 plants caught (P11 and P14 missed first and were repaired: HF-148); stages 41 to 45 green on
 the migrated code; 7,125 of 7,126 stzlib files read the same tree as before the rung; the stzMax census the same. **The 46-stage guard** passed whole on haro and its checked build, 0 failures (1,330 s; a first run was cut by the session's end, and rerun): stage 6 judged a sentence edit in 18.4 ms and compiled the court cold in 137.3 ms, under its 150 ms ceiling.
 
+## The forty-second rung -- Haro v0.42, one spelling per name: case-exact names in a `.haro` file -- 2026-11-07
+
+**D55's first rung**, on the author's "I agree with you!", his ruling (e) and "Lowercase (Recommended)" for the natives. In a `.haro` file a name
+is spelled as it is declared, a keyword in another case is no name, a native is lowercase; a `.ring` file folds case as Ring does.
+
+    v42/fixtures.json, cases/           19 cases (written first, 4facb1c: 14; N15-N19 after the code and the plants, said so; N14 corrected)
+    v42/name_court.py                   the cases on haro and its checked build
+    v42/plants.py                       16 protections in compile.zig switched off in turn (P16 removed: it moved nothing)
+    v42/GRAMMAR.md                      the rulings, the table, how it is built, what was measured, the desk's readings, what is not covered
+
+**Results.** 19 of 19 cases on both builds; 16 of 16 plants caught; stages 41 to 46 green on the migrated code; the stzMax census the same as
+v0.41's; Haro's code: 433 native calls lowered, one real misspelling renamed. **The 47-stage guard** passed whole on haro and its checked build, 0 failures (2,313 s; stage 6 judged a sentence edit in 17.8 ms and compiled the court cold in 144.3 ms, under its 150 ms ceiling). A first run failed: stage 23 (node identity over Haro's history) ran past its 1,800 s with its cache of revision graphs cold for every file this rung changed, the whole run at 6,377 s; alone it passed in 52 s, every replay timed under 2 s a file, and in the third run it took 71 s. A second run was cut by the session's end.
+
 ## The names -- `.haro`, not `.stzu` -- corrected 2026-10-02
 
 **At the author's word ("we agreed to use .haro instead of .stzu, no?").** D1 was ratified
@@ -2020,3 +2033,5 @@ whole guard re-run on the renamed tree: 28 + 30 + 27 + 23, 117 of 120, 32 of 32,
 37. ~~One spelling per keyword (HARO-SURFACE-01)~~ -- built 2026-11-07 as Haro v0.41, the forty-first rung above, on the author's rulings after
    `aNd`. Next: v0.42, case-exact names (D55, ruled 2026-11-07), a keyword in another case refused; then TYPES.md's rungs v0.43 to v0.48;
    as 36, the Zui-to-Zane rename in a quiet turn and D51's second altitude when W7's map lands.
+38. ~~Case-exact names (D55's first rung)~~ -- built 2026-11-07 as Haro v0.42, the forty-second rung above. Next: v0.43, boolean and no
+   coercion (TYPES.md T1, T3); SG1's draft on SG0's memo, with D55's amendment for the system grain's seats; as 36, the Zui-to-Zane rename.

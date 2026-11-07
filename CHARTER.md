@@ -1483,7 +1483,15 @@ states principle 14.
   error; T7 a sentence of a declared language is a value only its court makes, text from a door is `unjudged`, a handle names its door. The
   letters: b i d f n t x k v m r o e h s -- `v` for `vector of T`, not `l`, which a person reads as `1` (the desk's reading under his
   delegation). Builds PRINCIPLES 1.1, 2.1, 2.4, 4.1 and 4.3, ruled in v0.1 and never built. The rungs: v0.42 case-exact names, then v0.43 to
-  v0.48. Nothing of it is built at this entry.
+  v0.48. Nothing of it is built at this entry. **Rung v0.42 built 2026-11-07** (`spike/v42/GRAMMAR.md`, HF-149, stage 47): in a `.haro` file a
+  name is spelled where it is used as where it is declared -- local, parameter, global, function, class, attribute, method -- and any other
+  spelling is refused, naming the declared spelling and its line; a second spelling in one scope is that refusal, never a second name; two
+  functions differing only by case are refused at a call of either; a keyword of the grammar in another case is no name (decision (e)); a
+  native is spelled in lowercase, as the VM registers it -- **the author's ruling of 2026-11-07**, asked with the count (433 calls of Haro's
+  code not in lowercase): "Lowercase (Recommended)". Resolution stays Ring's, so a `.ring` file folds case as it did. *The desk's readings,
+  recorded as its own*: Haro's block words `within` and `using` are contextual, no keywords in principle 2.2's sense (v0.38's B03), so v41's
+  S14 stands; a `.ring` declaration is spelled as Ring reads it, lowered when keyword-shaped (`o.see()`, not `o.See()`); a method on a receiver
+  of unknown class is accepted when some class declares that spelling. 19 cases on both builds, 16 of 16 plants.
 - **D23 -- `rnxc fmt` is a Ring++ feature, not held for Haro** (CODEGRAPH Q4, ruled on the author's delegation, 2026-10-05: "take
   whatever decision you think is wiser on my behalf"). It is a verb of the one binary (commitment 5), depends on nothing of Haro's, is
   judged against the oracle and refuses what Ring refuses (58 of 6,061 Softanza files, 57 of them Ring's own refusals). It ships inside
