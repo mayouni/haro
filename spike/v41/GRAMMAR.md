@@ -18,7 +18,7 @@ dc5b731), then the grammar (`vm/vendor/tree-sitter-ring`), the lift, the loader,
 | S4 | `:key = value` is refused by name; `[:key, value]` says it | `:key = value` is Ring's pair | S06-S08 |
 | S5 | an eval reads its text by the rules of the program's root file | | S09, S10 |
 | S6 | a program may load files of both kinds: each is read by its own rules | | S11 |
-| S7 | `haro fmt` reads each file by its rules, and prints a name as written | | K01, K02 |
+| S7 | `haro fmt` reads each file by its rules, and prints a name as written | | K01-K03 |
 
 ## How it is built
 
@@ -34,6 +34,9 @@ dc5b731), then the grammar (`vm/vendor/tree-sitter-ring`), the lift, the loader,
   datetime/48_custom_format_strings.ring opens a `/*` it never closes).
 - **Every reader goes through it**: the loader (`haro run`, `check`, `census` ...), the prefix path, the load scan, an eval, `haro fmt` and its
   re-reads, `haro dump` and `dump --json` -- the two dumps print the file's own bytes by span, so a lossless export stays lossless.
+- **`haro fmt` prints the file's own bytes.** The lowering reaches a `.ring` file's names spelled like keywords -- a method `Get`, a member `See`
+  -- which the grammar reads as names; fmt's tree took its leaves from the lowered text and printed `o.get()`. Its leaves, and those of a re-read
+  piece, now read the file's own bytes under the same spans. Found by plant P11 MISSING, pinned by K03, written after the code.
 - **The compiler** asks of a node whether its file is a `.haro` one (an eval: the root's): `konstSymbol` keeps the spelling there, and the two places
   that build a pair from `:key = value` -- a list's element and an expression -- refuse it there.
 - **Haro's block words** (`within`, `using`, a bare `done`) are lowercase in every file: they are Haro's, and no `.ring` file writes them.
@@ -52,6 +55,13 @@ dc5b731), then the grammar (`vm/vendor/tree-sitter-ring`), the lift, the loader,
   findings, but 4 messages that quote a symbol key lowered (`'class'` for `:Class`), the key's value on Ring.
 - The 980 sites where Softanza names an object `oN`, `oK` or `oR` are read as keywords by Ring and Ring++ themselves, and by Haro in a `.ring` file;
   in a `.haro` file they are names.
+
+## The protections, each switched off (`plants.py`)
+
+15 plants over lift.zig, compile.zig, haro.zig and fmt.zig, each built and judged alone: **15 of 15 caught**, each by the fixture it exists for. Two
+missed on the first run and were repaired, not removed: P11 (fmt printing the lowered text) had no case that showed it, and K03 is that case; P14
+(the lift's keyword list one word short) planted a source that the harness restored before the court read it, so a check that reads the source
+now runs with its plant in place.
 
 ## The desk's readings, recorded as its own
 

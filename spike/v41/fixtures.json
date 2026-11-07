@@ -140,6 +140,14 @@
    "why": "`haro fmt` on a .ring file: its keywords are Ring's in any case, printed in lowercase as before",
    "file": "cases/K02.ring",
    "stdout": "f()\n\nfunc f()\n\tx = 1\n\tif x = 1\n\t\tsee \"yes\" + nl\n\tok\n\t? :Name\n"
+  },
+  {
+   "id": "K03",
+   "kind": "fmt",
+   "line": "S7",
+   "why": "`haro fmt` on a .ring file: a name spelled like a keyword is printed as written",
+   "file": "cases/K03.ring",
+   "stdout": "f()\n\nfunc f()\n\to = new Foo\n\t? o.Get()\n\t? o.See\n\tx = o.Done()\n\nclass Foo\n\tfunc Get()\n\t\treturn 1\n"
   }
  ]
 }

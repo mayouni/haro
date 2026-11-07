@@ -32,12 +32,15 @@ PLANTS = [
     ('P9', 'S14', 'lift.zig', 'Haro\'s block words in any case', [('    return if (std.mem.eql(u8, id.text(), "within") or std.mem.eql(u8, id.text(), "using")) id else null;',
                                                                    '    return if (std.ascii.eqlIgnoreCase(id.text(), "within") or std.ascii.eqlIgnoreCase(id.text(), "using")) id else null;')]),
     ('P10', 'K02', 'fmt.zig', '`haro fmt` reads every file by Haro\'s rules', [('    const pl = lift.parse(a, parser, src, haro) orelse {', '    const pl = lift.parse(a, parser, src, true) orelse {')]),
-    ('P11', 'K02', 'fmt.zig', '`haro fmt` prints the lowered text, not the file\'s', [('    var ab = try Abs.init(a, parser, if (lb.src.len == src.len) src else lb.src);', '    var ab = try Abs.init(a, parser, lb.src);')]),
+    ('P11', 'K03', 'fmt.zig', '`haro fmt` prints the lowered text, not the file\'s', [('    const own = if (lb.src.len == src.len) src else lb.src;', '    const own = lb.src;')]),
     ('P12', 'S11', 'haro.zig', 'every loaded file is read by the root\'s rules', [('        const pl = lift.parse(alloc, parser, src, lift.isHaro(p)) orelse continue;', '        const pl = lift.parse(alloc, parser, src, lift.haro_root) orelse continue;')]),
     ('P13', 'S09', 'haro.zig', 'the root\'s rules are never recorded', [('        if (qi == 0) lift.haro_root = lift.isHaro(p);', '        if (qi == 0) lift.haro_root = false;')]),
     ('P14', 'KEYWORDS', 'lift.zig', 'the lift lowers one keyword fewer than the grammar has', [(' "not",', '')]),
     ('P15', 'S10', 'compile.zig', 'an eval in a .ring program is read by Haro\'s rules', [('snippet, lift.haro_root) orelse return Error.Unsupported).tree;', 'snippet, true) orelse return Error.Unsupported).tree;')]),
 ]
+
+# the keyword check reads lift.zig and the grammar, not a build: its plant runs with the edit in place (a plant restored first was never seen)
+STATIC = {'P14'}
 
 
 def digest(b):
@@ -68,6 +71,17 @@ def main():
             for old, new in subs:
                 text = text.replace(old, new)
             open(files[f], 'wb').write(text.encode('utf-8'))
+            if pid in STATIC:
+                try:
+                    r = subprocess.run([sys.executable, COURT, '--vm', os.path.join(VM_DIR, 'zig-out', 'bin', 'haro.exe')], capture_output=True, timeout=600)
+                finally:
+                    restore()
+                out = r.stdout.decode('utf-8', 'replace')
+                failed = re.findall(r'^  FAIL ([SK]\d+)', out, re.M) + (['KEYWORDS'] if 'FAIL the lift' in out else [])
+                verdict = 'CAUGHT' if fixture in failed else 'MISSED'
+                print(f'{pid} {verdict} ({why}; the check reads the source, run with the plant in place): its fixture {fixture}; failed {", ".join(failed) or "none"}', flush=True)
+                results.append((pid, verdict))
+                continue
             b = subprocess.run(['zig', 'build', '-Doptimize=ReleaseFast', '-j2', '-p', OUT], cwd=VM_DIR, capture_output=True, timeout=900)
             restore()
             if b.returncode != 0:

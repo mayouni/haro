@@ -785,7 +785,8 @@ const Abs = struct {
         const tree = (lift.parse(a, self.parser, text_, self.haro) orelse return null).tree;
         defer tree.deinit();
         if (tree.root().hasError()) return null;
-        const root = try buildTree(a, tree.root(), 0);
+        // the piece's own bytes under the lowered parse's spans (the lowering keeps every length): a name as written
+        const root = try buildTree(a, .{ .raw = tree.root().raw, .src = text_ }, 0);
         var found = std.ArrayListUnmanaged(*CN){};
         for (root.kids) |top| {
             if (eq(top.kind, "function_definition")) {
@@ -1922,10 +1923,11 @@ pub fn format(a: Alloc, parser: ts.Parser, src: []const u8, haro: bool) Err!?[]c
     // `within` and `using` are read as the lift reads them (D52 rung 3), and sTry prints them back
     const lb = lift.blocks(a, parser, tree0, pl.src);
     defer lb.tree.deinit();
-    const root = lb.tree.root();
-    const cn = try buildTree(a, root, 0);
-    // a name is printed as the file wrote it: where nothing was put in, the file's own bytes stand under the same spans
-    var ab = try Abs.init(a, parser, if (lb.src.len == src.len) src else lb.src);
+    // a name is printed as the file wrote it: where nothing was put in, the file's own bytes stand under the same spans -- the leaves read
+    // them too, so a .ring file's `o.Get()` is not printed as the lowered `o.get()` (HARO-SURFACE-01)
+    const own = if (lb.src.len == src.len) src else lb.src;
+    const cn = try buildTree(a, .{ .raw = lb.tree.root().raw, .src = own }, 0);
+    var ab = try Abs.init(a, parser, own);
     ab.haro = haro;
     const g = try ab.file(cn);
     var p = Printer{ .a = a };

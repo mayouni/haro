@@ -94,6 +94,11 @@ FMT = [
     ('K02', 'S7', '`haro fmt` on a .ring file: its keywords are Ring\'s in any case, printed in lowercase as before', '.ring', [
         'f()', 'func f', T + 'x = 1', T + 'If x = 1', T * 2 + 'See "yes" + nl', T + 'Ok', T + '? :Name'],
      ['f()', '', 'func f()', T + 'x = 1', T + 'if x = 1', T * 2 + 'see "yes" + nl', T + 'ok', T + '? :Name']),
+    # WRITTEN AFTER THE CODE, found by plant P11 missing: the lowering reaches a .ring file's names spelled like keywords (a method Get, a member
+    # See), and fmt printed them lowered until its leaves read the file's own bytes. The expected text is what `haro fmt` printed before the rung.
+    ('K03', 'S7', '`haro fmt` on a .ring file: a name spelled like a keyword is printed as written', '.ring', [
+        'f()', 'func f', T + 'o = new Foo', T + '? o.Get()', T + '? o.See', T + 'x = o.Done()', 'class Foo', T + 'func Get', T * 2 + 'return 1'],
+     ['f()', '', 'func f()', T + 'o = new Foo', T + '? o.Get()', T + '? o.See', T + 'x = o.Done()', '', 'class Foo', T + 'func Get()', T * 2 + 'return 1']),
 ]
 
 os.makedirs(os.path.join(HERE, 'cases'), exist_ok=True)
