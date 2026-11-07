@@ -233,7 +233,7 @@ func NatClause(aD, cSeat)
 	for i = 1 to len(aC)
 		if aC[i][1] = cU return aC[i] ok
 	next
-	return NULL
+	return null
 
 func NatHas(aD, cSeat)
 	return not isNull(NatClause(aD, cSeat))
@@ -300,7 +300,7 @@ func NatFind(aList, cName)
 	for i = 1 to len(aList)
 		if aList[i][2] = cName return aList[i] ok
 	next
-	return NULL
+	return null
 
 # ---- the world: a surface's versioned artifact (facts `s | p | o` under a `facts` line) -------------------
 

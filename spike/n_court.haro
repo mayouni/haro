@@ -42,15 +42,15 @@ $aCourtViews = []
 $aCourtSentenceKinds = []
 $aCourtExprs = []
 $aCourtWalks = []
-$aCourtAsk = NULL
-$aCourtRun = NULL
+$aCourtAsk = null
+$aCourtRun = null
 $aCourtSymbols = []
-$aCourtWorldFile = NULL
+$aCourtWorldFile = null
 $cCourtCode = "PARSE"
 $aCourtCites = []
-$aCourtFormset = NULL
-$aCourtNarrate = NULL
-$aCourtUnderstand = NULL
+$aCourtFormset = null
+$aCourtNarrate = null
+$aCourtUnderstand = null
 $bNSurfaces = 0
 $aCourtConstitution = []
 $aCourtZone = []
@@ -130,11 +130,11 @@ $aCourtLangs = [
     ],
     [
     ],
-    NULL,
-    NULL,
+    null,
+    null,
     [],
-    NULL,
-    NULL,
+    null,
+    null,
     ["n", [["TONGUE", "tongue"], ["MEANING", "meaning"], ["ALIAS", "alias"], ["SURFACE", "surface"], ["STEP", "step"], ["FRAME", "frame"], ["EXAMPLE", "example"], ["COUNTEREXAMPLE", "counterexample"]]]
   ]
 ]

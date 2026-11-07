@@ -1854,6 +1854,7 @@ pub const BlockSite = struct {
 };
 
 const R_GLOBAL = "within needs a global (D52 A2)";
+const R_PAIR = "`:key = value` is no pair in a .haro file: write [:key, value] (HARO-SURFACE-01)";
 const R_BARE = "within or using without its block (D52)";
 const R_CLAUSE = "within or using with a catch of its own (D52)";
 const R_CLASS = "using a class that answers none of Release, Destroy, Close (D52 A3)";
@@ -3307,7 +3308,7 @@ pub const Compiler = struct {
             return;
         }
         if (std.mem.eql(u8, k, "symbol")) {
-            _ = try self.emit(.loadk, dst, 0, 0, try self.konstSymbol(n.text()));
+            _ = try self.emit(.loadk, dst, 0, 0, try self.konstSymbol(n.text(), self.haroNode(n)));
             return;
         }
         if (std.mem.eql(u8, k, "identifier")) {
@@ -3803,6 +3804,8 @@ pub const Compiler = struct {
             std.mem.eql(u8, opText(n), "=") and
             std.mem.eql(u8, n.namedChild(0).kind(), "symbol"))
         {
+            // a .haro file has no such sugar: [:k, v] says it (HARO-SURFACE-01, S4)
+            if (self.haroNode(n)) return self.nopeKind(n, R_PAIR);
             const save = self.temp;
             defer self.temp = save;
             // Built in a TEMP and moved, not built in `dst`: `tmp()` hands
@@ -3858,6 +3861,8 @@ pub const Compiler = struct {
                     try self.expr(el.namedChild(1), vt);
                     _ = try self.emit(.cmpv, t, kt, vt, 0);
                 } else if (std.mem.eql(u8, el.kind(), "hash_pair")) {
+                    // a .haro file has no such sugar: [:k, v] says it (HARO-SURFACE-01, S4)
+                    if (self.haroNode(el)) return self.nopeKind(el, R_PAIR);
                     // `:k = v` is sugar for the two-element list ["k", v].
                     // Nothing in Ring hides that: `aH[1][1]` is the key.
                     // RETAINED (c=1), like every other vector born into a
@@ -5156,14 +5161,23 @@ pub const Compiler = struct {
     /// `type(:Mixed_Case)` is STRING and its value is `mixed_case`, so
     /// `aH[:name]` and `aH["name"]` are the same lookup. 25,121 sites in
     /// Softanza -- the single most-used construct the front end lacked.
-    fn konstSymbol(self: *Compiler, raw: []const u8) Error!i32 {
+    /// HARO-SURFACE-01: is `n` read by Haro's rules -- a node of a .haro file, or of an eval in a program whose root is one (S5)?
+    fn haroNode(self: *Compiler, n: ts.Node) bool {
+        if (self.eval != null) return lift.haro_root;
+        const fi = self.fileOf(self.rereadSrc(n).ptr) orelse return lift.haro_root;
+        if (fi >= load_paths.len) return lift.haro_root;
+        return lift.isHaro(load_paths[fi]);
+    }
+
+    /// `keep`: a .haro file's symbol keeps its spelling (S3); Ring lowers it
+    fn konstSymbol(self: *Compiler, raw: []const u8, keep: bool) Error!i32 {
         var t = raw;
         if (t.len > 0 and t[0] == ':') t = t[1..];
         // `: word` is the symbol "word" on Ring: every space and tab between the colon and the word goes (the analysis's 2.14
         // hazard, kept); Ring++ kept them, so `x = : word` was " word" (bench/exec/colon_space.ring, 2026-10-15)
         while (t.len > 0 and (t[0] == ' ' or t[0] == '\t')) t = t[1..];
         const buf = self.alloc.alloc(u8, t.len) catch return Error.OutOfMemory;
-        for (t, 0..) |ch, i| buf[i] = std.ascii.toLower(ch);
+        for (t, 0..) |ch, i| buf[i] = if (keep) ch else std.ascii.toLower(ch);
         const kb: i32 = if (self.eval) |ev| ev.konst_base else 0;
         for (self.konst.items, 0..) |k, i| {
             if (k.tag == .str and std.mem.eql(u8, k.p.s.ptr[0..k.p.s.len], buf)) return @as(i32, @intCast(i)) + kb;
@@ -10887,7 +10901,7 @@ fn constOf(c: *Compiler, alloc: std.mem.Allocator, n: ts.Node) Error!?ConstVal {
         return .{ .int = if (std.ascii.eqlIgnoreCase(std.mem.trim(u8, n.text(), " \t\r\n"), "true")) 1 else 0 };
     if (std.mem.eql(u8, k, "null")) return .{ .konst = try c.konstIndex("\"\"") };
     if (std.mem.eql(u8, k, "string")) return .{ .konst = try c.konstIndex(try c.literalText(n.text())) };
-    if (std.mem.eql(u8, k, "symbol")) return .{ .konst = try c.konstSymbol(n.text()) };
+    if (std.mem.eql(u8, k, "symbol")) return .{ .konst = try c.konstSymbol(n.text(), c.haroNode(n)) };
     if (std.mem.eql(u8, k, "parenthesized_expression") and n.namedChildCount() == 1) return constOf(c, alloc, n.namedChild(0));
     if (std.mem.eql(u8, k, "list_literal")) {
         const items = try alloc.alloc(ConstVal, n.namedChildCount());
@@ -11615,7 +11629,8 @@ pub fn compileEval(c: *Compiler, src: []const u8, ev: *EvalCtx, locals: []const 
 
     const snippet = std.mem.concat(c.scratch, u8, &.{ "func __eval()\n", src, "\n" }) catch return Error.OutOfMemory;
     if (c.eval_parser == null) c.eval_parser = ts.Parser.init();
-    var tree = c.eval_parser.?.parse(snippet) orelse return Error.Unsupported;
+    // an eval reads its text by the rules of the program's root file (HARO-SURFACE-01, S5)
+    var tree = (lift.parse(c.scratch, c.eval_parser.?, snippet, lift.haro_root) orelse return Error.Unsupported).tree;
     defer tree.deinit();
     // A STRING THAT DOES NOT PARSE is Ring's compile report, then R42 (F-108)
     if (tree.root().hasError()) {

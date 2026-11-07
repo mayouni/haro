@@ -249,7 +249,7 @@ func StzuTellPlaceholders(cKey, aDeclarations, aRun, aAsk, cLName, nLine)
 		if cKey = "cut" return ["limit", "dropped", "count"] ok
 		return ["count", "rows"]
 	ok
-	aDecl = NULL
+	aDecl = null
 	for j = 1 to len(aDeclarations)
 		if aDeclarations[j][1] = cKey aDecl = aDeclarations[j] ok
 	next
@@ -567,7 +567,7 @@ func StzuMenuWords(aMenus, cName)
 	for i = 1 to len(aMenus)
 		if aMenus[i][1] = cName return aMenus[i][2] ok
 	next
-	return NULL
+	return null
 
 func StzuFail(nLine, cMsg)
 	raise("haro (line " + nLine + "): " + cMsg)
@@ -960,7 +960,7 @@ func ClauseValue(aClauses, cName)
 	for i = 1 to len(aClauses)
 		if aClauses[i][1] = cName return aClauses[i][2] ok
 	next
-	return NULL
+	return null
 
 func HasClause(aClauses, cName)
 	for i = 1 to len(aClauses)
@@ -1094,7 +1094,7 @@ func LangGet(aLang, cKey)
 	for i = 1 to len(aLang)
 		if aLang[i][1] = cKey return aLang[i][2] ok
 	next
-	return NULL
+	return null
 
 func DeclaredKind(aDeclared, cName)
 	for i = 1 to len(aDeclared)
@@ -1115,7 +1115,7 @@ func StzuDeclare(cSrc)
 	bHaveLang = 0
 	cLName = "" cLVersion = "" cLGrammar = "" cLCourt = "" cLExtension = "" cLRationale = ""
 	# v0.40: the doors the language NEEDS (D51), or NULL when it says nothing -- and what each kind OPENS, [verb, word, by seat]
-	aLNeeds = NULL nLNeedsLine = 0
+	aLNeeds = null nLNeedsLine = 0
 	aOpensOut = []
 	aDeclarations = []
 	aForms = []
@@ -1130,15 +1130,15 @@ func StzuDeclare(cSrc)
 	aSentences = []
 	aViews = []
 	aWalks = []
-	aAsk = NULL
-	aRun = NULL
-	aFormset = NULL
-	aNarrate = NULL
-	aUnderstand = NULL
+	aAsk = null
+	aRun = null
+	aFormset = null
+	aNarrate = null
+	aUnderstand = null
 	aSymbols = []
-	aWorld = NULL
-	aRefine = NULL
-	aConstitution = NULL
+	aWorld = null
+	aRefine = null
+	aConstitution = null
 	aDeclared = []
 	aVerbs = []
 	nCount = 0
@@ -1263,7 +1263,7 @@ func StzuDeclare(cSrc)
 							StzuFail(nLine, "'" + aOpd[i] + "' is not in the closed operand menu -- an escape hatch is unexpressible, not forbidden")
 						ok
 					next
-					aAgg = NULL
+					aAgg = null
 					if HasClause(aClauses, "AGGREGATES")
 						aAgg = ClauseValue(aClauses, "AGGREGATES")
 						for i = 1 to len(aAgg)
@@ -1272,7 +1272,7 @@ func StzuDeclare(cSrc)
 							ok
 						next
 					ok
-					aVars = NULL
+					aVars = null
 					if HasClause(aClauses, "VARIABLES")
 						aVars = ClauseValue(aClauses, "VARIABLES")
 					ok
@@ -1394,7 +1394,7 @@ func StzuDeclare(cSrc)
 					if HasClause(aClauses, "MESSAGE") cMsg = ClauseValue(aClauses, "MESSAGE") ok
 					cRefused = ""
 					if HasClause(aClauses, "REFUSED") cRefused = ClauseValue(aClauses, "REFUSED") ok
-					aSentences + [cName, ClauseValue(aClauses, "OF"), NULL, cMsg, cRefused, nLine]
+					aSentences + [cName, ClauseValue(aClauses, "OF"), null, cMsg, cRefused, nLine]
 				but cKind = "VIEW"
 					cOn = ""
 					if HasClause(aClauses, "ON") cOn = ClauseValue(aClauses, "ON") ok
@@ -1659,7 +1659,7 @@ func StzuDeclare(cSrc)
 		try
 			aSays = aNarrate[5]
 			for i = 1 to len(aSays)
-				aNK = NULL
+				aNK = null
 				for j = 1 to len(aDeclarations)
 					if aDeclarations[j][1] = aSays[i][1] aNK = aDeclarations[j] ok
 				next
@@ -1688,7 +1688,7 @@ func StzuDeclare(cSrc)
 		try
 			if len(aFormset[6]) = 3
 				aFam = aFormset[6]
-				aFK = NULL
+				aFK = null
 				for i = 1 to len(aDeclarations)
 					if aDeclarations[i][1] = aFam[1] aFK = aDeclarations[i] ok
 				next
@@ -1806,7 +1806,7 @@ func StzuDeclare(cSrc)
 			aMsgs = aDeclarations[i][7]
 			aSeats = aDeclarations[i][3]
 			for j = 1 to len(aMsgs)
-				aFound = NULL
+				aFound = null
 				for k = 1 to len(aSeats)
 					if aSeats[k][1] = aMsgs[j][1] aFound = aSeats[k] ok
 				next
@@ -1843,7 +1843,7 @@ func StzuDeclare(cSrc)
 	# The parser and the checker of RingFlex stand on the same barrier. A run that is not collecting
 	# never reaches this line having found anything, so its verdicts are what they were.
 	if $bStzuCollect
-		if len($aStzuFound) > 0 return NULL ok
+		if len($aStzuFound) > 0 return null ok
 	ok
 
 	# v0.4: a SENTENCE names another language's declaration, read beside this
@@ -1863,7 +1863,7 @@ func StzuDeclare(cSrc)
 			cSaveDir = $cStzuDir
 			$cStzuDir = StzuDirOf(cPath)
 			cErr = ""
-			aInner = NULL
+			aInner = null
 			bWas = $bStzuCollect
 			$bStzuCollect = 0
 			try
@@ -1973,7 +1973,7 @@ func StzuDeclare(cSrc)
 					StzuFail(aV[6], "VIEW '" + aV[1] + "' is already a seat of " + cOn + ": one name, one meaning")
 				ok
 			ok
-			aOut = [NULL]
+			aOut = [null]
 			cErr = ""
 			cWhy = ""
 			try
@@ -2409,12 +2409,12 @@ func StzuDeclare(cSrc)
 				ok
 				if cPSub != ""
 					aMS = StzuSeatRec(aDeclarations, cPDecl, cPSeat)
-					aMF = NULL
+					aMF = null
 					if aMS[3] aMF = StzuFormRec(aForms, aMS[2]) ok
 					if isNull(aMF) or not StzuIsPairForm(aMF[2], aDeclared)
 						StzuFail(aPers[i][2], "PERSONAL names '" + cPP + "', and '" + cPDecl + "." + cPSeat + "' is not a list of a pair form -- a mark lives on a form's seat")
 					ok
-					aTS = NULL
+					aTS = null
 					for j = 1 to len(aMF[2])
 						if aMF[2][j][1] = cPSub aTS = aMF[2][j] ok
 					next
@@ -2855,7 +2855,7 @@ func StzuSeatNamed(aSeats, cSeat)
 	for i = 1 to len(aSeats)
 		if aSeats[i][1] = cSeat return aSeats[i] ok
 	next
-	return NULL
+	return null
 
 # v0.6: a list seat whose element is a FORM of exactly two seats, the first a
 # name and the second a scalar, is written as name: value pairs; every other
@@ -2931,23 +2931,23 @@ func StzuSeatRec(aDeclarations, cDecl, cSeat)
 			next
 		ok
 	next
-	return NULL
+	return null
 
 # v0.27: a FORM's record by name, a MENU's record by name, or NULL
 func StzuFormRec(aForms, cName)
 	for i = 1 to len(aForms)
 		if aForms[i][1] = cName return aForms[i] ok
 	next
-	return NULL
+	return null
 
 func StzuMenuRec(aMenus, cName)
 	for i = 1 to len(aMenus)
 		if aMenus[i][1] = cName return aMenus[i] ok
 	next
-	return NULL
+	return null
 
 func StzuCheckCondition(cCond, cOn, aOneDecls, nLine)
-	aAst = NULL
+	aAst = null
 	cErr = ""
 	try
 		aAst = CondParse(cCond)
@@ -2977,7 +2977,7 @@ func StzuResolveSeats(aSeats, aDeclared)
 			ok
 			if cK = "UNION"
 				# v0.9: a list of references to several kinds -- a step list
-				aUAlts = NULL
+				aUAlts = null
 				aUL = aUnionsRef
 				for k = 1 to len(aUL)
 					if aUL[k][1] = cOf aUAlts = aUL[k][2] ok

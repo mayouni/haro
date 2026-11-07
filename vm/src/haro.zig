@@ -256,8 +256,9 @@ fn tryPrefix(
     names: *std.ArrayListUnmanaged([]const u8),
     on_top: *Unit,
 ) ?*co.Compiler {
-    const src = std.fs.cwd().readFileAlloc(alloc, root_path, 64 << 20) catch return null;
-    const tree = parser.parse(src) orelse return null;
+    const src0 = std.fs.cwd().readFileAlloc(alloc, root_path, 64 << 20) catch return null;
+    const pl = lift.parse(alloc, parser, src0, lift.isHaro(root_path)) orelse return null;
+    const tree = pl.tree;
     const rt = tree.root();
 
     // THE ONE THING A PREFIX CANNOT DO IS COME SECOND. Ring runs a loaded
@@ -428,7 +429,7 @@ fn loadReport(
             return true;
         }
     }
-    const tree = parser.parse(src) orelse return false;
+    const tree = (lift.parse(alloc, parser, src, lift.isHaro(path)) orelse return false).tree;
     defer tree.deinit();
     const dir = std.fs.path.dirname(path) orelse ".";
     var errs: u32 = 0;
@@ -590,9 +591,11 @@ fn loadUnit(
             }
         }
         var tp = std.time.Timer.start() catch unreachable;
-        const parsed = parser.parse(src) orelse continue;
+        // HARO-SURFACE-01: a .haro file by Haro's rules, any other by Ring's (lift.parse)
+        if (qi == 0) lift.haro_root = lift.isHaro(p);
+        const pl = lift.parse(alloc, parser, src, lift.isHaro(p)) orelse continue;
         t_parse_ns += tp.read();
-        const lf: lift.Lifted = if (u.lift) lift.apply(alloc, parser, parsed, src, p) else .{ .tree = parsed, .src = src };
+        const lf: lift.Lifted = if (u.lift) lift.apply(alloc, parser, pl.tree, pl.src, p) else pl;
         const tree = lf.tree;
         try u.trees.append(alloc, tree);
         try u.roots.append(alloc, tree.root());
@@ -709,11 +712,13 @@ fn normalisePath(alloc: std.mem.Allocator, p: []const u8) ![]const u8 {
     return out;
 }
 
-fn dump(n: ts.Node, depth: u32, w: *std.Io.Writer) !void {
+/// `orig`: the file's own bytes, when the tree was made of a text the lift lowered (a .ring file's keywords, HARO-SURFACE-01) -- same length,
+/// so a leaf is shown as the file wrote it
+fn dump(n: ts.Node, depth: u32, w: *std.Io.Writer, orig: []const u8) !void {
     var i: u32 = 0;
     while (i < depth) : (i += 1) try w.writeAll("  ");
     const kind = n.kind();
-    const txt = n.text();
+    const txt = if (orig.len == n.src.len) orig[n.startByte()..n.endByte()] else n.text();
     if (n.namedChildCount() == 0 and txt.len <= 40) {
         // Leaves carry their source text; interior nodes would drown it out.
         var flat: [40]u8 = undefined;
@@ -733,7 +738,7 @@ fn dump(n: ts.Node, depth: u32, w: *std.Io.Writer) !void {
     // every compound assignment. Found by dumping, not by assuming.
     var k: u32 = 0;
     while (k < n.childCount()) : (k += 1) {
-        try dump(n.child(k), depth + 1, w);
+        try dump(n.child(k), depth + 1, w, orig);
     }
 }
 
@@ -4174,7 +4179,7 @@ pub fn main() !void {
 
     if (std.mem.eql(u8, argv[1], "dump")) {
         if (tree.root().hasError()) std.debug.print("NOTE: tree contains errors\n", .{});
-        try dump(tree.root(), 0, w);
+        try dump(tree.root(), 0, w, unit.origs.items[0]);
         try w.flush();
         return;
     }

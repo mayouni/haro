@@ -38,8 +38,10 @@ CASES = [
     ('G03', 'E1', 'a name on the line AFTER `catch` stays a statement: it does not bind', [
         'f()', 'func f', T + 'e = "outer"', T + 'try', T * 2 + 'raise("z")', T + 'catch', T * 2 + 'e', T * 2 + '? "e is still " + e', T + 'done'],
      ['e is still outer']),
-    ('G04', 'E1', '`Catch err` in another case, with a comment after it, binds', [
-        'try', T + 'raise("x4")', 'Catch err   # the error', T + '? "err=" + err', 'done'],
+    # G04 CHANGED after the court spoke (v0.41, HARO-SURFACE-01): in a .haro file a keyword is lowercase, so `Catch` is a name -- the case
+    # was `Catch err` and now spells the keyword as Haro does; what it pins (a comment after the binding) is unchanged.
+    ('G04', 'E1', '`catch err` with a comment after it binds', [
+        'try', T + 'raise("x4")', 'catch err   # the error', T + '? "err=" + err', 'done'],
      ['err=x4']),
     ('G05', 'E1', 'the shape of stzlib\'s recovered plugin code: `catch cError` in a function binds cError', [
         'p()', 'func p', T + 'try', T * 2 + 'raise("plugin failed")', T + 'catch cError', T * 2 + '? "handled: " + cError', T + 'done'],

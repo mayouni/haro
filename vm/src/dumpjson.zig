@@ -30,6 +30,7 @@
 //! character a byte, so an offset in the JSON is an offset in the file.
 const std = @import("std");
 const ts = @import("ts.zig");
+const lift = @import("lift.zig");
 
 fn esc(w: *std.Io.Writer, bytes: []const u8) !void {
     try w.writeByte('"');
@@ -95,10 +96,11 @@ pub fn exportFile(alloc: std.mem.Allocator, parser: ts.Parser, path: []const u8,
         std.debug.print("note: could not read {s} ({s})\n", .{ path, @errorName(e) });
         return false;
     };
-    const tree = parser.parse(src) orelse {
+    // read by the file's rules (HARO-SURFACE-01); the bytes printed are the file's own, by span -- lowering keeps every length
+    const tree = (lift.parse(alloc, parser, src, lift.isHaro(path)) orelse {
         std.debug.print("note: could not parse {s}\n", .{path});
         return false;
-    };
+    }).tree;
     defer tree.deinit();
     const root = tree.root();
     try w.writeAll("{\"format\":\"haro-dump/1\",\"file\":");

@@ -73,7 +73,7 @@ func CtClauseNamed(aD, cClause)
 	for i = 1 to len(aD[4])
 		if aD[4][i][1] = cClause return aD[4][i] ok
 	next
-	return NULL
+	return null
 
 # the values of a seat across every declaration of a kind: a word, a string or a number is one, a list its items (a list of pairs is refused by the meta-court)
 func CtSetMembers(aDecls, cDecl, cSeat)

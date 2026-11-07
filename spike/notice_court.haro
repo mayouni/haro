@@ -43,15 +43,15 @@ $aCourtViews = []
 $aCourtSentenceKinds = []
 $aCourtExprs = []
 $aCourtWalks = []
-$aCourtAsk = NULL
-$aCourtRun = NULL
+$aCourtAsk = null
+$aCourtRun = null
 $aCourtSymbols = []
-$aCourtWorldFile = NULL
+$aCourtWorldFile = null
 $cCourtCode = "PARSE"
 $aCourtCites = []
-$aCourtFormset = NULL
-$aCourtNarrate = NULL
-$aCourtUnderstand = NULL
+$aCourtFormset = null
+$aCourtNarrate = null
+$aCourtUnderstand = null
 $bNSurfaces = 0
 $aCourtConstitution = []
 $aCourtZone = []
@@ -124,12 +124,12 @@ $aCourtLangs = [
     ],
     [
     ],
-    NULL,
-    NULL,
+    null,
+    null,
     [["regulations", "regulation", "follows", "NOTICE {name} follows '{value}', and the town's register declares no regulation:{value}", "UNKNOWN_REGULATION", "none"]],
-    NULL,
+    null,
     ["voice", "", "", "Stopped at line {line}: {message} ({code}; {cites})", [["notice", "{name} goes out on {medium} to the {audience}, issued by {issuer}."]], []],
-    NULL
+    null
   ]
 ]
 CtUseLanguage("notice")

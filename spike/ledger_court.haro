@@ -42,15 +42,15 @@ $aCourtViews = []
 $aCourtSentenceKinds = []
 $aCourtExprs = []
 $aCourtWalks = []
-$aCourtAsk = NULL
-$aCourtRun = NULL
+$aCourtAsk = null
+$aCourtRun = null
 $aCourtSymbols = []
-$aCourtWorldFile = NULL
+$aCourtWorldFile = null
 $cCourtCode = "PARSE"
 $aCourtCites = []
-$aCourtFormset = NULL
-$aCourtNarrate = NULL
-$aCourtUnderstand = NULL
+$aCourtFormset = null
+$aCourtNarrate = null
+$aCourtUnderstand = null
 $bNSurfaces = 0
 $aCourtConstitution = []
 $aCourtZone = []
@@ -118,12 +118,12 @@ $aCourtLangs = [
     ],
     [
     ],
-    NULL,
-    NULL,
+    null,
+    null,
     [],
-    NULL,
+    null,
     ["ledger_voice", "{file} is a ledger of {count} declarations.", "That is the whole ledger.", "Stopped at line {line}: {message} ({code}; {cites})", [["account", "{name} is held by {holder} in {currency}, up to {ceiling}. {rationale}"], ["limit", "{name} holds {on} to {daily} a day under the rule {rule}; broken, it says: {message}. {rationale}"]], []],
-    NULL
+    null
   ]
 ]
 CtUseLanguage("ledger")

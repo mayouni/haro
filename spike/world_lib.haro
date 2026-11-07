@@ -15,7 +15,7 @@ func CtSymbolByName(cName)
 	for i = 1 to len($aCourtSymbols)
 		if $aCourtSymbols[i][1] = cName return $aCourtSymbols[i] ok
 	next
-	return NULL
+	return null
 
 func CtWorldLoad(cPath)
 	if not fexists(cPath) CtFail(1, "no world artifact at '" + cPath + "'") ok

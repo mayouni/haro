@@ -232,7 +232,7 @@ func StzuFormAst(aAst, cOn, aTab, aDecls)
 func StzuExpandCond(cCond, cOn, aTab, aDecls)
 	if len(aTab) = 0 return cCond ok
 	$bFormChanged = 0
-	aAst = NULL
+	aAst = null
 	cErr = ""
 	try
 		aAst = CondParse(cCond)

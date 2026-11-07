@@ -102,7 +102,7 @@ func UnionOf(aLang, cName)
 	for i = 1 to len(aU)
 		if aU[i][1] = cName return aU[i] ok
 	next
-	return NULL
+	return null
 
 # a declaration's MESSAGES as [[seat, text], ...]
 func MessagesSource(aMsgs)
@@ -397,7 +397,7 @@ func LangSource(aLang)
 	next
 	cWalks = RowsSource(aRows, nl)
 	aAsk = LangGet(aLang, "ask")
-	cAsk = "NULL"
+	cAsk = "null"
 	if not isNull(aAsk)
 		cAsk = "[" + RingStr(aAsk[1]) + ", " + NamesSource(aAsk[2]) + ", " + RingStr(aAsk[3]) + ", " + NamesSource(aAsk[4])
 		# v0.34: the schema path, only where one is declared -- so a court forged from a language without FIELDS keeps the bytes it had
@@ -405,7 +405,7 @@ func LangSource(aLang)
 		cAsk += "]"
 	ok
 	aRun = LangGet(aLang, "run")
-	cRun = "NULL"
+	cRun = "null"
 	if not isNull(aRun)
 		cRun = "["
 		for i = 1 to len(aRun[2])
@@ -416,19 +416,19 @@ func LangSource(aLang)
 	ok
 	# v0.12: the FORMS [name, fluent, passive, statement, [[key, suffix], ...], [kind, base, forms]], or NULL
 	aFs = LangGet(aLang, "formset")
-	cFormset = "NULL"
+	cFormset = "null"
 	if not isNull(aFs)
 		cFormset = "[" + RingStr(aFs[1]) + ", " + RingStr(aFs[2]) + ", " + RingStr(aFs[3]) + ", " + RingStr(aFs[4]) + ", " + MessagesSource(aFs[5]) + ", " + NamesSource(aFs[6]) + "]"
 	ok
 	# v0.13: the NARRATE [name, opens, ends, refuses, [[kind, template], ...]], or NULL
 	aNr = LangGet(aLang, "narrate")
-	cNarrate = "NULL"
+	cNarrate = "null"
 	if not isNull(aNr)
 		cNarrate = "[" + RingStr(aNr[1]) + ", " + RingStr(aNr[2]) + ", " + RingStr(aNr[3]) + ", " + RingStr(aNr[4]) + ", " + MessagesSource(aNr[5]) + ", " + MessagesSource(aNr[8]) + "]"
 	ok
 	# v0.17: the UNDERSTAND [name, [[role, kind], ...]], or NULL
 	aUn = LangGet(aLang, "understand")
-	cUnderstand = "NULL"
+	cUnderstand = "null"
 	if not isNull(aUn)
 		cUnderstand = "[" + RingStr(aUn[1]) + ", ["
 		for i = 1 to len(aUn[2])
@@ -601,11 +601,11 @@ func ForgeCourt(aLang)
 	c += "$aCourtRanges = []" + nl + "$aCourtFormats = []" + nl + "$aCourtUnions = []" + nl + "$aCourtConstraints = []" + nl
 	c += "$aCourtWorld = [[], " + '""' + ", [], []]" + nl + "$aCourtPoints = []" + nl + "$aCourtFloors = []" + nl
 	c += "$aCourtViews = []" + nl + "$aCourtSentenceKinds = []" + nl
-	c += "$aCourtExprs = []" + nl + "$aCourtWalks = []" + nl + "$aCourtAsk = NULL" + nl + "$aCourtRun = NULL" + nl
-	c += "$aCourtSymbols = []" + nl + "$aCourtWorldFile = NULL" + nl
+	c += "$aCourtExprs = []" + nl + "$aCourtWalks = []" + nl + "$aCourtAsk = null" + nl + "$aCourtRun = null" + nl
+	c += "$aCourtSymbols = []" + nl + "$aCourtWorldFile = null" + nl
 	c += "$cCourtCode = " + RingStr("PARSE") + nl + "$aCourtCites = []" + nl
-	c += "$aCourtFormset = NULL" + nl + "$aCourtNarrate = NULL" + nl
-	c += "$aCourtUnderstand = NULL" + nl + "$bNSurfaces = 0" + nl
+	c += "$aCourtFormset = null" + nl + "$aCourtNarrate = null" + nl
+	c += "$aCourtUnderstand = null" + nl + "$bNSurfaces = 0" + nl
 	c += "$aCourtConstitution = []" + nl
 	# v0.24: the zone of organizational_sovereignty, and the audit chain of visible_state
 	c += "$aCourtZone = []" + nl + "$cCourtAuditFile = " + '""' + nl + "$aCourtAuditProposal = []" + nl
@@ -854,7 +854,7 @@ func ForgeAskGbnf(aLang)
 	g += "ident ::= [a-z_] [a-z0-9_]*" + nl
 	cBody = ""
 	if aAsk[3] != ""
-		aE = NULL
+		aE = null
 		aEs = LangGet(aLang, "expressions")
 		for i = 1 to len(aEs)
 			if aEs[i][1] = aAsk[3] aE = aEs[i] ok
@@ -915,7 +915,7 @@ func FormOf(aLang, cName)
 	for i = 1 to len(aF)
 		if aF[i][1] = cName return aF[i] ok
 	next
-	return NULL
+	return null
 
 func ForgeGbnf(aLang)
 	nl = char(10)

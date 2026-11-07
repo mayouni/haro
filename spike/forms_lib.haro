@@ -31,7 +31,7 @@ func FormsKindByName(cName)
 	for i = 1 to len($aCourtKinds)
 		if $aCourtKinds[i][2] = cName return $aCourtKinds[i] ok
 	next
-	return NULL
+	return null
 
 func FormsIsUpper(c)
 	return ascii(c) >= 65 and ascii(c) <= 90

@@ -26,7 +26,7 @@ func NdOpens(aDoors, aD)
 		next
 		return aOut
 	next
-	return NULL
+	return null
 
 # a declaration whose OPENS seat lists a door the language does not NEED is refused
 func NdCheck(aDecls, aDoors)

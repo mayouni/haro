@@ -49,8 +49,8 @@
                   "type": "PREC",
                   "value": 2,
                   "content": {
-                    "type": "PATTERN",
-                    "value": "[cC][hH][aA][nN][gG][eE][rR][iI][nN][gG][kK][eE][yY][wW][oO][rR][dD]"
+                    "type": "STRING",
+                    "value": "changeringkeyword"
                   }
                 }
               },
@@ -78,8 +78,8 @@
                   "type": "PREC",
                   "value": 2,
                   "content": {
-                    "type": "PATTERN",
-                    "value": "[cC][hH][aA][nN][gG][eE][rR][iI][nN][gG][oO][pP][eE][rR][aA][tT][oO][rR]"
+                    "type": "STRING",
+                    "value": "changeringoperator"
                   }
                 }
               },
@@ -107,8 +107,8 @@
                   "type": "PREC",
                   "value": 2,
                   "content": {
-                    "type": "PATTERN",
-                    "value": "[lL][oO][aA][dD][sS][yY][nN][tT][aA][xX]"
+                    "type": "STRING",
+                    "value": "loadsyntax"
                   }
                 }
               },
@@ -129,8 +129,8 @@
               "type": "PREC",
               "value": 2,
               "content": {
-                "type": "PATTERN",
-                "value": "[eE][nN][aA][bB][lL][eE][hH][aA][sS][hH][cC][oO][mM][mM][eE][nN][tT][sS]"
+                "type": "STRING",
+                "value": "enablehashcomments"
               }
             }
           },
@@ -145,8 +145,8 @@
               "type": "PREC",
               "value": 2,
               "content": {
-                "type": "PATTERN",
-                "value": "[dD][iI][sS][aA][bB][lL][eE][hH][aA][sS][hH][cC][oO][mM][mM][eE][nN][tT][sS]"
+                "type": "STRING",
+                "value": "disablehashcomments"
               }
             }
           },
@@ -169,8 +169,8 @@
                 "type": "PREC",
                 "value": 2,
                 "content": {
-                  "type": "PATTERN",
-                  "value": "[pP][aA][cC][kK][aA][gG][eE]"
+                  "type": "STRING",
+                  "value": "package"
                 }
               }
             },
@@ -247,8 +247,8 @@
                           "type": "PREC",
                           "value": 2,
                           "content": {
-                            "type": "PATTERN",
-                            "value": "[eE][nN][dD][pP][aA][cC][kK][aA][gG][eE]"
+                            "type": "STRING",
+                            "value": "endpackage"
                           }
                         }
                       },
@@ -263,8 +263,8 @@
                           "type": "PREC",
                           "value": 2,
                           "content": {
-                            "type": "PATTERN",
-                            "value": "[eE][nN][dD]"
+                            "type": "STRING",
+                            "value": "end"
                           }
                         }
                       },
@@ -317,8 +317,8 @@
                 "type": "PREC",
                 "value": 2,
                 "content": {
-                  "type": "PATTERN",
-                  "value": "[cC][lL][aA][sS][sS]"
+                  "type": "STRING",
+                  "value": "class"
                 }
               }
             },
@@ -463,8 +463,8 @@
                           "type": "PREC",
                           "value": 2,
                           "content": {
-                            "type": "PATTERN",
-                            "value": "[eE][nN][dD][cC][lL][aA][sS][sS]"
+                            "type": "STRING",
+                            "value": "endclass"
                           }
                         }
                       },
@@ -479,8 +479,8 @@
                           "type": "PREC",
                           "value": 2,
                           "content": {
-                            "type": "PATTERN",
-                            "value": "[eE][nN][dD]"
+                            "type": "STRING",
+                            "value": "end"
                           }
                         }
                       },
@@ -537,8 +537,8 @@
                 "type": "PREC",
                 "value": 2,
                 "content": {
-                  "type": "PATTERN",
-                  "value": "[pP][rR][iI][vV][aA][tT][eE]"
+                  "type": "STRING",
+                  "value": "private"
                 }
               }
             },
@@ -1020,8 +1020,8 @@
               "type": "PREC",
               "value": 2,
               "content": {
-                "type": "PATTERN",
-                "value": "[fF][uU][nN][cC]"
+                "type": "STRING",
+                "value": "func"
               }
             }
           },
@@ -1036,8 +1036,8 @@
               "type": "PREC",
               "value": 2,
               "content": {
-                "type": "PATTERN",
-                "value": "[fF][uU][nN][cC][tT][iI][oO][nN]"
+                "type": "STRING",
+                "value": "function"
               }
             }
           },
@@ -1052,8 +1052,8 @@
               "type": "PREC",
               "value": 2,
               "content": {
-                "type": "PATTERN",
-                "value": "[dD][eE][fF]"
+                "type": "STRING",
+                "value": "def"
               }
             }
           },
@@ -1073,8 +1073,8 @@
               "type": "PREC",
               "value": 2,
               "content": {
-                "type": "PATTERN",
-                "value": "[eE][nN][dD][fF][uU][nN][cC]"
+                "type": "STRING",
+                "value": "endfunc"
               }
             }
           },
@@ -1089,8 +1089,8 @@
               "type": "PREC",
               "value": 2,
               "content": {
-                "type": "PATTERN",
-                "value": "[eE][nN][dD][fF][uU][nN][cC][tT][iI][oO][nN]"
+                "type": "STRING",
+                "value": "endfunction"
               }
             }
           },
@@ -1105,8 +1105,8 @@
               "type": "PREC",
               "value": 2,
               "content": {
-                "type": "PATTERN",
-                "value": "[eE][nN][dD]"
+                "type": "STRING",
+                "value": "end"
               }
             }
           },
@@ -1211,8 +1211,8 @@
                 "type": "PREC",
                 "value": 2,
                 "content": {
-                  "type": "PATTERN",
-                  "value": "[iI][fF]"
+                  "type": "STRING",
+                  "value": "if"
                 }
               }
             },
@@ -1293,8 +1293,8 @@
                   "type": "PREC",
                   "value": 2,
                   "content": {
-                    "type": "PATTERN",
-                    "value": "[bB][uU][tT]"
+                    "type": "STRING",
+                    "value": "but"
                   }
                 }
               },
@@ -1309,8 +1309,8 @@
                   "type": "PREC",
                   "value": 2,
                   "content": {
-                    "type": "PATTERN",
-                    "value": "[eE][lL][sS][eE][iI][fF]"
+                    "type": "STRING",
+                    "value": "elseif"
                   }
                 }
               },
@@ -1346,8 +1346,8 @@
                   "type": "PREC",
                   "value": 2,
                   "content": {
-                    "type": "PATTERN",
-                    "value": "[eE][lL][sS][eE]"
+                    "type": "STRING",
+                    "value": "else"
                   }
                 }
               },
@@ -1362,8 +1362,8 @@
                   "type": "PREC",
                   "value": 2,
                   "content": {
-                    "type": "PATTERN",
-                    "value": "[oO][tT][hH][eE][rR]"
+                    "type": "STRING",
+                    "value": "other"
                   }
                 }
               },
@@ -1392,8 +1392,8 @@
               "type": "PREC",
               "value": 2,
               "content": {
-                "type": "PATTERN",
-                "value": "[oO][kK]"
+                "type": "STRING",
+                "value": "ok"
               }
             }
           },
@@ -1408,8 +1408,8 @@
               "type": "PREC",
               "value": 2,
               "content": {
-                "type": "PATTERN",
-                "value": "[eE][nN][dD]"
+                "type": "STRING",
+                "value": "end"
               }
             }
           },
@@ -1424,8 +1424,8 @@
               "type": "PREC",
               "value": 2,
               "content": {
-                "type": "PATTERN",
-                "value": "[eE][nN][dD][iI][fF]"
+                "type": "STRING",
+                "value": "endif"
               }
             }
           },
@@ -1452,8 +1452,8 @@
                 "type": "PREC",
                 "value": 2,
                 "content": {
-                  "type": "PATTERN",
-                  "value": "[wW][hH][iI][lL][eE]"
+                  "type": "STRING",
+                  "value": "while"
                 }
               }
             },
@@ -1501,8 +1501,8 @@
                     "type": "PREC",
                     "value": 2,
                     "content": {
-                      "type": "PATTERN",
-                      "value": "[eE][nN][dD]"
+                      "type": "STRING",
+                      "value": "end"
                     }
                   }
                 },
@@ -1517,8 +1517,8 @@
                     "type": "PREC",
                     "value": 2,
                     "content": {
-                      "type": "PATTERN",
-                      "value": "[eE][nN][dD][wW][hH][iI][lL][eE]"
+                      "type": "STRING",
+                      "value": "endwhile"
                     }
                   }
                 },
@@ -1551,8 +1551,8 @@
                     "type": "PREC",
                     "value": 2,
                     "content": {
-                      "type": "PATTERN",
-                      "value": "[fF][oO][rR]"
+                      "type": "STRING",
+                      "value": "for"
                     }
                   }
                 },
@@ -1567,8 +1567,8 @@
                     "type": "PREC",
                     "value": 2,
                     "content": {
-                      "type": "PATTERN",
-                      "value": "[fF][oO][rR][eE][aA][cC][hH]"
+                      "type": "STRING",
+                      "value": "foreach"
                     }
                   }
                 },
@@ -1711,8 +1711,8 @@
                     "type": "PREC",
                     "value": 2,
                     "content": {
-                      "type": "PATTERN",
-                      "value": "[nN][eE][xX][tT]"
+                      "type": "STRING",
+                      "value": "next"
                     }
                   }
                 },
@@ -1727,8 +1727,8 @@
                     "type": "PREC",
                     "value": 2,
                     "content": {
-                      "type": "PATTERN",
-                      "value": "[eE][nN][dD]"
+                      "type": "STRING",
+                      "value": "end"
                     }
                   }
                 },
@@ -1743,8 +1743,8 @@
                     "type": "PREC",
                     "value": 2,
                     "content": {
-                      "type": "PATTERN",
-                      "value": "[eE][nN][dD][fF][oO][rR]"
+                      "type": "STRING",
+                      "value": "endfor"
                     }
                   }
                 },
@@ -1771,8 +1771,8 @@
               "type": "PREC",
               "value": 2,
               "content": {
-                "type": "PATTERN",
-                "value": "[dD][oO]"
+                "type": "STRING",
+                "value": "do"
               }
             }
           },
@@ -1794,8 +1794,8 @@
               "type": "PREC",
               "value": 2,
               "content": {
-                "type": "PATTERN",
-                "value": "[aA][gG][aA][iI][nN]"
+                "type": "STRING",
+                "value": "again"
               }
             }
           },
@@ -1822,8 +1822,8 @@
                 "type": "PREC",
                 "value": 2,
                 "content": {
-                  "type": "PATTERN",
-                  "value": "[sS][wW][iI][tT][cC][hH]"
+                  "type": "STRING",
+                  "value": "switch"
                 }
               }
             },
@@ -1883,8 +1883,8 @@
                     "type": "PREC",
                     "value": 2,
                     "content": {
-                      "type": "PATTERN",
-                      "value": "[oO][fF][fF]"
+                      "type": "STRING",
+                      "value": "off"
                     }
                   }
                 },
@@ -1899,8 +1899,8 @@
                     "type": "PREC",
                     "value": 2,
                     "content": {
-                      "type": "PATTERN",
-                      "value": "[eE][nN][dD]"
+                      "type": "STRING",
+                      "value": "end"
                     }
                   }
                 },
@@ -1915,8 +1915,8 @@
                     "type": "PREC",
                     "value": 2,
                     "content": {
-                      "type": "PATTERN",
-                      "value": "[eE][nN][dD][sS][wW][iI][tT][cC][hH]"
+                      "type": "STRING",
+                      "value": "endswitch"
                     }
                   }
                 },
@@ -1946,8 +1946,8 @@
                   "type": "PREC",
                   "value": 2,
                   "content": {
-                    "type": "PATTERN",
-                    "value": "[oO][nN]"
+                    "type": "STRING",
+                    "value": "on"
                   }
                 }
               },
@@ -1962,8 +1962,8 @@
                   "type": "PREC",
                   "value": 2,
                   "content": {
-                    "type": "PATTERN",
-                    "value": "[cC][aA][sS][eE]"
+                    "type": "STRING",
+                    "value": "case"
                   }
                 }
               },
@@ -2032,8 +2032,8 @@
                   "type": "PREC",
                   "value": 2,
                   "content": {
-                    "type": "PATTERN",
-                    "value": "[oO][tT][hH][eE][rR]"
+                    "type": "STRING",
+                    "value": "other"
                   }
                 }
               },
@@ -2048,8 +2048,8 @@
                   "type": "PREC",
                   "value": 2,
                   "content": {
-                    "type": "PATTERN",
-                    "value": "[eE][lL][sS][eE]"
+                    "type": "STRING",
+                    "value": "else"
                   }
                 }
               },
@@ -2081,8 +2081,8 @@
                 "type": "PREC",
                 "value": 2,
                 "content": {
-                  "type": "PATTERN",
-                  "value": "[tT][rR][yY]"
+                  "type": "STRING",
+                  "value": "try"
                 }
               }
             },
@@ -2149,8 +2149,8 @@
                     "type": "PREC",
                     "value": 2,
                     "content": {
-                      "type": "PATTERN",
-                      "value": "[dD][oO][nN][eE]"
+                      "type": "STRING",
+                      "value": "done"
                     }
                   }
                 },
@@ -2165,8 +2165,8 @@
                     "type": "PREC",
                     "value": 2,
                     "content": {
-                      "type": "PATTERN",
-                      "value": "[eE][nN][dD]"
+                      "type": "STRING",
+                      "value": "end"
                     }
                   }
                 },
@@ -2181,8 +2181,8 @@
                     "type": "PREC",
                     "value": 2,
                     "content": {
-                      "type": "PATTERN",
-                      "value": "[eE][nN][dD][tT][rR][yY]"
+                      "type": "STRING",
+                      "value": "endtry"
                     }
                   }
                 },
@@ -2212,8 +2212,8 @@
                 "type": "PREC",
                 "value": 2,
                 "content": {
-                  "type": "PATTERN",
-                  "value": "[cC][aA][tT][cC][hH]"
+                  "type": "STRING",
+                  "value": "catch"
                 }
               }
             },
@@ -2270,8 +2270,8 @@
               "type": "PREC",
               "value": 2,
               "content": {
-                "type": "PATTERN",
-                "value": "[fF][iI][nN][aA][lL][lL][yY]"
+                "type": "STRING",
+                "value": "finally"
               }
             }
           },
@@ -2298,8 +2298,8 @@
               "type": "PREC",
               "value": 2,
               "content": {
-                "type": "PATTERN",
-                "value": "[lL][oO][aA][dD]"
+                "type": "STRING",
+                "value": "load"
               }
             }
           },
@@ -2320,8 +2320,8 @@
                       "type": "PREC",
                       "value": 2,
                       "content": {
-                        "type": "PATTERN",
-                        "value": "[pP][aA][cC][kK][aA][gG][eE]"
+                        "type": "STRING",
+                        "value": "package"
                       }
                     }
                   },
@@ -2336,8 +2336,8 @@
                       "type": "PREC",
                       "value": 2,
                       "content": {
-                        "type": "PATTERN",
-                        "value": "[aA][gG][aA][iI][nN]"
+                        "type": "STRING",
+                        "value": "again"
                       }
                     }
                   },
@@ -2368,8 +2368,8 @@
               "type": "PREC",
               "value": 2,
               "content": {
-                "type": "PATTERN",
-                "value": "[iI][mM][pP][oO][rR][tT]"
+                "type": "STRING",
+                "value": "import"
               }
             }
           },
@@ -2396,8 +2396,8 @@
                   "type": "PREC",
                   "value": 2,
                   "content": {
-                    "type": "PATTERN",
-                    "value": "[sS][eE][eE]"
+                    "type": "STRING",
+                    "value": "see"
                   }
                 }
               },
@@ -2412,8 +2412,8 @@
                   "type": "PREC",
                   "value": 2,
                   "content": {
-                    "type": "PATTERN",
-                    "value": "[pP][uU][tT]"
+                    "type": "STRING",
+                    "value": "put"
                   }
                 }
               },
@@ -2446,8 +2446,8 @@
                   "type": "PREC",
                   "value": 2,
                   "content": {
-                    "type": "PATTERN",
-                    "value": "[gG][iI][vV][eE]"
+                    "type": "STRING",
+                    "value": "give"
                   }
                 }
               },
@@ -2462,8 +2462,8 @@
                   "type": "PREC",
                   "value": 2,
                   "content": {
-                    "type": "PATTERN",
-                    "value": "[gG][eE][tT]"
+                    "type": "STRING",
+                    "value": "get"
                   }
                 }
               },
@@ -2502,8 +2502,8 @@
               "type": "PREC",
               "value": 2,
               "content": {
-                "type": "PATTERN",
-                "value": "[rR][eE][tT][uU][rR][nN]"
+                "type": "STRING",
+                "value": "return"
               }
             }
           },
@@ -2524,8 +2524,8 @@
                     "type": "PREC",
                     "value": 2,
                     "content": {
-                      "type": "PATTERN",
-                      "value": "[rR][eE][tT][uU][rR][nN]"
+                      "type": "STRING",
+                      "value": "return"
                     }
                   }
                 },
@@ -2567,8 +2567,8 @@
                   "type": "PREC",
                   "value": 2,
                   "content": {
-                    "type": "PATTERN",
-                    "value": "[eE][xX][iI][tT]"
+                    "type": "STRING",
+                    "value": "exit"
                   }
                 }
               },
@@ -2583,8 +2583,8 @@
                   "type": "PREC",
                   "value": 2,
                   "content": {
-                    "type": "PATTERN",
-                    "value": "[bB][rR][eE][aA][kK]"
+                    "type": "STRING",
+                    "value": "break"
                   }
                 }
               },
@@ -2610,8 +2610,8 @@
                         "type": "PREC",
                         "value": 2,
                         "content": {
-                          "type": "PATTERN",
-                          "value": "[eE][xX][iI][tT]"
+                          "type": "STRING",
+                          "value": "exit"
                         }
                       }
                     },
@@ -2626,8 +2626,8 @@
                         "type": "PREC",
                         "value": 2,
                         "content": {
-                          "type": "PATTERN",
-                          "value": "[bB][rR][eE][aA][kK]"
+                          "type": "STRING",
+                          "value": "break"
                         }
                       }
                     },
@@ -2659,8 +2659,8 @@
                   "type": "PREC",
                   "value": 2,
                   "content": {
-                    "type": "PATTERN",
-                    "value": "[lL][oO][oO][pP]"
+                    "type": "STRING",
+                    "value": "loop"
                   }
                 }
               },
@@ -2675,8 +2675,8 @@
                   "type": "PREC",
                   "value": 2,
                   "content": {
-                    "type": "PATTERN",
-                    "value": "[cC][oO][nN][tT][iI][nN][uU][eE]"
+                    "type": "STRING",
+                    "value": "continue"
                   }
                 }
               },
@@ -2702,8 +2702,8 @@
                         "type": "PREC",
                         "value": 2,
                         "content": {
-                          "type": "PATTERN",
-                          "value": "[lL][oO][oO][pP]"
+                          "type": "STRING",
+                          "value": "loop"
                         }
                       }
                     },
@@ -2718,8 +2718,8 @@
                         "type": "PREC",
                         "value": 2,
                         "content": {
-                          "type": "PATTERN",
-                          "value": "[cC][oO][nN][tT][iI][nN][uU][eE]"
+                          "type": "STRING",
+                          "value": "continue"
                         }
                       }
                     },
@@ -2745,8 +2745,8 @@
           "type": "PREC",
           "value": 2,
           "content": {
-            "type": "PATTERN",
-            "value": "[bB][yY][eE]"
+            "type": "STRING",
+            "value": "bye"
           }
         }
       },
@@ -3118,8 +3118,8 @@
                           "type": "PREC",
                           "value": 2,
                           "content": {
-                            "type": "PATTERN",
-                            "value": "[oO][rR]"
+                            "type": "STRING",
+                            "value": "or"
                           }
                         }
                       },
@@ -3160,8 +3160,8 @@
                           "type": "PREC",
                           "value": 2,
                           "content": {
-                            "type": "PATTERN",
-                            "value": "[aA][nN][dD]"
+                            "type": "STRING",
+                            "value": "and"
                           }
                         }
                       },
@@ -3453,8 +3453,8 @@
                           "type": "PREC",
                           "value": 2,
                           "content": {
-                            "type": "PATTERN",
-                            "value": "[oO][rR]"
+                            "type": "STRING",
+                            "value": "or"
                           }
                         }
                       },
@@ -3495,8 +3495,8 @@
                           "type": "PREC",
                           "value": 2,
                           "content": {
-                            "type": "PATTERN",
-                            "value": "[aA][nN][dD]"
+                            "type": "STRING",
+                            "value": "and"
                           }
                         }
                       },
@@ -3785,8 +3785,8 @@
                     "type": "PREC",
                     "value": 2,
                     "content": {
-                      "type": "PATTERN",
-                      "value": "[nN][oO][tT]"
+                      "type": "STRING",
+                      "value": "not"
                     }
                   }
                 },
@@ -3891,8 +3891,8 @@
               "type": "PREC",
               "value": 2,
               "content": {
-                "type": "PATTERN",
-                "value": "[cC][aA][lL][lL]"
+                "type": "STRING",
+                "value": "call"
               }
             }
           },
@@ -4549,8 +4549,8 @@
                 "type": "PREC",
                 "value": 2,
                 "content": {
-                  "type": "PATTERN",
-                  "value": "[nN][eE][wW]"
+                  "type": "STRING",
+                  "value": "new"
                 }
               }
             },
@@ -4568,8 +4568,8 @@
                     "type": "PREC",
                     "value": 2,
                     "content": {
-                      "type": "PATTERN",
-                      "value": "[fF][rR][oO][mM]"
+                      "type": "STRING",
+                      "value": "from"
                     }
                   }
                 },
@@ -4665,8 +4665,8 @@
                 "type": "PREC",
                 "value": 2,
                 "content": {
-                  "type": "PATTERN",
-                  "value": "[nN][eE][wW]"
+                  "type": "STRING",
+                  "value": "new"
                 }
               }
             },
@@ -4684,8 +4684,8 @@
                     "type": "PREC",
                     "value": 2,
                     "content": {
-                      "type": "PATTERN",
-                      "value": "[fF][rR][oO][mM]"
+                      "type": "STRING",
+                      "value": "from"
                     }
                   }
                 },
@@ -5301,8 +5301,8 @@
               "type": "PREC",
               "value": 2,
               "content": {
-                "type": "PATTERN",
-                "value": "[sS][eE][lL][fF]"
+                "type": "STRING",
+                "value": "self"
               }
             }
           },
@@ -5317,8 +5317,8 @@
               "type": "PREC",
               "value": 2,
               "content": {
-                "type": "PATTERN",
-                "value": "[tT][hH][iI][sS]"
+                "type": "STRING",
+                "value": "this"
               }
             }
           },
@@ -5335,8 +5335,8 @@
           "type": "PREC",
           "value": 2,
           "content": {
-            "type": "PATTERN",
-            "value": "[sS][uU][pP][eE][rR]"
+            "type": "STRING",
+            "value": "super"
           }
         }
       },
@@ -5354,8 +5354,8 @@
               "type": "PREC",
               "value": 2,
               "content": {
-                "type": "PATTERN",
-                "value": "[tT][rR][uU][eE]"
+                "type": "STRING",
+                "value": "true"
               }
             }
           },
@@ -5370,8 +5370,8 @@
               "type": "PREC",
               "value": 2,
               "content": {
-                "type": "PATTERN",
-                "value": "[fF][aA][lL][sS][eE]"
+                "type": "STRING",
+                "value": "false"
               }
             }
           },
@@ -5388,8 +5388,8 @@
           "type": "PREC",
           "value": 2,
           "content": {
-            "type": "PATTERN",
-            "value": "[nN][uU][lL][lL]"
+            "type": "STRING",
+            "value": "null"
           }
         }
       },

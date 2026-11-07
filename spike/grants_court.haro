@@ -43,15 +43,15 @@ $aCourtViews = []
 $aCourtSentenceKinds = []
 $aCourtExprs = []
 $aCourtWalks = []
-$aCourtAsk = NULL
-$aCourtRun = NULL
+$aCourtAsk = null
+$aCourtRun = null
 $aCourtSymbols = []
-$aCourtWorldFile = NULL
+$aCourtWorldFile = null
 $cCourtCode = "PARSE"
 $aCourtCites = []
-$aCourtFormset = NULL
-$aCourtNarrate = NULL
-$aCourtUnderstand = NULL
+$aCourtFormset = null
+$aCourtNarrate = null
+$aCourtUnderstand = null
 $bNSurfaces = 0
 $aCourtConstitution = []
 $aCourtZone = []
@@ -116,12 +116,12 @@ $aCourtLangs = [
     ],
     [
     ],
-    NULL,
-    NULL,
+    null,
+    null,
     [],
-    NULL,
-    NULL,
-    NULL,
+    null,
+    null,
+    null,
     [
       ["granted_right", "use", "primary", "[MEMBER granted]", [["zone", "rights", "granted", 42]], "USE {name} needs a right most, and no ZONE grants it", 40, "PRIMARY_NOT_GRANTED", ["right:granted-by-a-zone"], "error"],
       ["wants_are_granted", "use", "wants", "[INTO [ANY RULE granted_right]]", [], "USE {name} wants a right no ZONE grants", 49, "RIGHT_NOT_GRANTED", ["right:granted-by-a-zone"], "error"],

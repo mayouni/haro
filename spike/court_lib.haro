@@ -254,7 +254,7 @@ func CtRefusalRow(cCategory)
 	for i = 1 to len($aCourtRefusals)
 		if $aCourtRefusals[i][1] = cCategory return $aCourtRefusals[i] ok
 	next
-	return NULL
+	return null
 
 func CtRefusalCode(cCategory, cWord, cDefault)
 	aR = CtRefusalRow(cCategory)
@@ -343,7 +343,7 @@ func CtLangEntry(cName)
 	for i = 1 to len($aCourtLangs)
 		if $aCourtLangs[i][1] = cName return $aCourtLangs[i] ok
 	next
-	return NULL
+	return null
 
 func CtUseLanguage(cName)
 	aE = CtLangEntry(cName)
@@ -373,22 +373,22 @@ func CtUseLanguage(cName)
 		$aCourtWalks = aE[17]
 	ok
 	# v0.7: the ASK [name, from kinds, where, clauses], or NULL
-	$aCourtAsk = NULL
+	$aCourtAsk = null
 	if len(aE) >= 18 $aCourtAsk = aE[18] ok
 	# v0.9: the RUN [[role, [kind, seat, ...]], ...], or NULL
-	$aCourtRun = NULL
+	$aCourtRun = null
 	if len(aE) >= 19 $aCourtRun = aE[19] ok
 	# v0.10: the SYMBOLs [name, kind, ref, message]
 	$aCourtSymbols = []
 	if len(aE) >= 20 $aCourtSymbols = aE[20] ok
 	# v0.12: the FORMS [name, fluent, passive, statement, params, family], or NULL
-	$aCourtFormset = NULL
+	$aCourtFormset = null
 	if len(aE) >= 21 $aCourtFormset = aE[21] ok
 	# v0.13: the NARRATE [name, opens, ends, refuses, says], or NULL
-	$aCourtNarrate = NULL
+	$aCourtNarrate = null
 	if len(aE) >= 22 $aCourtNarrate = aE[22] ok
 	# v0.17: the UNDERSTAND [name, [[role, kind], ...]], or NULL -- a human language reaches closed questions (n_lib.haro)
-	$aCourtUnderstand = NULL
+	$aCourtUnderstand = null
 	if len(aE) >= 23 $aCourtUnderstand = aE[23] ok
 
 # the condition tables of every language the court carries, built once
@@ -421,7 +421,7 @@ func CtBuildCondLangs()
 		aViews = []
 		for j = 1 to len(aE[14])
 			aV = aE[14][j]
-			aViews + [aV[1], aV[2], NULL, aV[3], aV[4], aV[5]]
+			aViews + [aV[1], aV[2], null, aV[3], aV[4], aV[5]]
 		next
 		# v0.8: the WORLD's ENTRY kinds and the forms' seat kinds
 		aEntry = []
@@ -532,7 +532,7 @@ func CtDiagnose(cFile, cWorldPath)
 	$aCourtFound = []
 	$aCourtBroken = []
 	cErr = ""
-	aDecls = NULL
+	aDecls = null
 	try
 		if cWorldPath != "" $aCourtWorldFile = CtWorldLoad(cWorldPath) ok
 		aDecls = CtDeclare(cSrc)
@@ -571,7 +571,7 @@ func CtExprByName(cName)
 	for i = 1 to len($aCourtExprs)
 		if $aCourtExprs[i][1] = cName return $aCourtExprs[i] ok
 	next
-	return NULL
+	return null
 
 func CtExprUse(aE)
 	$cExprLang = aE[1]
@@ -589,7 +589,7 @@ func CtSentenceKind(cName)
 	for i = 1 to len($aCourtSentenceKinds)
 		if $aCourtSentenceKinds[i][1] = cName return $aCourtSentenceKinds[i] ok
 	next
-	return NULL
+	return null
 
 # a kind's MESSAGES entry for a seat, or ""
 func CtMessageFor(aKind, cSeat)
@@ -618,7 +618,7 @@ func CtJudgeSentence(aDecl, aSeat, aClause)
 	CtUseLanguage(aSK[2])
 	$cCourtDir = CtDirOf(cPath)
 	cErr = ""
-	aInner = NULL
+	aInner = null
 	bWas = $bCourtCollect
 	$bCourtCollect = 0
 	try
@@ -691,7 +691,7 @@ func CtKindByVerb(cVerb)
 	for i = 1 to len($aCourtKinds)
 		if $aCourtKinds[i][1] = cVerb return $aCourtKinds[i] ok
 	next
-	return NULL
+	return null
 
 func CtVerbs()
 	aV = []
@@ -704,7 +704,7 @@ func CtFormByName(cName)
 	for i = 1 to len($aCourtForms)
 		if $aCourtForms[i][1] = cName return $aCourtForms[i] ok
 	next
-	return NULL
+	return null
 
 # a seat is [name, of, isList, optional, typeKind]; its clause name is the
 # seat's name in UPPER_SNAKE, and its value shape follows its type:
@@ -789,25 +789,25 @@ func CtMenuByName(cName)
 	for i = 1 to len($aCourtMenus)
 		if $aCourtMenus[i][1] = cName return $aCourtMenus[i] ok
 	next
-	return NULL
+	return null
 
 func CtRangeByName(cName)
 	for i = 1 to len($aCourtRanges)
 		if $aCourtRanges[i][1] = cName return $aCourtRanges[i] ok
 	next
-	return NULL
+	return null
 
 func CtFormatByName(cName)
 	for i = 1 to len($aCourtFormats)
 		if $aCourtFormats[i][1] = cName return $aCourtFormats[i] ok
 	next
-	return NULL
+	return null
 
 func CtKindByDeclName(cName)
 	for i = 1 to len($aCourtKinds)
 		if $aCourtKinds[i][2] = cName return $aCourtKinds[i] ok
 	next
-	return NULL
+	return null
 
 # ---- v0.3: a UNION seat takes a value of one of several shapes -------------------
 # a union is [name, [[of, isList, typeKind], ...], message]
@@ -816,7 +816,7 @@ func CtUnionByName(cName)
 	for i = 1 to len($aCourtUnions)
 		if $aCourtUnions[i][1] = cName return $aCourtUnions[i] ok
 	next
-	return NULL
+	return null
 
 # an alternative's value shape, as CtClauseShape gives a seat's
 func CtAltShape(aAlt)
@@ -826,7 +826,7 @@ func CtAltShape(aAlt)
 # fits either list shape
 func CtUnionAlt(aSeat, aClause)
 	aU = CtUnionByName(aSeat[2])
-	if isNull(aU) return NULL ok
+	if isNull(aU) return null ok
 	cGot = aClause[3][1]
 	bEmpty = 0
 	if cGot = "namelist" or cGot = "stringlist"
@@ -838,7 +838,7 @@ func CtUnionAlt(aSeat, aClause)
 		if cShape = cGot return aAlts[i] ok
 		if bEmpty and (cShape = "namelist" or cShape = "stringlist") return aAlts[i] ok
 	next
-	return NULL
+	return null
 
 # the union's own MESSAGE speaks when the value fits no alternative
 func CtWantUnion(aDecl, aClause, aSeat)
@@ -900,7 +900,7 @@ func CtFill(cMsg, aDecl, cValue)
 							# a path: {x.seat} through a reference seat, a ONE kind or a
 							# VIEW, {view} a VIEW's declaration (v0.3, v0.4)
 							bSave = $bCondUnread
-							v = CondPathScalar(["path", CondSplit(cKey, ".")], ["decl", $cCondLang, aDecl, $aCondDecls], NULL)
+							v = CondPathScalar(["path", CondSplit(cKey, ".")], ["decl", $cCondLang, aDecl, $aCondDecls], null)
 							$bCondUnread = bSave
 							if not isNull(v) cRep = v ok
 						ok
@@ -979,7 +979,7 @@ func CtSeatByClause(aKind, cClause)
 	for i = 1 to len(aS)
 		if upper(aS[i][1]) = cClause return aS[i] ok
 	next
-	return NULL
+	return null
 
 # ---- parser ----------------------------------------------------------------
 
@@ -1073,14 +1073,14 @@ func CtParseDecl()
 		CtFailC(tV[3], aCC[1], aCC[2], "Unknown verb '" + CtShown(tV) + "': " + cMsg)
 	ok
 	tK = CtNext()
-	aKind = NULL
+	aKind = null
 	if tK[1] = "keyword" aKind = CtKindByVerb(tK[2]) ok
 	if isNull(aKind)
 		# v0.35: a NAMED kind held at warning is read past and said (severity_lib.haro, loaded only where one is held)
 		aSevR = CtRefusalRow("unknown_declaration")
 		if not isNull(aSevR)
 			if len(aSevR) >= 7
-				if SevSkipNamed(aSevR, tK) return NULL ok
+				if SevSkipNamed(aSevR, tK) return null ok
 			ok
 		ok
 		cNamed = CtRefusalNamed("unknown_declaration", lower(CtShown(tK)))
@@ -1317,7 +1317,7 @@ func CtDeclare(cSrc)
 		aK = CtKindByDeclName(aCn[2])
 		if isNull(aK) loop ok
 		aWhen = CondParse(aCn[3])
-		aThen = NULL
+		aThen = null
 		if aCn[4] != "" aThen = CondParse(aCn[4]) ok
 		for j = 1 to len(aDecls)
 			aD = aDecls[j]
@@ -1475,7 +1475,7 @@ func CtCheckNamed(cNames, cName)
 		if len(aM) >= 4 cOwn = aM[4] ok
 		aCC = CtElementCites(cOwn, "MENU", aM[1], aM, 5)
 		CtSetCode(aCC[1], aCC[2])
-		return CtFill(cMsg, NULL, cName)
+		return CtFill(cMsg, null, cName)
 	ok
 	aF = CtFormatByName(cNames)
 	if not isNull(aF)
@@ -1486,7 +1486,7 @@ func CtCheckNamed(cNames, cName)
 		if len(aF) >= 5 cOwn = aF[5] ok
 		aCC = CtElementCites(cOwn, "FORMAT", aF[1], aF, 6)
 		CtSetCode(aCC[1], aCC[2])
-		return CtFill(cMsg, NULL, cName)
+		return CtFill(cMsg, null, cName)
 	ok
 	return ""
 
@@ -1754,7 +1754,7 @@ func CtPrintVerdict(aDecls)
 func CtMarkedFields(aDecls)
 	aOut = []
 	for m = 1 to len($aCourtMarks)
-		aKind = NULL
+		aKind = null
 		for k = 1 to len($aCourtKinds)
 			if $aCourtKinds[k][2] = $aCourtMarks[m][1] aKind = $aCourtKinds[k] ok
 		next
@@ -1852,7 +1852,7 @@ func CtClauseText(aDecl, cClause)
 	for i = 1 to len(aC)
 		if aC[i][1] = cClause return aC[i][3][2] ok
 	next
-	return NULL
+	return null
 
 func CtRefuse(cStage, cCode, cMsg, cFile, nLine, aCites, cWhy, cTodo)
 	? $cCourtLang + " (line " + nLine + "): " + cStage + ": " + cMsg
@@ -1868,7 +1868,7 @@ func CtRefine(cFile, cRfnFile)
 	aSaveLang = $cCourtLang
 	$aCourtKinds = CtRfnKinds()
 	$cCourtLang = "rfn"
-	aR = NULL
+	aR = null
 	cErr = ""
 	try
 		aRs = CtDeclare(cRfn)
@@ -1897,7 +1897,7 @@ func CtRefine(cFile, cRfnFile)
 	ok
 
 	# structural, on the ORIGINAL: the file must be a sentence before it is refined
-	aDecls = NULL
+	aDecls = null
 	try
 		aDecls = CtDeclare(cSrc)
 	catch
@@ -1916,7 +1916,7 @@ func CtRefine(cFile, cRfnFile)
 	ok
 	cDeclName = left(cTarget, nDot - 1)
 	cClause = substr(cTarget, nDot + 1)
-	aDecl = NULL
+	aDecl = null
 	for i = 1 to len(aDecls)
 		if aDecls[i][2] = cDeclName aDecl = aDecls[i] ok
 	next
@@ -1974,7 +1974,7 @@ func CtRefine(cFile, cRfnFile)
 		return
 	ok
 	# the clause as written, with its token span
-	aClause = NULL
+	aClause = null
 	aC = aDecl[4]
 	for i = 1 to len(aC)
 		if aC[i][1] = cClause aClause = aC[i] ok
@@ -2098,13 +2098,13 @@ func CtDeclNamed(aDecls, cName)
 	for i = 1 to len(aDecls)
 		if aDecls[i][2] = cName return aDecls[i] ok
 	next
-	return NULL
+	return null
 
 func CtWalkOf(cKindName)
 	for i = 1 to len($aCourtWalks)
 		if $aCourtWalks[i][2] = cKindName return $aCourtWalks[i] ok
 	next
-	return NULL
+	return null
 
 # the node of an expression seat, parsed under its language; NULL when the
 # clause is not written
@@ -2114,7 +2114,7 @@ func CtExprNode(aDecl, cSeat)
 	if isNull(aSeat) raise("no seat '" + cSeat + "' on " + aDecl[1]) ok
 	if CtTypeKind(aSeat) != "expr" raise(upper(cSeat) + " of " + aDecl[1] + " " + aDecl[2] + " is not an expression seat") ok
 	cText = CondScalar(aDecl, cSeat)
-	if isNull(cText) return NULL ok
+	if isNull(cText) return null ok
 	aE = CtExprByName(aSeat[2])
 	if isNull(aE) raise("the court carries no EXPRESSION called '" + aSeat[2] + "'") ok
 	CtExprUse(aE)
@@ -2138,9 +2138,9 @@ func CtGuard(aDecls, aStep, cPath)
 	cHead = left(cPath, nDot - 1)
 	cTail = substr(cPath, nDot + 1)
 	cRef = CondScalar(aStep, cHead)
-	if isNull(cRef) return [NULL, ""] ok
+	if isNull(cRef) return [null, ""] ok
 	aTarget = CtDeclNamed(aDecls, cRef)
-	if isNull(aTarget) return [NULL, ""] ok
+	if isNull(aTarget) return [null, ""] ok
 	aNode = CtExprNode(aTarget, cTail)
 	cReason = CondScalar(aTarget, "message")
 	if isNull(cReason) cReason = upper(cTail) + " of " + aTarget[1] + " " + aTarget[2] + " failed" ok

@@ -424,6 +424,8 @@ const Abs = struct {
     inner: List = .{}, // the comments met inside the statement being read: items of their own after it
     depth: u32 = 0,
     last_reread: ?Reread = null,
+    /// the file's rules: a re-read piece of a .ring file is read as Ring reads it too (HARO-SURFACE-01)
+    haro: bool = true,
 
     fn init(a: Alloc, parser: ts.Parser, src: []const u8) Alloc.Error!Abs {
         var nl = std.ArrayListUnmanaged(u32){};
@@ -780,7 +782,7 @@ const Abs = struct {
     fn parseSnippet(self: *Abs, piece: []const u8) Err!?[]*G {
         const a = self.a;
         const text_ = try std.fmt.allocPrint(a, "func __reread()\n{s}\n", .{piece});
-        const tree = self.parser.parse(text_) orelse return null;
+        const tree = (lift.parse(a, self.parser, text_, self.haro) orelse return null).tree;
         defer tree.deinit();
         if (tree.root().hasError()) return null;
         const root = try buildTree(a, tree.root(), 0);
@@ -1904,23 +1906,27 @@ const Printer = struct {
 
 /// The canonical text of `src`, or an error (and `why`). Null when the parser reports an error in the file: that is not a failure of this
 /// formatter, it is a file that is not Ring yet.
-pub fn format(a: Alloc, parser: ts.Parser, src: []const u8) Err!?[]const u8 {
+/// `haro`: the file is read by Haro's rules (a .haro file); any other by Ring's -- its keywords in any case (HARO-SURFACE-01)
+pub fn format(a: Alloc, parser: ts.Parser, src: []const u8, haro: bool) Err!?[]const u8 {
     why = "";
-    const tree0 = parser.parse(src) orelse {
+    const pl = lift.parse(a, parser, src, haro) orelse {
         why = "the parser gave nothing";
         return null;
     };
+    const tree0 = pl.tree;
     if (tree0.root().hasError()) {
         tree0.deinit();
         why = "the parser reports an error in the file";
         return null;
     }
     // `within` and `using` are read as the lift reads them (D52 rung 3), and sTry prints them back
-    const lb = lift.blocks(a, parser, tree0, src);
+    const lb = lift.blocks(a, parser, tree0, pl.src);
     defer lb.tree.deinit();
     const root = lb.tree.root();
     const cn = try buildTree(a, root, 0);
-    var ab = try Abs.init(a, parser, lb.src);
+    // a name is printed as the file wrote it: where nothing was put in, the file's own bytes stand under the same spans
+    var ab = try Abs.init(a, parser, if (lb.src.len == src.len) src else lb.src);
+    ab.haro = haro;
     const g = try ab.file(cn);
     var p = Printer{ .a = a };
     try p.items(sl(g.items), 0);
@@ -1970,7 +1976,7 @@ fn runIt(alloc: Alloc, argv: []const []const u8) !u8 {
             code = 1;
             continue;
         };
-        const res = format(fa, parser, src) catch |e| {
+        const res = format(fa, parser, src, lift.isHaro(p)) catch |e| {
             std.debug.print("haro fmt: {s}: {s}{s}{s}\n", .{ p, @errorName(e), if (why.len > 0) ": " else "", why });
             code = 1;
             continue;

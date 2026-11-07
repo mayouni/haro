@@ -39,7 +39,7 @@
    "id": "G04",
    "kind": "run",
    "line": "E1",
-   "why": "`Catch err` in another case, with a comment after it, binds",
+   "why": "`catch err` with a comment after it binds",
    "file": "cases/G04.haro",
    "stdout": "err=x4\n"
   },

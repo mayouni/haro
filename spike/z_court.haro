@@ -44,15 +44,15 @@ $aCourtViews = []
 $aCourtSentenceKinds = []
 $aCourtExprs = []
 $aCourtWalks = []
-$aCourtAsk = NULL
-$aCourtRun = NULL
+$aCourtAsk = null
+$aCourtRun = null
 $aCourtSymbols = []
-$aCourtWorldFile = NULL
+$aCourtWorldFile = null
 $cCourtCode = "PARSE"
 $aCourtCites = []
-$aCourtFormset = NULL
-$aCourtNarrate = NULL
-$aCourtUnderstand = NULL
+$aCourtFormset = null
+$aCourtNarrate = null
+$aCourtUnderstand = null
 $bNSurfaces = 0
 $aCourtConstitution = []
 $aCourtZone = []
@@ -136,11 +136,11 @@ $aCourtLangs = [
       ["flows", "flow", "step", "flow", "order", ["validate", "enforcing.rule"], "compute", "formula", "on_fail"]
     ],
     ["questions", ["flow"], "zexpr", ["where", "order", "limit"], "records.fields"],
-    NULL,
+    null,
     [],
-    NULL,
+    null,
     ["telling", "{file} is a world of Z, {count} declarations.", "That is the whole world.", "I stopped: {message} ({code})", [["enum", "{name} is one of {words}. {rationale}"], ["entity", "{name} is a record of {fields}. {rationale}"], ["norm", "{name} holds {rule}; broken, it says: {message}. {rationale}"], ["flow", "{name} is a flow records walk. {rationale}"], ["step", "{name} is step {order} of {flow}, acted by {actor}. {rationale}"], ["landing_zone", "{name} is held by {held_by}; {format} records land in it and walk {into}. {rationale}"]], [["ask", "Asking {from}: {question}"], ["matched", "{count} of the {total} rows match."], ["ordered", "Ordered by {field} {direction}."], ["cut", "Only the first {limit} are kept."], ["answer", "The answer is {count} row(s): {rows}"]]],
-    NULL
+    null
   ]
 ]
 CtUseLanguage("z")

@@ -27,16 +27,6 @@ const PREC = {
 	MEMBER: 16,
 };
 
-// Case-insensitive keyword pattern
-const ci = (word) =>
-	new RegExp(
-		word
-			.split("")
-			.map((c) =>
-				/[a-z]/i.test(c) ? `[${c.toLowerCase()}${c.toUpperCase()}]` : c,
-			)
-			.join(""),
-	);
 
 // Ring's scanner treats ANY run of characters that are not operators,
 // whitespace or quotes as an identifier — this includes Unicode/Arabic
@@ -44,8 +34,10 @@ const ci = (word) =>
 const IDENT_CLASS = "[^\\s;\"'`#+*/%.,()=<>!\\[\\]{}:&|~^?-]";
 const ident = () => new RegExp(IDENT_CLASS + "+");
 
-// Named keyword rule — keywords win over identifiers (prec 2)
-const keyword = (word) => alias(token(prec(2, ci(word))), word);
+// Named keyword rule -- keywords win over identifiers (prec 2). A keyword is its lowercase word, exactly: in Haro any other spelling (aNd, oK,
+// If, NULL) is a name (HARO-SURFACE-01, the author's ruling of 2026-11-06). A .ring file keeps Ring's reading, a keyword in any case: the
+// Haro VM's lift lowers its keyword-shaped words before the parse is kept (vm/src/lift.zig, ring_keywords), so one grammar reads both.
+const keyword = (word) => alias(token(prec(2, word)), word);
 
 module.exports = grammar({
 	name: "ring",

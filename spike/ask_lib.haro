@@ -167,7 +167,7 @@ func AskParse(aDecls, cQ)
 	if len(aW) > 4 AskFail("Unexpected '" + aW[5] + "' after the question") ok
 	# FROM resolves to a declaration of one of the ASK's kinds
 	aVerbs = []
-	aFromDecl = NULL
+	aFromDecl = null
 	for k = 1 to len(aAsk[2])
 		aK = CtKindByDeclName(aAsk[2][k])
 		if isNull(aK) loop ok
@@ -182,7 +182,7 @@ func AskParse(aDecls, cQ)
 		if cMsg != "" cOut += " -- " + cMsg ok
 		AskFail(cOut)
 	ok
-	aWhere = NULL
+	aWhere = null
 	cField = ""
 	bDesc = 0
 	nLim = -1

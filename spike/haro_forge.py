@@ -3606,6 +3606,25 @@ def stage44():
         return 1
     return 0
 
+SURFACE_COURT = os.path.join(HERE, 'v41', 'surface_court.py')
+
+
+def stage46():
+    """Haro v0.41, HARO-SURFACE-01 (v41/GRAMMAR.md): the extension of a file says how it is read. In a .haro file a keyword is lowercase exactly
+    (aNd, oK, If, NULL are names), a symbol keeps its spelling and `:key = value` is refused by name; a .ring file reads as Ring reads it. v41/
+    surface_court.py runs the 16 cases of v41/fixtures.json on haro and its checked build, the two the same bytes, and checks that the lift lowers
+    exactly the grammar's keywords."""
+    print('stage 46 -- one spelling per keyword: v41/surface_court.py on haro and its checked build')
+    p = subprocess.run([sys.executable, SURFACE_COURT] + (['--plant'] if PLANT else []), capture_output=True, cwd=HERE, timeout=600)
+    out = p.stdout.decode('utf-8', 'replace').replace(chr(13) + chr(10), chr(10))
+    for line in out.splitlines():
+        if line.startswith('  FAIL') or line.startswith('       ') or line.startswith('SURFACE COURT'):
+            print(line)
+    if p.returncode != 0:
+        print(f'  FAIL the surface court exited {p.returncode}' + ('' if out.strip() else ': ' + p.stderr.decode('utf-8', 'replace')[-400:]))
+        return 1
+    return 0
+
 SENTENCE_TARGET = 50.0     # D42: a sentence edited, its court's image reused -- what a person editing a sentence waits for
 COLD_CEILING = 150.0       # D42: the court compiled from scratch -- a ceiling that catches the court library growing
 
@@ -3791,5 +3810,7 @@ if __name__ == '__main__':
         failures += stage44()
     if stage in (None, 45) and os.path.exists(DOOR_STZU) and os.path.exists(DOOR_CASES):
         failures += stage45()
+    if stage in (None, 46) and os.path.exists(SURFACE_COURT):
+        failures += stage46()
     print(f'haro_forge: {"FAIL" if failures else "PASS"} ({failures} failure(s), {time.perf_counter()-t0:.1f} s)')
     sys.exit(1 if failures else 0)

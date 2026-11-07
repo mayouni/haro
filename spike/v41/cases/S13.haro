@@ -1,0 +1,6 @@
+? "before"
+f()
+func f
+	g(:k = 1)
+func g x
+	return x

@@ -34,6 +34,106 @@ pub var trace: bool = false;
 var file_name: []const u8 = "";
 
 /// What the lift made of a file: the tree, the text it indexes, and what was put in to make that text from the file's.
+// ---- HARO-SURFACE-01: the extension says how a file is read (the author's rulings of 2026-11-06; v41/GRAMMAR.md)
+
+/// The Ring keywords: vendor/tree-sitter-ring/grammar.js's keyword() words, exactly (v41/surface_court.py checks the two lists agree).
+pub const ring_keywords = [_][]const u8{
+    "again", "and", "break", "but", "bye", "call", "case", "catch", "changeringkeyword", "changeringoperator", "class", "continue", "def",
+    "disablehashcomments", "do", "done", "else", "elseif", "enablehashcomments", "end", "endclass", "endfor", "endfunc", "endfunction",
+    "endif", "endpackage", "endswitch", "endtry", "endwhile", "exit", "false", "finally", "for", "foreach", "from", "func", "function",
+    "get", "give", "if", "import", "load", "loadsyntax", "loop", "new", "next", "not", "null", "off", "ok", "on", "or", "other", "package",
+    "private", "put", "return", "see", "self", "super", "switch", "this", "true", "try", "while",
+};
+
+/// A file is read by Haro's rules when its name ends .haro -- a keyword in lowercase only, a symbol as written, no `:key = value` -- and by
+/// Ring's otherwise, so Softanza's code reads exactly as it did.
+pub fn isHaro(path: []const u8) bool {
+    return std.mem.endsWith(u8, path, ".haro");
+}
+
+/// Whether the program's root file is a .haro file: an eval reads its text by the root's rules (S5). Set by the loader.
+pub var haro_root: bool = false;
+
+fn ringKeyword(w: []const u8) bool {
+    for (ring_keywords) |k| {
+        if (std.ascii.eqlIgnoreCase(k, w)) return true;
+    }
+    return false;
+}
+
+/// A byte of a name, as grammar.js's IDENT_CLASS has it: anything but blank and the operator, quote and comment characters.
+fn nameByte(b: u8) bool {
+    if (b == ' ' or b == '\t' or b == '\n' or b == '\r') return false;
+    return std.mem.indexOfScalar(u8, ";\"'`#+*/%.,()=<>![]{}:&|~^?-", b) == null;
+}
+
+/// Every word outside the strings and comments that is a Ring keyword written in a case other than lowercase. Found lexically: Ring's text has
+/// no escapes, so a string runs from a quote to the same quote, and a comment from # or // to the end of the line or from /* to */. Not from
+/// the parse: a .ring file read by the lowercase-only grammar is a cascade of error recovery, in which a string can be misjudged and swallow
+/// code, and the leaves fold skipped text (v41's stzlib A/B: three `NOT (` in stzListFunc.ring stayed a name).
+fn ringSpans(alloc: std.mem.Allocator, src: []const u8, out: *std.ArrayListUnmanaged([2]u32)) !void {
+    var i: usize = 0;
+    const n = src.len;
+    while (i < n) {
+        const ch = src[i];
+        if (ch == '"' or ch == '\'' or ch == '`') {
+            // an unclosed quote is no string to the grammar: only the quote is passed, and what follows is read as code, as the grammar reads it
+            const j = std.mem.indexOfScalarPos(u8, src, i + 1, ch) orelse n;
+            i = if (j >= n) i + 1 else j + 1;
+            continue;
+        }
+        if (ch == '#' or (ch == '/' and i + 1 < n and src[i + 1] == '/')) {
+            i = std.mem.indexOfScalarPos(u8, src, i, '\n') orelse n;
+            continue;
+        }
+        if (ch == '/' and i + 1 < n and src[i + 1] == '*') {
+            // an unclosed `/*` is no comment to the grammar (stzlib's datetime/48_custom_format_strings.ring): what follows is read as code
+            const j = std.mem.indexOfPos(u8, src, i + 2, "*/") orelse n;
+            i = if (j >= n) i + 2 else j + 2;
+            continue;
+        }
+        if (!nameByte(ch)) {
+            i += 1;
+            continue;
+        }
+        var j = i;
+        while (j < n and nameByte(src[j])) j += 1;
+        const w = src[i..j];
+        if (w.len <= 24 and ringKeyword(w)) {
+            for (w) |c2| {
+                if (std.ascii.isUpper(c2)) {
+                    try out.append(alloc, .{ @intCast(i), @intCast(j) });
+                    break;
+                }
+            }
+        }
+        i = j;
+    }
+}
+
+/// Parse `src` by the rules of its file. A .haro file is parsed as written: the grammar's keywords are lowercase, and any other spelling is a
+/// name (S1). Any other file is read as Ring reads it, a keyword in any case (S2): its keyword-shaped words written in another case are lowered
+/// and the text parsed again -- the same length, so every byte offset and column is the file's, and the tree is the one the case-insensitive
+/// grammar made of the same text. A reader that prints the file's bytes takes them by span from the original (fmt, dumpjson, dump).
+pub fn parse(alloc: std.mem.Allocator, parser: ts.Parser, src: []const u8, haro: bool) ?Lifted {
+    if (haro) return .{ .tree = parser.parse(src) orelse return null, .src = src };
+    // the words are found lexically, so the file is lowered BEFORE its one parse (a parse then a reparse cost a .ring file twice)
+    var spans = std.ArrayListUnmanaged([2]u32){};
+    defer spans.deinit(alloc);
+    ringSpans(alloc, src, &spans) catch return .{ .tree = parser.parse(src) orelse return null, .src = src };
+    if (spans.items.len == 0) return .{ .tree = parser.parse(src) orelse return null, .src = src };
+    const text = alloc.dupe(u8, src) catch return null;
+    for (spans.items) |sp| {
+        for (text[sp[0]..sp[1]]) |*ch| ch.* = std.ascii.toLower(ch.*);
+    }
+    const tree = parser.parse(text) orelse return null;
+    ring_case_files += 1;
+    return .{ .tree = tree, .src = text };
+}
+
+/// the .ring files whose keywords were lowered to be read as Ring reads them, for the census
+pub var ring_case_files: u32 = 0;
+
 pub const Lifted = struct { tree: ts.Tree, src: []const u8, inserts: []const Insert = &.{} };
 
 /// `len` bytes the lift put in before byte `pos` of the FILE's text; a list of them is in text order.
@@ -331,7 +431,8 @@ pub fn blockWord(n: ts.Node) ?ts.Node {
     if (!eq(n.kind(), "expression_statement")) return null;
     const id = soleChild(n) orelse return null;
     if (!eq(id.kind(), "identifier")) return null;
-    return if (std.ascii.eqlIgnoreCase(id.text(), "within") or std.ascii.eqlIgnoreCase(id.text(), "using")) id else null;
+    // Haro's words, lowercase in every file (HARO-SURFACE-01): `Within` is a name
+    return if (std.mem.eql(u8, id.text(), "within") or std.mem.eql(u8, id.text(), "using")) id else null;
 }
 
 /// A statement that is a bare `within` or `using`: the head of a block -- or, left bare, a block the compiler refuses.
@@ -368,7 +469,7 @@ fn nextStatement(n: ts.Node) ?ts.Node {
 fn isBareDone(n: ts.Node) bool {
     if (!eq(n.kind(), "expression_statement")) return false;
     const id = soleChild(n) orelse return false;
-    return eq(id.kind(), "identifier") and std.ascii.eqlIgnoreCase(id.text(), "done");
+    return eq(id.kind(), "identifier") and std.mem.eql(u8, id.text(), "done");
 }
 
 const Tok = struct { pos: u32, what: enum { block, try_, close } };

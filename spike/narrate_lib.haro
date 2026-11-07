@@ -94,7 +94,7 @@ func NarrateRun(cFile)
 	cSrc = read(cFile)
 	CtSetCode("PARSE", [])
 	cErr = ""
-	aDecls = NULL
+	aDecls = null
 	try
 		aDecls = CtDeclare(cSrc)
 	catch
@@ -217,7 +217,7 @@ func NarTellRun(cFile, cAlg, cRec)
 	CtSetCode("PARSE", [])
 	cBase = NarBaseName(cFile)
 	cErr = ""
-	aDecls = NULL
+	aDecls = null
 	try
 		aDecls = CtDeclare(read(cFile))
 	catch
@@ -227,7 +227,7 @@ func NarTellRun(cFile, cAlg, cRec)
 		NarRefuse(cErr, cBase)
 		return
 	ok
-	aRecord = NULL
+	aRecord = null
 	try
 		aRecord = ExJsonParse(cRec)
 	catch
@@ -241,7 +241,7 @@ func NarTellRun(cFile, cAlg, cRec)
 	$bRunTrace = 1
 	$aRunTrace = []
 	$nRunDepth = 0
-	aRes = NULL
+	aRes = null
 	try
 		aRes = RunAlgorithm(aDecls, cAlg, aRecord)
 	catch
@@ -274,7 +274,7 @@ func NarTellAsk(cFile, cQ, cRows)
 	CtSetCode("PARSE", [])
 	cBase = NarBaseName(cFile)
 	cErr = ""
-	aDecls = NULL
+	aDecls = null
 	try
 		aDecls = CtDeclare(read(cFile))
 	catch
@@ -284,7 +284,7 @@ func NarTellAsk(cFile, cQ, cRows)
 		NarRefuse(cErr, cBase)
 		return
 	ok
-	aRows = NULL
+	aRows = null
 	try
 		aRows = ExJsonParse(cRows)
 	catch

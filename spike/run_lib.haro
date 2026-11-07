@@ -25,7 +25,7 @@ func RunRole(cRole)
 	for i = 1 to len($aCourtRun)
 		if $aCourtRun[i][1] = cRole return $aCourtRun[i][2] ok
 	next
-	return NULL
+	return null
 
 func RunFail(cMsg)
 	CtFail(1, cMsg)

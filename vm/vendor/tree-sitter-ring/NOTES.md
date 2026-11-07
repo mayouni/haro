@@ -17,3 +17,10 @@ re-measured here (wrongly rejected files 18 -> 11 across 10,233).
 
 **The grammar is a lens, never the judge.** It locates spans and structure;
 whether a program is valid Ring is decided by the oracle running it.
+
+## Haro's change: one spelling per keyword (2026-11-06, HARO-SURFACE-01)
+
+Haro no longer carries the grammar as Ring has it in one respect: `keyword()` is the lowercase word, exactly, where it was `ci()`, every case. A
+`.haro` file is read with that grammar as it stands; any other file is read as Ring reads it, because the Haro VM's lift lowers its keyword-shaped
+words before the parse is kept (`vm/src/lift.zig`, `ring_keywords`). `src/` was regenerated with tree-sitter 0.25.10 -- the version that made the
+copy before it, which regenerating the unchanged grammar reproduced byte for byte. The author's ruling and the measurements: `spike/v41/GRAMMAR.md`.

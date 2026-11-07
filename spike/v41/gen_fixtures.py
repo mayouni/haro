@@ -74,6 +74,17 @@ CASES = [
     ('S11', 'S6', 'a .haro program loads a .ring file: each file is read by its own rules', '.haro', [
         'load "S11_lib.ring"', '? g()', '? :Name'],
      ['name', 'Name'], 0, {'S11_lib.ring': ['func g', T + 'If 1', T * 2 + 'Return :Name', T + 'Ok']}),
+    # WRITTEN AFTER THE CODE, found by designing the plants: a .ring file's strings are not lowered (S12); the expression form of a pair is
+    # refused as the list form is (S13); Haro's block words are lowercase, so a lone `Using` is a name (S14).
+    ('S12', 'S2', 'in a .ring file the keywords inside a string are text, kept as written', '.ring', [
+        'f()', 'func f', T + 'See "Ok, If and NULL" + nl', T + '? \'Return\''],
+     ['Ok, If and NULL', 'Return']),
+    ('S13', 'S4', 'in a .haro file `:key = value` given to a call is refused too', '.haro', [
+        '? "before"', 'f()', 'func f', T + 'g(:k = 1)', 'func g x', T + 'return x'],
+     refused('S13', '.haro', 4, R_PAIR, ':k = 1', 4, 2), 1),
+    ('S14', 'S1', 'in a .haro file Haro\'s block words are lowercase too: a lone `Using` is a name', '.haro', [
+        'f()', 'func f', T + 'Using = 5', T + 'Using', T + '? Using'],
+     ['5']),
 ]
 
 FMT = [
