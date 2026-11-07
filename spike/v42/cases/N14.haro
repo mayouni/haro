@@ -1,0 +1,3 @@
+load "N14_lib.ring"
+? StzThing()
+? stzthing()

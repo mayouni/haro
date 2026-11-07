@@ -1,0 +1,5 @@
+? "before"
+f()
+func f
+	o = new point
+class Point

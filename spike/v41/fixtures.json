@@ -15,17 +15,19 @@
    "id": "S01",
    "kind": "run",
    "line": "S1",
-   "why": "in a .haro file a word in no single case is a name: aNd, oK, oN",
+   "why": "in a .haro file a word in no single case is no name and no keyword: aNd refused",
    "file": "cases/S01.haro",
-   "stdout": "3\nan object\n"
+   "stdout": "before\n\nLine 4 Haro refused this statement (a keyword in another case is no name -- `and` is a keyword; written `aNd`, line 4 of S01.haro) and did not compile it -- running past it would give a wrong answer \nIn function f() in file S01.haro\n\nCalled from line 2 in file S01.haro ",
+   "exit": 1
   },
   {
    "id": "S02",
    "kind": "run",
    "line": "S1",
-   "why": "in a .haro file a Capital or UPPER keyword is a name too; the lowercase word is the keyword",
+   "why": "in a .haro file a Capital or UPPER keyword is refused; the lowercase word is the keyword",
    "file": "cases/S02.haro",
-   "stdout": "a name\n6\nnull is the keyword\n"
+   "stdout": "before\nnull is the keyword\n\nLine 7 Haro refused this statement (a keyword in another case is no name -- `if` is a keyword; written `If`, line 7 of S02.haro) and did not compile it -- running past it would give a wrong answer \nIn function f() in file S02.haro\n\nCalled from line 2 in file S02.haro ",
+   "exit": 1
   },
   {
    "id": "S03",
@@ -121,9 +123,10 @@
    "id": "S14",
    "kind": "run",
    "line": "S1",
-   "why": "in a .haro file Haro's block words are lowercase too: a lone `Using` is a name",
+   "why": "in a .haro file Haro's block words are lowercase too: a lone `Using` is refused",
    "file": "cases/S14.haro",
-   "stdout": "5\n"
+   "stdout": "before\n\nLine 4 Haro refused this statement (a keyword in another case is no name -- `using` is a keyword; written `Using`, line 4 of S14.haro) and did not compile it -- running past it would give a wrong answer \nIn function f() in file S14.haro\n\nCalled from line 2 in file S14.haro ",
+   "exit": 1
   },
   {
    "id": "K01",

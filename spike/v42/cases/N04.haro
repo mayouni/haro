@@ -1,0 +1,4 @@
+? "before"
+f(1)
+func f nCount
+	? ncount

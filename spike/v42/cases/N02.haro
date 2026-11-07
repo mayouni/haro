@@ -1,0 +1,5 @@
+? "before"
+f()
+func f
+	oClient = 1
+	? oclient

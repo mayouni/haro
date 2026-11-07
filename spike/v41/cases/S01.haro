@@ -1,7 +1,6 @@
+? "before"
 f()
 func f
 	aNd = 1
 	oN = 2
-	oK = "an object"
 	? aNd + oN
-	? oK

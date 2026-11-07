@@ -1,0 +1,8 @@
+? "before"
+f()
+func f
+	o = new Point
+	? o.getx()
+class Point
+	func GetX
+		return 3

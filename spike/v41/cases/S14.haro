@@ -1,5 +1,4 @@
+? "before"
 f()
 func f
 	Using = 5
-	Using
-	? Using

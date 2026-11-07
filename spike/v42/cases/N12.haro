@@ -1,0 +1,5 @@
+? "before"
+f()
+func f
+	aNd = 1
+	? aNd

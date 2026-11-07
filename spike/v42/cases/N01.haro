@@ -1,0 +1,15 @@
+$nTotal = 10
+f()
+func f
+	oClient = 2
+	? oClient + Twice(3)
+	? isnull(null)
+	o = new Point
+	? o.GetX()
+	? $nTotal
+func Twice nN
+	return nN * 2
+class Point
+	@nX = 3
+	func GetX
+		return @nX

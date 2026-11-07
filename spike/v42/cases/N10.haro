@@ -1,0 +1,7 @@
+? "before"
+o = new Point
+? o.GetX()
+class Point
+	@nX = 3
+	func GetX
+		return @nx

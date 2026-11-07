@@ -1,0 +1,5 @@
+$nTotal = 1
+? "before"
+f()
+func f
+	? $ntotal

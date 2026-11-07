@@ -1,0 +1,6 @@
+? "before"
+f()
+func f
+	? twice(2)
+func Twice nN
+	return nN * 2

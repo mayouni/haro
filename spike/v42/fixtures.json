@@ -1,0 +1,138 @@
+{
+ "rung": "v0.42",
+ "decision": "D55 (a ruled part): names case-exact in a .haro file; a keyword in another case no name; natives lowercase",
+ "lines": {
+  "N1": "a name is spelled where used as where declared",
+  "N2": "a second spelling in one scope is refused, not a second name",
+  "N3": "two functions differing only by case are refused at a call, naming both",
+  "N4": "a native is spelled in lowercase",
+  "N5": "a keyword in another case is no name in a .haro file",
+  "N6": "a .ring file folds case; a .haro file calls it as defined"
+ },
+ "cases": [
+  {
+   "id": "N01",
+   "kind": "run",
+   "line": "N1",
+   "why": "every kind of name spelled as declared runs",
+   "file": "cases/N01.haro",
+   "stdout": "8\n1\n3\n10\n"
+  },
+  {
+   "id": "N02",
+   "kind": "run",
+   "line": "N1",
+   "why": "a local read in another spelling is refused",
+   "file": "cases/N02.haro",
+   "stdout": "before\n\nLine 5 Haro refused this statement (one spelling per name -- declared `oClient` at line 4; written `oclient`, line 5 of N02.haro) and did not compile it -- running past it would give a wrong answer \nIn function f() in file N02.haro\n\nCalled from line 2 in file N02.haro ",
+   "exit": 1
+  },
+  {
+   "id": "N03",
+   "kind": "run",
+   "line": "N2",
+   "why": "a local assigned in another spelling is no second variable: refused",
+   "file": "cases/N03.haro",
+   "stdout": "before\n\nLine 5 Haro refused this statement (one spelling per name -- declared `oClient` at line 4; written `oclient`, line 5 of N03.haro) and did not compile it -- running past it would give a wrong answer \nIn function f() in file N03.haro\n\nCalled from line 2 in file N03.haro ",
+   "exit": 1
+  },
+  {
+   "id": "N04",
+   "kind": "run",
+   "line": "N1",
+   "why": "a parameter used in another spelling is refused",
+   "file": "cases/N04.haro",
+   "stdout": "before\n\nLine 4 Haro refused this statement (one spelling per name -- declared `nCount` at line 3; written `ncount`, line 4 of N04.haro) and did not compile it -- running past it would give a wrong answer \nIn function f() in file N04.haro\n\nCalled from line 2 in file N04.haro ",
+   "exit": 1
+  },
+  {
+   "id": "N05",
+   "kind": "run",
+   "line": "N1",
+   "why": "a function called in another spelling is refused",
+   "file": "cases/N05.haro",
+   "stdout": "before\n\nLine 4 Haro refused this statement (one spelling per name -- declared `Twice` at line 5; written `twice`, line 4 of N05.haro) and did not compile it -- running past it would give a wrong answer \nIn function f() in file N05.haro\n\nCalled from line 2 in file N05.haro ",
+   "exit": 1
+  },
+  {
+   "id": "N06",
+   "kind": "run",
+   "line": "N3",
+   "why": "two functions differing only by case: a call of either is refused, naming both",
+   "file": "cases/N06.haro",
+   "stdout": "before\n\nLine 4 Haro refused this statement (two functions differ only by case -- `Foo` at line 5 and `foo` at line 7; written `Foo`, line 4 of N06.haro) and did not compile it -- running past it would give a wrong answer \nIn function f() in file N06.haro\n\nCalled from line 2 in file N06.haro ",
+   "exit": 1
+  },
+  {
+   "id": "N07",
+   "kind": "run",
+   "line": "N4",
+   "why": "a native in another case is refused: natives are lowercase",
+   "file": "cases/N07.haro",
+   "stdout": "before\n\nLine 4 Haro refused this statement (a native is spelled in lowercase -- `isnull`; written `isNull`, line 4 of N07.haro) and did not compile it -- running past it would give a wrong answer \nIn function f() in file N07.haro\n\nCalled from line 2 in file N07.haro ",
+   "exit": 1
+  },
+  {
+   "id": "N08",
+   "kind": "run",
+   "line": "N1",
+   "why": "a class named in another spelling is refused",
+   "file": "cases/N08.haro",
+   "stdout": "before\n\nLine 4 Haro refused this statement (one spelling per name -- declared `Point` at line 5; written `point`, line 4 of N08.haro) and did not compile it -- running past it would give a wrong answer \nIn function f() in file N08.haro\n\nCalled from line 2 in file N08.haro ",
+   "exit": 1
+  },
+  {
+   "id": "N09",
+   "kind": "run",
+   "line": "N1",
+   "why": "a global used in another spelling is refused",
+   "file": "cases/N09.haro",
+   "stdout": "before\n\nLine 5 Haro refused this statement (one spelling per name -- declared `$nTotal` at line 1; written `$ntotal`, line 5 of N09.haro) and did not compile it -- running past it would give a wrong answer \nIn function f() in file N09.haro\n\nCalled from line 3 in file N09.haro ",
+   "exit": 1
+  },
+  {
+   "id": "N10",
+   "kind": "run",
+   "line": "N1",
+   "why": "an attribute used in another spelling is refused",
+   "file": "cases/N10.haro",
+   "stdout": "before\n\nLine 7 Haro refused this statement (one spelling per name -- declared `@nX` at line 5; written `@nx`, line 7 of N10.haro) and did not compile it -- running past it would give a wrong answer \nIn method getx() in file N10.haro\n\nCalled from line 3 in file N10.haro ",
+   "exit": 1
+  },
+  {
+   "id": "N11",
+   "kind": "run",
+   "line": "N1",
+   "why": "a method called in another spelling is refused",
+   "file": "cases/N11.haro",
+   "stdout": "before\n\nLine 5 Haro refused this statement (one spelling per name -- declared `GetX` at line 7; written `getx`, line 5 of N11.haro) and did not compile it -- running past it would give a wrong answer \nIn function f() in file N11.haro\n\nCalled from line 2 in file N11.haro ",
+   "exit": 1
+  },
+  {
+   "id": "N12",
+   "kind": "run",
+   "line": "N5",
+   "why": "a keyword in another case is no name in a .haro file",
+   "file": "cases/N12.haro",
+   "stdout": "before\n\nLine 4 Haro refused this statement (a keyword in another case is no name -- `and` is a keyword; written `aNd`, line 4 of N12.haro) and did not compile it -- running past it would give a wrong answer \nIn function f() in file N12.haro\n\nCalled from line 2 in file N12.haro ",
+   "exit": 1
+  },
+  {
+   "id": "N13",
+   "kind": "run",
+   "line": "N6",
+   "why": "a .ring file folds case as Ring does: locals, natives, functions",
+   "file": "cases/N13.ring",
+   "stdout": "1\n1\n4\n"
+  },
+  {
+   "id": "N14",
+   "kind": "run",
+   "line": "N6",
+   "why": "a .haro file calls a .ring function by its definition's spelling; another spelling is refused",
+   "file": "cases/N14.haro",
+   "stdout": "7\n\nLine 3 Haro refused this statement (one spelling per name -- declared `StzThing` in N14_lib.ring; written `stzthing`, line 3 of N14.haro) and did not compile it -- running past it would give a wrong answer \nin file N14.haro",
+   "exit": 1
+  }
+ ]
+}
