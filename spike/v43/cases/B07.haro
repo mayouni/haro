@@ -1,0 +1,5 @@
+? "before"
+f()
+func f
+	nA = 1
+	? true and nA

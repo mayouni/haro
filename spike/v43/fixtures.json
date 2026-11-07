@@ -1,0 +1,207 @@
+{
+ "rung": "v0.43",
+ "decision": "D55 T1 and T3: a real boolean, and no coercion, in a .haro file; a .ring file reads as Ring reads",
+ "class": "exact: the program's whole stdout and its exit code, byte for byte, on haro and on its checked build",
+ "lines": {
+  "B1": "true and false are the booleans",
+  "B2": "a comparison and the logic answer a boolean",
+  "B3": "a condition takes a boolean",
+  "B4": "the yes-or-no natives answer a boolean",
+  "B5": "a boolean is no number",
+  "B6": "no coercion; = and the orderings between two types refused",
+  "B7": "an integer stays exact to 64 bits, then raises",
+  "B8": "a .ring file reads as Ring reads; a boolean is 1 or 0 to it"
+ },
+ "cases": [
+  {
+   "id": "B01",
+   "kind": "run",
+   "line": "B1",
+   "why": "true and false print as themselves and are typed BOOLEAN",
+   "file": "cases/B01.haro",
+   "stdout": "true\nfalse\nBOOLEAN\ntrue\nfalse\n\n"
+  },
+  {
+   "id": "B02",
+   "kind": "run",
+   "line": "B2",
+   "why": "a comparison and and, or, not answer a boolean",
+   "file": "cases/B02.haro",
+   "stdout": "true\ntrue\nfalse\ntrue\nBOOLEAN\n"
+  },
+  {
+   "id": "B03",
+   "kind": "run",
+   "line": "B3",
+   "why": "a condition that is a literal of another type is refused when compiling",
+   "file": "cases/B03.haro",
+   "stdout": "before\n\nLine 4 Haro refused this statement (a condition takes a boolean -- this literal is an integer; written `1`, line 4 of B03.haro) and did not compile it -- running past it would give a wrong answer \nIn function f() in file B03.haro\n\nCalled from line 2 in file B03.haro ",
+   "exit": 1
+  },
+  {
+   "id": "B04",
+   "kind": "run",
+   "line": "B3",
+   "why": "an integer in an if raises BOOLEAN_EXPECTED",
+   "file": "cases/B04.haro",
+   "stdout": "before\n\nLine 5 Error (BOOLEAN_EXPECTED) : a condition takes a boolean, and this is an integer -- say what is meant: x != 0 \nIn function f() in file B04.haro\n\nCalled from line 2 in file B04.haro ",
+   "exit": 1
+  },
+  {
+   "id": "B05",
+   "kind": "run",
+   "line": "B3",
+   "why": "a text in a while raises BOOLEAN_EXPECTED",
+   "file": "cases/B05.haro",
+   "stdout": "before\n\nLine 5 Error (BOOLEAN_EXPECTED) : a condition takes a boolean, and this is a text -- say what is meant: x != \"\" \nIn function f() in file B05.haro\n\nCalled from line 2 in file B05.haro ",
+   "exit": 1
+  },
+  {
+   "id": "B06",
+   "kind": "run",
+   "line": "B3",
+   "why": "a vector under not raises BOOLEAN_EXPECTED",
+   "file": "cases/B06.haro",
+   "stdout": "before\n\nLine 5 Error (BOOLEAN_EXPECTED) : a condition takes a boolean, and this is a vector -- say what is meant: len(x) > 0 \nIn function f() in file B06.haro\n\nCalled from line 2 in file B06.haro ",
+   "exit": 1
+  },
+  {
+   "id": "B07",
+   "kind": "run",
+   "line": "B3",
+   "why": "an integer as an operand of and raises BOOLEAN_EXPECTED",
+   "file": "cases/B07.haro",
+   "stdout": "before\n\nLine 5 Error (BOOLEAN_EXPECTED) : a condition takes a boolean, and this is an integer -- say what is meant: x != 0 \nIn function f() in file B07.haro\n\nCalled from line 2 in file B07.haro ",
+   "exit": 1
+  },
+  {
+   "id": "B08",
+   "kind": "run",
+   "line": "B4",
+   "why": "the yes-or-no natives answer a boolean",
+   "file": "cases/B08.haro",
+   "stdout": "true\nfalse\ntrue\nnone\n"
+  },
+  {
+   "id": "B09",
+   "kind": "run",
+   "line": "B5",
+   "why": "a boolean in arithmetic raises NO_COERCION",
+   "file": "cases/B09.haro",
+   "stdout": "before\n\nLine 4 Error (NO_COERCION) : boolean + integer -- a value changes type only when asked: a comparison, or string(b) \nIn function f() in file B09.haro\n\nCalled from line 2 in file B09.haro ",
+   "exit": 1
+  },
+  {
+   "id": "B10",
+   "kind": "run",
+   "line": "B5",
+   "why": "string() of a boolean is its word",
+   "file": "cases/B10.haro",
+   "stdout": "ready: true\n"
+  },
+  {
+   "id": "B11",
+   "kind": "run",
+   "line": "B6",
+   "why": "a text plus an integer raises NO_COERCION",
+   "file": "cases/B11.haro",
+   "stdout": "before\n\nLine 5 Error (NO_COERCION) : text + integer -- a value changes type only when asked: string(x) or number(x) \nIn function f() in file B11.haro\n\nCalled from line 2 in file B11.haro ",
+   "exit": 1
+  },
+  {
+   "id": "B12",
+   "kind": "run",
+   "line": "B6",
+   "why": "an integer plus a numeric text raises NO_COERCION",
+   "file": "cases/B12.haro",
+   "stdout": "before\n\nLine 4 Error (NO_COERCION) : integer + text -- a value changes type only when asked: string(x) or number(x) \nIn function f() in file B12.haro\n\nCalled from line 2 in file B12.haro ",
+   "exit": 1
+  },
+  {
+   "id": "B13",
+   "kind": "run",
+   "line": "B6",
+   "why": "a numeric text times an integer raises NO_COERCION",
+   "file": "cases/B13.haro",
+   "stdout": "before\n\nLine 4 Error (NO_COERCION) : text * integer -- a value changes type only when asked: string(x) or number(x) \nIn function f() in file B13.haro\n\nCalled from line 2 in file B13.haro ",
+   "exit": 1
+  },
+  {
+   "id": "B14",
+   "kind": "run",
+   "line": "B6",
+   "why": "an integer equal to a text raises TYPE_MISMATCH",
+   "file": "cases/B14.haro",
+   "stdout": "before\n\nLine 4 Error (TYPE_MISMATCH) : integer = text -- = compares two values of one type \nIn function f() in file B14.haro\n\nCalled from line 2 in file B14.haro ",
+   "exit": 1
+  },
+  {
+   "id": "B15",
+   "kind": "run",
+   "line": "B6",
+   "why": "an integer ordered against a text raises TYPE_MISMATCH",
+   "file": "cases/B15.haro",
+   "stdout": "before\n\nLine 4 Error (TYPE_MISMATCH) : integer < text -- < compares two values of one type \nIn function f() in file B15.haro\n\nCalled from line 2 in file B15.haro ",
+   "exit": 1
+  },
+  {
+   "id": "B16",
+   "kind": "run",
+   "line": "B6",
+   "why": "a boolean equal to an integer raises TYPE_MISMATCH",
+   "file": "cases/B16.haro",
+   "stdout": "before\n\nLine 4 Error (TYPE_MISMATCH) : boolean = integer -- = compares two values of one type \nIn function f() in file B16.haro\n\nCalled from line 2 in file B16.haro ",
+   "exit": 1
+  },
+  {
+   "id": "B17",
+   "kind": "run",
+   "line": "B6",
+   "why": "what is one type compares, and an integer meets a number",
+   "file": "cases/B17.haro",
+   "stdout": "true\ntrue\ntrue\n3.50\nab\n"
+  },
+  {
+   "id": "B18",
+   "kind": "run",
+   "line": "B7",
+   "why": "an integer stays exact past 2^53",
+   "file": "cases/B18.haro",
+   "stdout": "9007199254740993\n18014398509481986\n"
+  },
+  {
+   "id": "B19",
+   "kind": "run",
+   "line": "B7",
+   "why": "an integer past 64 bits raises INTEGER_OVERFLOW",
+   "file": "cases/B19.haro",
+   "stdout": "before\n\nLine 5 Error (INTEGER_OVERFLOW) : integer + integer leaves 64 bits \nIn function f() in file B19.haro\n\nCalled from line 2 in file B19.haro ",
+   "exit": 1
+  },
+  {
+   "id": "B20",
+   "kind": "run",
+   "line": "B6",
+   "why": "a caught coercion answers its code",
+   "file": "cases/B20.haro",
+   "stdout": "NO_COERCION\n"
+  },
+  {
+   "id": "B21",
+   "kind": "run",
+   "line": "B8",
+   "why": "a .ring file reads as Ring reads: coercion and truth unchanged",
+   "file": "cases/B21.ring",
+   "stdout": "3\na1\nyes\n1\n1\n"
+  },
+  {
+   "id": "B22",
+   "kind": "run",
+   "line": "B8",
+   "why": "a boolean read by .ring code is 1 or 0; a .ring 1 is an integer to a .haro condition",
+   "file": "cases/B22.haro",
+   "stdout": "2\n\nLine 5 Error (BOOLEAN_EXPECTED) : a condition takes a boolean, and this is an integer -- say what is meant: x != 0 \nIn function f() in file B22.haro\n\nCalled from line 2 in file B22.haro ",
+   "exit": 1
+  }
+ ]
+}

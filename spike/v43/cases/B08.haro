@@ -1,0 +1,8 @@
+f()
+func f
+	? isstring("a")
+	? isnumber("a")
+	? islist([])
+	if isnull(null)
+		? "none"
+	ok

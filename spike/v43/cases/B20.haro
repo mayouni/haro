@@ -1,0 +1,7 @@
+f()
+func f
+	try
+		? "a" + 1
+	catch e
+		? e.Code()
+	done

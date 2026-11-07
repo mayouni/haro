@@ -1,0 +1,7 @@
+? "before"
+f()
+func f
+	tName = "x"
+	while tName
+		exit
+	end

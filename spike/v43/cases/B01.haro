@@ -1,0 +1,4 @@
+? true
+? false
+? type(true)
+? [true, false]
