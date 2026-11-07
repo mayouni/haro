@@ -1,0 +1,4 @@
+? "before"
+$nTotal = 1
+$ntotal = 2
+? $nTotal

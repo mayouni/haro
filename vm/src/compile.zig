@@ -2037,8 +2037,6 @@ pub const Compiler = struct {
     /// v0.42, case-exact names (D55): the statement being compiled, when it stands in a .haro file. A name written in it and spelled other
     /// than its declaration -- or a keyword in another case -- records the first fault, and the statement is refused (stmtSpelled).
     spell_on: bool = false,
-    spell_lo: usize = 0,
-    spell_hi: usize = 0,
     spell_src: []const u8 = "",
     spell_fault: ?[]const u8 = null,
     spell_use: []const u8 = "",
@@ -2573,11 +2571,10 @@ pub const Compiler = struct {
     // Resolution stays Ring's, folding case, so a .ring file reads as it did; in a .haro statement a name that resolves to a declaration
     // spelled otherwise is a fault, and so a second spelling of a name is never a second name.
 
-    /// Was `use` written in the statement being compiled? (a name the compiler builds, or one in a re-read piece, is not checked)
+    /// Is a .haro statement being compiled, with no fault yet? (Every lookup while it compiles is one of its own names: a check that the
+    /// name stands in the statement's text was planted out, P16, and no case or probe moved -- removed, v42/GRAMMAR.md.)
     fn spellIn(self: *Compiler, use: []const u8) bool {
-        if (!self.spell_on or self.spell_fault != null or use.len == 0) return false;
-        const a = @intFromPtr(use.ptr);
-        return a >= self.spell_lo and a + use.len <= self.spell_hi;
+        return self.spell_on and self.spell_fault == null and use.len > 0;
     }
 
     fn rowIn(src: []const u8, at: []const u8) ?u32 {
@@ -2708,15 +2705,11 @@ pub const Compiler = struct {
     /// the statement, a rejoined return's expression, or a piece of a re-read span -- and `st` the statement the body loop holds.
     fn stmtSpelled(self: *Compiler, st: ts.Node, what: ts.Node, as_return: bool) Error!void {
         const s_on = self.spell_on;
-        const s_lo = self.spell_lo;
-        const s_hi = self.spell_hi;
         const s_src = self.spell_src;
         const s_fault = self.spell_fault;
         const s_use = self.spell_use;
         defer {
             self.spell_on = s_on;
-            self.spell_lo = s_lo;
-            self.spell_hi = s_hi;
             self.spell_src = s_src;
             self.spell_fault = s_fault;
             self.spell_use = s_use;
@@ -2724,15 +2717,8 @@ pub const Compiler = struct {
         self.spell_fault = null;
         self.spell_on = self.haroNode(st);
         if (self.spell_on) {
+            // the file's text, where its declarations stand (a re-read piece's names stand in the re-read text: its row is reread_row)
             self.spell_src = st.src;
-            if (self.reread_src != null) {
-                // a re-read piece: its names stand in the re-read text, the declarations in the file's
-                self.spell_lo = @intFromPtr(what.src.ptr);
-                self.spell_hi = self.spell_lo + what.src.len;
-            } else {
-                self.spell_lo = @intFromPtr(st.src.ptr) + st.startByte();
-                self.spell_hi = @intFromPtr(st.src.ptr) + st.endByte();
-            }
             self.spellKeywords(what);
             if (self.spell_fault) |why| return self.nopeSpelled(why);
         }

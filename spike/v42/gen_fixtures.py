@@ -112,6 +112,11 @@ CASES = [
         'f()', 'func f', T + 'eval("aNd = 4")'],
      ['', 'Line 3 Error (E1) : a keyword in another case is no name -- `and` is a keyword; written `aNd` ', 'In function f() in file N18.haro', '',
       'Called from line 1 in file N18.haro '], 1),
+    # WRITTEN AFTER THE PLANTS: plant P7 (the hook where a global is written) MISSED, because every case read its global; N19 writes one.
+    ('N19', 'N2', 'a global assigned in another spelling is no second global: refused', '.haro', [
+        B, '$nTotal = 1', '$ntotal = 2', '? $nTotal'],
+     ['before', '', 'Line 3 Haro refused this statement (one spelling per name -- declared `$nTotal` at line 2; written `$ntotal`, line 3 of N19.haro) '
+      + REFUSED, 'in file N19.haro '], 1),
 ]
 
 os.makedirs(os.path.join(HERE, 'cases'), exist_ok=True)

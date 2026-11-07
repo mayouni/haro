@@ -169,6 +169,15 @@
    "file": "cases/N18.haro",
    "stdout": "\nLine 3 Error (E1) : a keyword in another case is no name -- `and` is a keyword; written `aNd` \nIn function f() in file N18.haro\n\nCalled from line 1 in file N18.haro ",
    "exit": 1
+  },
+  {
+   "id": "N19",
+   "kind": "run",
+   "line": "N2",
+   "why": "a global assigned in another spelling is no second global: refused",
+   "file": "cases/N19.haro",
+   "stdout": "before\n\nLine 3 Haro refused this statement (one spelling per name -- declared `$nTotal` at line 2; written `$ntotal`, line 3 of N19.haro) and did not compile it -- running past it would give a wrong answer \nin file N19.haro ",
+   "exit": 1
   }
  ]
 }
