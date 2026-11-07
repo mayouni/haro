@@ -1,6 +1,7 @@
 # SG1.md -- the system grain of Haro's computing altitude, a draft
 
-**A draft of the desk, 2026-11-07 21:39. Nothing in it is ruled and nothing is built.** It answers COMPASS-SYSLANG-02 (the
+**A draft of the desk, 2026-11-07 21:39; its nine decisions RULED by the author at 22:23 the same day, "Yes, as recommended" (CHARTER
+D56). Nothing in it is built.** It answers COMPASS-SYSLANG-02 (the
 Compass, 2026-11-06 08:41: "SG1, the system grain designed inside charter section 5 (memory regime, capability types from arXiv
 2603.00991 as principle 12's spec, BUDGET/PERSONAL/NEEDS as types, totality, the C ABI door), fixtures first") on SG0's decision
 memo (syslang-sg0, 2026-11-07 13:09). Its type seats are written as an amendment of D55 (section 9), which is
@@ -227,7 +228,9 @@ Proposed as additions to TYPES.md; D55's eight rulings stand as they are.
 The letters become sixteen: `b i d f n t x k v m r o e h s w`. `w` is free in D55, and a lowercase `w` before a capital is never
 read as the alphabet's W, which is a capital and a declared language, not a name.
 
-## 10. Decisions for the author -- one row, HARO-TYPES-SYSTEM-01
+## 10. Decisions for the author -- one row, HARO-TYPES-SYSTEM-01 -- RULED 2026-11-07, as recommended
+
+His words, asked with this table: "Yes, as recommended". Every part below is ruled as the third column says.
 
 | | decision | the desk recommends |
 |---|---|---|

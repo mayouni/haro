@@ -1492,6 +1492,20 @@ states principle 14.
   recorded as its own*: Haro's block words `within` and `using` are contextual, no keywords in principle 2.2's sense (v0.38's B03), so v41's
   S14 stands; a `.ring` declaration is spelled as Ring reads it, lowered when keyword-shaped (`o.see()`, not `o.See()`); a method on a receiver
   of unknown class is accepted when some class declares that spelling. 19 cases on both builds, 16 of 16 plants.
+- **D56 -- the system grain is a profile a `.haro` unit declares, and its seats are D55's, amended; RULED by the author 2026-11-07**
+  (HARO-TYPES-SYSTEM-01, COMPASS-SYSLANG-02; `SG1.md`, the desk's draft at c780692 on syslang-sg0's memo of 2026-11-07 13:09; his words, asked
+  with the draft's nine parts in section 10: "Yes, as recommended"). (a) Every seat is Haro's in every `.haro` file; `PROFILE system` only
+  refuses what C cannot hold without a runtime -- a managed value outside a region, `eval`, an unresolved call, an undeclared door. (b) Two
+  whole-number families: `i` integer, overflow raised, widths `i8` to `u64`, `integer` alone `i64`; `w` word, unsigned, wrapping by
+  definition, `w8` to `w64`, the only type the bit operators take -- the sixteenth letter. (c) `bytes` of a length fixed when made, `bytes of
+  N` fixed when compiling, an element a `w8`; `DEFINE LAYOUT` with widths, byte order and padding written, no native order. (d) One
+  second-class rule: `ref` (written at the call too), a region's values and a scoped door handle pass down and are never stored, returned or
+  captured. (e) Reference counting by default, regions on v0.38's `using` in the profile, no manual free. (f) `uses [door]` on a function from
+  D51's nine, pure without it, the call closure checked; a native outside W7's map refused in the profile until the map lands. (g) `personal`,
+  the dual of `unjudged`, reaching a door only under D37's `SAFEGUARDS`, built with the constitution desk. (h) `total` on a function; `budget`
+  in W6's form, checked at run time. (i) The C door is `DEFINE FOREIGN` under `uses [dynamic_load]`; the engine's ABI v1 untouched. Amends
+  D55 as T4a-c, T6a-b, T8 and T9 (`SG1.md` section 9). The rungs are `SG1.md` section 11, after D55's number rung; the first takes SG0's
+  seven X1/X2/X7 GAP tasks, written without their workarounds, as its acceptance set. Nothing of it is built at this entry.
 - **D23 -- `rnxc fmt` is a Ring++ feature, not held for Haro** (CODEGRAPH Q4, ruled on the author's delegation, 2026-10-05: "take
   whatever decision you think is wiser on my behalf"). It is a verb of the one binary (commitment 5), depends on nothing of Haro's, is
   judged against the oracle and refuses what Ring refuses (58 of 6,061 Softanza files, 57 of them Ring's own refusals). It ships inside
