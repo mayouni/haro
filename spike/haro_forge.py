@@ -3625,6 +3625,24 @@ def stage46():
         return 1
     return 0
 
+NAME_COURT = os.path.join(HERE, 'v42', 'name_court.py')
+
+
+def stage47():
+    """Haro v0.42, case-exact names (D55; v42/GRAMMAR.md): in a .haro file a name is spelled where it is used as where it is declared --
+    local, parameter, global, function, class, attribute, method -- a native in lowercase, and a keyword in another case is no name; a .ring
+    file folds case as Ring does. v42/name_court.py runs the 14 cases of v42/fixtures.json on haro and its checked build, the same bytes."""
+    print('stage 47 -- one spelling per name: v42/name_court.py on haro and its checked build')
+    p = subprocess.run([sys.executable, NAME_COURT] + (['--plant'] if PLANT else []), capture_output=True, cwd=HERE, timeout=600)
+    out = p.stdout.decode('utf-8', 'replace').replace(chr(13) + chr(10), chr(10))
+    for line in out.splitlines():
+        if line.startswith('  FAIL') or line.startswith('       ') or line.startswith('NAME COURT'):
+            print(line)
+    if p.returncode != 0:
+        print(f'  FAIL the name court exited {p.returncode}' + ('' if out.strip() else ': ' + p.stderr.decode('utf-8', 'replace')[-400:]))
+        return 1
+    return 0
+
 SENTENCE_TARGET = 50.0     # D42: a sentence edited, its court's image reused -- what a person editing a sentence waits for
 COLD_CEILING = 150.0       # D42: the court compiled from scratch -- a ceiling that catches the court library growing
 
@@ -3812,5 +3830,7 @@ if __name__ == '__main__':
         failures += stage45()
     if stage in (None, 46) and os.path.exists(SURFACE_COURT):
         failures += stage46()
+    if stage in (None, 47) and os.path.exists(NAME_COURT):
+        failures += stage47()
     print(f'haro_forge: {"FAIL" if failures else "PASS"} ({failures} failure(s), {time.perf_counter()-t0:.1f} s)')
     sys.exit(1 if failures else 0)

@@ -375,13 +375,13 @@ func ExNullMark()
 	return char(1) + "null"
 
 func ExIsObj(v)
-	if not isList(v) return 0 ok
+	if not islist(v) return 0 ok
 	if len(v) = 0 return 0 ok
-	if not isString(v[1]) return 0 ok
+	if not isstring(v[1]) return 0 ok
 	return v[1] = ExObjMark()
 
 func ExIsNull(v)
-	if not isString(v) return 0 ok
+	if not isstring(v) return 0 ok
 	return v = ExNullMark()
 
 func ExObjGet(aObj, cKey)
@@ -430,8 +430,8 @@ func ExRefGet(cPath)
 # a value as a number: [ok, n] -- a number, a numeric text (digits, a point,
 # an exponent; no spaces, as parseFloat reads it), a flag; never a list
 func ExNumOf(v)
-	if isNumber(v) return [1, v] ok
-	if not isString(v) return [0, 0] ok
+	if isnumber(v) return [1, v] ok
+	if not isstring(v) return [0, 0] ok
 	n = len(v)
 	if n = 0 return [0, 0] ok
 	i = 1
@@ -469,8 +469,8 @@ func ExNum(v)
 	return 0
 
 func ExStr(v)
-	if isNumber(v) return ExNumText(v) ok
-	if isString(v)
+	if isnumber(v) return ExNumText(v) ok
+	if isstring(v)
 		if ExIsNull(v) return "" ok
 		return v
 	ok
@@ -497,9 +497,9 @@ func ExContains(cHay, cNeedle)
 # ---- evaluator: env is [[name, value], ...]; a comparison answers 1 or 0 --------
 
 func ExTruthy(v)
-	if isNumber(v) return v != 0 ok
-	if isString(v) return 1 ok
-	if isList(v) return 1 ok
+	if isnumber(v) return v != 0 ok
+	if isstring(v) return 1 ok
+	if islist(v) return 1 ok
 	return 0
 
 func ExEnvGet(aEnv, cName)
@@ -624,8 +624,8 @@ func ExBool(aNode, aEnv)
 # equality by value and by kind: a number and a string are never equal (W's
 # rule on the Luau host), whatever the host's own = would say
 func ExSame(a, b)
-	if isNumber(a) and isNumber(b) return a = b ok
-	if isString(a) and isString(b) return a = b ok
+	if isnumber(a) and isnumber(b) return a = b ok
+	if isstring(a) and isstring(b) return a = b ok
 	return 0
 
 # EQUALITY value: numeric when both sides can be numbers, by text otherwise
@@ -662,7 +662,7 @@ func ExAggregate(cKind, cPath)
 	aGot = ExRefGet(cPath)
 	if not aGot[1] return 0 ok
 	aL = aGot[2]
-	if not isList(aL) or ExIsObj(aL) return 0 ok
+	if not islist(aL) or ExIsObj(aL) return 0 ok
 	nSum = 0
 	nCount = 0
 	nMin = 0
@@ -719,12 +719,12 @@ func ExNumText(n)
 	return cS
 
 func ExJson(v)
-	if isNumber(v) return ExNumText(v) ok
-	if isString(v)
+	if isnumber(v) return ExNumText(v) ok
+	if isstring(v)
 		if ExIsNull(v) return "null" ok
 		return '"' + v + '"'
 	ok
-	if isList(v)
+	if islist(v)
 		if ExIsObj(v)
 			cOut = "{"
 			for i = 2 to len(v)
@@ -901,7 +901,7 @@ func ExRun(cSeat, cExpr, aInput, vInit, bHasInit)
 		for i = 1 to len(aInput)
 			k = ExEval(aAst, [["item", aInput[i]]])
 			cKey = "" + k
-			if isNumber(k) cKey = ExNumText(k) ok
+			if isnumber(k) cKey = ExNumText(k) ok
 			nAt = 0
 			for j = 1 to len(aGroups)
 				if aGroups[j][1] = cKey nAt = j ok

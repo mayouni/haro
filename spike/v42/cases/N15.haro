@@ -1,0 +1,7 @@
+? "before"
+o = new App
+? o.GetX()
+class App
+	nX = 3
+	func GetX
+		return nx

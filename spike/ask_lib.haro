@@ -95,7 +95,7 @@ func AskFail(cMsg)
 # the parsed question: [from, where node or NULL, order field, descending, limit or -1]
 func AskParse(aDecls, cQ)
 	aAsk = $aCourtAsk
-	if isNull(aAsk) AskFail("this language declares no ASK, so it answers no question") ok
+	if isnull(aAsk) AskFail("this language declares no ASK, so it answers no question") ok
 	n = len(cQ)
 	# the frame keywords, at depth 0 and outside quotes
 	nWhere = 0
@@ -170,13 +170,13 @@ func AskParse(aDecls, cQ)
 	aFromDecl = null
 	for k = 1 to len(aAsk[2])
 		aK = CtKindByDeclName(aAsk[2][k])
-		if isNull(aK) loop ok
+		if isnull(aK) loop ok
 		aVerbs + aK[1]
 		for d = 1 to len(aDecls)
 			if aDecls[d][1] = aK[1] and aDecls[d][2] = cFrom aFromDecl = aDecls[d] ok
 		next
 	next
-	if isNull(aFromDecl)
+	if isnull(aFromDecl)
 		cMsg = CtRefusalMessage("dangling_reference")
 		cOut = "FROM '" + cFrom + "' resolves to nothing: no such " + CtJoin(aVerbs, " or ")
 		if cMsg != "" cOut += " -- " + cMsg ok
@@ -204,7 +204,7 @@ func AskParse(aDecls, cQ)
 		if cKind = "WHERE"
 			cExpr = AskTrim(substr(cText, 6))
 			aE = CtExprByName(aAsk[3])
-			if isNull(aE) AskFail("the court carries no EXPRESSION called '" + aAsk[3] + "'") ok
+			if isnull(aE) AskFail("the court carries no EXPRESSION called '" + aAsk[3] + "'") ok
 			CtExprUse(aE)
 			cErr = ""
 			try
@@ -274,7 +274,7 @@ func AskSchemaNames(aDecls, aFromDecl)
 	# what the steps of the flow compute into its records: a record of the flow has the name, as zing overlays a computed value by name
 	for w = 1 to len($aCourtWalks)
 		aKS = CtKindByDeclName($aCourtWalks[w][3])
-		if isNull(aKS) loop ok
+		if isnull(aKS) loop ok
 		cThr = upper($aCourtWalks[w][4])
 		cCmp = upper($aCourtWalks[w][7])
 		if cCmp = "" loop ok
@@ -294,8 +294,8 @@ func AskSchemaNames(aDecls, aFromDecl)
 
 # every field a condition names, in the order the text names them
 func AskRefsOf(aNode)
-	if not isList(aNode) return 0 ok
-	if len(aNode) = 0 or not isString(aNode[1]) return 0 ok
+	if not islist(aNode) return 0 ok
+	if len(aNode) = 0 or not isstring(aNode[1]) return 0 ok
 	if aNode[1] = "ref" and len(aNode) >= 2
 		$aAskRefsFound + aNode[2]
 		return 0
@@ -355,12 +355,12 @@ func AskNote(cEvent, aVals)
 
 func AskRun(aDecls, cQ, aRows)
 	aQ = AskParse(aDecls, cQ)
-	if not isList(aRows) or ExIsObj(aRows) AskFail("the rows are a JSON list of records") ok
+	if not islist(aRows) or ExIsObj(aRows) AskFail("the rows are a JSON list of records") ok
 	if $bAskTrace AskNote("ask", [["question", cQ], ["from", aQ[1]]]) ok
 	aOut = []
 	for i = 1 to len(aRows)
 		if not ExIsObj(aRows[i]) AskFail("row " + i + " is not a JSON object") ok
-		if not isNull(aQ[2])
+		if not isnull(aQ[2])
 			ExSetRecord(aRows[i])
 			if not ExBool(aQ[2], []) loop ok
 		ok

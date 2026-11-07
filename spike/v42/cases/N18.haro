@@ -1,0 +1,3 @@
+f()
+func f
+	eval("aNd = 4")

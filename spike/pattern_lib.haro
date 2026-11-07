@@ -401,7 +401,7 @@ func PatPositions(aVals)
 func PatM(nNode, nSeq, i)
 	nIdx = $aPatSeqBase[nSeq] + i * $nPatNodes + nNode
 	aMemo = $aPatMemo[nIdx]
-	if isList(aMemo) return aMemo ok
+	if islist(aMemo) return aMemo ok
 	$nPatSteps++
 	aR = PatBody(nNode, nSeq, i)
 	$aPatMemo[nIdx] = aR

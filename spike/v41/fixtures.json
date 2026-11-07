@@ -123,10 +123,9 @@
    "id": "S14",
    "kind": "run",
    "line": "S1",
-   "why": "in a .haro file Haro's block words are lowercase too: a lone `Using` is refused",
+   "why": "in a .haro file Haro's block words are lowercase too: a lone `Using` is a name",
    "file": "cases/S14.haro",
-   "stdout": "before\n\nLine 4 Haro refused this statement (a keyword in another case is no name -- `using` is a keyword; written `Using`, line 4 of S14.haro) and did not compile it -- running past it would give a wrong answer \nIn function f() in file S14.haro\n\nCalled from line 2 in file S14.haro ",
-   "exit": 1
+   "stdout": "5\n"
   },
   {
    "id": "K01",

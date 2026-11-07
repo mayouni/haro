@@ -131,7 +131,43 @@
    "line": "N6",
    "why": "a .haro file calls a .ring function by its definition's spelling; another spelling is refused",
    "file": "cases/N14.haro",
-   "stdout": "7\n\nLine 3 Haro refused this statement (one spelling per name -- declared `StzThing` in N14_lib.ring; written `stzthing`, line 3 of N14.haro) and did not compile it -- running past it would give a wrong answer \nin file N14.haro",
+   "stdout": "7\n\nLine 3 Haro refused this statement (one spelling per name -- declared `StzThing` in N14_lib.ring; written `stzthing`, line 3 of N14.haro) and did not compile it -- running past it would give a wrong answer \nin file N14.haro ",
+   "exit": 1
+  },
+  {
+   "id": "N15",
+   "kind": "run",
+   "line": "N1",
+   "why": "a bare attribute read in a method in another spelling is refused",
+   "file": "cases/N15.haro",
+   "stdout": "before\n\nLine 7 Haro refused this statement (one spelling per name -- declared `nX` at line 5; written `nx`, line 7 of N15.haro) and did not compile it -- running past it would give a wrong answer \nIn method getx() in file N15.haro\n\nCalled from line 3 in file N15.haro ",
+   "exit": 1
+  },
+  {
+   "id": "N16",
+   "kind": "run",
+   "line": "N5",
+   "why": "a member named like a keyword in another case is refused",
+   "file": "cases/N16.haro",
+   "stdout": "before\n\nLine 5 Haro refused this statement (a keyword in another case is no name -- `see` is a keyword; written `See`, line 5 of N16.haro) and did not compile it -- running past it would give a wrong answer \nIn function f() in file N16.haro\n\nCalled from line 2 in file N16.haro ",
+   "exit": 1
+  },
+  {
+   "id": "N17",
+   "kind": "run",
+   "line": "N1",
+   "why": "an eval in a .haro program spells a local as declared",
+   "file": "cases/N17.haro",
+   "stdout": "\nLine 4 Error (E1) : one spelling per name -- declared `nA`; written `na` \nIn function f() in file N17.haro\n\nCalled from line 1 in file N17.haro ",
+   "exit": 1
+  },
+  {
+   "id": "N18",
+   "kind": "run",
+   "line": "N5",
+   "why": "an eval in a .haro program refuses a keyword in another case",
+   "file": "cases/N18.haro",
+   "stdout": "\nLine 3 Error (E1) : a keyword in another case is no name -- `and` is a keyword; written `aNd` \nIn function f() in file N18.haro\n\nCalled from line 1 in file N18.haro ",
    "exit": 1
   }
  ]

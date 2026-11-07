@@ -228,7 +228,7 @@ func BlkPeekAt(k)
 func BlkLoad(cSrc)
 	$aBlkToks = BlkTokenize(cSrc)
 	tE = BlkLexError($aBlkToks)
-	if not isNull(tE) BlkFail(tE[3], BlkLexMessage(tE)) ok
+	if not isnull(tE) BlkFail(tE[3], BlkLexMessage(tE)) ok
 	$nBlkPos = 1
 	aOut = []
 	while BlkPeek()[1] != "eof"

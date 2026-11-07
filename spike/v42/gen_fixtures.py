@@ -92,7 +92,26 @@ CASES = [
     ('N14', 'N6', 'a .haro file calls a .ring function by its definition\'s spelling; another spelling is refused', '.haro', [
         'load "N14_lib.ring"', '? StzThing()', '? stzthing()'],
      ['7', '', 'Line 3 Haro refused this statement (one spelling per name -- declared `StzThing` in N14_lib.ring; written `stzthing`, line 3 of N14.haro) '
-      + REFUSED, 'in file N14.haro'], 1, {'N14_lib.ring': ['func StzThing', T + 'return 7']}),
+      + REFUSED, 'in file N14.haro '], 1, {'N14_lib.ring': ['func StzThing', T + 'return 7']}),
+    # N14 CORRECTED AFTER THE COURT SPOKE: a refusal at a file's top level prints `in file N14.haro ` with a trailing space, as every top-level
+    # trap does (v41's probe printed it too); the fixture as first written left the space out -- a transcription slip, not a change of rule.
+    # WRITTEN AFTER THE CODE, found while building it: a bare attribute in a method is checked as an @attribute is (N15); a member named like a
+    # keyword in another case is refused, since a .ring class's keyword-shaped method is declared lowered and a .haro one may not be named so
+    # (N16); an eval in a .haro program spells as the root does, its refusal the eval's own error (N17, N18).
+    ('N15', 'N1', 'a bare attribute read in a method in another spelling is refused', '.haro', [
+        B, 'o = new App', '? o.GetX()', 'class App', T + 'nX = 3', T + 'func GetX', T * 2 + 'return nx'],
+     refused('N15', 7, why_decl('nX', 5), 'nx', called=3, where='method getx()'), 1),
+    ('N16', 'N5', 'a member named like a keyword in another case is refused', '.haro', [
+        B, 'f()', 'func f', T + 'o = new App', T + 'x = o.See()', 'class App', T + 'func See', T * 2 + 'return 1'],
+     refused('N16', 5, 'a keyword in another case is no name -- `see` is a keyword; written', 'See'), 1),
+    ('N17', 'N1', 'an eval in a .haro program spells a local as declared', '.haro', [
+        'f()', 'func f', T + 'nA = 4', T + 'eval("? na")'],
+     ['', 'Line 4 Error (E1) : one spelling per name -- declared `nA`; written `na` ', 'In function f() in file N17.haro', '',
+      'Called from line 1 in file N17.haro '], 1),
+    ('N18', 'N5', 'an eval in a .haro program refuses a keyword in another case', '.haro', [
+        'f()', 'func f', T + 'eval("aNd = 4")'],
+     ['', 'Line 3 Error (E1) : a keyword in another case is no name -- `and` is a keyword; written `aNd` ', 'In function f() in file N18.haro', '',
+      'Called from line 1 in file N18.haro '], 1),
 ]
 
 os.makedirs(os.path.join(HERE, 'cases'), exist_ok=True)

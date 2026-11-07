@@ -16,6 +16,7 @@ const std = @import("std");
 const ts = @import("ts.zig");
 const vm = @import("main.zig");
 const lift = @import("lift.zig");
+const builtins = @import("builtins.zig");
 
 pub const Error = error{ Unsupported, OutOfMemory, BadNumber, PrefixInapplicable, Refused };
 
@@ -2033,6 +2034,14 @@ pub const Compiler = struct {
     last_row: u32 = 0,
     last_text: []const u8 = "",
     last_fail_src: ?[*]const u8 = null,
+    /// v0.42, case-exact names (D55): the statement being compiled, when it stands in a .haro file. A name written in it and spelled other
+    /// than its declaration -- or a keyword in another case -- records the first fault, and the statement is refused (stmtSpelled).
+    spell_on: bool = false,
+    spell_lo: usize = 0,
+    spell_hi: usize = 0,
+    spell_src: []const u8 = "",
+    spell_fault: ?[]const u8 = null,
+    spell_use: []const u8 = "",
     /// Census mode: record every refusal and keep going, instead of
     /// stopping at the first. A port needs the whole list, not the first
     /// item on it.
@@ -2560,6 +2569,210 @@ pub const Compiler = struct {
         return null;
     }
 
+    // ---- v0.42: case-exact names in a .haro file (D55) -------------------------------------------------------------------
+    // Resolution stays Ring's, folding case, so a .ring file reads as it did; in a .haro statement a name that resolves to a declaration
+    // spelled otherwise is a fault, and so a second spelling of a name is never a second name.
+
+    /// Was `use` written in the statement being compiled? (a name the compiler builds, or one in a re-read piece, is not checked)
+    fn spellIn(self: *Compiler, use: []const u8) bool {
+        if (!self.spell_on or self.spell_fault != null or use.len == 0) return false;
+        const a = @intFromPtr(use.ptr);
+        return a >= self.spell_lo and a + use.len <= self.spell_hi;
+    }
+
+    fn rowIn(src: []const u8, at: []const u8) ?u32 {
+        if (src.len == 0) return null;
+        const a = @intFromPtr(at.ptr);
+        const b = @intFromPtr(src.ptr);
+        if (a < b or a + at.len > b + src.len) return null;
+        return @intCast(std.mem.count(u8, src[0 .. a - b], "\n") + 1);
+    }
+
+    fn spellSet(self: *Compiler, use: []const u8, why: []const u8) void {
+        self.spell_fault = why;
+        self.spell_use = use;
+    }
+
+    /// `use`, written in the statement, resolved to `declared`; `decl_src` is the text of the file the declaration stands in, when known
+    fn spellAt(self: *Compiler, use: []const u8, declared: []const u8, decl_src: []const u8) void {
+        if (!self.spellIn(use) or std.mem.eql(u8, use, declared)) return;
+        const why = blk: {
+            if (rowIn(self.spell_src, declared)) |r|
+                break :blk std.fmt.allocPrint(self.alloc, "one spelling per name -- declared `{s}` at line {d}; written", .{ declared, r }) catch return;
+            if (rowIn(decl_src, declared) != null) {
+                if (self.fileOf(decl_src.ptr)) |fi| if (fi < load_paths.len)
+                    break :blk std.fmt.allocPrint(self.alloc, "one spelling per name -- declared `{s}` in {s}; written", .{ declared, std.fs.path.basename(load_paths[fi]) }) catch return;
+            }
+            break :blk std.fmt.allocPrint(self.alloc, "one spelling per name -- declared `{s}`; written", .{declared}) catch return;
+        };
+        self.spellSet(use, why);
+    }
+
+    /// A function: two whose names differ only by case are refused at a call of either (Ring reads them as one, and the first wins)
+    fn spellFunc(self: *Compiler, use: []const u8, f: *Func) void {
+        if (!self.spellIn(use)) return;
+        if (f.owner == null) for (self.funcs.items) |*g| {
+            if (g == f or g.owner != null or g.lambda_at != null) continue;
+            if (!std.ascii.eqlIgnoreCase(g.name, f.name) or std.mem.eql(u8, g.name, f.name)) continue;
+            const r1 = rowIn(f.node.src, f.name) orelse 0;
+            const r2 = rowIn(g.node.src, g.name) orelse 0;
+            const why = std.fmt.allocPrint(self.alloc, "two functions differ only by case -- `{s}` at line {d} and `{s}` at line {d}; written", .{ f.name, r1, g.name, r2 }) catch return;
+            return self.spellSet(use, why);
+        };
+        self.spellAt(use, f.name, f.node.src);
+    }
+
+    fn spellAttr(self: *Compiler, cid: u16, use: []const u8) void {
+        for (self.classes.items[cid].attrs.items) |a| {
+            if (std.ascii.eqlIgnoreCase(a.name, use)) return self.spellAt(use, a.name, self.classes.items[cid].node.src);
+        }
+    }
+
+    /// A method or attribute named on a receiver whose class is not known here: refused when some class of the program declares the name
+    /// and none spells it this way
+    fn spellMember(self: *Compiler, use: []const u8) void {
+        if (!self.spellIn(use)) return;
+        var first: ?[]const u8 = null;
+        var first_src: []const u8 = "";
+        for (self.classes.items) |*ci| {
+            for (ci.methods.items) |mi| {
+                const g = &self.funcs.items[mi];
+                if (!std.ascii.eqlIgnoreCase(g.name, use)) continue;
+                if (std.mem.eql(u8, g.name, use)) return;
+                if (first == null) {
+                    first = g.name;
+                    first_src = g.node.src;
+                }
+            }
+            for (ci.attrs.items) |a| {
+                if (!std.ascii.eqlIgnoreCase(a.name, use)) continue;
+                if (std.mem.eql(u8, a.name, use)) return;
+                if (first == null) {
+                    first = a.name;
+                    first_src = ci.node.src;
+                }
+            }
+        }
+        if (first) |d| self.spellAt(use, d, first_src);
+    }
+
+    /// A native is spelled as the VM registers it, in lowercase (the author's ruling of 2026-11-07)
+    fn spellNative(self: *Compiler, use: []const u8) void {
+        if (!self.spellIn(use) or use.len > 64) return;
+        var up = false;
+        for (use) |ch| if (std.ascii.isUpper(ch)) {
+            up = true;
+            break;
+        };
+        if (!up) return;
+        var buf: [64]u8 = undefined;
+        const low = std.ascii.lowerString(&buf, use);
+        var native = builtins.isBuiltin(low);
+        if (!native) for (builtin_table) |bi| if (std.mem.eql(u8, bi.name, low)) {
+            native = true;
+            break;
+        };
+        if (!native) return;
+        const why = std.fmt.allocPrint(self.alloc, "a native is spelled in lowercase -- `{s}`; written", .{low}) catch return;
+        self.spellSet(use, why);
+    }
+
+    /// A keyword in another case is no name in a .haro file (PRINCIPLES 2.2, D55 (e)): the grammar's keywords. Haro's block words `within`
+    /// and `using` are contextual -- a name where they open no block (v0.38's B03) -- so they are no keywords in 2.2's sense. A member's name
+    /// after `.` is walked too: a .ring class's keyword-shaped method is declared lowered (`see`), and a .haro class may not name one `See`.
+    fn spellKeywords(self: *Compiler, n: ts.Node) void {
+        if (self.spell_fault != null) return;
+        if (std.mem.eql(u8, n.kind(), "identifier")) {
+            const t = n.text();
+            if (t.len > 32) return;
+            var up = false;
+            for (t) |ch| if (std.ascii.isUpper(ch)) {
+                up = true;
+                break;
+            };
+            if (!up) return;
+            var buf: [32]u8 = undefined;
+            const low = std.ascii.lowerString(&buf, t);
+            for (lift.ring_keywords) |kw| if (std.mem.eql(u8, kw, low)) {
+                const why = std.fmt.allocPrint(self.alloc, "a keyword in another case is no name -- `{s}` is a keyword; written", .{kw}) catch return;
+                return self.spellSet(t, why);
+            };
+            return;
+        }
+        var i: u32 = 0;
+        while (i < n.childCount()) : (i += 1) self.spellKeywords(n.child(i));
+    }
+
+    /// One statement of a function's body. In a .haro file it is refused when a keyword in it stands in another case, or a name in it is
+    /// spelled other than its declaration (D55): the first fault names the declared spelling and its line. `what` is what is compiled --
+    /// the statement, a rejoined return's expression, or a piece of a re-read span -- and `st` the statement the body loop holds.
+    fn stmtSpelled(self: *Compiler, st: ts.Node, what: ts.Node, as_return: bool) Error!void {
+        const s_on = self.spell_on;
+        const s_lo = self.spell_lo;
+        const s_hi = self.spell_hi;
+        const s_src = self.spell_src;
+        const s_fault = self.spell_fault;
+        const s_use = self.spell_use;
+        defer {
+            self.spell_on = s_on;
+            self.spell_lo = s_lo;
+            self.spell_hi = s_hi;
+            self.spell_src = s_src;
+            self.spell_fault = s_fault;
+            self.spell_use = s_use;
+        }
+        self.spell_fault = null;
+        self.spell_on = self.haroNode(st);
+        if (self.spell_on) {
+            self.spell_src = st.src;
+            if (self.reread_src != null) {
+                // a re-read piece: its names stand in the re-read text, the declarations in the file's
+                self.spell_lo = @intFromPtr(what.src.ptr);
+                self.spell_hi = self.spell_lo + what.src.len;
+            } else {
+                self.spell_lo = @intFromPtr(st.src.ptr) + st.startByte();
+                self.spell_hi = @intFromPtr(st.src.ptr) + st.endByte();
+            }
+            self.spellKeywords(what);
+            if (self.spell_fault) |why| return self.nopeSpelled(why);
+        }
+        if (as_return) try self.returnExpr(what) else try self.stmt(what);
+        if (self.spell_fault) |why| return self.nopeSpelled(why);
+    }
+
+    fn nopeSpelled(self: *Compiler, why: []const u8) Error {
+        const use = self.spell_use;
+        const row = rowIn(self.spell_src, use) orelse (if (self.reread_src != null) self.reread_row else 0);
+        self.last_kind = why;
+        self.last_row = row;
+        self.last_text = use;
+        self.last_fail_src = self.spell_src.ptr;
+        // the trap stands at the fault's own line: the statement compiled to its end (or not at all) before the fault was raised
+        self.cur_row = row;
+        if (self.fileOf(self.spell_src.ptr)) |fi| {
+            self.cur_file = fi;
+            self.last_src = self.spell_src.ptr;
+            self.last_file = fi;
+        }
+        if (self.census) {
+            self.refusals.append(self.alloc, .{
+                .kind = why,
+                .row = row,
+                .text = use,
+                .func = self.cur.name,
+                .byte = @intCast(@intFromPtr(use.ptr) - @intFromPtr(self.spell_src.ptr)),
+                .src = self.spell_src,
+            }) catch {};
+        }
+        if (self.fail_kind.len == 0) {
+            self.fail_kind = why;
+            self.fail_row = row;
+            self.fail_text = use;
+            self.fail_fn = self.cur.name;
+        }
+        return Error.Unsupported;
+    }
+
     fn lookup(self: *Compiler, name: []const u8) ?*Local {
         // The LAST definition wins: a loop variable is a fresh local for its
         // loop (C-11) and shadows an outer local of the same name until the
@@ -2569,8 +2782,11 @@ pub const Compiler = struct {
             i -= 1;
             const l = &self.cur.locals.items[i];
             scans[9] += 1;
-            // Ring identifiers are case-insensitive (F-18).
-            if (std.ascii.eqlIgnoreCase(l.name, name)) return l;
+            // Ring identifiers are case-insensitive (F-18); a .haro file's are spelled as declared (D55)
+            if (std.ascii.eqlIgnoreCase(l.name, name)) {
+                if (self.spell_on) self.spellAt(name, l.name, "");
+                return l;
+            }
         }
         return null;
     }
@@ -4379,6 +4595,7 @@ pub const Compiler = struct {
             try self.predeclareEval(args.namedChild(0));
         }
         if (self.findFunc(callee)) |uf| return self.userCall(n, uf, args, argc, dst);
+        if (self.spell_on) self.spellNative(callee);
 
         // ---- builtins -------------------------------------------------
         if (std.ascii.eqlIgnoreCase(callee, "len")) {
@@ -4983,7 +5200,10 @@ pub const Compiler = struct {
     fn knownGlobalPlain(self: *Compiler, name: []const u8) ?i32 {
         for (self.globals.items, 0..) |g, i| {
             scans[0] += 1;
-            if (std.ascii.eqlIgnoreCase(g, name)) return @intCast(i);
+            if (std.ascii.eqlIgnoreCase(g, name)) {
+                if (self.spell_on) self.spellAt(name, g, "");
+                return @intCast(i);
+            }
         }
         return null;
     }
@@ -5004,7 +5224,10 @@ pub const Compiler = struct {
         sizes[0] = self.globals.items.len;
         for (self.globals.items, 0..) |g, i| {
             scans[1] += 1;
-            if (std.ascii.eqlIgnoreCase(g, name)) return @intCast(i);
+            if (std.ascii.eqlIgnoreCase(g, name)) {
+                if (self.spell_on) self.spellAt(name, g, "");
+                return @intCast(i);
+            }
         }
         // eval mode: the VM's global table is fixed; a new top-level name
         // needs the literal-prefix declaration (predeclareEval)
@@ -5096,6 +5319,12 @@ pub const Compiler = struct {
     }
 
     fn findClass(self: *Compiler, name: []const u8) ?*ClassInfo {
+        const ci = self.findClassQ(name) orelse return null;
+        if (self.spell_on) self.spellAt(name, ci.name, ci.node.src);
+        return ci;
+    }
+
+    fn findClassQ(self: *Compiler, name: []const u8) ?*ClassInfo {
         var qb: [300]u8 = undefined;
         if (self.appName(&qb, name)) |q| {
             if (self.findClassPlain(q)) |ci| return ci;
@@ -5133,7 +5362,10 @@ pub const Compiler = struct {
         if (self.eval != null) return null;
         var probe: ?u16 = self.cur.owner;
         while (probe) |pid| {
-            if (self.attrSlotOf(pid, name)) |slot| return slot;
+            if (self.attrSlotOf(pid, name)) |slot| {
+                if (self.spell_on) self.spellAttr(pid, name);
+                return slot;
+            }
             probe = self.classes.items[pid].parent;
         }
         return null;
@@ -5142,7 +5374,9 @@ pub const Compiler = struct {
     fn attrSlot(self: *Compiler, name: []const u8) ?u32 {
         if (self.eval != null) return null; // see declaredAttr
         const ci = self.cur.owner orelse return null;
-        return self.attrSlotOf(ci, name);
+        const slot = self.attrSlotOf(ci, name) orelse return null;
+        if (self.spell_on) self.spellAttr(ci, name);
+        return slot;
     }
 
     /// The same lookup for a class the receiver was PROVED to hold. Own
@@ -5963,6 +6197,7 @@ pub const Compiler = struct {
     fn memberCall(self: *Compiler, mexp: ts.Node, args: ts.Node, argc: u32, dst: u8) Error!void {
         if (self.appRef(mexp.namedChild(0))) return self.appCall(mexp, args, argc, dst);
         const mname = mexp.namedChild(1).text();
+        if (self.spell_on) self.spellMember(mname);
         const save = self.temp;
         defer self.temp = save;
         const win = try self.tmp();
@@ -6145,6 +6380,12 @@ pub const Compiler = struct {
     }
 
     fn findFunc(self: *Compiler, name: []const u8) ?*Func {
+        const f = self.findFuncQ(name) orelse return null;
+        if (self.spell_on) self.spellFunc(name, f);
+        return f;
+    }
+
+    fn findFuncQ(self: *Compiler, name: []const u8) ?*Func {
         var qb: [300]u8 = undefined;
         if (self.appName(&qb, name)) |q| {
             if (self.findFuncPlain(q)) |f| return f;
@@ -11726,7 +11967,7 @@ fn evalStmt(c: *Compiler, s: ts.Node, pending_return: *?u32) Error!void {
         // only a statement on the SAME row is the split `return <expr>`; a
         // `return` that ends its line is Ring's bare return (stmt.c:931)
         if (std.mem.eql(u8, k, "expression_statement") and s.namedChildCount() == 1 and s.start().row == ret_row) {
-            return c.returnExpr(s.namedChild(0));
+            return c.stmtSpelled(s, s.namedChild(0), true);
         }
         // a bare return on its own: value "", and the rest never runs
         c.temp = @max(c.floor, c.bottom());
@@ -11738,7 +11979,8 @@ fn evalStmt(c: *Compiler, s: ts.Node, pending_return: *?u32) Error!void {
         pending_return.* = s.end().row;
         return;
     }
-    try c.stmt(s);
+    // an eval in a .haro program spells its names by the root's rules, as it reads them (D55, S5)
+    try c.stmtSpelled(s, s, false);
 }
 
 fn emitAll(c: *Compiler) !void {
@@ -12639,7 +12881,7 @@ fn emitOne(c: *Compiler, f: *Func) Error!void {
                         const mark = c.here();
                         const fxmark = c.fixups.items.len;
                         const nref = c.refusals.items.len;
-                        (if (piece.as_return) c.returnExpr(piece.node) else c.stmt(piece.node)) catch |e| {
+                        c.stmtSpelled(st, piece.node, piece.as_return) catch |e| {
                             if (e != Error.Unsupported) return e;
                             noteUnnamed(c, st, nref);
                             c.stmts_bad += 1;
@@ -12648,9 +12890,7 @@ fn emitOne(c: *Compiler, f: *Func) Error!void {
                             continue;
                         };
                         c.stmts_ok += 1;
-                    } else if (piece.as_return) {
-                        try c.returnExpr(piece.node);
-                    } else try c.stmt(piece.node);
+                    } else try c.stmtSpelled(st, piece.node, piece.as_return);
                 }
                 si += rr.consumed - 1;
                 continue;
@@ -12675,7 +12915,7 @@ fn emitOne(c: *Compiler, f: *Func) Error!void {
                     const mark = c.here();
                     const fxmark = c.fixups.items.len;
                     const nref = c.refusals.items.len;
-                    c.returnExpr(f.stmts.items[si + 1].namedChild(0)) catch |e| {
+                    c.stmtSpelled(f.stmts.items[si + 1], f.stmts.items[si + 1].namedChild(0), true) catch |e| {
                         if (e != Error.Unsupported) return e;
                         noteUnnamed(c, f.stmts.items[si + 1], nref);
                         c.stmts_bad += 1;
@@ -12685,7 +12925,7 @@ fn emitOne(c: *Compiler, f: *Func) Error!void {
                         continue;
                     };
                     c.stmts_ok += 1;
-                } else try c.returnExpr(f.stmts.items[si + 1].namedChild(0));
+                } else try c.stmtSpelled(f.stmts.items[si + 1], f.stmts.items[si + 1].namedChild(0), true);
                 si += 1;
                 continue;
             }
@@ -12693,7 +12933,7 @@ fn emitOne(c: *Compiler, f: *Func) Error!void {
                 const mark = c.here();
                 const fxmark = c.fixups.items.len;
                 const nref = c.refusals.items.len;
-                c.stmt(st) catch |e| {
+                c.stmtSpelled(st, st, false) catch |e| {
                     if (e != Error.Unsupported) return e;
                     noteUnnamed(c, st, nref);
                     c.stmts_bad += 1;
@@ -12702,7 +12942,7 @@ fn emitOne(c: *Compiler, f: *Func) Error!void {
                     continue;
                 };
                 c.stmts_ok += 1;
-            } else try c.stmt(st);
+            } else try c.stmtSpelled(st, st, false);
         }
         c.lnSeqEnd();
         lnThread(c, ln_lo);

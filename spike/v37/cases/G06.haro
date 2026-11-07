@@ -6,5 +6,5 @@ catch e
 	? len(e)
 	? type(e)
 	? e = "boom"
-	? isString(e)
+	? isstring(e)
 done

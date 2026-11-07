@@ -182,7 +182,7 @@ func CtElementCode(cOwn, cDefault, cName)
 func CtElementCites(cOwn, cDefault, cName, aRow, n)
 	aCC = CtElementCode(cOwn, cDefault, cName)
 	if len(aRow) < n return aCC ok
-	if isString(aRow[n])
+	if isstring(aRow[n])
 		aCC[2] = []
 	but len(aRow[n]) > 0
 		aCC[2] = aRow[n]
@@ -258,7 +258,7 @@ func CtRefusalRow(cCategory)
 
 func CtRefusalCode(cCategory, cWord, cDefault)
 	aR = CtRefusalRow(cCategory)
-	if isNull(aR) return [cDefault, []] ok
+	if isnull(aR) return [cDefault, []] ok
 	cCode = ""
 	if cWord != "" and len(aR) >= 5
 		for i = 1 to len(aR[5])
@@ -269,7 +269,7 @@ func CtRefusalCode(cCategory, cWord, cDefault)
 	if cCode = "" cCode = cDefault ok
 	aCites = []
 	if len(aR) >= 6
-		if isList(aR[6]) aCites = aR[6] ok
+		if islist(aR[6]) aCites = aR[6] ok
 	ok
 	return [cCode, aCites]
 
@@ -347,7 +347,7 @@ func CtLangEntry(cName)
 
 func CtUseLanguage(cName)
 	aE = CtLangEntry(cName)
-	if isNull(aE) raise("the court carries no language called '" + cName + "'") ok
+	if isnull(aE) raise("the court carries no language called '" + cName + "'") ok
 	$cCourtLang = aE[1]
 	$cCourtExt = aE[2]
 	$aCourtKinds = aE[3]
@@ -554,12 +554,12 @@ func CtDiagnose(cFile, cWorldPath)
 		return aDiags
 	ok
 	CtAppendWarnings(aDiags, cFile)
-	if isNull($aCourtWorldFile) and len($aCourtSymbols) > 0
+	if isnull($aCourtWorldFile) and len($aCourtSymbols) > 0
 		aSites = CtSymbolSites(aDecls)
 		if len(aSites) > 0
 			aSy = CtSymbolByName(aSites[1][2][2])
 			aCites = []
-			if not isNull(aSy) aCites = CtSymbolCode(aSy)[2] ok
+			if not isnull(aSy) aCites = CtSymbolCode(aSy)[2] ok
 			aDiags + ["NO_WORLD", "warning", "no world to resolve against; " + len(aSites) + " symbol reference(s) unresolved, which is what C3 section 3.2 asks a project to close", cFile, 0, aCites]
 		ok
 	ok
@@ -605,7 +605,7 @@ func CtMessageFor(aKind, cSeat)
 func CtJudgeSentence(aDecl, aSeat, aClause)
 	cRel = aClause[3][2]
 	aSK = CtSentenceKind(aSeat[2])
-	if isNull(aSK) CtFail(aClause[2], "Clause " + aClause[1] + " names a SENTENCE the court does not carry") ok
+	if isnull(aSK) CtFail(aClause[2], "Clause " + aClause[1] + " names a SENTENCE the court does not carry") ok
 	cPath = cRel
 	if $cCourtDir != "" cPath = $cCourtDir + "/" + cRel ok
 	if cRel = "" or not fexists(cPath)
@@ -736,7 +736,7 @@ func CtHasMarkSeat(aFS)
 # scalar values
 func CtUnionHasDecls(cName)
 	aU = CtUnionByName(cName)
-	if isNull(aU) return 0 ok
+	if isnull(aU) return 0 ok
 	for i = 1 to len(aU[2])
 		if aU[2][i][3] = "decl" return 1 ok
 	next
@@ -752,7 +752,7 @@ func CtSeatPasses(aSeat)
 	ok
 	if aSeat[3] and cK = "form"
 		aF = CtFormByName(aSeat[2])
-		if not isNull(aF) and CtIsPairForm(aF[2])
+		if not isnull(aF) and CtIsPairForm(aF[2])
 			bRef = 0
 			if CtTypeKind(aF[2][1]) = "decl" bRef = 1 ok
 			if CtTypeKind(aF[2][2]) = "decl" bRef = 1 ok
@@ -769,7 +769,7 @@ func CtClauseShape(aSeat)
 		if cK = "union" return "namelist" ok
 		if cK = "form"
 			aF = CtFormByName(cOf)
-			if isNull(aF) return "namelist" ok
+			if isnull(aF) return "namelist" ok
 			aFS = aF[2]
 			# v0.6: a FORM that is a name and a scalar is written as pairs
 			if CtIsPairForm(aFS) return "pairlist" ok
@@ -826,7 +826,7 @@ func CtAltShape(aAlt)
 # fits either list shape
 func CtUnionAlt(aSeat, aClause)
 	aU = CtUnionByName(aSeat[2])
-	if isNull(aU) return null ok
+	if isnull(aU) return null ok
 	cGot = aClause[3][1]
 	bEmpty = 0
 	if cGot = "namelist" or cGot = "stringlist"
@@ -842,9 +842,9 @@ func CtUnionAlt(aSeat, aClause)
 
 # the union's own MESSAGE speaks when the value fits no alternative
 func CtWantUnion(aDecl, aClause, aSeat)
-	if not isNull(CtUnionAlt(aSeat, aClause)) return ok
+	if not isnull(CtUnionAlt(aSeat, aClause)) return ok
 	aU = CtUnionByName(aSeat[2])
-	if isNull(aU) CtFail(aClause[2], "Clause " + aClause[1] + " names a UNION the court does not carry") ok
+	if isnull(aU) CtFail(aClause[2], "Clause " + aClause[1] + " names a UNION the court does not carry") ok
 	cMsg = aU[3]
 	if cMsg = ""
 		aNames = []
@@ -880,21 +880,21 @@ func CtFill(cMsg, aDecl, cValue)
 			cKey = substr(cMsg, i + 1, j - i - 1)
 			cRep = ""
 			if cKey = "name"
-				if not isNull(aDecl) cRep = aDecl[2] ok
+				if not isnull(aDecl) cRep = aDecl[2] ok
 			but cKey = "VERB"
-				if not isNull(aDecl) cRep = aDecl[1] ok
+				if not isnull(aDecl) cRep = aDecl[1] ok
 			but cKey = "value"
 				cRep = cValue
 			but cKey = "other"
 				cRep = $cCondOther
 			else
-				if not isNull(aDecl)
+				if not isnull(aDecl)
 					v = CondScalar(aDecl, cKey)
-					if not isNull(v)
+					if not isnull(v)
 						cRep = v
 					else
 						aL = CondListOf(aDecl, cKey)
-						if not isNull(aL)
+						if not isnull(aL)
 							cRep = CtJoin(aL, ", ")
 						else
 							# a path: {x.seat} through a reference seat, a ONE kind or a
@@ -902,7 +902,7 @@ func CtFill(cMsg, aDecl, cValue)
 							bSave = $bCondUnread
 							v = CondPathScalar(["path", CondSplit(cKey, ".")], ["decl", $cCondLang, aDecl, $aCondDecls], null)
 							$bCondUnread = bSave
-							if not isNull(v) cRep = v ok
+							if not isnull(v) cRep = v ok
 						ok
 					ok
 				ok
@@ -1075,10 +1075,10 @@ func CtParseDecl()
 	tK = CtNext()
 	aKind = null
 	if tK[1] = "keyword" aKind = CtKindByVerb(tK[2]) ok
-	if isNull(aKind)
+	if isnull(aKind)
 		# v0.35: a NAMED kind held at warning is read past and said (severity_lib.haro, loaded only where one is held)
 		aSevR = CtRefusalRow("unknown_declaration")
-		if not isNull(aSevR)
+		if not isnull(aSevR)
 			if len(aSevR) >= 7
 				if SevSkipNamed(aSevR, tK) return null ok
 			ok
@@ -1130,10 +1130,10 @@ func CtParseDecl()
 		aVal = CtParseValue()
 		# a FORMAT that FOLDs case reads its value folded (v0.4): hex is case-blind
 		aSeatF = CtSeatByClause(aKind, tC[2])
-		if not isNull(aSeatF)
+		if not isnull(aSeatF)
 			if CtTypeKind(aSeatF) = "format" and aVal[1] = "string"
 				aF = CtFormatByName(aSeatF[2])
-				if not isNull(aF)
+				if not isnull(aF)
 					if len(aF) >= 4
 						if aF[4] = "case" aVal[2] = lower(aVal[2]) ok
 					ok
@@ -1193,7 +1193,7 @@ func CtDeclare(cSrc)
 	while CtPeek()[1] != "eof"
 		# v0.35: a NAMED kind held at warning is read past, and declares nothing
 		aPD = CtParseDecl()
-		if not isNull(aPD) aDecls + aPD ok
+		if not isnull(aPD) aDecls + aPD ok
 	end
 	if len(aDecls) = 0
 		CtFail(1, "A " + $cCourtLang + " file declares nothing")
@@ -1279,7 +1279,7 @@ func CtDeclare(cSrc)
 	aOne = $aCourtWorld[1]
 	for i = 1 to len(aOne)
 		aK = CtKindByDeclName(aOne[i])
-		if isNull(aK) loop ok
+		if isnull(aK) loop ok
 		n = 0
 		for j = 1 to len(aDecls)
 			if aDecls[j][1] = aK[1] n++ ok
@@ -1294,7 +1294,7 @@ func CtDeclare(cSrc)
 	next
 	if $aCourtWorld[2] != ""
 		aK = CtKindByDeclName($aCourtWorld[2])
-		if not isNull(aK) and aDecls[1][1] != aK[1]
+		if not isnull(aK) and aDecls[1][1] != aK[1]
 			try
 				CtFailC(aDecls[1][3], "WORLD_FIRST", ["rule:world"], "The " + aK[1] + " declaration comes first")
 			catch
@@ -1315,7 +1315,7 @@ func CtDeclare(cSrc)
 	for i = 1 to len($aCourtConstraints)
 		aCn = $aCourtConstraints[i]
 		aK = CtKindByDeclName(aCn[2])
-		if isNull(aK) loop ok
+		if isnull(aK) loop ok
 		aWhen = CondParse(aCn[3])
 		aThen = null
 		if aCn[4] != "" aThen = CondParse(aCn[4]) ok
@@ -1330,7 +1330,7 @@ func CtDeclare(cSrc)
 			if bWhen
 				# WHEN alone names a forbidden state; with THEN, the consequence must hold
 				bFail = 1
-				if not isNull(aThen)
+				if not isnull(aThen)
 					bFail = not CondEval(aThen, aD)
 					if $bCondUnread loop ok
 				ok
@@ -1344,7 +1344,7 @@ func CtDeclare(cSrc)
 					# first -- HF-36, met again here (stage 29's L6 on the oracle, 2026-11-02)
 					# v0.28: CITES none -- the row's "none" -- cites nothing
 					if len(aCn) >= 7
-						if isString(aCn[7])
+						if isstring(aCn[7])
 							aCC[2] = []
 						but len(aCn[7]) > 0
 							aCC[2] = aCn[7]
@@ -1370,7 +1370,7 @@ func CtDeclare(cSrc)
 	# v0.32: the PATTERNs, each on the value of its OVER seat as the sentence writes it
 	# (pattern_judge.haro, loaded by a court whose language declares a PATTERN: the language entry has a 24th element)
 	aEPat = CtLangEntry($cCourtLang)
-	if not isNull(aEPat)
+	if not isnull(aEPat)
 		# (v0.40: a language that NEEDS writes the 24th element empty when it declares no PATTERN)
 		if len(aEPat) >= 24
 			if len(aEPat[24]) > 0 CtCheckPatterns(aDecls, cSrc) ok
@@ -1381,11 +1381,11 @@ func CtDeclare(cSrc)
 	CtCheckValues(aDecls, 1)
 	# v0.40: a door a sentence opens must be one its language NEEDS (needs_lib.haro, loaded where a language NEEDS: the entry has a 25th element)
 	aENd = CtLangEntry($cCourtLang)
-	if not isNull(aENd)
+	if not isnull(aENd)
 		if len(aENd) >= 25 NdCheck(aDecls, aENd[25]) ok
 	ok
 	# v0.9: an algorithm's step tree is a tree
-	if not isNull($aCourtRun)
+	if not isnull($aCourtRun)
 		try
 			RunCheckAcyclic(aDecls)
 		catch
@@ -1393,7 +1393,7 @@ func CtDeclare(cSrc)
 		done
 	ok
 	# v0.12: a family offers only forms the FORMS declares
-	if not isNull($aCourtFormset)
+	if not isnull($aCourtFormset)
 		try
 			FormsCheck(aDecls)
 		catch
@@ -1402,7 +1402,7 @@ func CtDeclare(cSrc)
 	ok
 	# v0.17: the rules of a language that is UNDERSTOOD (n_lib.haro). They read a sentence whose references
 	# resolve, so a sentence that already has a finding is not read by them; `check` stops at the first
-	if not isNull($aCourtUnderstand) and len($aCourtFound) = 0
+	if not isnull($aCourtUnderstand) and len($aCourtFound) = 0
 		try
 			NatCheckRules(aDecls)
 		catch
@@ -1410,7 +1410,7 @@ func CtDeclare(cSrc)
 		done
 	ok
 	# v0.10: the symbols resolve against the world, when one is handed in
-	if not isNull($aCourtWorldFile) CtResolveWorld(aDecls) ok
+	if not isnull($aCourtWorldFile) CtResolveWorld(aDecls) ok
 	return aDecls
 
 # the NAMES and the typed seat values of every declaration: bRefs 0 checks
@@ -1467,7 +1467,7 @@ func CtCheckValues(aDecls, bRefs)
 # a declaration's name against its kind's NAMES (a MENU or a FORMAT); "" or why
 func CtCheckNamed(cNames, cName)
 	aM = CtMenuByName(cNames)
-	if not isNull(aM)
+	if not isnull(aM)
 		if CtInList(cName, aM[2]) return "" ok
 		cMsg = aM[3]
 		if cMsg = "" cMsg = "is not a " + cNames + ": the menu is " + CtJoin(aM[2], ", ") ok
@@ -1478,7 +1478,7 @@ func CtCheckNamed(cNames, cName)
 		return CtFill(cMsg, null, cName)
 	ok
 	aF = CtFormatByName(cNames)
-	if not isNull(aF)
+	if not isnull(aF)
 		if CtHasShape(cName, aF[2]) return "" ok
 		cMsg = aF[3]
 		if cMsg = "" cMsg = "is not a " + aF[2] ok
@@ -1496,7 +1496,7 @@ func CtCheckScalar(aDecl, aSeat, cValue)
 	cClause = upper(aSeat[1])
 	if cK = "menu"
 		aM = CtMenuByName(aSeat[2])
-		if isNull(aM) or CtInList(cValue, aM[2]) return "" ok
+		if isnull(aM) or CtInList(cValue, aM[2]) return "" ok
 		cMsg = aM[3]
 		if cMsg = "" cMsg = cClause + " is " + CtJoin(aM[2], ", ") ok
 		if substr(cMsg, "{value}") = 0 cMsg += ", not '{value}'" ok
@@ -1507,7 +1507,7 @@ func CtCheckScalar(aDecl, aSeat, cValue)
 		return CtFill(cMsg, aDecl, cValue)
 	but cK = "range"
 		aR = CtRangeByName(aSeat[2])
-		if isNull(aR) return "" ok
+		if isnull(aR) return "" ok
 		n = 0 + cValue
 		if n >= 0 + aR[2] and n <= 0 + aR[3] return "" ok
 		cMsg = aR[4]
@@ -1519,7 +1519,7 @@ func CtCheckScalar(aDecl, aSeat, cValue)
 		return CtFill(cMsg, aDecl, cValue)
 	but cK = "format"
 		aF = CtFormatByName(aSeat[2])
-		if isNull(aF) or CtHasShape(cValue, aF[2]) return "" ok
+		if isnull(aF) or CtHasShape(cValue, aF[2]) return "" ok
 		cMsg = aF[3]
 		if cMsg = "" cMsg = cClause + " is not a " + aF[2] + ": '{value}'" ok
 		cOwn = ""
@@ -1530,7 +1530,7 @@ func CtCheckScalar(aDecl, aSeat, cValue)
 	but cK = "expr"
 		# v0.6: the text is an expression of the seat's language, or the refusal says why
 		aE = CtExprByName(aSeat[2])
-		if isNull(aE) return "" ok
+		if isnull(aE) return "" ok
 		CtExprUse(aE)
 		cErr = ""
 		try
@@ -1545,7 +1545,7 @@ func CtCheckScalar(aDecl, aSeat, cValue)
 		return ""
 	but cK = "decl"
 		aK = CtKindByDeclName(aSeat[2])
-		if isNull(aK) return "" ok
+		if isnull(aK) return "" ok
 		for i = 1 to len($aCondDecls)
 			if $aCondDecls[i][1] = aK[1] and $aCondDecls[i][2] = cValue return "" ok
 		next
@@ -1582,12 +1582,12 @@ func CtCheckScalar(aDecl, aSeat, cValue)
 # of one of the union's kinds, or the union's own MESSAGE speaks
 func CtCheckUnionWord(aDecl, aSeat, cValue)
 	aU = CtUnionByName(aSeat[2])
-	if isNull(aU) return "" ok
+	if isnull(aU) return "" ok
 	aVerbs = []
 	for i = 1 to len(aU[2])
 		if aU[2][i][3] != "decl" loop ok
 		aK = CtKindByDeclName(aU[2][i][1])
-		if isNull(aK) loop ok
+		if isnull(aK) loop ok
 		aVerbs + aK[1]
 		for j = 1 to len($aCondDecls)
 			if $aCondDecls[j][1] = aK[1] and $aCondDecls[j][2] = cValue return "" ok
@@ -1604,7 +1604,7 @@ func CtCheckUnionWord(aDecl, aSeat, cValue)
 func CtCheckSeatValue(aDecl, aSeat, aClause, bRefs)
 	if CtTypeKind(aSeat) = "union" and not aSeat[3]
 		aAlt = CtUnionAlt(aSeat, aClause)
-		if isNull(aAlt) return "" ok
+		if isnull(aAlt) return "" ok
 		if aAlt[3] = "decl"
 			if not bRefs return "" ok
 			if aClause[3][1] != "word" return "" ok
@@ -1637,7 +1637,7 @@ func CtCheckSeatValue(aDecl, aSeat, aClause, bRefs)
 		# key is a name (once), a MENU word (a sequence, keys may repeat) or a
 		# declaration (resolved), and a value may be a reference
 		aF = CtFormByName(aSeat[2])
-		if isNull(aF) or len(aF[2]) < 2 return "" ok
+		if isnull(aF) or len(aF[2]) < 2 return "" ok
 		aKeySeat = aF[2][1]
 		aValSeat = aF[2][2]
 		cKeyK = CtTypeKind(aKeySeat)
@@ -1712,7 +1712,7 @@ func CtCheckSeatValue(aDecl, aSeat, aClause, bRefs)
 	but cK = "form"
 		# a form's one seat may be a FORMAT: each item takes its shape
 		aF = CtFormByName(aSeat[2])
-		if not isNull(aF) and len(aF[2]) > 0 and CtTypeKind(aF[2][1]) = "format"
+		if not isnull(aF) and len(aF[2]) > 0 and CtTypeKind(aF[2][1]) = "format"
 			for i = 1 to len(aItems)
 				cWhy = CtCheckScalar(aDecl, aF[2][1], aItems[i])
 				if cWhy != "" return cWhy ok
@@ -1758,7 +1758,7 @@ func CtMarkedFields(aDecls)
 		for k = 1 to len($aCourtKinds)
 			if $aCourtKinds[k][2] = $aCourtMarks[m][1] aKind = $aCourtKinds[k] ok
 		next
-		if isNull(aKind) loop ok
+		if isnull(aKind) loop ok
 		for d = 1 to len(aDecls)
 			if aDecls[d][1] != aKind[1] loop ok
 			aC = aDecls[d][4]
@@ -1790,7 +1790,7 @@ func CtRedactRows(aRows, aFields)
 		aRow = []
 		for j = 1 to len(aRows[i])
 			v = aRows[i][j]
-			if j > 1 and isList(v) and len(v) = 2 and isString(v[1]) and CtInList(v[1], aFields)
+			if j > 1 and islist(v) and len(v) = 2 and isstring(v[1]) and CtInList(v[1], aFields)
 				aRow + [v[1], "[personal]"]
 			else
 				aRow + v
@@ -1878,7 +1878,7 @@ func CtRefine(cFile, cRfnFile)
 	done
 	$aCourtKinds = aSaveKinds
 	$cCourtLang = aSaveLang
-	if not isNull(cErr) and cErr != ""
+	if not isnull(cErr) and cErr != ""
 		? cErr
 		return
 	ok
@@ -1920,14 +1920,14 @@ func CtRefine(cFile, cRfnFile)
 	for i = 1 to len(aDecls)
 		if aDecls[i][2] = cDeclName aDecl = aDecls[i] ok
 	next
-	if isNull(aDecl)
+	if isnull(aDecl)
 		CtRefuse("constraint", "NO_SUCH_POINT", "no declaration '" + cDeclName + "' in " + cFile, cRfnFile, nRLine,
 		         ["rule:constraint"], "every named thing is a refinement point, and nothing by this name is declared", "name a declaration the file carries")
 		return
 	ok
 	aKind = CtKindByVerb(aDecl[1])
 	aSeat = CtSeatByClause(aKind, cClause)
-	if isNull(aSeat)
+	if isnull(aSeat)
 		CtRefuse("constraint", "NO_SUCH_POINT", aDecl[1] + " has no clause " + cClause + "; allowed are " + CtJoin(CtAllowedClauses(aKind), ", "),
 		         cRfnFile, nRLine, ["rule:constraint"], "the point's clause is not a seat of its declaration kind", "name one of the allowed clauses")
 		return
@@ -1979,7 +1979,7 @@ func CtRefine(cFile, cRfnFile)
 	for i = 1 to len(aC)
 		if aC[i][1] = cClause aClause = aC[i] ok
 	next
-	if isNull(aClause)
+	if isnull(aClause)
 		CtRefuse("constraint", "POINT_UNSET", aDecl[1] + " " + cDeclName + " does not write " + cClause + "; this gate refines a clause that is written",
 		         cRfnFile, nRLine, ["rule:constraint"], "a refinement changes a value the sentence carries", "write the clause first, then refine it")
 		return
@@ -2111,20 +2111,20 @@ func CtWalkOf(cKindName)
 func CtExprNode(aDecl, cSeat)
 	aKind = CtKindByVerb(aDecl[1])
 	aSeat = CtSeatByClause(aKind, upper(cSeat))
-	if isNull(aSeat) raise("no seat '" + cSeat + "' on " + aDecl[1]) ok
+	if isnull(aSeat) raise("no seat '" + cSeat + "' on " + aDecl[1]) ok
 	if CtTypeKind(aSeat) != "expr" raise(upper(cSeat) + " of " + aDecl[1] + " " + aDecl[2] + " is not an expression seat") ok
 	cText = CondScalar(aDecl, cSeat)
-	if isNull(cText) return null ok
+	if isnull(cText) return null ok
 	aE = CtExprByName(aSeat[2])
-	if isNull(aE) raise("the court carries no EXPRESSION called '" + aSeat[2] + "'") ok
+	if isnull(aE) raise("the court carries no EXPRESSION called '" + aSeat[2] + "'") ok
 	CtExprUse(aE)
 	return ExParse(cText, [])
 
 func CtEval(aDecls, cDecl, cSeat, aRecord)
 	aD = CtDeclNamed(aDecls, cDecl)
-	if isNull(aD) raise("no declaration named '" + cDecl + "' in this file") ok
+	if isnull(aD) raise("no declaration named '" + cDecl + "' in this file") ok
 	aNode = CtExprNode(aD, cSeat)
-	if isNull(aNode) raise(upper(cSeat) + " is not written on " + aD[1] + " " + aD[2]) ok
+	if isnull(aNode) raise(upper(cSeat) + " is not written on " + aD[1] + " " + aD[2]) ok
 	ExSetRecord(aRecord)
 	return ExBool(aNode, [])
 
@@ -2138,20 +2138,20 @@ func CtGuard(aDecls, aStep, cPath)
 	cHead = left(cPath, nDot - 1)
 	cTail = substr(cPath, nDot + 1)
 	cRef = CondScalar(aStep, cHead)
-	if isNull(cRef) return [null, ""] ok
+	if isnull(cRef) return [null, ""] ok
 	aTarget = CtDeclNamed(aDecls, cRef)
-	if isNull(aTarget) return [null, ""] ok
+	if isnull(aTarget) return [null, ""] ok
 	aNode = CtExprNode(aTarget, cTail)
 	cReason = CondScalar(aTarget, "message")
-	if isNull(cReason) cReason = upper(cTail) + " of " + aTarget[1] + " " + aTarget[2] + " failed" ok
+	if isnull(cReason) cReason = upper(cTail) + " of " + aTarget[1] + " " + aTarget[2] + " failed" ok
 	return [aNode, cReason]
 
 func CtWalk(aDecls, cName, aRecord)
 	aD = CtDeclNamed(aDecls, cName)
-	if isNull(aD) raise("no declaration named '" + cName + "' in this file") ok
+	if isnull(aD) raise("no declaration named '" + cName + "' in this file") ok
 	aKind = CtKindByVerb(aD[1])
 	aW = CtWalkOf(aKind[2])
-	if isNull(aW) raise("no WALK of " + aKind[2] + " is declared, so " + aD[1] + " " + cName + " cannot be walked") ok
+	if isnull(aW) raise("no WALK of " + aKind[2] + " is declared, so " + aD[1] + " " + cName + " cannot be walked") ok
 	aStepKind = CtKindByDeclName(aW[3])
 	# the steps THROUGH this declaration, in ORDER (an insertion sort on the
 	# number: Ring's sort() orders a column of text)
@@ -2159,7 +2159,7 @@ func CtWalk(aDecls, cName, aRecord)
 	for i = 1 to len(aDecls)
 		if aDecls[i][1] != aStepKind[1] loop ok
 		cThrough = CondScalar(aDecls[i], aW[4])
-		if isNull(cThrough) or cThrough != cName loop ok
+		if isnull(cThrough) or cThrough != cName loop ok
 		nOrder = 0 + CondScalar(aDecls[i], aW[5])
 		nAt = len(aSteps) + 1
 		for j = 1 to len(aSteps)
@@ -2183,7 +2183,7 @@ func CtWalk(aDecls, cName, aRecord)
 		if aW[7] != "" and aW[8] != ""
 			cTarget = CondScalar(aStep, aW[7])
 			aF = CtExprNode(aStep, aW[8])
-			if not isNull(cTarget) and not isNull(aF)
+			if not isnull(cTarget) and not isnull(aF)
 				v = ExNum(ExEval(aF, []))
 				$aExprOverlay + [cTarget, v]
 				aPair = [cTarget, v]
@@ -2193,12 +2193,12 @@ func CtWalk(aDecls, cName, aRecord)
 		aG = aW[6]
 		for j = 1 to len(aG)
 			aGuard = CtGuard(aDecls, aStep, aG[j])
-			if isNull(aGuard[1]) loop ok
+			if isnull(aGuard[1]) loop ok
 			if not ExBool(aGuard[1], [])
 				aOut = [ExObjMark(), ["status", "failed"], ["at", aStep[2]]]
 				if aW[9] != ""
 					cCode = CondScalar(aStep, aW[9])
-					if not isNull(cCode)
+					if not isnull(cCode)
 						aPair = ["code", cCode]
 						aOut + aPair
 					ok
@@ -2229,7 +2229,7 @@ func CtMain()
 		cSrc = read(sysargv[4])
 		try
 			# v0.17: `surfaces` asks each surface's own court to judge its queries (a language that is understood)
-			if not isNull($aCourtUnderstand) and len(sysargv) >= 5
+			if not isnull($aCourtUnderstand) and len(sysargv) >= 5
 				if sysargv[5] = "surfaces" $bNSurfaces = 1 ok
 			ok
 			if len(sysargv) >= 5 and not $bNSurfaces $aCourtWorldFile = CtWorldLoad(sysargv[5]) ok
@@ -2240,7 +2240,7 @@ func CtMain()
 			for i = 1 to len($aCourtWarnings)
 				? "warning " + $aCourtWarnings[i][1] + ": " + $aCourtWarnings[i][4] + " (line " + $aCourtWarnings[i][3] + ")"
 			next
-			if isNull($aCourtWorldFile) and len($aCourtSymbols) > 0
+			if isnull($aCourtWorldFile) and len($aCourtSymbols) > 0
 				nSites = len(CtSymbolSites(aDecls))
 				if nSites > 0
 					? "warning NO_WORLD: no world to resolve against; " + nSites + " symbol reference(s) unresolved, which is what C3 section 3.2 asks a project to close"
@@ -2252,7 +2252,7 @@ func CtMain()
 	but cVerb = "diagnose"
 		# v0.11: the same court, in the family's machine form (C2 v1.2.0)
 		cWorldPath = ""
-		if not isNull($aCourtUnderstand) and len(sysargv) >= 5
+		if not isnull($aCourtUnderstand) and len(sysargv) >= 5
 			if sysargv[5] = "surfaces" $bNSurfaces = 1 ok
 		ok
 		if len(sysargv) >= 5 and not $bNSurfaces cWorldPath = sysargv[5] ok
@@ -2265,7 +2265,7 @@ func CtMain()
 			aWRows = CtWorldRows(aDecls, CtWorldStem(sysargv[4]) + $cCourtExt)
 			# v0.40: the doors each declaration opens, published for the consumer that enforces them -- only where the language NEEDS (D51)
 			aEW = CtLangEntry($cCourtLang)
-			if not isNull(aEW)
+			if not isnull(aEW)
 				if len(aEW) >= 25 aWRows + ["opens", NdRows(aDecls, aEW[25], CtWorldStem(sysargv[4]) + $cCourtExt)] ok
 			ok
 			? ExJson(aWRows)
@@ -2342,7 +2342,7 @@ func CtMain()
 		cSrc = read(sysargv[4])
 		try
 			aDecls = CtDeclare(cSrc)
-			if isNull($aCourtRun) CtFail(1, "this language declares no RUN, so nothing in it runs") ok
+			if isnull($aCourtRun) CtFail(1, "this language declares no RUN, so nothing in it runs") ok
 			aRecord = ExJsonParse(sysargv[6])
 			? ExJson(RunAlgorithm(aDecls, sysargv[5], aRecord))
 		catch
@@ -2355,7 +2355,7 @@ func CtMain()
 			return
 		ok
 		try
-			if isNull($aCourtNarrate) CtFail(1, "this language declares no NARRATE, so it has no voice") ok
+			if isnull($aCourtNarrate) CtFail(1, "this language declares no NARRATE, so it has no voice") ok
 			NarrateRun(sysargv[4])
 		catch
 			? cCatchError
@@ -2367,8 +2367,8 @@ func CtMain()
 			return
 		ok
 		try
-			if isNull($aCourtNarrate) CtFail(1, "this language declares no NARRATE, so it has no voice") ok
-			if isNull($aCourtRun) CtFail(1, "this language declares no RUN, so nothing in it runs") ok
+			if isnull($aCourtNarrate) CtFail(1, "this language declares no NARRATE, so it has no voice") ok
+			if isnull($aCourtRun) CtFail(1, "this language declares no RUN, so nothing in it runs") ok
 			NarTellRun(sysargv[4], sysargv[5], sysargv[6])
 		catch
 			? cCatchError
@@ -2380,8 +2380,8 @@ func CtMain()
 			return
 		ok
 		try
-			if isNull($aCourtNarrate) CtFail(1, "this language declares no NARRATE, so it has no voice") ok
-			if isNull($aCourtAsk) CtFail(1, "this language declares no ASK, so it answers no question") ok
+			if isnull($aCourtNarrate) CtFail(1, "this language declares no NARRATE, so it has no voice") ok
+			if isnull($aCourtAsk) CtFail(1, "this language declares no ASK, so it answers no question") ok
 			NarTellAsk(sysargv[4], sysargv[5], sysargv[6])
 		catch
 			? cCatchError
@@ -2391,7 +2391,7 @@ func CtMain()
 		cSrc = read(sysargv[4])
 		try
 			aDecls = CtDeclare(cSrc)
-			if isNull($aCourtFormset) CtFail(1, "this language declares no FORMS, so it spells no family") ok
+			if isnull($aCourtFormset) CtFail(1, "this language declares no FORMS, so it spells no family") ok
 			FormsPrintFamilies(aDecls)
 		catch
 			? cCatchError
@@ -2405,12 +2405,12 @@ func CtMain()
 		cSrc = read(sysargv[4])
 		try
 			aDecls = CtDeclare(cSrc)
-			if isNull($aCourtFormset) CtFail(1, "this language declares no FORMS, so it judges no spelling") ok
+			if isnull($aCourtFormset) CtFail(1, "this language declares no FORMS, so it judges no spelling") ok
 			FormsPrintSpellings(aDecls, FormsReadNames(sysargv[5]))
 		catch
 			? cCatchError
 		done
-	but not isNull($aCourtUnderstand) and CtInList(cVerb, ["tokens", "understand", "ask", "vocabulary", "examples"])
+	but not isnull($aCourtUnderstand) and CtInList(cVerb, ["tokens", "understand", "ask", "vocabulary", "examples"])
 		# v0.17: a human language over a declared world, understood (n_lib.haro); `ask` here takes a tongue and
 		# a text, where the Q letter's takes a question and rows -- different courts, different arguments
 		NatMain(cVerb)
@@ -2423,7 +2423,7 @@ func CtMain()
 		cSrc = read(sysargv[4])
 		try
 			aDecls = CtDeclare(cSrc)
-			if isNull($aCourtAsk) CtFail(1, "this language declares no ASK, so it answers no question") ok
+			if isnull($aCourtAsk) CtFail(1, "this language declares no ASK, so it answers no question") ok
 			aRows = ExJsonParse(sysargv[6])
 			aAns = AskRun(aDecls, sysargv[5], aRows)
 			# v0.27: under anonymisation the ask path answers with the marked fields redacted; under consent, whole

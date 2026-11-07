@@ -1,0 +1,4 @@
+f()
+func f
+	nA = 4
+	eval("? na")

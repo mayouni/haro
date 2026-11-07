@@ -33,11 +33,11 @@ func RunFail(cMsg)
 # the construct a declaration plays: COMPUTE COLLECT GROUP BRANCH ITERATE, or ""
 func RunConstructOf(aDecl)
 	aKind = CtKindByVerb(aDecl[1])
-	if isNull(aKind) return "" ok
+	if isnull(aKind) return "" ok
 	aRoles = ["COMPUTE", "COLLECT", "GROUP", "BRANCH", "ITERATE"]
 	for i = 1 to len(aRoles)
 		aR = RunRole(aRoles[i])
-		if not isNull(aR)
+		if not isnull(aR)
 			if aR[1] = aKind[2] return aRoles[i] ok
 		ok
 	next
@@ -46,7 +46,7 @@ func RunConstructOf(aDecl)
 # the names a step list seat of a declaration holds, as written
 func RunStepsOf(aDecl, cSeat)
 	aL = CondListOf(aDecl, cSeat)
-	if isNull(aL) return [] ok
+	if isnull(aL) return [] ok
 	return aL
 
 # the step lists a declaration owns: its construct's list seats
@@ -67,9 +67,9 @@ func RunChildLists(aDecl)
 
 func RunCheckAcyclic(aDecls)
 	aOf = RunRole("OF")
-	if isNull(aOf) return ok
+	if isnull(aOf) return ok
 	aK = CtKindByDeclName(aOf[1])
-	if isNull(aK) return ok
+	if isnull(aK) return ok
 	for i = 1 to len(aDecls)
 		if aDecls[i][1] != aK[1] loop ok
 		aSteps = RunStepsOf(aDecls[i], aOf[2])
@@ -84,7 +84,7 @@ func RunWalkCheck(aDecls, cName, aPath)
 		RunFail("step '" + cName + "' re-enters itself through " + CtJoin(aPath, " > ") + ": an algorithm's steps form a tree, and no step may lead back to one on the way down")
 	ok
 	aD = CtDeclNamed(aDecls, cName)
-	if isNull(aD) return ok
+	if isnull(aD) return ok
 	aLists = RunChildLists(aD)
 	aNext = []
 	for i = 1 to len(aPath) aNext + aPath[i] next
@@ -129,7 +129,7 @@ func RunSteps(aDecls, aSteps, aPath)
 func RunStep(aDecls, cName, aPath)
 	if CtInList(cName, aPath) RunFail("step '" + cName + "' re-enters itself") ok
 	aD = CtDeclNamed(aDecls, cName)
-	if isNull(aD) RunFail("step '" + cName + "' is not declared") ok
+	if isnull(aD) RunFail("step '" + cName + "' is not declared") ok
 	cC = RunConstructOf(aD)
 	if cC = "" RunFail(aD[1] + " " + cName + " is not a step: it plays no construct of this language") ok
 	aNext = []
@@ -150,7 +150,7 @@ func RunStep(aDecls, cName, aPath)
 		aGot = RunGet(cInto)
 		aList = []
 		if aGot[1]
-			if not isList(aGot[2]) or ExIsObj(aGot[2]) RunFail("COLLECT " + cName + " into '" + cInto + "', which is not a list") ok
+			if not islist(aGot[2]) or ExIsObj(aGot[2]) RunFail("COLLECT " + cName + " into '" + cInto + "', which is not a list") ok
 			aList = aGot[2]
 		ok
 		aList + v
@@ -162,11 +162,11 @@ func RunStep(aDecls, cName, aPath)
 		k = ExEval(RunExprNode(aD, aR[3]), [])
 		v = ExEval(RunExprNode(aD, aR[4]), [])
 		cKey = "" + k
-		if isNumber(k) cKey = ExNumText(k) ok
+		if isnumber(k) cKey = ExNumText(k) ok
 		aGot = RunGet(cInto)
 		aGroups = []
 		if aGot[1]
-			if not isList(aGot[2]) or ExIsObj(aGot[2]) RunFail("GROUP " + cName + " into '" + cInto + "', which is not a list of groups") ok
+			if not islist(aGot[2]) or ExIsObj(aGot[2]) RunFail("GROUP " + cName + " into '" + cInto + "', which is not a list of groups") ok
 			aGroups = aGot[2]
 		ok
 		nAt = 0
@@ -201,7 +201,7 @@ func RunStep(aDecls, cName, aPath)
 		cAs = CondScalar(aD, aR[3])
 		aGot = RunGet(cOver)
 		if not aGot[1] RunFail("ITERATE " + cName + " over '" + cOver + "', which the record does not hold") ok
-		if not isList(aGot[2]) or ExIsObj(aGot[2]) RunFail("ITERATE " + cName + " over '" + cOver + "', which is not a list") ok
+		if not islist(aGot[2]) or ExIsObj(aGot[2]) RunFail("ITERATE " + cName + " over '" + cOver + "', which is not a list") ok
 		# a snapshot: the walk is as long as the list was when it began
 		aSnap = []
 		for j = 1 to len(aGot[2]) aSnap + aGot[2][j] next
@@ -217,11 +217,11 @@ func RunStep(aDecls, cName, aPath)
 
 func RunAlgorithm(aDecls, cName, aRecord)
 	aOf = RunRole("OF")
-	if isNull(aOf) RunFail("this language declares no RUN, so nothing in it runs") ok
+	if isnull(aOf) RunFail("this language declares no RUN, so nothing in it runs") ok
 	aD = CtDeclNamed(aDecls, cName)
-	if isNull(aD) RunFail("no declaration named '" + cName + "' in this file") ok
+	if isnull(aD) RunFail("no declaration named '" + cName + "' in this file") ok
 	aK = CtKindByDeclName(aOf[1])
-	if isNull(aK) or aD[1] != aK[1] RunFail(aD[1] + " " + cName + " is not an " + aK[1] + ", and only an " + aK[1] + " runs") ok
+	if isnull(aK) or aD[1] != aK[1] RunFail(aD[1] + " " + cName + " is not an " + aK[1] + ", and only an " + aK[1] + " runs") ok
 	if not ExIsObj(aRecord) RunFail("the record is a JSON object") ok
 	ExSetRecord(aRecord)
 	RunSteps(aDecls, RunStepsOf(aD, aOf[2]), [cName])

@@ -52,8 +52,8 @@ func CondPrintP(aAst, nCtx)
 	if k = "exists" return "exists " + aAst[2] ok
 	if k = "quant"
 		c = "(" + aAst[2] + " " + CondPathText(aAst[3])
-		if not isNull(aAst[4]) c += " named " + CondPrintRight(aAst[4], 1) ok
-		if not isNull(aAst[5]) c += " where " + CondPrintP(aAst[5], 0) ok
+		if not isnull(aAst[4]) c += " named " + CondPrintRight(aAst[4], 1) ok
+		if not isnull(aAst[5]) c += " where " + CondPrintP(aAst[5], 0) ok
 		return c + ")"
 	ok
 	if k = "cmp"
@@ -73,8 +73,8 @@ func CondPrintP(aAst, nCtx)
 
 # a parsed condition as one line, every string length-free and quoted: two conditions are one when their dumps are
 func CondDump(x)
-	if isNull(x) return "NULL" ok
-	if isString(x) return '"' + x + '"' ok
+	if isnull(x) return "NULL" ok
+	if isstring(x) return '"' + x + '"' ok
 	cOut = "["
 	for i = 1 to len(x)
 		if i > 1 cOut += " " ok
@@ -202,14 +202,14 @@ func StzuFormAst(aAst, cOn, aTab, aDecls)
 	ok
 	if k = "quant"
 		aCond = aAst[5]
-		if not isNull(aCond) aCond = StzuFormAst(aCond, cOn, aTab, aDecls) ok
+		if not isnull(aCond) aCond = StzuFormAst(aCond, cOn, aTab, aDecls) ok
 		cHead = ""
 		if len(aAst[3][2]) = 1 cHead = aAst[3][2][1] ok
 		nF = 0
 		if cHead != "" nF = StzuFormAt(aTab, cHead) ok
 		# a name that is a seat of the constraint's kind keeps the meaning it had
 		if nF > 0 and cOn != ""
-			if not isNull(StzuSeatNamed(StzuSeatsOf(aDecls, cOn), cHead)) nF = 0 ok
+			if not isnull(StzuSeatNamed(StzuSeatsOf(aDecls, cOn), cHead)) nF = 0 ok
 		ok
 		if nF > 0
 			$bFormChanged = 1

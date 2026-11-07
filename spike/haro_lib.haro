@@ -237,12 +237,12 @@ func StzuIsC2Cite(cS)
 # v0.16: the placeholders an event of a run or a question can fill, or a refusal naming why it cannot be told
 func StzuTellPlaceholders(cKey, aDeclarations, aRun, aAsk, cLName, nLine)
 	if cKey = "run" or cKey = "result"
-		if isNull(aRun) StzuFail(nLine, "TELLS: '" + cKey + "' tells a run, and this language declares no RUN") ok
+		if isnull(aRun) StzuFail(nLine, "TELLS: '" + cKey + "' tells a run, and this language declares no RUN") ok
 		if cKey = "run" return ["language", "file", "algorithm", "record"] ok
 		return ["language", "file", "algorithm", "result"]
 	ok
 	if InStrList(cKey, ["ask", "matched", "ordered", "cut", "answer"])
-		if isNull(aAsk) StzuFail(nLine, "TELLS: '" + cKey + "' tells a question, and this language declares no ASK") ok
+		if isnull(aAsk) StzuFail(nLine, "TELLS: '" + cKey + "' tells a question, and this language declares no ASK") ok
 		if cKey = "ask" return ["language", "file", "question", "from"] ok
 		if cKey = "matched" return ["count", "total", "from"] ok
 		if cKey = "ordered" return ["field", "direction"] ok
@@ -253,8 +253,8 @@ func StzuTellPlaceholders(cKey, aDeclarations, aRun, aAsk, cLName, nLine)
 	for j = 1 to len(aDeclarations)
 		if aDeclarations[j][1] = cKey aDecl = aDeclarations[j] ok
 	next
-	if isNull(aDecl) StzuFail(nLine, "TELLS: no declaration '" + cKey + "' in " + cLName) ok
-	if isNull(aRun) StzuFail(nLine, "TELLS: '" + cKey + "' tells a step, and this language declares no RUN") ok
+	if isnull(aDecl) StzuFail(nLine, "TELLS: no declaration '" + cKey + "' in " + cLName) ok
+	if isnull(aRun) StzuFail(nLine, "TELLS: '" + cKey + "' tells a step, and this language declares no RUN") ok
 	bPlays = 0
 	for r = 1 to len(aRun[2])
 		if aRun[2][r][1] != "OF"
@@ -323,7 +323,7 @@ func StzuWantCode(cCode, nLine, cWhere)
 # v0.28 (HARO-MENU-CITES-01): the word none cites nothing and passes; an empty list says nothing and is refused
 # by name -- the machine language's own idiom for EGRESS, a list or the word none, never an empty list
 func StzuWantCites(aCites, nLine, cWhere)
-	if isString(aCites) return ok
+	if isstring(aCites) return ok
 	if len(aCites) = 0
 		StzuFail(nLine, "an empty CITES says nothing: a list names what the refusal cites, and the word none says it cites nothing")
 	ok
@@ -422,7 +422,7 @@ func StzuTypeKindOf(aLang, cOf)
 	aL = LangGet(aLang, "sentences")
 	for i = 1 to len(aL) if aL[i][1] = cOf return "sentence" ok next
 	aL = LangGet(aLang, "symbols")
-	if not isNull(aL)
+	if not isnull(aL)
 		for i = 1 to len(aL) if aL[i][1] = cOf return "symbol" ok next
 	ok
 	return "expr"
@@ -434,7 +434,7 @@ func StzuCondLangs(aLang, aViewEntries)
 	aOut = [StzuCondLang(aLang, aViewEntries)]
 	aS = LangGet(aLang, "sentences")
 	for i = 1 to len(aS)
-		if not isNull(aS[i][3])
+		if not isnull(aS[i][3])
 			aInner = StzuCondLangs(aS[i][3], [])
 			for j = 1 to len(aInner)
 				aOut + aInner[j]
@@ -459,7 +459,7 @@ func StzuCondLang(aLang, aViewEntries)
 			if cTK = "sentence"
 				for k = 1 to len(aSents)
 					if aSents[k][1] = cOf
-						if not isNull(aSents[k][3]) cTarget = LangGet(aSents[k][3], "name") ok
+						if not isnull(aSents[k][3]) cTarget = LangGet(aSents[k][3], "name") ok
 					ok
 				next
 			ok
@@ -471,7 +471,7 @@ func StzuCondLang(aLang, aViewEntries)
 	aOne = []
 	aEntry = []
 	aW = LangGet(aLang, "world")
-	if not isNull(aW)
+	if not isnull(aW)
 		aOne = aW[1]
 		if len(aW) >= 4 aEntry = aW[4] ok
 	ok
@@ -669,7 +669,7 @@ func StzuTokenize(cSrc)
 	# A comment is a value of the block and layout to the meta-court
 	aToks = BlkTokenize(cSrc)
 	tE = BlkLexError(aToks)
-	if not isNull(tE)
+	if not isnull(tE)
 		if tE[2] = "unterminated_string"
 			StzuFail(tE[3], "Unterminated string")
 		but tE[2] = "mixed_case"
@@ -1171,7 +1171,7 @@ func StzuDeclare(cSrc)
 					nLNeedsLine = nLine
 				ok
 			but cKind = "WORLD"
-				if not isNull(aWorld)
+				if not isnull(aWorld)
 					StzuFail(nLine, "a .haro file declares at most one WORLD")
 				ok
 				aOne = []
@@ -1188,7 +1188,7 @@ func StzuDeclare(cSrc)
 				if HasClause(aClauses, "PUBLISH") aPublish = ClauseValue(aClauses, "PUBLISH") ok
 				aWorld = [aOne, cFirst, nLine, aEntry, aPublish]
 			but cKind = "REFINE"
-				if not isNull(aRefine)
+				if not isnull(aRefine)
 					StzuFail(nLine, "a .haro file declares at most one REFINE")
 				ok
 				aFloors = []
@@ -1197,7 +1197,7 @@ func StzuDeclare(cSrc)
 			but cKind = "CONSTITUTION"
 				# v0.23: the constitution -- the articles a world declares itself under (charter 2,
 				# ratified 2026-11-01); judged once the whole file is read, below
-				if not isNull(aConstitution)
+				if not isnull(aConstitution)
 					StzuFail(nLine, "a .haro file declares at most one CONSTITUTION")
 				ok
 				aCWeaves = []
@@ -1281,7 +1281,7 @@ func StzuDeclare(cSrc)
 					aCtx = []
 					if HasClause(aClauses, "CONTEXTS")
 						aCtx = ClauseValue(aClauses, "CONTEXTS")
-						if isNull(aVars) StzuFail(nLine, "CONTEXTS requires a VARIABLES clause: a seat is a choice among the variables") ok
+						if isnull(aVars) StzuFail(nLine, "CONTEXTS requires a VARIABLES clause: a seat is a choice among the variables") ok
 						for i = 1 to len(aCtx)
 							for j = 1 to i - 1
 								if aCtx[j][1] = aCtx[i][1]
@@ -1417,7 +1417,7 @@ func StzuDeclare(cSrc)
 					aSymbols + [cName, cSKind, cRef, cMsg, nLine, StzuCodeOf(aClauses, nLine, cName), StzuCitesOf(aClauses, nLine, cName)]
 				but cKind = "FORMS"
 					# v0.12: a vocabulary's function-name grammar as data (principle 7)
-					if not isNull(aFormset)
+					if not isnull(aFormset)
 						StzuFail(nLine, "a .haro file declares at most one FORMS: a vocabulary spells its families one way (" + aFormset[1] + " is it)")
 					ok
 					cFluent = ""
@@ -1460,7 +1460,7 @@ func StzuDeclare(cSrc)
 					aFormset = [cName, cFluent, cPassive, cStmt, aParams, aFamily, cRationale, nLine]
 				but cKind = "NARRATE"
 					# v0.13: how a run of the language is narrated back -- a voice, never stored, never parsed back
-					if not isNull(aNarrate)
+					if not isnull(aNarrate)
 						StzuFail(nLine, "a .haro file declares at most one NARRATE: a language has one voice (" + aNarrate[1] + " is it)")
 					ok
 					cOpens = ""
@@ -1493,7 +1493,7 @@ func StzuDeclare(cSrc)
 					next
 					aNarrate = [cName, cOpens, cEnds, cRefuses, aSays, cRationale, nLine, aTells]
 				but cKind = "RUN"
-					if not isNull(aRun)
+					if not isnull(aRun)
 						StzuFail(nLine, "a .haro file declares at most one RUN: a language runs one way (" + aRun[1] + " is it)")
 					ok
 					aRoles = []
@@ -1504,7 +1504,7 @@ func StzuDeclare(cSrc)
 					aRun = [cName, aRoles, cRationale, nLine]
 				but cKind = "UNDERSTAND"
 					# v0.17: how a human language reaches closed questions -- the kinds that play the eight roles of N
-					if not isNull(aUnderstand)
+					if not isnull(aUnderstand)
 						StzuFail(nLine, "a .haro file declares at most one UNDERSTAND: a language is understood one way (" + aUnderstand[1] + " is it)")
 					ok
 					aRoles = []
@@ -1514,7 +1514,7 @@ func StzuDeclare(cSrc)
 					next
 					aUnderstand = [cName, aRoles, cRationale, nLine]
 				but cKind = "ASK"
-					if not isNull(aAsk)
+					if not isnull(aAsk)
 						StzuFail(nLine, "a .haro file declares at most one ASK: a language asks in one grammar (" + aAsk[1] + " is it)")
 					ok
 					cWhere = ""
@@ -1655,7 +1655,7 @@ func StzuDeclare(cSrc)
 		done
 	next
 	# v0.13: a NARRATE voices declared kinds, and fills only placeholders it can fill
-	if not isNull(aNarrate)
+	if not isnull(aNarrate)
 		try
 			aSays = aNarrate[5]
 			for i = 1 to len(aSays)
@@ -1663,7 +1663,7 @@ func StzuDeclare(cSrc)
 				for j = 1 to len(aDeclarations)
 					if aDeclarations[j][1] = aSays[i][1] aNK = aDeclarations[j] ok
 				next
-				if isNull(aNK) StzuFail(aSays[i][3], "SAYS: no declaration '" + aSays[i][1] + "' in " + cLName) ok
+				if isnull(aNK) StzuFail(aSays[i][3], "SAYS: no declaration '" + aSays[i][1] + "' in " + cLName) ok
 				aOk = ["name", "verb", "rationale", "line"]
 				for j = 1 to len(aNK[3])
 					aOk + aNK[3][j][1]
@@ -1684,7 +1684,7 @@ func StzuDeclare(cSrc)
 		done
 	ok
 	# v0.12: a FORMS' FAMILY names a declared kind, a scalar base seat and a list forms seat
-	if not isNull(aFormset)
+	if not isnull(aFormset)
 		try
 			if len(aFormset[6]) = 3
 				aFam = aFormset[6]
@@ -1692,12 +1692,12 @@ func StzuDeclare(cSrc)
 				for i = 1 to len(aDeclarations)
 					if aDeclarations[i][1] = aFam[1] aFK = aDeclarations[i] ok
 				next
-				if isNull(aFK) StzuFail(aFormset[8], "FAMILY: no declaration '" + aFam[1] + "'") ok
+				if isnull(aFK) StzuFail(aFormset[8], "FAMILY: no declaration '" + aFam[1] + "'") ok
 				aBS = StzuSeatNamed(aFK[3], aFam[2])
-				if isNull(aBS) StzuFail(aFormset[8], "FAMILY: no seat '" + aFam[2] + "' on " + aFam[1]) ok
+				if isnull(aBS) StzuFail(aFormset[8], "FAMILY: no seat '" + aFam[2] + "' on " + aFam[1]) ok
 				if aBS[3] StzuFail(aFormset[8], "FAMILY: the base seat '" + aFam[2] + "' of " + aFam[1] + " is one verb, not a list") ok
 				aFS = StzuSeatNamed(aFK[3], aFam[3])
-				if isNull(aFS) StzuFail(aFormset[8], "FAMILY: no seat '" + aFam[3] + "' on " + aFam[1]) ok
+				if isnull(aFS) StzuFail(aFormset[8], "FAMILY: no seat '" + aFam[3] + "' on " + aFam[1]) ok
 				if not aFS[3] StzuFail(aFormset[8], "FAMILY: the forms seat '" + aFam[3] + "' of " + aFam[1] + " is a list of the forms offered") ok
 			ok
 		catch
@@ -1709,7 +1709,7 @@ func StzuDeclare(cSrc)
 		try
 			aCd = aDeclarations[i][8]
 			for j = 1 to len(aCd)
-				if isNull(StzuSeatNamed(aDeclarations[i][3], aCd[j][1]))
+				if isnull(StzuSeatNamed(aDeclarations[i][3], aCd[j][1]))
 					StzuFail(aCd[j][3], "CODES: no seat '" + aCd[j][1] + "' on " + aDeclarations[i][1])
 				ok
 			next
@@ -1727,7 +1727,7 @@ func StzuDeclare(cSrc)
 			StzuWantSeverities(aSv, "a seat")
 			for j = 1 to len(aSv)
 				aSvSeat = StzuSeatNamed(aDeclarations[i][3], aSv[j][1])
-				if isNull(aSvSeat) StzuFail(aSv[j][3], "SEVERITIES: no seat '" + aSv[j][1] + "' on " + aDeclarations[i][1]) ok
+				if isnull(aSvSeat) StzuFail(aSv[j][3], "SEVERITIES: no seat '" + aSv[j][1] + "' on " + aDeclarations[i][1]) ok
 				if not StzuIsReferenceSeat(aSvSeat, aDeclared, aForms, aUnions)
 					StzuFail(aSv[j][3], "SEVERITIES: '" + aSv[j][1] + "' of " + aDeclarations[i][1] + " is not a reference: only a reference that resolves to nothing may be a warning")
 				ok
@@ -1741,7 +1741,7 @@ func StzuDeclare(cSrc)
 	# (silence refuses); a NEEDS word no kind can open is refused (least authority) -- a word of an OPENS seat's MENU counts as one a kind
 	# can open. A language with neither clause is exactly what it was.
 	try
-		if not isNull(aLNeeds)
+		if not isnull(aLNeeds)
 			for i = 1 to len(aLNeeds)
 				if not InStrList(aLNeeds[i], StzuCapabilities())
 					StzuFail(nLNeedsLine, "NEEDS: '" + aLNeeds[i] + "' is not a capability; the nine are " + StzuCapabilityList())
@@ -1766,9 +1766,9 @@ func StzuDeclare(cSrc)
 				aCanOpen = [cOp]
 			else
 				aOs = StzuSeatNamed(aDeclarations[i][3], cOp)
-				if isNull(aOs) StzuFail(aDeclarations[i][5], "OPENS: '" + cOp + "' is neither a capability nor a seat of " + cKn) ok
+				if isnull(aOs) StzuFail(aDeclarations[i][5], "OPENS: '" + cOp + "' is neither a capability nor a seat of " + cKn) ok
 				aCanOpen = StzuMenuWords(aMenus, aOs[2])
-				if isNull(aCanOpen) StzuFail(aDeclarations[i][5], "OPENS: the seat '" + cOp + "' of " + cKn + " is not a MENU of capabilities") ok
+				if isnull(aCanOpen) StzuFail(aDeclarations[i][5], "OPENS: the seat '" + cOp + "' of " + cKn + " is not a MENU of capabilities") ok
 				for j = 1 to len(aCanOpen)
 					if not InStrList(aCanOpen[j], StzuCapabilities())
 						StzuFail(aDeclarations[i][5], "OPENS: the seat '" + cOp + "' of " + cKn + " is a MENU holding '" + aCanOpen[j] + "', which is not a capability")
@@ -1776,7 +1776,7 @@ func StzuDeclare(cSrc)
 				next
 				bBySeat = 1
 			ok
-			if isNull(aLNeeds)
+			if isnull(aLNeeds)
 				StzuFail(aDeclarations[i][5], cKn + " OPENS " + cOp + ", and the LANGUAGE " + cLName + " NEEDS nothing: a door a kind opens is NEEDED first")
 			ok
 			if not bBySeat and not InStrList(cOp, aLNeeds)
@@ -1789,7 +1789,7 @@ func StzuDeclare(cSrc)
 		done
 	next
 	try
-		if not isNull(aLNeeds)
+		if not isnull(aLNeeds)
 			for i = 1 to len(aLNeeds)
 				if not InStrList(aLNeeds[i], aOpened) StzuFail(nLNeedsLine, "NEEDS " + aLNeeds[i] + ", and no kind OPENS it") ok
 			next
@@ -1810,7 +1810,7 @@ func StzuDeclare(cSrc)
 				for k = 1 to len(aSeats)
 					if aSeats[k][1] = aMsgs[j][1] aFound = aSeats[k] ok
 				next
-				if isNull(aFound)
+				if isnull(aFound)
 					StzuFail(aMsgs[j][3], "MESSAGES: no seat '" + aMsgs[j][1] + "' on " + aDeclarations[i][1])
 				ok
 				bRef = 0
@@ -1894,10 +1894,10 @@ func StzuDeclare(cSrc)
 				if aOpd[j] = "var" bVar = 1 ok
 				if aOpd[j] = "agg" bAgg = 1 ok
 			next
-			if bVar and isNull(aE[5]) StzuFail(aE[7], "operand 'var' requires a VARIABLES clause") ok
-			if not isNull(aE[5]) and not bVar StzuFail(aE[7], "a VARIABLES clause requires operand 'var'") ok
-			if bAgg and isNull(aE[4]) StzuFail(aE[7], "operand 'agg' requires an AGGREGATES clause") ok
-			if not isNull(aE[4]) and not bAgg StzuFail(aE[7], "an AGGREGATES clause requires operand 'agg'") ok
+			if bVar and isnull(aE[5]) StzuFail(aE[7], "operand 'var' requires a VARIABLES clause") ok
+			if not isnull(aE[5]) and not bVar StzuFail(aE[7], "a VARIABLES clause requires operand 'var'") ok
+			if bAgg and isnull(aE[4]) StzuFail(aE[7], "operand 'agg' requires an AGGREGATES clause") ok
+			if not isnull(aE[4]) and not bAgg StzuFail(aE[7], "an AGGREGATES clause requires operand 'agg'") ok
 		catch
 			StzuNote(cCatchError)
 		done
@@ -1905,7 +1905,7 @@ func StzuDeclare(cSrc)
 
 	# the WORLD: ONE and FIRST name declarations
 	aOneDecls = []
-	if not isNull(aWorld)
+	if not isnull(aWorld)
 		try
 			aOne = aWorld[1]
 			for i = 1 to len(aOne)
@@ -2015,7 +2015,7 @@ func StzuDeclare(cSrc)
 			cK = DeclaredKind(aDeclared, aP[2])
 			if cK = "" StzuFail(aP[7], "OVER: '" + aP[2] + "' resolves to nothing in this declaration") ok
 			if cK != "DECLARATION" StzuFail(aP[7], "OVER must name a DECLARATION; '" + aP[2] + "' is a " + cK) ok
-			if isNull(StzuSeatNamed(StzuSeatsOf(aDeclarations, aP[2]), aP[3]))
+			if isnull(StzuSeatNamed(StzuSeatsOf(aDeclarations, aP[2]), aP[3]))
 				StzuFail(aP[7], "OVER names a seat of " + aP[2] + "; '" + aP[3] + "' is not one")
 			ok
 			aPS = aP[5]
@@ -2024,7 +2024,7 @@ func StzuDeclare(cSrc)
 				if cK = "" StzuFail(aPS[j][4], "SETS: '" + aPS[j][1] + "' resolves to nothing in this declaration") ok
 				if cK != "DECLARATION" StzuFail(aPS[j][4], "SETS must name a DECLARATION; '" + aPS[j][1] + "' is a " + cK) ok
 				aSetSeat = StzuSeatNamed(StzuSeatsOf(aDeclarations, aPS[j][1]), aPS[j][2])
-				if isNull(aSetSeat)
+				if isnull(aSetSeat)
 					StzuFail(aPS[j][4], "SETS names a seat of " + aPS[j][1] + "; '" + aPS[j][2] + "' is not one")
 				ok
 				if StzuIsPairListSeat(aSetSeat, aDeclared, aForms)
@@ -2097,11 +2097,11 @@ func StzuDeclare(cSrc)
 			if cK != "DECLARATION" StzuFail(nL, "STEPS must name a DECLARATION; '" + aW[3] + "' is a " + cK) ok
 			aStepSeats = StzuSeatsOf(aDeclarations, aW[3])
 			aT = StzuSeatNamed(aStepSeats, aW[4])
-			if isNull(aT) or aT[2] != aW[2] or aT[3]
+			if isnull(aT) or aT[2] != aW[2] or aT[3]
 				StzuFail(nL, "THROUGH names a seat of " + aW[3] + " that refers to " + aW[2] + "; '" + aW[4] + "' is not one")
 			ok
 			aO = StzuSeatNamed(aStepSeats, aW[5])
-			if isNull(aO) or aO[3] or not (aO[2] = "number" or DeclaredKind(aDeclared, aO[2]) = "RANGE")
+			if isnull(aO) or aO[3] or not (aO[2] = "number" or DeclaredKind(aDeclared, aO[2]) = "RANGE")
 				StzuFail(nL, "ORDER names a number seat of " + aW[3] + "; '" + aW[5] + "' is not one")
 			ok
 			aG = aW[6]
@@ -2110,7 +2110,7 @@ func StzuDeclare(cSrc)
 				nDot = substr(cP, ".")
 				if nDot = 0
 					aS = StzuSeatNamed(aStepSeats, cP)
-					if isNull(aS) StzuFail(aG[j][2], "GUARDS: no seat '" + cP + "' on " + aW[3]) ok
+					if isnull(aS) StzuFail(aG[j][2], "GUARDS: no seat '" + cP + "' on " + aW[3]) ok
 					if aS[3] or DeclaredKind(aDeclared, aS[2]) != "EXPRESSION"
 						StzuFail(aG[j][2], "GUARDS: '" + cP + "' is not an expression seat of " + aW[3])
 					ok
@@ -2118,25 +2118,25 @@ func StzuDeclare(cSrc)
 					cHead = left(cP, nDot - 1)
 					cTail = substr(cP, nDot + 1)
 					aS = StzuSeatNamed(aStepSeats, cHead)
-					if isNull(aS) StzuFail(aG[j][2], "GUARDS: no seat '" + cHead + "' on " + aW[3]) ok
+					if isnull(aS) StzuFail(aG[j][2], "GUARDS: no seat '" + cHead + "' on " + aW[3]) ok
 					if aS[3] or DeclaredKind(aDeclared, aS[2]) != "DECLARATION"
 						StzuFail(aG[j][2], "GUARDS: '" + cHead + "' is not a reference seat of " + aW[3] + ", so '" + cP + "' reads through nothing")
 					ok
 					aS2 = StzuSeatNamed(StzuSeatsOf(aDeclarations, aS[2]), cTail)
-					if isNull(aS2) or aS2[3] or DeclaredKind(aDeclared, aS2[2]) != "EXPRESSION"
+					if isnull(aS2) or aS2[3] or DeclaredKind(aDeclared, aS2[2]) != "EXPRESSION"
 						StzuFail(aG[j][2], "GUARDS: '" + cP + "' is not an expression seat (no expression seat '" + cTail + "' on " + aS[2] + ")")
 					ok
 				ok
 			next
 			if aW[7] != ""
 				aS = StzuSeatNamed(aStepSeats, aW[7])
-				if isNull(aS) or aS[3] or not (aS[2] = "name" or aS[2] = "text")
+				if isnull(aS) or aS[3] or not (aS[2] = "name" or aS[2] = "text")
 					StzuFail(nL, "COMPUTE names a name or text seat of " + aW[3] + "; '" + aW[7] + "' is not one")
 				ok
 			ok
 			if aW[8] != ""
 				aS = StzuSeatNamed(aStepSeats, aW[8])
-				if isNull(aS) or aS[3] or DeclaredKind(aDeclared, aS[2]) != "EXPRESSION"
+				if isnull(aS) or aS[3] or DeclaredKind(aDeclared, aS[2]) != "EXPRESSION"
 					StzuFail(nL, "FORMULA names an expression seat of " + aW[3] + "; '" + aW[8] + "' is not one")
 				ok
 			ok
@@ -2145,7 +2145,7 @@ func StzuDeclare(cSrc)
 			ok
 			if aW[9] != ""
 				aS = StzuSeatNamed(aStepSeats, aW[9])
-				if isNull(aS) or aS[3] or not (aS[2] = "name" or aS[2] = "text" or DeclaredKind(aDeclared, aS[2]) = "MENU")
+				if isnull(aS) or aS[3] or not (aS[2] = "name" or aS[2] = "text" or DeclaredKind(aDeclared, aS[2]) = "MENU")
 					StzuFail(nL, "FAIL names a name, text or MENU seat of " + aW[3] + "; '" + aW[9] + "' is not one")
 				ok
 			ok
@@ -2156,7 +2156,7 @@ func StzuDeclare(cSrc)
 
 	# v0.7: the ASK names the kinds a question may ask, the expression its
 	# condition is written in, and the optional clauses it admits
-	if not isNull(aAsk)
+	if not isnull(aAsk)
 		try
 			nL = aAsk[6]
 			aFrom = aAsk[2]
@@ -2194,13 +2194,13 @@ func StzuDeclare(cSrc)
 				cFS2 = substr(aAsk[7], nFD + 1)
 				for i = 1 to len(aFrom)
 					aFSeat = StzuSeatNamed(StzuSeatsOf(aDeclarations, aFrom[i]), cFS1)
-					if isNull(aFSeat) StzuFail(nL, "FIELDS: '" + cFS1 + "' is not a seat of " + aFrom[i]) ok
+					if isnull(aFSeat) StzuFail(nL, "FIELDS: '" + cFS1 + "' is not a seat of " + aFrom[i]) ok
 					if aFSeat[3] StzuFail(nL, "FIELDS: '" + cFS1 + "' of " + aFrom[i] + " must be one reference to a declaration") ok
 					if DeclaredKind(aDeclared, aFSeat[2]) != "DECLARATION"
 						StzuFail(nL, "FIELDS: '" + cFS1 + "' of " + aFrom[i] + " must refer to a declaration, not to '" + aFSeat[2] + "'")
 					ok
 					aFSeat2 = StzuSeatNamed(StzuSeatsOf(aDeclarations, aFSeat[2]), cFS2)
-					if isNull(aFSeat2) StzuFail(nL, "FIELDS: '" + cFS2 + "' is not a seat of " + aFSeat[2]) ok
+					if isnull(aFSeat2) StzuFail(nL, "FIELDS: '" + cFS2 + "' is not a seat of " + aFSeat[2]) ok
 					if not StzuIsPairListSeat(aFSeat2, aDeclared, aForms)
 						StzuFail(nL, "FIELDS: '" + cFS2 + "' of " + aFSeat[2] + " is not a list of name: type pairs")
 					ok
@@ -2213,7 +2213,7 @@ func StzuDeclare(cSrc)
 
 	# v0.9: the RUN names the kind that runs and the kinds that play the five
 	# constructs, each with its seats by role
-	if not isNull(aRun)
+	if not isnull(aRun)
 		try
 			nL = aRun[4]
 			aRoles = aRun[2]
@@ -2239,7 +2239,7 @@ func StzuDeclare(cSrc)
 					cRoleSeat = aWant[j]
 					cSeat = aNames[j + 1]
 					aS = StzuSeatNamed(aKS, cSeat)
-					if isNull(aS) StzuFail(nL, cRole + ": no seat '" + cSeat + "' on " + aNames[1]) ok
+					if isnull(aS) StzuFail(nL, cRole + ": no seat '" + cSeat + "' on " + aNames[1]) ok
 					cSK = DeclaredKind(aDeclared, aS[2])
 					if cRoleSeat = "value" or cRoleSeat = "when" or cRoleSeat = "by"
 						if aS[3] or cSK != "EXPRESSION"
@@ -2264,7 +2264,7 @@ func StzuDeclare(cSrc)
 
 	# v0.17: the UNDERSTAND names, for each of the eight roles, the one declaration of this language that plays it,
 	# and that declaration has the seats the emitted court reads (no declaration plays two roles)
-	if not isNull(aUnderstand)
+	if not isnull(aUnderstand)
 		try
 			nL = aUnderstand[4]
 			aRoles = aUnderstand[2]
@@ -2303,7 +2303,7 @@ func StzuDeclare(cSrc)
 	ok
 
 	# the REFINE: every point is a seat of a declaration; kinds and floors are closed
-	if not isNull(aRefine)
+	if not isnull(aRefine)
 		try
 			aPoints = aRefine[1]
 			for i = 1 to len(aPoints)
@@ -2346,7 +2346,7 @@ func StzuDeclare(cSrc)
 	# CONSTITUTION names the ZONE kind, its SOVEREIGN seat (a MENU word or a text, never optional) and its
 	# MOVEMENT seat (a declared kind, never optional). WEAVES and REGIME are carried, their words closed,
 	# and refused by name (ZC4).
-	if not isNull(aConstitution)
+	if not isnull(aConstitution)
 		try
 			nCL = aConstitution[5]
 			aArts = aConstitution[2]
@@ -2411,18 +2411,18 @@ func StzuDeclare(cSrc)
 					aMS = StzuSeatRec(aDeclarations, cPDecl, cPSeat)
 					aMF = null
 					if aMS[3] aMF = StzuFormRec(aForms, aMS[2]) ok
-					if isNull(aMF) or not StzuIsPairForm(aMF[2], aDeclared)
+					if isnull(aMF) or not StzuIsPairForm(aMF[2], aDeclared)
 						StzuFail(aPers[i][2], "PERSONAL names '" + cPP + "', and '" + cPDecl + "." + cPSeat + "' is not a list of a pair form -- a mark lives on a form's seat")
 					ok
 					aTS = null
 					for j = 1 to len(aMF[2])
 						if aMF[2][j][1] = cPSub aTS = aMF[2][j] ok
 					next
-					if isNull(aTS)
+					if isnull(aTS)
 						StzuFail(aPers[i][2], "PERSONAL names '" + cPP + "', and the form '" + aMF[1] + "' of '" + cPDecl + "." + cPSeat + "' has no seat '" + cPSub + "'")
 					ok
 					aTM = StzuMenuRec(aMenus, aTS[2])
-					if isNull(aTM) or not InStrList("personal", aTM[2])
+					if isnull(aTM) or not InStrList("personal", aTM[2])
 						StzuFail(aPers[i][2], "PERSONAL names '" + cPP + "' as a mark, and the MENU '" + aTS[2] + "' has no word 'personal' -- a mark seat is a MENU that can say personal")
 					ok
 					aMarks + [cPP, aPers[i][2]]
@@ -2477,7 +2477,7 @@ func StzuDeclare(cSrc)
 			for i = 1 to len(aArts)
 				cArt = aArts[i]
 				if cArt = "explainability"
-					if isNull(aNarrate)
+					if isnull(aNarrate)
 						StzuFail(nCL, "Art. 1 explainability: '" + cLName + "' declares no NARRATE -- a world under explainability tells every run and every refusal in its own voice")
 					ok
 					for j = 1 to len(aRefusals)
@@ -2497,7 +2497,7 @@ func StzuDeclare(cSrc)
 						ok
 					next
 				but cArt = "reversibility"
-					if isNull(aRefine)
+					if isnull(aRefine)
 						StzuFail(nCL, "Art. 2 reversibility: '" + cLName + "' declares no REFINE -- a world under reversibility changes only by refinement, whose inverse is computed before it lands and whose revert is an event (charter 6.5)")
 					ok
 				but cArt = "visible_state"
@@ -2505,15 +2505,15 @@ func StzuDeclare(cSrc)
 					for j = 1 to len(aDeclarations)
 						cVK = aDeclarations[j][1]
 						bReached = 0
-						if not isNull(aNarrate)
+						if not isnull(aNarrate)
 							for k = 1 to len(aNarrate[5])
 								if aNarrate[5][k][1] = cVK bReached = 1 ok
 							next
 						ok
-						if not isNull(aAsk)
+						if not isnull(aAsk)
 							if InStrList(cVK, aAsk[2]) bReached = 1 ok
 						ok
-						if not isNull(aWorld)
+						if not isnull(aWorld)
 							if len(aWorld) >= 5
 								for k = 1 to len(aWorld[5])
 									if aWorld[5][k][1] = cVK bReached = 1 ok
@@ -2525,7 +2525,7 @@ func StzuDeclare(cSrc)
 						ok
 					next
 				but cArt = "predictable_authority"
-					if not isNull(aRefine)
+					if not isnull(aRefine)
 						aPts = aRefine[1]
 						aFls = aRefine[2]
 						for j = 1 to len(aPts)
@@ -2554,7 +2554,7 @@ func StzuDeclare(cSrc)
 						StzuFail(nCL, "Art. 5 organizational_sovereignty: ZONE '" + cZ + "' has no SOVEREIGN seat named -- a zone is held by someone, never by silence")
 					ok
 					aSS = StzuSeatRec(aDeclarations, cZ, cSv)
-					if isNull(aSS)
+					if isnull(aSS)
 						StzuFail(nCL, "Art. 5 organizational_sovereignty: SOVEREIGN '" + cSv + "' is not a seat of '" + cZ + "'")
 					ok
 					if aSS[4]
@@ -2567,7 +2567,7 @@ func StzuDeclare(cSrc)
 						StzuFail(nCL, "Art. 5 organizational_sovereignty: ZONE '" + cZ + "' has no MOVEMENT seat named -- a record enters a zone through a declared flow, or not at all")
 					ok
 					aMS = StzuSeatRec(aDeclarations, cZ, cMv)
-					if isNull(aMS)
+					if isnull(aMS)
 						StzuFail(nCL, "Art. 5 organizational_sovereignty: MOVEMENT '" + cMv + "' is not a seat of '" + cZ + "'")
 					ok
 					if aMS[4]
@@ -2577,7 +2577,7 @@ func StzuDeclare(cSrc)
 						StzuFail(aMS[5], "Art. 5 organizational_sovereignty: MOVEMENT seat '" + cMv + "' of '" + cZ + "' is typed '" + aMS[2] + "' -- it names a declared kind, the flow a record walks in")
 					ok
 				but cArt = "trust_hierarchy"
-					if not isNull(aRefine)
+					if not isnull(aRefine)
 						aPts = aRefine[1]
 						aFls = aRefine[2]
 						for j = 1 to len(aPts)
@@ -2605,7 +2605,7 @@ func StzuDeclare(cSrc)
 				# v0.27: a mark path (decl.seat.mark) is judged below, on the paths records take; a published schema moves no datum
 				if substr(cPSeat, ".") > 0 loop ok
 				if cSevPrivacy != ""
-					if not isNull(aNarrate)
+					if not isnull(aNarrate)
 						for k = 1 to len(aNarrate[5])
 							if aNarrate[5][k][1] = cPDecl
 								if substr(aNarrate[5][k][2], "{" + cPSeat + "}") > 0
@@ -2614,14 +2614,14 @@ func StzuDeclare(cSrc)
 							ok
 						next
 					ok
-					if not isNull(aAsk)
+					if not isnull(aAsk)
 						if InStrList(cPDecl, aAsk[2])
 							StzuWeave(cSevPrivacy, aAsk[6], "W4.2 privacy: kind '" + cPDecl + "' holds the personal seat '" + cPSeat + "' and is asked (ASK FROM) -- usage over personal data is analytics, which needs consent" + StzuRegimeTail(cRg, "W4.2"))
 						ok
 					ok
 				ok
 				if cSevSovereignty != ""
-					if not isNull(aWorld)
+					if not isnull(aWorld)
 						if len(aWorld) >= 5
 							for k = 1 to len(aWorld[5])
 								if aWorld[5][k][1] = cPDecl
@@ -2636,10 +2636,10 @@ func StzuDeclare(cSrc)
 			# consent or anonymisation, the voice telling rows (W4.4) needs redaction; the court applies what it can
 			if cSevPrivacy != ""
 				for i = 1 to len(aMarks)
-					if not isNull(aAsk) and cSafeAsk = ""
+					if not isnull(aAsk) and cSafeAsk = ""
 						StzuWeave(cSevPrivacy, aAsk[6], "W4.2 privacy: the fields marked by '" + aMarks[i][1] + "' may be asked (ASK " + aAsk[1] + ") and no safeguard is declared for the ask path -- usage over personal data is analytics, which needs consent or anonymisation" + StzuRegimeTail(cRg, "W4.2"))
 					ok
-					if not isNull(aNarrate) and cSafeVoice = ""
+					if not isnull(aNarrate) and cSafeVoice = ""
 						aTls = aNarrate[8]
 						for k = 1 to len(aTls)
 							if substr(aTls[k][2], "{rows}") > 0
@@ -2659,7 +2659,7 @@ func StzuDeclare(cSrc)
 				if cWN = "resilience"
 					# W1.5: a degradation preserves the invariants -- a CONSTRAINT held at warning that cites an article the world stands under
 					for j = 1 to len(aConstraints)
-						if aConstraints[j][9] = "warning" and isList(aConstraints[j][8])
+						if aConstraints[j][9] = "warning" and islist(aConstraints[j][8])
 							aCts = aConstraints[j][8]
 							for k = 1 to len(aCts)
 								nCA = StzuCitedArticle(aCts[k])
@@ -2674,7 +2674,7 @@ func StzuDeclare(cSrc)
 				ok
 				if cWN = "observability"
 					# W2.2 and W2.3: a model's proposal and a gate's denial are traced by the audit chain, which is Art. 3's
-					if not isNull(aRefine) and not InStrList("visible_state", aArts)
+					if not isnull(aRefine) and not InStrList("visible_state", aArts)
 						aFlO = aRefine[2]
 						for j = 1 to len(aFlO)
 							if aFlO[j][3] = "llm"
@@ -2686,14 +2686,14 @@ func StzuDeclare(cSrc)
 				ok
 				if cWN = "temporal_integrity"
 					# W5.2: the changes of points that have a history are versioned by the numbered chain, which is Art. 3's
-					if not isNull(aRefine) and not InStrList("visible_state", aArts)
+					if not isnull(aRefine) and not InStrList("visible_state", aArts)
 						StzuWeave(cWS, aRefine[3], "W5.2 temporal_integrity: '" + cLName + "' declares a REFINE, which changes points that have a history, and visible_state is not among ARTICLES: no numbered chain versions the changes" + StzuArtTail(3))
 					ok
 				ok
 				if cWN = "learnability"
 					# W7.4: a denial is explained -- told by a voice and met by a stable identifier, Art. 1's two conditions
 					nDen = len(aRefusals) + len(aConstraints)
-					if nDen > 0 and isNull(aNarrate)
+					if nDen > 0 and isnull(aNarrate)
 						nDL = aConstraints[1][6]
 						if len(aRefusals) > 0
 							nDL = aRefusals[1][4]
@@ -2713,14 +2713,14 @@ func StzuDeclare(cSrc)
 				ok
 				if cWN = "structural_integrity"
 					# W8.5: synthesis never overrides what the court proved -- a policy point a model may propose, Art. 4's condition
-					if not isNull(aRefine)
-						aPtS = aRefine[1]
-						aFlS = aRefine[2]
-						for j = 1 to len(aPtS)
-							if aPtS[j][3] = "policy"
-								for k = 1 to len(aFlS)
-									if aFlS[k][1] = aPtS[j][1] and aFlS[k][2] = aPtS[j][2] and aFlS[k][3] = "llm"
-										StzuWeave(cWS, aFlS[k][4], "W8.5 structural_integrity: policy point '" + aPtS[j][1] + "." + aPtS[j][2] + "' has FLOOR llm -- a model-composed proposal could replace a rule the court proved" + StzuArtTail(4))
+					if not isnull(aRefine)
+						aPts = aRefine[1]
+						aFls = aRefine[2]
+						for j = 1 to len(aPts)
+							if aPts[j][3] = "policy"
+								for k = 1 to len(aFls)
+									if aFls[k][1] = aPts[j][1] and aFls[k][2] = aPts[j][2] and aFls[k][3] = "llm"
+										StzuWeave(cWS, aFls[k][4], "W8.5 structural_integrity: policy point '" + aPts[j][1] + "." + aPts[j][2] + "' has FLOOR llm -- a model-composed proposal could replace a rule the court proved" + StzuArtTail(4))
 									ok
 								next
 							ok
@@ -2982,7 +2982,7 @@ func StzuResolveSeats(aSeats, aDeclared)
 				for k = 1 to len(aUL)
 					if aUL[k][1] = cOf aUAlts = aUL[k][2] ok
 				next
-				if not isNull(aUAlts)
+				if not isnull(aUAlts)
 					for k = 1 to len(aUAlts)
 						if DeclaredKind(aDeclared, aUAlts[k][1]) != "DECLARATION"
 							StzuFail(aS[5], "a list seat's element UNION is a UNION of DECLARATIONs; '" + cOf + "' holds '" + aUAlts[k][1] + "'")
@@ -3028,7 +3028,7 @@ func StzuPrintLanguage(aLang)
 	? "constraints " + len(LangGet(aLang, "constraints"))
 	# v0.32: printed only where there is one, so a language without a PATTERN prints the bytes it printed
 	aPaL = LangGet(aLang, "patterns")
-	if not isNull(aPaL)
+	if not isnull(aPaL)
 		if len(aPaL) > 0 ? "patterns " + len(aPaL) ok
 	ok
 	nCtx = 0
@@ -3039,36 +3039,36 @@ func StzuPrintLanguage(aLang)
 	? "contexts " + nCtx
 	? "walks " + len(LangGet(aLang, "walks"))
 	nAsks = 0
-	if not isNull(LangGet(aLang, "ask")) nAsks = 1 ok
+	if not isnull(LangGet(aLang, "ask")) nAsks = 1 ok
 	? "asks " + nAsks
 	nRuns = 0
-	if not isNull(LangGet(aLang, "run")) nRuns = 1 ok
+	if not isnull(LangGet(aLang, "run")) nRuns = 1 ok
 	? "runs " + nRuns
 	aSy = LangGet(aLang, "symbols")
 	nSy = 0
-	if not isNull(aSy) nSy = len(aSy) ok
+	if not isnull(aSy) nSy = len(aSy) ok
 	? "symbols " + nSy
 	nFs = 0
-	if not isNull(LangGet(aLang, "formset")) nFs = 1 ok
+	if not isnull(LangGet(aLang, "formset")) nFs = 1 ok
 	? "formsets " + nFs
 	nNr = 0
-	if not isNull(LangGet(aLang, "narrate")) nNr = 1 ok
+	if not isnull(LangGet(aLang, "narrate")) nNr = 1 ok
 	? "narrates " + nNr
 	nUn = 0
-	if not isNull(LangGet(aLang, "understand")) nUn = 1 ok
+	if not isnull(LangGet(aLang, "understand")) nUn = 1 ok
 	? "understands " + nUn
 	nWorld = 0
-	if not isNull(LangGet(aLang, "world")) nWorld = 1 ok
+	if not isnull(LangGet(aLang, "world")) nWorld = 1 ok
 	? "world " + nWorld
 	nPoints = 0
 	aR = LangGet(aLang, "refine")
-	if not isNull(aR) nPoints = len(aR[1]) ok
+	if not isnull(aR) nPoints = len(aR[1]) ok
 	? "points " + nPoints
 	# v0.23: the constitution, and its articles in the declared order
 	aCs = LangGet(aLang, "constitution")
 	nCs = 0
 	cArts = ""
-	if not isNull(aCs)
+	if not isnull(aCs)
 		nCs = 1
 		for i = 1 to len(aCs[2])
 			if i > 1 cArts += "," ok
@@ -3079,7 +3079,7 @@ func StzuPrintLanguage(aLang)
 	? "articles " + cArts
 	# v0.24: the zone kind of organizational_sovereignty, empty under none
 	cZone = ""
-	if not isNull(aCs)
+	if not isnull(aCs)
 		if len(aCs) >= 7 cZone = aCs[7] ok
 	ok
 	? "zone " + cZone
@@ -3087,7 +3087,7 @@ func StzuPrintLanguage(aLang)
 	cRegime = ""
 	cWeaves = ""
 	cPersonal = ""
-	if not isNull(aCs)
+	if not isnull(aCs)
 		if len(aCs) >= 10
 			cRegime = aCs[4]
 			for i = 1 to len(aCs[3])
@@ -3102,7 +3102,7 @@ func StzuPrintLanguage(aLang)
 	ok
 	# v0.27: the safeguards, as path:word, comma-joined
 	cSafeg = ""
-	if not isNull(aCs)
+	if not isnull(aCs)
 		if len(aCs) >= 11
 			for i = 1 to len(aCs[11])
 				if i > 1 cSafeg += "," ok
@@ -3119,7 +3119,7 @@ func StzuPrintLanguage(aLang)
 	cHeld = ""
 	cCarried = ""
 	bSix = 0
-	if not isNull(aCs)
+	if not isnull(aCs)
 		for i = 1 to len(aCs[3])
 			cWn = aCs[3][i][1]
 			if cWn != "sovereignty" and cWn != "privacy"
@@ -3138,7 +3138,7 @@ func StzuPrintLanguage(aLang)
 	ok
 	# v0.40: the doors, printed only for a language that NEEDS -- so every other verdict keeps its bytes
 	aDoors = LangGet(aLang, "needs")
-	if not isNull(aDoors)
+	if not isnull(aDoors)
 		cNd = ""
 		for i = 1 to len(aDoors)
 			if i > 1 cNd += "," ok

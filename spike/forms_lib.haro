@@ -75,7 +75,7 @@ func FormsFamilies(aDecls)
 	if len(aF) < 6 return aOut ok
 	if len(aF[6]) < 3 return aOut ok
 	aKind = FormsKindByName(aF[6][1])
-	if isNull(aKind) return aOut ok
+	if isnull(aKind) return aOut ok
 	for i = 1 to len(aDecls)
 		aD = aDecls[i]
 		if aD[1] != aKind[1] loop ok

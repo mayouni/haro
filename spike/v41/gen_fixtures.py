@@ -46,7 +46,7 @@ def refused(cid, ext, line, why, text, at, called):
 # (id, line, why, ext, program, expected, exit, extra files)
 CASES = [
     # CHANGED AFTER THE COURT SPOKE, 2026-11-07, by the author's ruling (TYPES.md decision (e)): a keyword in another case is refused in a .haro
-    # file, as PRINCIPLES 2.2 reads it, not read as a name as v0.41 first built it. S01, S02 and S14 now expect v0.42's refusal; the misreading
+    # file, as PRINCIPLES 2.2 reads it, not read as a name as v0.41 first built it. S01 and S02 now expect v0.42's refusal; the misreading
     # the author ruled against stays closed either way. S02's `isNull` is `isnull`, a native spelled as the VM registers it (v0.42's N4); S09's
     # eval no longer names a variable `aNd`.
     ('S01', 'S1', 'in a .haro file a word in no single case is no name and no keyword: aNd refused', '.haro', [
@@ -90,9 +90,11 @@ CASES = [
     ('S13', 'S4', 'in a .haro file `:key = value` given to a call is refused too', '.haro', [
         '? "before"', 'f()', 'func f', T + 'g(:k = 1)', 'func g x', T + 'return x'],
      refused('S13', '.haro', 4, R_PAIR, ':k = 1', 4, 2), 1),
-    ('S14', 'S1', 'in a .haro file Haro\'s block words are lowercase too: a lone `Using` is refused', '.haro', [
-        '? "before"', 'f()', 'func f', T + 'Using = 5'],
-     refused('S14', '.haro', 4, KEYWORD('using'), 'Using', 4, 2), 1),
+    ('S14', 'S1', 'in a .haro file Haro\'s block words are lowercase too: a lone `Using` is a name', '.haro', [
+        'f()', 'func f', T + 'Using = 5', T + 'Using', T + '? Using'],
+     ['5']),
+    # S14 RESTORED the same day, before v0.42 was built: Haro's block words are contextual -- v0.38's B03 keeps `within`, `using`, `Within`
+    # and `Using` names where they open no block -- so they are no keywords in PRINCIPLES 2.2's sense, and ruling (e) does not reach them.
 ]
 
 FMT = [

@@ -122,12 +122,12 @@ func NarrateRun(cFile)
 		aD = aDecls[i]
 		aKind = CtKindByVerb(aD[1])
 		cT = ""
-		if not isNull(aKind) cT = NarSays(aKind[2]) ok
+		if not isnull(aKind) cT = NarSays(aKind[2]) ok
 		if cT = ""
 			? lower(aD[1]) + " " + aD[2] + ": " + aD[5]
 		else
 			aVals = [["name", aD[2]], ["verb", aD[1]], ["rationale", aD[5]], ["line", "" + aD[3]]]
-			if not isNull(aKind)
+			if not isnull(aKind)
 				for j = 1 to len(aKind[3])
 					aVals + [aKind[3][j][1], NarSeatText(aD, aKind[3][j][1])]
 				next
@@ -180,7 +180,7 @@ func NarTellStep(aDecls, aE)
 	aD = CtDeclNamed(aDecls, aE[2])
 	aKind = CtKindByVerb(aD[1])
 	cT = ""
-	if not isNull(aKind) cT = NarTellText(aKind[2]) ok
+	if not isnull(aKind) cT = NarTellText(aKind[2]) ok
 	if cT = ""
 		# a step the voice does not tell: its verb and name, and what it DID, read off the event's own fields
 		cL = lower(aD[1]) + " " + aD[2]
@@ -199,7 +199,7 @@ func NarTellStep(aDecls, aE)
 	# what the step DID is told before what was written: a seat that shares a name with one of the
 	# event's own placeholders ({value} of a compute is the number it made, not the expression
 	# that made it) is shadowed, so no key is filled twice
-	if not isNull(aKind)
+	if not isnull(aKind)
 		for j = 1 to len(aKind[3])
 			cSeatKey = aKind[3][j][1]
 			bTaken = 0
@@ -309,7 +309,7 @@ func NarTellAsk(cFile, cQ, cRows)
 		aVals = [["language", $cCourtLang], ["file", cBase]]
 		for j = 1 to len(aE[2])
 			aV2 = aE[2][j]
-			if isList(aV2[2])
+			if islist(aV2[2])
 				# v0.27: the rows a told answer carries leave redacted under the voice's safeguard
 				aRows2 = aV2[2]
 				if CtSafeguard("voice") = "redaction" aRows2 = CtRedactRows(aRows2, CtMarkedFields(aDecls)) ok

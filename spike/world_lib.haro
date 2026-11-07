@@ -44,7 +44,7 @@ func CtSymbolSites(aDecls)
 		aC = aD[4]
 		for j = 1 to len(aC)
 			aSeat = CtSeatByClause(aKind, aC[j][1])
-			if isNull(aSeat) loop ok
+			if isnull(aSeat) loop ok
 			if CtTypeKind(aSeat) != "symbol" loop ok
 			if aC[j][3][1] != "word" loop ok
 			aOut + [aD, aSeat, aC[j][3][2], aC[j][2]]
@@ -58,7 +58,7 @@ func CtResolveWorld(aDecls)
 	aSites = CtSymbolSites(aDecls)
 	for i = 1 to len(aSites)
 		aSy = CtSymbolByName(aSites[i][2][2])
-		if isNull(aSy) loop ok
+		if isnull(aSy) loop ok
 		if CtWorldHas($aCourtWorldFile, aSy[2], aSites[i][3]) loop ok
 		cMsg = aSy[4]
 		if cMsg = "" cMsg = "{VERB} {name} names '{value}', and the world declares no " + aSy[2] + ":{value}" ok
@@ -85,7 +85,7 @@ func CtSymbolCode(aSy)
 	if len(aSy) >= 6
 		if aSy[5] != "" cCode = aSy[5] ok
 		# v0.28: CITES none -- the row's "none" -- cites nothing
-		if isString(aSy[6])
+		if isstring(aSy[6])
 			aCites = []
 		but len(aSy[6]) > 0
 			aCites = aSy[6]
@@ -120,7 +120,7 @@ func CtWorldRows(aDecls, cFile)
 		aD = aDecls[i]
 		for j = 1 to len(aPublish)
 			aK = CtKindByDeclName(aPublish[j][1])
-			if isNull(aK) or aK[1] != aD[1] loop ok
+			if isnull(aK) or aK[1] != aD[1] loop ok
 			aRow = [ExObjMark(), ["kind", aPublish[j][2]], ["name", aD[2]], ["span", [ExObjMark(), ["file", cFile], ["line", aD[3]]]], ["rationale", aD[5]]]
 			aSymbols + aRow
 			if cFrom = "" cFrom = aPublish[j][2] + ":" + aD[2] ok
@@ -131,7 +131,7 @@ func CtWorldRows(aDecls, cFile)
 	aSites = CtSymbolSites(aDecls)
 	for i = 1 to len(aSites)
 		aSy = CtSymbolByName(aSites[i][2][2])
-		if isNull(aSy) loop ok
+		if isnull(aSy) loop ok
 		cRef = aSy[3]
 		if cRef = "" cRef = "cites" ok
 		aRow = [ExObjMark(), ["from", cFrom], ["to", aSy[2] + ":" + aSites[i][3]], ["kind", cRef], ["span", [ExObjMark(), ["file", cFile], ["line", aSites[i][4]]]]]

@@ -48,8 +48,10 @@ CASES = [
      ['handled: plugin failed']),
     ('G06', 'E2', 'in a text context the error is its message, byte for byte', [
         'try', T + 'raise("boom")', 'catch e', T + '? "caught: " + e', T + '? e + "!"', T + '? len(e)', T + '? type(e)', T + '? e = "boom"',
-        T + '? isString(e)', 'done'],
+        T + '? isstring(e)', 'done'],
      ['caught: boom', 'boom!', '4', 'STRING', '1', '1']),
+    # G06 CHANGED AFTER ITS COURT SPOKE, 2026-11-07: `isString` is `isstring`, a native spelled as the VM registers it (v0.42, the author's
+    # ruling on natives); the case asks the same question.
     ('G07', 'E3', 'Message() is the message, a plain string', [
         'try', T + 'raise("boom")', 'catch e', T + '? e.Message()', T + '? type(e.Message())', T + '? e.Message() = e', 'done'],
      ['boom', 'STRING', '1']),

@@ -62,7 +62,7 @@ func NdRows(aDecls, aDoors, cFile)
 	for i = 1 to len(aDecls)
 		aD = aDecls[i]
 		aO = NdOpens(aDoors, aD)
-		if isNull(aO) loop ok
+		if isnull(aO) loop ok
 		aRows + [ExObjMark(), ["verb", aD[1]], ["name", aD[2]], ["opens", aO], ["span", [ExObjMark(), ["file", cFile], ["line", aD[3]]]]]
 	next
 	return aRows
