@@ -1,0 +1,9 @@
+nums = [3, 1, 2]
+see total() + nl
+
+func total
+    n = 0
+    for x in $nums
+        n = n + x
+    next
+    return n

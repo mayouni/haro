@@ -259,6 +259,11 @@ and the name Haro's VM already gives it (`vec`, `vm/src/main.zig:587`). "List" g
 does not have (a list, to most of computing, is linked). *Owed*: whether Softanza names a class of its own "vector" (a numeric vector would make
 the word ambiguous at the `.ring` boundary) -- a sweep that waits until no other heavy job runs.
 
+**Amendment proposed, not ruled (HARO-TYPES-SYSTEM-01, 2026-11-07 21:39).** SG0 named eight seats the system grain lacks (X1 to X8:
+wrapping and unsigned integers, fixed-width traps, buffers, layouts, a reference to a slot, an allocator). Under the author's ruling of
+2026-11-06 (a) the grain IS this altitude, so they are D55's to hold: `SG1.md` section 9 proposes them as T4a-c, T6a-b, T8 and T9, with
+a sixteenth letter, `w` for a word. Nothing above changes until the author rules it.
+
 ## 10. The rungs, in order
 
 Each one fixtures first, both builds byte for byte, every protection planted, as every rung.
