@@ -1,6 +1,7 @@
 # TYPES.md -- Haro's types, redesigned
 
-**A proposal of the desk, 2026-11-07 12:54, for the author's ruling. Nothing in it is built, and nothing in it is ruled until he rules it.**
+**A proposal of the desk, 2026-11-07 12:54; its eight decisions RULED by the author the same day, as recommended, the letter for a list changed
+(section 9). Nothing in it is built.**
 
 The author's words in the session, 2026-11-07, quoted whole:
 
@@ -72,14 +73,14 @@ is refused by name with its `todo`, never 0.
 
 ### T2 -- A name's first letter is its type, and the compiler holds it to it
 
-In a `.haro` file a name is a lowercase type letter followed by a capital: `tTitle`, `lNames`, `bReady`. The letter is checked wherever the
+In a `.haro` file a name is a lowercase type letter followed by a capital: `tTitle`, `vNames`, `bReady`. The letter is checked wherever the
 value's type is known when compiling, and at the assignment where it is known only when running (one tag comparison; its cost measured before
 it is promised). `tTitle = 3` is `TYPE_LETTER` refused, naming the letter, the type and the value's type.
 
-The letter carries the OUTER type. The full type -- what a list holds, what a map maps, which language a sentence is in -- is written once, at
+The letter carries the OUTER type. The full type -- what a vector holds, what a map maps, which language a sentence is in -- is written once, at
 the boundaries where a reader needs it: a parameter, a return, an attribute.
 
-    def Total(lAmounts: list of decimal) -> decimal  is "the sum of the amounts"
+    def Total(vAmounts: vector of decimal) -> decimal  is "the sum of the amounts"
 
 A local takes its full type from its first value; the letter is its declaration.
 
@@ -91,8 +92,8 @@ turn part of type checking into grammar, which is where Haro wants its checks (p
 ### T3 -- Boolean is its own type, and only a boolean decides
 
 `true` and `false` are the two values of `boolean`, literals, not variables (principle 1.1). A comparison answers a boolean. `if`, `while`, a
-W condition, and `and`, `or`, `not` take booleans only: `if nCount`, `if tName`, `if lItems` are refused, with the comparison they meant as the
-`todo` (`if nCount > 0`, `if tName != ""`, `if len(lItems) > 0`). A boolean is printed `true` or `false`. It is not a number: `true + 1` is refused.
+W condition, and `and`, `or`, `not` take booleans only: `if nCount`, `if tName`, `if vItems` are refused, with the comparison they meant as the
+`todo` (`if nCount > 0`, `if tName != ""`, `if len(vItems) > 0`). A boolean is printed `true` or `false`. It is not a number: `true + 1` is refused.
 
 ### T4 -- Three kinds of number, each saying whether it is exact
 
@@ -117,11 +118,11 @@ an integer may join a decimal. `float` keeps its honest name: "real" is a promis
 A `maybe` never travels in a local, so it needs no letter: a name's letter always names what it holds. Only a return and an attribute may be
 declared `maybe`. Ring's NULL, which was the empty string, is gone with the global it lived in: `""` is a text of length 0 and nothing else.
 
-### T6 -- Structure: list, map, record, object, error
+### T6 -- Structure: vector, map, record, object, error
 
 | type | letter | what it is |
 |---|---|---|
-| `list of T` | `l` | ordered, of one element type |
+| `vector of T` | `v` | ordered, growable, of one element type: what Ring calls a list, and what the VM already names `vec` |
 | `map of K to V` | `m` | a key to a value, keys unique; what Softanza's pair lists were used for when the keys vary |
 | `record` | `r` | named fields fixed when it is made; what pair lists were used for when the keys are known (`[:name = "x", :age = 3]`) |
 | object | `o` | an instance of a class, its attributes declared with their types |
@@ -164,7 +165,7 @@ a handle of it. This is D51's computing altitude, the half that waits for W7's m
 | `t` | `text`: valid UTF-8 | `c`, C's char; Haro has no char type |
 | `x` | `bytes`: raw, from a file or a socket | `c`, the same string type as text |
 | `k` | `symbol`: an interned name, `:Name`, kept as written (v0.41) | none; symbols were strings |
-| `l` | `list of T` | `a`, C's array; a Haro list grows and is not an array |
+| `v` | `vector of T` | `a`, C's array; it grows, so it is no array -- and not `l`, which reads as `1` and `I` in the fonts people read Haro in |
 | `m` | `map of K to V` | `a`, a list of pairs |
 | `r` | `record` | `a`, a list of pairs |
 | `o` | an object | `o` |
@@ -172,7 +173,7 @@ a handle of it. This is D51's computing altitude, the half that waits for W7's m
 | `h` | `handle of door` | `p`, a pointer |
 | `s` | `sentence of L` | none |
 
-Fifteen letters, one per type, none shared. A `$` or `@` stands before the letter as today (`$lCourtAsk`, `@tTitle`); the letter rule does not
+Fifteen letters, one per type, none shared. A `$` or `@` stands before the letter as today (`$vCourtAsk`, `@tTitle`); the letter rule does not
 change what a name is (principle 1.2).
 
 ---
@@ -187,9 +188,9 @@ The meta-court's seat types become Haro types, so a declared language and a prog
 | `ident`, `name` | `symbol` |
 | `number` | `integer` or `decimal`, by the seat (decision (g)) |
 | `flag` | `boolean` |
-| `namelist` | `list of symbol` |
+| `namelist` | `vector of symbol` |
 | `pairlist` | `map of symbol to symbol` |
-| `citelist`, `messagelist`, `pathlist`, `pointlist`, `contextlist`, `seatlist` | `list of` the record each one is |
+| `citelist`, `messagelist`, `pathlist`, `pointlist`, `contextlist`, `seatlist` | `vector of` the record each one is |
 | `ref` (a seat typed by a declaration) | `sentence of` that kind |
 
 The forge then emits, for every declared language, its type -- the court as the type's checker, the GBNF as the type's grammar -- and a program
@@ -219,7 +220,7 @@ is built (section 8).
   the same bytes.
 - **Agents trained on Softanza** write `cName` and `aList`. The refusal teaches them in one turn (`TYPE_LETTER: c is no letter in a .haro file;
   text is t: tName`), and the grammar can make the old letters unemittable.
-- **What it does not decide**: whether text is indexed by byte, code point or grapheme; lists counted from 1 or 0; function values. Those are in
+- **What it does not decide**: whether text is indexed by byte, code point or grapheme; vectors counted from 1 or 0; function values. Those are in
   the survey of Ring's habits, ruled with their costs beside them.
 
 ---
@@ -229,25 +230,34 @@ is built (section 8).
 1. stzlib, one sweep: how often a Softanza result that a `.haro` program would bind is a 0/1 integer used as a boolean, a pair list with
    repeated keys, a string that is not UTF-8.
 2. The courts and stzMax with every pointed literal a decimal: the cost, two figures, minima over repetitions.
-3. Haro's own code: how many of its 437 `a` names are lists, maps and records, read from what the compiler binds to them.
+3. Haro's own code: how many of its 437 `a` names are vectors, maps and records, read from what the compiler binds to them.
 4. The cost of the runtime letter check per assignment, on the courts' hot loops.
 
 ---
 
-## 9. Decisions for the author
+## 9. Decisions -- RULED by the author, 2026-11-07
 
-| | decision | the desk's recommendation | class |
-|---|---|---|---|
-| (a) | letters on every name, the full type written at parameters, returns and attributes | yes | judgement |
-| (b) | the fifteen letters of section 4 | as written | naming |
-| (c) | a literal with a point is a `decimal`; a float is asked for | yes, after measurement 2 | judgement |
-| (d) | `none` belongs to no type; `maybe T` only on returns and attributes, resolved where it lands | yes | judgement |
-| (e) | a keyword in another case is refused (principle 2.2), not a name as v0.41 reads it | yes, in v0.42 | judgement |
-| (f) | `n` as "any number", or no letter that stands for more than one type | keep `n`, for parameters only | judgement |
-| (g) | a seat typed `number` becomes `integer` or `decimal` by what it counts | by the seat, the meta-court refusing `number` | judgement |
-| (h) | `unjudged` text: the three uses it may not have (run, sentence, door argument) | yes | judgement |
+His words: "Yes as recommended, but think of an other letter for list be "l" is visually simar to 1, unless you think this is not an issue for
+agnets to read and cause no amibguities in practice".
 
----
+| | decision | ruled |
+|---|---|---|
+| (a) | letters on every name, the full type written at parameters, returns and attributes | yes |
+| (b) | the fifteen letters of section 4 | yes, with `v` for the vector in place of `l` (below) |
+| (c) | a literal with a point is a `decimal`; a float is asked for | yes; measurement 2 before its rung |
+| (d) | `none` belongs to no type; `maybe T` only on returns and attributes, resolved where it lands | yes |
+| (e) | a keyword in another case is refused (principle 2.2), not a name as v0.41 reads it | yes, in v0.42 |
+| (f) | `n` as "any number", for parameters only | yes |
+| (g) | a seat typed `number` becomes `integer` or `decimal` by what it counts; the meta-court refuses `number` | yes |
+| (h) | `unjudged` text may not be run, become a sentence, or be a door's argument | yes |
+
+**The letter for a list, the desk's reading under the delegation.** For an agent `l` is no ambiguity: a model's tokens for `l` and `1` are
+unrelated, and a name cannot begin with a digit, so `lNames` has one reading for a parser and for a decoder. For a person it is one: in the
+proportional fonts of a chat, a document or this app, `l`, `I` and `1` are often the same shape, and a person is who Haro's surface is for
+(principle 8). So the letter is `v` and the type is named for what it is, `vector of T`: ordered and growable, Rust's `Vec` and C++'s `vector`,
+and the name Haro's VM already gives it (`vec`, `vm/src/main.zig:587`). "List" goes the way "array" went, as the word for a shape this value
+does not have (a list, to most of computing, is linked). *Owed*: whether Softanza names a class of its own "vector" (a numeric vector would make
+the word ambiguous at the `.ring` boundary) -- a sweep that waits until no other heavy job runs.
 
 ## 10. The rungs, in order
 
@@ -260,5 +270,5 @@ Each one fixtures first, both builds byte for byte, every protection planted, as
 3. **v0.44 -- the letters, checked** (T2), and Haro's own code re-lettered.
 4. **v0.45 -- numbers** (T4): decimal and float apart, `near`.
 5. **v0.46 -- absence** (T5): `maybe`, `else`.
-6. **v0.47 -- map and record** (T6), and v0.41's `todo` pointing at them.
+6. **v0.47 -- vector, map and record** (T6), and v0.41's `todo` pointing at them.
 7. **v0.48 -- judged types** (T7): sentences as values, `unjudged`, handles by door, and the seat types of section 5.
