@@ -119,7 +119,7 @@
    "line": "Y1",
    "why": "a global and an attribute are lettered too",
    "file": "cases/Y13.haro",
-   "stdout": "\nLine 5 Haro refused this statement (a name begins with its type's letter -- `count` has none; written `count`, line 5 of Y13.haro) and did not compile it -- running past it would give a wrong answer \nin file Y13.haro ",
+   "stdout": "\nLine 5 Haro refused this statement (a name begins with its type's letter -- `count` has none; written `count`, line 5 of Y13.haro) and did not compile it -- running past it would give a wrong answer \nIn method @@attrs() in file Y13.haro\n\nCalled from line 2 in file Y13.haro ",
    "exit": 1
   },
   {
@@ -129,6 +129,15 @@
    "why": "a for counter is checked as its letter says, and a lettered counter too",
    "file": "cases/Y14.haro",
    "stdout": "before\n\nLine 4 Error (TYPE_LETTER) : `tW` is lettered t, a text, and is given an integer \nIn function f() in file Y14.haro\n\nCalled from line 2 in file Y14.haro ",
+   "exit": 1
+  },
+  {
+   "id": "Y15",
+   "kind": "run",
+   "line": "Y1",
+   "why": "a parameter is lettered too, refused at its function's first statement",
+   "file": "cases/Y15.haro",
+   "stdout": "before\n\nLine 5 Haro refused this statement (a name begins with its type's letter -- `count` has none; written `count`, line 5 of Y15.haro) and did not compile it -- running past it would give a wrong answer \nIn function twice() in file Y15.haro\n\nCalled from line 4 In function f() in file Y15.haro\n\nCalled from line 2 in file Y15.haro ",
    "exit": 1
   }
  ]

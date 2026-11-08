@@ -1,5 +1,5 @@
 $iTotal = 1
-o = new P
+oP = new P
 ? $iTotal
 class P
 	count = 2

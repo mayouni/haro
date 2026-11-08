@@ -1,0 +1,6 @@
+? "before"
+f()
+func f
+	? Twice(3)
+func Twice count
+	return count * 2

@@ -80,12 +80,18 @@ CASES = [
     ('Y12', 'Y3', 'an integer letter refuses a number with a point when compiling', '.haro', [B, 'f()', 'func f', T + 'iN = 2.5'],
      refused('Y12', 4, 'i is the letter of an integer, and this literal is a number; written', 'iN'), 1),
     ('Y13', 'Y1', 'a global and an attribute are lettered too', '.haro', [
-        '$iTotal = 1', 'o = new P', '? $iTotal', 'class P', T + 'count = 2'],
+        '$iTotal = 1', 'oP = new P', '? $iTotal', 'class P', T + 'count = 2'],
      ['', 'Line 5 Haro refused this statement (a name begins with its type\'s letter -- `count` has none; written `count`, line 5 of Y13.haro) '
-      + REFUSED, 'in file Y13.haro '], 1),
+      + REFUSED, 'In method @@attrs() in file Y13.haro', '', 'Called from line 2 in file Y13.haro '], 1),
     ('Y14', 'Y3', 'a for counter is checked as its letter says, and a lettered counter too', '.haro', [
         B, 'f()', 'func f', T + 'for tW in [1]', T * 2 + '? tW', T + 'next'],
      letter_err('Y14', 4, 'tW', 't', 'a text', 'an integer'), 1),
+    ('Y15', 'Y1', "a parameter is lettered too, refused at its function's first statement", '.haro', [
+        B, 'f()', 'func f', T + '? Twice(3)', 'func Twice count', T + 'return count * 2'],
+     ['before', '', "Line 5 Haro refused this statement (a name begins with its type's letter -- `count` has none;"
+      " written `count`, line 5 of "
+      'Y15.haro) ' + REFUSED, 'In function twice() in file Y15.haro', '', 'Called from line 4 In function f() in file Y15.haro', '',
+      'Called from line 2 in file Y15.haro '], 1),
 ]
 
 os.makedirs(os.path.join(HERE, 'cases'), exist_ok=True)
