@@ -21,6 +21,7 @@ Windows; a Linux Haro brings them when it is built. The --oracle and --official 
   python engine/build_engine.py --ref=<commit>   from another ref
   python engine/build_engine.py --build          copy, patch and build every domain, in batches, ReleaseSafe (the engine's own default)
   python engine/build_engine.py --build stz_string stz_list   these only
+  python engine/build_engine.py --dst=C:\haro-engine --build  the copy and its build in another folder (STZ_ENGINE_DIR names it)
 
 Each batch checks the free space on the drive first and stops below 11 GB (this machine freezes under pressure; a hook refuses builds
 under 10). What built and what did not is written to runtime/engine/BUILT.txt, one line a domain.
@@ -210,15 +211,20 @@ def build(domains):
         for d in domains:
             fh.write(f'{d}\t{results.get(d, "not built")}\n')
     nb = sum(1 for v in results.values() if v == 'built')
-    print(f'ENGINE {nb} of {len(domains)} domains built in {time.time() - t_all:.0f} s; runtime/engine/BUILT.txt')
+    print(f'ENGINE {nb} of {len(domains)} domains built in {time.time() - t_all:.0f} s; ' + os.path.join(DST, 'BUILT.txt'))
     return 0 if nb == len(domains) else 1
 
 
 def main():
+    global DST
     ref = 'origin/main'
     for a in sys.argv[1:]:
         if a.startswith('--ref='):
             ref = a[6:]
+        elif a.startswith('--dst='):
+            # another folder for the copy and its build (2026-11-08: D: was at its floor, C:\haro-engine on the author's word);
+            # stzlib finds it through STZ_ENGINE_DIR
+            DST = os.path.abspath(a[6:])
     names = [a for a in sys.argv[1:] if not a.startswith('--')]
     if not os.path.isdir(STZLIB):
         print('SKIP: no stzlib at ' + STZLIB)
