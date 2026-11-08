@@ -11,6 +11,7 @@ K08 written after the plants, both said so). Every run case was read off Ring 1.
 |---|---|---|
 | K1 | a read by a key not proven a whole number answers the element or the empty text of a missing key, so it is never held as an uncounted integer, nor read by an uncounted `vget` (HARO-KEYEDRELEASE-01: a segfault, two shapes) | K01, K02, K09 |
 | K2 | `haro check`: a call whose statement follows a lone `.` is a call on a receiver, and the class's own method's arity is not its (HARO-ARITY-RECEIVER-01) | K03, K04 |
+| K4 | an error unwound out of a call leaves no uncounted borrow behind: the unwind clears from the first unwound frame's base, its call window (HARO-CLONEDEEP-01) | K13 |
 | K3 | `object2pointer(o)` is an OBJECTPOINTER, `pointer2object(p)` that same object, shared; two pointers to one object are equal; `ptrcmp` and `pointercompare` answer it, `obj2ptr` and `ptr2obj` are the short forms; anything else Bad parameter type!, as Ring's (HARO-OBJECT2POINTER-01, HARO-PTRCMP-01) | K05-K08, K10-K12 |
 
 ## How it is built
@@ -40,6 +41,8 @@ K08 written after the plants, both said so). Every run case was read off Ring 1.
 
 ## The protections, each switched off (`plants.py`)
 
+**The third round** (haro f1554fb fixture, 9b82974 code): HARO-CLONEDEEP-01. stzlib's stzObject guard crashed in `Summary()` -- the crash first looked like its IfQ scenario, whose line was still in the output buffer -- or hung. ddmin over its 17 scenarios found one, "AddTimeValue ... keep the elapsed time", and reading it gave K13, 31 lines and no library: an error raised inside `$aTV + This.T()` and caught outside. The append borrows `$aTV`'s list into a register uncounted and ends the borrow with a raw store the raise skipped; `forgetUnwound` cleared registers from the end of the handler's frame, but a callee's frame starts inside it, at the call window, so the borrow stayed and the next store there released it and freed the global's list. Clearing now starts at the first unwound frame's base. N13 caught; **12 of 12 plants**. stzlib's stzObject_defects_narrated.ring (4fdffce2c) passes 186 of 186, its DataSet guard 185 of 185; the 50-stage guard green (1,632 s).
+
 **The second round** (haro 4b85327 fixtures, 47fced6 code, on stzlib's second report): a key the compiler cannot prove a text -- `"" + (anA[i] * 3 + anB[i])` is a ref, its operands may be objects -- reached the keyed read through an uncounted `vget`, and the static empty text was freed again (K09, stzlib's haro_keyed_release_arith.ring). The count that closes it was N2's, removed in the first round as idle because no case reached it: **a plant that moves no case says the cases are thin, not that the protection is idle** -- N2 is restored and caught by K09. `ptrcmp`, `pointercompare`, `obj2ptr`, `ptr2obj` added (K10-K12; N10-N12 caught). **11 of 11 plants** in all.
 
 **7 of 7 caught** (first round): the keyed read's class (N1), the receiver call's lone `.` (N3), object2pointer's object check (N5), pointer2object's
@@ -61,7 +64,6 @@ kind check (N6), its shared reference (N7), pointer equality (N8), the OBJECTPOI
 
 ## Not covered, named
 
-- **HARO-CLONEDEEP-01, open and not reduced**: with `ptrcmp` present, stzlib's `stzObject_defects_narrated.ring` (4fdffce2c) runs past ToPointer and segfaults in its IfQ scenario, in `cloneDeepD`; it crashes the same with ToPointer and Numberified removed, and the IfQ calls alone on the same objects do not -- state from earlier scenarios matters. The next work.
 
 - `strictEq`, the comparison `find()` and its kin use, is unchanged for C pointers.
 - A checker that knows the receiver's class could judge `This.F().M()`'s arity; this one says nothing of it.
