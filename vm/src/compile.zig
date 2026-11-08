@@ -201,6 +201,8 @@ const builtin_table = [_]BuiltinEntry{
     .{ .name = "addmethod", .id = .addmethod, .argc = 3 },
     .{ .name = "ref", .id = .refv, .argc = 1 },
     .{ .name = "reference", .id = .reference, .argc = 1 },
+    .{ .name = "object2pointer", .id = .object2pointer, .argc = 1 },
+    .{ .name = "pointer2object", .id = .pointer2object, .argc = 1 },
     .{ .name = "refcount", .id = .refcount, .argc = 1 },
     // The console primitives (contract gate 3). Measured on conhost
     // and Windows Terminal before they were written -- main.zig
@@ -4112,7 +4114,9 @@ pub const Compiler = struct {
                 return;
             }
             switch (bc) {
-                .list => _ = try self.emit(.vget, dst, base, idx, if (ec.boxed()) 1 else 0),
+                // counted unless the element is unboxed AND the index is proven a whole number: a text index makes it a keyed read,
+                // whose missing key answers the empty text (v0.46, K1)
+                .list => _ = try self.emit(.vget, dst, base, idx, if (ec.boxed() or self.classOf(n.namedChild(1)) != .int) 1 else 0),
                 .str => _ = try self.emit(.sgets, dst, base, idx, 0),
                 else => _ = try self.emit(.dget, dst, base, idx, 1),
             }
@@ -13764,9 +13768,15 @@ fn exprClass(c: *Compiler, f: *Func, n: ts.Node) Class {
                 // there (2026-09-24). A rule's answer may only rise as its
                 // inputs rise: str -> str, list -> its elements, unknown ->
                 // unknown, and anything wider -> ref, the top.
+                // A KEYED READ ANSWERS THE EMPTY TEXT FOR A MISSING KEY (v0.46, HARO-KEYEDRELEASE-01). An element class is a fact about
+                // POSITIONS; `aSeen[cKey]` with a text key answers an element or "" -- so unless the index is proven a whole number the
+                // answer is the element class joined with text. Without it, a list whose elements were all integers made the read an
+                // uncounted integer register, the missing key's static empty text was released from it twice, and the VM freed
+                // static memory (stzlib's haro_keyed_release.ring, a segfault in release()).
+                const idx_is_int = n.namedChildCount() > 1 and exprClass(c, f, n.namedChild(1)) == .int;
                 return switch (l.class) {
                     .str => .str,
-                    .list => l.elem,
+                    .list => if (idx_is_int) l.elem else Class.join(l.elem, .str),
                     .unknown => .unknown,
                     else => .ref,
                 };

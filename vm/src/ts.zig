@@ -112,6 +112,11 @@ pub const Node = struct {
         return .{ .raw = c.ts_node_prev_named_sibling(self.raw), .src = self.src };
     }
 
+    /// The previous sibling, anonymous tokens included (a lone `.`). O(1), as prevNamedSibling.
+    pub fn prevSibling(self: Node) Node {
+        return .{ .raw = c.ts_node_prev_sibling(self.raw), .src = self.src };
+    }
+
     pub fn nextNamedSibling(self: Node) Node {
         return .{ .raw = c.ts_node_next_named_sibling(self.raw), .src = self.src };
     }

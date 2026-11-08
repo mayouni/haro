@@ -3681,6 +3681,24 @@ def stage49():
         return 1
     return 0
 
+FINDING_COURT = os.path.join(HERE, 'v46', 'finding_court.py')
+
+
+def stage50():
+    """Haro v0.46, stzlib's findings on haro.exe (HARO-KEYEDRELEASE-01, HARO-ARITY-RECEIVER-01, HARO-OBJECT2POINTER-01; v46/GRAMMAR.md): a
+    keyed read is never an uncounted integer, a call on a receiver is no unqualified call to `haro check`, and object2pointer and
+    pointer2object are Ring's. v46/finding_court.py on haro and its checked build."""
+    print("stage 50 -- stzlib's findings: v46/finding_court.py on haro and its checked build")
+    p = subprocess.run([sys.executable, FINDING_COURT] + (['--plant'] if PLANT else []), capture_output=True, cwd=HERE, timeout=600)
+    out = p.stdout.decode('utf-8', 'replace').replace(chr(13) + chr(10), chr(10))
+    for line in out.splitlines():
+        if line.startswith('  FAIL') or line.startswith('       ') or line.startswith('FINDING COURT'):
+            print(line)
+    if p.returncode != 0:
+        print(f'  FAIL the finding court exited {p.returncode}' + ('' if out.strip() else ': ' + p.stderr.decode('utf-8', 'replace')[-400:]))
+        return 1
+    return 0
+
 SENTENCE_TARGET = 50.0     # D42: a sentence edited, its court's image reused -- what a person editing a sentence waits for
 COLD_CEILING = 150.0       # D42: the court compiled from scratch -- a ceiling that catches the court library growing
 
@@ -3874,5 +3892,7 @@ if __name__ == '__main__':
         failures += stage48()
     if stage in (None, 49) and os.path.exists(PORTED_COURT):
         failures += stage49()
+    if stage in (None, 50) and os.path.exists(FINDING_COURT):
+        failures += stage50()
     print(f'haro_forge: {"FAIL" if failures else "PASS"} ({failures} failure(s), {time.perf_counter()-t0:.1f} s)')
     sys.exit(1 if failures else 0)

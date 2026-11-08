@@ -1332,6 +1332,9 @@ pub const Builtin = enum(u16) {
     newlist1,
     newlist2d,
     reference,
+    // v0.46 (HARO-OBJECT2POINTER-01): Ring's object pointer, a C pointer of kind OBJECTPOINTER to an object, and back
+    object2pointer,
+    pointer2object,
     // THE RESIDENT VM, rung 2: a running program admits more source into
     // itself -- a file, or a name and its source (AdmitHook). Not Ring's.
     admitfile,
@@ -3962,6 +3965,8 @@ pub const VM = struct {
             return x == y;
         }
         if (a.tag == .obj and b.tag == .obj) return a.p.o == b.p.o;
+        // v0.46: two C pointers are equal when they point at one thing -- two object2pointer of one object compare 1, as on Ring
+        if (a.tag == .cptr and b.tag == .cptr) return cptrOf(a) == cptrOf(b);
         return false;
     }
 
@@ -8158,6 +8163,32 @@ pub const VM = struct {
                             if (rv.p.v.rref == 0) rv.p.v.rref = 1;
                         } else if (rv.p.o.rref == 0) rv.p.o.rref = 1;
                         out = rv;
+                    },
+                    // v0.46 (HARO-OBJECT2POINTER-01), read off Ring 1.27: object2pointer(o) is a pointer of kind OBJECTPOINTER
+                    // (type() answers the kind, isPointer 1); pointer2object(p) is THAT object, shared -- a reference, as
+                    // reference() makes one -- so a write through it is a write to the original. The object is retained, so the
+                    // pointer never outlives it. Anything else is Bad parameter type!, in the function's name, as Ring's.
+                    .object2pointer => {
+                        const ov = regs[A];
+                        if (ov.tag != .obj) {
+                            self.pending = BADPARAM;
+                            continue :dispatch .raise;
+                        }
+                        retain(ov);
+                        out = self.newCptr(@ptrCast(ov.p.o), "OBJECTPOINTER");
+                    },
+                    .pointer2object => {
+                        const pv = regs[A];
+                        const kind_ok = pv.tag == .cptr and pv.p.i >= 0 and pv.p.i < cptr_tab.items.len and
+                            std.mem.eql(u8, cptr_tab.items[@intCast(pv.p.i)].kind, "OBJECTPOINTER");
+                        const raw = if (kind_ok) cptrOf(pv) else null;
+                        if (raw == null) {
+                            self.pending = BADPARAM;
+                            continue :dispatch .raise;
+                        }
+                        const o: *Obj = @ptrCast(@alignCast(raw.?));
+                        if (o.rref == 0) o.rref = 1;
+                        out = Value.object(o);
                     },
                     // Ring counts the NAMED holders (vmgc.c:677); the VM's
                     // count less the temporaries is that (`ringHolders`)
