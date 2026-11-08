@@ -272,6 +272,13 @@ is this desk's; the compass reads, rates and recounts only. With it:
 - **A primer for agents carries at least one worked example per shape** (S2b, syslang-sg0 a2c0383: one example took Qwen2.5-Coder 1.5B from
   0 to 5 of 20 basic tasks and 0 to 2 of 30 system tasks); one is not enough for system tasks, and a larger local model there is unmeasured.
 
+**The constitution desk closed, 2026-11-08** (the compass, 11:40, under the same delegation): its open charge -- the weaves WC2 to WC4 of
+`D:\GitHub\softanza\memos\2026-11-02-weaves-charge.md` (WC2 declared seats: posture, clock, budget, cascade; WC3 HaroBase and the stzlib
+model-door budget; WC4 proof and the author's own reading) -- is this desk's, and so are the three parts this file named as that desk's:
+W6's budget form, W7's map of natives to doors, and `personal`, built with WC2. Its branch `constitution` (a37ccb8, v0.29 = WC1) is
+contained in origin/main, checked here. **Parked for the author at WC2's first rung**: may a world leave a weave out of WEAVES? Until then
+a world may leave any weave out. Read the sentences below that name "the constitution desk" as this desk.
+
 Owed to other desks, named so nobody waits on this one: the decoder's depth limit (statements four deep, subscripts below the
 first level) is the engine's, stzlib-intelligence's; Haro's GBNF carrying the bit operators, hex, `finally` and `catch e` is this
 desk's, with rung 1; W7's map of natives to doors and W6's budget form are the constitution desk's.
