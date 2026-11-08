@@ -1853,6 +1853,21 @@ is spelled as it is declared, a keyword in another case is no name, a native is 
 **Results.** 19 of 19 cases on both builds; 16 of 16 plants caught; stages 41 to 46 green on the migrated code; the stzMax census the same as
 v0.41's; Haro's code: 433 native calls lowered, one real misspelling renamed. **The 47-stage guard** passed whole on haro and its checked build, 0 failures (2,313 s; stage 6 judged a sentence edit in 17.8 ms and compiled the court cold in 144.3 ms, under its 150 ms ceiling). A first run failed: stage 23 (node identity over Haro's history) ran past its 1,800 s with its cache of revision graphs cold for every file this rung changed, the whole run at 6,377 s; alone it passed in 52 s, every replay timed under 2 s a file, and in the third run it took 71 s. A second run was cut by the session's end.
 
+## The forty-third rung -- Haro v0.43, a real boolean and no coercion -- 2026-11-08
+
+**D55 T1 and T3**, on the author's "Haro holds no bolean type which was one of my strong critics to ring!" and his "Yes as recommended" to
+TYPES.md. In a `.haro` file `true` and `false` are booleans, a comparison and the logic answer one, a condition takes one, no value changes
+type unasked and an integer stays exact to 64 bits; a `.ring` file reads as Ring reads, and a boolean is 1 or 0 to it.
+
+    v43/fixtures.json, cases/           24 cases (written first, 503de5c: 22; B23 and B24 after the code, B24 again after the plants, said so)
+    v43/bool_court.py                   the cases on haro and its checked build (stage 48)
+    v43/plants.py                       26 protections in main.zig and compile.zig switched off in turn (P8 and P19 removed, named)
+    v43/GRAMMAR.md                      the rulings, the table, how it is built, what was measured, the desk's readings, what is not covered
+    study/v43/                          the census, both migrations, the census build's patch
+
+**Results.** 24 of 24 cases on both builds; 26 of 26 plants caught; Haro's code migrated by rule (about 680 lines) and by hand (a dozen),
+four earlier fixtures printing `true` where they printed `1`, by the ruling. **The 48-stage guard** on the final VM code: 47 of 48 stages green (1,508 s; stage 6 compiled the court cold in 147.5 ms, under its 150 ms ceiling, after the compiler was made to ask the cheap question first -- 156 ms before). Stage 24 failed alone: its history measure read 94.9% against a 95% floor, every lost target in the pairs ending at this rung's own migration commit, which a tool made; on the author's "Exclude tool commits" (2026-11-08) such a commit is listed in `v20/tool_commits.txt` and its pairs are counted apart, both figures printed every run: 99.8% on human edits (90 pairs), 94.9% with the tool's. Stage 24 then passed (274 s).
+
 ## The names -- `.haro`, not `.stzu` -- corrected 2026-10-02
 
 **At the author's word ("we agreed to use .haro instead of .stzu, no?").** D1 was ratified
@@ -2035,3 +2050,4 @@ whole guard re-run on the renamed tree: 28 + 30 + 27 + 23, 117 of 120, 32 of 32,
    as 36, the Zui-to-Zane rename in a quiet turn and D51's second altitude when W7's map lands.
 38. ~~Case-exact names (D55's first rung)~~ -- built 2026-11-07 as Haro v0.42, the forty-second rung above. Next: v0.43, boolean and no
    coercion (TYPES.md T1, T3); SG1's draft on SG0's memo, with D55's amendment for the system grain's seats; as 36, the Zui-to-Zane rename.
+39. ~~A real boolean and no coercion (D55 T1, T3)~~ -- built 2026-11-08 as Haro v0.43, the forty-third rung above. SG1 drafted and ruled the same night (D56). Next: v0.44, the letters checked (T2), with `isboolean` and the conversion at a b-name; then v0.45 numbers, and SG1's rung 1 (words and widths) after it; as 36, the Zui-to-Zane rename.
