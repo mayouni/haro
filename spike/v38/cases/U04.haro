@@ -7,10 +7,10 @@ func g
 	done
 func h
 	for i = 1 to 3
-		using o = new Res("i" + i)
+		using o = new Res("i" + string(i))
 			if i = 1 loop ok
 			if i = 3 exit ok
-			? "body " + i
+			? "body " + string(i)
 		done
 	next
 class Res

@@ -1,7 +1,7 @@
 try
 	for i = 1 to 3
 		if i = 2 exit ok
-		? "body " + i
+		? "body " + string(i)
 	next
 	? "after loop"
 finally

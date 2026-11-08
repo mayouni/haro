@@ -6,7 +6,7 @@ func f
 			try
 				raise("x")
 			catch e
-				? "span line " + e.Span()[:line]
+				? "span line " + string(e.Span()[:line])
 			done
 			? "g " + $g
 		done

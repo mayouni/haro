@@ -43,12 +43,12 @@ func CtCheckPatterns(aDecls, cSrc)
 			aCl = CtClauseNamed(aD, cClause)
 			if isnull(aCl) loop ok
 			cText = substr(cSrc, aCl[3][3], aCl[3][4] - aCl[3][3])
-			bHolds = 0
+			bHolds = false
 			try
 				aR = PatRun(aP[1], cText)
 				bHolds = aR[1]
 			catch
-				bHolds = 0
+				bHolds = false
 			done
 			if bHolds loop ok
 			aCC = CtElementCode(aP[8], "PATTERN", aP[1])

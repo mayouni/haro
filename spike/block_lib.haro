@@ -83,11 +83,11 @@ func BlkTokenize(cSrc)
 			nBeg = i
 			cBuf = ""
 			i++
-			bClosed = 0
+			bClosed = false
 			while i <= n
 				d = cSrc[i]
 				if d = '"'
-					bClosed = 1
+					bClosed = true
 					i++
 					exit
 				ok
@@ -151,11 +151,11 @@ func BlkTokenize(cSrc)
 				j++
 			end
 			cW = substr(cSrc, i, j - i)
-			bLower = 1
-			bUpper = 1
+			bLower = true
+			bUpper = true
 			for k = 1 to len(cW)
-				if BlkIsLower(cW[k]) bUpper = 0 ok
-				if BlkIsUpper(cW[k]) bLower = 0 ok
+				if BlkIsLower(cW[k]) bUpper = false ok
+				if BlkIsUpper(cW[k]) bLower = false ok
 			next
 			if bLower
 				aToks + ["ident", cW, nLine, i, j]
@@ -205,7 +205,7 @@ func BlkWithoutComments(aToks)
 # ---- the block loader --------------------------------------------------------------------------------------------------
 
 func BlkFail(nLine, cMsg)
-	raise("block (line " + nLine + "): " + cMsg)
+	raise("block (line " + string(nLine) + "): " + cMsg)
 
 func BlkLexMessage(t)
 	cCat = t[2]
@@ -323,7 +323,7 @@ func BlkFlush(aItems, aSeg)
 	aVals = []
 	aLead = []
 	aTrail = []
-	bSeen = 0
+	bSeen = false
 	for i = 1 to len(aSeg)
 		v = aSeg[i]
 		if v[1] = "comment"
@@ -333,7 +333,7 @@ func BlkFlush(aItems, aSeg)
 				aLead + v
 			ok
 		else
-			bSeen = 1
+			bSeen = true
 			aVals + v
 		ok
 	next
@@ -353,7 +353,7 @@ func BlkFlush(aItems, aSeg)
 func BlkContainer(cClose, cWhat, nLine0)
 	aItems = []
 	aSeg = []
-	while 1
+	while true
 		t = BlkPeek()
 		if t[1] = "eof"
 			BlkFail(nLine0, "a " + cWhat + " not closed")
@@ -395,7 +395,7 @@ func BlkJoin(aParts, cSep)
 func BlkDump(v)
 	k = v[1]
 	if k = "word" or k = "kw" or k = "num" or k = "str" or k = "comment"
-		return "(" + k + " " + len(v[2]) + ":" + v[2] + ")"
+		return "(" + string(k) + " " + string(len(v[2])) + ":" + string(v[2]) + ")"
 	ok
 	if k = "path" return "(path " + BlkJoin(v[2], ".") + ")" ok
 	if k = "pair" return "(pair " + BlkDump(v[2]) + " " + BlkDump(v[3]) + ")" ok
@@ -421,9 +421,9 @@ func BlkDumpAll(aVals)
 
 func BlkHoldsCommentOrGroup(aItems)
 	for i = 1 to len(aItems)
-		if aItems[i][1] = "comment" or aItems[i][1] = "group" return 1 ok
+		if aItems[i][1] = "comment" or aItems[i][1] = "group" return true ok
 	next
-	return 0
+	return false
 
 func BlkPrint(v, nInd)
 	k = v[1]

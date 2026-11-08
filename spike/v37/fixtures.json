@@ -57,7 +57,7 @@
    "line": "E2",
    "why": "in a text context the error is its message, byte for byte",
    "file": "cases/G06.haro",
-   "stdout": "caught: boom\nboom!\n4\nSTRING\n1\n1\n"
+   "stdout": "caught: boom\nboom!\n4\nSTRING\ntrue\ntrue\n"
   },
   {
    "id": "G07",
@@ -65,7 +65,7 @@
    "line": "E3",
    "why": "Message() is the message, a plain string",
    "file": "cases/G07.haro",
-   "stdout": "boom\nSTRING\n1\n"
+   "stdout": "boom\nSTRING\ntrue\n"
   },
   {
    "id": "G08",

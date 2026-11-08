@@ -24,7 +24,7 @@ $aCondVerbOf = []
 $cCondOther = ""
 $aCondRefSeats = []
 $aCondFormats = []
-$bCondUnread = 0
+$bCondUnread = false
 $aCondLangs = []
 $cCondLang = ""
 $aCourtSentences = []
@@ -52,7 +52,7 @@ $aCourtCites = []
 $aCourtFormset = null
 $aCourtNarrate = null
 $aCourtUnderstand = null
-$bNSurfaces = 0
+$bNSurfaces = false
 $aCourtConstitution = []
 $aCourtZone = []
 $cCourtAuditFile = ""
@@ -61,13 +61,13 @@ $aCourtPersonal = []
 $aCourtWarnings = []
 $aCourtMarks = []
 $aCourtSafeguards = []
-$bCourtCollect = 0
+$bCourtCollect = false
 $aCourtFound = []
 $aCourtBroken = []
-$bRunTrace = 0
+$bRunTrace = false
 $aRunTrace = []
 $nRunDepth = 0
-$bAskTrace = 0
+$bAskTrace = false
 $aAskTrace = []
 $cExprLang = ""
 $aExprOperators = []
@@ -86,9 +86,9 @@ $aExprOverlay = []
 $aCourtLangs = [
   ["notice", ".notice",
     [
-      ["OFFICE", "office", [["head", "text", 0, 0, "prim"]], "", [], []],
-      ["DESK", "desk", [["clerk", "text", 0, 0, "prim"]], "", [], []],
-      ["NOTICE", "notice", [["issuer", "issuers", 0, 0, "union"], ["tone", "tones", 0, 0, "menu"], ["medium", "media", 0, 0, "menu"], ["audience", "audiences", 0, 0, "menu"], ["length", "lengths", 0, 0, "range"], ["archive", "archive_path", 0, 0, "format"], ["follows", "regulations", 0, 1, "symbol"]], "", [], []]
+      ["OFFICE", "office", [["head", "text", false, false, "prim"]], "", [], []],
+      ["DESK", "desk", [["clerk", "text", false, false, "prim"]], "", [], []],
+      ["NOTICE", "notice", [["issuer", "issuers", false, false, "union"], ["tone", "tones", false, false, "menu"], ["medium", "media", false, false, "menu"], ["audience", "audiences", false, false, "menu"], ["length", "lengths", false, false, "range"], ["archive", "archive_path", false, false, "format"], ["follows", "regulations", false, true, "symbol"]], "", [], []]
     ],
     [
     ],
@@ -108,7 +108,7 @@ $aCourtLangs = [
       ["archive_path", "absolute_path", "ARCHIVE is an absolute path, not '{value}'", "", "BAD_ARCHIVE", ["pattern:absolute-path"]]
     ],
     [
-      ["issuers", [["office", 0, "decl"], ["desk", 0, "decl"]], "NOTICE {name} is issued by '{value}', which is no OFFICE and no DESK", "NO_ISSUER", ["rule:2"]]
+      ["issuers", [["office", false, "decl"], ["desk", false, "decl"]], "NOTICE {name} is issued by '{value}', which is no OFFICE and no DESK", "NO_ISSUER", ["rule:2"]]
     ],
     [
       ["urgent_not_by_letter", "notice", "tone = urgent and medium = letter", "", "NOTICE {name} is urgent and goes out by letter, which arrives days late", "URGENT_LETTER", "none", "error"]

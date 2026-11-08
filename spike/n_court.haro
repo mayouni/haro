@@ -23,7 +23,7 @@ $aCondVerbOf = []
 $cCondOther = ""
 $aCondRefSeats = []
 $aCondFormats = []
-$bCondUnread = 0
+$bCondUnread = false
 $aCondLangs = []
 $cCondLang = ""
 $aCourtSentences = []
@@ -51,7 +51,7 @@ $aCourtCites = []
 $aCourtFormset = null
 $aCourtNarrate = null
 $aCourtUnderstand = null
-$bNSurfaces = 0
+$bNSurfaces = false
 $aCourtConstitution = []
 $aCourtZone = []
 $cCourtAuditFile = ""
@@ -60,13 +60,13 @@ $aCourtPersonal = []
 $aCourtWarnings = []
 $aCourtMarks = []
 $aCourtSafeguards = []
-$bCourtCollect = 0
+$bCourtCollect = false
 $aCourtFound = []
 $aCourtBroken = []
-$bRunTrace = 0
+$bRunTrace = false
 $aRunTrace = []
 $nRunDepth = 0
-$bAskTrace = 0
+$bAskTrace = false
 $aAskTrace = []
 $cExprLang = ""
 $aExprOperators = []
@@ -85,20 +85,20 @@ $aExprOverlay = []
 $aCourtLangs = [
   ["n", ".n",
     [
-      ["TONGUE", "tongue", [["code", "text", 0, 0, "prim"], ["ignores", "text", 0, 0, "prim"], ["allows", "text", 0, 1, "prim"], ["digits", "digit_sets", 0, 1, "menu"], ["names", "spellings", 0, 1, "menu"], ["joins", "text", 0, 1, "prim"], ["refuses", "refusal_text", 1, 0, "form"]], "", [["code", "TONGUE {name} needs its CODE, the language's own short name (en, fr)"], ["ignores", "TONGUE {name} needs IGNORES, the words a question may carry that mean nothing (the, a, de, le); an empty text if none"]], [["code", "TONGUE_INCOMPLETE"], ["ignores", "TONGUE_INCOMPLETE"]]],
-      ["MEANING", "meaning", [["slot", "slots", 0, 0, "menu"], ["of", "name", 0, 1, "prim"], ["from", "surface", 0, 1, "decl"], ["words", "in_tongue", 1, 1, "form"]], "", [["slot", "MEANING {name} needs a SLOT: none, number or entity"], ["from", "MEANING {name} draws its entities from '{value}', which is not a declared surface"]], [["slot", "MEANING_INCOMPLETE"], ["from", "DANGLING_SURFACE"]]],
-      ["ALIAS", "alias", [["meaning", "meaning", 0, 0, "decl"], ["entity", "text", 0, 0, "prim"], ["words", "in_tongue", 1, 0, "form"]], "", [["meaning", "ALIAS {name} is of '{value}', which is not a declared meaning"]], [["meaning", "DANGLING_MEANING"]]],
-      ["SURFACE", "surface", [["kind", "surface_kinds", 0, 0, "menu"], ["grammar", "text", 0, 0, "prim"], ["court", "text", 0, 0, "prim"], ["world", "text", 0, 1, "prim"], ["entities", "word", 1, 1, "form"], ["spells", "spelling", 1, 1, "form"], ["tells", "tongue", 1, 1, "decl"]], "", [["kind", "SURFACE {name} needs a KIND: query or pattern"], ["grammar", "SURFACE {name} needs its GRAMMAR, the closed query grammar its court judges"], ["court", "SURFACE {name} needs its COURT, the court that judges and runs a query: a surface is a protocol, never a library"], ["tells", "SURFACE {name} tells in '{value}', which is not a declared tongue"]], [["kind", "SURFACE_INCOMPLETE"], ["grammar", "SURFACE_INCOMPLETE"], ["court", "SURFACE_INCOMPLETE"], ["tells", "DANGLING_TONGUE"]]],
-      ["STEP", "step", [["target", "surface", 0, 0, "decl"], ["query", "text", 0, 0, "prim"], ["binds", "name", 0, 1, "prim"]], "", [["target", "STEP {name} is aimed at '{value}', which is not a declared surface"]], [["target", "DANGLING_SURFACE"]]],
-      ["FRAME", "frame", [["shape", "meaning", 1, 0, "decl"], ["target", "surface", 0, 1, "decl"], ["query", "text", 0, 1, "prim"], ["steps", "step", 1, 1, "decl"], ["answers", "in_tongue", 1, 1, "form"], ["empty", "in_tongue", 1, 1, "form"]], "", [["shape", "FRAME {name} has '{value}' in its SHAPE, which is not a declared meaning"], ["target", "FRAME {name} is aimed at '{value}', which is not a declared surface"], ["steps", "FRAME {name} steps to '{value}', which is not a declared step"]], [["shape", "DANGLING_MEANING"], ["target", "DANGLING_SURFACE"], ["steps", "DANGLING_STEP"]]],
-      ["EXAMPLE", "example", [["means", "frame", 0, 0, "decl"], ["asking", "in_tongue", 1, 0, "form"]], "", [["means", "EXAMPLE {name} means '{value}', which is not a declared frame"]], [["means", "DANGLING_FRAME"]]],
-      ["COUNTEREXAMPLE", "counterexample", [["asking", "in_tongue", 1, 0, "form"], ["refused", "refusal_kinds", 0, 0, "menu"]], "", [], []]
+      ["TONGUE", "tongue", [["code", "text", false, false, "prim"], ["ignores", "text", false, false, "prim"], ["allows", "text", false, true, "prim"], ["digits", "digit_sets", false, true, "menu"], ["names", "spellings", false, true, "menu"], ["joins", "text", false, true, "prim"], ["refuses", "refusal_text", true, false, "form"]], "", [["code", "TONGUE {name} needs its CODE, the language's own short name (en, fr)"], ["ignores", "TONGUE {name} needs IGNORES, the words a question may carry that mean nothing (the, a, de, le); an empty text if none"]], [["code", "TONGUE_INCOMPLETE"], ["ignores", "TONGUE_INCOMPLETE"]]],
+      ["MEANING", "meaning", [["slot", "slots", false, false, "menu"], ["of", "name", false, true, "prim"], ["from", "surface", false, true, "decl"], ["words", "in_tongue", true, true, "form"]], "", [["slot", "MEANING {name} needs a SLOT: none, number or entity"], ["from", "MEANING {name} draws its entities from '{value}', which is not a declared surface"]], [["slot", "MEANING_INCOMPLETE"], ["from", "DANGLING_SURFACE"]]],
+      ["ALIAS", "alias", [["meaning", "meaning", false, false, "decl"], ["entity", "text", false, false, "prim"], ["words", "in_tongue", true, false, "form"]], "", [["meaning", "ALIAS {name} is of '{value}', which is not a declared meaning"]], [["meaning", "DANGLING_MEANING"]]],
+      ["SURFACE", "surface", [["kind", "surface_kinds", false, false, "menu"], ["grammar", "text", false, false, "prim"], ["court", "text", false, false, "prim"], ["world", "text", false, true, "prim"], ["entities", "word", true, true, "form"], ["spells", "spelling", true, true, "form"], ["tells", "tongue", true, true, "decl"]], "", [["kind", "SURFACE {name} needs a KIND: query or pattern"], ["grammar", "SURFACE {name} needs its GRAMMAR, the closed query grammar its court judges"], ["court", "SURFACE {name} needs its COURT, the court that judges and runs a query: a surface is a protocol, never a library"], ["tells", "SURFACE {name} tells in '{value}', which is not a declared tongue"]], [["kind", "SURFACE_INCOMPLETE"], ["grammar", "SURFACE_INCOMPLETE"], ["court", "SURFACE_INCOMPLETE"], ["tells", "DANGLING_TONGUE"]]],
+      ["STEP", "step", [["target", "surface", false, false, "decl"], ["query", "text", false, false, "prim"], ["binds", "name", false, true, "prim"]], "", [["target", "STEP {name} is aimed at '{value}', which is not a declared surface"]], [["target", "DANGLING_SURFACE"]]],
+      ["FRAME", "frame", [["shape", "meaning", true, false, "decl"], ["target", "surface", false, true, "decl"], ["query", "text", false, true, "prim"], ["steps", "step", true, true, "decl"], ["answers", "in_tongue", true, true, "form"], ["empty", "in_tongue", true, true, "form"]], "", [["shape", "FRAME {name} has '{value}' in its SHAPE, which is not a declared meaning"], ["target", "FRAME {name} is aimed at '{value}', which is not a declared surface"], ["steps", "FRAME {name} steps to '{value}', which is not a declared step"]], [["shape", "DANGLING_MEANING"], ["target", "DANGLING_SURFACE"], ["steps", "DANGLING_STEP"]]],
+      ["EXAMPLE", "example", [["means", "frame", false, false, "decl"], ["asking", "in_tongue", true, false, "form"]], "", [["means", "EXAMPLE {name} means '{value}', which is not a declared frame"]], [["means", "DANGLING_FRAME"]]],
+      ["COUNTEREXAMPLE", "counterexample", [["asking", "in_tongue", true, false, "form"], ["refused", "refusal_kinds", false, false, "menu"]], "", [], []]
     ],
     [
-      ["word", [["name", "name", 0, 0, "prim"]]],
-      ["in_tongue", [["tongue", "tongue", 0, 0, "decl"], ["text", "text", 0, 0, "prim"]]],
-      ["refusal_text", [["kind", "refusal_kinds", 0, 0, "menu"], ["text", "text", 0, 0, "prim"]]],
-      ["spelling", [["entity", "name", 0, 0, "prim"], ["how", "spellings", 0, 0, "menu"]]]
+      ["word", [["name", "name", false, false, "prim"]]],
+      ["in_tongue", [["tongue", "tongue", false, false, "decl"], ["text", "text", false, false, "prim"]]],
+      ["refusal_text", [["kind", "refusal_kinds", false, false, "menu"], ["text", "text", false, false, "prim"]]],
+      ["spelling", [["entity", "name", false, false, "prim"], ["how", "spellings", false, false, "menu"]]]
     ],
     [
       ["unknown_declaration", "A sentence of N declares TONGUE, MEANING, ALIAS, SURFACE, FRAME, STEP, EXAMPLE and COUNTEREXAMPLE, and nothing else. N asks; it never declares the world, the facts or a rule.", [], "", [], []],

@@ -30,10 +30,10 @@ func CtWorldHas(aSymbols, cKind, cName)
 		aK = ExObjGet(aSymbols[i], "kind")
 		aN = ExObjGet(aSymbols[i], "name")
 		if aK[1] and aN[1]
-			if lower("" + aK[2]) = lower(cKind) and lower("" + aN[2]) = lower(cName) return 1 ok
+			if lower(string(aK[2])) = lower(cKind) and lower(string(aN[2])) = lower(cName) return true ok
 		ok
 	next
-	return 0
+	return false
 
 # every SYMBOL seat of the sentence, as [decl, seat, value, line]
 func CtSymbolSites(aDecls)

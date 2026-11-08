@@ -40,9 +40,9 @@ func NdCheck(aDecls, aDoors)
 				aW = []
 				if aV[1] = "namelist" aW = aV[2] else aW = [aV[2]] ok
 				for m = 1 to len(aW)
-					bNeeded = 0
+					bNeeded = false
 					for n = 1 to len(aDoors[1])
-						if aDoors[1][n] = aW[m] bNeeded = 1 ok
+						if aDoors[1][n] = aW[m] bNeeded = true ok
 					next
 					if not bNeeded
 						try

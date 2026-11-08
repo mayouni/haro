@@ -24,7 +24,7 @@ $aCondVerbOf = []
 $cCondOther = ""
 $aCondRefSeats = []
 $aCondFormats = []
-$bCondUnread = 0
+$bCondUnread = false
 $aCondLangs = []
 $cCondLang = ""
 $aCourtSentences = []
@@ -52,7 +52,7 @@ $aCourtCites = []
 $aCourtFormset = null
 $aCourtNarrate = null
 $aCourtUnderstand = null
-$bNSurfaces = 0
+$bNSurfaces = false
 $aCourtConstitution = []
 $aCourtZone = []
 $cCourtAuditFile = ""
@@ -61,13 +61,13 @@ $aCourtPersonal = []
 $aCourtWarnings = []
 $aCourtMarks = []
 $aCourtSafeguards = []
-$bCourtCollect = 0
+$bCourtCollect = false
 $aCourtFound = []
 $aCourtBroken = []
-$bRunTrace = 0
+$bRunTrace = false
 $aRunTrace = []
 $nRunDepth = 0
-$bAskTrace = 0
+$bAskTrace = false
 $aAskTrace = []
 $cExprLang = ""
 $aExprOperators = []
@@ -86,10 +86,10 @@ $aExprOverlay = []
 $aCourtLangs = [
   ["panel", ".panel",
     [
-      ["INTENT_FLOW", "intent_flow", [["satisfies", "intents", 1, 1, "menu"]], "", [], []],
-      ["FORM", "form", [["satisfies", "intents", 1, 1, "menu"], ["intent_flow", "intent_flow", 0, 1, "decl"], ["next", "intent_flow", 0, 1, "decl"], ["also", "intent_flow", 1, 1, "decl"]], "", [["intent_flow", "FORM {name} walks the INTENT_FLOW '{value}', and no flow of that name is declared"], ["next", "FORM {name} hands on to '{value}', and no flow of that name is declared"], ["also", "FORM {name} also serves '{value}', and no flow of that name is declared"]], [["intent_flow", "UNRESOLVED_INTENT_FLOW"], ["next", "UNRESOLVED_NEXT"], ["also", "UNRESOLVED_ALSO"]], [["intent_flow", "warning"], ["next", "error"], ["also", "warning"]]],
-      ["WORLD_VIEW", "world_view", [["shows", "entity", 0, 1, "symbol"], ["flows", "intent_flow", 1, 1, "decl"]], "", [["flows", "WORLD_VIEW {name} lists the INTENT_FLOW '{value}', and no flow of that name is declared"]], [["flows", "UNRESOLVED_FLOWS"]], [["shows", "warning"]]],
-      ["INTERACTION", "interaction", [["role", "roles", 0, 1, "menu"]], "", [], []]
+      ["INTENT_FLOW", "intent_flow", [["satisfies", "intents", true, true, "menu"]], "", [], []],
+      ["FORM", "form", [["satisfies", "intents", true, true, "menu"], ["intent_flow", "intent_flow", false, true, "decl"], ["next", "intent_flow", false, true, "decl"], ["also", "intent_flow", true, true, "decl"]], "", [["intent_flow", "FORM {name} walks the INTENT_FLOW '{value}', and no flow of that name is declared"], ["next", "FORM {name} hands on to '{value}', and no flow of that name is declared"], ["also", "FORM {name} also serves '{value}', and no flow of that name is declared"]], [["intent_flow", "UNRESOLVED_INTENT_FLOW"], ["next", "UNRESOLVED_NEXT"], ["also", "UNRESOLVED_ALSO"]], [["intent_flow", "warning"], ["next", "error"], ["also", "warning"]]],
+      ["WORLD_VIEW", "world_view", [["shows", "entity", false, true, "symbol"], ["flows", "intent_flow", true, true, "decl"]], "", [["flows", "WORLD_VIEW {name} lists the INTENT_FLOW '{value}', and no flow of that name is declared"]], [["flows", "UNRESOLVED_FLOWS"]], [["shows", "warning"]]],
+      ["INTERACTION", "interaction", [["role", "roles", false, true, "menu"]], "", [], []]
     ],
     [
     ],

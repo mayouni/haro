@@ -35,7 +35,7 @@ func SevWarnClause(aDecl, aSeat, aClause)
 
 func SevWarnOne(aDecl, aSeat, aClause)
 	CtSetCode("PARSE", [])
-	cWhy = CtCheckSeatValue(aDecl, aSeat, aClause, 1)
+	cWhy = CtCheckSeatValue(aDecl, aSeat, aClause, true)
 	if cWhy != "" $aCourtWarnings + [$cCourtCode, $aCourtCites, aClause[2], cWhy] ok
 	CtSetCode("PARSE", [])
 
@@ -48,7 +48,7 @@ func SevSkipNamed(aRow, tK)
 	for i = 1 to len(aRow[7])
 		if aRow[7][i][1] = cWord cSev = aRow[7][i][2] ok
 	next
-	if cSev != "warning" return 0 ok
+	if cSev != "warning" return false ok
 	cNamed = CtRefusalNamed("unknown_declaration", cWord)
 	aCC = CtRefusalCode("unknown_declaration", cWord, "UNKNOWN_KIND")
 	tName = CtExpect("ident", "a lower_snake name")
@@ -72,4 +72,4 @@ func SevSkipNamed(aRow, tK)
 	ok
 	CtExpect("string", "the RATIONALE string")
 	$aCourtWarnings + [aCC[1], aCC[2], tK[3], cNamed]
-	return 1
+	return true

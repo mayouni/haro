@@ -5,5 +5,5 @@ try
 		raise("boom")
 	done
 catch e
-	? "caught " + e + ", g=" + $g
+	? "caught " + e + ", g=" + string($g)
 done

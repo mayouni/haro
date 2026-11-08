@@ -144,6 +144,15 @@ CASES = [
         'load "B22_lib.ring"', 'f()', 'func f', T + '? Plus1(2 > 1)', T + 'if Ready()', T * 2 + '? "ready"', T + 'ok'],
      ['2', '', 'Line 5 Error (BOOLEAN_EXPECTED) : ' + cond('an integer', 'x != 0') + ' ', 'In function f() in file B22.haro', '',
       'Called from line 2 in file B22.haro '], 1, {'B22_lib.ring': ['func Plus1 x', T + 'return x + 1', 'func Ready', T + 'return 1']}),
+    # WRITTEN AFTER THE CODE, before the plants, found while writing them: no case reached the left of `or` (a jtruthy the VM judges, B23), nor a
+    # comparison whose operand may be an object, which the VM answers through cmpv rather than a jump (B24).
+    ('B23', 'B3', 'an integer on the left of or raises BOOLEAN_EXPECTED', '.haro', [
+        B, 'f()', 'func f', T + 'nA = 1', T + '? nA or true'],
+     err('B23', 5, 'BOOLEAN_EXPECTED', cond('an integer', 'x != 0')), 1),
+    ('B24', 'B6', 'a comparison of a call\'s answer is judged as every comparison is', '.haro', [
+        B, 'f()', 'func f', T + '? Two() = 2', T + '? Two() = "2"', 'func Two', T + 'return 2'],
+     ['before', 'true', '', 'Line 5 Error (TYPE_MISMATCH) : ' + mismatch('integer', '=', 'text') + ' ', 'In function f() in file B24.haro', '',
+      'Called from line 2 in file B24.haro '], 1),
 ]
 
 os.makedirs(os.path.join(HERE, 'cases'), exist_ok=True)

@@ -16,7 +16,7 @@
    "line": "N1",
    "why": "every kind of name spelled as declared runs",
    "file": "cases/N01.haro",
-   "stdout": "8\n1\n3\n10\n"
+   "stdout": "8\ntrue\n3\n10\n"
   },
   {
    "id": "N02",

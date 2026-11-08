@@ -60,7 +60,9 @@ CASES = [
      ['yes']),
     ('S04', 'S3', 'in a .haro file a symbol keeps its spelling', '.haro', [
         'f()', 'func f', T + '? :Name', T + '? :name', T + 'x = :Name', T + '? x = "Name"'],
-     ['Name', 'name', '1']),
+     ['Name', 'name', 'true']),
+    # S04 CHANGED AFTER ITS COURT SPOKE, 2026-11-08: `x = "Name"` answers a boolean in a .haro file and prints `true` (v0.43, D55 T3,
+    # the author's ruling of 2026-11-07); the case asks the same question.
     ('S05', 'S3', 'in a .ring file a symbol is lowered, as Ring lowers it', '.ring', [
         'f()', 'func f', T + '? :Name', T + 'x = :Name', T + '? x = "name"'],
      ['name', '1']),

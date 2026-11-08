@@ -16,11 +16,11 @@
 # ---- the canonical text of a condition ----------------------------------------------------------------------------------------
 
 func CondIsBareWord(cV)
-	if len(cV) = 0 return 0 ok
+	if len(cV) = 0 return false ok
 	for i = 1 to len(cV)
-		if not CondIsWordChar(cV[i]) return 0 ok
+		if not CondIsWordChar(cV[i]) return false ok
 	next
-	return 1
+	return true
 
 # a value: a number, or a bare word where a bare word is a value (the right of = and != and a quantifier's named, and after contains), else quoted
 func CondPrintVal(cV, bBare)
@@ -52,23 +52,23 @@ func CondPrintP(aAst, nCtx)
 	if k = "exists" return "exists " + aAst[2] ok
 	if k = "quant"
 		c = "(" + aAst[2] + " " + CondPathText(aAst[3])
-		if not isnull(aAst[4]) c += " named " + CondPrintRight(aAst[4], 1) ok
+		if not isnull(aAst[4]) c += " named " + CondPrintRight(aAst[4], true) ok
 		if not isnull(aAst[5]) c += " where " + CondPrintP(aAst[5], 0) ok
 		return c + ")"
 	ok
 	if k = "cmp"
 		if aAst[2] = ">" or aAst[2] = "<" return CondPathText(aAst[3]) + " " + aAst[2] + " " + aAst[4][2] ok
-		return CondPathText(aAst[3]) + " " + aAst[2] + " " + CondPrintRight(aAst[4], 1)
+		return CondPathText(aAst[3]) + " " + aAst[2] + " " + CondPrintRight(aAst[4], true)
 	ok
 	if k = "has" return CondPathText(aAst[3]) + " " + aAst[2] ok
-	if k = "contains" return CondPathText(aAst[2]) + " contains " + CondPrintVal(aAst[3], 1) ok
-	if k = "rel" return CondPathText(aAst[3]) + " " + aAst[2] + " " + CondPrintRight(aAst[4], 0) ok
+	if k = "contains" return CondPathText(aAst[2]) + " contains " + CondPrintVal(aAst[3], true) ok
+	if k = "rel" return CondPathText(aAst[3]) + " " + aAst[2] + " " + CondPrintRight(aAst[4], false) ok
 	if k = "cyclic" return CondPathText(aAst[2]) + " cyclic" ok
 	if k = "matches" return CondPathText(aAst[2]) + " matches " + aAst[3] ok
 	if k = "is" return "self is " + aAst[2] ok
 	if k = "reach" return CondPathText(aAst[2]) + " reachable" ok
 	if k = "refd" return CondPathText(aAst[2]) + " referenced" ok
-	if k = "keyed" return CondPathText(aAst[2]) + " keyed_by " + CondPrintRight(aAst[3], 0) ok
+	if k = "keyed" return CondPathText(aAst[2]) + " keyed_by " + CondPrintRight(aAst[3], false) ok
 	raise("condition: no printing for a node of kind '" + k + "'")
 
 # a parsed condition as one line, every string length-free and quoted: two conditions are one when their dumps are
@@ -190,7 +190,7 @@ func StzuFormAst(aAst, cOn, aTab, aDecls)
 	if k = "exists"
 		nF = StzuFormAt(aTab, aAst[2])
 		if nF > 0
-			$bFormChanged = 1
+			$bFormChanged = true
 			aNodes = []
 			for j = 1 to len(aTab[nF][2])
 				aE = ["exists", aTab[nF][2][j]]
@@ -212,7 +212,7 @@ func StzuFormAst(aAst, cOn, aTab, aDecls)
 			if not isnull(StzuSeatNamed(StzuSeatsOf(aDecls, cOn), cHead)) nF = 0 ok
 		ok
 		if nF > 0
-			$bFormChanged = 1
+			$bFormChanged = true
 			aNodes = []
 			for j = 1 to len(aTab[nF][2])
 				aP = ["path", [aTab[nF][2][j]]]
@@ -231,7 +231,7 @@ func StzuFormAst(aAst, cOn, aTab, aDecls)
 # a condition as written, or its expansion in the canonical text when it quantifies over a FORM some kind includes
 func StzuExpandCond(cCond, cOn, aTab, aDecls)
 	if len(aTab) = 0 return cCond ok
-	$bFormChanged = 0
+	$bFormChanged = false
 	aAst = null
 	cErr = ""
 	try
@@ -247,9 +247,9 @@ func StzuExpandCond(cCond, cOn, aTab, aDecls)
 
 func StzuNameIn(cName, aRecs)
 	for i = 1 to len(aRecs)
-		if aRecs[i][1] = cName return 1 ok
+		if aRecs[i][1] = cName return true ok
 	next
-	return 0
+	return false
 
 # the CONSTRAINTs, each ON a FORM made once for each including kind, every condition expanded
 func StzuExpandConstraints(aCons, aTab, aDecls, aDeclared)
@@ -264,7 +264,7 @@ func StzuExpandConstraints(aCons, aTab, aDecls, aDeclared)
 		if nF > 0
 			aKinds = aTab[nF][2]
 			# EXCEPT: the kinds the constraint is not made for, each a kind that includes the FORM, named once, and not all of them
-			bErr = 0
+			bErr = false
 			aKept = []
 			try
 				for e = 1 to len(aExc)
@@ -279,7 +279,7 @@ func StzuExpandConstraints(aCons, aTab, aDecls, aDeclared)
 				next
 				if len(aKept) = 0 StzuFail(aC[6], "EXCEPT leaves no kind for ON " + aC[2]) ok
 			catch
-				bErr = 1
+				bErr = true
 				StzuNote(cCatchError)
 			done
 			if bErr loop ok

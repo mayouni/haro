@@ -36,7 +36,7 @@ CASES = [
         T + '? "outer: " + cCatchError', 'done'],
      ['finally', 'outer: only']),
     ('F04', 'S2', 'a return in the body: the value is taken, the finally runs (computing as it likes), the value returned is the one taken', [
-        '? f()', '? "after"', 'func f', T + 'n = 1', T + 'try', T * 2 + 'return n', T + 'finally', T * 2 + '? "finally " + n + " " + upper("x")',
+        '? f()', '? "after"', 'func f', T + 'n = 1', T + 'try', T * 2 + 'return n', T + 'finally', T * 2 + '? "finally " + string(n) + " " + upper("x")',
         T * 2 + 'n = 2', T + 'done', T + 'return 99'],
      ['finally 1 X', '1', 'after']),
     ('F05', 'S2', 'a return in the handler: the finally runs, then the return resumes', [
@@ -48,24 +48,24 @@ CASES = [
         T * 2 + '? "finally after handler raise"', T + 'done', 'catch', T + '? "outer: " + cCatchError', 'done'],
      ['finally after handler raise', 'outer: in handler']),
     ('F07', 'S5', '`exit` crossing a try in a for loop runs its finally first', [
-        'for i = 1 to 3', T + 'try', T * 2 + 'if i = 2 exit ok', T * 2 + '? "body " + i', T + 'finally', T * 2 + '? "finally " + i', T + 'done',
+        'for i = 1 to 3', T + 'try', T * 2 + 'if i = 2 exit ok', T * 2 + '? "body " + string(i)', T + 'finally', T * 2 + '? "finally " + string(i)', T + 'done',
         'next', '? "after"'],
      ['body 1', 'finally 1', 'finally 2', 'after']),
     ('F08', 'S5', '`loop` crossing a try in a for loop runs its finally first, and the loop goes on', [
-        'for i = 1 to 3', T + 'try', T * 2 + 'if i = 2 loop ok', T * 2 + '? "body " + i', T + 'finally', T * 2 + '? "finally " + i', T + 'done',
-        T + '? "end " + i', 'next'],
+        'for i = 1 to 3', T + 'try', T * 2 + 'if i = 2 loop ok', T * 2 + '? "body " + string(i)', T + 'finally', T * 2 + '? "finally " + string(i)', T + 'done',
+        T + '? "end " + string(i)', 'next'],
      ['body 1', 'finally 1', 'end 1', 'finally 2', 'body 3', 'finally 3', 'end 3']),
     ('F09', 'S5', '`exit` crossing a try with a catch, in a while loop', [
         'w()', 'func w', T + 'n = 0', T + 'while true', T * 2 + 'n++', T * 2 + 'try', T * 3 + 'if n = 3 exit ok', T * 2 + 'catch',
-        T * 3 + '? "no"', T * 2 + 'finally', T * 3 + '? "finally " + n', T * 2 + 'done', T + 'end', T + '? "after " + n'],
+        T * 3 + '? "no"', T * 2 + 'finally', T * 3 + '? "finally " + string(n)', T * 2 + 'done', T + 'end', T + '? "after " + string(n)'],
      ['finally 1', 'finally 2', 'finally 3', 'after 3']),
     ('F10', 'S2', 'a return crossing two trys runs the inner finally, then the outer', [
         '? h()', 'func h', T + 'try', T * 2 + 'try', T * 3 + 'return "value"', T * 2 + 'finally', T * 3 + '? "inner finally"', T * 2 + 'done',
         T + 'finally', T * 2 + '? "outer finally"', T + 'done'],
      ['inner finally', 'outer finally', 'value']),
     ('F11', 'S5', '`exit 2` crossing two loops and two trys runs both finallys, inner first, once each', [
-        'for i = 1 to 2', T + 'try', T * 2 + 'for j = 1 to 2', T * 3 + 'try', T * 4 + 'exit 2', T * 3 + 'finally', T * 4 + '? "inner " + i + j',
-        T * 3 + 'done', T * 2 + 'next', T + 'finally', T * 2 + '? "outer " + i', T + 'done', 'next', '? "after"'],
+        'for i = 1 to 2', T + 'try', T * 2 + 'for j = 1 to 2', T * 3 + 'try', T * 4 + 'exit 2', T * 3 + 'finally', T * 4 + '? "inner " + string(i) + string(j)',
+        T * 3 + 'done', T * 2 + 'next', T + 'finally', T * 2 + '? "outer " + string(i)', T + 'done', 'next', '? "after"'],
      ['inner 11', 'outer 1', 'after']),
     ('F12', 'S1', 'a raise in the finally on the return path goes outward: the finally does not run twice', [
         'try', T + '? k()', 'catch', T + '? "caught: " + cCatchError', 'done', 'func k', T + 'try', T * 2 + 'return "value"', T + 'finally',
@@ -73,7 +73,7 @@ CASES = [
      ['finally', 'caught: from finally']),
     ('F13', 'S1', 'a raise in the finally on the exit path never lands in the same try\'s catch', [
         'try', T + 'for i = 1 to 3', T * 2 + 'try', T * 3 + 'exit', T * 2 + 'catch', T * 3 + '? "own catch: " + cCatchError', T * 2 + 'finally',
-        T * 3 + '? "finally " + i', T * 3 + 'raise("from finally")', T * 2 + 'done', T + 'next', 'catch', T + '? "outer: " + cCatchError', 'done'],
+        T * 3 + '? "finally " + string(i)', T * 3 + 'raise("from finally")', T * 2 + 'done', T + 'next', 'catch', T + '? "outer: " + cCatchError', 'done'],
      ['finally 1', 'outer: from finally']),
     ('F14', 'S3', 'a try inside the finally does not overwrite the error the finally holds', [
         'try', T + 'try', T * 2 + 'raise("outer")', T + 'finally', T * 2 + 'try', T * 3 + 'raise("inner")', T * 2 + 'catch', T * 2 + 'done',
@@ -86,14 +86,14 @@ CASES = [
         '? m2()', 'func m2', T + 'try', T * 2 + 'raise("dropped")', T + 'finally', T * 2 + 'return "from finally"', T + 'done'],
      ['from finally']),
     ('F17', 'S5', '`exit` crossing a try in a for-in loop', [
-        'for x in [1, 2, 3]', T + 'try', T * 2 + 'if x = 2 exit ok', T + 'finally', T * 2 + '? "finally " + x', T + 'done', 'next', '? "after"'],
+        'for x in [1, 2, 3]', T + 'try', T * 2 + 'if x = 2 exit ok', T + 'finally', T * 2 + '? "finally " + string(x)', T + 'done', 'next', '? "after"'],
      ['finally 1', 'finally 2', 'after']),
     ('F18', 'S5', '`loop` crossing a try in a do-again loop', [
-        'd()', 'func d', T + 'n = 0', T + 'do', T * 2 + 'n++', T * 2 + 'try', T * 3 + 'if n = 2 loop ok', T * 3 + '? "body " + n', T * 2 + 'finally',
-        T * 3 + '? "finally " + n', T * 2 + 'done', T + 'again n < 3'],
+        'd()', 'func d', T + 'n = 0', T + 'do', T * 2 + 'n++', T * 2 + 'try', T * 3 + 'if n = 2 loop ok', T * 3 + '? "body " + string(n)', T * 2 + 'finally',
+        T * 3 + '? "finally " + string(n)', T * 2 + 'done', T + 'again n < 3'],
      ['body 1', 'finally 1', 'finally 2', 'body 3', 'finally 3']),
     ('F19', 'S2', 'a return from a loop inside the try body runs the finally once', [
-        '? r()', 'func r', T + 'try', T * 2 + 'for i = 1 to 5', T * 3 + 'if i = 2 return "at " + i ok', T * 2 + 'next', T + 'finally',
+        '? r()', 'func r', T + 'try', T * 2 + 'for i = 1 to 5', T * 3 + 'if i = 2 return "at " + string(i) ok', T * 2 + 'next', T + 'finally',
         T * 2 + '? "finally once"', T + 'done'],
      ['finally once', 'at 2']),
     ('F20', 'S2', 'a return crossing a try without finally inside one with: both handlers are left, and a later raise lands where it is raised', [
@@ -101,8 +101,8 @@ CASES = [
         T * 3 + 'return "v"', T * 2 + 'catch', T * 3 + '? "no"', T * 2 + 'done', T + 'finally', T * 2 + '? "finally"', T + 'done'],
      ['finally', 'v', 'later caught at top: later']),
     ('F21', 'S5', '`loop` from the handler crosses the finally', [
-        'for i = 1 to 2', T + 'try', T * 2 + 'raise("e" + i)', T + 'catch', T * 2 + '? "caught " + cCatchError', T * 2 + 'loop', T + 'finally',
-        T * 2 + '? "finally " + i', T + 'done', T + '? "not reached " + i', 'next'],
+        'for i = 1 to 2', T + 'try', T * 2 + 'raise("e" + string(i))', T + 'catch', T * 2 + '? "caught " + cCatchError', T * 2 + 'loop', T + 'finally',
+        T * 2 + '? "finally " + string(i)', T + 'done', T + '? "not reached " + i', 'next'],
      ['caught e1', 'finally 1', 'caught e2', 'finally 2']),
     ('F22', 'S2', 'a return from a `catch(e)` handler uses e, then the finally runs before it resumes', [
         '? t()', 'func t', T + 'try', T * 2 + 'raise("why")', T + 'catch(e)', T * 2 + 'return "handled " + e', T + 'finally', T * 2 + '? "finally"',
@@ -114,7 +114,7 @@ CASES = [
     # F24 was written AFTER the compiler change, found by designing the plants (plants.py P9): no case had a loop INSIDE a try body, so a loop
     # that forgot which regions were open at its entry would have run the enclosing finally at every exit, and no fixture would have said so.
     ('F24', 'S1', '`exit` from a loop inside the try body stays inside it: the finally runs once, at the end of the try', [
-        'try', T + 'for i = 1 to 3', T * 2 + 'if i = 2 exit ok', T * 2 + '? "body " + i', T + 'next', T + '? "after loop"', 'finally',
+        'try', T + 'for i = 1 to 3', T * 2 + 'if i = 2 exit ok', T * 2 + '? "body " + string(i)', T + 'next', T + '? "after loop"', 'finally',
         T + '? "finally"', 'done'],
      ['body 1', 'after loop', 'finally']),
 ]

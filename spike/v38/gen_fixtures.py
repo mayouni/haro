@@ -70,22 +70,22 @@ CASES = [
         'func who', T + '? "who: " + $cCaller'],
      ['in: agent-x', 'who: agent-x', 'after: nobody']),
     ('W02', 'W2', 'a raise out of the block restores the global before the handler runs', [
-        '$g = 1', 'try', T + 'within $g = 2', T * 2 + '? $g', T * 2 + 'raise("boom")', T + 'done', 'catch e', T + '? "caught " + e + ", g=" + $g',
+        '$g = 1', 'try', T + 'within $g = 2', T * 2 + '? $g', T * 2 + 'raise("boom")', T + 'done', 'catch e', T + '? "caught " + e + ", g=" + string($g)',
         'done'],
      ['2', 'caught boom, g=1']),
     ('W03', 'W2', 'a return out of the block restores the global; the value returned was computed inside it', [
         '$g = "a"', '? f()', '? $g', 'func f', T + 'within $g = "b"', T * 2 + 'return "returned " + $g', T + 'done'],
      ['returned b', 'a']),
     ('W04', 'W2', 'a loop and an exit crossing the block restore the global', [
-        '$g = 0', 'for i = 1 to 3', T + '? "top g=" + $g', T + 'within $g = i * 10', T * 2 + 'if i = 1 loop ok', T * 2 + '? "i=" + i + " g=" + $g',
-        T * 2 + 'if i = 2 exit ok', T + 'done', 'next', '? "g=" + $g'],
+        '$g = 0', 'for i = 1 to 3', T + '? "top g=" + string($g)', T + 'within $g = i * 10', T * 2 + 'if i = 1 loop ok', T * 2 + '? "i=" + string(i) + " g=" + string($g)',
+        T * 2 + 'if i = 2 exit ok', T + 'done', 'next', '? "g=" + string($g)'],
      ['top g=0', 'top g=0', 'i=2 g=20', 'g=0']),
     ('W05', 'W2', 'a write by the body and by a callee is undone; a callee\'s raise restores too', [
         '$g = "start"', 'try', T + 'within $g = "mid"', T * 2 + '$g = "changed in body"', T * 2 + 'setG()', T + 'done', 'catch e', T + '? e', 'done',
         '? $g', 'func setG', T + '$g = "changed by callee"', T + 'raise("from callee " + $g)'],
      ['from callee changed by callee', 'start']),
     ('W06', 'W3', 'the value may read the global: a depth that counts its own recursion and ends where it began', [
-        '$depth = 0', 'nest(3)', '? "depth after: " + $depth', 'func nest n', T + 'within $depth = $depth + 1', T * 2 + '? "depth " + $depth',
+        '$depth = 0', 'nest(3)', '? "depth after: " + string($depth)', 'func nest n', T + 'within $depth = $depth + 1', T * 2 + '? "depth " + string($depth)',
         T * 2 + 'if n > 1 nest(n - 1) ok', T + 'done'],
      ['depth 1', 'depth 2', 'depth 3', 'depth after: 0']),
     ('W07', 'W3', 'a value that raises leaves the global unchanged and the body unrun', [
@@ -125,7 +125,7 @@ CASES = [
      ['release r', 'caught boom']),
     ('U04', 'U2', 'a return, a loop and an exit release, once each', [
         '? g()', 'h()', '? "end"', 'func g', T + 'using o = new Res("g")', T * 2 + 'return "returned " + o.cName', T + 'done', 'func h',
-        T + 'for i = 1 to 3', T * 2 + 'using o = new Res("i" + i)', T * 3 + 'if i = 1 loop ok', T * 3 + 'if i = 3 exit ok', T * 3 + '? "body " + i',
+        T + 'for i = 1 to 3', T * 2 + 'using o = new Res("i" + string(i))', T * 3 + 'if i = 1 loop ok', T * 3 + 'if i = 3 exit ok', T * 3 + '? "body " + string(i)',
         T * 2 + 'done', T + 'next'] + RES,
      ['release g', 'returned g', 'release i1', 'body 2', 'release i2', 'release i3', 'end']),
     ('U05', 'U2', 'a raise in the release replaces the held raise, which is its cause', [
@@ -137,7 +137,7 @@ CASES = [
      refused('U06', 4, R_CLASS, 'Plain', 4, 2), 1),
     ('U07', 'U3', 'any other value with none -- an object, a number -- is raised at entry, before the body, and caught', [
         'f()', 'func f', T + 'try', T * 2 + 'using o = make()', T * 3 + '? "body ran"', T * 2 + 'done', T + 'catch e', T * 2 + '? "caught: " + e',
-        T * 2 + '? "line " + e.Span()[:line] + ", code [" + e.Code() + "]"', T + 'done', T + 'try', T * 2 + 'using n = 42', T * 3 + '? "body ran"',
+        T * 2 + '? "line " + string(e.Span()[:line]) + ", code [" + e.Code() + "]"', T + 'done', T + 'try', T * 2 + 'using n = 42', T * 3 + '? "body ran"',
         T * 2 + 'done', T + 'catch e', T * 2 + '? "caught: " + e', T + 'done', 'func make', T + 'return new Plain'] + PLAIN,
      ['caught: using: o answers none of Release, Destroy, Close', 'line 4, code []', 'caught: using: n answers none of Release, Destroy, Close']),
     ('U08', 'U3', 'uncaught, the refusal at entry is reported at the using line, and names no raise()', [
@@ -153,17 +153,17 @@ CASES = [
      ['caught: using: $r answers none of Release, Destroy, Close']),
 
     ('B01', 'B1', 'within inside a try body, inside a catch clause, inside itself; a try inside within', [
-        '$g = 0', 'try', T + 'within $g = 1', T * 2 + 'within $g = 2', T * 3 + '? "inner " + $g', T * 2 + 'done', T * 2 + '? "outer " + $g', T + 'done',
-        T + 'raise("go")', 'catch', T + 'within $g = 3', T * 2 + 'try', T * 3 + '? "in catch " + $g', T * 3 + 'raise("again")', T * 2 + 'catch',
-        T * 3 + '? "nested catch " + $g', T * 2 + 'done', T + 'done', T + '? "after catch block " + $g', 'done', '? "end " + $g'],
+        '$g = 0', 'try', T + 'within $g = 1', T * 2 + 'within $g = 2', T * 3 + '? "inner " + string($g)', T * 2 + 'done', T * 2 + '? "outer " + string($g)', T + 'done',
+        T + 'raise("go")', 'catch', T + 'within $g = 3', T * 2 + 'try', T * 3 + '? "in catch " + string($g)', T * 3 + 'raise("again")', T * 2 + 'catch',
+        T * 3 + '? "nested catch " + string($g)', T * 2 + 'done', T + 'done', T + '? "after catch block " + string($g)', 'done', '? "end " + string($g)'],
      ['inner 2', 'outer 1', 'in catch 3', 'nested catch 3', 'after catch block 0', 'end 0']),
     ('B02', 'B1', 'using inside within, a try inside both; a raise keeps its own line', [
         '$g = "a"', 'f()', 'func f', T + 'within $g = "b"', T * 2 + 'using o = new Res("r")', T * 3 + 'try', T * 4 + 'raise("x")', T * 3 + 'catch e',
-        T * 4 + '? "span line " + e.Span()[:line]', T * 3 + 'done', T * 3 + '? "g " + $g', T * 2 + 'done', T + 'done', T + '? "g " + $g'] + RES,
+        T * 4 + '? "span line " + string(e.Span()[:line])', T * 3 + 'done', T * 3 + '? "g " + $g', T * 2 + 'done', T + 'done', T + '? "g " + $g'] + RES,
      ['span line 7', 'g b', 'release r', 'g a']),
     ('B03', 'B2', '`within` and `using` assigned, called, or an attribute, are what they were', [
-        'f()', 'func f', T + 'within = "a word"', T + 'using = 2', T + '? within + " " + using', T + 'o = new App', T + '? o.Within', T + 'Using(5)',
-        'func Using n', T + '? "Using called with " + n', 'class App', T + 'Within = "attribute"'],
+        'f()', 'func f', T + 'within = "a word"', T + 'using = 2', T + '? within + " " + string(using)', T + 'o = new App', T + '? o.Within', T + 'Using(5)',
+        'func Using n', T + '? "Using called with " + string(n)', 'class App', T + 'Within = "attribute"'],
      ['a word 2', 'attribute', 'Using called with 5']),
     ('B04', 'B2', 'a block with no `done` is refused', [
         '? "before"', 'f()', 'func f', T + 'within $g = 1', T * 2 + '? "body"'],

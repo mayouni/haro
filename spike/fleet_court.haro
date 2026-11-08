@@ -22,7 +22,7 @@ $aCondVerbOf = []
 $cCondOther = ""
 $aCondRefSeats = []
 $aCondFormats = []
-$bCondUnread = 0
+$bCondUnread = false
 $aCondLangs = []
 $cCondLang = ""
 $aCourtSentences = []
@@ -50,7 +50,7 @@ $aCourtCites = []
 $aCourtFormset = null
 $aCourtNarrate = null
 $aCourtUnderstand = null
-$bNSurfaces = 0
+$bNSurfaces = false
 $aCourtConstitution = []
 $aCourtZone = []
 $cCourtAuditFile = ""
@@ -59,13 +59,13 @@ $aCourtPersonal = []
 $aCourtWarnings = []
 $aCourtMarks = []
 $aCourtSafeguards = []
-$bCourtCollect = 0
+$bCourtCollect = false
 $aCourtFound = []
 $aCourtBroken = []
-$bRunTrace = 0
+$bRunTrace = false
 $aRunTrace = []
 $nRunDepth = 0
-$bAskTrace = 0
+$bAskTrace = false
 $aAskTrace = []
 $cExprLang = ""
 $aExprOperators = []
@@ -84,9 +84,9 @@ $aExprOverlay = []
 $aCourtLangs = [
   ["fleet", ".fleet",
     [
-      ["FLEET", "fleet", [["link", "name", 0, 1, "prim"]], "", [], []],
-      ["MEMBER", "member", [["declaration", "machine_file", 0, 0, "sentence"], ["key", "ed25519_key", 0, 1, "format"], ["hardware", "hardware_address", 0, 1, "format"]], "", [], []],
-      ["RETIREMENT", "retirement", [["member", "member", 0, 0, "decl"], ["key", "ed25519_key", 0, 0, "format"], ["through", "journal_head", 0, 0, "format"]], "", [["member", "RETIREMENT {name} retires a key of {value}, and no MEMBER {value} is declared: a key is retired FROM a device"], ["through", "RETIREMENT {name} names no THROUGH: a retired key with no entry it is trusted through vouches for whatever its holder signs next, and a card that was stolen rather than broken goes on signing"]], []]
+      ["FLEET", "fleet", [["link", "name", false, true, "prim"]], "", [], []],
+      ["MEMBER", "member", [["declaration", "machine_file", false, false, "sentence"], ["key", "ed25519_key", false, true, "format"], ["hardware", "hardware_address", false, true, "format"]], "", [], []],
+      ["RETIREMENT", "retirement", [["member", "member", false, false, "decl"], ["key", "ed25519_key", false, false, "format"], ["through", "journal_head", false, false, "format"]], "", [["member", "RETIREMENT {name} retires a key of {value}, and no MEMBER {value} is declared: a key is retired FROM a device"], ["through", "RETIREMENT {name} names no THROUGH: a retired key with no entry it is trusted through vouches for whatever its holder signs next, and a card that was stolen rather than broken goes on signing"]], []]
     ],
     [
     ],
@@ -148,19 +148,19 @@ $aCourtLangs = [
   ],
   ["machine", ".machine",
     [
-      ["MACHINE", "box", [["profile", "profiles", 0, 0, "menu"], ["arch", "archs", 0, 0, "menu"], ["kernel", "kernels", 0, 0, "menu"], ["libc", "libcs", 0, 1, "menu"], ["board", "boards", 0, 1, "menu"], ["console", "text", 0, 1, "prim"], ["slots", "slots_device", 0, 1, "format"], ["identity", "identity_path", 0, 1, "format"], ["journal", "journal_path", 0, 1, "format"]], "", [], []],
-      ["CAPABILITY", "capability", [["grant", "yes_no", 0, 0, "menu"]], "capabilities", [], []],
-      ["USER", "user", [["uid", "uids", 0, 0, "range"], ["gid", "number", 0, 1, "prim"]], "", [], []],
-      ["MOUNT", "mount", [["at", "at_path", 0, 0, "format"], ["fs", "filesystems", 0, 0, "menu"], ["device", "text", 0, 1, "prim"], ["options", "mount_options", 1, 0, "menu"]], "", [], []],
-      ["SERVICE", "service", [["run", "word", 1, 0, "form"], ["restart", "restart_policies", 0, 1, "menu"], ["after", "service", 1, 0, "decl"], ["needs", "capability", 1, 0, "decl"], ["ready", "ready_path", 0, 1, "format"], ["health", "number", 0, 1, "prim"], ["memory", "number", 0, 1, "prim"], ["cpu", "number", 0, 1, "prim"], ["tasks", "number", 0, 1, "prim"], ["user", "user", 0, 1, "decl"], ["sees", "mount", 1, 0, "decl"]], "", [["needs", "{name} needs {value}, which no declaration grants"], ["sees", "{name} SEES {value}, and there is no such MOUNT in this declaration"]], []],
-      ["NETWORK", "network", [["interface", "text", 0, 0, "prim"], ["address", "address", 0, 0, "union"], ["gateway", "gateway_address", 0, 1, "format"], ["dns", "server", 1, 0, "form"], ["egress", "egress", 0, 1, "union"], ["domain", "domain_name", 0, 1, "format"]], "", [], []],
-      ["PIN", "pin", [["gpio", "number", 0, 0, "prim"], ["mode", "pin_modes", 0, 0, "menu"]], "", [], []],
-      ["PEER", "peer", [["network", "network", 0, 0, "decl"], ["hardware", "hardware_address", 0, 0, "format"], ["address", "peer_address", 0, 0, "format"]], "", [], []]
+      ["MACHINE", "box", [["profile", "profiles", false, false, "menu"], ["arch", "archs", false, false, "menu"], ["kernel", "kernels", false, false, "menu"], ["libc", "libcs", false, true, "menu"], ["board", "boards", false, true, "menu"], ["console", "text", false, true, "prim"], ["slots", "slots_device", false, true, "format"], ["identity", "identity_path", false, true, "format"], ["journal", "journal_path", false, true, "format"]], "", [], []],
+      ["CAPABILITY", "capability", [["grant", "yes_no", false, false, "menu"]], "capabilities", [], []],
+      ["USER", "user", [["uid", "uids", false, false, "range"], ["gid", "number", false, true, "prim"]], "", [], []],
+      ["MOUNT", "mount", [["at", "at_path", false, false, "format"], ["fs", "filesystems", false, false, "menu"], ["device", "text", false, true, "prim"], ["options", "mount_options", true, false, "menu"]], "", [], []],
+      ["SERVICE", "service", [["run", "word", true, false, "form"], ["restart", "restart_policies", false, true, "menu"], ["after", "service", true, false, "decl"], ["needs", "capability", true, false, "decl"], ["ready", "ready_path", false, true, "format"], ["health", "number", false, true, "prim"], ["memory", "number", false, true, "prim"], ["cpu", "number", false, true, "prim"], ["tasks", "number", false, true, "prim"], ["user", "user", false, true, "decl"], ["sees", "mount", true, false, "decl"]], "", [["needs", "{name} needs {value}, which no declaration grants"], ["sees", "{name} SEES {value}, and there is no such MOUNT in this declaration"]], []],
+      ["NETWORK", "network", [["interface", "text", false, false, "prim"], ["address", "address", false, false, "union"], ["gateway", "gateway_address", false, true, "format"], ["dns", "server", true, false, "form"], ["egress", "egress", false, true, "union"], ["domain", "domain_name", false, true, "format"]], "", [], []],
+      ["PIN", "pin", [["gpio", "number", false, false, "prim"], ["mode", "pin_modes", false, false, "menu"]], "", [], []],
+      ["PEER", "peer", [["network", "network", false, false, "decl"], ["hardware", "hardware_address", false, false, "format"], ["address", "peer_address", false, false, "format"]], "", [], []]
     ],
     [
-      ["word", [["value", "text", 0, 0, "prim"]]],
-      ["server", [["address", "text", 0, 0, "prim"]]],
-      ["egress_destination", [["prefix", "destination", 0, 0, "format"]]]
+      ["word", [["value", "text", false, false, "prim"]]],
+      ["server", [["address", "text", false, false, "prim"]]],
+      ["egress_destination", [["prefix", "destination", false, false, "format"]]]
     ],
     [
       ["unknown_verb", "The machine verb set is closed (DEFINE).", [], "", [], []],
@@ -200,8 +200,8 @@ $aCourtLangs = [
       ["wire_label", "label", "'{value}' cannot be a name on the wire: lowercase letters, digits and the hyphen, not at either end", "", ""]
     ],
     [
-      ["address", [["dhcp_only", 0, "menu"], ["address_prefix", 0, "format"]], "ADDRESS is dhcp, or a static address/prefix (a.b.c.d/n), and '{value}' is neither", ""],
-      ["egress", [["none_only", 0, "menu"], ["egress_destination", 1, "form"]], "EGRESS is none, or a list of destinations (address/prefix)", ""]
+      ["address", [["dhcp_only", false, "menu"], ["address_prefix", false, "format"]], "ADDRESS is dhcp, or a static address/prefix (a.b.c.d/n), and '{value}' is neither", ""],
+      ["egress", [["none_only", false, "menu"], ["egress_destination", true, "form"]], "EGRESS is none, or a list of destinations (address/prefix)", ""]
     ],
     [
       ["hosted_runs_linux", "box", "profile = hosted", "kernel = linux", "PROFILE {profile} contradicts KERNEL {kernel}: a machine of PROFILE hosted runs on KERNEL linux", "", [], "error"],

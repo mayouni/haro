@@ -22,7 +22,7 @@ $aCondVerbOf = []
 $cCondOther = ""
 $aCondRefSeats = []
 $aCondFormats = []
-$bCondUnread = 0
+$bCondUnread = false
 $aCondLangs = []
 $cCondLang = ""
 $aCourtSentences = []
@@ -50,7 +50,7 @@ $aCourtCites = []
 $aCourtFormset = null
 $aCourtNarrate = null
 $aCourtUnderstand = null
-$bNSurfaces = 0
+$bNSurfaces = false
 $aCourtConstitution = []
 $aCourtZone = []
 $cCourtAuditFile = ""
@@ -59,13 +59,13 @@ $aCourtPersonal = []
 $aCourtWarnings = []
 $aCourtMarks = []
 $aCourtSafeguards = []
-$bCourtCollect = 0
+$bCourtCollect = false
 $aCourtFound = []
 $aCourtBroken = []
-$bRunTrace = 0
+$bRunTrace = false
 $aRunTrace = []
 $nRunDepth = 0
-$bAskTrace = 0
+$bAskTrace = false
 $aAskTrace = []
 $cExprLang = ""
 $aExprOperators = []
@@ -84,12 +84,12 @@ $aExprOverlay = []
 $aCourtLangs = [
   ["medium", ".medium",
     [
-      ["SCREEN", "screen", [["satisfies", "intents", 1, 1, "menu"], ["always_reachable", "intents", 1, 1, "menu"], ["actor", "name", 0, 1, "prim"]], "", [], []],
-      ["VIBE", "vibe", [["satisfies", "intents", 1, 1, "menu"], ["always_reachable", "intents", 1, 1, "menu"], ["actor", "name", 0, 1, "prim"], ["surface_as", "media", 0, 1, "menu"]], "", [], []],
-      ["PANEL", "panel", [["satisfies", "intents", 1, 1, "menu"], ["always_reachable", "intents", 1, 1, "menu"], ["actor", "name", 0, 1, "prim"], ["bound_to", "name", 0, 1, "prim"]], "", [], []]
+      ["SCREEN", "screen", [["satisfies", "intents", true, true, "menu"], ["always_reachable", "intents", true, true, "menu"], ["actor", "name", false, true, "prim"]], "", [], []],
+      ["VIBE", "vibe", [["satisfies", "intents", true, true, "menu"], ["always_reachable", "intents", true, true, "menu"], ["actor", "name", false, true, "prim"], ["surface_as", "media", false, true, "menu"]], "", [], []],
+      ["PANEL", "panel", [["satisfies", "intents", true, true, "menu"], ["always_reachable", "intents", true, true, "menu"], ["actor", "name", false, true, "prim"], ["bound_to", "name", false, true, "prim"]], "", [], []]
     ],
     [
-      ["guarantees", [["satisfies", "intents", 1, 1, "menu"], ["always_reachable", "intents", 1, 1, "menu"], ["actor", "name", 0, 1, "prim"]]]
+      ["guarantees", [["satisfies", "intents", true, true, "menu"], ["always_reachable", "intents", true, true, "menu"], ["actor", "name", false, true, "prim"]]]
     ],
     [
     ],

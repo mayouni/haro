@@ -202,6 +202,24 @@
    "file": "cases/B22.haro",
    "stdout": "2\n\nLine 5 Error (BOOLEAN_EXPECTED) : a condition takes a boolean, and this is an integer -- say what is meant: x != 0 \nIn function f() in file B22.haro\n\nCalled from line 2 in file B22.haro ",
    "exit": 1
+  },
+  {
+   "id": "B23",
+   "kind": "run",
+   "line": "B3",
+   "why": "an integer on the left of or raises BOOLEAN_EXPECTED",
+   "file": "cases/B23.haro",
+   "stdout": "before\n\nLine 5 Error (BOOLEAN_EXPECTED) : a condition takes a boolean, and this is an integer -- say what is meant: x != 0 \nIn function f() in file B23.haro\n\nCalled from line 2 in file B23.haro ",
+   "exit": 1
+  },
+  {
+   "id": "B24",
+   "kind": "run",
+   "line": "B6",
+   "why": "a comparison of a call's answer is judged as every comparison is",
+   "file": "cases/B24.haro",
+   "stdout": "before\ntrue\n\nLine 5 Error (TYPE_MISMATCH) : integer = text -- = compares two values of one type \nIn function f() in file B24.haro\n\nCalled from line 2 in file B24.haro ",
+   "exit": 1
   }
  ]
 }

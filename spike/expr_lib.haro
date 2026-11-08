@@ -42,9 +42,9 @@
 
 func ExInList(cS, aL)
 	for i = 1 to len(aL)
-		if aL[i] = cS return 1 ok
+		if aL[i] = cS return true ok
 	next
-	return 0
+	return false
 
 func ExFail(cMsg)
 	raise($cExprLang + ": " + cMsg)
@@ -113,8 +113,8 @@ func ExTokenize(cS)
 			while k <= n and (cS[k] = " " or cS[k] = char(9))
 				k++
 			end
-			bCall = 0
-			if k <= n and cS[k] = "(" bCall = 1 ok
+			bCall = false
+			if k <= n and cS[k] = "(" bCall = true ok
 			if cL = "and" or cL = "or" or cL = "not"
 				aT + [cL, cL]
 			but cL = "contains"
@@ -213,7 +213,7 @@ func ExPrimary()
 	if t[1] = "num"
 		ExTake()
 		ExWantOperand("number", t[2])
-		return ["num", 0 + t[2]]
+		return ["num", number(t[2])]
 	ok
 	if t[1] = "str"
 		ExTake()
@@ -285,7 +285,7 @@ func ExUnary()
 
 func ExMul()
 	aL = ExUnary()
-	while 1
+	while true
 		t = ExPeek()
 		if t[1] != "op" exit ok
 		if t[2] != "*" and t[2] != "/" and t[2] != "%" exit ok
@@ -302,7 +302,7 @@ func ExMul()
 
 func ExAdd()
 	aL = ExMul()
-	while 1
+	while true
 		t = ExPeek()
 		if t[1] != "op" exit ok
 		if t[2] != "+" and t[2] != "-" exit ok
@@ -375,20 +375,20 @@ func ExNullMark()
 	return char(1) + "null"
 
 func ExIsObj(v)
-	if not islist(v) return 0 ok
-	if len(v) = 0 return 0 ok
-	if not isstring(v[1]) return 0 ok
+	if not islist(v) return false ok
+	if len(v) = 0 return false ok
+	if not isstring(v[1]) return false ok
 	return v[1] = ExObjMark()
 
 func ExIsNull(v)
-	if not isstring(v) return 0 ok
+	if not isstring(v) return false ok
 	return v = ExNullMark()
 
 func ExObjGet(aObj, cKey)
 	for i = 2 to len(aObj)
-		if aObj[i][1] = cKey return [1, aObj[i][2]] ok
+		if aObj[i][1] = cKey return [true, aObj[i][2]] ok
 	next
-	return [0, 0]
+	return [false, 0]
 
 func ExSetRecord(aRecord)
 	$aExprRecord = aRecord
@@ -412,28 +412,28 @@ func ExSplitPath(cPath)
 # as written) and then by path through the record: [found, value]
 func ExRefGet(cPath)
 	for i = 1 to len($aExprOverlay)
-		if $aExprOverlay[i][1] = cPath return [1, $aExprOverlay[i][2]] ok
+		if $aExprOverlay[i][1] = cPath return [true, $aExprOverlay[i][2]] ok
 	next
 	aSegs = ExSplitPath(cPath)
 	v = $aExprRecord
 	for i = 1 to len(aSegs)
-		if not ExIsObj(v) return [0, 0] ok
+		if not ExIsObj(v) return [false, 0] ok
 		aGot = ExObjGet(v, aSegs[i])
-		if not aGot[1] return [0, 0] ok
+		if not aGot[1] return [false, 0] ok
 		v = aGot[2]
 	next
-	if ExIsNull(v) return [0, 0] ok
-	return [1, v]
+	if ExIsNull(v) return [false, 0] ok
+	return [true, v]
 
 # ---- numbers and texts under EQUALITY value (zql.zig's asNum and asStr) ------------
 
 # a value as a number: [ok, n] -- a number, a numeric text (digits, a point,
 # an exponent; no spaces, as parseFloat reads it), a flag; never a list
 func ExNumOf(v)
-	if isnumber(v) return [1, v] ok
-	if not isstring(v) return [0, 0] ok
+	if isnumber(v) return [true, v] ok
+	if not isstring(v) return [false, 0] ok
 	n = len(v)
-	if n = 0 return [0, 0] ok
+	if n = 0 return [false, 0] ok
 	i = 1
 	if v[i] = "-" or v[i] = "+" i++ ok
 	nDigits = 0
@@ -448,7 +448,7 @@ func ExNumOf(v)
 			nDigits++
 		end
 	ok
-	if nDigits = 0 return [0, 0] ok
+	if nDigits = 0 return [false, 0] ok
 	if i <= n and (v[i] = "e" or v[i] = "E")
 		i++
 		if i <= n and (v[i] = "-" or v[i] = "+") i++ ok
@@ -457,10 +457,10 @@ func ExNumOf(v)
 			i++
 			nExp++
 		end
-		if nExp = 0 return [0, 0] ok
+		if nExp = 0 return [false, 0] ok
 	ok
-	if i <= n return [0, 0] ok
-	return [1, 0 + v]
+	if i <= n return [false, 0] ok
+	return [true, number(v)]
 
 # a value as a number for arithmetic: what cannot be one is 0
 func ExNum(v)
@@ -491,16 +491,18 @@ func ExStrOrder(a, b)
 	return 0
 
 func ExContains(cHay, cNeedle)
-	if len(cNeedle) = 0 return 1 ok
+	if len(cNeedle) = 0 return true ok
 	return substr(lower(cHay), lower(cNeedle)) > 0
 
 # ---- evaluator: env is [[name, value], ...]; a comparison answers 1 or 0 --------
 
 func ExTruthy(v)
+	# v0.43: a comparison of Haro's own is a boolean (ExCompareValue answers one); W's are its numbers 1 and 0
+	if type(v) = "BOOLEAN" return v ok
 	if isnumber(v) return v != 0 ok
-	if isstring(v) return 1 ok
-	if islist(v) return 1 ok
-	return 0
+	if isstring(v) return true ok
+	if islist(v) return true ok
+	return false
 
 func ExEnvGet(aEnv, cName)
 	for i = 1 to len(aEnv)
@@ -606,27 +608,27 @@ func ExCondition(aNode, aEnv)
 func ExBool(aNode, aEnv)
 	cK = aNode[1]
 	if cK = "cmp" return ExTruthy(ExEval(aNode, aEnv)) ok
-	if cK = "flag" return aNode[2] ok
+	if cK = "flag" return ExTruthy(aNode[2]) ok
 	if cK = "not"
-		if ExBool(aNode[2], aEnv) return 0 ok
-		return 1
+		if ExBool(aNode[2], aEnv) return false ok
+		return true
 	ok
 	if cK = "and"
-		if not ExBool(aNode[2], aEnv) return 0 ok
+		if not ExBool(aNode[2], aEnv) return false ok
 		return ExBool(aNode[3], aEnv)
 	ok
 	if cK = "or"
-		if ExBool(aNode[2], aEnv) return 1 ok
+		if ExBool(aNode[2], aEnv) return true ok
 		return ExBool(aNode[3], aEnv)
 	ok
-	return 0
+	return false
 
 # equality by value and by kind: a number and a string are never equal (W's
 # rule on the Luau host), whatever the host's own = would say
 func ExSame(a, b)
 	if isnumber(a) and isnumber(b) return a = b ok
 	if isstring(a) and isstring(b) return a = b ok
-	return 0
+	return false
 
 # EQUALITY value: numeric when both sides can be numbers, by text otherwise
 # (zql.zig's compareOperands, zql.js's _compare)
@@ -709,7 +711,7 @@ func ExSeatNames()
 # ---- JSON, the harness's exchange form ---------------------------------------------
 
 func ExNumText(n)
-	cS = "" + n
+	cS = string(n)
 	if substr(cS, ".") > 0
 		while len(cS) > 1 and cS[len(cS)] = "0"
 			cS = left(cS, len(cS) - 1)
@@ -781,7 +783,7 @@ func ExJsonValue()
 			$nExprPos++
 			return aOut
 		ok
-		while 1
+		while true
 			aOut + ExJsonValue()
 			ExJsonWs()
 			if $nExprPos > len(cS) ExFail("input: unclosed '['") ok
@@ -803,7 +805,7 @@ func ExJsonValue()
 			$nExprPos++
 			return aObj
 		ok
-		while 1
+		while true
 			ExJsonWs()
 			if $nExprPos > len(cS) or cS[$nExprPos] != '"' ExFail("input: a key was expected in an object") ok
 			cKey = ExJsonString()
@@ -851,7 +853,7 @@ func ExJsonValue()
 		end
 	ok
 	if j = $nExprPos ExFail("input: unexpected '" + c + "'") ok
-	v = 0 + substr(cS, $nExprPos, j - $nExprPos)
+	v = number(substr(cS, $nExprPos, j - $nExprPos))
 	$nExprPos = j
 	return v
 
@@ -900,7 +902,7 @@ func ExRun(cSeat, cExpr, aInput, vInit, bHasInit)
 		aGroups = []
 		for i = 1 to len(aInput)
 			k = ExEval(aAst, [["item", aInput[i]]])
-			cKey = "" + k
+			cKey = string(k)
 			if isnumber(k) cKey = ExNumText(k) ok
 			nAt = 0
 			for j = 1 to len(aGroups)
@@ -947,10 +949,10 @@ func ExMain()
 			aInput = []
 			if len(sysargv) >= 6 aInput = ExJsonParse(sysargv[6]) ok
 			vInit = 0
-			bHasInit = 0
+			bHasInit = false
 			if len(sysargv) >= 7
 				vInit = ExJsonParse(sysargv[7])
-				bHasInit = 1
+				bHasInit = true
 			ok
 			? ExJson(ExRun(cSeat, cExpr, aInput, vInit, bHasInit))
 		else

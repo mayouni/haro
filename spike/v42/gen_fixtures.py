@@ -52,7 +52,9 @@ CASES = [
     ('N01', 'N1', 'every kind of name spelled as declared runs', '.haro', [
         '$nTotal = 10', 'f()', 'func f', T + 'oClient = 2', T + '? oClient + Twice(3)', T + '? isnull(null)', T + 'o = new Point',
         T + '? o.GetX()', T + '? $nTotal', 'func Twice nN', T + 'return nN * 2', 'class Point', T + '@nX = 3', T + 'func GetX', T * 2 + 'return @nX'],
-     ['8', '1', '3', '10']),
+     ['8', 'true', '3', '10']),
+    # N01 CHANGED AFTER ITS COURT SPOKE, 2026-11-08: `isnull(null)` answers a boolean in a .haro file and prints `true` (v0.43, D55 T3,
+    # the author's ruling of 2026-11-07); the case asks the same question.
     ('N02', 'N1', 'a local read in another spelling is refused', '.haro', [
         B, 'f()', 'func f', T + 'oClient = 1', T + '? oclient'],
      refused('N02', 5, why_decl('oClient', 4), 'oclient'), 1),

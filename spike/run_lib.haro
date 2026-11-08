@@ -161,7 +161,7 @@ func RunStep(aDecls, cName, aPath)
 		cInto = CondScalar(aD, aR[2])
 		k = ExEval(RunExprNode(aD, aR[3]), [])
 		v = ExEval(RunExprNode(aD, aR[4]), [])
-		cKey = "" + k
+		cKey = string(k)
 		if isnumber(k) cKey = ExNumText(k) ok
 		aGot = RunGet(cInto)
 		aGroups = []
@@ -206,7 +206,7 @@ func RunStep(aDecls, cName, aPath)
 		aSnap = []
 		for j = 1 to len(aGot[2]) aSnap + aGot[2][j] next
 		aBody = RunStepsOf(aD, aR[4])
-		if $bRunTrace RunNote(cName, "", "", "", "" + len(aSnap)) ok
+		if $bRunTrace RunNote(cName, "", "", "", string(len(aSnap))) ok
 		RunDepth(1)
 		for j = 1 to len(aSnap)
 			RunSet(cAs, aSnap[j])

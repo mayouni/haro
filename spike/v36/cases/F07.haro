@@ -1,9 +1,9 @@
 for i = 1 to 3
 	try
 		if i = 2 exit ok
-		? "body " + i
+		? "body " + string(i)
 	finally
-		? "finally " + i
+		? "finally " + string(i)
 	done
 next
 ? "after"

@@ -3643,6 +3643,25 @@ def stage47():
         return 1
     return 0
 
+BOOL_COURT = os.path.join(HERE, 'v43', 'bool_court.py')
+
+
+def stage48():
+    """Haro v0.43, a real boolean and no coercion (D55 T1, T3; v43/GRAMMAR.md): in a .haro file true and false are booleans, a comparison and
+    the logic answer one, a condition takes one, no value changes type unasked (NO_COERCION, TYPE_MISMATCH) and an integer stays exact to 64
+    bits (INTEGER_OVERFLOW); a .ring file reads as Ring reads. v43/bool_court.py runs the cases of v43/fixtures.json on haro and its checked
+    build, the same bytes."""
+    print('stage 48 -- a real boolean, no coercion: v43/bool_court.py on haro and its checked build')
+    p = subprocess.run([sys.executable, BOOL_COURT] + (['--plant'] if PLANT else []), capture_output=True, cwd=HERE, timeout=600)
+    out = p.stdout.decode('utf-8', 'replace').replace(chr(13) + chr(10), chr(10))
+    for line in out.splitlines():
+        if line.startswith('  FAIL') or line.startswith('       ') or line.startswith('BOOLEAN COURT'):
+            print(line)
+    if p.returncode != 0:
+        print(f'  FAIL the boolean court exited {p.returncode}' + ('' if out.strip() else ': ' + p.stderr.decode('utf-8', 'replace')[-400:]))
+        return 1
+    return 0
+
 SENTENCE_TARGET = 50.0     # D42: a sentence edited, its court's image reused -- what a person editing a sentence waits for
 COLD_CEILING = 150.0       # D42: the court compiled from scratch -- a ceiling that catches the court library growing
 
@@ -3832,5 +3851,7 @@ if __name__ == '__main__':
         failures += stage46()
     if stage in (None, 47) and os.path.exists(NAME_COURT):
         failures += stage47()
+    if stage in (None, 48) and os.path.exists(BOOL_COURT):
+        failures += stage48()
     print(f'haro_forge: {"FAIL" if failures else "PASS"} ({failures} failure(s), {time.perf_counter()-t0:.1f} s)')
     sys.exit(1 if failures else 0)

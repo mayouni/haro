@@ -6,7 +6,7 @@ func f
 		done
 	catch e
 		? "caught: " + e
-		? "line " + e.Span()[:line] + ", code [" + e.Code() + "]"
+		? "line " + string(e.Span()[:line]) + ", code [" + e.Code() + "]"
 	done
 	try
 		using n = 42

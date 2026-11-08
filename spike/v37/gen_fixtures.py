@@ -49,12 +49,16 @@ CASES = [
     ('G06', 'E2', 'in a text context the error is its message, byte for byte', [
         'try', T + 'raise("boom")', 'catch e', T + '? "caught: " + e', T + '? e + "!"', T + '? len(e)', T + '? type(e)', T + '? e = "boom"',
         T + '? isstring(e)', 'done'],
-     ['caught: boom', 'boom!', '4', 'STRING', '1', '1']),
+     ['caught: boom', 'boom!', '4', 'STRING', 'true', 'true']),
+    # G06 CHANGED AFTER ITS COURT SPOKE, 2026-11-08: `e = "boom"` and `isstring(e)` answers a boolean in a .haro file and prints `true` (v0.43, D55 T3,
+    # the author's ruling of 2026-11-07); the case asks the same question.
     # G06 CHANGED AFTER ITS COURT SPOKE, 2026-11-07: `isString` is `isstring`, a native spelled as the VM registers it (v0.42, the author's
     # ruling on natives); the case asks the same question.
     ('G07', 'E3', 'Message() is the message, a plain string', [
         'try', T + 'raise("boom")', 'catch e', T + '? e.Message()', T + '? type(e.Message())', T + '? e.Message() = e', 'done'],
-     ['boom', 'STRING', '1']),
+     ['boom', 'STRING', 'true']),
+    # G07 CHANGED AFTER ITS COURT SPOKE, 2026-11-08: `e.Message() = e` answers a boolean in a .haro file and prints `true` (v0.43, D55 T3,
+    # the author's ruling of 2026-11-07); the case asks the same question.
     ('G08', 'E3', 'Code() of an error the VM raised is Ring\'s code', [
         'g()', 'func g', T + 'aL = [1]', T + 'try', T * 2 + '? aL[5]', T + 'catch e', T * 2 + '? e.Code()', T * 2 + '? e', T + 'done', T + 'try',
         T * 2 + 'x = 1 / 0', T + 'catch e2', T * 2 + '? e2.Code()', T + 'done'],
@@ -79,7 +83,7 @@ CASES = [
      ['cleanup', '5']),
     ('G14', 'E4', 'raise(e) of an error value is a rethrow: it keeps the origin it had', [
         'h()', 'func h', T + 'try', T * 2 + 'try', T * 3 + 'raise("orig")', T * 2 + 'catch e', T * 3 + 'raise(e)', T * 2 + 'done', T + 'catch e2',
-        T * 2 + '? e2 + " " + e2.Span()[:line]', T + 'done'],
+        T * 2 + '? e2 + " " + string(e2.Span()[:line])', T + 'done'],
      ['orig 5']),
     ('G15', 'E5', 'a raise in finally replaces the held raise of the body, which is its cause', [
         'try', T + 'try', T * 2 + 'raise("first")', T + 'finally', T * 2 + 'raise("second")', T + 'done', 'catch e', T + '? e', T + '? e.Cause()',
@@ -107,7 +111,7 @@ CASES = [
      ['instead', '[]']),
     ('G21', 'E5', 'a VM error in finally replaces the held raise too, and the cause is a whole error value', [
         'h()', 'func h', T + 'aL = []', T + 'try', T * 2 + 'try', T * 3 + 'raise("held")', T * 2 + 'finally', T * 3 + '? aL[3]', T * 2 + 'done',
-        T + 'catch e', T * 2 + '? e.Code()', T * 2 + '? e.Cause() + " " + e.Cause().Span()[:line]', T + 'done'],
+        T + 'catch e', T * 2 + '? e.Code()', T * 2 + '? string(e.Cause()) + " " + string(e.Cause().Span()[:line])', T + 'done'],
      ['R2', 'held 6']),
     # G22 CHANGED after the court spoke: plant P13 left the finally's handler armed at a return and this case still passed, because its later raise
     # sat inside a newer try. It now returns 300 times from that finally -- past the VM's 256 handlers, so a handler left armed each time overflows.
@@ -125,7 +129,7 @@ CASES = [
      ['Bad parameter type!', 'Bad parameter type!']),
     ('G25', 'E2', 'the error value is assigned, passed and returned as itself', [
         'g()', 'func g', T + 'try', T * 2 + 'raise("travels")', T + 'catch e', T * 2 + 'f = e', T * 2 + '? f.Message()', T * 2 + '? show(e)', T + 'done',
-        'func show x', T + 'return x.Message() + " from " + x.Span()[:line]'],
+        'func show x', T + 'return x.Message() + " from " + string(x.Span()[:line])'],
      ['travels', 'travels from 4']),
     ('G26', 'E2', 'cCatchError read after the handler is the last error, still its message', [
         'try', T + 'raise("last one")', 'catch e', 'done', '? cCatchError'],

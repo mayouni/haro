@@ -7,5 +7,5 @@ func h
 			raise(e)
 		done
 	catch e2
-		? e2 + " " + e2.Span()[:line]
+		? e2 + " " + string(e2.Span()[:line])
 	done

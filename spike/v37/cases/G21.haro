@@ -9,5 +9,5 @@ func h
 		done
 	catch e
 		? e.Code()
-		? e.Cause() + " " + e.Cause().Span()[:line]
+		? string(e.Cause()) + " " + string(e.Cause().Span()[:line])
 	done

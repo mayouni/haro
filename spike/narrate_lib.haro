@@ -109,14 +109,14 @@ func NarrateRun(cFile)
 			if i > 1 cCites += ", " ok
 			cCites += $aCourtCites[i]
 		next
-		? NarFill(cRefuses, [["language", $cCourtLang], ["file", cBase], ["line", "" + CtLineOf(cErr)], ["code", $cCourtCode], ["message", CtStripPrefix(cErr)], ["cites", cCites]])
+		? NarFill(cRefuses, [["language", $cCourtLang], ["file", cBase], ["line", string(CtLineOf(cErr))], ["code", $cCourtCode], ["message", CtStripPrefix(cErr)], ["cites", cCites]])
 		return
 	ok
 	cOpens = $aCourtNarrate[2]
 	if cOpens = "" cOpens = "{file} is a sentence of {language}, {count} declarations." ok
 	cEnds = $aCourtNarrate[3]
 	if cEnds = "" cEnds = "That is all of it." ok
-	aTop = [["language", $cCourtLang], ["file", cBase], ["count", "" + len(aDecls)]]
+	aTop = [["language", $cCourtLang], ["file", cBase], ["count", string(len(aDecls))]]
 	? NarFill(cOpens, aTop)
 	for i = 1 to len(aDecls)
 		aD = aDecls[i]
@@ -126,7 +126,7 @@ func NarrateRun(cFile)
 		if cT = ""
 			? lower(aD[1]) + " " + aD[2] + ": " + aD[5]
 		else
-			aVals = [["name", aD[2]], ["verb", aD[1]], ["rationale", aD[5]], ["line", "" + aD[3]]]
+			aVals = [["name", aD[2]], ["verb", aD[1]], ["rationale", aD[5]], ["line", string(aD[3])]]
 			if not isnull(aKind)
 				for j = 1 to len(aKind[3])
 					aVals + [aKind[3][j][1], NarSeatText(aD, aKind[3][j][1])]
@@ -173,7 +173,7 @@ func NarRefuse(cErr, cBase)
 		if i > 1 cCites += ", " ok
 		cCites += $aCourtCites[i]
 	next
-	? NarFill(cRefuses, [["language", $cCourtLang], ["file", cBase], ["line", "" + CtLineOf(cErr)], ["code", $cCourtCode], ["message", CtStripPrefix(cErr)], ["cites", cCites]])
+	? NarFill(cRefuses, [["language", $cCourtLang], ["file", cBase], ["line", string(CtLineOf(cErr))], ["code", $cCourtCode], ["message", CtStripPrefix(cErr)], ["cites", cCites]])
 
 # one step of a run, told: [depth, name, value, key, taken, count]
 func NarTellStep(aDecls, aE)
@@ -195,16 +195,16 @@ func NarTellStep(aDecls, aE)
 		ok
 		return cL
 	ok
-	aVals = [["name", aD[2]], ["verb", aD[1]], ["rationale", aD[5]], ["line", "" + aD[3]], ["value", aE[3]], ["key", aE[4]], ["taken", aE[5]], ["count", aE[6]]]
+	aVals = [["name", aD[2]], ["verb", aD[1]], ["rationale", aD[5]], ["line", string(aD[3])], ["value", aE[3]], ["key", aE[4]], ["taken", aE[5]], ["count", aE[6]]]
 	# what the step DID is told before what was written: a seat that shares a name with one of the
 	# event's own placeholders ({value} of a compute is the number it made, not the expression
 	# that made it) is shadowed, so no key is filled twice
 	if not isnull(aKind)
 		for j = 1 to len(aKind[3])
 			cSeatKey = aKind[3][j][1]
-			bTaken = 0
+			bTaken = false
 			for m = 1 to len(aVals)
-				if aVals[m][1] = cSeatKey bTaken = 1 ok
+				if aVals[m][1] = cSeatKey bTaken = true ok
 			next
 			if not bTaken
 				aVals + [cSeatKey, NarSeatText(aD, cSeatKey)]
@@ -238,7 +238,7 @@ func NarTellRun(cFile, cAlg, cRec)
 		return
 	ok
 	cRecText = ExJson(aRecord)
-	$bRunTrace = 1
+	$bRunTrace = true
 	$aRunTrace = []
 	$nRunDepth = 0
 	aRes = null
@@ -247,7 +247,7 @@ func NarTellRun(cFile, cAlg, cRec)
 	catch
 		cErr = cCatchError
 	done
-	$bRunTrace = 0
+	$bRunTrace = false
 	cT = NarTellText("run")
 	if cT = "" cT = "Running {algorithm}." ok
 	? NarFill(cT, [["language", $cCourtLang], ["file", cBase], ["algorithm", cAlg], ["record", cRecText]])
@@ -294,14 +294,14 @@ func NarTellAsk(cFile, cQ, cRows)
 		NarRefuse(cErr, cBase)
 		return
 	ok
-	$bAskTrace = 1
+	$bAskTrace = true
 	$aAskTrace = []
 	try
 		AskRun(aDecls, cQ, aRows)
 	catch
 		cErr = cCatchError
 	done
-	$bAskTrace = 0
+	$bAskTrace = false
 	for i = 1 to len($aAskTrace)
 		aE = $aAskTrace[i]
 		cT = NarTellText(aE[1])

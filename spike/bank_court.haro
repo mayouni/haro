@@ -23,7 +23,7 @@ $aCondVerbOf = []
 $cCondOther = ""
 $aCondRefSeats = []
 $aCondFormats = []
-$bCondUnread = 0
+$bCondUnread = false
 $aCondLangs = []
 $cCondLang = ""
 $aCourtSentences = []
@@ -51,7 +51,7 @@ $aCourtCites = []
 $aCourtFormset = null
 $aCourtNarrate = null
 $aCourtUnderstand = null
-$bNSurfaces = 0
+$bNSurfaces = false
 $aCourtConstitution = []
 $aCourtZone = []
 $cCourtAuditFile = ""
@@ -60,13 +60,13 @@ $aCourtPersonal = []
 $aCourtWarnings = []
 $aCourtMarks = []
 $aCourtSafeguards = []
-$bCourtCollect = 0
+$bCourtCollect = false
 $aCourtFound = []
 $aCourtBroken = []
-$bRunTrace = 0
+$bRunTrace = false
 $aRunTrace = []
 $nRunDepth = 0
-$bAskTrace = 0
+$bAskTrace = false
 $aAskTrace = []
 $cExprLang = ""
 $aExprOperators = []
@@ -85,10 +85,10 @@ $aExprOverlay = []
 $aCourtLangs = [
   ["bank", ".bank",
     [
-      ["ACCOUNT", "account", [["holder", "text", 0, 0, "prim"], ["currency", "currencies", 0, 0, "menu"], ["ceiling", "number", 0, 0, "prim"]], "", [], []],
-      ["LIMIT", "limit", [["on", "account", 0, 0, "decl"], ["daily", "number", 0, 0, "prim"], ["rule", "text", 0, 0, "prim"], ["message", "text", 0, 0, "prim"]], "", [["on", "LIMIT {name} stands on '{value}', and no ACCOUNT of that name is declared"]], [["on", "NO_ACCOUNT"]]],
+      ["ACCOUNT", "account", [["holder", "text", false, false, "prim"], ["currency", "currencies", false, false, "menu"], ["ceiling", "number", false, false, "prim"]], "", [], []],
+      ["LIMIT", "limit", [["on", "account", false, false, "decl"], ["daily", "number", false, false, "prim"], ["rule", "text", false, false, "prim"], ["message", "text", false, false, "prim"]], "", [["on", "LIMIT {name} stands on '{value}', and no ACCOUNT of that name is declared"]], [["on", "NO_ACCOUNT"]]],
       ["FLOW", "flow", [], "", [], []],
-      ["VAULT", "vault", [["held_by", "holders", 0, 0, "menu"], ["entered_through", "flow", 0, 0, "decl"]], "", [["entered_through", "VAULT {name} is entered through '{value}', and no FLOW of that name is declared: a record enters a vault only through a declared flow"]], [["held_by", "NO_HOLDER"], ["entered_through", "NO_FLOW"]]]
+      ["VAULT", "vault", [["held_by", "holders", false, false, "menu"], ["entered_through", "flow", false, false, "decl"]], "", [["entered_through", "VAULT {name} is entered through '{value}', and no FLOW of that name is declared: a record enters a vault only through a declared flow"]], [["held_by", "NO_HOLDER"], ["entered_through", "NO_FLOW"]]]
     ],
     [
     ],

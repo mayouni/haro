@@ -23,7 +23,7 @@ $aCondVerbOf = []
 $cCondOther = ""
 $aCondRefSeats = []
 $aCondFormats = []
-$bCondUnread = 0
+$bCondUnread = false
 $aCondLangs = []
 $cCondLang = ""
 $aCourtSentences = []
@@ -51,7 +51,7 @@ $aCourtCites = []
 $aCourtFormset = null
 $aCourtNarrate = null
 $aCourtUnderstand = null
-$bNSurfaces = 0
+$bNSurfaces = false
 $aCourtConstitution = []
 $aCourtZone = []
 $cCourtAuditFile = ""
@@ -60,13 +60,13 @@ $aCourtPersonal = []
 $aCourtWarnings = []
 $aCourtMarks = []
 $aCourtSafeguards = []
-$bCourtCollect = 0
+$bCourtCollect = false
 $aCourtFound = []
 $aCourtBroken = []
-$bRunTrace = 0
+$bRunTrace = false
 $aRunTrace = []
 $nRunDepth = 0
-$bAskTrace = 0
+$bAskTrace = false
 $aAskTrace = []
 $cExprLang = ""
 $aExprOperators = []
@@ -85,7 +85,7 @@ $aExprOverlay = []
 $aCourtLangs = [
   ["stzv", ".stzv",
     [
-      ["FAMILY", "family", [["base", "text", 0, 0, "prim"], ["forms", "offered", 1, 1, "menu"]], "", [], []]
+      ["FAMILY", "family", [["base", "text", false, false, "prim"], ["forms", "offered", true, true, "menu"]], "", [], []]
     ],
     [
     ],

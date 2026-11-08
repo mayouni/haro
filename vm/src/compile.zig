@@ -3478,6 +3478,11 @@ pub const Compiler = struct {
                     _ = try self.emit(.loadi, dst, 0, 0, @intCast(v));
                     return;
                 }
+                // v0.43 (D55 T1, B7): a .haro file's integer stays an integer to 64 bits
+                if (self.haroNode(n)) {
+                    _ = try self.emit(.loadk, dst, 0, 0, try self.konstInt(v));
+                    return;
+                }
                 _ = try self.emit(.loadk, dst, 0, 0, try self.konstNum(@floatFromInt(v)));
                 return;
             } else |_| {}
@@ -3491,6 +3496,8 @@ pub const Compiler = struct {
             const t = n.text();
             const yes = std.ascii.eqlIgnoreCase(std.mem.trim(u8, t, " \t\r\n"), "true");
             _ = try self.emit(.loadi, dst, 0, 0, if (yes) 1 else 0);
+            // v0.43 (D55 T3): in a .haro file the literal is a boolean
+            if (self.haroNode(n)) _ = try self.emit(.truth, dst, dst, 2, 0);
             return;
         }
         if (std.mem.eql(u8, k, "null")) {
@@ -4133,7 +4140,7 @@ pub const Compiler = struct {
             defer self.temp = save;
             const t = try self.tmp();
             try self.expr(n.namedChild(0), t);
-            _ = try self.emit(.lnot, dst, t, 0, 0);
+            _ = try self.emit(.lnot, dst, t, if (self.haroNode(n)) 1 else 0, 0);
             return;
         }
         if (std.mem.eql(u8, k, "unary_expression")) {
@@ -4164,7 +4171,12 @@ pub const Compiler = struct {
             _ = try self.emit(.sub, dst, dst, t, 1);
             return;
         }
-        if (std.mem.eql(u8, k, "call_expression")) return self.call(n, dst);
+        if (std.mem.eql(u8, k, "call_expression")) {
+            try self.call(n, dst);
+            // v0.43 (D55 T3, B4): a native that answers yes or no answers a boolean to a .haro file
+            if (self.yesNoNative(n) and self.haroNode(n)) _ = try self.emit(.truth, dst, dst, 2, 0);
+            return;
+        }
 
         return self.nope(n);
     }
@@ -4182,15 +4194,17 @@ pub const Compiler = struct {
         const is_and = std.mem.eql(u8, op, "and");
         const is_or = std.mem.eql(u8, op, "or");
         if (is_and or is_or) {
+            const hb: u8 = if (self.haroNode(n)) 1 else 0;
             const t = try self.tmp();
             try self.expr(ln, t);
-            const shortcut = try self.emit(if (is_and) .jfalsy else .jtruthy, t, 0, 0, 0);
+            const shortcut = try self.emit(if (is_and) .jfalsy else .jtruthy, t, 0, hb, 0);
             const t2 = try self.tmp();
             try self.expr(rn, t2);
-            _ = try self.emit(.truth, dst, t2, 0, 0);
+            _ = try self.emit(.truth, dst, t2, hb, 0);
             const done = try self.emit(.jmp, 0, 0, 0, 0);
             self.land(shortcut);
             _ = try self.emit(.loadi, dst, 0, 0, if (is_and) 0 else 1);
+            if (hb == 1) _ = try self.emit(.truth, dst, dst, 2, 0);
             self.land(done);
             return;
         }
@@ -4229,6 +4243,7 @@ pub const Compiler = struct {
             for (nofire.items) |p| self.land(p);
             _ = try self.emit(.loadi, dst, 0, 0, 0);
             self.land(done);
+            if (self.haroNode(n)) _ = try self.emit(.truth, dst, dst, 2, 0);
             return;
         }
 
@@ -5382,6 +5397,22 @@ pub const Compiler = struct {
     /// `aH[:name]` and `aH["name"]` are the same lookup. 25,121 sites in
     /// Softanza -- the single most-used construct the front end lacked.
     /// HARO-SURFACE-01: is `n` read by Haro's rules -- a node of a .haro file, or of an eval in a program whose root is one (S5)?
+    /// The natives that answer yes or no (0 or 1 on Ring), called by their own name and not shadowed by a function of the program.
+    fn yesNoNative(self: *Compiler, n: ts.Node) bool {
+        if (n.namedChildCount() == 0) return false;
+        const f = n.namedChild(0);
+        if (!std.mem.eql(u8, f.kind(), "identifier")) return false;
+        const name = f.text();
+        const yes_no = [_][]const u8{ "isalnum", "isalpha", "isandroid", "isattribute", "iscfunction", "isclass", "iscntrl", "isdigit", "isfreebsd",
+            "isfunction", "isglobal", "isgraph", "islinux", "islist", "islocal", "islower", "ismacosx", "ismethod", "ismsdos", "isnull", "isnumber",
+            "isobject", "ispackage", "ispackageclass", "ispointer", "isprint", "isprivateattribute", "isprivatemethod", "ispunct", "isspace",
+            "isstring", "isunix", "isupper", "iswindows", "iswindows64", "isxdigit", "fexists", "direxists" };
+        for (yes_no) |w| {
+            if (std.mem.eql(u8, name, w)) return self.findFunc(name) == null;
+        }
+        return false;
+    }
+
     fn haroNode(self: *Compiler, n: ts.Node) bool {
         if (self.eval != null) return lift.haro_root;
         const fi = self.fileOf(self.rereadSrc(n).ptr) orelse return lift.haro_root;
@@ -5410,6 +5441,15 @@ pub const Compiler = struct {
 
     /// A numeric constant. Ring has exactly one number type and it is a
     /// double, so this is where every decimal literal lands.
+    fn konstInt(self: *Compiler, v: i64) Error!i32 {
+        const kb: i32 = if (self.eval) |ev| ev.konst_base else 0;
+        for (self.konst.items, 0..) |k, i| {
+            if (k.tag == .int and k.p.i == v) return @as(i32, @intCast(i)) + kb;
+        }
+        self.konst.append(self.alloc, vm.Value.int(v)) catch return Error.OutOfMemory;
+        return @as(i32, @intCast(self.konst.items.len - 1)) + kb;
+    }
+
     fn konstNum(self: *Compiler, d: f64) Error!i32 {
         const kb: i32 = if (self.eval) |ev| ev.konst_base else 0;
         for (self.konst.items, 0..) |k, i| {
@@ -6449,7 +6489,7 @@ pub const Compiler = struct {
                 defer self.temp = save;
                 const t = try self.tmp();
                 try self.expr(n, t);
-                try out.append(self.scratch, try self.emit(.jfalsy, t, 0, 0, 0));
+                try out.append(self.scratch, try self.emit(.jfalsy, t, 0, if (self.haroNode(n)) 1 else 0, 0));
                 return;
             }
             if (std.mem.eql(u8, op, "and")) {
@@ -6494,7 +6534,7 @@ pub const Compiler = struct {
                 defer self.temp = save;
                 const t = try self.tmp();
                 try self.expr(n, t);
-                try out.append(self.scratch, try self.emit(.jfalsy, t, 0, 0, 0));
+                try out.append(self.scratch, try self.emit(.jfalsy, t, 0, if (self.haroNode(n)) 1 else 0, 0));
                 return;
             }
             if (inv) |o| {
@@ -6524,11 +6564,35 @@ pub const Compiler = struct {
         // Any other expression is a truth test. Ring's truth is emptiness:
         // 0, "" and [] are false, an object is true -- so `jeqi` (int-only)
         // was wrong for every string and list condition.
+        // v0.43 (D55 T3): in a .haro file a condition takes a boolean. A
+        // literal of another type is refused here, when compiling; any other
+        // value is judged by the VM (c = 1), which names its type.
+        const hc = self.haroNode(n);
+        if (hc and self.spellIn(n.text())) {
+            const lit: ?[]const u8 = if (std.mem.eql(u8, k, "number"))
+                (if (std.mem.indexOfScalar(u8, n.text(), '.') != null) "a number" else "an integer")
+            else if (std.mem.eql(u8, k, "string") or std.mem.eql(u8, k, "null"))
+                "a text"
+            else if (std.mem.eql(u8, k, "list_literal"))
+                "a vector"
+            else
+                null;
+            if (lit) |what| {
+                self.spellSet(std.mem.trim(u8, n.text(), " \t\r\n"), if (std.mem.eql(u8, what, "an integer"))
+                    "a condition takes a boolean -- this literal is an integer; written"
+                else if (std.mem.eql(u8, what, "a number"))
+                    "a condition takes a boolean -- this literal is a number; written"
+                else if (std.mem.eql(u8, what, "a text"))
+                    "a condition takes a boolean -- this literal is a text; written"
+                else
+                    "a condition takes a boolean -- this literal is a vector; written");
+            }
+        }
         const save = self.temp;
         defer self.temp = save;
         const t = try self.tmp();
         try self.expr(n, t);
-        try out.append(self.scratch, try self.emit(.jfalsy, t, 0, 0, 0));
+        try out.append(self.scratch, try self.emit(.jfalsy, t, 0, if (hc) 1 else 0, 0));
     }
 
     // -------------------------------------------------------- statements
@@ -11116,14 +11180,16 @@ fn mentionsName(n: ts.Node, nm: []const u8) bool {
 /// class grew cannot be given.
 fn constOf(c: *Compiler, alloc: std.mem.Allocator, n: ts.Node) Error!?ConstVal {
     const k = n.kind();
-    if (std.mem.eql(u8, k, "number")) return try constNumber(c, std.mem.trim(u8, n.text(), " \t\r\n"), false);
+    if (std.mem.eql(u8, k, "number")) return try constNumber(c, std.mem.trim(u8, n.text(), " \t\r\n"), false, c.haroNode(n));
     if (std.mem.eql(u8, k, "unary_expression") and n.namedChildCount() == 1) {
         const t = std.mem.trimLeft(u8, n.text(), " \t");
         const inner = n.namedChild(0);
         if (t.len > 0 and t[0] == '-' and std.mem.eql(u8, inner.kind(), "number"))
-            return try constNumber(c, std.mem.trim(u8, inner.text(), " \t\r\n"), true);
+            return try constNumber(c, std.mem.trim(u8, inner.text(), " \t\r\n"), true, c.haroNode(n));
         return null;
     }
+    // v0.43: a .haro file's true and false are booleans, made when running, never folded to Ring's 1 and 0
+    if (std.mem.eql(u8, k, "boolean") and c.haroNode(n)) return null;
     if (std.mem.eql(u8, k, "boolean"))
         return .{ .int = if (std.ascii.eqlIgnoreCase(std.mem.trim(u8, n.text(), " \t\r\n"), "true")) 1 else 0 };
     if (std.mem.eql(u8, k, "null")) return .{ .konst = try c.konstIndex("\"\"") };
@@ -11141,10 +11207,12 @@ fn constOf(c: *Compiler, alloc: std.mem.Allocator, n: ts.Node) Error!?ConstVal {
     return null;
 }
 
-fn constNumber(c: *Compiler, t: []const u8, neg: bool) Error!?ConstVal {
+fn constNumber(c: *Compiler, t: []const u8, neg: bool, haro: bool) Error!?ConstVal {
     if (std.fmt.parseInt(i64, t, 10)) |v0| {
         const v = if (neg) -v0 else v0;
         if (v >= std.math.minInt(i32) and v <= std.math.maxInt(i32)) return .{ .int = v };
+        // v0.43 (D55 T1, B7): a .haro file's integer stays an integer to 64 bits
+        if (haro) return .{ .konst = try c.konstInt(v) };
         return .{ .konst = try c.konstNum(@floatFromInt(v)) };
     } else |_| {}
     const d = std.fmt.parseFloat(f64, t) catch return null;

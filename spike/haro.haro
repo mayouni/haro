@@ -23,12 +23,12 @@ $aCondVerbOf = []
 $cCondOther = ""
 $aCondRefSeats = []
 $aCondFormats = []
-$bCondUnread = 0
+$bCondUnread = false
 $aCondLangs = []
 $cCondLang = ""
 $aCourtSentences = []
 $cStzuDir = ""
-$bStzuCollect = 0
+$bStzuCollect = false
 $aStzuFound = []
 $aStzuBroken = []
 $aStzuLastName = ""
@@ -44,11 +44,11 @@ else
 	cPath = sysargv[3]
 	cSrc = read(cPath)
 	$cStzuDir = StzuDirOf(cPath)
-	bAll = 0
-	bFmt = 0
+	bAll = false
+	bFmt = false
 	if len(sysargv) >= 4
-		if sysargv[4] = "all" bAll = 1 ok
-		if sysargv[4] = "fmt" bFmt = 1 ok
+		if sysargv[4] = "all" bAll = true ok
+		if sysargv[4] = "fmt" bFmt = true ok
 	ok
 	if bFmt
 		HaroFmt(cSrc)
@@ -80,7 +80,7 @@ func HaroFmt(cText)
 # ones no script-level variable of this file is called -- cErr and aLang are, and StzuDeclare
 # assigns both of its own (found on the oracle: its cErr leaked into the top level's)
 func HaroAll(cText)
-	$bStzuCollect = 1
+	$bStzuCollect = true
 	cE = ""
 	aL = null
 	try
@@ -88,14 +88,14 @@ func HaroAll(cText)
 	catch
 		cE = cCatchError
 	done
-	$bStzuCollect = 0
+	$bStzuCollect = false
 	if cE != ""
 		$aStzuFound + [StzuLineOf(cE), StzuStripPrefix(cE)]
 	ok
 	if len($aStzuFound) > 0
 		aFd = StzuSortFound($aStzuFound)
 		for k = 1 to len(aFd)
-			? "haro (line " + aFd[k][1] + "): " + aFd[k][2]
+			? "haro (line " + string(aFd[k][1]) + "): " + string(aFd[k][2])
 		next
 	else
 		StzuPrintLanguage(aL)

@@ -43,7 +43,7 @@
    "line": "S3",
    "why": "in a .haro file a symbol keeps its spelling",
    "file": "cases/S04.haro",
-   "stdout": "Name\nname\n1\n"
+   "stdout": "Name\nname\ntrue\n"
   },
   {
    "id": "S05",

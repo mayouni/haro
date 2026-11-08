@@ -35,11 +35,11 @@ func AskIsSpace(c)
 # the word starting at i is exactly cKw, bounded by the text's edges or spaces
 func AskWordAt(cQ, i, cKw)
 	n = len(cKw)
-	if i + n - 1 > len(cQ) return 0 ok
-	if substr(cQ, i, n) != cKw return 0 ok
-	if i > 1 and not AskIsSpace(cQ[i - 1]) return 0 ok
-	if i + n <= len(cQ) and not AskIsSpace(cQ[i + n]) return 0 ok
-	return 1
+	if i + n - 1 > len(cQ) return false ok
+	if substr(cQ, i, n) != cKw return false ok
+	if i > 1 and not AskIsSpace(cQ[i - 1]) return false ok
+	if i + n <= len(cQ) and not AskIsSpace(cQ[i + n]) return false ok
+	return true
 
 func AskTrim(cS)
 	i = 1
@@ -69,25 +69,25 @@ func AskWords(cS)
 	return aW
 
 func AskIsName(cW)
-	if len(cW) = 0 return 0 ok
+	if len(cW) = 0 return false ok
 	for i = 1 to len(cW)
-		if not (CtIsLowerish(cW[i]) or CtIsDigit(cW[i]) or cW[i] = "_") return 0 ok
+		if not (CtIsLowerish(cW[i]) or CtIsDigit(cW[i]) or cW[i] = "_") return false ok
 	next
-	return 1
+	return true
 
 func AskIsField(cW)
-	if len(cW) = 0 return 0 ok
+	if len(cW) = 0 return false ok
 	for i = 1 to len(cW)
-		if not (CtIsLowerish(cW[i]) or CtIsDigit(cW[i]) or cW[i] = "_" or cW[i] = ".") return 0 ok
+		if not (CtIsLowerish(cW[i]) or CtIsDigit(cW[i]) or cW[i] = "_" or cW[i] = ".") return false ok
 	next
-	return 1
+	return true
 
 func AskIsNumber(cW)
-	if len(cW) = 0 return 0 ok
+	if len(cW) = 0 return false ok
 	for i = 1 to len(cW)
-		if not CtIsDigit(cW[i]) return 0 ok
+		if not CtIsDigit(cW[i]) return false ok
 	next
-	return 1
+	return true
 
 func AskFail(cMsg)
 	CtFail(1, cMsg)
@@ -184,7 +184,7 @@ func AskParse(aDecls, cQ)
 	ok
 	aWhere = null
 	cField = ""
-	bDesc = 0
+	bDesc = false
 	nLim = -1
 	nSeen = 0
 	for s = 1 to len(aSeg)
@@ -224,9 +224,9 @@ func AskParse(aDecls, cQ)
 			if not AskIsField(cField) AskFail("ORDER BY takes a field name, found '" + cField + "'") ok
 			if len(aOW) >= 4
 				if aOW[4] = "DESC"
-					bDesc = 1
+					bDesc = true
 				but aOW[4] = "ASC"
-					bDesc = 0
+					bDesc = false
 				else
 					AskFail("Unexpected '" + aOW[4] + "' after the question")
 				ok
@@ -236,8 +236,8 @@ func AskParse(aDecls, cQ)
 			aLW = AskWords(cText)
 			if len(aLW) < 2 AskFail("Expected a number after LIMIT") ok
 			if not AskIsNumber(aLW[2]) AskFail("LIMIT takes a number, found '" + aLW[2] + "'") ok
-			nLim = 0 + aLW[2]
-			if len(aLW) > 2 AskFail("Unexpected '" + aLW[3] + "' after the question") ok
+			nLim = number(aLW[2])
+			if len(aLW) > 2 AskFail("Unexpected '" + string(aLW[3]) + "' after the question") ok
 		ok
 	next
 	AskCheckFields(aDecls, aFromDecl, aWhere, cField)
@@ -280,11 +280,11 @@ func AskSchemaNames(aDecls, aFromDecl)
 		if cCmp = "" loop ok
 		for d = 1 to len(aDecls)
 			if aDecls[d][1] != aKS[1] loop ok
-			bThis = 0
+			bThis = false
 			cComputed = ""
 			aSC = aDecls[d][4]
 			for i = 1 to len(aSC)
-				if aSC[i][1] = cThr and aSC[i][3][2] = aFromDecl[2] bThis = 1 ok
+				if aSC[i][1] = cThr and aSC[i][3][2] = aFromDecl[2] bThis = true ok
 				if aSC[i][1] = cCmp cComputed = aSC[i][3][2] ok
 			next
 			if bThis and cComputed != "" and not CtInList(cComputed, aNames) aNames + cComputed ok
@@ -294,15 +294,15 @@ func AskSchemaNames(aDecls, aFromDecl)
 
 # every field a condition names, in the order the text names them
 func AskRefsOf(aNode)
-	if not islist(aNode) return 0 ok
-	if len(aNode) = 0 or not isstring(aNode[1]) return 0 ok
+	if not islist(aNode) return false ok
+	if len(aNode) = 0 or not isstring(aNode[1]) return false ok
 	if aNode[1] = "ref" and len(aNode) >= 2
 		$aAskRefsFound + aNode[2]
-		return 0
+		return false
 	ok
 	if aNode[1] = "agg" and len(aNode) >= 3
 		$aAskRefsFound + aNode[3]
-		return 0
+		return false
 	ok
 	for i = 2 to len(aNode)
 		AskRefsOf(aNode[i])
@@ -359,14 +359,14 @@ func AskRun(aDecls, cQ, aRows)
 	if $bAskTrace AskNote("ask", [["question", cQ], ["from", aQ[1]]]) ok
 	aOut = []
 	for i = 1 to len(aRows)
-		if not ExIsObj(aRows[i]) AskFail("row " + i + " is not a JSON object") ok
+		if not ExIsObj(aRows[i]) AskFail("row " + string(i) + " is not a JSON object") ok
 		if not isnull(aQ[2])
 			ExSetRecord(aRows[i])
 			if not ExBool(aQ[2], []) loop ok
 		ok
 		aOut + aRows[i]
 	next
-	if $bAskTrace AskNote("matched", [["count", "" + len(aOut)], ["total", "" + len(aRows)], ["from", aQ[1]]]) ok
+	if $bAskTrace AskNote("matched", [["count", string(len(aOut))], ["total", string(len(aRows))], ["from", aQ[1]]]) ok
 	if aQ[3] != ""
 		# a stable insertion: a record goes after every one it does not precede
 		aSorted = []
@@ -396,7 +396,7 @@ func AskRun(aDecls, cQ, aRows)
 	ok
 	if aQ[5] >= 0 and len(aOut) > aQ[5]
 		# told only when the limit DROPPED rows: "only the first 5 are kept" over three matches would be untrue
-		if $bAskTrace AskNote("cut", [["limit", "" + aQ[5]], ["dropped", "" + (len(aOut) - aQ[5])], ["count", "" + aQ[5]]]) ok
+		if $bAskTrace AskNote("cut", [["limit", string(aQ[5])], ["dropped", string(len(aOut) - aQ[5])], ["count", string(aQ[5])]]) ok
 		aCut = []
 		for i = 1 to aQ[5]
 			aCut + aOut[i]
@@ -404,5 +404,5 @@ func AskRun(aDecls, cQ, aRows)
 		aOut = aCut
 	ok
 	# v0.27: the rows themselves, not their JSON -- the voice renders them, redacted under its safeguard
-	if $bAskTrace AskNote("answer", [["count", "" + len(aOut)], ["rows", aOut]]) ok
+	if $bAskTrace AskNote("answer", [["count", string(len(aOut))], ["rows", aOut]]) ok
 	return aOut

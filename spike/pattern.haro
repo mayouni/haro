@@ -80,10 +80,10 @@ func PatCases(cBody)
 	aSetN = []
 	aSetM = []
 	cStart = "main"
-	bInput = 0
+	nInput = 0
 	cInput = ""
 	cFile = ""
-	bOpen = 0
+	bOpen = false
 	for i = 1 to len(aLines)
 		cLine = aLines[i]
 		if len(cLine) > 0 and cLine[len(cLine)] = char(13)
@@ -92,15 +92,15 @@ func PatCases(cBody)
 		aP = PatSplit1(cLine)
 		cCmd = aP[1]
 		if cCmd = "case"
-			if bOpen PatOneCase(cId, aNames, aTexts, aSetN, aSetM, cStart, bInput, cInput, cFile) ok
-			bOpen = 1
+			if bOpen PatOneCase(cId, aNames, aTexts, aSetN, aSetM, cStart, nInput, cInput, cFile) ok
+			bOpen = true
 			cId = aP[2]
 			aNames = []
 			aTexts = []
 			aSetN = []
 			aSetM = []
 			cStart = "main"
-			bInput = 0
+			nInput = 0
 			cInput = ""
 			cFile = ""
 		but cCmd = "rule"
@@ -118,26 +118,26 @@ func PatCases(cBody)
 		but cCmd = "start"
 			cStart = aP[2]
 		but cCmd = "input"
-			bInput = 1
+			nInput = 1
 			cInput = aP[2]
 		but cCmd = "file"
-			bInput = 2
+			nInput = 2
 			cFile = aP[2]
 		ok
 	next
-	if bOpen PatOneCase(cId, aNames, aTexts, aSetN, aSetM, cStart, bInput, cInput, cFile) ok
+	if bOpen PatOneCase(cId, aNames, aTexts, aSetN, aSetM, cStart, nInput, cInput, cFile) ok
 
-func PatOneCase(cId, aNames, aTexts, aSetN, aSetM, cStart, bInput, cInput, cFile)
+func PatOneCase(cId, aNames, aTexts, aSetN, aSetM, cStart, nInput, cInput, cFile)
 	try
 		PatDeclare(aNames, aTexts, aSetN, aSetM)
-		if bInput = 0
+		if nInput = 0
 			? cId + " declared"
 		else
-			if bInput = 2 cInput = read(cFile) ok
+			if nInput = 2 cInput = read(cFile) ok
 			aR = PatRun(cStart, cInput)
 			cWhole = "0"
 			if aR[1] cWhole = "1" ok
-			? cId + " match " + cWhole + " steps " + aR[3] + " bound " + aR[4] + " kept " + PatPrintKept(aR[2])
+			? cId + " match " + cWhole + " steps " + string(aR[3]) + " bound " + string(aR[4]) + " kept " + PatPrintKept(aR[2])
 		ok
 	catch
 		? cId + " refused " + cCatchError

@@ -25,7 +25,7 @@ $aCondVerbOf = []
 $cCondOther = ""
 $aCondRefSeats = []
 $aCondFormats = []
-$bCondUnread = 0
+$bCondUnread = false
 $aCondLangs = []
 $cCondLang = ""
 $aCourtSentences = []
@@ -53,7 +53,7 @@ $aCourtCites = []
 $aCourtFormset = null
 $aCourtNarrate = null
 $aCourtUnderstand = null
-$bNSurfaces = 0
+$bNSurfaces = false
 $aCourtConstitution = []
 $aCourtZone = []
 $cCourtAuditFile = ""
@@ -62,13 +62,13 @@ $aCourtPersonal = []
 $aCourtWarnings = []
 $aCourtMarks = []
 $aCourtSafeguards = []
-$bCourtCollect = 0
+$bCourtCollect = false
 $aCourtFound = []
 $aCourtBroken = []
-$bRunTrace = 0
+$bRunTrace = false
 $aRunTrace = []
 $nRunDepth = 0
-$bAskTrace = 0
+$bAskTrace = false
 $aAskTrace = []
 $cExprLang = ""
 $aExprOperators = []
@@ -87,16 +87,16 @@ $aExprOverlay = []
 $aCourtLangs = [
   ["z", ".z",
     [
-      ["ENUM", "enum", [["words", "word", 1, 0, "form"]], "", [], []],
-      ["ENTITY", "entity", [["fields", "field", 1, 0, "form"]], "", [], []],
-      ["NORM", "norm", [["rule", "zexpr", 0, 0, "expr"], ["message", "text", 0, 0, "prim"]], "", [], []],
-      ["FLOW", "flow", [["records", "entity", 0, 1, "decl"]], "", [], []],
-      ["STEP", "step", [["flow", "flow", 0, 0, "decl"], ["order", "number", 0, 0, "prim"], ["actor", "actors", 0, 0, "menu"], ["validate", "zexpr", 0, 1, "expr"], ["enforcing", "norm", 0, 1, "decl"], ["compute", "name", 0, 1, "prim"], ["formula", "zexpr", 0, 1, "expr"], ["on_fail", "text", 0, 1, "prim"], ["on_success", "outcomes", 0, 1, "menu"]], "", [["flow", "STEP {name} walks '{value}', and no FLOW of that name is declared"], ["enforcing", "STEP {name} enforces '{value}', and no NORM of that name is declared: referencing an undeclared norm is a registration error"]], [["flow", "NO_FLOW"], ["enforcing", "NO_NORM"]]],
-      ["LANDING_ZONE", "landing_zone", [["format", "formats", 0, 0, "menu"], ["into", "flow", 0, 0, "decl"], ["held_by", "holders", 0, 0, "menu"]], "", [["into", "LANDING_ZONE {name} lands INTO '{value}', and no FLOW of that name is declared"]], [["held_by", "NO_HOLDER"], ["into", "NO_FLOW"]]]
+      ["ENUM", "enum", [["words", "word", true, false, "form"]], "", [], []],
+      ["ENTITY", "entity", [["fields", "field", true, false, "form"]], "", [], []],
+      ["NORM", "norm", [["rule", "zexpr", false, false, "expr"], ["message", "text", false, false, "prim"]], "", [], []],
+      ["FLOW", "flow", [["records", "entity", false, true, "decl"]], "", [], []],
+      ["STEP", "step", [["flow", "flow", false, false, "decl"], ["order", "number", false, false, "prim"], ["actor", "actors", false, false, "menu"], ["validate", "zexpr", false, true, "expr"], ["enforcing", "norm", false, true, "decl"], ["compute", "name", false, true, "prim"], ["formula", "zexpr", false, true, "expr"], ["on_fail", "text", false, true, "prim"], ["on_success", "outcomes", false, true, "menu"]], "", [["flow", "STEP {name} walks '{value}', and no FLOW of that name is declared"], ["enforcing", "STEP {name} enforces '{value}', and no NORM of that name is declared: referencing an undeclared norm is a registration error"]], [["flow", "NO_FLOW"], ["enforcing", "NO_NORM"]]],
+      ["LANDING_ZONE", "landing_zone", [["format", "formats", false, false, "menu"], ["into", "flow", false, false, "decl"], ["held_by", "holders", false, false, "menu"]], "", [["into", "LANDING_ZONE {name} lands INTO '{value}', and no FLOW of that name is declared"]], [["held_by", "NO_HOLDER"], ["into", "NO_FLOW"]]]
     ],
     [
-      ["word", [["value", "name", 0, 0, "prim"]]],
-      ["field", [["name", "name", 0, 0, "prim"], ["type", "name", 0, 0, "prim"], ["tag", "tags", 0, 1, "menu"]]]
+      ["word", [["value", "name", false, false, "prim"]]],
+      ["field", [["name", "name", false, false, "prim"], ["type", "name", false, false, "prim"], ["tag", "tags", false, true, "menu"]]]
     ],
     [
       ["unknown_verb", "The ZQL verb set is closed -- destructive or unrecognized operations are not part of the grammar.", [], "UNKNOWN_VERB", [], []],

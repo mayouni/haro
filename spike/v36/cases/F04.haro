@@ -5,7 +5,7 @@ func f
 	try
 		return n
 	finally
-		? "finally " + n + " " + upper("x")
+		? "finally " + string(n) + " " + upper("x")
 		n = 2
 	done
 	return 99

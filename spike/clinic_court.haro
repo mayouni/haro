@@ -23,7 +23,7 @@ $aCondVerbOf = []
 $cCondOther = ""
 $aCondRefSeats = []
 $aCondFormats = []
-$bCondUnread = 0
+$bCondUnread = false
 $aCondLangs = []
 $cCondLang = ""
 $aCourtSentences = []
@@ -51,7 +51,7 @@ $aCourtCites = []
 $aCourtFormset = null
 $aCourtNarrate = null
 $aCourtUnderstand = null
-$bNSurfaces = 0
+$bNSurfaces = false
 $aCourtConstitution = []
 $aCourtZone = []
 $cCourtAuditFile = ""
@@ -60,13 +60,13 @@ $aCourtPersonal = []
 $aCourtWarnings = []
 $aCourtMarks = []
 $aCourtSafeguards = []
-$bCourtCollect = 0
+$bCourtCollect = false
 $aCourtFound = []
 $aCourtBroken = []
-$bRunTrace = 0
+$bRunTrace = false
 $aRunTrace = []
 $nRunDepth = 0
-$bAskTrace = 0
+$bAskTrace = false
 $aAskTrace = []
 $cExprLang = ""
 $aExprOperators = []
@@ -85,9 +85,9 @@ $aExprOverlay = []
 $aCourtLangs = [
   ["clinic", ".clinic",
     [
-      ["PATIENT", "patient", [["full_name", "text", 0, 0, "prim"], ["file_no", "text", 0, 0, "prim"], ["ward", "wards", 0, 0, "menu"]], "", [], []],
+      ["PATIENT", "patient", [["full_name", "text", false, false, "prim"], ["file_no", "text", false, false, "prim"], ["ward", "wards", false, false, "menu"]], "", [], []],
       ["FLOW", "flow", [], "", [], []],
-      ["REGISTRY", "registry", [["held_by", "holders", 0, 0, "menu"], ["entered_through", "flow", 0, 0, "decl"]], "", [["entered_through", "REGISTRY {name} is entered through '{value}', and no FLOW of that name is declared: a record enters a registry only through a declared flow"]], [["held_by", "NO_HOLDER"], ["entered_through", "NO_FLOW"]]]
+      ["REGISTRY", "registry", [["held_by", "holders", false, false, "menu"], ["entered_through", "flow", false, false, "decl"]], "", [["entered_through", "REGISTRY {name} is entered through '{value}', and no FLOW of that name is declared: a record enters a registry only through a declared flow"]], [["held_by", "NO_HOLDER"], ["entered_through", "NO_FLOW"]]]
     ],
     [
     ],

@@ -562,6 +562,7 @@ fn describeValue(v: Value) []const u8 {
         .obj => "obj",
         .dll => "dll",
         .cptr => "cptr",
+        .boolean => if (v.p.i != 0) "boolean true" else "boolean false",
     };
 }
 
@@ -584,7 +585,8 @@ fn describeValue(v: Value) []const u8 {
 /// NULL, and a NULL pointer is FALSE in an `if`). Measured on 1.27
 /// (bench/exec/file_stdio.ring): type "file", isPointer 1, isList 0, never
 /// equal to "", R21 in arithmetic, printed as address / kind / status.
-pub const Tag = enum(u32) { nil, int, num, str, vec, obj, dll, cptr };
+/// `boolean` is Haro's (v0.43, D55 T3): only code from a .haro file makes one; Ring's code reads it as 1 or 0.
+pub const Tag = enum(u32) { nil, int, num, str, vec, obj, dll, cptr, boolean };
 
 /// An object: a class id plus a flat slot array, one slot per attribute.
 ///
@@ -1505,6 +1507,10 @@ pub const Value = extern struct {
     }
     pub inline fn nil() Value {
         return .{ .p = .{ .i = 0 }, .tag = .nil };
+    }
+    /// v0.43: the payload is 1 or 0, so code that reads `p.i` reads Ring's 1 or 0.
+    pub inline fn boolean(b: bool) Value {
+        return .{ .p = .{ .i = @intFromBool(b) }, .tag = .boolean };
     }
     pub inline fn vec(v: *Vec) Value {
         return .{ .p = .{ .v = v }, .tag = .vec };
@@ -3745,7 +3751,156 @@ pub const VM = struct {
         return false;
     }
 
-    fn valEq(a: Value, b: Value) bool {
+
+    // ------------------------------------------------------------------
+    // v0.43 (D55 T1, T3): a real boolean, and no value changes type unasked,
+    // in code from a .haro file. A .ring file reads as Ring reads, and a
+    // boolean reaching it is 1 or 0 there. Which code is Haro's is the file
+    // of the instruction (strictAt), asked only on paths that are slow
+    // already; a condition the program wrote carries its own flag from the
+    // compiler (c = 1), so Ring's truth tests pay nothing.
+    fn strictAt(self: *VM, pc: u32) bool {
+        if (pc >= self.files.len) return false;
+        const fi = self.files[pc];
+        if (fi >= self.file_names.len) return false;
+        return std.mem.endsWith(u8, self.file_names[fi], ".haro");
+    }
+    fn typeWord(v: Value) []const u8 {
+        return switch (v.tag) {
+            .boolean => "boolean",
+            .int => "integer",
+            .num => "number",
+            .str => "text",
+            .vec => if (v.p.v.closure) "function" else "vector",
+            .obj => "object",
+            .nil => "none",
+            .dll, .cptr => "handle",
+        };
+    }
+    fn typeArticle(v: Value) []const u8 {
+        return switch (v.tag) {
+            .boolean => "a boolean",
+            .int => "an integer",
+            .num => "a number",
+            .str => "a text",
+            .vec => if (v.p.v.closure) "a function" else "a vector",
+            .obj => "an object",
+            .nil => "none",
+            .dll, .cptr => "a handle",
+        };
+    }
+    fn haroMsg(self: *VM, comptime fmt: []const u8, args: anytype) []const u8 {
+        return std.fmt.allocPrint(self.alloc, fmt, args) catch @panic("oom");
+    }
+    fn condErr(self: *VM, v: Value) []const u8 {
+        const todo: []const u8 = switch (v.tag) {
+            .int, .num => "x != 0",
+            .str => "x != \"\"",
+            .vec => "len(x) > 0",
+            else => "a comparison",
+        };
+        return self.haroMsg("Error (BOOLEAN_EXPECTED) : a condition takes a boolean, and this is {s} -- say what is meant: {s}", .{ typeArticle(v), todo });
+    }
+    fn coerceErr(self: *VM, op: []const u8, x: Value, y: Value) []const u8 {
+        const todo: []const u8 = if (x.tag == .boolean or y.tag == .boolean) "a comparison, or string(b)" else "string(x) or number(x)";
+        return self.haroMsg("Error (NO_COERCION) : {s} {s} {s} -- a value changes type only when asked: {s}", .{ typeWord(x), op, typeWord(y), todo });
+    }
+    fn mismatchErr(self: *VM, op: []const u8, x: Value, y: Value) []const u8 {
+        if (x.tag == .boolean and y.tag == .boolean)
+            return self.haroMsg("Error (TYPE_MISMATCH) : boolean {s} boolean -- {s} orders numbers and texts", .{ op, op });
+        return self.haroMsg("Error (TYPE_MISMATCH) : {s} {s} {s} -- {s} compares two values of one type", .{ typeWord(x), op, typeWord(y), op });
+    }
+    inline fn unb(v: Value) Value {
+        return if (v.tag == .boolean) Value.int(v.p.i) else v;
+    }
+    const ARITH_DONE: []const u8 = "\x00done";
+    /// The slow path's answer with ARITH_DONE read as "computed, no error".
+    inline fn arithDone(r: ?[]const u8) ?[]const u8 {
+        if (r) |e| {
+            if (e.len == ARITH_DONE.len and e[0] == 0) return null;
+        }
+        return r;
+    }
+    fn arithSym(op: ArithOp) []const u8 {
+        return switch (op) {
+            .sub => "-",
+            .mul => "*",
+            .div => "/",
+            .mod => "%",
+            .band => "&",
+            .bor => "|",
+            .bxor => "^",
+            .shl => "<<",
+            .shr => ">>",
+        };
+    }
+    /// Ahead of `+`'s slow path. Null: go on to addSlow. Otherwise the error,
+    /// or ARITH_DONE when a boolean in Ring's code was added here as 1 or 0.
+    fn preAdd(self: *VM, pc: u32, dst: u32, lreg: u32, x: Value, y: Value, flag: i32) ?[]const u8 {
+        if (x.tag == .vec) return null; // an append, whatever is appended
+        const xb = x.tag == .boolean;
+        const yb = y.tag == .boolean;
+        const mixed = (x.tag == .str and isNum(y)) or (isNum(x) and y.tag == .str);
+        if (!xb and !yb and !mixed) return null;
+        if (self.strictAt(pc)) return self.coerceErr("+", x, y);
+        if (!xb and !yb) return null;
+        const a = unb(x);
+        const b = unb(y);
+        if (isNum(a) and isNum(b)) {
+            self.setRegB(dst, narrow(asF64(a) + asF64(b)), false);
+            return ARITH_DONE;
+        }
+        return self.addSlow(dst, lreg, a, b, flag) orelse ARITH_DONE;
+    }
+    fn preArith(self: *VM, pc: u32, dst: u32, op: ArithOp, x: Value, y: Value) ?[]const u8 {
+        const xb = x.tag == .boolean;
+        const yb = y.tag == .boolean;
+        const txt = x.tag == .str or y.tag == .str;
+        if (!xb and !yb and !txt) return null;
+        if (x.tag == .vec or y.tag == .vec or x.tag == .obj or y.tag == .obj) return null;
+        if (self.strictAt(pc)) return self.coerceErr(arithSym(op), x, y);
+        if (!xb and !yb) return null;
+        return self.arithSlow(dst, op, unb(x), unb(y)) orelse ARITH_DONE;
+    }
+    /// `=` and `!=` between two types, in Haro's code.
+    fn preEq(self: *VM, pc: u32, x: Value, y: Value, op: []const u8) ?[]const u8 {
+        if (x.tag == y.tag) return null;
+        if (isNum(x) and isNum(y)) return null;
+        if (!self.strictAt(pc)) return null;
+        return self.mismatchErr(op, x, y);
+    }
+    /// The orderings between two types, or of booleans, in Haro's code.
+    fn preCmp(self: *VM, pc: u32, x: Value, y: Value, op: []const u8) ?[]const u8 {
+        const same = (x.tag == y.tag and x.tag != .boolean) or (isNum(x) and isNum(y));
+        if (same) return null;
+        if (!self.strictAt(pc)) return null;
+        return self.mismatchErr(op, x, y);
+    }
+    /// An integer immediate compared with a value that is no number.
+    fn preImm(self: *VM, pc: u32, x: Value, op: []const u8) ?[]const u8 {
+        if (x.tag == .int or x.tag == .num) return null;
+        if (!self.strictAt(pc)) return null;
+        return self.mismatchErr(op, x, Value.int(0));
+    }
+    /// Integer arithmetic past Ring's exact range, in Haro's code: exact to 64
+    /// bits, then INTEGER_OVERFLOW (signalled by a none). Null in Ring's code.
+    fn intStrict(self: *VM, pc: u32, x: i64, y: i64, comptime op: u8) ?Value {
+        if (!self.strictAt(pc)) return null;
+        const rr = switch (op) {
+            '+' => @addWithOverflow(x, y),
+            '-' => @subWithOverflow(x, y),
+            else => @mulWithOverflow(x, y),
+        };
+        if (rr[1] != 0) return Value.nil();
+        return Value.int(rr[0]);
+    }
+    fn overflowErr(self: *VM, comptime op: u8) []const u8 {
+        return self.haroMsg("Error (INTEGER_OVERFLOW) : integer {c} integer leaves 64 bits", .{op});
+    }
+
+    fn valEq(a0: Value, b0: Value) bool {
+        const a = unb(a0);
+        const b = unb(b0);
         if (a.tag == .int and b.tag == .int) return a.p.i == b.p.i;
         if (a.tag == .str and b.tag == .str) {
             const x = a.p.s;
@@ -3800,7 +3955,9 @@ pub const VM = struct {
     ///
     /// Checked by the CALLER, because valCmp is a plain function and cannot
     /// reach the dispatch loop's unwind.
-    fn cmpCheck(a: Value, b: Value) ?[]const u8 {
+    fn cmpCheck(a0: Value, b0: Value) ?[]const u8 {
+        const a = unb(a0);
+        const b = unb(b0);
         if (a.tag == .nil or b.tag == .nil) return R24;
         if (a.tag == .vec or a.tag == .obj or b.tag == .vec or b.tag == .obj) return R21;
         if (a.tag == .str and b.tag == .str) return null;
@@ -3812,7 +3969,9 @@ pub const VM = struct {
 
     /// Ordering: numeric when both are ints, lexicographic for two
     /// strings. Anything else is a type error rather than a silent answer.
-    fn valCmp(a: Value, b: Value) i32 {
+    fn valCmp(a0: Value, b0: Value) i32 {
+        const a = unb(a0);
+        const b = unb(b0);
         if (a.tag == .int and b.tag == .int) {
             if (a.p.i < b.p.i) return -1;
             if (a.p.i > b.p.i) return 1;
@@ -3915,6 +4074,8 @@ pub const VM = struct {
                 outPrint("{X:0>16}\n{s}\n0\n{s}", .{ @intFromPtr(cptrOf(v)), kind, end });
             },
             .int => outPrint("{d}{s}", .{ v.p.i, end }),
+            // v0.43: a boolean prints its word wherever it is printed
+            .boolean => outPrint("{s}{s}", .{ if (v.p.i != 0) "true" else "false", end }),
             // Ring prints a whole-valued number without a point (`? 1.5*2`
             // is `3`), and otherwise to decimals() places -- 2 by default,
             // verified on 1.27 (`? 0.1+0.2` is `0.30`). decimals() being a
@@ -4050,7 +4211,7 @@ pub const VM = struct {
     fn truthy(v: Value) bool {
         return switch (v.tag) {
             .nil => false,
-            .int => v.p.i != 0,
+            .int, .boolean => v.p.i != 0,
             .num => v.p.d != 0,
             .str => v.p.s.len != 0,
             .vec => v.p.v.len != 0,
@@ -4066,6 +4227,7 @@ pub const VM = struct {
         // whole-valued double used as an index or a count is legitimate.
         if (x.tag == .int) return x.p.i;
         if (x.tag == .num) return @intFromFloat(x.p.d);
+        if (x.tag == .boolean) return x.p.i;
         @panic("expected a number");
     }
 
@@ -4077,6 +4239,7 @@ pub const VM = struct {
         return switch (x.tag) {
             .int => @floatFromInt(x.p.i),
             .num => x.p.d,
+            .boolean => @floatFromInt(x.p.i),
             else => @panic("expected a number"),
         };
     }
@@ -4418,7 +4581,13 @@ pub const VM = struct {
                         self.setRegU(base + in.a, Value.int(r), op == .add_u);
                     } else {
                         @branchHint(.cold);
-                        self.setRegU(base + in.a, intSlow(r, 0, x.p.i, y.p.i, '+'), op == .add_u);
+                        if (self.intStrict(pc, x.p.i, y.p.i, '+')) |sv| {
+                            if (sv.tag == .nil) {
+                                self.pending = self.overflowErr('+');
+                                continue :dispatch .raise;
+                            }
+                            self.setRegU(base + in.a, sv, op == .add_u);
+                        } else self.setRegU(base + in.a, intSlow(r, 0, x.p.i, y.p.i, '+'), op == .add_u);
                     }
                 } else if (isNum(x) and isNum(y)) {
                     self.setRegU(base + in.a, narrow(asF64(x) + asF64(y)), op == .add_u);
@@ -4429,7 +4598,7 @@ pub const VM = struct {
                     // invisible to the census, which measures compiling,
                     // and to `usable`, which measures the same thing.
                     if (self.opWant(x, y, "+", "r+")) continue :dispatch .opcall;
-                    if (self.addSlow(base + in.a, base + in.b, x, y, in.d)) |e| {
+                    if (arithDone(self.preAdd(pc, base + in.a, base + in.b, x, y, in.d) orelse self.addSlow(base + in.a, base + in.b, x, y, in.d))) |e| {
                         const err = Value.str(self.newStr(e));
                         if (hsp == self.hsp_floor) { if (self.hsp_floor != 0) return self.escape(e, pc, fsp, base, false); self.dieRing(e, pc, fsp); }
                         const ev = self.landErr(err, pc, fsp, false);
@@ -4455,7 +4624,7 @@ pub const VM = struct {
                     self.setRegB(base + in.a, narrow(asF64(x) / asF64(y)), false);
                 } else if (self.opWant(x, y, "/", "r/")) {
                     continue :dispatch .opcall;
-                } else if (self.arithSlow(base + in.a, .div, x, y)) |e| {
+                } else if (arithDone(self.preArith(pc, base + in.a, .div, x, y) orelse self.arithSlow(base + in.a, .div, x, y))) |e| {
                     const err = Value.str(self.newStr(e));
                     if (hsp == self.hsp_floor) { if (self.hsp_floor != 0) return self.escape(e, pc, fsp, base, false); self.dieRing(e, pc, fsp); }
                     const ev = self.landErr(err, pc, fsp, false);
@@ -4482,7 +4651,13 @@ pub const VM = struct {
                         self.setRegU(base + in.a, Value.int(r), op == .sub_u);
                     } else {
                         @branchHint(.cold);
-                        self.setRegU(base + in.a, intSlow(r, 0, x.p.i, y.p.i, '-'), op == .sub_u);
+                        if (self.intStrict(pc, x.p.i, y.p.i, '-')) |sv| {
+                            if (sv.tag == .nil) {
+                                self.pending = self.overflowErr('-');
+                                continue :dispatch .raise;
+                            }
+                            self.setRegU(base + in.a, sv, op == .sub_u);
+                        } else self.setRegU(base + in.a, intSlow(r, 0, x.p.i, y.p.i, '-'), op == .sub_u);
                     }
                 } else if (isNum(x) and isNum(y)) {
                     self.setRegU(base + in.a, narrow(asF64(x) - asF64(y)), op == .sub_u);
@@ -4493,7 +4668,7 @@ pub const VM = struct {
                     continue :dispatch .opcall;
                 } else if (self.opWant(x, y, "-", "r-")) {
                     continue :dispatch .opcall;
-                } else if (self.arithSlow(base + in.a, .sub, x, y)) |e| {
+                } else if (arithDone(self.preArith(pc, base + in.a, .sub, x, y) orelse self.arithSlow(base + in.a, .sub, x, y))) |e| {
                     const err = Value.str(self.newStr(e));
                     if (hsp == self.hsp_floor) { if (self.hsp_floor != 0) return self.escape(e, pc, fsp, base, false); self.dieRing(e, pc, fsp); }
                     const ev = self.landErr(err, pc, fsp, false);
@@ -4538,7 +4713,7 @@ pub const VM = struct {
                     else => "r>>",
                 })) {
                     continue :dispatch .opcall;
-                } else if (self.arithSlow(base + in.a, aop, x, y)) |e| {
+                } else if (arithDone(self.preArith(pc, base + in.a, aop, x, y) orelse self.arithSlow(base + in.a, aop, x, y))) |e| {
                     const err = Value.str(self.newStr(e));
                     if (hsp == self.hsp_floor) { if (self.hsp_floor != 0) return self.escape(e, pc, fsp, base, false); self.dieRing(e, pc, fsp); }
                     const ev = self.landErr(err, pc, fsp, false);
@@ -4565,13 +4740,19 @@ pub const VM = struct {
                         self.setRegU(base + in.a, Value.int(rr[0]), op == .mul_u);
                     } else {
                         @branchHint(.cold);
-                        self.setRegU(base + in.a, intSlow(rr[0], rr[1], x.p.i, y.p.i, '*'), op == .mul_u);
+                        if (self.intStrict(pc, x.p.i, y.p.i, '*')) |sv| {
+                            if (sv.tag == .nil) {
+                                self.pending = self.overflowErr('*');
+                                continue :dispatch .raise;
+                            }
+                            self.setRegU(base + in.a, sv, op == .mul_u);
+                        } else self.setRegU(base + in.a, intSlow(rr[0], rr[1], x.p.i, y.p.i, '*'), op == .mul_u);
                     }
                 } else if (isNum(x) and isNum(y)) {
                     self.setRegU(base + in.a, narrow(asF64(x) * asF64(y)), op == .mul_u);
                 } else if (self.opWant(x, y, "*", "r*")) {
                     continue :dispatch .opcall;
-                } else if (self.arithSlow(base + in.a, .mul, x, y)) |e| {
+                } else if (arithDone(self.preArith(pc, base + in.a, .mul, x, y) orelse self.arithSlow(base + in.a, .mul, x, y))) |e| {
                     const err = Value.str(self.newStr(e));
                     if (hsp == self.hsp_floor) { if (self.hsp_floor != 0) return self.escape(e, pc, fsp, base, false); self.dieRing(e, pc, fsp); }
                     const ev = self.landErr(err, pc, fsp, false);
@@ -4600,7 +4781,7 @@ pub const VM = struct {
                         continue :dispatch .raise;
                     }
                     self.setRegB(base + in.a, Value.int(@rem(xv.p.i, yv.p.i)), false);
-                } else if (self.arithSlow(base + in.a, .mod, xv, yv)) |e| {
+                } else if (arithDone(self.preArith(pc, base + in.a, .mod, xv, yv) orelse self.arithSlow(base + in.a, .mod, xv, yv))) |e| {
                     // F-144: a real operand was truncated to an integer, so
                     // `7 % 2.5` answered 1 and `2.07 % 0.39` raised R1
                     self.pending = e;
@@ -4664,10 +4845,13 @@ pub const VM = struct {
                         // `.addi` is the folded form of a plain `+` with a constant, and
                         // `aList + 5` must still append. No compound assignment
                         // emits it: those carry the operand in a register.
-                        if (self.addSlow(base + in.a, base + in.b, x, Value.int(in.d), @intFromBool(in.c != 0))) |e| {
+                        if (arithDone(self.preAdd(pc, base + in.a, base + in.b, x, Value.int(in.d), @intFromBool(in.c != 0)) orelse self.addSlow(base + in.a, base + in.b, x, Value.int(in.d), @intFromBool(in.c != 0)))) |e| {
                             const err = Value.str(self.newStr(e));
                             if (hsp == self.hsp_floor) {
                                 if (self.hsp_floor != 0) return self.escape(e, pc, fsp, base, false);
+                                // v0.43: Haro's code reports the line as every other path does; Ring's
+                                // keeps this older form, unchanged here (HF-150)
+                                if (self.strictAt(pc)) self.dieRing(e, pc, fsp);
                                 outPrint("Error: {s}\n", .{e});
                                 outFlush();
                                 std.process.exit(1);
@@ -4695,7 +4879,13 @@ pub const VM = struct {
                     self.setRegU(base + in.a, Value.int(r), op == .addi_u);
                 } else {
                     @branchHint(.cold);
-                    self.setRegU(base + in.a, intSlow(r, 0, x.p.i, in.d, '+'), op == .addi_u);
+                    if (self.intStrict(pc, x.p.i, @as(i64, in.d), '+')) |sv| {
+                        if (sv.tag == .nil) {
+                            self.pending = self.overflowErr('+');
+                            continue :dispatch .raise;
+                        }
+                        self.setRegU(base + in.a, sv, op == .addi_u);
+                    } else self.setRegU(base + in.a, intSlow(r, 0, x.p.i, in.d, '+'), op == .addi_u);
                 }
                 pc += 1;
                 continue :dispatch code[pc].op;
@@ -4717,7 +4907,7 @@ pub const VM = struct {
                         // number to `*`. The slow path knows the rules and
                         // raises R41/R21 where Ring does; it used to be
                         // BADPARAM here regardless (found 2026-09-11).
-                        if (self.arithSlow(base + in.a, .mul, x, Value.int(in.d))) |e| {
+                        if (arithDone(self.preArith(pc, base + in.a, .mul, x, Value.int(in.d)) orelse self.arithSlow(base + in.a, .mul, x, Value.int(in.d)))) |e| {
                             self.pending = e;
                             continue :dispatch .raise;
                         }
@@ -4733,7 +4923,13 @@ pub const VM = struct {
                     self.setRegU(base + in.a, Value.int(rr[0]), op == .muli_u);
                 } else {
                     @branchHint(.cold);
-                    self.setRegU(base + in.a, intSlow(rr[0], rr[1], x.p.i, in.d, '*'), op == .muli_u);
+                    if (self.intStrict(pc, x.p.i, @as(i64, in.d), '*')) |sv| {
+                        if (sv.tag == .nil) {
+                            self.pending = self.overflowErr('*');
+                            continue :dispatch .raise;
+                        }
+                        self.setRegU(base + in.a, sv, op == .muli_u);
+                    } else self.setRegU(base + in.a, intSlow(rr[0], rr[1], x.p.i, in.d, '*'), op == .muli_u);
                 }
                 pc += 1;
                 continue :dispatch code[pc].op;
@@ -4749,7 +4945,7 @@ pub const VM = struct {
                     if (!isNum(x)) {
                         // F-144: Ring's own errors -- a numeric string is its
                         // number, a list R21, other text R41 -- as `%` has them
-                        if (self.arithSlow(base + in.a, .mod, x, Value.int(in.d))) |e| {
+                        if (arithDone(self.preArith(pc, base + in.a, .mod, x, Value.int(in.d)) orelse self.arithSlow(base + in.a, .mod, x, Value.int(in.d)))) |e| {
                             self.pending = e;
                             continue :dispatch .raise;
                         }
@@ -4798,6 +4994,10 @@ pub const VM = struct {
             },
             .jlt => {
                 const in = code[pc];
+                if (self.preCmp(pc, regs[base + in.a], regs[base + in.b], if (in.c != 0) ">=" else "<")) |e| {
+                    self.pending = e;
+                    continue :dispatch .raise;
+                }
                 // an OBJECT operand is cmpCheck's error case already, so the
                 // operator dispatch lives on that path and the numbers pay
                 // nothing (checked ahead of it, sieve read +24%)
@@ -4813,6 +5013,10 @@ pub const VM = struct {
             },
             .jle => {
                 const in = code[pc];
+                if (self.preCmp(pc, regs[base + in.a], regs[base + in.b], if (in.c != 0) ">" else "<=")) |e| {
+                    self.pending = e;
+                    continue :dispatch .raise;
+                }
                 if (cmpCheck(regs[base + in.a], regs[base + in.b])) |e| {
                     if (self.opWantJump(regs[base + in.a], regs[base + in.b], if (in.c != 0) ">" else "<=", if (in.c != 0) "r>" else "r<=", in.c != 0)) continue :dispatch .opcall;
                     self.pending = e;
@@ -4825,6 +5029,10 @@ pub const VM = struct {
             },
             .jgt => {
                 const in = code[pc];
+                if (self.preCmp(pc, regs[base + in.a], regs[base + in.b], if (in.c != 0) "<=" else ">")) |e| {
+                    self.pending = e;
+                    continue :dispatch .raise;
+                }
                 if (cmpCheck(regs[base + in.a], regs[base + in.b])) |e| {
                     if (self.opWantJump(regs[base + in.a], regs[base + in.b], if (in.c != 0) "<=" else ">", if (in.c != 0) "r<=" else "r>", in.c != 0)) continue :dispatch .opcall;
                     self.pending = e;
@@ -4837,6 +5045,10 @@ pub const VM = struct {
             },
             .jge => {
                 const in = code[pc];
+                if (self.preCmp(pc, regs[base + in.a], regs[base + in.b], if (in.c != 0) "<" else ">=")) |e| {
+                    self.pending = e;
+                    continue :dispatch .raise;
+                }
                 if (cmpCheck(regs[base + in.a], regs[base + in.b])) |e| {
                     if (self.opWantJump(regs[base + in.a], regs[base + in.b], if (in.c != 0) "<" else ">=", if (in.c != 0) "r<" else "r>=", in.c != 0)) continue :dispatch .opcall;
                     self.pending = e;
@@ -4849,6 +5061,10 @@ pub const VM = struct {
             },
             .jeq => {
                 const in = code[pc];
+                if (self.preEq(pc, regs[base + in.a], regs[base + in.b], if (in.c != 0) "!=" else "=")) |e| {
+                    self.pending = e;
+                    continue :dispatch .raise;
+                }
                 if ((regs[base + in.a].tag == .obj or regs[base + in.b].tag == .obj) and
                     self.opWantJump(regs[base + in.a], regs[base + in.b], if (in.c != 0) "!=" else "=", "", in.c != 0)) continue :dispatch .opcall;
                 if (valEq(regs[base + in.a], regs[base + in.b])) {
@@ -4858,6 +5074,10 @@ pub const VM = struct {
             },
             .jne => {
                 const in = code[pc];
+                if (self.preEq(pc, regs[base + in.a], regs[base + in.b], if (in.c != 0) "=" else "!=")) |e| {
+                    self.pending = e;
+                    continue :dispatch .raise;
+                }
                 if ((regs[base + in.a].tag == .obj or regs[base + in.b].tag == .obj) and
                     self.opWantJump(regs[base + in.a], regs[base + in.b], if (in.c != 0) "=" else "!=", "", in.c != 0)) continue :dispatch .opcall;
                 if (!valEq(regs[base + in.a], regs[base + in.b])) {
@@ -4867,6 +5087,10 @@ pub const VM = struct {
             },
             .jeqi => {
                 const in = code[pc];
+                if (self.preImm(pc, regs[base + in.a], "=")) |e| {
+                    self.pending = e;
+                    continue :dispatch .raise;
+                }
                 if (asInt(regs[base + in.a]) == in.c) {
                     pc = self.loopStep(@intCast(in.d), pc, fsp);
                 } else pc += 1;
@@ -4874,6 +5098,10 @@ pub const VM = struct {
             },
             .jnei => {
                 const in = code[pc];
+                if (self.preImm(pc, regs[base + in.a], "!=")) |e| {
+                    self.pending = e;
+                    continue :dispatch .raise;
+                }
                 if (asInt(regs[base + in.a]) != in.c) {
                     pc = self.loopStep(@intCast(in.d), pc, fsp);
                 } else pc += 1;
@@ -4881,6 +5109,10 @@ pub const VM = struct {
             },
             .jgti => {
                 const in = code[pc];
+                if (self.preImm(pc, regs[base + in.a], ">")) |e| {
+                    self.pending = e;
+                    continue :dispatch .raise;
+                }
                 if (asInt(regs[base + in.a]) > in.c) {
                     pc = self.loopStep(@intCast(in.d), pc, fsp);
                 } else pc += 1;
@@ -5144,6 +5376,10 @@ pub const VM = struct {
             },
             .jfalsy => {
                 const in = code[pc];
+                if (in.c == 1 and regs[base + in.a].tag != .boolean) {
+                    self.pending = self.condErr(regs[base + in.a]);
+                    continue :dispatch .raise;
+                }
                 if (!truthy(regs[base + in.a])) {
                     pc = self.loopStep(@intCast(in.d), pc, fsp);
                 } else pc += 1;
@@ -5151,6 +5387,10 @@ pub const VM = struct {
             },
             .jtruthy => {
                 const in = code[pc];
+                if (in.c == 1 and regs[base + in.a].tag != .boolean) {
+                    self.pending = self.condErr(regs[base + in.a]);
+                    continue :dispatch .raise;
+                }
                 if (truthy(regs[base + in.a])) {
                     pc = self.loopStep(@intCast(in.d), pc, fsp);
                 } else pc += 1;
@@ -5158,13 +5398,25 @@ pub const VM = struct {
             },
             .truth => {
                 const in = code[pc];
-                self.setRegB(base + in.a, Value.int(if (truthy(regs[base + in.b])) 1 else 0), false);
+                if (in.c == 1 and regs[base + in.b].tag != .boolean) {
+                    self.pending = self.condErr(regs[base + in.b]);
+                    continue :dispatch .raise;
+                }
+                if (in.c != 0) {
+                    self.setRegB(base + in.a, Value.boolean(truthy(regs[base + in.b])), false);
+                } else self.setRegB(base + in.a, Value.int(if (truthy(regs[base + in.b])) 1 else 0), false);
                 pc += 1;
                 continue :dispatch code[pc].op;
             },
             .lnot => {
                 const in = code[pc];
-                self.setRegB(base + in.a, Value.int(if (truthy(regs[base + in.b])) 0 else 1), false);
+                if (in.c == 1 and regs[base + in.b].tag != .boolean) {
+                    self.pending = self.condErr(regs[base + in.b]);
+                    continue :dispatch .raise;
+                }
+                if (in.c != 0) {
+                    self.setRegB(base + in.a, Value.boolean(!truthy(regs[base + in.b])), false);
+                } else self.setRegB(base + in.a, Value.int(if (truthy(regs[base + in.b])) 0 else 1), false);
                 pc += 1;
                 continue :dispatch code[pc].op;
             },
@@ -6136,6 +6388,8 @@ pub const VM = struct {
                         const v = regs[A];
                         if (v.tag == .str) {
                             out = v;
+                        } else if (v.tag == .boolean) {
+                            out = Value.str(self.newStr(if (v.p.i != 0) "true" else "false"));
                         } else if (isNum(v)) {
                             var buf: [128]u8 = undefined;
                             out = Value.str(self.newStr(numText(v, &buf)));
@@ -6155,6 +6409,7 @@ pub const VM = struct {
                         // builtin and the call was "without definition".
                         const nm: []const u8 = switch (regs[A].tag) {
                             .int, .num => "NUMBER",
+                            .boolean => "BOOLEAN",
                             .str, .nil => "STRING",
                             .vec => if (regs[A].p.v.closure) "STRING" else "LIST",
                             .obj => "OBJECT",
@@ -8307,6 +8562,13 @@ pub const VM = struct {
                     self.pend_op = .{ .recv = y, .arg = x, .name = rnames[k], .kind = 1 };
                     continue :dispatch .opcall;
                 }
+                const strict = self.strictAt(pc);
+                if (strict) {
+                    if (if (k < 2) self.preEq(pc, x, y, names[k]) else self.preCmp(pc, x, y, names[k])) |e| {
+                        self.pending = e;
+                        continue :dispatch .raise;
+                    }
+                }
                 var t: bool = undefined;
                 if (k < 2) {
                     t = valEq(x, y) == (k == 0);
@@ -8323,7 +8585,7 @@ pub const VM = struct {
                         else => c >= 0,
                     };
                 }
-                self.setRegB(base + in.a, Value.int(if (t) 1 else 0), false);
+                self.setRegB(base + in.a, if (strict) Value.boolean(t) else Value.int(if (t) 1 else 0), false);
                 pc += 1;
                 continue :dispatch code[pc].op;
             },

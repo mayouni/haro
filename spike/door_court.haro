@@ -24,7 +24,7 @@ $aCondVerbOf = []
 $cCondOther = ""
 $aCondRefSeats = []
 $aCondFormats = []
-$bCondUnread = 0
+$bCondUnread = false
 $aCondLangs = []
 $cCondLang = ""
 $aCourtSentences = []
@@ -52,7 +52,7 @@ $aCourtCites = []
 $aCourtFormset = null
 $aCourtNarrate = null
 $aCourtUnderstand = null
-$bNSurfaces = 0
+$bNSurfaces = false
 $aCourtConstitution = []
 $aCourtZone = []
 $cCourtAuditFile = ""
@@ -61,13 +61,13 @@ $aCourtPersonal = []
 $aCourtWarnings = []
 $aCourtMarks = []
 $aCourtSafeguards = []
-$bCourtCollect = 0
+$bCourtCollect = false
 $aCourtFound = []
 $aCourtBroken = []
-$bRunTrace = 0
+$bRunTrace = false
 $aRunTrace = []
 $nRunDepth = 0
-$bAskTrace = 0
+$bAskTrace = false
 $aAskTrace = []
 $cExprLang = ""
 $aExprOperators = []
@@ -86,9 +86,9 @@ $aExprOverlay = []
 $aCourtLangs = [
   ["door", ".door",
     [
-      ["LISTENER", "listener", [["host", "text", 0, 1, "prim"]], "", [], []],
-      ["SERVICE", "service", [["host", "text", 0, 1, "prim"], ["needs", "caps", 1, 1, "menu"]], "", [], []],
-      ["NOTE", "note", [["text", "text", 0, 1, "prim"]], "", [], []]
+      ["LISTENER", "listener", [["host", "text", false, true, "prim"]], "", [], []],
+      ["SERVICE", "service", [["host", "text", false, true, "prim"], ["needs", "caps", true, true, "menu"]], "", [], []],
+      ["NOTE", "note", [["text", "text", false, true, "prim"]], "", [], []]
     ],
     [
     ],
@@ -124,8 +124,8 @@ $aCourtLangs = [
     null,
     [],
     [["network", "process"], [
-      ["LISTENER", "network", 0],
-      ["SERVICE", "needs", 1]
+      ["LISTENER", "network", false],
+      ["SERVICE", "needs", true]
     ]]
   ]
 ]

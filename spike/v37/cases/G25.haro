@@ -8,4 +8,4 @@ func g
 		? show(e)
 	done
 func show x
-	return x.Message() + " from " + x.Span()[:line]
+	return x.Message() + " from " + string(x.Span()[:line])

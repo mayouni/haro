@@ -8,7 +8,7 @@ func w
 		catch
 			? "no"
 		finally
-			? "finally " + n
+			? "finally " + string(n)
 		done
 	end
-	? "after " + n
+	? "after " + string(n)

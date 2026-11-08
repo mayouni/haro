@@ -5,7 +5,7 @@ try
 		catch
 			? "own catch: " + cCatchError
 		finally
-			? "finally " + i
+			? "finally " + string(i)
 			raise("from finally")
 		done
 	next

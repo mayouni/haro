@@ -24,7 +24,7 @@ $aCondVerbOf = []
 $cCondOther = ""
 $aCondRefSeats = []
 $aCondFormats = []
-$bCondUnread = 0
+$bCondUnread = false
 $aCondLangs = []
 $cCondLang = ""
 $aCourtSentences = []
@@ -52,7 +52,7 @@ $aCourtCites = []
 $aCourtFormset = null
 $aCourtNarrate = null
 $aCourtUnderstand = null
-$bNSurfaces = 0
+$bNSurfaces = false
 $aCourtConstitution = []
 $aCourtZone = []
 $cCourtAuditFile = ""
@@ -61,13 +61,13 @@ $aCourtPersonal = []
 $aCourtWarnings = []
 $aCourtMarks = []
 $aCourtSafeguards = []
-$bCourtCollect = 0
+$bCourtCollect = false
 $aCourtFound = []
 $aCourtBroken = []
-$bRunTrace = 0
+$bRunTrace = false
 $aRunTrace = []
 $nRunDepth = 0
-$bAskTrace = 0
+$bAskTrace = false
 $aAskTrace = []
 $cExprLang = ""
 $aExprOperators = []
@@ -86,11 +86,11 @@ $aExprOverlay = []
 $aCourtLangs = [
   ["grants", ".grant",
     [
-      ["ZONE", "zone", [["rights", "word", 1, 0, "form"], ["primary", "name", 0, 1, "prim"]], "", [], []],
-      ["USE", "use", [["wants", "word", 1, 0, "form"], ["primary", "name", 0, 1, "prim"], ["via", "word", 1, 1, "form"]], "", [], []]
+      ["ZONE", "zone", [["rights", "word", true, false, "form"], ["primary", "name", false, true, "prim"]], "", [], []],
+      ["USE", "use", [["wants", "word", true, false, "form"], ["primary", "name", false, true, "prim"], ["via", "word", true, true, "form"]], "", [], []]
     ],
     [
-      ["word", [["value", "name", 0, 0, "prim"]]]
+      ["word", [["value", "name", false, false, "prim"]]]
     ],
     [
     ],
