@@ -1880,6 +1880,20 @@ Ring++ and reproduced on `haro.exe` (HARO-PORTED-FINDINGS-01), fixed in Haro, ev
 
 **Results.** 14 of 14 cases on both builds; 20 of 20 plants caught. **The 49-stage guard** passed whole on haro and its checked build, 0 failures (1,939 s; stage 6 compiled the court cold in 145.7 ms, under its 150 ms ceiling; stage 24 99.8% on human edits, 94.9% with the tool's commit, both printed).
 
+## The forty-sixth rung -- Haro v0.46, stzlib's findings on haro.exe -- 2026-11-08
+
+Under the author's Haro-first ruling: three findings the session "StzLib towards Haro" sent while porting stzlib to Haro, each with a probe,
+each reproduced before anything changed -- HARO-KEYEDRELEASE-01 (a segfault), HARO-ARITY-RECEIVER-01 (`haro check`), HARO-OBJECT2POINTER-01.
+
+    v46/fixtures.json, cases/           8 cases (written first, 4a6d724: 7; K03 rewritten to stzlib's probe before the code, K08 after the plants)
+    v46/finding_court.py                run and check cases on haro and its checked build; --ring reads the run cases off Ring 1.27
+    v46/plants.py                       7 protections switched off in turn (N2 and N4 removed, named)
+    v46/GRAMMAR.md                      the ruling, the table, how it is built, what was measured, the readings, what is not covered
+
+**Results.** 8 of 8 cases on both builds; 7 of 7 plants caught; stzlib's stzDataSet guard, which crashed after 41 assertions, 185 of 185 on
+haro.exe with Haro's engine. **The 50-stage guard** passed whole on haro and its checked build, 0 failures (1,328 s; stage 6 compiled
+the court cold in 144.6 ms).
+
 ## The names -- `.haro`, not `.stzu` -- corrected 2026-10-02
 
 **At the author's word ("we agreed to use .haro instead of .stzu, no?").** D1 was ratified
@@ -2065,3 +2079,4 @@ whole guard re-run on the renamed tree: 28 + 30 + 27 + 23, 117 of 120, 32 of 32,
 39. ~~A real boolean and no coercion (D55 T1, T3)~~ -- built 2026-11-08 as Haro v0.43, the forty-third rung above. SG1 drafted and ruled the same night (D56). Next: v0.44, the letters checked (T2), with `isboolean` and the conversion at a b-name; then v0.45 numbers, and SG1's rung 1 (words and widths) after it; as 36, the Zui-to-Zane rename.
 40. ~~The ported defects (HARO-PORTED-FINDINGS-01)~~ -- built 2026-11-08 as Haro v0.44, the forty-fourth rung above, on the author's Haro-first ruling; TYPES.md's rungs move two versions (the checked letters are v0.46). The system-language plan is this desk's whole (the author, "Yes, delegate it all to the Haro session.", COMPASS-SYSLANG-DELEGATE-01): SG0b is SG1's rung 4's acceptance, on the frozen kit. Next: v0.45, C27 -- a load of stzlib that reports every site that does not scan instead of stopping, then which of the 125 sites Haro accepts on its Ring surface (HARO-STZLIB-LOAD-01); then the three defects that wait for the load.
 41. ~~C27, Haro's half of loading stzlib (HARO-STZLIB-LOAD-01)~~ -- done 2026-11-08 as Haro v0.45, a tool and no VM change: C27 was two loads of Ring's own library, `stdlibcore.ring` and `ziplib.ring`, both stzlib's to remove (HARO-STZLIB-LOAD-02, routed; the author: zip is the engine's). The engine for Haro's ABI is built here now (`engine/build_engine.py`, forked from ringpp 98642d9, no part of Ring carried): all 92 domains from stzlib origin/main 511338e65 in 814 s, at `C:\haro-engine` on the author's word, and stzBase.ring loads on haro.exe with 0 warnings and answers. Next: stzlib runs its own sweep on haro.exe with that engine, and what fails on Haro's side comes back as findings; v0.46, the letters checked (TYPES.md T2); Haro's copy of Ring's zip functions (vm/src/zip.zig) retires once stzZipFile.ring uses the engine.
+42. ~~stzlib's first findings on Haro~~ -- built 2026-11-08 as Haro v0.46, the forty-sixth rung above. stzlib origin/main c4f6f85ea loads on haro.exe unmodified with Haro's engine. Next: what stzlib's sweep on haro.exe sends; v0.47, the letters checked (TYPES.md T2); Haro's copy of Ring's zip functions retires once stzZipFile.ring uses the engine.
