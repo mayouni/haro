@@ -55,6 +55,28 @@ CASES = [
     ('K08', 'K3', 'pointer2object of a pointer of another kind is Bad parameter type', 'run', '.ring', [
         'fp = fopen("K08.txt", "w")', 'o = pointer2object(fp)', '? "after"'],
      {'stdout': '\nLine 2 Bad parameter type! \nIn pointer2object() in file K08.ring ', 'exit': 1}),
+    # WRITTEN AFTER THE RUNG LANDED (haro 55c377d), on stzlib's second report of 2026-11-08, before any code: (1) the keyed-read fix held
+    # only where the key was PROVEN a text (an `hget`, which counts); a key whose class the compiler cannot prove -- `"" + (anA[i] * 3 +
+    # anB[i])` is a `ref`, its operands may be objects -- reads through `vget`, uncounted, and still freed the static empty text: plant N2's
+    # change was load-bearing, and no case had reached it (K09, stzlib's haro_keyed_release_arith.ring whole). The desk had also reported
+    # stzDataSet_defects 185 of 185 on stzlib c4f6f85ea, a ref OLDER than the guard that reaches this loop -- corrected in the records.
+    # (2) HARO-PTRCMP-01: ptrcmp and pointercompare, and the short forms obj2ptr and ptr2obj, absent (K10-K12; Ring's answers read off it).
+    ('K09', 'K1', 'a keyed read by a key the compiler cannot prove a text is counted too', 'run', '.ring', [
+        'o = new K', '? o.Joint([ 1, 1, 2, 2 ], [ 1, 1, 2, 2 ])', '? "done"', 'class K', T + 'def Joint(anA, anB)', T * 2 + 'aAt = []',
+        T * 2 + 'anN = []', T * 2 + 'nTotal = len(anA)', T * 2 + 'for i = 1 to nTotal', T * 3 + 'cPair = "" + (anA[i] * 3 + anB[i])',
+        T * 3 + 'nAt = aAt[cPair]', T * 3 + 'if isNumber(nAt)', T * 4 + 'anN[nAt]++', T * 3 + 'else', T * 4 + 'anN + 1',
+        T * 4 + 'aAt[cPair] = len(anN)', T * 3 + 'ok', T * 2 + 'next', T * 2 + 'return anN'],
+     {'stdout': '2\n2\n\ndone\n'}),
+    ('K10', 'K3', 'ptrcmp and pointercompare answer whether two pointers point at one thing', 'run', '.ring', [
+        'o1 = new P', 'o2 = new P', 'p1 = object2pointer(o1)', 'p2 = object2pointer(o1)', 'p3 = object2pointer(o2)', '? ptrcmp(p1, p2)',
+        '? ptrcmp(p1, p3)', '? pointercompare(p1, p2)', 'class P', T + 'x = 1'],
+     {'stdout': '1\n0\n1\n'}),
+    ('K11', 'K3', 'obj2ptr and ptr2obj are object2pointer and pointer2object', 'run', '.ring', [
+        'o = new P', 'p = obj2ptr(o)', '? type(p)', 'o2 = ptr2obj(p)', 'o2.x = 7', '? o.x', 'class P', T + 'x = 1'],
+     {'stdout': 'OBJECTPOINTER\n7\n'}),
+    ('K12', 'K3', 'ptrcmp of no pointer is Bad parameter type, in its name', 'run', '.ring', [
+        'o = new P', 'p = object2pointer(o)', '? ptrcmp(p, 5)', 'class P', T + 'x = 1'],
+     {'stdout': '\nLine 3 Bad parameter type! \nIn ptrcmp() in file K12.ring ', 'exit': 1}),
 ]
 
 os.makedirs(os.path.join(HERE, 'cases'), exist_ok=True)

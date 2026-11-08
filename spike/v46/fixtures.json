@@ -74,6 +74,39 @@
    "file": "cases/K08.ring",
    "stdout": "\nLine 2 Bad parameter type! \nIn pointer2object() in file K08.ring ",
    "exit": 1
+  },
+  {
+   "id": "K09",
+   "kind": "run",
+   "line": "K1",
+   "why": "a keyed read by a key the compiler cannot prove a text is counted too",
+   "file": "cases/K09.ring",
+   "stdout": "2\n2\n\ndone\n"
+  },
+  {
+   "id": "K10",
+   "kind": "run",
+   "line": "K3",
+   "why": "ptrcmp and pointercompare answer whether two pointers point at one thing",
+   "file": "cases/K10.ring",
+   "stdout": "1\n0\n1\n"
+  },
+  {
+   "id": "K11",
+   "kind": "run",
+   "line": "K3",
+   "why": "obj2ptr and ptr2obj are object2pointer and pointer2object",
+   "file": "cases/K11.ring",
+   "stdout": "OBJECTPOINTER\n7\n"
+  },
+  {
+   "id": "K12",
+   "kind": "run",
+   "line": "K3",
+   "why": "ptrcmp of no pointer is Bad parameter type, in its name",
+   "file": "cases/K12.ring",
+   "stdout": "\nLine 3 Bad parameter type! \nIn ptrcmp() in file K12.ring ",
+   "exit": 1
   }
  ]
 }
