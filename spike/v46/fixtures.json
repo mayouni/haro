@@ -5,7 +5,8 @@
  "lines": {
   "K1": "a keyed read is never an uncounted integer",
   "K2": "a call on a receiver is no unqualified call",
-  "K3": "object2pointer and pointer2object as Ring's"
+  "K3": "object2pointer and pointer2object as Ring's",
+  "K4": "an unwound call leaves no uncounted borrow behind"
  },
  "cases": [
   {
@@ -107,6 +108,14 @@
    "file": "cases/K12.ring",
    "stdout": "\nLine 3 Bad parameter type! \nIn ptrcmp() in file K12.ring ",
    "exit": 1
+  },
+  {
+   "id": "K13",
+   "kind": "run",
+   "line": "K4",
+   "why": "an error raised inside an append to a global, caught outside, leaves the global whole",
+   "file": "cases/K13.ring",
+   "stdout": "2\ncaught\ncaught\ncaught\n2\n2\n3\ndone\n"
   }
  ]
 }

@@ -77,6 +77,16 @@ CASES = [
     ('K12', 'K3', 'ptrcmp of no pointer is Bad parameter type, in its name', 'run', '.ring', [
         'o = new P', 'p = object2pointer(o)', '? ptrcmp(p, 5)', 'class P', T + 'x = 1'],
      {'stdout': '\nLine 3 Bad parameter type! \nIn ptrcmp() in file K12.ring ', 'exit': 1}),
+    # WRITTEN BEFORE THE CODE, third round (HARO-CLONEDEEP-01): stzlib's stzObject guard crashed in Summary() and sometimes hung; reduced
+    # by ddmin to one scenario, then to this, with no library: an error raised inside `$g + This.T()` and caught outside leaves the
+    # caller's call-window register holding the global's list as an uncounted borrow -- the unwind clears only from the end of the
+    # handler's frame, and a callee's frame starts inside it -- so the next store there releases the list while $g still holds it.
+    ('K13', 'K4', 'an error raised inside an append to a global, caught outside, leaves the global whole', 'run', '.ring', [
+        '$aTV = []', '$bOn = 1', 'oA = new O', 'oA.Add()', 'oA.Add()', '? len(oA.Vals())', '$bOn = 0', 'for i = 1 to 3', T + 'try',
+        T * 2 + 'oA.Add()', T + 'catch', T * 2 + '? "caught"', T + 'done', 'next', '? len(oA.Vals())', 's = "banana"', 'aCopy = oA.Vals()',
+        '? len(aCopy)', '$aTV + 5', '? len($aTV)', '? "done"', 'class O', T + 'def Add()', T * 2 + '$aTV + This.T()', T + 'def T()',
+        T * 2 + 'if $bOn = 0', T * 3 + 'raise("off")', T * 2 + 'ok', T * 2 + 'return 1', T + 'def Vals()', T * 2 + 'return $aTV'],
+     {'stdout': '2\ncaught\ncaught\ncaught\n2\n2\n3\ndone\n'}),
 ]
 
 os.makedirs(os.path.join(HERE, 'cases'), exist_ok=True)
@@ -91,7 +101,7 @@ for cid, line, why, kind, ext, prog, want in CASES:
 doc = {'rung': 'v0.46', 'decision': 'stzlib\'s three findings on haro.exe, fixed in Haro; Ring 1.27 the specification of a .ring file',
        'class': 'run: exact stdout and exit code on haro and its checked build, the same bytes; check: the report holds (has) or lacks (not) a rule name',
        'lines': {'K1': 'a keyed read is never an uncounted integer', 'K2': 'a call on a receiver is no unqualified call',
-                 'K3': 'object2pointer and pointer2object as Ring\'s'},
+                 'K3': 'object2pointer and pointer2object as Ring\'s', 'K4': 'an unwound call leaves no uncounted borrow behind'},
        'cases': out}
 with open(os.path.join(HERE, 'fixtures.json'), 'w', encoding='utf-8', newline='\n') as fh:
     json.dump(doc, fh, indent=1)
