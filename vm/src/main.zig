@@ -4490,13 +4490,20 @@ pub const VM = struct {
     /// An eval's temporaries are inside the bound: its caller's recorded
     /// size grows for the eval's life (runEval).
     inline fn forgetUnwound(self: *VM, h: Handler, fsp: u32, base: u32) void {
-        const lo: u32 = h.base + (if (h.fsp > 0) @as(u32, self.frames[h.fsp - 1].size) else 0);
-        var hw = lo;
+        const top: u32 = h.base + (if (h.fsp > 0) @as(u32, self.frames[h.fsp - 1].size) else 0);
+        var hw = top;
         var k = h.fsp;
         while (k < fsp) : (k += 1) {
             const own: u32 = if (k + 1 < fsp) self.frames[k + 1].base else base;
             hw = @max(hw, own + @as(u32, self.frames[k].size));
         }
+        // FROM THE FIRST UNWOUND FRAME'S BASE, when that lies inside the handler's frame (v0.46, HARO-CLONEDEEP-01). A callee's frame
+        // starts at its caller's call window, below the end of the caller's frame, so clearing from `top` left the unwound callee's
+        // low registers -- a borrow among them: `$g + This.F()` holds $g's list uncounted, ended by a raw store the raise skipped --
+        // in the handler's frame, where the next store there released what it never counted and freed $g's list (stzlib's
+        // stzObject guard: a crash in Summary(), or a hang). Those registers are the dead call's window; nothing reads them again.
+        const first: u32 = if (h.fsp + 1 < fsp) self.frames[h.fsp + 1].base else base;
+        const lo: u32 = if (h.fsp < fsp) @min(top, first) else top;
         var r = lo;
         while (r < hw and r < self.regs.len) : (r += 1) self.regs[r] = Value.nil();
     }

@@ -44,6 +44,8 @@ PLANTS = [
     ('N11', 'K10', MAIN, 'ptrcmp answers 1 for any two pointers', '                        out = Value.int(if (cptrOf(pa) == cptrOf(pb)) 1 else 0);',
      '                        out = Value.int(if (true or cptrOf(pa) == cptrOf(pb)) 1 else 0);'),
     ('N12', 'K11', COMP, 'obj2ptr is no name the compiler knows', '    .{ .name = "obj2ptr", .id = .obj2ptr, .argc = 1 },', '    .{ .name = "obj2ptr_unknown", .id = .obj2ptr, .argc = 1 },'),
+    ('N13', 'K13', MAIN, 'the unwind clears from the end of the handler frame, not from the first unwound frame',
+     '        const lo: u32 = if (h.fsp < fsp) @min(top, first) else top;', '        const lo: u32 = if (false and h.fsp < fsp) @min(top, first) else top;'),
     ('N3', 'K03', TYPES, 'the lone `.` ending the statement before is not looked for',
      '                if (cnt > 0 and std.mem.eql(u8, before.child(cnt - 1).kind(), ".")) return;',
      '                if (false and cnt > 0 and std.mem.eql(u8, before.child(cnt - 1).kind(), ".")) return;'),
