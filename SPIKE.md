@@ -1890,8 +1890,7 @@ each reproduced before anything changed -- HARO-KEYEDRELEASE-01 (a segfault), HA
     v46/plants.py                       7 protections switched off in turn (N2 and N4 removed, named)
     v46/GRAMMAR.md                      the ruling, the table, how it is built, what was measured, the readings, what is not covered
 
-**Results.** 8 of 8 cases on both builds; 7 of 7 plants caught; stzlib's stzDataSet guard, which crashed after 41 assertions, 185 of 185 on
-haro.exe with Haro's engine. **The 50-stage guard** passed whole on haro and its checked build, 0 failures (1,328 s; stage 6 compiled
+**Results.** 8 of 8 cases on both builds; 7 of 7 plants caught. **CORRECTED 2026-11-08, second round**: the 185 of 185 first written here was measured on stzlib c4f6f85ea, a ref OLDER than the guard that reaches the MutualInformation loop, and named no ref -- stzlib's port caught it. At stzlib origin/main 4fdffce2c, after the second round, the guard passes 185 of 185 with its three MutualInformation scenarios run. **Second round** (4b85327, 47fced6): the keyed read's second shape (a key of class ref, through an uncounted `vget` -- the first round had removed that count as idle), and `ptrcmp`, `pointercompare`, `obj2ptr`, `ptr2obj`; 12 cases, 11 of 11 plants, the 50-stage guard green (1,817 s; stage 6 at 149.2 ms, a hair under its ceiling). HARO-CLONEDEEP-01 open. **The 50-stage guard** passed whole on haro and its checked build, 0 failures (1,328 s; stage 6 compiled
 the court cold in 144.6 ms).
 
 ## The names -- `.haro`, not `.stzu` -- corrected 2026-10-02

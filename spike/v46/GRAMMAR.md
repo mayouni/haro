@@ -9,9 +9,9 @@ K08 written after the plants, both said so). Every run case was read off Ring 1.
 
 | line | what | cases |
 |---|---|---|
-| K1 | a read by a key not proven a whole number answers the element or the empty text of a missing key, so it is never held as an uncounted integer (HARO-KEYEDRELEASE-01: a segfault) | K01, K02 |
+| K1 | a read by a key not proven a whole number answers the element or the empty text of a missing key, so it is never held as an uncounted integer, nor read by an uncounted `vget` (HARO-KEYEDRELEASE-01: a segfault, two shapes) | K01, K02, K09 |
 | K2 | `haro check`: a call whose statement follows a lone `.` is a call on a receiver, and the class's own method's arity is not its (HARO-ARITY-RECEIVER-01) | K03, K04 |
-| K3 | `object2pointer(o)` is an OBJECTPOINTER, `pointer2object(p)` that same object, shared; two pointers to one object are equal; anything else Bad parameter type!, as Ring's (HARO-OBJECT2POINTER-01) | K05-K08 |
+| K3 | `object2pointer(o)` is an OBJECTPOINTER, `pointer2object(p)` that same object, shared; two pointers to one object are equal; `ptrcmp` and `pointercompare` answer it, `obj2ptr` and `ptr2obj` are the short forms; anything else Bad parameter type!, as Ring's (HARO-OBJECT2POINTER-01, HARO-PTRCMP-01) | K05-K08, K10-K12 |
 
 ## How it is built
 
@@ -36,11 +36,13 @@ K08 written after the plants, both said so). Every run case was read off Ring 1.
 - **Read off Ring 1.27**: the keyed loop prints `2`, `2`, an empty line and `done`; `type(object2pointer(o))` is OBJECTPOINTER,
   isPointer 1, a write through `pointer2object` reaches the original, two pointers to one object compare 1, `isNull` 0.
 - **stzlib's own guard** `base/test/stats/stzDataSet_defects_narrated.ring`, which crashed after 41 assertions (its `_CategoryIds` is the
-  K1 pattern), passes 185 of 185 on haro.exe with Haro's engine (stzlib origin/main c4f6f85ea, `STZ_ENGINE_DIR=C:\haro-engine`).
+  K1 pattern). **CORRECTED 2026-11-08, second round**: the 185 of 185 first written here was measured on stzlib c4f6f85ea, a ref OLDER than the guard that reaches the MutualInformation loop, and named no ref -- stzlib's port caught it. At stzlib origin/main 4fdffce2c, after the second round, the guard passes 185 of 185 with its three MutualInformation scenarios run.
 
 ## The protections, each switched off (`plants.py`)
 
-**7 of 7 caught**: the keyed read's class (N1), the receiver call's lone `.` (N3), object2pointer's object check (N5), pointer2object's
+**The second round** (haro 4b85327 fixtures, 47fced6 code, on stzlib's second report): a key the compiler cannot prove a text -- `"" + (anA[i] * 3 + anB[i])` is a ref, its operands may be objects -- reached the keyed read through an uncounted `vget`, and the static empty text was freed again (K09, stzlib's haro_keyed_release_arith.ring). The count that closes it was N2's, removed in the first round as idle because no case reached it: **a plant that moves no case says the cases are thin, not that the protection is idle** -- N2 is restored and caught by K09. `ptrcmp`, `pointercompare`, `obj2ptr`, `ptr2obj` added (K10-K12; N10-N12 caught). **11 of 11 plants** in all.
+
+**7 of 7 caught** (first round): the keyed read's class (N1), the receiver call's lone `.` (N3), object2pointer's object check (N5), pointer2object's
 kind check (N6), its shared reference (N7), pointer equality (N8), the OBJECTPOINTER kind (N9).
 
 - **N2 removed, named**: a `vget` counted whenever the index was not proven an integer. The class of the read (N1) is what stops the
@@ -58,6 +60,8 @@ kind check (N6), its shared reference (N7), pointer equality (N8), the OBJECTPOI
   names lives with the program, as on Ring.
 
 ## Not covered, named
+
+- **HARO-CLONEDEEP-01, open and not reduced**: with `ptrcmp` present, stzlib's `stzObject_defects_narrated.ring` (4fdffce2c) runs past ToPointer and segfaults in its IfQ scenario, in `cloneDeepD`; it crashes the same with ToPointer and Numberified removed, and the IfQ calls alone on the same objects do not -- state from earlier scenarios matters. The next work.
 
 - `strictEq`, the comparison `find()` and its kin use, is unchanged for C pointers.
 - A checker that knows the receiver's class could judge `This.F().M()`'s arity; this one says nothing of it.
