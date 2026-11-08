@@ -1,0 +1,70 @@
+{
+ "rung": "v0.46",
+ "decision": "stzlib's three findings on haro.exe, fixed in Haro; Ring 1.27 the specification of a .ring file",
+ "class": "run: exact stdout and exit code on haro and its checked build, the same bytes; check: the report holds (has) or lacks (not) a rule name",
+ "lines": {
+  "K1": "a keyed read is never an uncounted integer",
+  "K2": "a call on a receiver is no unqualified call",
+  "K3": "object2pointer and pointer2object as Ring's"
+ },
+ "cases": [
+  {
+   "id": "K01",
+   "kind": "run",
+   "line": "K1",
+   "why": "a keyed read of missing keys in a loop answers as Ring, never freeing the empty text",
+   "file": "cases/K01.ring",
+   "stdout": "2\n2\n\ndone\n"
+  },
+  {
+   "id": "K02",
+   "kind": "run",
+   "line": "K1",
+   "why": "a missing key's answer is the empty text, and the name holding it is a text until it is set again",
+   "file": "cases/K02.ring",
+   "stdout": "1\n5\n1\n5\n1\n5\n1\n"
+  },
+  {
+   "id": "K03",
+   "kind": "check",
+   "line": "K2",
+   "why": "a method called on a receiver is not the class's own: no arity error",
+   "file": "cases/K03.ring",
+   "not": "haro/type-arity"
+  },
+  {
+   "id": "K04",
+   "kind": "check",
+   "line": "K2",
+   "why": "an unqualified call of the class's own method with the wrong arity is still reported (must not move)",
+   "file": "cases/K04.ring",
+   "has": "haro/type-arity"
+  },
+  {
+   "id": "K05",
+   "kind": "run",
+   "line": "K3",
+   "why": "object2pointer and pointer2object as Ring's: one object, shared, pointers equal",
+   "file": "cases/K05.ring",
+   "stdout": "OBJECTPOINTER\n1\n5\nOBJECT\n1\n0\n"
+  },
+  {
+   "id": "K06",
+   "kind": "run",
+   "line": "K3",
+   "why": "object2pointer of no object is Bad parameter type, in its name",
+   "file": "cases/K06.ring",
+   "stdout": "\nLine 1 Bad parameter type! \nIn object2pointer() in file K06.ring ",
+   "exit": 1
+  },
+  {
+   "id": "K07",
+   "kind": "run",
+   "line": "K3",
+   "why": "pointer2object of no pointer is Bad parameter type, in its name",
+   "file": "cases/K07.ring",
+   "stdout": "\nLine 1 Bad parameter type! \nIn pointer2object() in file K07.ring ",
+   "exit": 1
+  }
+ ]
+}
