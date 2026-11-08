@@ -6,6 +6,13 @@ The VM is built with the plant into runtime/v44/plant-build (ReleaseFast, -j2, o
 and the file is restored byte for byte before the next plant -- verified by its digest, and restored even when a build fails or the
 script is stopped.
 
+A file with CRLF line ends (zip.zig, HF-135) is matched and planted on its LF-normalised text and written back with its own ends: the
+first run read raw bytes, and four zip plants stood 0 times (STALE) though their text was there.
+
+Removed after planting, named: Z6 and Z8, the NaN check of `jle` and `jge`. The compiler emits an ordering jump only inverted (c = 1, from
+cond()), and for these two a NaN's valCmp of 0 already makes `<=` and `>=` hold, so the jump fires and the comparison reads false, as IEEE
+says; switched off, no case moved, and none can. The checks are removed from the VM; `jlt` and `jgt` keep theirs (Z5, Z7).
+
   python spike/v44/plants.py            all plants (about a minute each)
   python spike/v44/plants.py Z3 Z7      some
 """
@@ -28,9 +35,7 @@ PLANTS = [
      '                            if ((px < 0 and py != @trunc(py)) or (px == 0 and py < 0)) {',
      '                            if (false and ((px < 0 and py != @trunc(py)) or (px == 0 and py < 0))) {'),
     ('Z5', 'Q03', MAIN, 'a NaN is ordered by `jlt`', None, 'jlt'),
-    ('Z6', 'Q03', MAIN, 'a NaN is ordered by `jle`', None, 'jle'),
     ('Z7', 'Q03', MAIN, 'a NaN is ordered by `jgt`', None, 'jgt'),
-    ('Z8', 'Q03', MAIN, 'a NaN is ordered by `jge`', None, 'jge'),
     ('Z9', 'Q13', MAIN, 'a NaN is ordered by cmpv', '                    t = if (unordered(x, y)) false else switch (k) {',
      '                    t = if (false and unordered(x, y)) false else switch (k) {'),
     ('Z10', 'Q09', MAIN, 'a .haro file writes a letter in place',
@@ -91,7 +96,9 @@ def main():
         for pid, fixture, src, why, old, new in PLANTS:
             if want and pid not in want:
                 continue
-            text = originals[src].decode('utf-8')
+            raw_text = originals[src].decode('utf-8')
+            crlf = (chr(13) + chr(10)) in raw_text
+            text = raw_text.replace(chr(13) + chr(10), chr(10))
             if old is None:
                 planted = nan_plant(text, new)
             else:
@@ -100,7 +107,7 @@ def main():
                     results.append((pid, 'STALE'))
                     continue
                 planted = text.replace(old, new)
-            open(src, 'wb').write(planted.encode('utf-8'))
+            open(src, 'wb').write((planted.replace(chr(10), chr(13) + chr(10)) if crlf else planted).encode('utf-8'))
             b = subprocess.run(['zig', 'build', '-Doptimize=ReleaseFast', '-j2', '-p', OUT], cwd=VM_DIR, capture_output=True, timeout=900)
             restore()
             if b.returncode != 0:

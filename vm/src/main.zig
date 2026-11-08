@@ -5053,12 +5053,8 @@ pub const VM = struct {
                     self.pending = e;
                     continue :dispatch .raise;
                 }
-                // v0.44: a NaN is unordered -- the comparison is false, so a jump that fires when it holds (c = 0) does not, and
-                // an inverted one (c = 1, fires when it fails) does
-                if (unordered(regs[base + in.a], regs[base + in.b])) {
-                    if (in.c != 0) pc = self.loopStep(@intCast(in.d), pc, fsp) else pc += 1;
-                    continue :dispatch code[pc].op;
-                }
+                // v0.44: no NaN check here -- the compiler emits this jump only inverted (c = 1), and a NaN's valCmp of 0 already
+                // makes `<=` hold, so the jump fires and the comparison reads false, as IEEE says (plant Z6, removed)
                 if (valCmp(regs[base + in.a], regs[base + in.b]) <= 0) {
                     pc = self.loopStep(@intCast(in.d), pc, fsp);
                 } else pc += 1;
@@ -5097,12 +5093,8 @@ pub const VM = struct {
                     self.pending = e;
                     continue :dispatch .raise;
                 }
-                // v0.44: a NaN is unordered -- the comparison is false, so a jump that fires when it holds (c = 0) does not, and
-                // an inverted one (c = 1, fires when it fails) does
-                if (unordered(regs[base + in.a], regs[base + in.b])) {
-                    if (in.c != 0) pc = self.loopStep(@intCast(in.d), pc, fsp) else pc += 1;
-                    continue :dispatch code[pc].op;
-                }
+                // v0.44: no NaN check here -- the compiler emits this jump only inverted (c = 1), and a NaN's valCmp of 0 already
+                // makes `>=` hold, so the jump fires and the comparison reads false, as IEEE says (plant Z8, removed)
                 if (valCmp(regs[base + in.a], regs[base + in.b]) >= 0) {
                     pc = self.loopStep(@intCast(in.d), pc, fsp);
                 } else pc += 1;

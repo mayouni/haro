@@ -271,6 +271,10 @@ a sixteenth letter, `w` for a word. Sections 3 and 4 above read with those addit
 
 Each one fixtures first, both builds byte for byte, every protection planted, as every rung.
 
+**Renumbered 2026-11-08**: v0.44 went to the ported defects and v0.45 to C27 (the author's Haro-first ruling, and "Yes, that order"), so
+each rung below from 3 on is two versions later than written: the checked letters are v0.46, numbers v0.47, absence v0.48, structure
+v0.49, judged types v0.50.
+
 1. **v0.42 -- case-exact names** (ruled): a name spelled only as declared; two names differing only by case refused (`CASE_COLLISION`); a keyword
    in another case refused (e).
 2. **v0.43 -- boolean, and no coercion** (T1, T3): `true`/`false` a type, conditions boolean only, comparisons across types refused, integer

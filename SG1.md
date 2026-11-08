@@ -259,6 +259,19 @@ the seats SG0 named before the governance seats, because SG2 needs the first and
 6. **the C door** (section 8), and then SG2: numtheory on the register target, then as C through `zig cc` (COMPASS-SYSLANG-03).
 7. **`personal` and `budget`**, with the constitution desk (W6).
 
+**Delegated whole to this desk, 2026-11-08** (the author in the compass session, about 10:37: "Yes, delegate it all to the Haro session.";
+relayed by the compass at 10:39, COMPASS-SYSLANG-DELEGATE-01). Everything that builds, changes or tests Haro for the system-language plan
+is this desk's; the compass reads, rates and recounts only. With it:
+- **SG0b, the harder round (SG0-HARD-SET-01)**, is rung 4's acceptance, scheduled here. It runs **the frozen SG0 kit unchanged**
+  (`D:\GitHub\syslang-sg0`, private, no remote, main c0ae4cf: the judge in `rig/`, the rule in `docs/RULE.md` as amended at 33d6ccd, the
+  tasks in `tasks/`); any change it needs (`.haro` programs instead of `prog.ring`, for one) is a dated amendment committed BEFORE the first
+  job, and the compass recounts the result read-only from the raw judged files.
+- **Its primer and prompts are written against the surface as it is on the day of the run**, D56 (b)'s words included: under v0.43 a
+  condition is a boolean in a `.haro` file, so S2b's passing answer `if (x >> i) & 1` would be refused there and needs `!= 0` (the
+  compass's finding, not run by it; SG0 judged `.ring` files, so its results stand).
+- **A primer for agents carries at least one worked example per shape** (S2b, syslang-sg0 a2c0383: one example took Qwen2.5-Coder 1.5B from
+  0 to 5 of 20 basic tasks and 0 to 2 of 30 system tasks); one is not enough for system tasks, and a larger local model there is unmeasured.
+
 Owed to other desks, named so nobody waits on this one: the decoder's depth limit (statements four deep, subscripts below the
 first level) is the engine's, stzlib-intelligence's; Haro's GBNF carrying the bit operators, hex, `finally` and `catch e` is this
 desk's, with rung 1; W7's map of natives to doors and W6's budget form are the constitution desk's.

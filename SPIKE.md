@@ -1868,6 +1868,18 @@ type unasked and an integer stays exact to 64 bits; a `.ring` file reads as Ring
 **Results.** 24 of 24 cases on both builds; 26 of 26 plants caught; Haro's code migrated by rule (about 680 lines) and by hand (a dozen),
 four earlier fixtures printing `true` where they printed `1`, by the ruling. **The 48-stage guard** on the final VM code: 47 of 48 stages green (1,508 s; stage 6 compiled the court cold in 147.5 ms, under its 150 ms ceiling, after the compiler was made to ask the cheap question first -- 156 ms before). Stage 24 failed alone: its history measure read 94.9% against a 95% floor, every lost target in the pairs ending at this rung's own migration commit, which a tool made; on the author's "Exclude tool commits" (2026-11-08) such a commit is listed in `v20/tool_commits.txt` and its pairs are counted apart, both figures printed every run: 99.8% on human edits (90 pairs), 94.9% with the tool's. Stage 24 then passed (274 s).
 
+## The forty-fourth rung -- Haro v0.44, the ported defects -- 2026-11-08
+
+**D57**, under the author's Haro-first ruling (PRINCIPAL-HAROFIRST-01) and his "Yes, that order": four runtime defects stzlib found on
+Ring++ and reproduced on `haro.exe` (HARO-PORTED-FINDINGS-01), fixed in Haro, every `.ring` answer read off Ring 1.27.
+
+    v44/fixtures.json, cases/           14 cases (written first, 07912da: 12; Q13 and Q14 after the code, before the plants, said so)
+    v44/ported_court.py                 the cases on haro and its checked build, each in a folder of its own; --ring reads them off Ring 1.27
+    v44/plants.py                       20 protections in main.zig, compile.zig and zip.zig switched off in turn (Z6 and Z8 removed, named)
+    v44/GRAMMAR.md                      the rulings, the table, how it is built, what was measured, the readings, what is not covered
+
+**Results.** 14 of 14 cases on both builds; 20 of 20 plants caught. **The 49-stage guard** passed whole on haro and its checked build, 0 failures (1,939 s; stage 6 compiled the court cold in 145.7 ms, under its 150 ms ceiling; stage 24 99.8% on human edits, 94.9% with the tool's commit, both printed).
+
 ## The names -- `.haro`, not `.stzu` -- corrected 2026-10-02
 
 **At the author's word ("we agreed to use .haro instead of .stzu, no?").** D1 was ratified
@@ -2051,3 +2063,4 @@ whole guard re-run on the renamed tree: 28 + 30 + 27 + 23, 117 of 120, 32 of 32,
 38. ~~Case-exact names (D55's first rung)~~ -- built 2026-11-07 as Haro v0.42, the forty-second rung above. Next: v0.43, boolean and no
    coercion (TYPES.md T1, T3); SG1's draft on SG0's memo, with D55's amendment for the system grain's seats; as 36, the Zui-to-Zane rename.
 39. ~~A real boolean and no coercion (D55 T1, T3)~~ -- built 2026-11-08 as Haro v0.43, the forty-third rung above. SG1 drafted and ruled the same night (D56). Next: v0.44, the letters checked (T2), with `isboolean` and the conversion at a b-name; then v0.45 numbers, and SG1's rung 1 (words and widths) after it; as 36, the Zui-to-Zane rename.
+40. ~~The ported defects (HARO-PORTED-FINDINGS-01)~~ -- built 2026-11-08 as Haro v0.44, the forty-fourth rung above, on the author's Haro-first ruling; TYPES.md's rungs move two versions (the checked letters are v0.46). The system-language plan is this desk's whole (the author, "Yes, delegate it all to the Haro session.", COMPASS-SYSLANG-DELEGATE-01): SG0b is SG1's rung 4's acceptance, on the frozen kit. Next: v0.45, C27 -- a load of stzlib that reports every site that does not scan instead of stopping, then which of the 125 sites Haro accepts on its Ring surface (HARO-STZLIB-LOAD-01); then the three defects that wait for the load.
