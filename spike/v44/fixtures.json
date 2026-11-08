@@ -111,6 +111,22 @@
    "why": "appending to an archive keeps its entries and adds one (must not move)",
    "file": "cases/Q12.ring",
    "stdout": "2\n"
+  },
+  {
+   "id": "Q13",
+   "kind": "run",
+   "line": "P2",
+   "why": "a NaN compared through a global (cmpv) is unordered too",
+   "file": "cases/Q13.ring",
+   "stdout": "0\n0\n0\n"
+  },
+  {
+   "id": "Q14",
+   "kind": "run",
+   "line": "P6",
+   "why": "an entry whose name leaves the folder is not written; the others are",
+   "file": "cases/Q14.ring",
+   "stdout": "0\n1\n"
   }
  ]
 }

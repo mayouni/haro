@@ -14,7 +14,8 @@ which is this rung's subject and never its judge.
   P4  a .haro file refuses it: a text is not written in place (TEXT_IN_PLACE; D56 (c): bytes are, text is not)
   P5  zip_openfile(f, "a") on a file that is no archive answers a null handle, every later call on it does nothing, and the file is not
       rewritten -- as Ring's zip does
-  P6  zip_extract_allfiles writes every entry, the last of a name winning, and answers nothing, as Ring's does
+  P6  zip_extract_allfiles writes every entry, the last of a name winning, and answers nothing, as Ring's does; a name that leaves the
+      folder is not written (Ring writes it: a named divergence)
 
 THE DESK'S READINGS, recorded as its own:
   - a letter of a text held by a global, an attribute or a list item is REFUSED in a .ring file for now, by name: the VM writes the letter
@@ -98,6 +99,17 @@ CASES = [
         'zip_close(oZip)', 'oZip = zip_openfile("two.zip", "a")', 'zip_entry_open(oZip, "b.txt")', 'zip_entry_write(oZip, "two", 3)',
         'zip_entry_close(oZip)', 'zip_close(oZip)', 'oZip = zip_openfile("two.zip", "r")', '? zip_filescount(oZip)', 'zip_close(oZip)'],
      ['2']),
+    # WRITTEN AFTER THE CODE, before the plants, found while writing them: no case compared a NaN through cmpv, which a global's value takes
+    # (Q13, Ring's answers); and no case gave an entry a name that leaves the folder (Q14). Ring 1.27 WRITES `../evil.txt` beside the folder
+    # (zip slip, read off Ring); Haro does not -- a named divergence, least authority over parity.
+    ('Q13', 'P2', 'a NaN compared through a global (cmpv) is unordered too', '.ring', [
+        '$y = exp(1000) - exp(1000)', '? $y <= 0', '? $y > 0', '? $y = $y'],
+     ['0', '0', '0']),
+    ('Q14', 'P6', 'an entry whose name leaves the folder is not written; the others are', '.ring', [
+        'oZip = zip_openfile("slip.zip", "w")', 'zip_entry_open(oZip, "../evil.txt")', 'zip_entry_write(oZip, "x", 1)', 'zip_entry_close(oZip)',
+        'zip_entry_open(oZip, "ok.txt")', 'zip_entry_write(oZip, "y", 1)', 'zip_entry_close(oZip)', 'zip_close(oZip)',
+        'zip_extract_allfiles("slip.zip", "out")', '? fexists("evil.txt")', '? fexists("out/ok.txt")'],
+     ['0', '1']),
 ]
 
 os.makedirs(os.path.join(HERE, 'cases'), exist_ok=True)

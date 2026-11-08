@@ -3662,6 +3662,25 @@ def stage48():
         return 1
     return 0
 
+PORTED_COURT = os.path.join(HERE, 'v44', 'ported_court.py')
+
+
+def stage49():
+    """Haro v0.44, the ported defects (HARO-PORTED-FINDINGS-01, under the author's Haro-first ruling; v44/GRAMMAR.md): a math domain error
+    is R51, a NaN is unordered, a letter of a local text is written as Ring writes it and a .haro file refuses it, append to no archive
+    answers NULL and leaves the file, extraction writes every entry and none outside its folder. v44/ported_court.py on haro and its
+    checked build, each case in a folder of its own."""
+    print('stage 49 -- the ported defects: v44/ported_court.py on haro and its checked build')
+    p = subprocess.run([sys.executable, PORTED_COURT] + (['--plant'] if PLANT else []), capture_output=True, cwd=HERE, timeout=600)
+    out = p.stdout.decode('utf-8', 'replace').replace(chr(13) + chr(10), chr(10))
+    for line in out.splitlines():
+        if line.startswith('  FAIL') or line.startswith('       ') or line.startswith('PORTED COURT'):
+            print(line)
+    if p.returncode != 0:
+        print(f'  FAIL the ported court exited {p.returncode}' + ('' if out.strip() else ': ' + p.stderr.decode('utf-8', 'replace')[-400:]))
+        return 1
+    return 0
+
 SENTENCE_TARGET = 50.0     # D42: a sentence edited, its court's image reused -- what a person editing a sentence waits for
 COLD_CEILING = 150.0       # D42: the court compiled from scratch -- a ceiling that catches the court library growing
 
@@ -3853,5 +3872,7 @@ if __name__ == '__main__':
         failures += stage47()
     if stage in (None, 48) and os.path.exists(BOOL_COURT):
         failures += stage48()
+    if stage in (None, 49) and os.path.exists(PORTED_COURT):
+        failures += stage49()
     print(f'haro_forge: {"FAIL" if failures else "PASS"} ({failures} failure(s), {time.perf_counter()-t0:.1f} s)')
     sys.exit(1 if failures else 0)

@@ -2701,6 +2701,9 @@ pub const VM = struct {
     const NULLPTR = "Error in parameter, NULL pointer!";
     const R29 = "Error (R29) : Using bad data type in for loop";
     const BADPARAM = "Bad parameter type!";
+    /// v0.44 (HARO-PORTED-FINDINGS-01 (1)): Ring's math library raises R51 on a domain or pole error -- read off Ring 1.27
+    const R51 = "Error (R51) : Value Error";
+    const R7 = "Error (R7) : Can't assign to a string letter more than one character";
     const BADVALUE = "Bad parameter value!";
     const BADRANGE = "Bad parameters value, error in range!";
     const R35 = "Error (R35) : Can't create/open the file";
@@ -3809,6 +3812,34 @@ pub const VM = struct {
         if (x.tag == .boolean and y.tag == .boolean)
             return self.haroMsg("Error (TYPE_MISMATCH) : boolean {s} boolean -- {s} orders numbers and texts", .{ op, op });
         return self.haroMsg("Error (TYPE_MISMATCH) : {s} {s} {s} -- {s} compares two values of one type", .{ typeWord(x), op, typeWord(y), op });
+    }
+    /// v0.44: a letter of a text written, Ring's rule (read off Ring 1.27): one character, or a number taken as its byte; more or fewer is
+    /// R7, an index past the end R2. The text is a value: a new one is made and put in the local's register (`local`, from the compiler);
+    /// a text reached through a global, an attribute or a list item is refused by name, since its holder would not see the new one.
+    fn textLetter(self: *VM, pc: u32, reg: u32, vv: Value, iv: Value, nv: Value, local: bool) ?[]const u8 {
+        if (self.strictAt(pc)) return "Error (TEXT_IN_PLACE) : a text is not written in place -- build a new one: left(t, i - 1) + c + substr(t, i + 1)";
+        if (!local) return "Haro: a letter of a text held by a global, an attribute or a list item is not written yet -- copy it to a local, write the letter, and assign it back";
+        if (!isNum(iv)) return BADPARAM;
+        const s = strOf(vv);
+        const idx = asInt(iv);
+        if (idx < 1 or idx > s.len) return R2;
+        const ch: u8 = if (nv.tag == .str) blk: {
+            const t = strOf(nv);
+            if (t.len != 1) return R7;
+            break :blk t[0];
+        } else if (isNum(nv)) @truncate(@as(u64, @bitCast(asInt(nv)))) else return BADPARAM;
+        const buf = self.alloc.alloc(u8, s.len) catch @panic("oom");
+        @memcpy(buf, s);
+        buf[@intCast(idx - 1)] = ch;
+        const sp = self.alloc.create(Str) catch @panic("oom");
+        sp.* = .{ .ptr = buf.ptr, .len = @intCast(buf.len), .rc = 0, .cap = @intCast(buf.len) };
+        self.setRegB(reg, Value.str(sp), true);
+        return null;
+    }
+
+    /// v0.44: a NaN on either side: no ordering holds (IEEE 754, and Ring's C comparisons)
+    inline fn unordered(a: Value, b: Value) bool {
+        return (a.tag == .num and std.math.isNan(a.p.d)) or (b.tag == .num and std.math.isNan(b.p.d));
     }
     inline fn unb(v: Value) Value {
         return if (v.tag == .boolean) Value.int(v.p.i) else v;
@@ -5000,6 +5031,12 @@ pub const VM = struct {
                     self.pending = e;
                     continue :dispatch .raise;
                 }
+                // v0.44: a NaN is unordered -- the comparison is false, so a jump that fires when it holds (c = 0) does not, and
+                // an inverted one (c = 1, fires when it fails) does
+                if (unordered(regs[base + in.a], regs[base + in.b])) {
+                    if (in.c != 0) pc = self.loopStep(@intCast(in.d), pc, fsp) else pc += 1;
+                    continue :dispatch code[pc].op;
+                }
                 if (valCmp(regs[base + in.a], regs[base + in.b]) < 0) {
                     pc = self.loopStep(@intCast(in.d), pc, fsp);
                 } else pc += 1;
@@ -5015,6 +5052,12 @@ pub const VM = struct {
                     if (self.opWantJump(regs[base + in.a], regs[base + in.b], if (in.c != 0) ">" else "<=", if (in.c != 0) "r>" else "r<=", in.c != 0)) continue :dispatch .opcall;
                     self.pending = e;
                     continue :dispatch .raise;
+                }
+                // v0.44: a NaN is unordered -- the comparison is false, so a jump that fires when it holds (c = 0) does not, and
+                // an inverted one (c = 1, fires when it fails) does
+                if (unordered(regs[base + in.a], regs[base + in.b])) {
+                    if (in.c != 0) pc = self.loopStep(@intCast(in.d), pc, fsp) else pc += 1;
+                    continue :dispatch code[pc].op;
                 }
                 if (valCmp(regs[base + in.a], regs[base + in.b]) <= 0) {
                     pc = self.loopStep(@intCast(in.d), pc, fsp);
@@ -5032,6 +5075,12 @@ pub const VM = struct {
                     self.pending = e;
                     continue :dispatch .raise;
                 }
+                // v0.44: a NaN is unordered -- the comparison is false, so a jump that fires when it holds (c = 0) does not, and
+                // an inverted one (c = 1, fires when it fails) does
+                if (unordered(regs[base + in.a], regs[base + in.b])) {
+                    if (in.c != 0) pc = self.loopStep(@intCast(in.d), pc, fsp) else pc += 1;
+                    continue :dispatch code[pc].op;
+                }
                 if (valCmp(regs[base + in.a], regs[base + in.b]) > 0) {
                     pc = self.loopStep(@intCast(in.d), pc, fsp);
                 } else pc += 1;
@@ -5047,6 +5096,12 @@ pub const VM = struct {
                     if (self.opWantJump(regs[base + in.a], regs[base + in.b], if (in.c != 0) "<" else ">=", if (in.c != 0) "r<" else "r>=", in.c != 0)) continue :dispatch .opcall;
                     self.pending = e;
                     continue :dispatch .raise;
+                }
+                // v0.44: a NaN is unordered -- the comparison is false, so a jump that fires when it holds (c = 0) does not, and
+                // an inverted one (c = 1, fires when it fails) does
+                if (unordered(regs[base + in.a], regs[base + in.b])) {
+                    if (in.c != 0) pc = self.loopStep(@intCast(in.d), pc, fsp) else pc += 1;
+                    continue :dispatch code[pc].op;
                 }
                 if (valCmp(regs[base + in.a], regs[base + in.b]) >= 0) {
                     pc = self.loopStep(@intCast(in.d), pc, fsp);
@@ -5266,6 +5321,15 @@ pub const VM = struct {
                 const in = code[pc];
                 const vv = regs[base + in.a];
                 const iv = regs[base + in.b];
+                if (vv.tag == .str) {
+                    // v0.44 (HARO-PORTED-FINDINGS-01 (2)): `s[i] = c` as Ring writes it, in a .ring file; a .haro file refuses it
+                    if (self.textLetter(pc, base + in.a, vv, iv, regs[base + in.c], (in.d & 2) != 0)) |e| {
+                        self.pending = e;
+                        continue :dispatch .raise;
+                    }
+                    pc += 1;
+                    continue :dispatch code[pc].op;
+                }
                 if (vv.tag != .vec) {
                     self.pending = BADPARAM;
                     continue :dispatch .raise;
@@ -6252,11 +6316,32 @@ pub const VM = struct {
                             self.pending = BADPARAM;
                             continue :dispatch .raise;
                         }
+                        // v0.44: outside the domain is R51, as Ring's library says -- never a NaN or a pole's infinity
+                        const dx = asF64(regs[A]);
+                        const outside = switch (which) {
+                            .sqrt => dx < 0,
+                            .log, .log10 => dx <= 0,
+                            .asin, .acos => dx > 1 or dx < -1,
+                            else => false,
+                        };
+                        if (outside) {
+                            self.pending = R51;
+                            continue :dispatch .raise;
+                        }
                     },
                     .atan2, .pow => {
                         if (!isNum(regs[A]) or !isNum(regs[A + 1])) {
                             self.pending = BADPARAM;
                             continue :dispatch .raise;
+                        }
+                        if (which == .pow) {
+                            const px = asF64(regs[A]);
+                            const py = asF64(regs[A + 1]);
+                            // a negative to a power that is no whole number, or 0 to a negative power: R51, as Ring's pow
+                            if ((px < 0 and py != @trunc(py)) or (px == 0 and py < 0)) {
+                                self.pending = R51;
+                                continue :dispatch .raise;
+                            }
                         }
                     },
                     .left, .right, .copystr => {
@@ -8560,7 +8645,7 @@ pub const VM = struct {
                         continue :dispatch .raise;
                     }
                     const c = valCmp(x, y);
-                    t = switch (k) {
+                    t = if (unordered(x, y)) false else switch (k) {
                         2 => c < 0,
                         3 => c <= 0,
                         4 => c > 0,

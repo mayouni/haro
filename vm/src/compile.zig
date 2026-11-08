@@ -7098,7 +7098,9 @@ pub const Compiler = struct {
             if (self.classOf(idxn[0]) == .str) {
                 _ = try self.emit(.hset, container, idx, src, 1);
             } else {
-                _ = try self.emit(.vset, container, idx, src, 1);
+                // d bit 2 (v0.44): the container is a local's own register -- a text's new letter may land there
+                const own: i32 = if (depth == 1 and borrowed.items.len == 0) 2 else 0;
+                _ = try self.emit(.vset, container, idx, src, 1 | own);
             }
             // Every borrow ends here: a borrowed register was never
             // retained, and the mask marks every temp as boxed, so leaving

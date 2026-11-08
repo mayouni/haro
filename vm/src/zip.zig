@@ -96,6 +96,13 @@ fn readNames(path: []const u8, names: *std.ArrayListUnmanaged([]u8)) !void {
 
 /// One entry's bytes, uncompressed. Null when the archive has no such name.
 fn readEntry(path: []const u8, want: []const u8) !?[]u8 {
+    return readEntryAt(path, want, null);
+}
+
+/// The bytes of the entry at a position (0-based, central-directory order) when `at` is given, else of the first entry named `want`.
+/// By position, two entries of one name are two entries (v0.44: extraction read the first of a name twice).
+fn readEntryAt(path: []const u8, want: []const u8, at: ?usize) !?[]u8 {
+    var k: usize = 0;
     var f = try std.fs.cwd().openFile(path, .{});
     defer f.close();
     var rbuf: [4096]u8 = undefined;
@@ -107,7 +114,11 @@ fn readEntry(path: []const u8, want: []const u8) !?[]u8 {
         const name = namebuf[0..e.filename_len];
         try fr.seekTo(e.header_zip_offset + @sizeOf(std.zip.CentralDirectoryFileHeader));
         try fr.interface.readSliceAll(name);
-        if (!std.mem.eql(u8, name, want)) continue;
+        const here = k;
+        k += 1;
+        if (at) |pos| {
+            if (here != pos) continue;
+        } else if (!std.mem.eql(u8, name, want)) continue;
 
         // The local header's own filename and extra fields sit between it
         // and the data, and their lengths need not match the central
@@ -263,6 +274,18 @@ fn addEntry(a: *Archive, name: []const u8, raw: []const u8) !void {
 
 // ------------------------------------------------------- the twelve
 
+/// v0.44: the null handle zip_openfile answers for an archive it cannot open; every call on it does nothing, as on Ring
+fn nullArchive(args: [*]const RppVal, argc: u32) bool {
+    if (argc < 1) return false;
+    const v = args[0];
+    return switch (@as(Tag, @enumFromInt(v.tag))) {
+        .handle => v.bits == 0,
+        .int => v.asInt() == 0,
+        .str => v.asStr().len == 0,
+        else => false,
+    };
+}
+
 fn argStr(args: [*]const RppVal, i: u32) ?[]const u8 {
     if (args[i].tag != @intFromEnum(Tag.str)) return null;
     return args[i].asStr();
@@ -321,12 +344,29 @@ fn zipOpenFile(args: [*]const RppVal, argc: u32, out: *RppVal) callconv(.c) c_in
             // handle: Ring's zip_open returns NULL and the Ring code tests it.
             var probe = std.fs.cwd().openFile(path, .{}) catch {
                 a.deinit();
-                out.* = RppVal.handle(null);
+                retStr(out, ""); // Ring's NULL: isnull() holds, as on Ring (v0.44)
                 return 0;
             };
             probe.close();
         },
-        'a' => loadExisting(a) catch {},
+        'a' => {
+            // v0.44 (HARO-PORTED-FINDINGS-01 (3)): a file that is there and is no archive answers a null handle, as Ring's zip_open does;
+            // it was read as empty and written over at zip_close
+            if (std.fs.cwd().openFile(path, .{})) |probe| {
+                probe.close();
+                var names: std.ArrayListUnmanaged([]u8) = .{};
+                defer {
+                    for (names.items) |n| alloc.free(n);
+                    names.deinit(alloc);
+                }
+                readNames(path, &names) catch {
+                    a.deinit();
+                    retStr(out, ""); // Ring's NULL
+                    return 0;
+                };
+            } else |_| {}
+            loadExisting(a) catch {};
+        },
         else => {}, // 'w' starts empty and replaces the file at close
     }
     out.* = RppVal.handle(a);
@@ -335,6 +375,7 @@ fn zipOpenFile(args: [*]const RppVal, argc: u32, out: *RppVal) callconv(.c) c_in
 
 fn zipEntryOpen(args: [*]const RppVal, argc: u32, out: *RppVal) callconv(.c) c_int {
     if (argc != 2) return 1;
+    if (nullArchive(args, argc)) return noop(out);
     const a = argArchive(args, 0) orelse return 1;
     const name = argStr(args, 1) orelse return 1;
     if (a.open_name) |n| alloc.free(n);
@@ -349,6 +390,7 @@ fn zipEntryWrite(args: [*]const RppVal, argc: u32, out: *RppVal) callconv(.c) c_
     // too -- `ZipEntry.WriteString` in Ring's own shim passes two and fails
     // on Ring for the same reason. Matching it keeps the two comparable.
     if (argc != 3) return 1;
+    if (nullArchive(args, argc)) return noop(out);
     const a = argArchive(args, 0) orelse return 1;
     const data = argStr(args, 1) orelse return 1;
     const n = argNum(args, 2) orelse return 1;
@@ -420,6 +462,7 @@ fn zipEntryFread(args: [*]const RppVal, argc: u32, out: *RppVal) callconv(.c) c_
 
 fn zipEntryClose(args: [*]const RppVal, argc: u32, out: *RppVal) callconv(.c) c_int {
     if (argc != 1) return 1;
+    if (nullArchive(args, argc)) return noop(out);
     const a = argArchive(args, 0) orelse return 1;
     if (a.open_name) |name| {
         addEntry(a, name, a.open_data.items) catch return 1;
@@ -431,25 +474,57 @@ fn zipEntryClose(args: [*]const RppVal, argc: u32, out: *RppVal) callconv(.c) c_
     return 0;
 }
 
+/// A name that stays inside the folder it is extracted to: not absolute, no drive, no `..` part.
+fn safeName(name: []const u8) bool {
+    if (name.len == 0) return false;
+    if (name[0] == '/' or name[0] == '\\') return false;
+    if (name.len > 1 and name[1] == ':') return false;
+    var it = std.mem.tokenizeAny(u8, name, "/\\");
+    while (it.next()) |part| {
+        if (std.mem.eql(u8, part, "..")) return false;
+    }
+    return true;
+}
+
 fn zipExtractAllFiles(args: [*]const RppVal, argc: u32, out: *RppVal) callconv(.c) c_int {
     if (argc != 2) return 1;
     const path = argStr(args, 0) orelse return 1;
     const folder = argStr(args, 1) orelse return 1;
-    out.* = RppVal.int(0);
-
+    // v0.44 (HARO-PORTED-FINDINGS-01 (4)): every entry is written, in the archive's order, so a later entry of the same name wins, and
+    // the call answers nothing, as Ring's does. std.zip.extract stopped at the first duplicate and its error was swallowed, so every entry
+    // after it was lost. A name that would land outside the folder (absolute, a drive, a `..` part) is not written.
+    retStr(out, "");
     std.fs.cwd().makePath(folder) catch {};
     var dir = std.fs.cwd().openDir(folder, .{}) catch return 0;
     defer dir.close();
-    var f = std.fs.cwd().openFile(path, .{}) catch return 0;
-    defer f.close();
-    var rbuf: [4096]u8 = undefined;
-    var fr = f.reader(&rbuf);
-    std.zip.extract(dir, &fr, .{}) catch {};
+    var names: std.ArrayListUnmanaged([]u8) = .{};
+    defer {
+        for (names.items) |n| alloc.free(n);
+        names.deinit(alloc);
+    }
+    readNames(path, &names) catch return 0;
+    for (names.items, 0..) |name, pos| {
+        if (!safeName(name)) continue;
+        const raw = (readEntryAt(path, name, pos) catch continue) orelse continue;
+        defer alloc.free(raw);
+        if (name.len > 0 and (name[name.len - 1] == '/' or name[name.len - 1] == '\\')) {
+            dir.makePath(name) catch {};
+            continue;
+        }
+        if (std.fs.path.dirname(name)) |d| dir.makePath(d) catch {};
+        dir.writeFile(.{ .sub_path = name, .data = raw }) catch {};
+    }
+    return 0;
+}
+
+fn noop(out: *RppVal) c_int {
+    out.* = RppVal.int(0);
     return 0;
 }
 
 fn zipClose(args: [*]const RppVal, argc: u32, out: *RppVal) callconv(.c) c_int {
     if (argc != 1) return 1;
+    if (nullArchive(args, argc)) return noop(out);
     const a = argArchive(args, 0) orelse return 1;
     if (a.mode != 'r') writeArchive(a) catch {};
     a.deinit();
