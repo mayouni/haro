@@ -1,0 +1,16 @@
+f()
+func f
+	for tE in ["log(-1)", "log(0)", "log10(0)", "acos(2)", "asin(2)", "pow(-8, 0.5)", "pow(0, -1)", "sqrt(-3)"]
+		try
+			eval("x = " + tE)
+			? tE + " answered"
+		catch e
+			? tE + " " + e.Code()
+		done
+	next
+	? sqrt(0)
+	? pow(-8, 3)
+	? pow(0, 0)
+	? sqrt(-0.0)
+	? pow(2, 2000)
+	? acos(1)

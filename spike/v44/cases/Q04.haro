@@ -1,0 +1,15 @@
+f()
+func f
+	nX = exp(1000)
+	nY = nX - nX
+	? nY <= 0
+	? nY >= 0
+	? nY < 0
+	? nY > 0
+	? nY = nY
+	? nY != nY
+	if nY >= 0
+		? "ge"
+	else
+		? "not ge"
+	ok

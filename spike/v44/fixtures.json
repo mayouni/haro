@@ -1,0 +1,116 @@
+{
+ "rung": "v0.44",
+ "decision": "HARO-PORTED-FINDINGS-01, under PRINCIPAL-HAROFIRST-01: four runtime defects fixed in Haro, Ring 1.27 the specification of a .ring file",
+ "class": "exact: the program's whole stdout and its exit code, byte for byte, on haro and on its checked build, each case in a folder of its own",
+ "lines": {
+  "P1": "a domain error raises R51",
+  "P2": "a NaN is unordered",
+  "P3": "a letter of a local text is written as Ring writes it",
+  "P4": "a .haro file refuses a text written in place",
+  "P5": "append to no archive answers a null handle and leaves the file",
+  "P6": "extraction writes every entry, the last of a name winning"
+ },
+ "cases": [
+  {
+   "id": "Q01",
+   "kind": "run",
+   "line": "P1",
+   "why": "sqrt of a negative raises R51, as Ring does",
+   "file": "cases/Q01.ring",
+   "stdout": "before\n\nLine 2 Error (R51) : Value Error \nIn sqrt() in file Q01.ring ",
+   "exit": 1
+  },
+  {
+   "id": "Q02",
+   "kind": "run",
+   "line": "P1",
+   "why": "every domain error raises R51; a value at the edge or an overflow is none",
+   "file": "cases/Q02.haro",
+   "stdout": "log(-1) R51\nlog(0) R51\nlog10(0) R51\nacos(2) R51\nasin(2) R51\npow(-8, 0.5) R51\npow(0, -1) R51\nsqrt(-3) R51\n0\n-512\n1\n0\ninf\n0\n"
+  },
+  {
+   "id": "Q03",
+   "kind": "run",
+   "line": "P2",
+   "why": "a NaN is unordered in a .ring file: Ring's answers",
+   "file": "cases/Q03.ring",
+   "stdout": "0\n0\n0\n0\n0\n1\n0\nnot ge\nnot lt\nnot le\n"
+  },
+  {
+   "id": "Q04",
+   "kind": "run",
+   "line": "P2",
+   "why": "a NaN is unordered in a .haro file",
+   "file": "cases/Q04.haro",
+   "stdout": "false\nfalse\nfalse\nfalse\nfalse\ntrue\nnot ge\n"
+  },
+  {
+   "id": "Q05",
+   "kind": "run",
+   "line": "P3",
+   "why": "a letter of a local text is written as Ring writes it, and a copy does not move",
+   "file": "cases/Q05.ring",
+   "stdout": "axc\naxc\nzxc\nzxB\n3\n"
+  },
+  {
+   "id": "Q06",
+   "kind": "run",
+   "line": "P3",
+   "why": "more than one character is R7",
+   "file": "cases/Q06.ring",
+   "stdout": "\nLine 4 Error (R7) : Can't assign to a string letter more than one character \nIn function f() in file Q06.ring\n\nCalled from line 1 in file Q06.ring ",
+   "exit": 1
+  },
+  {
+   "id": "Q07",
+   "kind": "run",
+   "line": "P3",
+   "why": "an index past the end is R2",
+   "file": "cases/Q07.ring",
+   "stdout": "\nLine 4 Error (R2) : Array Access (Index out of range) \nIn function f() in file Q07.ring\n\nCalled from line 1 in file Q07.ring ",
+   "exit": 1
+  },
+  {
+   "id": "Q08",
+   "kind": "run",
+   "line": "P3",
+   "why": "a letter of a global's text is refused by name, never dropped",
+   "file": "cases/Q08.ring",
+   "stdout": "\nLine 2 Haro: a letter of a text held by a global, an attribute or a list item is not written yet -- copy it to a local, write the letter, and assign it back \nin file Q08.ring ",
+   "exit": 1
+  },
+  {
+   "id": "Q09",
+   "kind": "run",
+   "line": "P4",
+   "why": "a .haro file refuses a letter written in place",
+   "file": "cases/Q09.haro",
+   "stdout": "\nLine 4 Error (TEXT_IN_PLACE) : a text is not written in place -- build a new one: left(t, i - 1) + c + substr(t, i + 1) \nIn function f() in file Q09.haro\n\nCalled from line 1 in file Q09.haro ",
+   "exit": 1
+  },
+  {
+   "id": "Q10",
+   "kind": "run",
+   "line": "P5",
+   "why": "appending to a file that is no archive answers a null handle and leaves the file",
+   "file": "cases/Q10.ring",
+   "stdout": "1\n28\n"
+  },
+  {
+   "id": "Q11",
+   "kind": "run",
+   "line": "P6",
+   "why": "extracting writes every entry, the last of a name winning, and answers nothing",
+   "file": "cases/Q11.ring",
+   "stdout": "\nsecond\nbee\n"
+  },
+  {
+   "id": "Q12",
+   "kind": "run",
+   "line": "P5",
+   "why": "appending to an archive keeps its entries and adds one (must not move)",
+   "file": "cases/Q12.ring",
+   "stdout": "2\n"
+  }
+ ]
+}

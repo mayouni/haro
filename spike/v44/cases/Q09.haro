@@ -1,0 +1,4 @@
+f()
+func f
+	tS = "abc"
+	tS[2] = "x"
