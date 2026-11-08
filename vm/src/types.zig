@@ -949,11 +949,11 @@ const Walker = struct {
         // `This.F(x)`, a lone `.` and a statement `M()` -- the compiler re-reads the span and rejoins them; this walk sees the raw
         // tree, where `M()` looks unqualified, and resolved it to the class's own M, whose arity is not this call's. A call whose
         // statement follows a lone `.` names a method of whatever the chain answers, which the checker does not know.
-        // The lone `.` is the LAST token of the statement before (`This.F(x)` `.`), as the tree stands; a sibling `.` is taken too.
+        // The lone `.` is the LAST token of the statement before (`This.F(x)` `.`), as the tree stands (a sibling `.` was looked for
+        // too, and plant N4 showed the grammar never puts it there).
         if (!parent.isNull() and std.mem.eql(u8, parent.kind(), "expression_statement")) {
             const before = parent.prevSibling();
             if (!before.isNull()) {
-                if (std.mem.eql(u8, before.kind(), ".")) return;
                 const cnt = before.childCount();
                 if (cnt > 0 and std.mem.eql(u8, before.child(cnt - 1).kind(), ".")) return;
             }

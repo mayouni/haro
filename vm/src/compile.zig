@@ -4114,9 +4114,7 @@ pub const Compiler = struct {
                 return;
             }
             switch (bc) {
-                // counted unless the element is unboxed AND the index is proven a whole number: a text index makes it a keyed read,
-                // whose missing key answers the empty text (v0.46, K1)
-                .list => _ = try self.emit(.vget, dst, base, idx, if (ec.boxed() or self.classOf(n.namedChild(1)) != .int) 1 else 0),
+                .list => _ = try self.emit(.vget, dst, base, idx, if (ec.boxed()) 1 else 0),
                 .str => _ = try self.emit(.sgets, dst, base, idx, 0),
                 else => _ = try self.emit(.dget, dst, base, idx, 1),
             }

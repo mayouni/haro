@@ -65,6 +65,15 @@
    "file": "cases/K07.ring",
    "stdout": "\nLine 1 Bad parameter type! \nIn pointer2object() in file K07.ring ",
    "exit": 1
+  },
+  {
+   "id": "K08",
+   "kind": "run",
+   "line": "K3",
+   "why": "pointer2object of a pointer of another kind is Bad parameter type",
+   "file": "cases/K08.ring",
+   "stdout": "\nLine 2 Bad parameter type! \nIn pointer2object() in file K08.ring ",
+   "exit": 1
   }
  ]
 }

@@ -50,6 +50,11 @@ CASES = [
      {'stdout': '\nLine 1 Bad parameter type! \nIn object2pointer() in file K06.ring ', 'exit': 1}),
     ('K07', 'K3', 'pointer2object of no pointer is Bad parameter type, in its name', 'run', '.ring', ['p = pointer2object(5)', '? "after"'],
      {'stdout': '\nLine 1 Bad parameter type! \nIn pointer2object() in file K07.ring ', 'exit': 1}),
+    # WRITTEN AFTER THE PLANTS: plant N6 (pointer2object takes a pointer of any kind) missed, because K07 passes a number, which is refused
+    # before the kind is asked; K08 passes a file's pointer (Ring's answer read off Ring 1.27).
+    ('K08', 'K3', 'pointer2object of a pointer of another kind is Bad parameter type', 'run', '.ring', [
+        'fp = fopen("K08.txt", "w")', 'o = pointer2object(fp)', '? "after"'],
+     {'stdout': '\nLine 2 Bad parameter type! \nIn pointer2object() in file K08.ring ', 'exit': 1}),
 ]
 
 os.makedirs(os.path.join(HERE, 'cases'), exist_ok=True)

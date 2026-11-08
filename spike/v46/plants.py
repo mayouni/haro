@@ -13,6 +13,11 @@ Removed after planting, named: Z6 and Z8, the NaN check of `jle` and `jge`. The 
 cond()), and for these two a NaN's valCmp of 0 already makes `<=` and `>=` hold, so the jump fires and the comparison reads false, as IEEE
 says; switched off, no case moved, and none can. The checks are removed from the VM; `jlt` and `jgt` keep theirs (Z5, Z7).
 
+Removed after planting, named: N2, the keyed read's vget counted when the element is unboxed -- the class of the read (N1) is what stops
+the crash, since the move into the counted register retains; switched off, nothing moved, and the change is taken out. N4, a lone `.` as
+the sibling of the receiver call's statement -- the grammar puts it at the end of the statement before (N3), never there; taken out.
+N6 missed first: K07 passes a number, refused before the kind is asked, so K08 (a file's pointer) was written after the plants.
+
   python spike/v46/plants.py            all plants (about a minute each)
   python spike/v46/plants.py Z3 Z7      some
 """
@@ -30,18 +35,13 @@ COURT = os.path.join(HERE, 'finding_court.py')
 PLANTS = [
     ('N1', 'K01', COMP, 'a keyed read takes the element class',
      '                    .list => if (idx_is_int) l.elem else Class.join(l.elem, .str),', '                    .list => if (idx_is_int or true) l.elem else Class.join(l.elem, .str),'),
-    ('N2', 'K01', COMP, 'a keyed read is an uncounted vget when the element is unboxed',
-     '.list => _ = try self.emit(.vget, dst, base, idx, if (ec.boxed() or self.classOf(n.namedChild(1)) != .int) 1 else 0),',
-     '.list => _ = try self.emit(.vget, dst, base, idx, if (ec.boxed() or (false and self.classOf(n.namedChild(1)) != .int)) 1 else 0),'),
     ('N3', 'K03', TYPES, 'the lone `.` ending the statement before is not looked for',
      '                if (cnt > 0 and std.mem.eql(u8, before.child(cnt - 1).kind(), ".")) return;',
      '                if (false and cnt > 0 and std.mem.eql(u8, before.child(cnt - 1).kind(), ".")) return;'),
-    ('N4', 'K03', TYPES, 'a lone `.` sibling is not looked for',
-     '                if (std.mem.eql(u8, before.kind(), ".")) return;', '                if (false and std.mem.eql(u8, before.kind(), ".")) return;'),
     ('N5', 'K06', MAIN, 'object2pointer takes anything',
      '                        if (ov.tag != .obj) {\n                            self.pending = BADPARAM;\n                            continue :dispatch .raise;\n                        }\n                        retain(ov);',
      '                        if (false and ov.tag != .obj) {\n                            self.pending = BADPARAM;\n                            continue :dispatch .raise;\n                        }\n                        retain(ov);'),
-    ('N6', 'K07', MAIN, 'pointer2object takes anything that is a pointer of any kind',
+    ('N6', 'K08', MAIN, 'pointer2object takes anything that is a pointer of any kind',
      '                        const raw = if (kind_ok) cptrOf(pv) else null;', '                        const raw = if (kind_ok or pv.tag == .cptr) cptrOf(pv) else null;'),
     ('N7', 'K05', MAIN, 'pointer2object answers the object unshared', '                        if (o.rref == 0) o.rref = 1;', '                        if (false and o.rref == 0) o.rref = 1;'),
     ('N8', 'K05', MAIN, 'two pointers to one object are unequal',
