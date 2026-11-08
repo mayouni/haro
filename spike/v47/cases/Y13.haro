@@ -1,0 +1,5 @@
+$iTotal = 1
+o = new P
+? $iTotal
+class P
+	count = 2

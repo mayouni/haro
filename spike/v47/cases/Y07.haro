@@ -1,0 +1,13 @@
+f()
+func f
+	for i = 1 to 2
+		? i
+	next
+	for x in [5, 6]
+		? x
+	next
+	try
+		raise("no")
+	catch e
+		? e.Message()
+	done

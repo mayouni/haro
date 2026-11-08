@@ -1,0 +1,6 @@
+? "before"
+f()
+func f
+	nX = Word()
+func Word
+	return "abc"

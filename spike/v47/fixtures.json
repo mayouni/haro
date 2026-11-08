@@ -1,0 +1,135 @@
+{
+ "rung": "v0.47",
+ "decision": "D55 T2: a name's first letter is its type, checked, in a .haro file; the scope as the author ruled it 2026-11-08",
+ "class": "exact: the program's whole stdout and its exit code, byte for byte, on haro and on its checked build",
+ "lines": {
+  "Y1": "a value's name begins with a type's letter",
+  "Y2": "a single letter only as a for counter or a catch name",
+  "Y3": "the letters whose types exist are checked",
+  "Y4": "the others are accepted until their rungs",
+  "Y5": "NULL passes any letter until v0.49"
+ },
+ "cases": [
+  {
+   "id": "Y01",
+   "kind": "run",
+   "line": "Y3",
+   "why": "every checked letter holding its own type runs",
+   "file": "cases/Y01.haro",
+   "stdout": "true\n4\n2.50\nada\n2\n7\n"
+  },
+  {
+   "id": "Y02",
+   "kind": "run",
+   "line": "Y1",
+   "why": "a name with no letter is refused when compiling",
+   "file": "cases/Y02.haro",
+   "stdout": "before\n\nLine 4 Haro refused this statement (a name begins with its type's letter -- `count` has none; written `count`, line 4 of Y02.haro) and did not compile it -- running past it would give a wrong answer \nIn function f() in file Y02.haro\n\nCalled from line 2 in file Y02.haro ",
+   "exit": 1
+  },
+  {
+   "id": "Y03",
+   "kind": "run",
+   "line": "Y1",
+   "why": "Softanza's c is no letter in a .haro file",
+   "file": "cases/Y03.haro",
+   "stdout": "before\n\nLine 4 Haro refused this statement (`c` is Softanza's letter and no type's -- text is t: tName; written `cName`, line 4 of Y03.haro) and did not compile it -- running past it would give a wrong answer \nIn function f() in file Y03.haro\n\nCalled from line 2 in file Y03.haro ",
+   "exit": 1
+  },
+  {
+   "id": "Y04",
+   "kind": "run",
+   "line": "Y3",
+   "why": "a literal of another type is refused when compiling",
+   "file": "cases/Y04.haro",
+   "stdout": "before\n\nLine 4 Haro refused this statement (t is the letter of a text, and this literal is an integer; written `tName`, line 4 of Y04.haro) and did not compile it -- running past it would give a wrong answer \nIn function f() in file Y04.haro\n\nCalled from line 2 in file Y04.haro ",
+   "exit": 1
+  },
+  {
+   "id": "Y05",
+   "kind": "run",
+   "line": "Y3",
+   "why": "a value of another type raises TYPE_LETTER where it is assigned",
+   "file": "cases/Y05.haro",
+   "stdout": "before\n\nLine 4 Error (TYPE_LETTER) : `nX` is lettered n, a number, and is given a text \nIn function f() in file Y05.haro\n\nCalled from line 2 in file Y05.haro ",
+   "exit": 1
+  },
+  {
+   "id": "Y06",
+   "kind": "run",
+   "line": "Y3",
+   "why": "a parameter is checked on entry",
+   "file": "cases/Y06.haro",
+   "stdout": "before\n\nLine 5 Error (TYPE_LETTER) : `iN` is lettered i, an integer, and is given a text \nIn function twice() in file Y06.haro\n\nCalled from line 4 In function f() in file Y06.haro\n\nCalled from line 2 in file Y06.haro ",
+   "exit": 1
+  },
+  {
+   "id": "Y07",
+   "kind": "run",
+   "line": "Y2",
+   "why": "a single letter is a for counter, of either form, and a catch name",
+   "file": "cases/Y07.haro",
+   "stdout": "1\n2\n5\n6\nno\n"
+  },
+  {
+   "id": "Y08",
+   "kind": "run",
+   "line": "Y2",
+   "why": "a single letter anywhere else is refused",
+   "file": "cases/Y08.haro",
+   "stdout": "before\n\nLine 4 Haro refused this statement (a name begins with its type's letter -- `x` has none; written `x`, line 4 of Y08.haro) and did not compile it -- running past it would give a wrong answer \nIn function f() in file Y08.haro\n\nCalled from line 2 in file Y08.haro ",
+   "exit": 1
+  },
+  {
+   "id": "Y09",
+   "kind": "run",
+   "line": "Y4",
+   "why": "a letter whose type is not built yet is accepted and not checked",
+   "file": "cases/Y09.haro",
+   "stdout": "5\nk\n1\n"
+  },
+  {
+   "id": "Y10",
+   "kind": "run",
+   "line": "Y5",
+   "why": "null is absence until v0.49, and passes any letter",
+   "file": "cases/Y10.haro",
+   "stdout": "true\n"
+  },
+  {
+   "id": "Y11",
+   "kind": "run",
+   "line": "Y1",
+   "why": "a .ring file is untouched: no letter, Softanza's c, a single letter",
+   "file": "cases/Y11.ring",
+   "stdout": "8\na3\n"
+  },
+  {
+   "id": "Y12",
+   "kind": "run",
+   "line": "Y3",
+   "why": "an integer letter refuses a number with a point when compiling",
+   "file": "cases/Y12.haro",
+   "stdout": "before\n\nLine 4 Haro refused this statement (i is the letter of an integer, and this literal is a number; written `iN`, line 4 of Y12.haro) and did not compile it -- running past it would give a wrong answer \nIn function f() in file Y12.haro\n\nCalled from line 2 in file Y12.haro ",
+   "exit": 1
+  },
+  {
+   "id": "Y13",
+   "kind": "run",
+   "line": "Y1",
+   "why": "a global and an attribute are lettered too",
+   "file": "cases/Y13.haro",
+   "stdout": "\nLine 5 Haro refused this statement (a name begins with its type's letter -- `count` has none; written `count`, line 5 of Y13.haro) and did not compile it -- running past it would give a wrong answer \nin file Y13.haro ",
+   "exit": 1
+  },
+  {
+   "id": "Y14",
+   "kind": "run",
+   "line": "Y3",
+   "why": "a for counter is checked as its letter says, and a lettered counter too",
+   "file": "cases/Y14.haro",
+   "stdout": "before\n\nLine 4 Error (TYPE_LETTER) : `tW` is lettered t, a text, and is given an integer \nIn function f() in file Y14.haro\n\nCalled from line 2 in file Y14.haro ",
+   "exit": 1
+  }
+ ]
+}

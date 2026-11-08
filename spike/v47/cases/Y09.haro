@@ -1,0 +1,8 @@
+f()
+func f
+	aRows = 5
+	mIndex = "k"
+	rUser = [1]
+	? aRows
+	? mIndex
+	? len(rUser)
