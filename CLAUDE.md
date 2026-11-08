@@ -346,6 +346,9 @@ the cut say `haro/X`, `X.ring`, `rnxc` and "the oracle"**: read them as this rep
                      the letters' declarations (*_vNN.haro) and sentences, and vNN/ per rung: fixtures.json (written FIRST),
                      GRAMMAR.md (prose second), court cases. spike/haro_forge.py is THE GUARD: 49 stages, --stage=N runs one,
                      --plant must fail it. spike/f/ringflex_record.json: RingFlex's own court's answers, recorded (D41)
+    engine/          Softanza's engine built for Haro's ABI: build_engine.py (a copy of stzlib's engine at a stated ref, by git archive) and
+                     ring_api_haro.zig, the backend; the build lives outside the tree (--dst, C:\haro-engine) and stzlib finds it by
+                     STZ_ENGINE_DIR. No part of Ring is carried (D50)
     study/           the measurements behind design memos (codegraph, phase15, rebol). Studies and probes OF Ring keep Ring 1.27 as
                      their subject (paths.RING_ORACLE), never as a judge
     runtime/         gitignored: what runs write (the second judge's forge folder, scratch)
