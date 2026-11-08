@@ -5441,6 +5441,15 @@ pub const Compiler = struct {
 
     /// A numeric constant. Ring has exactly one number type and it is a
     /// double, so this is where every decimal literal lands.
+    fn konstBool(self: *Compiler, b: bool) Error!i32 {
+        const kb: i32 = if (self.eval) |ev| ev.konst_base else 0;
+        for (self.konst.items, 0..) |k, i| {
+            if (k.tag == .boolean and (k.p.i != 0) == b) return @as(i32, @intCast(i)) + kb;
+        }
+        self.konst.append(self.alloc, vm.Value.boolean(b)) catch return Error.OutOfMemory;
+        return @as(i32, @intCast(self.konst.items.len - 1)) + kb;
+    }
+
     fn konstInt(self: *Compiler, v: i64) Error!i32 {
         const kb: i32 = if (self.eval) |ev| ev.konst_base else 0;
         for (self.konst.items, 0..) |k, i| {
@@ -11188,8 +11197,9 @@ fn constOf(c: *Compiler, alloc: std.mem.Allocator, n: ts.Node) Error!?ConstVal {
             return try constNumber(c, std.mem.trim(u8, inner.text(), " \t\r\n"), true, c.haroNode(n));
         return null;
     }
-    // v0.43: a .haro file's true and false are booleans, made when running, never folded to Ring's 1 and 0
-    if (std.mem.eql(u8, k, "boolean") and c.haroNode(n)) return null;
+    // v0.43: a .haro file's true and false are boolean constants, never folded to Ring's 1 and 0 (the resident VM's gained attribute)
+    if (std.mem.eql(u8, k, "boolean") and c.haroNode(n))
+        return .{ .konst = try c.konstBool(std.ascii.eqlIgnoreCase(std.mem.trim(u8, n.text(), " \t\r\n"), "true")) };
     if (std.mem.eql(u8, k, "boolean"))
         return .{ .int = if (std.ascii.eqlIgnoreCase(std.mem.trim(u8, n.text(), " \t\r\n"), "true")) 1 else 0 };
     if (std.mem.eql(u8, k, "null")) return .{ .konst = try c.konstIndex("\"\"") };

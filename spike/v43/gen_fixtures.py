@@ -149,9 +149,11 @@ CASES = [
     ('B23', 'B3', 'an integer on the left of or raises BOOLEAN_EXPECTED', '.haro', [
         B, 'f()', 'func f', T + 'nA = 1', T + '? nA or true'],
      err('B23', 5, 'BOOLEAN_EXPECTED', cond('an integer', 'x != 0')), 1),
-    ('B24', 'B6', 'a comparison of a call\'s answer is judged as every comparison is', '.haro', [
-        B, 'f()', 'func f', T + '? Two() = 2', T + '? Two() = "2"', 'func Two', T + 'return 2'],
-     ['before', 'true', '', 'Line 5 Error (TYPE_MISMATCH) : ' + mismatch('integer', '=', 'text') + ' ', 'In function f() in file B24.haro', '',
+    # B24 CHANGED AFTER THE PLANTS: plant P28 missed, because a call's answer is compared by a jump and not by cmpv; a global's value may be
+    # an object, so it is the operand that sends a comparison to cmpv (read off `haro dis`). The case asks the same question of that path.
+    ('B24', 'B6', 'a comparison whose operand may be an object (cmpv) is judged as every comparison is', '.haro', [
+        B, 'f()', 'func f', T + '$nTwo = 2', T + '? $nTwo = 2', T + '? $nTwo = "2"'],
+     ['before', 'true', '', 'Line 6 Error (TYPE_MISMATCH) : ' + mismatch('integer', '=', 'text') + ' ', 'In function f() in file B24.haro', '',
       'Called from line 2 in file B24.haro '], 1),
 ]
 

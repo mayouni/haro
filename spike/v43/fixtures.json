@@ -216,9 +216,9 @@
    "id": "B24",
    "kind": "run",
    "line": "B6",
-   "why": "a comparison of a call's answer is judged as every comparison is",
+   "why": "a comparison whose operand may be an object (cmpv) is judged as every comparison is",
    "file": "cases/B24.haro",
-   "stdout": "before\ntrue\n\nLine 5 Error (TYPE_MISMATCH) : integer = text -- = compares two values of one type \nIn function f() in file B24.haro\n\nCalled from line 2 in file B24.haro ",
+   "stdout": "before\ntrue\n\nLine 6 Error (TYPE_MISMATCH) : integer = text -- = compares two values of one type \nIn function f() in file B24.haro\n\nCalled from line 2 in file B24.haro ",
    "exit": 1
   }
  ]

@@ -1049,9 +1049,20 @@ def literal_assignments(g):
     return out
 
 
-def landing(sources, n):
-    """Old literal assignments as the targets of refinements drafted at one revision, over every consecutive pair: where does each land at the next?"""
-    tot = {'pairs': 0, 'targets': 0, 'lands': 0, 'stale': 0, 'shape': 0, 'other': 0, 'lost': 0}
+TOOL_COMMITS = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'tool_commits.txt')
+
+
+def tool_commits():
+    """The commits a tool made, not a person (v0.43, the author's "Exclude tool commits", 2026-11-08): one per line, the full hash first."""
+    if not os.path.exists(TOOL_COMMITS):
+        return set()
+    return {ln.split()[0] for ln in open(TOOL_COMMITS, encoding='utf-8') if ln.strip() and not ln.startswith('#')}
+
+
+def landing(sources, n, tools=frozenset()):
+    """Old literal assignments as the targets of refinements drafted at one revision, over every consecutive pair: where does each land at the next?
+    A pair whose later revision is a tool's commit (`tools`) is no human edit: it is counted apart, in 'tool', and judges nothing."""
+    tot = {'pairs': 0, 'targets': 0, 'lands': 0, 'stale': 0, 'shape': 0, 'other': 0, 'lost': 0, 'tool': 0}
     for repo, path in sources:
         revs = ids_check.revisions(repo, path, n)
         gs = []
@@ -1060,7 +1071,10 @@ def landing(sources, n):
                 gs.append(ids_check.graph_at(repo, rv, pth))
             except Exception:
                 gs.append(None)
-        for a, b in zip(gs, gs[1:]):
+        for k, (a, b) in enumerate(zip(gs, gs[1:])):
+            if revs[k + 1][0] in tools:
+                tot['tool'] += 1
+                continue
             if a is None or b is None:
                 continue
             og, ng = copy.deepcopy(a), copy.deepcopy(b)
@@ -1460,7 +1474,13 @@ def main():
 
     # history
     srcs = ids_check.hand_written()
-    tot = landing(srcs, 4 if QUICK else 7)
+    tools = tool_commits()
+    if tools:
+        whole = landing(srcs, 4 if QUICK else 7)
+        print('  --   with every pair, tool commits included: %d pairs, %d targets, %d land (%.1f%%) -- printed so the exclusion stays visible'
+              % (whole['pairs'], whole['targets'], whole['lands'], 100.0 * whole['lands'] / max(1, whole['targets'])))
+    tot = landing(srcs, 4 if QUICK else 7, tools)
+    print('  --   %d pair(s) end at one of the %d commits a tool made (v20/tool_commits.txt): no human edit, left out' % (tot['tool'], len(tools)))
     lands = tot['lands'] / max(1, tot['targets'])
     resolve = (tot['lands'] + tot['stale'] + tot['other']) / max(1, tot['targets'])
     print('  --   %d pairs of consecutive revisions, %d literal assignments drafted against: %d land (%.1f%%), %d refused as stale (the value changed), %d no longer a literal '

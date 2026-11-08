@@ -3876,12 +3876,6 @@ pub const VM = struct {
         if (!self.strictAt(pc)) return null;
         return self.mismatchErr(op, x, y);
     }
-    /// An integer immediate compared with a value that is no number.
-    fn preImm(self: *VM, pc: u32, x: Value, op: []const u8) ?[]const u8 {
-        if (x.tag == .int or x.tag == .num) return null;
-        if (!self.strictAt(pc)) return null;
-        return self.mismatchErr(op, x, Value.int(0));
-    }
     /// Integer arithmetic past Ring's exact range, in Haro's code: exact to 64
     /// bits, then INTEGER_OVERFLOW (signalled by a none). Null in Ring's code.
     fn intStrict(self: *VM, pc: u32, x: i64, y: i64, comptime op: u8) ?Value {
@@ -5087,10 +5081,6 @@ pub const VM = struct {
             },
             .jeqi => {
                 const in = code[pc];
-                if (self.preImm(pc, regs[base + in.a], "=")) |e| {
-                    self.pending = e;
-                    continue :dispatch .raise;
-                }
                 if (asInt(regs[base + in.a]) == in.c) {
                     pc = self.loopStep(@intCast(in.d), pc, fsp);
                 } else pc += 1;
@@ -5098,10 +5088,6 @@ pub const VM = struct {
             },
             .jnei => {
                 const in = code[pc];
-                if (self.preImm(pc, regs[base + in.a], "!=")) |e| {
-                    self.pending = e;
-                    continue :dispatch .raise;
-                }
                 if (asInt(regs[base + in.a]) != in.c) {
                     pc = self.loopStep(@intCast(in.d), pc, fsp);
                 } else pc += 1;
@@ -5109,10 +5095,6 @@ pub const VM = struct {
             },
             .jgti => {
                 const in = code[pc];
-                if (self.preImm(pc, regs[base + in.a], ">")) |e| {
-                    self.pending = e;
-                    continue :dispatch .raise;
-                }
                 if (asInt(regs[base + in.a]) > in.c) {
                     pc = self.loopStep(@intCast(in.d), pc, fsp);
                 } else pc += 1;

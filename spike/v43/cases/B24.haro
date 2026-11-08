@@ -1,7 +1,6 @@
 ? "before"
 f()
 func f
-	? Two() = 2
-	? Two() = "2"
-func Two
-	return 2
+	$nTwo = 2
+	? $nTwo = 2
+	? $nTwo = "2"
