@@ -203,6 +203,10 @@ const builtin_table = [_]BuiltinEntry{
     .{ .name = "reference", .id = .reference, .argc = 1 },
     .{ .name = "object2pointer", .id = .object2pointer, .argc = 1 },
     .{ .name = "pointer2object", .id = .pointer2object, .argc = 1 },
+    .{ .name = "obj2ptr", .id = .obj2ptr, .argc = 1 },
+    .{ .name = "ptr2obj", .id = .ptr2obj, .argc = 1 },
+    .{ .name = "pointercompare", .id = .pointercompare, .argc = 2 },
+    .{ .name = "ptrcmp", .id = .ptrcmp, .argc = 2 },
     .{ .name = "refcount", .id = .refcount, .argc = 1 },
     // The console primitives (contract gate 3). Measured on conhost
     // and Windows Terminal before they were written -- main.zig
@@ -4114,7 +4118,11 @@ pub const Compiler = struct {
                 return;
             }
             switch (bc) {
-                .list => _ = try self.emit(.vget, dst, base, idx, if (ec.boxed()) 1 else 0),
+                // COUNTED UNLESS THE INDEX IS PROVEN A WHOLE NUMBER (v0.46, second round). A key the compiler cannot prove a text --
+                // `"" + (anA[i] * 3 + anB[i])` is a ref, its operands may be objects -- reaches the VM's keyed read through vget, and a
+                // missing key's static empty text stored uncounted is released by the next store and freed (stzlib's
+                // haro_keyed_release_arith.ring). Removed once as idle (plant N2), because no case had reached it.
+                .list => _ = try self.emit(.vget, dst, base, idx, if (ec.boxed() or self.classOf(n.namedChild(1)) != .int) 1 else 0),
                 .str => _ = try self.emit(.sgets, dst, base, idx, 0),
                 else => _ = try self.emit(.dget, dst, base, idx, 1),
             }

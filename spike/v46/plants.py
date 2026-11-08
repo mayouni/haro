@@ -13,7 +13,8 @@ Removed after planting, named: Z6 and Z8, the NaN check of `jle` and `jge`. The 
 cond()), and for these two a NaN's valCmp of 0 already makes `<=` and `>=` hold, so the jump fires and the comparison reads false, as IEEE
 says; switched off, no case moved, and none can. The checks are removed from the VM; `jlt` and `jgt` keep theirs (Z5, Z7).
 
-Removed after planting, named: N2, the keyed read's vget counted when the element is unboxed -- the class of the read (N1) is what stops
+N2 RESTORED, second round: removed once as idle because no case reached it, it is load-bearing for a key of class ref (K09). Removed after
+planting, named: N2 (FIRST ROUND), the keyed read's vget counted when the element is unboxed -- the class of the read (N1) is what stops
 the crash, since the move into the counted register retains; switched off, nothing moved, and the change is taken out. N4, a lone `.` as
 the sibling of the receiver call's statement -- the grammar puts it at the end of the statement before (N3), never there; taken out.
 N6 missed first: K07 passes a number, refused before the kind is asked, so K08 (a file's pointer) was written after the plants.
@@ -35,6 +36,14 @@ COURT = os.path.join(HERE, 'finding_court.py')
 PLANTS = [
     ('N1', 'K01', COMP, 'a keyed read takes the element class',
      '                    .list => if (idx_is_int) l.elem else Class.join(l.elem, .str),', '                    .list => if (idx_is_int or true) l.elem else Class.join(l.elem, .str),'),
+    ('N2', 'K09', COMP, 'a keyed read by an unproven key is an uncounted vget when the element is unboxed',
+     '.list => _ = try self.emit(.vget, dst, base, idx, if (ec.boxed() or self.classOf(n.namedChild(1)) != .int) 1 else 0),',
+     '.list => _ = try self.emit(.vget, dst, base, idx, if (ec.boxed() or (false and self.classOf(n.namedChild(1)) != .int)) 1 else 0),'),
+    ('N10', 'K12', MAIN, 'ptrcmp takes anything', '                        if (pa.tag != .cptr or pb.tag != .cptr) {',
+     '                        if (false and (pa.tag != .cptr or pb.tag != .cptr)) {'),
+    ('N11', 'K10', MAIN, 'ptrcmp answers 1 for any two pointers', '                        out = Value.int(if (cptrOf(pa) == cptrOf(pb)) 1 else 0);',
+     '                        out = Value.int(if (true or cptrOf(pa) == cptrOf(pb)) 1 else 0);'),
+    ('N12', 'K11', COMP, 'obj2ptr is no name the compiler knows', '    .{ .name = "obj2ptr", .id = .obj2ptr, .argc = 1 },', '    .{ .name = "obj2ptr_unknown", .id = .obj2ptr, .argc = 1 },'),
     ('N3', 'K03', TYPES, 'the lone `.` ending the statement before is not looked for',
      '                if (cnt > 0 and std.mem.eql(u8, before.child(cnt - 1).kind(), ".")) return;',
      '                if (false and cnt > 0 and std.mem.eql(u8, before.child(cnt - 1).kind(), ".")) return;'),

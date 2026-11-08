@@ -1335,6 +1335,12 @@ pub const Builtin = enum(u16) {
     // v0.46 (HARO-OBJECT2POINTER-01): Ring's object pointer, a C pointer of kind OBJECTPOINTER to an object, and back
     object2pointer,
     pointer2object,
+    // v0.46, second round (HARO-PTRCMP-01): Ring's short forms, and whether two pointers point at one thing -- each its own op, so an
+    // error names the function as it was called (`In ptrcmp()`), as ref and reference do
+    obj2ptr,
+    ptr2obj,
+    pointercompare,
+    ptrcmp,
     // THE RESIDENT VM, rung 2: a running program admits more source into
     // itself -- a file, or a name and its source (AdmitHook). Not Ring's.
     admitfile,
@@ -8168,7 +8174,7 @@ pub const VM = struct {
                     // (type() answers the kind, isPointer 1); pointer2object(p) is THAT object, shared -- a reference, as
                     // reference() makes one -- so a write through it is a write to the original. The object is retained, so the
                     // pointer never outlives it. Anything else is Bad parameter type!, in the function's name, as Ring's.
-                    .object2pointer => {
+                    .object2pointer, .obj2ptr => {
                         const ov = regs[A];
                         if (ov.tag != .obj) {
                             self.pending = BADPARAM;
@@ -8177,7 +8183,7 @@ pub const VM = struct {
                         retain(ov);
                         out = self.newCptr(@ptrCast(ov.p.o), "OBJECTPOINTER");
                     },
-                    .pointer2object => {
+                    .pointer2object, .ptr2obj => {
                         const pv = regs[A];
                         const kind_ok = pv.tag == .cptr and pv.p.i >= 0 and pv.p.i < cptr_tab.items.len and
                             std.mem.eql(u8, cptr_tab.items[@intCast(pv.p.i)].kind, "OBJECTPOINTER");
@@ -8189,6 +8195,16 @@ pub const VM = struct {
                         const o: *Obj = @ptrCast(@alignCast(raw.?));
                         if (o.rref == 0) o.rref = 1;
                         out = Value.object(o);
+                    },
+                    // ptrcmp(p1, p2): 1 when both point at one thing, else 0; a value that is no pointer is Bad parameter type!, as Ring's
+                    .pointercompare, .ptrcmp => {
+                        const pa = regs[A];
+                        const pb = regs[A + 1];
+                        if (pa.tag != .cptr or pb.tag != .cptr) {
+                            self.pending = BADPARAM;
+                            continue :dispatch .raise;
+                        }
+                        out = Value.int(if (cptrOf(pa) == cptrOf(pb)) 1 else 0);
                     },
                     // Ring counts the NAMED holders (vmgc.c:677); the VM's
                     // count less the temporaries is that (`ringHolders`)
