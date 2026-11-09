@@ -53,6 +53,11 @@ CASES = [
         'f()', 'func f', T + 'Eval("? len(' + "'ab'" + ')")'],
      ['', 'Line 3 Error (E1) : a built-in is spelled `Len`; written `len` ', 'In function f() in file P08.haro', '',
       'Called from line 1 in file P08.haro '], 1),
+    # WRITTEN AFTER THE CODE, before the plants, 2026-11-09: the spelling is looked up by the native a call RESOLVED to, so a name written
+    # without its underscore and in the wrong case is refused too; no case reached that, and plant B3 needs one.
+    ('P09', 'P2', 'a built-in reached without its underscore, in another case, is refused naming its spelling', '.haro', [
+        B, 'f()', 'func f', T + '? tuisize()'],
+     refused('P09', 4, 'TUISize', 'tuisize'), 1),
 ]
 
 os.makedirs(os.path.join(HERE, 'cases'), exist_ok=True)
