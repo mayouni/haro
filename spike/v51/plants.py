@@ -29,7 +29,9 @@ PLANTS = [
     ('G2', 'X01', 'the checker names no commit', BUILD,
      [('    opts.addOption([]const u8, "commit", vmCommit(b));', '    opts.addOption([]const u8, "commit", "unknown");')]),
     ('G3', 'X01', 'the sha256 is of the path, not the bytes read', FACTS,
-     [('        std.crypto.hash.sha2.Sha256.hash(origs[fi], &digest, .{});', '        std.crypto.hash.sha2.Sha256.hash(paths[fi], &digest, .{});')]),
+     # G3 FAILED TO BUILD on its first run: hashing the path left `origs` unused, which Zig refuses; it still reads origs here
+     [('        std.crypto.hash.sha2.Sha256.hash(origs[fi], &digest, .{});',
+       '        std.crypto.hash.sha2.Sha256.hash(if (origs.len > 0) paths[fi] else origs[fi], &digest, .{});')]),
     ('G4', 'X10', 'every file reads as the Ring surface', FACTS,
      [('        try str(w, if (lift.isHaro(paths[fi])) "haro" else "ring");', '        try str(w, if (false) "haro" else "ring");')]),
     ('G5', 'X04', 'every finding goes to its file\'s top', FACTS,
@@ -39,8 +41,11 @@ PLANTS = [
     ('G7', 'X03', 'a function\'s blank lines at its end are kept', FACTS,
      [('        while (end > start and std.ascii.isWhitespace(root.src[end - 1])) end -= 1;',
        '        while (false and end > start and std.ascii.isWhitespace(root.src[end - 1])) end -= 1;')]),
+    # G8 MISSED on its first run, switching off the fold in the call lists alone: the lambda's call is one the compiler patched, folded
+    # by the second loop. The protection is the pair; G8 switches both off.
     ('G8', 'X07', 'a lambda\'s calls are not its function\'s', FACTS,
-     [('        const from = real(d.funcs, raw);', '        const from = raw;')]),
+     [('        const from = real(d.funcs, raw);', '        const from = if (false) real(d.funcs, raw) else raw;'),
+      ('|n| try statics[real(d.funcs, fx.from)].append(a, n);', '|n| try statics[fx.from].append(a, n);')]),
     ('G9', 'X06', 'the calls the compiler patched are not read', FACTS,
      [('        if (try display(a, d, fx.fidx)) |n| try statics[real(d.funcs, fx.from)].append(a, n);',
        '        if (false) if (try display(a, d, fx.fidx)) |n| try statics[real(d.funcs, fx.from)].append(a, n);')]),
