@@ -116,6 +116,22 @@
    "why": "an error raised inside an append to a global, caught outside, leaves the global whole",
    "file": "cases/K13.ring",
    "stdout": "2\ncaught\ncaught\ncaught\n2\n2\n3\ndone\n"
+  },
+  {
+   "id": "K14",
+   "kind": "check",
+   "line": "K2",
+   "why": "a receiver call cut after a method's last statement is no unqualified call: no arity error",
+   "file": "cases/K14.ring",
+   "not": "haro/type-arity"
+  },
+  {
+   "id": "K15",
+   "kind": "check",
+   "line": "K2",
+   "why": "stzlib's probe whole (haroport_probes/haro_arity_receiver2.ring, bb0cd0fa8), its unclosed `if` kept",
+   "file": "cases/K15.ring",
+   "not": "haro/type-arity"
   }
  ]
 }

@@ -87,6 +87,19 @@ CASES = [
         '? len(aCopy)', '$aTV + 5', '? len($aTV)', '? "done"', 'class O', T + 'def Add()', T * 2 + '$aTV + This.T()', T + 'def T()',
         T * 2 + 'if $bOn = 0', T * 3 + 'raise("off")', T * 2 + 'ok', T * 2 + 'return 1', T + 'def Vals()', T * 2 + 'return $aTV'],
      {'stdout': '2\ncaught\ncaught\ncaught\n2\n2\n3\ndone\n'}),
+    # FOURTH ROUND, 2026-11-09, written before the code: HARO-ARITY-RECEIVER-02 (stzlib-haroport, stzlib bb0cd0fa8,
+    # security/stzResponsePlan.ring 445). When the method before ends in `return ... > 0`, the grammar cuts a chained call that is a
+    # method's LAST statement: the lone `.` ends that statement INSIDE the definition, and `LockAccount(...)` lands as the definition's
+    # next sibling -- so the `.` is the last LEAF of the statement before, not its last child, which is all K03's fix looked at.
+    ('K14', 'K2', 'a receiver call cut after a method\'s last statement is no unqualified call: no arity error', 'check', '.ring', [
+        'class Plan', T + 'def Owns(pcVerb)', T * 2 + 'return ring_find([ "lockaccount" ], lower("" + pcVerb)) > 0', '',
+        T + 'def LockAccount(pcTarget)', T * 2 + 'This._Auth().LockAccount("" + pcTarget, "locked")', '', T + 'def RevokeSession(pcTarget)',
+        T * 2 + 'if pcTarget = "" return 0 ok', T * 2 + 'return 1'],
+     {'not': 'haro/type-arity'}),
+    ('K15', 'K2', 'stzlib\'s probe whole (haroport_probes/haro_arity_receiver2.ring, bb0cd0fa8), its unclosed `if` kept', 'check', '.ring', [
+        T * 2 + 'return ring_find([ "lockaccount", "revokesession" ], StzLower("" + pcVerb)) > 0', T + 'def LockAccount(pcTarget)',
+        T * 2 + 'This._Auth().LockAccount("" + pcTarget, "locked by a containment plan")', T * 2 + 'if _i_ = 0'],
+     {'not': 'haro/type-arity'}),
 ]
 
 os.makedirs(os.path.join(HERE, 'cases'), exist_ok=True)
