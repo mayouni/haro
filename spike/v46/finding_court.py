@@ -18,6 +18,10 @@ RING = os.path.abspath(sys.argv[sys.argv.index('--ring') + 1]) if '--ring' in sy
 sys.argv = [sys.argv[0]]
 import paths
 
+# K23 (HARO-PIPEWRITE-01): a `pipe` case runs its program into a pipe Git Bash makes -- `"$0" "$1" | cat` -- since the defect showed
+# there, and a pipe Python or cmd.exe makes carried every line whole. On a machine without that bash the case is NOT RUN, named.
+GIT_BASH = r'C:\Git\usr\bin\bash.exe'
+
 
 def run(exe, case):
     src = os.path.join(HERE, case['file'])
@@ -26,8 +30,11 @@ def run(exe, case):
         shutil.copy(src, td)
         env = dict(os.environ)
         env['HARO_NOCACHE'] = '1'
+        cmd = [exe] + verb + [os.path.basename(src)]
+        if case.get('pipe'):
+            cmd = [GIT_BASH, '-c', '"$0" "$1" | cat', exe.replace(chr(92), '/'), os.path.basename(src)]
         try:
-            r = subprocess.run([exe] + verb + [os.path.basename(src)], capture_output=True, env=env, timeout=30, cwd=td)
+            r = subprocess.run(cmd, capture_output=True, env=env, timeout=60, cwd=td)
         except subprocess.TimeoutExpired:
             return 'TIMEOUT', -1
         return r.stdout.decode('utf-8', 'replace').replace('\r\n', '\n'), r.returncode
@@ -47,8 +54,12 @@ def main():
     else:
         vm, twin = paths.need_bins()
         builds = [('haro', vm), ('checked', twin)]
-    failed = []
+    failed, not_run = [], []
     for c in doc['cases']:
+        if c.get('pipe') and not os.path.exists(GIT_BASH):
+            not_run.append(c['id'])
+            print(f'  NOT RUN {c["id"]} [{c["line"]}] {c["why"]}: Git Bash is not at {GIT_BASH}, and the pipe it makes is the case')
+            continue
         got = [run(exe, c) for _, exe in builds]
         if c['kind'] == 'check':
             # a `haro check` case: the report must hold (has) or lack (not) a rule name; the plant asks the opposite of K03
@@ -71,8 +82,9 @@ def main():
                 print(f'       {b}')
         else:
             print(f'  ok   {c["id"]} [{c["line"]}] {c["why"]}')
-    n = len(doc['cases'])
-    print(f'FINDING COURT {n - len(failed)} of {n} cases on {" and ".join(l for l, _ in builds)}' + (f'; failed: {", ".join(failed)}' if failed else ''))
+    n = len(doc['cases']) - len(not_run)
+    print(f'FINDING COURT {n - len(failed)} of {n} cases on {" and ".join(l for l, _ in builds)}' + (f'; failed: {", ".join(failed)}' if failed else '')
+          + (f'; NOT RUN: {", ".join(not_run)}' if not_run else ''))
     return 1 if failed else 0
 
 

@@ -136,6 +136,14 @@ CASES = [
      {'stdout': "hi\n\nLine 4 Haro refused this statement (a built-in is spelled `SystemCmd`; written `systemcmd`, line 4 of K22.haro) and did "
                 "not compile it -- running past it would give a wrong answer \nIn function f() in file K22.haro\n\nCalled from line 1 in file "
                 "K22.haro ", 'exit': 1}),
+    # SIXTH ROUND, written after the diagnosis and before the fix was committed: HARO-PIPEWRITE-01, found reproducing HARO-CHECKPIPE-01
+    # (stzlib-haroport 07:30: `haro check` through a pipe ended "error: WriteFailed"). Not a reader closing early: through `cat`, which reads
+    # everything, the checker failed after 932 lines -- and a PROGRAM's output through a pipe, past its 64 KB buffer, was repeated and
+    # lost lines (20,000 lines printed, 557,632 carried, 12,925 distinct; to a file, exact). Zig's file writer starts positional, and a pipe
+    # is no file. A court reads through a pipe, so this case is one.
+    ('K23', 'K8', 'a program\'s output past its 64 KB buffer reaches a pipe whole, once', 'run', '.ring', [
+        'for i = 1 to 3000', T + '? "line " + i + " ' + 'x' * 40 + '"', 'next'],
+     {'stdout': ''.join(f'line {i} ' + 'x' * 40 + '\n' for i in range(1, 3001)), 'pipe': True}),
 ]
 
 os.makedirs(os.path.join(HERE, 'cases'), exist_ok=True)
