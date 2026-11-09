@@ -42,6 +42,8 @@ pub fn build(b: *std.Build) void {
         .target = target,
         .optimize = optimize,
         .link_libc = true,
+        // the release builds strip (release/build_release.py): a Linux binary carried 12 MB of debug information in itself
+        .strip = b.option(bool, "strip", "leave the debug information out of the binary"),
     });
     mod.addOptions("config", opts);
     mod.addIncludePath(.{ .cwd_relative = b.fmt("{s}/tree-sitter/include", .{vendor}) });
@@ -57,6 +59,9 @@ pub fn build(b: *std.Build) void {
         .flags = &(ts_c_flags ++ [_][]const u8{"-O1"}),
     });
     mod.addIncludePath(.{ .cwd_relative = b.fmt("{s}/mimalloc/include", .{vendor}) });
+    // a macOS build cross-compiled without Apple's SDK: mimalloc's random source includes CommonCrypto, which Zig's macOS headers
+    // lack; compat/macos declares the one call (HARO-RELEASE-ADOPT-01 (c), 2026-11-09)
+    if (target.result.os.tag == .macos) mod.addIncludePath(b.path("compat/macos"));
     mod.addCSourceFile(.{
         .file = .{ .cwd_relative = b.fmt("{s}/mimalloc/src/static.c", .{vendor}) },
         .flags = &.{ "-O2", "-DNDEBUG" },
