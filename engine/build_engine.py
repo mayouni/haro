@@ -218,6 +218,15 @@ def build(domains):
 def main():
     global DST
     ref = 'origin/main'
+    # 2026-11-09: `--help` was not parsed, so it refreshed the copy from origin/main (stzlib-haroport, reported). Anything this does not
+    # read is refused before any work.
+    if any(a in ('-h', '--help', '/?') for a in sys.argv[1:]):
+        print(__doc__)
+        return 0
+    unknown = [a for a in sys.argv[1:] if a.startswith('-') and a != '--build' and not a.startswith(('--ref=', '--dst='))]
+    if unknown:
+        print('build_engine: not an option here: ' + ' '.join(unknown) + ' -- `--help` lists them; nothing was done')
+        return 2
     for a in sys.argv[1:]:
         if a.startswith('--ref='):
             ref = a[6:]
