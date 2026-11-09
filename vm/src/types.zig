@@ -951,12 +951,12 @@ const Walker = struct {
         // statement follows a lone `.` names a method of whatever the chain answers, which the checker does not know.
         // The lone `.` is the LAST token of the statement before (`This.F(x)` `.`), as the tree stands (a sibling `.` was looked for
         // too, and plant N4 showed the grammar never puts it there).
+        // HARO-ARITY-RECEIVER-02 (fourth round): when the chained call was a method's LAST statement, the `.` ends that statement
+        // inside the definition and the cut call is the definition's next sibling -- so the `.` is the statement before's last LEAF.
         if (!parent.isNull() and std.mem.eql(u8, parent.kind(), "expression_statement")) {
-            const before = parent.prevSibling();
-            if (!before.isNull()) {
-                const cnt = before.childCount();
-                if (cnt > 0 and std.mem.eql(u8, before.child(cnt - 1).kind(), ".")) return;
-            }
+            var last = parent.prevSibling();
+            while (!last.isNull() and last.childCount() > 0) last = last.child(last.childCount() - 1);
+            if (!last.isNull() and std.mem.eql(u8, last.kind(), ".")) return;
         }
 
         const key = lower(self.arena, callee) catch return;
