@@ -12,6 +12,7 @@ K08 written after the plants, both said so). Every run case was read off Ring 1.
 | K1 | a read by a key not proven a whole number answers the element or the empty text of a missing key, so it is never held as an uncounted integer, nor read by an uncounted `vget` (HARO-KEYEDRELEASE-01: a segfault, two shapes) | K01, K02, K09 |
 | K2 | `haro check`: a call whose statement follows a lone `.` is a call on a receiver, and the class's own method's arity is not its (HARO-ARITY-RECEIVER-01) | K03, K04 |
 | K4 | an error unwound out of a call leaves no uncounted borrow behind: the unwind clears from the first unwound frame's base, its call window (HARO-CLONEDEEP-01) | K13 |
+| K5 | `parentclassname(o)` answers the parent's name as Ring stores it, folded, `""` with none, Bad parameter type for anything else (Ring 1.27, meta_e.c; HARO-PARENTCLASSNAME-01) | K16, K17 |
 | K3 | `object2pointer(o)` is an OBJECTPOINTER, `pointer2object(p)` that same object, shared; two pointers to one object are equal; `ptrcmp` and `pointercompare` answer it, `obj2ptr` and `ptr2obj` are the short forms; anything else Bad parameter type!, as Ring's (HARO-OBJECT2POINTER-01, HARO-PTRCMP-01) | K05-K08, K10-K12 |
 
 ## How it is built
@@ -40,6 +41,10 @@ K08 written after the plants, both said so). Every run case was read off Ring 1.
   K1 pattern). **CORRECTED 2026-11-08, second round**: the 185 of 185 first written here was measured on stzlib c4f6f85ea, a ref OLDER than the guard that reaches the MutualInformation loop, and named no ref -- stzlib's port caught it. At stzlib origin/main 4fdffce2c, after the second round, the guard passes 185 of 185 with its three MutualInformation scenarios run.
 
 ## The protections, each switched off (`plants.py`)
+
+**The fifth round** (haro b6aea26 fixtures, 66354e5 code): HARO-PARENTCLASSNAME-01, from stzlib's sound_mu3 guard (stzlib 44103f717): `parentclassname` raised R3. Built beside `classname`, on its op with c = 1, reading the class's parent; a report names it. Plants N15, N16, N17 caught.
+
+**The fourth round** (haro 64a96b1 fixtures, 664fee2 code): HARO-ARITY-RECEIVER-02, stzlib's last arity error (stzResponsePlan.ring 445). When the method before ends `return ... > 0`, the grammar cuts a chained call that is a method's LAST statement: the lone `.` ends that statement inside the definition and the cut call is the definition's next sibling. K14 is a ten-line class that parses whole, K15 stzlib's probe as sent (its unclosed `if` kept). The check now descends to the statement before's last leaf; N3 re-pointed and N14 caught. 17 of 17 cases on both builds.
 
 **The third round** (haro f1554fb fixture, 9b82974 code): HARO-CLONEDEEP-01. stzlib's stzObject guard crashed in `Summary()` -- the crash first looked like its IfQ scenario, whose line was still in the output buffer -- or hung. ddmin over its 17 scenarios found one, "AddTimeValue ... keep the elapsed time", and reading it gave K13, 31 lines and no library: an error raised inside `$aTV + This.T()` and caught outside. The append borrows `$aTV`'s list into a register uncounted and ends the borrow with a raw store the raise skipped; `forgetUnwound` cleared registers from the end of the handler's frame, but a callee's frame starts inside it, at the call window, so the borrow stayed and the next store there released it and freed the global's list. Clearing now starts at the first unwound frame's base. N13 caught; **12 of 12 plants**. stzlib's stzObject_defects_narrated.ring (4fdffce2c) passes 186 of 186, its DataSet guard 185 of 185; the 50-stage guard green (1,632 s).
 

@@ -1893,6 +1893,18 @@ each reproduced before anything changed -- HARO-KEYEDRELEASE-01 (a segfault), HA
 **Results.** 8 of 8 cases on both builds; 7 of 7 plants caught. **CORRECTED 2026-11-08, second round**: the 185 of 185 first written here was measured on stzlib c4f6f85ea, a ref OLDER than the guard that reaches the MutualInformation loop, and named no ref -- stzlib's port caught it. At stzlib origin/main 4fdffce2c, after the second round, the guard passes 185 of 185 with its three MutualInformation scenarios run. **Second round** (4b85327, 47fced6): the keyed read's second shape (a key of class ref, through an uncounted `vget` -- the first round had removed that count as idle), and `ptrcmp`, `pointercompare`, `obj2ptr`, `ptr2obj`; 12 cases, 11 of 11 plants, the 50-stage guard green (1,817 s; stage 6 at 149.2 ms, a hair under its ceiling). **Third round** (f1554fb, 9b82974): HARO-CLONEDEEP-01 -- an error unwound out of a call left an uncounted borrow of a global's list in the caller's frame, which freed it; the unwind clears from the first unwound frame's base now. 13 cases, 12 of 12 plants; stzlib's stzObject guard, which crashed or hung, 186 of 186; the 50-stage guard green (1,632 s). **The 50-stage guard** passed whole on haro and its checked build, 0 failures (1,328 s; stage 6 compiled
 the court cold in 144.6 ms).
 
+## The forty-seventh rung -- Haro v0.47, a name's first letter is its type -- 2026-11-09
+
+D55 T2, on the author's scope of 2026-11-08 ("Yes, as recommended"): in a `.haro` file a value's name carries its type's letter; the letters whose types exist are checked, a literal when compiling and any other value where it is given; Haro's own code re-lettered by rule.
+
+    v47/fixtures.json, cases/           16 cases (36b0aca: 14, 5 holding; Y15 before the parameter code; Y16 after the plants)
+    v47/letter_court.py                 on haro and its checked build
+    v47/plants.py                       15 protections switched off in turn
+    v47/GRAMMAR.md                      the ruling, the table, how it is built, the re-lettering, what was measured, what is named
+    study/v47/                          letters.py (the measure), reletter.py (the rules), port_cases.py, port_snippets.py, census.py, stage6_ab.py
+
+**Results.** 16 of 16 cases on both builds; 15 of 15 plants. Haro's code re-lettered by a tool (a11646b, listed in v20/tool_commits.txt); five earlier rungs' cases re-lettered after their courts spoke, each saying so, and green. Stage 6 unchanged by the rung (143.5 / 144.4 ms alternating). **v0.46, fourth and fifth rounds** (stzlib's port): HARO-ARITY-RECEIVER-02 (664fee2) and HARO-PARENTCLASSNAME-01 (66354e5), 17 of 17 cases, N14-N17 caught.
+
 ## The names -- `.haro`, not `.stzu` -- corrected 2026-10-02
 
 **At the author's word ("we agreed to use .haro instead of .stzu, no?").** D1 was ratified

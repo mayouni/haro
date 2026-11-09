@@ -3,3 +3,4 @@
 # figure with it is printed beside the one without. Ruled by the author 2026-11-08: "Exclude tool commits".
 # A commit is listed by the desk that made it, with the tool and what it rewrote; nothing else belongs here.
 3752c05d09546aefed4955a2deee83df846b5f81 study/v43/migrate.py, study/v43/migrate_bool.py -- v0.43: Haro's code moved off coercion and 1/0 flags (about 680 lines by rule)
+a11646b3a30459e4a00a939cc1f2f6f1fba1f553 study/v47/reletter.py, port_cases.py, port_snippets.py -- v0.47: Haro's own code and five rungs' case programs re-lettered by rule (D55 T2)

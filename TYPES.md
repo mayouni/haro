@@ -279,7 +279,7 @@ v0.49, judged types v0.50.
    in another case refused (e).
 2. **v0.43 -- boolean, and no coercion** (T1, T3): `true`/`false` a type, conditions boolean only, comparisons across types refused, integer
    overflow raised.
-3. **v0.44 -- the letters, checked** (T2), and Haro's own code re-lettered.
+3. **v0.44 -- the letters, checked** (T2), and Haro's own code re-lettered. **Built as v0.47, 2026-11-09** (`spike/v47/GRAMMAR.md`): the checked letters b i n f t v o h; the others accepted until their rungs; `a` until v0.50.
 4. **v0.45 -- numbers** (T4): decimal and float apart, `near`.
 5. **v0.46 -- absence** (T5): `maybe`, `else`.
 6. **v0.47 -- vector, map and record** (T6), and v0.41's `todo` pointing at them.
