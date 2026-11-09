@@ -3718,6 +3718,25 @@ def stage51():
         return 1
     return 0
 
+BUILTIN_COURT = os.path.join(HERE, 'v48', 'builtin_court.py')
+
+
+def stage52():
+    """Haro v0.48, a built-in spelled as Softanza writes a name, in a .haro file (the Principal's ruling of 2026-11-09, "ParentClassName";
+    v48/GRAMMAR.md): one spelling per built-in from study/v48/builtin_names.py's table, any other refused naming it; a built-in registered
+    with an underscore reached without it; a program's own function of that name is its own; a .ring file reads every spelling.
+    v48/builtin_court.py on haro and its checked build."""
+    print("stage 52 -- the built-ins' spelling: v48/builtin_court.py on haro and its checked build")
+    p = subprocess.run([sys.executable, BUILTIN_COURT] + (['--plant'] if PLANT else []), capture_output=True, cwd=HERE, timeout=600)
+    out = p.stdout.decode('utf-8', 'replace').replace(chr(13) + chr(10), chr(10))
+    for line in out.splitlines():
+        if line.startswith('  FAIL') or line.startswith('       ') or line.startswith('BUILTIN COURT'):
+            print(line)
+    if p.returncode != 0:
+        print(f'  FAIL the builtin court exited {p.returncode}' + ('' if out.strip() else ': ' + p.stderr.decode('utf-8', 'replace')[-400:]))
+        return 1
+    return 0
+
 SENTENCE_TARGET = 50.0     # D42: a sentence edited, its court's image reused -- what a person editing a sentence waits for
 COLD_CEILING = 150.0       # D42: the court compiled from scratch -- a ceiling that catches the court library growing
 
@@ -3915,5 +3934,7 @@ if __name__ == '__main__':
         failures += stage50()
     if stage in (None, 51) and os.path.exists(LETTER_COURT):
         failures += stage51()
+    if stage in (None, 52) and os.path.exists(BUILTIN_COURT):
+        failures += stage52()
     print(f'haro_forge: {"FAIL" if failures else "PASS"} ({failures} failure(s), {time.perf_counter()-t0:.1f} s)')
     sys.exit(1 if failures else 0)

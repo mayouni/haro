@@ -27,7 +27,9 @@ PLANTS = [
     ('P2', 'N05', 'a function is not checked', '        if (self.spell_on) self.spellFunc(name, f);\n', ''),
     ('P3', 'N06', 'two functions differing by case are not looked for',
      '        if (f.owner == null) for (self.funcs.items) |*g| {', '        if (false) for (self.funcs.items) |*g| {'),
-    ('P4', 'N07', 'a native is not checked', '        if (self.spell_on) self.spellNative(callee);\n', ''),
+    # P4 RE-POINTED 2026-11-09 (v0.48): the check names the native the call resolved to beside the spelling written
+    ('P4', 'N07', 'a native is not checked', '        if (self.spell_on) self.spellNative(written, callee);\n',
+     '        if (false) self.spellNative(written, callee);\n'),
     ('P5', 'N08', 'a class is not checked', '        if (self.spell_on) self.spellAt(name, ci.name, ci.node.src);\n', ''),
     ('P6', 'N09', 'a global read is not checked',
      '            scans[0] += 1;\n            if (std.ascii.eqlIgnoreCase(g, name)) {\n                if (self.spell_on) self.spellAt(name, g, "");\n',

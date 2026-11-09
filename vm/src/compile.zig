@@ -2662,24 +2662,15 @@ pub const Compiler = struct {
         if (first) |d| self.spellAt(use, d, first_src);
     }
 
-    /// A native is spelled as the VM registers it, in lowercase (the author's ruling of 2026-11-07)
-    fn spellNative(self: *Compiler, use: []const u8) void {
-        if (!self.spellIn(use) or use.len > 64) return;
-        var up = false;
-        for (use) |ch| if (std.ascii.isUpper(ch)) {
-            up = true;
-            break;
-        };
-        if (!up) return;
+    /// A built-in is spelled as Softanza writes a name, in a .haro file: one spelling each, `builtins.pascal` (v0.48, the Principal's ruling
+    /// of 2026-11-09, "ParentClassName", revising 2026-11-07's lowercase). `registered` is the native the call resolved to.
+    fn spellNative(self: *Compiler, use: []const u8, registered: []const u8) void {
+        if (!self.spellIn(use) or registered.len > 64) return;
         var buf: [64]u8 = undefined;
-        const low = std.ascii.lowerString(&buf, use);
-        var native = builtins.isBuiltin(low);
-        if (!native) for (builtin_table) |bi| if (std.mem.eql(u8, bi.name, low)) {
-            native = true;
-            break;
-        };
-        if (!native) return;
-        const why = std.fmt.allocPrint(self.alloc, "a native is spelled in lowercase -- `{s}`; written", .{low}) catch return;
+        const low = std.ascii.lowerString(&buf, registered);
+        const want = builtins.pascalOf(low) orelse return;
+        if (std.mem.eql(u8, use, want)) return;
+        const why = std.fmt.allocPrint(self.alloc, "a built-in is spelled `{s}`; written", .{want}) catch return;
         self.spellSet(use, why);
     }
 
@@ -4437,7 +4428,8 @@ pub const Compiler = struct {
             }
             return self.memberCall(n.namedChild(0), ar, if (have) ar.namedChildCount() else 0, dst);
         }
-        const callee = n.namedChild(0).text();
+        var callee = n.namedChild(0).text();
+        const written = callee;
         var args = n.field("arguments");
         if (args.isNull()) {
             var i: u32 = 0;
@@ -4614,7 +4606,11 @@ pub const Compiler = struct {
             try self.predeclareEval(args.namedChild(0));
         }
         if (self.findFunc(callee)) |uf| return self.userCall(n, uf, args, argc, dst);
-        if (self.spell_on) self.spellNative(callee);
+        // v0.48: a .haro file reaches a native registered with an underscore by its spelling without one (`TUISize` -> `tui_size`)
+        if (self.spell_on) if (builtins.underscoreOf(callee)) |registered| {
+            callee = registered;
+        };
+        if (self.spell_on) self.spellNative(written, callee);
 
         // ---- builtins -------------------------------------------------
         if (std.ascii.eqlIgnoreCase(callee, "len")) {
@@ -5437,7 +5433,7 @@ pub const Compiler = struct {
             "isobject", "ispackage", "ispackageclass", "ispointer", "isprint", "isprivateattribute", "isprivatemethod", "ispunct", "isspace",
             "isstring", "isunix", "isupper", "iswindows", "iswindows64", "isxdigit", "fexists", "direxists" };
         for (yes_no) |w| {
-            if (std.mem.eql(u8, name, w)) return self.findFunc(name) == null;
+            if (std.ascii.eqlIgnoreCase(name, w)) return self.findFunc(name) == null;
         }
         return false;
     }
