@@ -24,8 +24,8 @@
 //!
 //! One request at a time, one connection per request (`Connection: close`):
 //! the VM runs one program on one thread, and the loop is the program.
-//! Published at start-up through the table `rpp_init` fills, as `src/zip.zig`
-//! is -- no library, no DLL: commitment 5, one binary.
+//! Published at start-up through the table `rpp_init` fills -- no library,
+//! no DLL: commitment 5, one binary.
 const std = @import("std");
 const native = @import("native.zig");
 

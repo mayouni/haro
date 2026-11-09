@@ -20,7 +20,6 @@ const image = @import("image.zig");
 const dumpjson = @import("dumpjson.zig");
 const fmt = @import("fmt.zig");
 const graph = @import("graph.zig");
-const zip = @import("zip.zig");
 const httpd = @import("httpd.zig");
 const prefix = @import("prefix.zig");
 const lift = @import("lift.zig");
@@ -3907,11 +3906,8 @@ pub fn main() !void {
     if (std.process.getEnvVarOwned(std.heap.page_allocator, "HARO_WATCHDOG")) |v| {
         vm.g_watchdog_s = std.fmt.parseInt(i64, std.mem.trim(u8, v, " \t\r\n"), 10) catch 0;
     } else |_| {}
-    // ZIP is built IN, not loaded. Ring reaches it through an
-    // extension DLL because that is how Ring reaches natives at all;
-    // commitment 5 says this is one binary, so the twelve names are
-    // published here, through the same table `rpp_init` fills.
-    zip.registerAll(vmheap);
+    // ZIP is no longer the VM's (v0.49, 2026-11-09): Softanza's engine carries it (stz_compress), and the twelve zip_ natives
+    // zip.zig published here are retired -- a zip_ call is Ring's R3, as Ring with its extension not loaded.
     // a server's socket, for a program that holds its own request loop
     // (HaroServer's host, under `rnxc resident`)
     httpd.registerAll(vmheap);

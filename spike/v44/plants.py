@@ -1,13 +1,15 @@
 """Every protection of v0.44 (the ported defects, HARO-PORTED-FINDINGS-01) switched off in turn: the ported court must fail, for the fixture
 that protection exists for.
 
-Each plant is one text substitution in vm/src/main.zig, compile.zig or zip.zig, written so that no name is left unused (Zig refuses one).
+Each plant is one text substitution in vm/src/main.zig or compile.zig (zip.zig too until v0.49 retired it), written so that no name is left unused (Zig refuses one).
 The VM is built with the plant into runtime/v44/plant-build (ReleaseFast, -j2, one build at a time), the court is run on that build alone,
 and the file is restored byte for byte before the next plant -- verified by its digest, and restored even when a build fails or the
 script is stopped.
 
 A file with CRLF line ends (zip.zig, HF-135) is matched and planted on its LF-normalised text and written back with its own ends: the
 first run read raw bytes, and four zip plants stood 0 times (STALE) though their text was there.
+
+RETIRED 2026-11-09 with zip.zig (v0.49): Z17 to Z22, the zip plants, with Q10, Q11, Q12 and Q14.
 
 Removed after planting, named: Z6 and Z8, the NaN check of `jle` and `jge`. The compiler emits an ordering jump only inverted (c = 1, from
 cond()), and for these two a NaN's valCmp of 0 already makes `<=` and `>=` hold, so the jump fires and the comparison reads false, as IEEE
@@ -23,7 +25,6 @@ ROOT = os.path.dirname(os.path.dirname(HERE))
 VM_DIR = os.path.join(ROOT, 'vm')
 MAIN = os.path.join(VM_DIR, 'src', 'main.zig')
 COMP = os.path.join(VM_DIR, 'src', 'compile.zig')
-ZIP = os.path.join(VM_DIR, 'src', 'zip.zig')
 OUT = os.path.join(ROOT, 'runtime', 'v44', 'plant-build')
 COURT = os.path.join(HERE, 'ported_court.py')
 
@@ -53,20 +54,6 @@ PLANTS = [
     ('Z16', 'Q05', MAIN, 'a number is not taken as its byte',
      '        } else if (isNum(nv)) @truncate(@as(u64, @bitCast(asInt(nv)))) else return BADPARAM;',
      '        } else if (false and isNum(nv)) @truncate(@as(u64, @bitCast(asInt(nv)))) else return BADPARAM;'),
-    ('Z17', 'Q10', ZIP, 'append reads a file that is no archive as an empty one',
-     '                readNames(path, &names) catch {\n                    a.deinit();\n                    retStr(out, ""); // Ring\'s NULL',
-     '                readNames(path, &names) catch if (false) {\n                    a.deinit();\n                    retStr(out, ""); // Ring\'s NULL'),
-    ('Z18', 'Q10', ZIP, 'a call on the null archive is refused instead of doing nothing',
-     '    if (argc != 1) return 1;\n    if (nullArchive(args, argc)) return noop(out);\n    const a = argArchive(args, 0) orelse return 1;\n    if (a.open_name) |name| {',
-     '    if (argc != 1) return 1;\n    if (false and nullArchive(args, argc)) return noop(out);\n    const a = argArchive(args, 0) orelse return 1;\n    if (a.open_name) |name| {'),
-    ('Z19', 'Q10', ZIP, 'the null archive is the integer 0, which isnull() does not see',
-     '                retStr(out, ""); // Ring\'s NULL\n                    return 0;', '                out.* = RppVal.handle(null);\n                    return 0;'),
-    ('Z20', 'Q11', ZIP, 'extraction reads an entry by its name, the first of a name twice',
-     '        const raw = (readEntryAt(path, name, pos) catch continue) orelse continue;',
-     '        const raw = (readEntryAt(path, name, if (false) pos else null) catch continue) orelse continue;'),
-    ('Z21', 'Q11', ZIP, 'extraction answers 0, not nothing', '    retStr(out, "");\n    std.fs.cwd().makePath(folder) catch {};',
-     '    out.* = RppVal.int(0);\n    std.fs.cwd().makePath(folder) catch {};'),
-    ('Z22', 'Q14', ZIP, 'a name that leaves the folder is written', '        if (!safeName(name)) continue;', '        if (false and !safeName(name)) continue;'),
 ]
 
 
@@ -84,7 +71,7 @@ def digest(b):
 
 def main():
     want = set(sys.argv[1:])
-    originals = {f: open(f, 'rb').read() for f in (MAIN, COMP, ZIP)}
+    originals = {f: open(f, 'rb').read() for f in (MAIN, COMP)}
 
     def restore():
         for f, b in originals.items():
