@@ -470,6 +470,17 @@ pub fn impurityOf(arena: std.mem.Allocator, n: ts.Node) ?Impurity {
 }
 
 fn impurityHere(arena: std.mem.Allocator, n: ts.Node) ?Impurity {
+    if (impurityDirect(arena, n)) |r| return r;
+    var i: u32 = 0;
+    while (i < n.childCount()) : (i += 1) {
+        if (impurityOf(arena, n.child(i))) |r| return r;
+    }
+    return null;
+}
+
+/// The node ITSELF is impure -- its children not asked. `haro check --facts` walks a file once with a cursor and asks each node this
+/// (v0.51): impurityOf per function walked the file's top level once per function, cubic on Softanza's largest files.
+pub fn impurityDirect(arena: std.mem.Allocator, n: ts.Node) ?Impurity {
     const k = n.kind();
     if (std.mem.eql(u8, k, "see_statement")) return .{ .why = "prints", .at = n };
     if (std.mem.eql(u8, k, "assignment_expression") and n.childCount() > 0) {
@@ -492,10 +503,6 @@ fn impurityHere(arena: std.mem.Allocator, n: ts.Node) ?Impurity {
                 }
             } else |_| {}
         }
-    }
-    var i: u32 = 0;
-    while (i < n.childCount()) : (i += 1) {
-        if (impurityOf(arena, n.child(i))) |r| return r;
     }
     return null;
 }

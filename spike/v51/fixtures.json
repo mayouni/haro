@@ -404,7 +404,7 @@
   {
    "id": "X13",
    "line": "P6",
-   "why": "the rules that did not look, and why: eval in the unit, no listener named",
+   "why": "the rules that did not look, and why: an eval of text the checker cannot read, no listener named",
    "folder": "cases/X13",
    "run": "e.ring",
    "flag_first": false,
@@ -438,6 +438,26 @@
     [
      "[r for x in d['not_checked'] for r in x['rules']]",
      [
+      "haro/listener-binds-all"
+     ]
+    ]
+   ]
+  },
+  {
+   "id": "X15",
+   "line": "P6",
+   "why": "an eval of a literal the checker reads: the absence rules stop, the variable rule keeps looking",
+   "folder": "cases/X15",
+   "run": "e.ring",
+   "flag_first": false,
+   "same_as_flag_last": false,
+   "asserts": [
+    [
+     "[r for x in d['not_checked'] for r in x['rules']]",
+     [
+      "haro/undefined-function",
+      "haro/unknown-class",
+      "haro/unknown-package",
       "haro/listener-binds-all"
      ]
     ]

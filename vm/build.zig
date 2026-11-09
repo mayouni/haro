@@ -25,6 +25,17 @@ const ts_c_flags = [_][]const u8{
     "-D_DARWIN_C_SOURCE",
 };
 
+fn vmCommit(b: *std.Build) []const u8 {
+    const root = b.pathFromRoot(".");
+    var code: u8 = 0;
+    const h = b.runAllowFail(&.{ "git", "-C", root, "log", "-1", "--format=%H", "--", "." }, &code, .Ignore) catch return "unknown";
+    const hash = std.mem.trim(u8, h, " \r\n");
+    if (hash.len == 0) return "unknown";
+    const st = b.runAllowFail(&.{ "git", "-C", root, "status", "--porcelain", "--untracked-files=no", "--", "." }, &code, .Ignore) catch return "unknown";
+    if (std.mem.trim(u8, st, " \r\n").len > 0) return b.fmt("{s}+uncommitted", .{hash});
+    return hash;
+}
+
 pub fn build(b: *std.Build) void {
     const target = b.standardTargetOptions(.{});
     const optimize = b.standardOptimizeOption(.{});
@@ -35,6 +46,9 @@ pub fn build(b: *std.Build) void {
     opts.addOption(bool, "typed", b.option(bool, "typed", "typed registers") orelse true);
     opts.addOption(bool, "deferred", b.option(bool, "deferred", "deferred counting") orelse false);
     opts.addOption(bool, "cow", b.option(bool, "cow", "eager copy at assignment") orelse true);
+    // v0.51 (HARO-FACTS-01): the checker's version in `haro check --facts` -- the last commit that touched vm/, and "+uncommitted"
+    // when vm/ holds changes as it is built; "unknown" without git (a build from an archive). A commit of records alone changes nothing.
+    opts.addOption([]const u8, "commit", vmCommit(b));
 
     const vendor = b.pathFromRoot("vendor");
     const mod = b.createModule(.{

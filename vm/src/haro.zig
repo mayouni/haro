@@ -20,6 +20,7 @@ const image = @import("image.zig");
 const dumpjson = @import("dumpjson.zig");
 const fmt = @import("fmt.zig");
 const graph = @import("graph.zig");
+const facts = @import("facts.zig");
 const httpd = @import("httpd.zig");
 const syscmd = @import("syscmd.zig");
 const prefix = @import("prefix.zig");
@@ -3950,6 +3951,13 @@ pub fn main() !void {
         argv = re.items;
     }
 
+    // `haro check --facts <file>` is `haro check <file> --facts` (v0.51): the file is argv[2] from here on
+    if (argv.len >= 4 and std.mem.eql(u8, argv[1], "check") and std.mem.eql(u8, argv[2], "--facts")) {
+        const t = argv[2];
+        argv[2] = argv[3];
+        argv[3] = t;
+    }
+
     // `rnxc dump --json <file>` (or `rnxc dump <file> --json`): the parse of ONE file, lossless -- every node with its byte span, every
     // gap, every token the grammar hides (src/dumpjson.zig has the format). It follows no load and compiles nothing.
     if (argv.len >= 4 and std.mem.eql(u8, argv[1], "dump")) {
@@ -4975,6 +4983,27 @@ pub fn main() !void {
             if (unit.origs.items[i].len == 0) continue;
             const path = unit.paths.items[i];
             check.checkLifted(alloc, r, path, &report, ctx, opts, unit.inserts.items[i]) catch continue;
+        }
+        // v0.51 (HARO-FACTS-01): the same findings and the compiler's own record, per function, as one JSON document (src/facts.zig)
+        var want_facts = false;
+        if (argv.len > 3) for (argv[3..]) |a| {
+            if (std.mem.eql(u8, a, "--facts")) want_facts = true;
+        };
+        if (want_facts) {
+            var nc = std.ArrayListUnmanaged(facts.NotChecked){};
+            if (!uni.complete) try nc.append(alloc, .{ .rules = &.{ "haro/undefined-function", "haro/unknown-class", "haro/unknown-package" }, .why = uni.reason });
+            if (!uni.complete_vars) try nc.append(alloc, .{ .rules = &.{"haro/uninitialized-variable"}, .why = if (uni.reason.len > 0)
+                uni.reason
+            else
+                "an eval() in the unit assigns a name this pass cannot read" });
+            if (listeners.items.len == 0) try nc.append(alloc, .{ .rules = &.{"haro/listener-binds-all"}, .why = "no listening native named (--listeners=), so no call was looked at" });
+            const fd = co.factsData(alloc, unit.roots.items) catch |e| {
+                co.reportFailure(e);
+                std.process.exit(1);
+            };
+            try facts.print(alloc, w, unit.roots.items, unit.paths.items, unit.origs.items, report.findings.items, nc.items, fd);
+            try w.flush();
+            return;
         }
         var last_file: []const u8 = "";
         for (report.findings.items) |f| {

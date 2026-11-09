@@ -120,8 +120,10 @@ CASES = [
              ("d['files'][fn(d, 'twice')['file']]['sha256']", '@SHA:lib.ring'),
              ("fn(d, 'local')['calls_static']", ['twice']),
          ]),
-    dict(id='X13', line='P6', why='the rules that did not look, and why: eval in the unit, no listener named',
-         files={'e.ring': ['eval("x = 1")', 'func f', T + 'return 1']}, run='e.ring', asserts=[
+    # X13 CHANGED AFTER THE CODE, said so: it held `eval("x = 1")`, which the checker reads -- the variable rule keeps looking past a
+    # literal eval, and the text report says the same. An eval of text the checker cannot read shuts it; X15 keeps the literal eval.
+    dict(id='X13', line='P6', why='the rules that did not look, and why: an eval of text the checker cannot read, no listener named',
+         files={'e.ring': ['cCode = "x = 1"', 'eval(cCode)', 'func f', T + 'return 1']}, run='e.ring', asserts=[
              ("[r for x in d['not_checked'] for r in x['rules']]",
               ['haro/undefined-function', 'haro/unknown-class', 'haro/unknown-package', 'haro/uninitialized-variable', 'haro/listener-binds-all']),
              ("all(len(x['why']) > 0 for x in d['not_checked'])", True),
@@ -129,6 +131,11 @@ CASES = [
     dict(id='X14', line='P6', why='a unit without eval: only the listener rule did not look',
          files={'a.ring': A_RING}, run='a.ring', asserts=[
              ("[r for x in d['not_checked'] for r in x['rules']]", ['haro/listener-binds-all']),
+         ]),
+    dict(id='X15', line='P6', why='an eval of a literal the checker reads: the absence rules stop, the variable rule keeps looking',
+         files={'e.ring': ['eval("x = 1")', 'func f', T + 'return 1']}, run='e.ring', asserts=[
+             ("[r for x in d['not_checked'] for r in x['rules']]",
+              ['haro/undefined-function', 'haro/unknown-class', 'haro/unknown-package', 'haro/listener-binds-all']),
          ]),
 ]
 

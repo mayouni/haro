@@ -405,6 +405,9 @@ pub const Func = struct {
     /// function they can reach. These do not take part in the same-name
     /// poison rule -- they have a real edge instead.
     calls_static: std.ArrayListUnmanaged(u32) = .{},
+    /// Calls resolved by name when the program runs -- a native the VM or a loaded library publishes, or nothing (R3): the name
+    /// table's index of each, for `haro check --facts` (v0.51)
+    calls_late: std.ArrayListUnmanaged(u16) = .{},
     /// Names this lambda captures from its enclosing function, in slot
     /// order. Slot 0 of the closure vector is the function id, so capture
     /// i lives at slot i+1.
@@ -5139,6 +5142,7 @@ pub const Compiler = struct {
             break :blk try self.nameIndex(callee);
         };
         try self.natives.append(self.alloc, ni2);
+        try self.cur.calls_late.append(self.alloc, try self.nameIndex(callee));
         self.stmts_native += 1;
         self.atNodeStart(n);
         _ = try self.emit(.nchk, 0, 0, 0, ni2);
@@ -9326,6 +9330,7 @@ pub fn census(alloc: std.mem.Allocator, roots: []const ts.Node) !Census {
         f.poisoned = false;
         f.calls_named.clearRetainingCapacity();
         f.calls_static.clearRetainingCapacity();
+        f.calls_late.clearRetainingCapacity();
     }
     try emitAll(&c);
     census_ns[4] = tmr.lap();
@@ -9412,6 +9417,24 @@ pub fn graphData(alloc: std.mem.Allocator, roots: []const ts.Node) !GraphData {
     last_fail = .{};
     try compileFront(&c, roots, roots, 0, alloc);
     return .{ .funcs = c.funcs.items, .classes = c.classes.items, .fixups = c.fixups.items, .names = c.names.items };
+}
+
+/// What `haro check --facts` reads of a compile (v0.51): the graph's data, and the refusals of each function's own body. A lenient
+/// compile with the census on, so each refusal names its site; nothing runs.
+pub const FactsData = struct { graph: GraphData, refusals: []const Refusal };
+
+pub fn factsData(alloc: std.mem.Allocator, roots: []const ts.Node) !FactsData {
+    var c = Compiler{ .alloc = alloc, .lenient = true, .rank = false, .census = true };
+    var scratch_arena = std.heap.ArenaAllocator.init(std.heap.page_allocator);
+    defer scratch_arena.deinit();
+    c.scratch_arena = &scratch_arena;
+    c.scratch = scratch_arena.allocator();
+    last_fail = .{};
+    try compileFront(&c, roots, roots, 0, alloc);
+    return .{
+        .graph = .{ .funcs = c.funcs.items, .classes = c.classes.items, .fixups = c.fixups.items, .names = c.names.items },
+        .refusals = c.refusals.items,
+    };
 }
 
 fn compileWith(alloc: std.mem.Allocator, roots: []const ts.Node, lenient: bool, rank: bool) !Program {
@@ -10109,6 +10132,7 @@ fn compileFrontAfterCollect(c: *Compiler, alloc: std.mem.Allocator) Error!void {
         f.poisoned = false;
         f.calls_named.clearRetainingCapacity();
         f.calls_static.clearRetainingCapacity();
+        f.calls_late.clearRetainingCapacity();
     }
     try emitAll(c);
 
