@@ -203,7 +203,7 @@ check(not bad, f"C' each of the {len(CODES)} codes, with its rule switched off i
 # named by a path (must not run) and, as the control, beside the court (must run, or the marker shows nothing)
 os.makedirs(paths.OUT, exist_ok=True)
 MARKER = os.path.join(paths.OUT, 'zz_marker.txt')
-PROGRAM = 'write("' + paths.rel(MARKER, SP) + '", "ran")\n'   # the court runs from SP
+PROGRAM = 'Write("' + paths.rel(MARKER, SP) + '", "ran")\n'   # the court runs from SP
 HOSTILE, SIBLING = os.path.join(SP, 'v17', 'zz_marker.haro'), os.path.join(SP, 'zz_marker_court.haro')
 
 

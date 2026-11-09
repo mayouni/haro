@@ -204,9 +204,25 @@ def graph_at(repo, rev, path):
     return g
 
 
+TOOL_COMMITS = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'v20', 'tool_commits.txt')
+
+
+def tool_commits():
+    """The commits a tool made, not a person (the author's "Exclude tool commits", 2026-11-08, ruled for stage 24's history and read here
+    by this stage's own words: "after the next HUMAN edit"). Applied here 2026-11-09, when v0.47 and v0.48's renames, made in place by a
+    tool, let the position control keep 96.6% of a history it must keep less than 95% of."""
+    if not os.path.exists(TOOL_COMMITS):
+        return set()
+    return {ln.split()[0] for ln in open(TOOL_COMMITS, encoding='utf-8') if ln.strip() and not ln.startswith('#')}
+
+
+TOOLS = tool_commits()
+
+
 def replay(sources, n):
-    """Old statements as refinement targets over every consecutive pair of revisions: -> totals and the per-pass diagnostics."""
-    tot = {'pairs': 0, 'skipped': 0, 'total': {}, 'same': {}, 'edited': {}, 'lost': {}, 'how': {}, 'sims': [], 'files': 0}
+    """Old statements as refinement targets over every consecutive pair of revisions: -> totals and the per-pass diagnostics. A pair
+    whose later revision is a tool's commit is no human edit: left out, and counted in `tool`."""
+    tot = {'pairs': 0, 'skipped': 0, 'tool': 0, 'total': {}, 'same': {}, 'edited': {}, 'lost': {}, 'how': {}, 'sims': [], 'files': 0}
     for repo, path in sources:
         revs = revisions(repo, path, n)
         gs = []
@@ -216,7 +232,10 @@ def replay(sources, n):
             except Exception:
                 gs.append(None)
         used = False
-        for a, b in zip(gs, gs[1:]):
+        for (a, b), (rv_b, _) in zip(zip(gs, gs[1:]), revs[1:]):
+            if rv_b in TOOLS:
+                tot['tool'] += 1
+                continue
             if a is None or b is None:
                 tot['skipped'] += 1
                 continue
@@ -283,7 +302,8 @@ def main():
     tot = replay(srcs, MAX_REVS)
     ret, same = share(tot)
     nst = tot['total'].get('statement', 0)
-    print(f"  --   {tot['pairs']} pairs of consecutive revisions over {tot['files']} files, {nst} old statements ({tot['skipped']} pairs skipped: a revision that does not parse)")
+    print(f"  --   {tot['pairs']} pairs of consecutive revisions over {tot['files']} files, {nst} old statements ({tot['skipped']} pairs skipped: a revision that does not parse; "
+          f"{tot['tool']} end at one of the {len(TOOLS)} commits a tool made, v20/tool_commits.txt: no human edit, left out)")
     print(f"  --   statements: {same*100:.1f}% kept with the same text (the memo's measure, 98.1% on its seven files), {ret*100:.1f}% keep their id; "
           f"definitions {share(tot, 'definition')[0]*100:.1f}%, comments {share(tot, 'comment')[0]*100:.1f}%")
     how = ', '.join(f'{k} {v}' for k, v in sorted(tot['how'].items(), key=lambda kv: -kv[1]))
