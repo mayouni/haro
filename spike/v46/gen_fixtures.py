@@ -100,6 +100,15 @@ CASES = [
         T * 2 + 'return ring_find([ "lockaccount", "revokesession" ], StzLower("" + pcVerb)) > 0', T + 'def LockAccount(pcTarget)',
         T * 2 + 'This._Auth().LockAccount("" + pcTarget, "locked by a containment plan")', T * 2 + 'if _i_ = 0'],
      {'not': 'haro/type-arity'}),
+    # FIFTH ROUND, 2026-11-09, written before the code: HARO-PARENTCLASSNAME-01 (stzlib-haroport, stzlib 44103f717,
+    # sound_mu3_narrated.ring 329): parentclassname() was absent (R3). Ring 1.27's meta_e.c, ring_vm_refmeta_parentclassname: one
+    # argument; an object answers its class's parent as Ring stores it (folded), "" when it has none; anything else Bad parameter type.
+    ('K16', 'K5', 'parentclassname answers the parent folded, the empty text with no parent, through a chain the nearest', 'run', '.ring', [
+        '? parentclassname(new B)', '? "[" + parentclassname(new A) + "]"', '? parentclassname(new C)', 'class A', 'class B from A',
+        'class C from B'],
+     {'stdout': 'a\n[]\nb\n'}),
+    ('K17', 'K5', 'parentclassname of no object is Bad parameter type, in its name', 'run', '.ring', ['? parentclassname(5)'],
+     {'stdout': '\nLine 1 Bad parameter type! \nIn parentclassname() in file K17.ring ', 'exit': 1}),
 ]
 
 os.makedirs(os.path.join(HERE, 'cases'), exist_ok=True)

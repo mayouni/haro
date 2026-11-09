@@ -132,6 +132,23 @@
    "why": "stzlib's probe whole (haroport_probes/haro_arity_receiver2.ring, bb0cd0fa8), its unclosed `if` kept",
    "file": "cases/K15.ring",
    "not": "haro/type-arity"
+  },
+  {
+   "id": "K16",
+   "kind": "run",
+   "line": "K5",
+   "why": "parentclassname answers the parent folded, the empty text with no parent, through a chain the nearest",
+   "file": "cases/K16.ring",
+   "stdout": "a\n[]\nb\n"
+  },
+  {
+   "id": "K17",
+   "kind": "run",
+   "line": "K5",
+   "why": "parentclassname of no object is Bad parameter type, in its name",
+   "file": "cases/K17.ring",
+   "stdout": "\nLine 1 Bad parameter type! \nIn parentclassname() in file K17.ring ",
+   "exit": 1
   }
  ]
 }
