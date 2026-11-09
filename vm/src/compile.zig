@@ -3709,6 +3709,15 @@ pub const Compiler = struct {
                 _ = try self.emit(.bcall, dst, dst, 0, @intFromEnum(vm.Builtin.sysargv));
                 return;
             }
+            // `stdin`, `stdout`, `stderr`: the program's three streams, C pointers of type "file" as Ring's vmvars.c adds them (v0.50,
+            // HARO-STDIOFLUSH-01). Spelled exactly in a .haro file. A program's own global of that name replaces it from the
+            // assignment onwards, as `nl`'s does: `gorc` reads the global once it is set.
+            if (streamOf(nm, self.haroNode(n))) |which| {
+                _ = try self.emit(.bcall, dst, dst, 0, @intFromEnum(which));
+                if (self.knownGlobal(nm)) |slot|
+                    _ = try self.emit(.gorc, dst, 0, 0, slot);
+                return;
+            }
             // Inside `obj { ... }`: a local shields it (measured: `x = x + 1`
             // in a block, with a local x, wrote the LOCAL), otherwise the
             // name is the object's attribute.
@@ -5438,6 +5447,16 @@ pub const Compiler = struct {
     /// Softanza -- the single most-used construct the front end lacked.
     /// HARO-SURFACE-01: is `n` read by Haro's rules -- a node of a .haro file, or of an eval in a program whose root is one (S5)?
     /// The natives that answer yes or no (0 or 1 on Ring), called by their own name and not shadowed by a function of the program.
+    /// The builtin that answers `stdin`, `stdout` or `stderr` (v0.50): exact in a .haro file, any case in a .ring file
+    fn streamOf(nm: []const u8, haro: bool) ?vm.Builtin {
+        const names = [_][]const u8{ "stdin", "stdout", "stderr" };
+        const ids = [_]vm.Builtin{ .stdinv, .stdoutv, .stderrv };
+        for (names, ids) |w, id| {
+            if (if (haro) std.mem.eql(u8, nm, w) else std.ascii.eqlIgnoreCase(nm, w)) return id;
+        }
+        return null;
+    }
+
     fn yesNoNative(self: *Compiler, n: ts.Node) bool {
         if (n.namedChildCount() == 0) return false;
         const f = n.namedChild(0);
@@ -5446,7 +5465,7 @@ pub const Compiler = struct {
         const yes_no = [_][]const u8{ "isalnum", "isalpha", "isandroid", "isattribute", "iscfunction", "isclass", "iscntrl", "isdigit", "isfreebsd",
             "isfunction", "isglobal", "isgraph", "islinux", "islist", "islocal", "islower", "ismacosx", "ismethod", "ismsdos", "isnull", "isnumber",
             "isobject", "ispackage", "ispackageclass", "ispointer", "isprint", "isprivateattribute", "isprivatemethod", "ispunct", "isspace",
-            "isstring", "isunix", "isupper", "iswindows", "iswindows64", "isxdigit", "fexists", "direxists" };
+            "isstring", "isunix", "isupper", "iswindows", "iswindows64", "isxdigit", "fexists", "direxists", "feof" };
         for (yes_no) |w| {
             if (std.ascii.eqlIgnoreCase(name, w)) return self.findFunc(name) == null;
         }

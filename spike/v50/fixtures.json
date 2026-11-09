@@ -118,7 +118,17 @@
    "why": "a .ring program's own variable named stdout is its own, in any case",
    "file": "cases/D07.ring",
    "input": "",
-   "stdout": "6\nmine\n"
+   "stdout": "6\nmine\n7\n"
+  },
+  {
+   "id": "D14",
+   "kind": "run",
+   "line": "S2",
+   "why": "in a .haro file the streams are spelled exactly: `StdOut` is no stream",
+   "file": "cases/D14.haro",
+   "input": "",
+   "stdout": "\nLine 1 Error (R24) : Using uninitialized variable: stdout \nin file D14.haro ",
+   "exit": 1
   },
   {
    "id": "D08",

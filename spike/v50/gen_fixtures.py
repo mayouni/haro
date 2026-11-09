@@ -58,8 +58,16 @@ CASES = [
          src=['see "one" + nl', 'FPuts(stdout, "two" + nl)', 'see "three" + nl'],
          stdout='one\ntwo\nthree\n'),
     dict(id='D07', line='S2', why='a .ring program\'s own variable named stdout is its own, in any case', ext='.ring', kind='run', input='',
-         src=['StdOut = 5', '? stdout + 1', '? f()', 'func f', T + 'stdin = "mine"', T + 'return stdin'],
-         stdout='6\nmine\n'),
+         # D07 CHANGED AFTER THE CODE, said so: plant F9 missed -- a top-level read finds the global as the main chunk's own name, so
+         # only a FUNCTION reading the program's global asks whether it replaces the stream; g() asks it
+         src=['StdOut = 5', '? stdout + 1', '? f()', '? g()', 'func f', T + 'stdin = "mine"', T + 'return stdin', 'func g',
+              T + 'return stdout + 2'],
+         stdout='6\nmine\n7\n'),
+    # D14 was ADDED AFTER THE CODE, said so: the plants found the .haro file's exact spelling of the three names judged by no case. Its
+    # message names `stdout` folded -- R24 folds a name in a .haro file, a gap named since v0.42, not this rung's.
+    dict(id='D14', line='S2', why='in a .haro file the streams are spelled exactly: `StdOut` is no stream', ext='.haro', kind='run', input='',
+         src=['FPuts(StdOut, "x" + nl)'],
+         stdout='\nLine 1 Error (R24) : Using uninitialized variable: stdout \nin file D14.haro ', exit=1),
     # ---- S3: a line read whole
     dict(id='D08', line='S3', why=f'a .ring give reads a {LONG:,}-byte line whole, and the next give the next line', ext='.ring', kind='run',
          input='a' * LONG + '\nb\n',
@@ -107,6 +115,8 @@ def main():
         else:
             row['input'] = c['input']
         row['stdout'] = c['stdout']
+        if c.get('exit'):
+            row['exit'] = c['exit']
         out.append(row)
     doc = {
         'rung': 'v0.50',

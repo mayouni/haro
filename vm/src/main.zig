@@ -352,6 +352,44 @@ extern "c" fn freopen(path: [*:0]const u8, mode: [*:0]const u8, f: *anyopaque) ?
 extern "c" fn perror(s: [*:0]const u8) void;
 extern "c" fn fgetpos(f: *anyopaque, pos: *anyopaque) c_int;
 extern "c" fn fsetpos(f: *anyopaque, pos: *const anyopaque) c_int;
+// C's three streams, which Ring's `stdin`, `stdout` and `stderr` hold (vmvars.c) -- v0.50, HARO-STDIOFLUSH-01. Each C library names
+// them its own way: UCRT through a function, macOS's libc as __stdinp, glibc and musl as plain variables.
+const c_std = switch (host_os) {
+    .windows => struct {
+        extern "c" fn __acrt_iob_func(i: c_uint) *anyopaque;
+    },
+    .macos => struct {
+        extern "c" var __stdinp: *anyopaque;
+        extern "c" var __stdoutp: *anyopaque;
+        extern "c" var __stderrp: *anyopaque;
+    },
+    else => struct {
+        extern "c" var stdin: *anyopaque;
+        extern "c" var stdout: *anyopaque;
+        extern "c" var stderr: *anyopaque;
+    },
+};
+
+fn cStream(i: u2) *anyopaque {
+    if (comptime host_os == .windows) return c_std.__acrt_iob_func(i);
+    if (comptime host_os == .macos) return switch (i) {
+        0 => c_std.__stdinp,
+        1 => c_std.__stdoutp,
+        else => c_std.__stderrp,
+    };
+    return switch (i) {
+        0 => c_std.stdin,
+        1 => c_std.stdout,
+        else => c_std.stderr,
+    };
+}
+
+/// The cptr_tab entry each stream was given at its first read, -1 before
+var std_cptr = [3]i64{ -1, -1, -1 };
+/// A read of the program's input (`give`) found no more: what `feof(stdin)` answers, since give reads the input itself and C's
+/// stdin never sees that read
+var stdin_ended = false;
+
 const c_wfopen = if (is_win) struct {
     extern "c" fn _wfopen(path: [*:0]const u16, mode: [*:0]const u16) ?*anyopaque;
 } else struct {};
@@ -1133,6 +1171,9 @@ pub const Builtin = enum(u16) {
     min,
     number, // number(x)      -> numeric value of a string
     sysargv, // the process arguments as Ring lists them: [exe, script, args...]
+    stdinv, // `stdin`, `stdout`, `stderr`: C's streams as "file" pointers, as Ring's vmvars.c adds them (v0.50)
+    stdoutv,
+    stderrv,
     // type predicates: islist(x) isstring(x) isnumber(x) -> 1 or 0. Any
     // argument is legal, so they take no string pre-check.
     islist,
@@ -1375,7 +1416,7 @@ pub const Builtin = enum(u16) {
 /// `reference` have ids of their own for exactly this.
 pub fn builtinRingName(b: Builtin) ?[]const u8 {
     return switch (b) {
-        .sysargv, .catchlast, .bye, .giveline, .eval => null,
+        .sysargv, .stdinv, .stdoutv, .stderrv, .catchlast, .bye, .giveline, .eval => null,
         .copystr => "copy",
         .typeof => "type",
         .find2, .find3, .find4 => "find",
@@ -6409,6 +6450,12 @@ pub const VM = struct {
                         for (self.argv) |a| self.vecPush(v, Value.str(self.newStr(a)));
                         out = Value.vec(v);
                     },
+                    .stdinv, .stdoutv, .stderrv => {
+                        const i: u2 = if (which == .stdinv) 0 else if (which == .stdoutv) 1 else 2;
+                        // one table entry per stream, made at its first read: a read in a loop adds nothing
+                        if (std_cptr[i] < 0) std_cptr[i] = self.newCptr(cStream(i), "file").p.i;
+                        out = Value.cptrh(@intCast(std_cptr[i]));
+                    },
                     .lower, .upper => {
                         const src = strOf(regs[A]);
                         const buf = self.alloc.alloc(u8, src.len) catch @panic("oom");
@@ -7092,18 +7139,28 @@ pub const VM = struct {
                         // Byte at a time, so nothing past the newline is
                         // consumed -- the next give, or tui_key under a
                         // pipe, must still see it.
-                        var buf: [4096]u8 = undefined;
-                        var n: usize = 0;
+                        //
+                        // v0.50 (HARO-STDIOFLUSH-01): the program's output is sent BEFORE the wait, as Ring's see and C's stdio
+                        // for a terminal send it -- a program serving another (an MCP server) held its replies until it ended;
+                        // the line is read whole, where 4,096 bytes cut it (Ring's give cuts at 255: a named divergence); and a
+                        // read that finds no more input is remembered for feof(stdin).
+                        outFlush();
+                        var line: std.ArrayListUnmanaged(u8) = .{};
+                        defer line.deinit(self.alloc);
                         const stdin = std.fs.File.stdin();
-                        while (n < buf.len) {
+                        while (true) {
                             var one: [1]u8 = undefined;
                             const got = stdin.read(&one) catch 0;
-                            if (got == 0 or one[0] == '\n') break;
-                            buf[n] = one[0];
-                            n += 1;
+                            if (got == 0) {
+                                stdin_ended = true;
+                                break;
+                            }
+                            if (one[0] == '\n') break;
+                            line.append(self.alloc, one[0]) catch @panic("oom");
                         }
-                        if (n > 0 and buf[n - 1] == '\r') n -= 1;
-                        out = Value.str(self.newStr(buf[0..n]));
+                        var n = line.items.len;
+                        if (n > 0 and line.items[n - 1] == '\r') n -= 1;
+                        out = Value.str(self.newStr(line.items[0..n]));
                     },
                     .str2list => {
                         out = Value.vec(self.splitLines(strOf(regs[A])));
@@ -7379,7 +7436,11 @@ pub const VM = struct {
                                 // second fclose raises, and `if fp` is false after.
                                 cptr_tab.items[@intCast(regs[A].p.i)].ptr = null;
                             },
-                            .fflush => out = Value.int(fflush(fp)),
+                            .fflush => {
+                                // `fflush(stdout)` sends what `see` holds too (v0.50, HARO-STDIOFLUSH-01 (b))
+                                if (fp == cStream(1)) outFlush();
+                                out = Value.int(fflush(fp));
+                            },
                             .fgetc => {
                                 const ch = fgetc(fp);
                                 if (ch < 0) {
@@ -7394,7 +7455,8 @@ pub const VM = struct {
                                 rewind(fp);
                                 out = Value.str(&empty_str);
                             },
-                            .feof => out = Value.int(feof(fp)),
+                            // `feof(stdin)` is also 1 once `give` found no more input (v0.50, HARO-STDIOFLUSH-01 (c))
+                            .feof => out = Value.int(if (fp == cStream(0) and stdin_ended) 1 else feof(fp)),
                             .ferror => out = Value.int(ferror(fp)),
                             .clearerr => {
                                 clearerr(fp);
@@ -7420,6 +7482,13 @@ pub const VM = struct {
                             continue :dispatch .raise;
                         }
                         const s = strOf(regs[A + 1]);
+                        // a write through `stdout` takes its place among `see`'s: what see buffered goes first, and the write is
+                        // sent at once, so the next see cannot pass it (v0.50)
+                        const to_out = fp == cStream(1);
+                        if (to_out) outFlush();
+                        defer if (to_out) {
+                            _ = fflush(fp);
+                        };
                         switch (which) {
                             .fwrite => out = Value.int(@intCast(fwrite(s.ptr, 1, s.len, fp))),
                             .fputc, .ungetc => {

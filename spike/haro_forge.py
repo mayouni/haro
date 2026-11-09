@@ -3754,6 +3754,25 @@ def stage53():
         return 1
     return 0
 
+
+STDIO_COURT = os.path.join(HERE, 'v50', 'stdio_court.py')
+
+
+def stage54():
+    """Haro v0.50, a program that serves another (HARO-STDIOFLUSH-01; v50/GRAMMAR.md): give sends the output before it waits, stdin,
+    stdout and stderr are Ring's file handles with fflush(stdout), a line is read whole, feof(stdin) says the input ended (a boolean in a
+    .haro file). v50/stdio_court.py on haro and its checked build, its dialog cases driven on pipes."""
+    print('stage 54 -- a program that serves another: v50/stdio_court.py on haro and its checked build')
+    p = subprocess.run([sys.executable, STDIO_COURT] + (['--plant'] if PLANT else []), capture_output=True, cwd=HERE, timeout=900)
+    out = p.stdout.decode('utf-8', 'replace').replace(chr(13) + chr(10), chr(10))
+    for line in out.splitlines():
+        if line.startswith('  FAIL') or line.startswith('       ') or line.startswith('STDIO COURT'):
+            print(line)
+    if p.returncode != 0:
+        print(f'  FAIL the stdio court exited {p.returncode}' + ('' if out.strip() else ': ' + p.stderr.decode('utf-8', 'replace')[-400:]))
+        return 1
+    return 0
+
 SENTENCE_TARGET = 50.0     # D42: a sentence edited, its court's image reused -- what a person editing a sentence waits for
 COLD_CEILING = 150.0       # D42: the court compiled from scratch -- a ceiling that catches the court library growing
 
@@ -3955,5 +3974,7 @@ if __name__ == '__main__':
         failures += stage52()
     if stage in (None, 53) and os.path.exists(ZIP_COURT):
         failures += stage53()
+    if stage in (None, 54) and os.path.exists(STDIO_COURT):
+        failures += stage54()
     print(f'haro_forge: {"FAIL" if failures else "PASS"} ({failures} failure(s), {time.perf_counter()-t0:.1f} s)')
     sys.exit(1 if failures else 0)
