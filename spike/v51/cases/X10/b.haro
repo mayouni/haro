@@ -1,0 +1,5 @@
+f()
+func f
+	return len("abc")
+func g
+	return f()

@@ -1,0 +1,447 @@
+{
+ "rung": "v0.51",
+ "decision": "HARO-FACTS-01, answering HARO-PROOF-01 (a): `haro check --facts`, per function, what the checker and the compiler establish",
+ "class": "every assert holds on the JSON each build prints; both builds print the same bytes (D41); exit 0. @COMMIT is the last commit that touched vm/ (+uncommitted when vm/ holds changes); @SHA:<file> is the sha256 of that case file's bytes",
+ "lines": {
+  "P1": "the record: format, checker commit, each file's sha256 and surface; the flag before or after the file",
+  "P2": "every function and method, its lines, the findings inside it; those outside every function per file",
+  "P3": "its calls: static, dynamic, late",
+  "P4": "its first direct impurity and its line; absent when none is seen",
+  "P5": "compiled or not, why and where; whether it reaches an unfinished function",
+  "P6": "the rules that did not look, and why"
+ },
+ "cases": [
+  {
+   "id": "X01",
+   "line": "P1",
+   "why": "the record names its format, its checker and the file it read, by sha256 and surface",
+   "folder": "cases/X01",
+   "run": "a.ring",
+   "flag_first": false,
+   "same_as_flag_last": false,
+   "asserts": [
+    [
+     "d['format']",
+     "haro-check-facts/1"
+    ],
+    [
+     "d['checker']['name']",
+     "haro"
+    ],
+    [
+     "d['checker']['commit']",
+     "@COMMIT"
+    ],
+    [
+     "len(d['files'])",
+     1
+    ],
+    [
+     "d['files'][0]['path'].endswith('a.ring')",
+     true
+    ],
+    [
+     "d['files'][0]['sha256']",
+     "@SHA:a.ring"
+    ],
+    [
+     "d['files'][0]['surface']",
+     "ring"
+    ]
+   ]
+  },
+  {
+   "id": "X02",
+   "line": "P1",
+   "why": "`haro check --facts <file>` is the same record, byte for byte, as `haro check <file> --facts`",
+   "folder": "cases/X02",
+   "run": "a.ring",
+   "flag_first": true,
+   "same_as_flag_last": true,
+   "asserts": [
+    [
+     "d['format']",
+     "haro-check-facts/1"
+    ]
+   ]
+  },
+  {
+   "id": "X03",
+   "line": "P2",
+   "why": "every function and method, in file order, with its lines and its class",
+   "folder": "cases/X03",
+   "run": "a.ring",
+   "flag_first": false,
+   "same_as_flag_last": false,
+   "asserts": [
+    [
+     "[(x['class'], x['name'], x['line'], x['end_line'], x['file']) for x in d['functions']]",
+     [
+      [
+       null,
+       "f",
+       3,
+       7,
+       0
+      ],
+      [
+       null,
+       "g",
+       9,
+       11,
+       0
+      ],
+      [
+       null,
+       "h",
+       13,
+       15,
+       0
+      ],
+      [
+       "K",
+       "m",
+       18,
+       19,
+       0
+      ]
+     ]
+    ]
+   ]
+  },
+  {
+   "id": "X04",
+   "line": "P2",
+   "why": "a finding is its function's, at its line and column; a function without one has none",
+   "folder": "cases/X04",
+   "run": "a.ring",
+   "flag_first": false,
+   "same_as_flag_last": false,
+   "asserts": [
+    [
+     "[(x['rule'], x['severity'], x['line'], x['col']) for x in fn(d, 'K.m')['findings']]",
+     [
+      [
+       "haro/undefined-function",
+       "error",
+       19,
+       10
+      ]
+     ]
+    ],
+    [
+     "'nowhere()' in fn(d, 'K.m')['findings'][0]['message']",
+     true
+    ],
+    [
+     "fn(d, 'f')['findings']",
+     []
+    ],
+    [
+     "d['files'][0]['top_findings']",
+     []
+    ]
+   ]
+  },
+  {
+   "id": "X05",
+   "line": "P2",
+   "why": "a finding outside every function is its file's",
+   "folder": "cases/X05",
+   "run": "t.ring",
+   "flag_first": false,
+   "same_as_flag_last": false,
+   "asserts": [
+    [
+     "[(x['rule'], x['line']) for x in d['files'][0]['top_findings']]",
+     [
+      [
+       "haro/undefined-function",
+       1
+      ]
+     ]
+    ],
+    [
+     "fn(d, 'f')['findings']",
+     []
+    ]
+   ]
+  },
+  {
+   "id": "X06",
+   "line": "P3",
+   "why": "calls the compiler bound, and a call resolved only when the program runs",
+   "folder": "cases/X06",
+   "run": "a.ring",
+   "flag_first": false,
+   "same_as_flag_last": false,
+   "asserts": [
+    [
+     "fn(d, 'f')['calls_static']",
+     [
+      "K.m",
+      "g"
+     ]
+    ],
+    [
+     "fn(d, 'f')['calls_dynamic']",
+     []
+    ],
+    [
+     "fn(d, 'f')['calls_late']",
+     []
+    ],
+    [
+     "fn(d, 'K.m')['calls_late']",
+     [
+      "nowhere"
+     ]
+    ],
+    [
+     "fn(d, 'h')['calls_static'] + fn(d, 'h')['calls_late']",
+     []
+    ]
+   ]
+  },
+  {
+   "id": "X07",
+   "line": "P3",
+   "why": "a method called on a receiver the compiler cannot prove is dispatched by name; a lambda's calls are its function's",
+   "folder": "cases/X07",
+   "run": "l.ring",
+   "flag_first": false,
+   "same_as_flag_last": false,
+   "asserts": [
+    [
+     "fn(d, 'f')['calls_dynamic']",
+     [
+      "run"
+     ]
+    ],
+    [
+     "fn(d, 'f')['calls_static']",
+     [
+      "g"
+     ]
+    ],
+    [
+     "[x['name'] for x in d['functions']]",
+     [
+      "f",
+      "g",
+      "run",
+      "run"
+     ]
+    ]
+   ]
+  },
+  {
+   "id": "X08",
+   "line": "P4",
+   "why": "the first direct impurity met, with its line; none seen, no field",
+   "folder": "cases/X08",
+   "run": "a.ring",
+   "flag_first": false,
+   "same_as_flag_last": false,
+   "asserts": [
+    [
+     "fn(d, 'g')['impure']",
+     {
+      "why": "prints",
+      "line": 10
+     }
+    ],
+    [
+     "fn(d, 'h')['impure']",
+     {
+      "why": "writes a global",
+      "line": 14
+     }
+    ],
+    [
+     "'impure' in fn(d, 'f')",
+     false
+    ],
+    [
+     "'impure' in fn(d, 'K.m')",
+     false
+    ],
+    [
+     "'calls are not followed' in d['impurity']",
+     true
+    ]
+   ]
+  },
+  {
+   "id": "X09",
+   "line": "P4",
+   "why": "a call whose value moves on its own is an impurity, named",
+   "folder": "cases/X09",
+   "run": "c.ring",
+   "flag_first": false,
+   "same_as_flag_last": false,
+   "asserts": [
+    [
+     "fn(d, 'f')['impure']",
+     {
+      "why": "calls clock()",
+      "line": 2
+     }
+    ]
+   ]
+  },
+  {
+   "id": "X10",
+   "line": "P5",
+   "why": "a .haro function the compiler refused: not compiled, why and where; its caller compiled and reaches it",
+   "folder": "cases/X10",
+   "run": "b.haro",
+   "flag_first": false,
+   "same_as_flag_last": false,
+   "asserts": [
+    [
+     "d['files'][0]['surface']",
+     "haro"
+    ],
+    [
+     "fn(d, 'f')['compiled']",
+     false
+    ],
+    [
+     "'a built-in is spelled `Len`' in fn(d, 'f')['refused']['why']",
+     true
+    ],
+    [
+     "fn(d, 'f')['refused']['line']",
+     3
+    ],
+    [
+     "fn(d, 'g')['compiled']",
+     true
+    ],
+    [
+     "'refused' in fn(d, 'g')",
+     false
+    ],
+    [
+     "fn(d, 'g')['reaches_uncompiled']",
+     true
+    ],
+    [
+     "fn(d, 'f')['reaches_uncompiled']",
+     false
+    ]
+   ]
+  },
+  {
+   "id": "X11",
+   "line": "P5",
+   "why": "every function of a clean unit compiled, none reaching an unfinished one",
+   "folder": "cases/X11",
+   "run": "a.ring",
+   "flag_first": false,
+   "same_as_flag_last": false,
+   "asserts": [
+    [
+     "[(x['compiled'], x['reaches_uncompiled']) for x in d['functions']]",
+     [
+      [
+       true,
+       false
+      ],
+      [
+       true,
+       false
+      ],
+      [
+       true,
+       false
+      ],
+      [
+       true,
+       false
+      ]
+     ]
+    ]
+   ]
+  },
+  {
+   "id": "X12",
+   "line": "P2",
+   "why": "a unit of two files: each function names its own file",
+   "folder": "cases/X12",
+   "run": "main.ring",
+   "flag_first": false,
+   "same_as_flag_last": false,
+   "asserts": [
+    [
+     "sorted(x['path'].replace(chr(92), '/').split('/')[-1] for x in d['files'])",
+     [
+      "lib.ring",
+      "main.ring"
+     ]
+    ],
+    [
+     "d['files'][fn(d, 'twice')['file']]['path'].endswith('lib.ring')",
+     true
+    ],
+    [
+     "d['files'][fn(d, 'local')['file']]['path'].endswith('main.ring')",
+     true
+    ],
+    [
+     "d['files'][fn(d, 'twice')['file']]['sha256']",
+     "@SHA:lib.ring"
+    ],
+    [
+     "fn(d, 'local')['calls_static']",
+     [
+      "twice"
+     ]
+    ]
+   ]
+  },
+  {
+   "id": "X13",
+   "line": "P6",
+   "why": "the rules that did not look, and why: eval in the unit, no listener named",
+   "folder": "cases/X13",
+   "run": "e.ring",
+   "flag_first": false,
+   "same_as_flag_last": false,
+   "asserts": [
+    [
+     "[r for x in d['not_checked'] for r in x['rules']]",
+     [
+      "haro/undefined-function",
+      "haro/unknown-class",
+      "haro/unknown-package",
+      "haro/uninitialized-variable",
+      "haro/listener-binds-all"
+     ]
+    ],
+    [
+     "all(len(x['why']) > 0 for x in d['not_checked'])",
+     true
+    ]
+   ]
+  },
+  {
+   "id": "X14",
+   "line": "P6",
+   "why": "a unit without eval: only the listener rule did not look",
+   "folder": "cases/X14",
+   "run": "a.ring",
+   "flag_first": false,
+   "same_as_flag_last": false,
+   "asserts": [
+    [
+     "[r for x in d['not_checked'] for r in x['rules']]",
+     [
+      "haro/listener-binds-all"
+     ]
+    ]
+   ]
+  }
+ ]
+}
