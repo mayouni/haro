@@ -129,6 +129,13 @@ CASES = [
      {'stdout': "before\n\nLine 5 Haro refused this statement (`==` is no operator: equality is `=`; written `nA == 1`, line 5 of K21.haro) "
                 "and did not compile it -- running past it would give a wrong answer \nIn function f() in file K21.haro\n\nCalled from line 2 "
                 "in file K21.haro ", 'exit': 1}),
+    # WRITTEN AFTER THE CODE, before the plants: in a .haro file the native is spelled as v0.48 rules, SystemCmd (the VM's own natives
+    # are in its table)
+    ('K22', 'K6', 'a .haro file calls it SystemCmd, and is refused systemcmd', 'run', '.haro', [
+        'f()', 'func f', T + '? SystemCmd("echo hi")', T + '? systemcmd("echo hi")'],
+     {'stdout': "hi\n\nLine 4 Haro refused this statement (a built-in is spelled `SystemCmd`; written `systemcmd`, line 4 of K22.haro) and did "
+                "not compile it -- running past it would give a wrong answer \nIn function f() in file K22.haro\n\nCalled from line 1 in file "
+                "K22.haro ", 'exit': 1}),
 ]
 
 os.makedirs(os.path.join(HERE, 'cases'), exist_ok=True)

@@ -1,0 +1,4 @@
+f()
+func f
+	? SystemCmd("echo hi")
+	? systemcmd("echo hi")
