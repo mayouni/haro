@@ -1,0 +1,3 @@
+see "one" + nl
+FPuts(stdout, "two" + nl)
+see "three" + nl

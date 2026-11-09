@@ -1,0 +1,3 @@
+see "name?" + nl
+give tName
+see "hello " + tName + nl

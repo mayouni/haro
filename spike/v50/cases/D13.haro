@@ -1,0 +1,9 @@
+func main
+	while true
+		give tLine
+		if tLine = "" and FEOF(stdin)
+			exit
+		ok
+		see "got [" + tLine + "]" + nl
+	end
+	see "bye" + nl
