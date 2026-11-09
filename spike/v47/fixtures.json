@@ -139,6 +139,14 @@
    "file": "cases/Y15.haro",
    "stdout": "before\n\nLine 5 Haro refused this statement (a name begins with its type's letter -- `count` has none; written `count`, line 5 of Y15.haro) and did not compile it -- running past it would give a wrong answer \nIn function twice() in file Y15.haro\n\nCalled from line 4 In function f() in file Y15.haro\n\nCalled from line 2 in file Y15.haro ",
    "exit": 1
+  },
+  {
+   "id": "Y16",
+   "kind": "run",
+   "line": "Y1",
+   "why": "a .ring file is untouched at run time too: a lettered name or parameter takes any value",
+   "file": "cases/Y16.ring",
+   "stdout": "6\n33\n"
   }
  ]
 }

@@ -92,6 +92,13 @@ CASES = [
       " written `count`, line 5 of "
       'Y15.haro) ' + REFUSED, 'In function twice() in file Y15.haro', '', 'Called from line 4 In function f() in file Y15.haro', '',
       'Called from line 2 in file Y15.haro '], 1),
+    # WRITTEN AFTER THE PLANTS, 2026-11-09: plant L12 (the checks reach a .ring file) MISSED -- Y11 gives its checked-letter name only a
+    # literal, which is settled when compiling, so no case reached the run-time check a .ring file is kept from. Y16 gives one a call's
+    # value, and a lettered parameter a value of another type.
+    ('Y16', 'Y1', 'a .ring file is untouched at run time too: a lettered name or parameter takes any value', '.ring', [
+        'f()', 'func f', T + 'tName = Five()', T + '? tName + 1', T + '? Twice("3")', 'func Five', T + 'return 5', 'func Twice iN',
+        T + 'return iN + iN'],
+     ['6', '33']),
 ]
 
 os.makedirs(os.path.join(HERE, 'cases'), exist_ok=True)
