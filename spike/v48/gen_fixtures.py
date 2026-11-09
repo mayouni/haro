@@ -47,8 +47,10 @@ CASES = [
         'f()', 'func f', T + '? Max([3, 9, 2])', 'func Max aL', T + 'nBest = aL[1]', T + 'for x in aL', T * 2 + 'if x > nBest', T * 3 + 'nBest = x',
         T * 2 + 'ok', T + 'next', T + 'return nBest'],
      ['9']),
+    # P08 CORRECTED before its code passed, 2026-11-09: it wrote `eval(...)` in lowercase, which the rule it tests refuses first; the
+    # call is `Eval`, and the case asks what it asked -- the string's own `len`.
     ('P08', 'P4', 'an eval in a .haro program spells a built-in as the root does', '.haro', [
-        'f()', 'func f', T + 'eval("? len(' + "'ab'" + ')")'],
+        'f()', 'func f', T + 'Eval("? len(' + "'ab'" + ')")'],
      ['', 'Line 3 Error (E1) : a built-in is spelled `Len`; written `len` ', 'In function f() in file P08.haro', '',
       'Called from line 1 in file P08.haro '], 1),
 ]
