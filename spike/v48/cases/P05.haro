@@ -1,0 +1,5 @@
+f()
+func f
+	aS = TUISize()
+	? Len(aS)
+	? aS[1] + aS[2]

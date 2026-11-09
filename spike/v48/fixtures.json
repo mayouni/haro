@@ -1,0 +1,81 @@
+{
+ "rung": "v0.48",
+ "decision": "the Principal 2026-11-09: a built-in in a .haro file is spelled ParentClassName, Softanza's casing",
+ "class": "exact: the program's whole stdout and its exit code, byte for byte, on haro and on its checked build",
+ "lines": {
+  "P1": "one spelling per built-in, Softanza's casing",
+  "P2": "an underscore name reached without its underscore",
+  "P3": "a program's own function of that name is its own; a .ring file reads every spelling",
+  "P4": "an eval spells as the root does"
+ },
+ "cases": [
+  {
+   "id": "P01",
+   "kind": "run",
+   "line": "P1",
+   "why": "the built-ins in Softanza's casing run",
+   "file": "cases/P01.haro",
+   "stdout": "3\ntrue\nbcd\nAB\nA\na\n"
+  },
+  {
+   "id": "P02",
+   "kind": "run",
+   "line": "P1",
+   "why": "a built-in in lowercase is refused, naming its spelling",
+   "file": "cases/P02.haro",
+   "stdout": "before\n\nLine 4 Haro refused this statement (a built-in is spelled `Len`; written `len`, line 4 of P02.haro) and did not compile it -- running past it would give a wrong answer \nIn function f() in file P02.haro\n\nCalled from line 2 in file P02.haro ",
+   "exit": 1
+  },
+  {
+   "id": "P03",
+   "kind": "run",
+   "line": "P1",
+   "why": "a built-in in another mixed casing is refused",
+   "file": "cases/P03.haro",
+   "stdout": "before\n\nLine 4 Haro refused this statement (a built-in is spelled `IsNull`; written `isNull`, line 4 of P03.haro) and did not compile it -- running past it would give a wrong answer \nIn function f() in file P03.haro\n\nCalled from line 2 in file P03.haro ",
+   "exit": 1
+  },
+  {
+   "id": "P04",
+   "kind": "run",
+   "line": "P2",
+   "why": "a built-in registered with an underscore is refused under that name",
+   "file": "cases/P04.haro",
+   "stdout": "before\n\nLine 4 Haro refused this statement (a built-in is spelled `TUISize`; written `tui_size`, line 4 of P04.haro) and did not compile it -- running past it would give a wrong answer \nIn function f() in file P04.haro\n\nCalled from line 2 in file P04.haro ",
+   "exit": 1
+  },
+  {
+   "id": "P05",
+   "kind": "run",
+   "line": "P2",
+   "why": "a built-in registered with an underscore is reached by its spelling without one",
+   "file": "cases/P05.haro",
+   "stdout": "2\n0\n"
+  },
+  {
+   "id": "P06",
+   "kind": "run",
+   "line": "P3",
+   "why": "a .ring file reads every spelling as Ring does",
+   "file": "cases/P06.ring",
+   "stdout": "2\n2\n2\n1\nb\n"
+  },
+  {
+   "id": "P07",
+   "kind": "run",
+   "line": "P3",
+   "why": "a program's own function of a built-in's name is the program's",
+   "file": "cases/P07.haro",
+   "stdout": "9\n"
+  },
+  {
+   "id": "P08",
+   "kind": "run",
+   "line": "P4",
+   "why": "an eval in a .haro program spells a built-in as the root does",
+   "file": "cases/P08.haro",
+   "stdout": "\nLine 3 Error (E1) : a built-in is spelled `Len`; written `len` \nIn function f() in file P08.haro\n\nCalled from line 1 in file P08.haro ",
+   "exit": 1
+  }
+ ]
+}

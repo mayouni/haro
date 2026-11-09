@@ -1,0 +1,5 @@
+? len("ab")
+? Len("ab")
+? LEN("ab")
+? isNull("")
+? substr("abc", 2, 1)

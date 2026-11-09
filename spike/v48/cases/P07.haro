@@ -1,0 +1,11 @@
+f()
+func f
+	? Max([3, 9, 2])
+func Max aL
+	nBest = aL[1]
+	for x in aL
+		if x > nBest
+			nBest = x
+		ok
+	next
+	return nBest

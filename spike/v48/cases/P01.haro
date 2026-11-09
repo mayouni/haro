@@ -1,0 +1,10 @@
+f()
+func f
+	? Len("abc")
+	? IsNull(null)
+	? SubStr("abcdef", 2, 3)
+	? Upper("ab")
+	? Char(65)
+	? ParentClassName(new B)
+class A
+class B from A
