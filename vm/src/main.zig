@@ -1865,6 +1865,9 @@ pub const Op = enum(u8) {
     ///          nothing when the class has none
     newn,
     callp,
+    /// v0.47 (D55 T2): a name's letter checked where a value is given it, in a .haro file. r[a] is the value; b the letter (b i n f t v
+    /// o h); d the name, a string constant. The empty text NULL passes any letter until v0.49 builds `none`; otherwise TYPE_LETTER.
+    lchk,
 };
 
 /// What `jmpl` recorded, per frame depth: the line a report gives for a pc
@@ -3799,6 +3802,20 @@ pub const VM = struct {
             .obj => "an object",
             .nil => "none",
             .dll, .cptr => "a handle",
+        };
+    }
+    /// v0.47: what a checked letter names
+    fn letterWord(l: u8) []const u8 {
+        return switch (l) {
+            'b' => "a boolean",
+            'i' => "an integer",
+            'n' => "a number",
+            'f' => "a float",
+            't' => "a text",
+            'v' => "a vector",
+            'o' => "an object",
+            'h' => "a handle",
+            else => "a value",
         };
     }
     fn haroMsg(self: *VM, comptime fmt: []const u8, args: anytype) []const u8 {
@@ -8391,6 +8408,28 @@ pub const VM = struct {
                 const in = code[pc];
                 const ov = self.lateObj(@intCast(in.d)) orelse continue :dispatch .raise;
                 self.setRegB(base + in.a, ov, true);
+                pc += 1;
+                continue :dispatch code[pc].op;
+            },
+            .lchk => {
+                const in = code[pc];
+                const v = regs[base + in.a];
+                const ok = switch (in.b) {
+                    'b' => v.tag == .boolean,
+                    'i' => v.tag == .int,
+                    'n', 'f' => v.tag == .int or v.tag == .num,
+                    't' => v.tag == .str,
+                    'v' => v.tag == .vec and !v.p.v.closure,
+                    'o' => v.tag == .obj,
+                    'h' => v.tag == .cptr or v.tag == .dll,
+                    else => true,
+                } or v.tag == .nil or (v.tag == .str and v.p.s.len == 0);
+                if (!ok) {
+                    const nm = konst[@intCast(in.d)];
+                    self.pending = self.haroMsg("Error (TYPE_LETTER) : `{s}` is lettered {c}, {s}, and is given {s}", .{
+                        if (nm.tag == .str) nm.p.s.ptr[0..nm.p.s.len] else "?", in.b, letterWord(in.b), typeArticle(v) });
+                    continue :dispatch .raise;
+                }
                 pc += 1;
                 continue :dispatch code[pc].op;
             },

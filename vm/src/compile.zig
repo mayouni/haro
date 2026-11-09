@@ -2230,6 +2230,9 @@ pub const Compiler = struct {
     /// records its line -- the only two cases where an if's own record can
     /// reach anything. An if/else last in a loop body pays nothing.
     ln_has_next: bool = false,
+    /// v0.47: a parameter whose shape is refused, carried to its function's first statement (Y15)
+    entry_fault: ?[]const u8 = null,
+    entry_use: []const u8 = "",
     ln_block_quirk: bool = false,
     /// F-114: the statement being compiled ends in a postfix construct and a
     /// newline follows it -- what it still emits after that construct takes
@@ -2725,6 +2728,11 @@ pub const Compiler = struct {
         if (self.spell_on) {
             // the file's text, where its declarations stand (a re-read piece's names stand in the re-read text: its row is reread_row)
             self.spell_src = st.src;
+            if (self.entry_fault) |why| {
+                self.entry_fault = null;
+                self.spellSet(self.entry_use, why);
+                return self.nopeSpelled(why);
+            }
             self.spellKeywords(what);
             if (self.spell_fault) |why| return self.nopeSpelled(why);
         }
@@ -6675,7 +6683,158 @@ pub const Compiler = struct {
         return true;
     }
 
+    // ------------------------------------------------------------------
+    // v0.47 (D55 T2): a value's name begins with its type's letter, in a .haro file. The shape and a literal of another type are
+    // refused when compiling (the statement's fault, as a misspelling is); any other value given a checked letter is checked where
+    // it is given, by `lchk`. A .ring file is untouched.
+    const LETTERS = "bidfntxkvmroehswa";
+    const CHECKED = "bintfvoh";
+
+    fn letterCore(name: []const u8) []const u8 {
+        return if (name.len > 0 and (name[0] == '$' or name[0] == '@')) name[1..] else name;
+    }
+
+    /// The letter of a lettered name, or null: a lowercase letter, then a capital
+    fn letterOf(name: []const u8) ?u8 {
+        const core = letterCore(name);
+        if (core.len >= 2 and std.ascii.isLower(core[0]) and std.ascii.isUpper(core[1])) return core[0];
+        return null;
+    }
+
+    fn letterWordC(l: u8) []const u8 {
+        return switch (l) {
+            'b' => "a boolean",
+            'i' => "an integer",
+            'n' => "a number",
+            'f' => "a float",
+            't' => "a text",
+            'v' => "a vector",
+            'o' => "an object",
+            'h' => "a handle",
+            else => "a value",
+        };
+    }
+
+    /// Why a name's shape is refused, or null; `single_ok` for a `for` counter
+    fn letterFault(self: *Compiler, use: []const u8, single_ok: bool) ?[]const u8 {
+        const core = letterCore(use);
+        if (core.len == 1 and std.ascii.isLower(core[0]) and single_ok) return null;
+        const l = letterOf(use) orelse 0;
+        if (l == 'c')
+            return std.fmt.allocPrint(self.alloc, "`c` is Softanza's letter and no type's -- text is t: t{s}; written", .{core[1..]}) catch "`c` is no letter";
+        if (l == 0 or std.mem.indexOfScalar(u8, LETTERS, l) == null)
+            return std.fmt.allocPrint(self.alloc, "a name begins with its type's letter -- `{s}` has none; written", .{use}) catch "no letter";
+        return null;
+    }
+
+    /// The name's shape. Sets the statement's fault and answers false when it is refused.
+    fn letterShape(self: *Compiler, use: []const u8, single_ok: bool) bool {
+        if (!self.spellIn(use)) return true;
+        const why = self.letterFault(use, single_ok) orelse return true;
+        self.spellSet(use, why);
+        return false;
+    }
+
+    /// The type of a literal: i integer, n number, t text, b boolean, v vector, o object, 0 the empty text (null); null for no literal
+    fn literalLetter(n: ts.Node) ?u8 {
+        const k = n.kind();
+        if (std.mem.eql(u8, k, "number")) {
+            const s = std.mem.trim(u8, n.text(), " \t\r\n");
+            _ = std.fmt.parseInt(i64, s, 10) catch return 'n';
+            return 'i';
+        }
+        if (std.mem.eql(u8, k, "unary_expression") and n.namedChildCount() == 1 and std.mem.eql(u8, n.namedChild(0).kind(), "number")) {
+            const s = std.mem.trimLeft(u8, n.text(), " \t");
+            if (s.len > 0 and s[0] == '-') return literalLetter(n.namedChild(0));
+            return null;
+        }
+        if (std.mem.eql(u8, k, "string")) return if (std.mem.trim(u8, n.text(), " \t\r\n").len <= 2) '0' else 't';
+        if (std.mem.eql(u8, k, "null")) return '0';
+        if (std.mem.eql(u8, k, "boolean")) return 'b';
+        if (std.mem.eql(u8, k, "list_literal")) return 'v';
+        if (isNewExpr(n)) return 'o';
+        return null;
+    }
+
+    fn letterTakes(l: u8, lit: u8) bool {
+        if (lit == '0') return true;
+        return switch (l) {
+            'n', 'f' => lit == 'i' or lit == 'n',
+            else => lit == l,
+        };
+    }
+
+    /// A checked letter given a literal of another type: the statement's fault. Answers whether the literal settles the check.
+    fn letterLiteral(self: *Compiler, use: []const u8, l: u8, rhs: ts.Node) bool {
+        const lit = literalLetter(rhs) orelse return false;
+        if (letterTakes(l, lit)) return true;
+        if (!self.spellIn(use)) return true;
+        const lw: []const u8 = switch (lit) {
+            'i' => "an integer",
+            'n' => "a number",
+            't' => "a text",
+            'b' => "a boolean",
+            'v' => "a vector",
+            else => "an object",
+        };
+        const why = std.fmt.allocPrint(self.alloc, "{c} is the letter of {s}, and this literal is {s}; written", .{ l, letterWordC(l), lw }) catch return true;
+        self.spellSet(use, why);
+        return true;
+    }
+
+    /// `lchk` on register `r` for the name `use` lettered `l`
+    fn emitLetterCheck(self: *Compiler, r: u8, l: u8, use: []const u8) Error!void {
+        _ = try self.emit(.lchk, r, l, 0, try self.konstIndex(use));
+    }
+
     fn assign(self: *Compiler, n: ts.Node) Error!void {
+        const lhs = n.namedChild(0);
+        const rhs = n.namedChild(1);
+        // the name a value is given: a variable, or an attribute through This
+        const named: ?[]const u8 = if (self.eval != null or !self.spell_on) null else if (std.mem.eql(u8, lhs.kind(), "identifier"))
+            lhs.text()
+        else if (std.mem.eql(u8, lhs.kind(), "member_expression") and self.isThis(lhs.namedChild(0)))
+            lhs.namedChild(1).text()
+        else
+            null;
+        const use = named orelse return self.assignBody(n);
+        // a name spelled other than its declaration is that fault first: it names the declaration the writer meant (v42)
+        if (self.spellIn(use)) if (self.letterFault(use, false)) |why| {
+            try self.assignBody(n);
+            if (self.spell_fault == null) self.spellSet(use, why);
+            return;
+        };
+        const l = letterOf(use) orelse return self.assignBody(n);
+        if (std.mem.indexOfScalar(u8, CHECKED, l) == null) return self.assignBody(n);
+        const op = opText(n);
+        var settled = false;
+        if (std.mem.eql(u8, op, "=")) {
+            settled = self.letterLiteral(use, l, rhs);
+        } else if (literalLetter(rhs)) |lit| {
+            // a compound with a literal of the letter's own kind keeps the type (no coercion; an overflow raises)
+            settled = switch (l) {
+                'i' => lit == 'i',
+                'n', 'f' => lit == 'i' or lit == 'n',
+                't' => lit == 't',
+                else => false,
+            };
+        }
+        try self.assignBody(n);
+        if (settled or self.spell_fault != null or self.braces.items.len > 0) return;
+        // the statement's own line: Ring's F-114 row (the next token's, after a statement's last call) is not a .haro statement's
+        self.atNodeStart(n);
+        const name = lhs.text();
+        if (std.mem.eql(u8, lhs.kind(), "identifier") and name.len > 0 and name[0] != '$' and name[0] != '@') {
+            if (self.lookup(name)) |lv| return self.emitLetterCheck(lv.reg, l, use);
+        }
+        const save = self.temp;
+        defer self.temp = save;
+        const t = try self.tmp();
+        try self.expr(lhs, t);
+        try self.emitLetterCheck(t, l, use);
+    }
+
+    fn assignBody(self: *Compiler, n: ts.Node) Error!void {
         const lhs = n.namedChild(0);
         const rhs = n.namedChild(1);
         const op = opText(n);
@@ -8721,6 +8880,8 @@ pub const Compiler = struct {
         }
         const step_node = if (has_step) n.namedChild(3) else to;
         const body_from: u32 = if (has_step) 4 else 3;
+        // v0.47: a counter's name is lettered, or a single letter
+        if (self.spell_on and self.eval == null) _ = self.letterShape(v.text(), true);
 
         // Rule A: a `$` name is a GLOBAL, even as a loop variable. The
         // counter lives in a hidden temporary and the global slot is written
@@ -8938,6 +9099,12 @@ pub const Compiler = struct {
         const fj = try self.emit(.jmp, 0, 0, 0, 0);
         const bodyat = self.here();
         _ = try self.emit(.iget, xr, lst, idx, 0);
+        // v0.47: the counter's letter is checked on every element (a single letter is a counter's name)
+        if (self.spell_on and self.eval == null and self.letterShape(vname, true)) {
+            if (letterOf(vname)) |vl| {
+                if (std.mem.indexOfScalar(u8, CHECKED, vl) != null) try self.emitLetterCheck(xr, vl, vname);
+            }
+        }
         // x is assigned at the top of every iteration; the body may run no
         // times at all (F-89)
         const da_in = self.da;
@@ -12933,6 +13100,22 @@ fn emitOne(c: *Compiler, f: *Func) Error!void {
                     const site = try c.emit(.call, win, 0, 0, 0);
                     try c.fixups.append(c.alloc, .{ .site = site, .fidx = ppf, .from = c.funcIndex(f) });
                 }
+            }
+        }
+        // v0.47 (D55 T2): a .haro function's lettered parameters are checked on entry, at its own line; a parameter's shape refused is
+        // its first statement's fault
+        c.entry_fault = null;
+        if (!f.is_main and c.eval == null and f.params.len > 0 and c.haroNode(f.node)) {
+            c.atNodeStart(f.node);
+            for (f.params) |p| {
+                if (p.len == 0 or p[0] == '@' or std.mem.eql(u8, p, "this")) continue;
+                if (c.entry_fault == null) if (c.letterFault(p, false)) |why| {
+                    c.entry_fault = why;
+                    c.entry_use = p;
+                };
+                const pl = Compiler.letterOf(p) orelse continue;
+                if (std.mem.indexOfScalar(u8, Compiler.CHECKED, pl) == null) continue;
+                if (c.lookup(p)) |lp| try c.emitLetterCheck(lp.reg, pl, p);
             }
         }
         const ln_lo = c.here();

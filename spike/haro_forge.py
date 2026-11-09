@@ -3699,6 +3699,25 @@ def stage50():
         return 1
     return 0
 
+LETTER_COURT = os.path.join(HERE, 'v47', 'letter_court.py')
+
+
+def stage51():
+    """Haro v0.47, a name's first letter is its type, in a .haro file (D55 T2; v47/GRAMMAR.md): a name with no letter, Softanza's c, a
+    single letter outside a `for` counter or a catch name, and a literal of another type are refused when compiling; a checked letter
+    (b i n f t v o h) given a value of another type raises TYPE_LETTER where it is given -- a statement, a parameter on entry, a for-in
+    counter; null passes any letter; a .ring file is untouched. v47/letter_court.py on haro and its checked build."""
+    print('stage 51 -- the letters: v47/letter_court.py on haro and its checked build')
+    p = subprocess.run([sys.executable, LETTER_COURT] + (['--plant'] if PLANT else []), capture_output=True, cwd=HERE, timeout=600)
+    out = p.stdout.decode('utf-8', 'replace').replace(chr(13) + chr(10), chr(10))
+    for line in out.splitlines():
+        if line.startswith('  FAIL') or line.startswith('       ') or line.startswith('LETTER COURT'):
+            print(line)
+    if p.returncode != 0:
+        print(f'  FAIL the letter court exited {p.returncode}' + ('' if out.strip() else ': ' + p.stderr.decode('utf-8', 'replace')[-400:]))
+        return 1
+    return 0
+
 SENTENCE_TARGET = 50.0     # D42: a sentence edited, its court's image reused -- what a person editing a sentence waits for
 COLD_CEILING = 150.0       # D42: the court compiled from scratch -- a ceiling that catches the court library growing
 
@@ -3894,5 +3913,7 @@ if __name__ == '__main__':
         failures += stage49()
     if stage in (None, 50) and os.path.exists(FINDING_COURT):
         failures += stage50()
+    if stage in (None, 51) and os.path.exists(LETTER_COURT):
+        failures += stage51()
     print(f'haro_forge: {"FAIL" if failures else "PASS"} ({failures} failure(s), {time.perf_counter()-t0:.1f} s)')
     sys.exit(1 if failures else 0)
