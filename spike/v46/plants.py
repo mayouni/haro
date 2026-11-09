@@ -30,6 +30,8 @@ VM_DIR = os.path.join(ROOT, 'vm')
 MAIN = os.path.join(VM_DIR, 'src', 'main.zig')
 COMP = os.path.join(VM_DIR, 'src', 'compile.zig')
 TYPES = os.path.join(VM_DIR, 'src', 'types.zig')
+SYS = os.path.join(VM_DIR, 'src', 'syscmd.zig')
+HAROZ = os.path.join(VM_DIR, 'src', 'haro.zig')
 OUT = os.path.join(ROOT, 'runtime', 'v46', 'plant-build')
 COURT = os.path.join(HERE, 'finding_court.py')
 
@@ -58,6 +60,20 @@ PLANTS = [
      '                    if (false and in.c == 1 and cls < class_konst.len) {'),
     ('N17', 'K17', MAIN, 'a non-object is reported in classname, not parentclassname',
      '            .clsname => if (in.c == 1) "parentclassname" else "classname",', '            .clsname => if (in.c == 9) "parentclassname" else "classname",'),
+    ('N18', 'K18', HAROZ, 'systemcmd is not published (HARO-SYSTEMCMD-01)', '    syscmd.registerAll(vmheap);\n',
+     '    if (false) syscmd.registerAll(vmheap);\n'),
+    ('N19', 'K18', SYS, 'only the last \\n goes, as Ring leaves the \\r',
+     '    if (std.mem.endsWith(u8, s, "\\r\\n")) s = s[0 .. s.len - 2] else if',
+     '    if (false and std.mem.endsWith(u8, s, "\\r\\n")) s = s[0 .. s.len - 2] else if'),
+    ('N20', 'K19', SYS, 'systemcmd takes anything', '    if (argc != 1 or args[0].tag != @intFromEnum(Tag.str)) {',
+     '    if (argc != 1) {'),
+    ('N21', 'K20', COMP, 'a missing node is read as a name', '        if (n.isMissing()) {\n            var at = n;',
+     '        if (false and n.isMissing()) {\n            var at = n;'),
+    ('N22', 'K20', COMP, '`==` is not named', 'if (std.mem.indexOf(u8, at.text(), "==") != null)',
+     'if (std.mem.indexOf(u8, at.text(), "=:=") != null)'),
+    ('N23', 'K23', MAIN, 'the program writes its output positionally (HARO-PIPEWRITE-01)',
+     '    if (out_fw == null) out_fw = std.fs.File.stdout().writerStreaming(&out_buf);',
+     '    if (out_fw == null) out_fw = std.fs.File.stdout().writer(&out_buf);'),
     ('N5', 'K06', MAIN, 'object2pointer takes anything',
      '                        if (ov.tag != .obj) {\n                            self.pending = BADPARAM;\n                            continue :dispatch .raise;\n                        }\n                        retain(ov);',
      '                        if (false and ov.tag != .obj) {\n                            self.pending = BADPARAM;\n                            continue :dispatch .raise;\n                        }\n                        retain(ov);'),
@@ -84,7 +100,7 @@ def digest(b):
 
 def main():
     want = set(sys.argv[1:])
-    originals = {f: open(f, 'rb').read() for f in (MAIN, COMP, TYPES)}
+    originals = {f: open(f, 'rb').read() for f in (MAIN, COMP, TYPES, SYS, HAROZ)}
 
     def restore():
         for f, b in originals.items():

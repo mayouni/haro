@@ -3465,6 +3465,21 @@ pub const Compiler = struct {
     }
 
     fn exprBody(self: *Compiler, n: ts.Node, dst: u8) Error!void {
+        // HARO-SYSTEMCMD-01 (b): a node the parser's recovery put where nothing was written is no name -- `a == b` read as `a = <missing>
+        // = b` became a variable named "" (R24 naming nothing). The statement is refused, anchored on the expression the node stands in.
+        if (n.isMissing()) {
+            var at = n;
+            while (true) {
+                const p = at.parent();
+                if (p.isNull() or !std.mem.eql(u8, p.kind(), "binary_expression")) break;
+                at = p;
+            }
+            const why = if (std.mem.indexOf(u8, at.text(), "==") != null)
+                "`==` is no operator: equality is `=`; written"
+            else
+                "the parser found something missing here; written";
+            return self.nopeKind(at, why);
+        }
         if (self.depth > 200) return self.nope(n);
         self.depth += 1;
         defer self.depth -= 1;

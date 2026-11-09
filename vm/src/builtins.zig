@@ -360,6 +360,7 @@ pub const pascal = [_][2][]const u8{
     .{ "web_done", "WebDone" },
     .{ "web_serve", "WebServe" },
     .{ "web_wait", "WebWait" },
+    .{ "systemcmd", "SystemCmd" },
 };
 
 /// The spelling a .haro file writes for the native registered as `low` (lowercase, underscores as registered), or null for no native

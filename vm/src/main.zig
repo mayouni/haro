@@ -1937,7 +1937,9 @@ var out_buf: [64 * 1024]u8 = undefined;
 var out_fw: ?std.fs.File.Writer = null;
 
 pub fn outw() *std.Io.Writer {
-    if (out_fw == null) out_fw = std.fs.File.stdout().writer(&out_buf);
+    // STREAMING, never positional (HARO-PIPEWRITE-01, 2026-11-09): stdout is often a pipe, and the positional writer Zig starts with
+    // repeated and lost lines in a pipe Git Bash makes, past the first 64 KB
+    if (out_fw == null) out_fw = std.fs.File.stdout().writerStreaming(&out_buf);
     return &out_fw.?.interface;
 }
 

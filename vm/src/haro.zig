@@ -21,6 +21,7 @@ const dumpjson = @import("dumpjson.zig");
 const fmt = @import("fmt.zig");
 const graph = @import("graph.zig");
 const httpd = @import("httpd.zig");
+const syscmd = @import("syscmd.zig");
 const prefix = @import("prefix.zig");
 const lift = @import("lift.zig");
 const native = @import("native.zig");
@@ -150,7 +151,7 @@ fn implicitAtStart(alloc: std.mem.Allocator, root_path: []const u8) ?Implicit {
 
 fn refuseImplicit(im: Implicit) noreturn {
     var buf: [2048]u8 = undefined;
-    var fw = std.fs.File.stdout().writer(&buf);
+    var fw = std.fs.File.stdout().writerStreaming(&buf);
     const w = &fw.interface;
     w.print("\nHaro refused this program (C-28): Ring would read {s}, a file the program does not name, ", .{im.path}) catch {};
     switch (im.kind) {
@@ -389,7 +390,7 @@ fn resolveLoad(alloc: std.mem.Allocator, lit: []const u8, dir: []const u8, is_ro
 /// at all, and Softanza has none (C-4).
 fn refuseMissingLoads(alloc: std.mem.Allocator, parser: ts.Parser, root_path: []const u8) noreturn {
     var buf: [16 * 1024]u8 = undefined;
-    var fw = std.fs.File.stdout().writer(&buf);
+    var fw = std.fs.File.stdout().writerStreaming(&buf);
     const w = &fw.interface;
     const cwd = std.process.getCwdAlloc(alloc) catch ".";
     var seen = std.StringHashMapUnmanaged(void){};
@@ -3911,6 +3912,8 @@ pub fn main() !void {
     // a server's socket, for a program that holds its own request loop
     // (HaroServer's host, under `rnxc resident`)
     httpd.registerAll(vmheap);
+    // systemcmd, Ring's library function, as Haro's own native (HARO-SYSTEMCMD-01)
+    syscmd.registerAll(vmheap);
     native.register("shutdown", &ringShutdown);
     if (vm.poison_on) std.debug.print("note: POISONING HEAP -- freed memory is 0xDD and never reused\n", .{});
     if (std.process.getEnvVarOwned(std.heap.page_allocator, "HARO_TRACE_RET")) |v| {
@@ -3955,7 +3958,7 @@ pub fn main() !void {
             const jparser = ts.Parser.init();
             defer jparser.deinit();
             var jbuf: [64 * 1024]u8 = undefined;
-            var jw = std.fs.File.stdout().writer(&jbuf);
+            var jw = std.fs.File.stdout().writerStreaming(&jbuf);
             const ok = try dumpjson.exportFile(alloc, jparser, if (flag_first) argv[3] else argv[2], &jw.interface);
             try jw.interface.flush();
             if (!ok) std.process.exit(1);
@@ -4170,7 +4173,7 @@ pub fn main() !void {
     const tree = unit.trees.items[0];
 
     var buf: [64 * 1024]u8 = undefined;
-    var fw = std.fs.File.stdout().writer(&buf);
+    var fw = std.fs.File.stdout().writerStreaming(&buf);
     const w = &fw.interface;
 
     if (std.mem.eql(u8, argv[1], "dump")) {

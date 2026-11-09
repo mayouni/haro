@@ -67,7 +67,7 @@ SPLIT_VM = """
 admitapp Admit-App | admitcode Admit-Code | admitfile Admit-File | admitfinish Admit-Finish | admitstart Admit-Start | admitstate Admit-State
 releasecode Release-Code | releasefile Release-File | replaceapp Replace-App | replacecode Replace-Code | replacefile Replace-File
 tui_done TUI-Done | tui_init TUI-Init | tui_key TUI-Key | tui_size TUI-Size | web_bye Web-Bye | web_done Web-Done | web_serve Web-Serve
-web_wait Web-Wait
+web_wait Web-Wait | systemcmd System-Cmd
 """
 
 
