@@ -1,0 +1,36 @@
+{
+ "rung": "v0.49",
+ "decision": "zip.zig retired; Softanza's engine carries ZIP (the author 2026-11-08; stzlib cb6f5de65)",
+ "class": "exact: the program's whole stdout and its exit code, byte for byte, on haro and on its checked build",
+ "lines": {
+  "Z1": "a zip_ call is R3, as Ring without its extension",
+  "Z2": "ZIP is the engine's, judged by stzlib's guard (not run here)"
+ },
+ "cases": [
+  {
+   "id": "R01",
+   "kind": "run",
+   "line": "Z1",
+   "why": "a zip_ call is Ring's R3 for a function nothing defines, uncaught at its line",
+   "file": "cases/R01.ring",
+   "stdout": "before\n\nLine 2 Error (R3) : Calling Function without definition: zip_openfile \nin file R01.ring ",
+   "exit": 1
+  },
+  {
+   "id": "R02",
+   "kind": "run",
+   "line": "Z1",
+   "why": "each of the twelve names raises R3, caught",
+   "file": "cases/R02.ring",
+   "stdout": "Error (R3) : Calling Function without definition: zip_openfile\nError (R3) : Calling Function without definition: zip_entry_open\nError (R3) : Calling Function without definition: zip_entry_write\nError (R3) : Calling Function without definition: zip_entry_fwrite\nError (R3) : Calling Function without definition: zip_entry_read\nError (R3) : Calling Function without definition: zip_entry_fread\nError (R3) : Calling Function without definition: zip_entry_close\nError (R3) : Calling Function without definition: zip_extract_allfiles\nError (R3) : Calling Function without definition: zip_close\nError (R3) : Calling Function without definition: zip_filescount\nError (R3) : Calling Function without definition: zip_getfilenamebyindex\nError (R3) : Calling Function without definition: zip_extract_file\n"
+  },
+  {
+   "id": "R03",
+   "kind": "run",
+   "line": "Z1",
+   "why": "no archive is written: the R3 comes before the call runs",
+   "file": "cases/R03.ring",
+   "stdout": "refused\n0\n"
+  }
+ ]
+}

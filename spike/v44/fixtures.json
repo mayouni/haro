@@ -89,44 +89,12 @@
    "exit": 1
   },
   {
-   "id": "Q10",
-   "kind": "run",
-   "line": "P5",
-   "why": "appending to a file that is no archive answers a null handle and leaves the file",
-   "file": "cases/Q10.ring",
-   "stdout": "1\n28\n"
-  },
-  {
-   "id": "Q11",
-   "kind": "run",
-   "line": "P6",
-   "why": "extracting writes every entry, the last of a name winning, and answers nothing",
-   "file": "cases/Q11.ring",
-   "stdout": "\nsecond\nbee\n"
-  },
-  {
-   "id": "Q12",
-   "kind": "run",
-   "line": "P5",
-   "why": "appending to an archive keeps its entries and adds one (must not move)",
-   "file": "cases/Q12.ring",
-   "stdout": "2\n"
-  },
-  {
    "id": "Q13",
    "kind": "run",
    "line": "P2",
    "why": "a NaN compared through a global (cmpv) is unordered too",
    "file": "cases/Q13.ring",
    "stdout": "0\n0\n0\n"
-  },
-  {
-   "id": "Q14",
-   "kind": "run",
-   "line": "P6",
-   "why": "an entry whose name leaves the folder is not written; the others are",
-   "file": "cases/Q14.ring",
-   "stdout": "0\n1\n"
   }
  ]
 }

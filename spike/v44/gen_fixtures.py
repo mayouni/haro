@@ -12,9 +12,9 @@ which is this rung's subject and never its judge.
   P3  a letter of a text is written by `s[i] = c` in a .ring file, as Ring writes it: one character, or a number taken as its byte; more or
       fewer than one is R7, an index past the end R2; the text is a value, so another name holding it does not change
   P4  a .haro file refuses it: a text is not written in place (TEXT_IN_PLACE; D56 (c): bytes are, text is not)
-  P5  zip_openfile(f, "a") on a file that is no archive answers a null handle, every later call on it does nothing, and the file is not
+  P5  (RETIRED v0.49, with zip.zig) zip_openfile(f, "a") on a file that is no archive answers a null handle, every later call on it does nothing, and the file is not
       rewritten -- as Ring's zip does
-  P6  zip_extract_allfiles writes every entry, the last of a name winning, and answers nothing, as Ring's does; a name that leaves the
+  P6  (RETIRED v0.49, with zip.zig) zip_extract_allfiles writes every entry, the last of a name winning, and answers nothing, as Ring's does; a name that leaves the
       folder is not written (Ring writes it: a named divergence)
 
 THE DESK'S READINGS, recorded as its own:
@@ -49,6 +49,9 @@ def err(cid, ext, line, msg, where=None, called=None):
 
 R51 = 'Error (R51) : Value Error'
 CASES = [
+    # Q10, Q11, Q12 AND Q14 RETIRED 2026-11-09 (v0.49): they judged zip.zig, the twelve zip_ natives Haro published, retired when
+    # Softanza's engine took ZIP (stz_compress; stzlib cb6f5de65; the author's "we have zip covered by the engine!!"). What they asked
+    # is now the engine's, judged by stzlib's own guard; v49 judges that a zip_ call is Ring's R3. Their plants, Z17 to Z22, go with them.
     # v0.48 RE-SPELLED, 2026-11-09, AFTER THIS COURT SPOKE (the Principal's ruling, "ParentClassName"): a .haro program's calls of
     # built-ins are spelled as Softanza writes a name (Len, IsNull, SubStr), by study/v48/respell.py, ported here by
     # study/v47/port_cases.py --respell. A report still names a built-in as the VM registers it. Each case asks what it asked.
@@ -87,34 +90,9 @@ CASES = [
     ('Q09', 'P4', 'a .haro file refuses a letter written in place', '.haro', ['f()', 'func f', T + 'tS = "abc"', T + 'tS[2] = "x"'],
      ['', 'Line 4 Error (TEXT_IN_PLACE) : a text is not written in place -- build a new one: left(t, i - 1) + c + substr(t, i + 1) ',
       'In function f() in file Q09.haro', '', 'Called from line 1 in file Q09.haro '], 1),
-    ('Q10', 'P5', 'appending to a file that is no archive answers a null handle and leaves the file', '.ring', [
-        'write("notzip.zip", "This is a plain text file.." + nl)', 'oZip = zip_openfile("notzip.zip", "a")', '? isnull(oZip)',
-        'zip_entry_open(oZip, "a.txt")', 'zip_entry_write(oZip, "hello", 5)', 'zip_entry_close(oZip)', 'zip_close(oZip)',
-        '? len(read("notzip.zip"))'],
-     ['1', '28']),
-    ('Q11', 'P6', 'extracting writes every entry, the last of a name winning, and answers nothing', '.ring', [
-        'oZip = zip_openfile("dup.zip", "w")',
-        'zip_entry_open(oZip, "a.txt")', 'zip_entry_write(oZip, "first", 5)', 'zip_entry_close(oZip)',
-        'zip_entry_open(oZip, "a.txt")', 'zip_entry_write(oZip, "second", 6)', 'zip_entry_close(oZip)',
-        'zip_entry_open(oZip, "b.txt")', 'zip_entry_write(oZip, "bee", 3)', 'zip_entry_close(oZip)', 'zip_close(oZip)',
-        '? zip_extract_allfiles("dup.zip", "out")', '? read("out/a.txt")', '? read("out/b.txt")'],
-     ['', 'second', 'bee']),
-    ('Q12', 'P5', 'appending to an archive keeps its entries and adds one (must not move)', '.ring', [
-        'oZip = zip_openfile("two.zip", "w")', 'zip_entry_open(oZip, "a.txt")', 'zip_entry_write(oZip, "one", 3)', 'zip_entry_close(oZip)',
-        'zip_close(oZip)', 'oZip = zip_openfile("two.zip", "a")', 'zip_entry_open(oZip, "b.txt")', 'zip_entry_write(oZip, "two", 3)',
-        'zip_entry_close(oZip)', 'zip_close(oZip)', 'oZip = zip_openfile("two.zip", "r")', '? zip_filescount(oZip)', 'zip_close(oZip)'],
-     ['2']),
-    # WRITTEN AFTER THE CODE, before the plants, found while writing them: no case compared a NaN through cmpv, which a global's value takes
-    # (Q13, Ring's answers); and no case gave an entry a name that leaves the folder (Q14). Ring 1.27 WRITES `../evil.txt` beside the folder
-    # (zip slip, read off Ring); Haro does not -- a named divergence, least authority over parity.
     ('Q13', 'P2', 'a NaN compared through a global (cmpv) is unordered too', '.ring', [
         '$y = exp(1000) - exp(1000)', '? $y <= 0', '? $y > 0', '? $y = $y'],
      ['0', '0', '0']),
-    ('Q14', 'P6', 'an entry whose name leaves the folder is not written; the others are', '.ring', [
-        'oZip = zip_openfile("slip.zip", "w")', 'zip_entry_open(oZip, "../evil.txt")', 'zip_entry_write(oZip, "x", 1)', 'zip_entry_close(oZip)',
-        'zip_entry_open(oZip, "ok.txt")', 'zip_entry_write(oZip, "y", 1)', 'zip_entry_close(oZip)', 'zip_close(oZip)',
-        'zip_extract_allfiles("slip.zip", "out")', '? fexists("evil.txt")', '? fexists("out/ok.txt")'],
-     ['0', '1']),
 ]
 
 os.makedirs(os.path.join(HERE, 'cases'), exist_ok=True)

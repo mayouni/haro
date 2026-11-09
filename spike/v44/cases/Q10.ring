@@ -1,8 +1,0 @@
-write("notzip.zip", "This is a plain text file.." + nl)
-oZip = zip_openfile("notzip.zip", "a")
-? isnull(oZip)
-zip_entry_open(oZip, "a.txt")
-zip_entry_write(oZip, "hello", 5)
-zip_entry_close(oZip)
-zip_close(oZip)
-? len(read("notzip.zip"))
