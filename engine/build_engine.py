@@ -122,6 +122,10 @@ def patch_copy():
             print('neural_gen.zig: the pool-size fix applied')
         elif 'mem_size_est' in s:
             print('neural_gen.zig: already carries the pool-size fix')
+        elif 'graphPoolBytes' in s:
+            # HARO-NEURALGEN-POOL-01, 2026-11-09: since stzlib fe871d7e2 the decoder sizes its pool from the graph it builds (a shape
+            # pass, then the graph in a pool of exactly that size) -- the estimate this fix corrected is gone, and the fix with it
+            print('neural_gen.zig: sizes its pool from the graph (stzlib fe871d7e2 on): the pool-size fix is not needed')
         else:
             print('neural_gen.zig: the line changed upstream -- the pool-size fix was NOT applied; check the 1.5B model runs')
     domains, skipped = [], []
