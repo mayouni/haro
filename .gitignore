@@ -10,3 +10,6 @@ vm/zig-out/
 vm/.zig-cache/
 # the checked build (zig build -Doptimize=ReleaseSafe -j2 -p zig-out-safe)
 vm/zig-out-safe/
+
+# a session's own permission list can hold a typed secret; ignored here, not only by one machine's global ignore (LOOKOUT-W45-SECRETS-01)
+.claude/settings.local.json
