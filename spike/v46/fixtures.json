@@ -149,6 +149,41 @@
    "file": "cases/K17.ring",
    "stdout": "\nLine 1 Bad parameter type! \nIn parentclassname() in file K17.ring ",
    "exit": 1
+  },
+  {
+   "id": "K18",
+   "kind": "run",
+   "line": "K6",
+   "why": "systemcmd answers what the command writes, its last line end dropped",
+   "file": "cases/K18.ring",
+   "stdout": "hello\n[hello]\n"
+  },
+  {
+   "id": "K19",
+   "kind": "run",
+   "line": "K6",
+   "why": "systemcmd of no text is Bad parameter type, in its name",
+   "file": "cases/K19.ring",
+   "stdout": "\nLine 1 Bad parameter type! \nIn systemcmd() in file K19.ring ",
+   "exit": 1
+  },
+  {
+   "id": "K20",
+   "kind": "run",
+   "line": "K7",
+   "why": "`a == b` is refused naming `==`, not read as a variable with no name",
+   "file": "cases/K20.ring",
+   "stdout": "before\n\nLine 4 Haro refused this statement (`==` is no operator: equality is `=`; written `a == b`, line 4 of K20.ring) and did not compile it -- running past it would give a wrong answer \nin file K20.ring ",
+   "exit": 1
+  },
+  {
+   "id": "K21",
+   "kind": "run",
+   "line": "K7",
+   "why": "and in a .haro file",
+   "file": "cases/K21.haro",
+   "stdout": "before\n\nLine 5 Haro refused this statement (`==` is no operator: equality is `=`; written `nA == 1`, line 5 of K21.haro) and did not compile it -- running past it would give a wrong answer \nIn function f() in file K21.haro\n\nCalled from line 2 in file K21.haro ",
+   "exit": 1
   }
  ]
 }

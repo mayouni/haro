@@ -109,6 +109,26 @@ CASES = [
      {'stdout': 'a\n[]\nb\n'}),
     ('K17', 'K5', 'parentclassname of no object is Bad parameter type, in its name', 'run', '.ring', ['? parentclassname(5)'],
      {'stdout': '\nLine 1 Bad parameter type! \nIn parentclassname() in file K17.ring ', 'exit': 1}),
+    # SIXTH ROUND, 2026-11-09, written before the code: HARO-SYSTEMCMD-01 (lookout, 2026-11-08 13:20, carried by central 22:33).
+    # (a) systemcmd() raised R3: it is Ring's LIBRARY code (stdlibcore.ring: System(cmd + "> " + tempname()), read the file, drop a last
+    # "\n"), and Haro carries no part of Ring's library (D50) -- so Haro gives it as its own native, C's popen as Ring's system() runs the
+    # shell. The desk's named divergence: the whole last line end goes ("\r\n" on Windows), where Ring's leaves the "\r".
+    # (b) `a == b` gave R24 naming an EMPTY variable: the parser's recovery put a MISSING identifier between the two `=`, and the
+    # compiler read it as a name. A statement holding a missing node is refused, and `==` named.
+    ('K18', 'K6', 'systemcmd answers what the command writes, its last line end dropped', 'run', '.ring', [
+        '? systemcmd("echo hello")', '? "[" + systemcmd("echo hello") + "]"'],
+     {'stdout': 'hello\n[hello]\n'}),
+    ('K19', 'K6', 'systemcmd of no text is Bad parameter type, in its name', 'run', '.ring', ['? systemcmd(5)'],
+     {'stdout': '\nLine 1 Bad parameter type! \nIn systemcmd() in file K19.ring ', 'exit': 1}),
+    ('K20', 'K7', '`a == b` is refused naming `==`, not read as a variable with no name', 'run', '.ring', [
+        '? "before"', 'a = 1', 'b = 1', '? a == b'],
+     {'stdout': "before\n\nLine 4 Haro refused this statement (`==` is no operator: equality is `=`; written `a == b`, line 4 of K20.ring) "
+                "and did not compile it -- running past it would give a wrong answer \nin file K20.ring ", 'exit': 1}),
+    ('K21', 'K7', 'and in a .haro file', 'run', '.haro', [
+        '? "before"', 'f()', 'func f', T + 'nA = 1', T + '? nA == 1'],
+     {'stdout': "before\n\nLine 5 Haro refused this statement (`==` is no operator: equality is `=`; written `nA == 1`, line 5 of K21.haro) "
+                "and did not compile it -- running past it would give a wrong answer \nIn function f() in file K21.haro\n\nCalled from line 2 "
+                "in file K21.haro ", 'exit': 1}),
 ]
 
 os.makedirs(os.path.join(HERE, 'cases'), exist_ok=True)
