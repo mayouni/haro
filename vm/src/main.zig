@@ -3351,7 +3351,7 @@ pub const VM = struct {
             },
             .vdel => "del",
             .vins => "insert",
-            .clsname => "classname",
+            .clsname => if (in.c == 1) "parentclassname" else "classname",
             .substr2d, .sfind => "substr",
             .vpush => if (in.d == 1) "add" else null,
             .dlen => if (in.d == 1) "len" else null,
@@ -5942,6 +5942,17 @@ pub const VM = struct {
                 const rv = regs[base + in.b];
                 if (rv.tag == .obj) {
                     const cls: usize = rv.p.o.class;
+                    // c = 1: parentclassname -- the parent's name, the empty text with none (HARO-PARENTCLASSNAME-01)
+                    if (in.c == 1 and cls < class_konst.len) {
+                        const pk: usize = if (cls < class_parent.len) class_parent[cls] else 0xFFFF;
+                        if (pk < class_konst.len) {
+                            self.setRegB(base + in.a, konst[class_konst[pk]], true);
+                        } else {
+                            self.setRegB(base + in.a, Value.str(self.newStr("")), true);
+                        }
+                        pc += 1;
+                        continue :dispatch code[pc].op;
+                    }
                     if (cls < class_konst.len) {
                         self.setRegB(base + in.a, konst[class_konst[cls]], true);
                         pc += 1;

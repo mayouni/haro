@@ -4788,6 +4788,17 @@ pub const Compiler = struct {
             return;
         }
 
+        // `parentclassname(o)` (HARO-PARENTCLASSNAME-01): the class's parent as Ring stores it, folded, "" with none; Bad parameter
+        // type for anything else (Ring 1.27, meta_e.c). Read at run time from the object, as `classname` is when not proved.
+        if (std.ascii.eqlIgnoreCase(callee, "parentclassname") and argc == 1) {
+            const save = self.temp;
+            defer self.temp = save;
+            const r = try self.tmp();
+            try self.expr(args.namedChild(0), r);
+            _ = try self.emit(.clsname, dst, r, 1, try self.konstIndex("\"Bad parameter type!\""));
+            return;
+        }
+
         // `del(aList, n)` MUTATES its first argument, so it needs the
         // container's own register rather than a copied value.
         // `insert(list, n, item)` mutates a PLACE, like del and add: a local,
