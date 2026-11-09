@@ -1,13 +1,13 @@
-$g = "start"
+$tG = "start"
 try
-	within $g = "mid"
-		$g = "changed in body"
+	within $tG = "mid"
+		$tG = "changed in body"
 		setG()
 	done
 catch e
 	? e
 done
-? $g
+? $tG
 func setG
-	$g = "changed by callee"
-	raise("from callee " + $g)
+	$tG = "changed by callee"
+	raise("from callee " + $tG)

@@ -1,9 +1,9 @@
-$g = 1
+$nG = 1
 try
-	within $g = 2
-		? $g
+	within $nG = 2
+		? $nG
 		raise("boom")
 	done
 catch e
-	? "caught " + e + ", g=" + string($g)
+	? "caught " + e + ", g=" + string($nG)
 done

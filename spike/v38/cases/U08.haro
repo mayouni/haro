@@ -1,10 +1,10 @@
 ? "before"
 f()
 func f
-	using o = make()
+	using xO = make()
 		? "body"
 	done
 func make
 	return new Plain
 class Plain
-	x = 1
+	nX = 1

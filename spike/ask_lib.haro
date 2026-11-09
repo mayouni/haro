@@ -29,101 +29,101 @@
 #
 # Functions only; the globals are the generated court's.
 
-func AskIsSpace(c)
-	return c = " " or c = char(9) or c = char(13) or c = char(10)
+func AskIsSpace(tC)
+	return tC = " " or tC = char(9) or tC = char(13) or tC = char(10)
 
 # the word starting at i is exactly cKw, bounded by the text's edges or spaces
-func AskWordAt(cQ, i, cKw)
-	n = len(cKw)
-	if i + n - 1 > len(cQ) return false ok
-	if substr(cQ, i, n) != cKw return false ok
-	if i > 1 and not AskIsSpace(cQ[i - 1]) return false ok
-	if i + n <= len(cQ) and not AskIsSpace(cQ[i + n]) return false ok
+func AskWordAt(tQ, nI, tKw)
+	nN = len(tKw)
+	if nI + nN - 1 > len(tQ) return false ok
+	if substr(tQ, nI, nN) != tKw return false ok
+	if nI > 1 and not AskIsSpace(tQ[nI - 1]) return false ok
+	if nI + nN <= len(tQ) and not AskIsSpace(tQ[nI + nN]) return false ok
 	return true
 
-func AskTrim(cS)
-	i = 1
-	j = len(cS)
-	while i <= j and AskIsSpace(cS[i])
-		i++
+func AskTrim(tS)
+	nI = 1
+	nJ = len(tS)
+	while nI <= nJ and AskIsSpace(tS[nI])
+		nI++
 	end
-	while j >= i and AskIsSpace(cS[j])
-		j--
+	while nJ >= nI and AskIsSpace(tS[nJ])
+		nJ--
 	end
-	if j < i return "" ok
-	return substr(cS, i, j - i + 1)
+	if nJ < nI return "" ok
+	return substr(tS, nI, nJ - nI + 1)
 
 # the words of a text, split on spaces
-func AskWords(cS)
+func AskWords(tS)
 	aW = []
-	cCur = ""
-	for i = 1 to len(cS)
-		if AskIsSpace(cS[i])
-			if cCur != "" aW + cCur ok
-			cCur = ""
+	tCur = ""
+	for i = 1 to len(tS)
+		if AskIsSpace(tS[i])
+			if tCur != "" aW + tCur ok
+			tCur = ""
 		else
-			cCur += cS[i]
+			tCur += tS[i]
 		ok
 	next
-	if cCur != "" aW + cCur ok
+	if tCur != "" aW + tCur ok
 	return aW
 
-func AskIsName(cW)
-	if len(cW) = 0 return false ok
-	for i = 1 to len(cW)
-		if not (CtIsLowerish(cW[i]) or CtIsDigit(cW[i]) or cW[i] = "_") return false ok
+func AskIsName(tW)
+	if len(tW) = 0 return false ok
+	for i = 1 to len(tW)
+		if not (CtIsLowerish(tW[i]) or CtIsDigit(tW[i]) or tW[i] = "_") return false ok
 	next
 	return true
 
-func AskIsField(cW)
-	if len(cW) = 0 return false ok
-	for i = 1 to len(cW)
-		if not (CtIsLowerish(cW[i]) or CtIsDigit(cW[i]) or cW[i] = "_" or cW[i] = ".") return false ok
+func AskIsField(tW)
+	if len(tW) = 0 return false ok
+	for i = 1 to len(tW)
+		if not (CtIsLowerish(tW[i]) or CtIsDigit(tW[i]) or tW[i] = "_" or tW[i] = ".") return false ok
 	next
 	return true
 
-func AskIsNumber(cW)
-	if len(cW) = 0 return false ok
-	for i = 1 to len(cW)
-		if not CtIsDigit(cW[i]) return false ok
+func AskIsNumber(tW)
+	if len(tW) = 0 return false ok
+	for i = 1 to len(tW)
+		if not CtIsDigit(tW[i]) return false ok
 	next
 	return true
 
-func AskFail(cMsg)
-	CtFail(1, cMsg)
+func AskFail(tMsg)
+	CtFail(1, tMsg)
 
 # the parsed question: [from, where node or NULL, order field, descending, limit or -1]
-func AskParse(aDecls, cQ)
+func AskParse(aDecls, tQ)
 	aAsk = $aCourtAsk
 	if isnull(aAsk) AskFail("this language declares no ASK, so it answers no question") ok
-	n = len(cQ)
+	nN = len(tQ)
 	# the frame keywords, at depth 0 and outside quotes
 	nWhere = 0
 	nOrder = 0
 	nLimit = 0
-	i = 1
+	nI = 1
 	nDepth = 0
-	cQuote = ""
-	while i <= n
-		c = cQ[i]
-		if cQuote != ""
-			if c = cQuote cQuote = "" ok
-			i++
+	tQuote = ""
+	while nI <= nN
+		tC = tQ[nI]
+		if tQuote != ""
+			if tC = tQuote tQuote = "" ok
+			nI++
 			loop
 		ok
-		if c = "'" or c = '"'
-			cQuote = c
-			i++
+		if tC = "'" or tC = '"'
+			tQuote = tC
+			nI++
 			loop
 		ok
-		if c = "(" nDepth++ ok
-		if c = ")" nDepth-- ok
-		if nDepth = 0 and (i = 1 or AskIsSpace(cQ[i - 1]))
-			if nWhere = 0 and AskWordAt(cQ, i, "WHERE") nWhere = i ok
-			if nOrder = 0 and AskWordAt(cQ, i, "ORDER") nOrder = i ok
-			if nLimit = 0 and AskWordAt(cQ, i, "LIMIT") nLimit = i ok
+		if tC = "(" nDepth++ ok
+		if tC = ")" nDepth-- ok
+		if nDepth = 0 and (nI = 1 or AskIsSpace(tQ[nI - 1]))
+			if nWhere = 0 and AskWordAt(tQ, nI, "WHERE") nWhere = nI ok
+			if nOrder = 0 and AskWordAt(tQ, nI, "ORDER") nOrder = nI ok
+			if nLimit = 0 and AskWordAt(tQ, nI, "LIMIT") nLimit = nI ok
 		ok
-		i++
+		nI++
 	end
 	# the segments, in textual order
 	aSeg = []
@@ -139,31 +139,31 @@ func AskParse(aDecls, cQ)
 			ok
 		next
 	next
-	nHeadEnd = n + 1
+	nHeadEnd = nN + 1
 	if len(aSeg) > 0 nHeadEnd = aSeg[1][1] ok
-	cHead = ""
-	if nHeadEnd > 1 cHead = AskTrim(substr(cQ, 1, nHeadEnd - 1)) ok
-	aW = AskWords(cHead)
+	tHead = ""
+	if nHeadEnd > 1 tHead = AskTrim(substr(tQ, 1, nHeadEnd - 1)) ok
+	aW = AskWords(tHead)
 	if len(aW) = 0 or aW[1] != "SELECT"
-		cVerb = ""
-		if len(aW) > 0 cVerb = aW[1] ok
-		cMsg = CtRefusalMessage("unknown_verb")
-		if cMsg = "" cMsg = "a question opens with SELECT" ok
-		AskFail("Unknown verb '" + cVerb + "': " + cMsg)
+		tVerb = ""
+		if len(aW) > 0 tVerb = aW[1] ok
+		tMsg = CtRefusalMessage("unknown_verb")
+		if tMsg = "" tMsg = "a question opens with SELECT" ok
+		AskFail("Unknown verb '" + tVerb + "': " + tMsg)
 	ok
 	if len(aW) < 2 or aW[2] != "*"
-		cFound = ""
-		if len(aW) >= 2 cFound = aW[2] ok
-		AskFail("Expected '*' after SELECT: a question asks for whole records (SELECT * only), found '" + cFound + "'")
+		tFound = ""
+		if len(aW) >= 2 tFound = aW[2] ok
+		AskFail("Expected '*' after SELECT: a question asks for whole records (SELECT * only), found '" + tFound + "'")
 	ok
 	if len(aW) < 3 or aW[3] != "FROM"
-		cFound = ""
-		if len(aW) >= 3 cFound = aW[3] ok
-		AskFail("Expected FROM after SELECT *, found '" + cFound + "'")
+		tFound = ""
+		if len(aW) >= 3 tFound = aW[3] ok
+		AskFail("Expected FROM after SELECT *, found '" + tFound + "'")
 	ok
 	if len(aW) < 4 AskFail("Expected a name after FROM") ok
-	cFrom = aW[4]
-	if not AskIsName(cFrom) AskFail("FROM takes a lower_snake name, found '" + cFrom + "'") ok
+	tFrom = aW[4]
+	if not AskIsName(tFrom) AskFail("FROM takes a lower_snake name, found '" + tFrom + "'") ok
 	if len(aW) > 4 AskFail("Unexpected '" + aW[5] + "' after the question") ok
 	# FROM resolves to a declaration of one of the ASK's kinds
 	aVerbs = []
@@ -173,55 +173,55 @@ func AskParse(aDecls, cQ)
 		if isnull(aK) loop ok
 		aVerbs + aK[1]
 		for d = 1 to len(aDecls)
-			if aDecls[d][1] = aK[1] and aDecls[d][2] = cFrom aFromDecl = aDecls[d] ok
+			if aDecls[d][1] = aK[1] and aDecls[d][2] = tFrom aFromDecl = aDecls[d] ok
 		next
 	next
 	if isnull(aFromDecl)
-		cMsg = CtRefusalMessage("dangling_reference")
-		cOut = "FROM '" + cFrom + "' resolves to nothing: no such " + CtJoin(aVerbs, " or ")
-		if cMsg != "" cOut += " -- " + cMsg ok
-		AskFail(cOut)
+		tMsg = CtRefusalMessage("dangling_reference")
+		tOut = "FROM '" + tFrom + "' resolves to nothing: no such " + CtJoin(aVerbs, " or ")
+		if tMsg != "" tOut += " -- " + tMsg ok
+		AskFail(tOut)
 	ok
 	aWhere = null
-	cField = ""
+	tField = ""
 	bDesc = false
 	nLim = -1
 	nSeen = 0
 	for s = 1 to len(aSeg)
 		nStart = aSeg[s][1]
-		nEnd = n
+		nEnd = nN
 		if s < len(aSeg) nEnd = aSeg[s + 1][1] - 1 ok
-		cText = AskTrim(substr(cQ, nStart, nEnd - nStart + 1))
-		cKind = aSeg[s][2]
+		tText = AskTrim(substr(tQ, nStart, nEnd - nStart + 1))
+		tKind = aSeg[s][2]
 		nRank = 1
-		if cKind = "ORDER" nRank = 2 ok
-		if cKind = "LIMIT" nRank = 3 ok
-		if nRank <= nSeen AskFail("Unexpected '" + cKind + "' after the question") ok
+		if tKind = "ORDER" nRank = 2 ok
+		if tKind = "LIMIT" nRank = 3 ok
+		if nRank <= nSeen AskFail("Unexpected '" + tKind + "' after the question") ok
 		nSeen = nRank
-		if not CtInList(lower(cKind), aAsk[4])
-			AskFail(cKind + " is not a clause of " + aAsk[1] + " (its clauses: " + CtJoin(aAsk[4], ", ") + ")")
+		if not CtInList(lower(tKind), aAsk[4])
+			AskFail(tKind + " is not a clause of " + aAsk[1] + " (its clauses: " + CtJoin(aAsk[4], ", ") + ")")
 		ok
-		if cKind = "WHERE"
-			cExpr = AskTrim(substr(cText, 6))
+		if tKind = "WHERE"
+			tExpr = AskTrim(substr(tText, 6))
 			aE = CtExprByName(aAsk[3])
 			if isnull(aE) AskFail("the court carries no EXPRESSION called '" + aAsk[3] + "'") ok
 			CtExprUse(aE)
-			cErr = ""
+			tErr = ""
 			try
-				aWhere = ExParse(cExpr, [])
+				aWhere = ExParse(tExpr, [])
 			catch
-				cErr = cCatchError
+				tErr = cCatchError
 			done
-			if cErr != "" AskFail("WHERE: " + cErr) ok
+			if tErr != "" AskFail("WHERE: " + tErr) ok
 			if not ExIsCondition(aWhere)
-				AskFail("WHERE is not a condition: a comparison, and, or, not -- '" + cExpr + "' computes a value")
+				AskFail("WHERE is not a condition: a comparison, and, or, not -- '" + tExpr + "' computes a value")
 			ok
-		but cKind = "ORDER"
-			aOW = AskWords(cText)
+		but tKind = "ORDER"
+			aOW = AskWords(tText)
 			if len(aOW) < 2 or aOW[2] != "BY" AskFail("Expected BY after ORDER") ok
 			if len(aOW) < 3 AskFail("Expected a field after ORDER BY") ok
-			cField = aOW[3]
-			if not AskIsField(cField) AskFail("ORDER BY takes a field name, found '" + cField + "'") ok
+			tField = aOW[3]
+			if not AskIsField(tField) AskFail("ORDER BY takes a field name, found '" + tField + "'") ok
 			if len(aOW) >= 4
 				if aOW[4] = "DESC"
 					bDesc = true
@@ -233,15 +233,15 @@ func AskParse(aDecls, cQ)
 			ok
 			if len(aOW) > 4 AskFail("Unexpected '" + aOW[5] + "' after the question") ok
 		else
-			aLW = AskWords(cText)
+			aLW = AskWords(tText)
 			if len(aLW) < 2 AskFail("Expected a number after LIMIT") ok
 			if not AskIsNumber(aLW[2]) AskFail("LIMIT takes a number, found '" + aLW[2] + "'") ok
 			nLim = number(aLW[2])
 			if len(aLW) > 2 AskFail("Unexpected '" + string(aLW[3]) + "' after the question") ok
 		ok
 	next
-	AskCheckFields(aDecls, aFromDecl, aWhere, cField)
-	return [cFrom, aWhere, cField, bDesc, nLim]
+	AskCheckFields(aDecls, aFromDecl, aWhere, tField)
+	return [tFrom, aWhere, tField, bDesc, nLim]
 
 # v0.34 (COMPASS-KERN-03): the field names a question may use for a declaration, read from the schema the language declares (the ASK's FIELDS
 # seat.seat) -- the keys of that pair list in the declaration the first seat refers to, then the names the walk's steps COMPUTE into a record of
@@ -251,20 +251,20 @@ func AskSchemaNames(aDecls, aFromDecl)
 	aAsk = $aCourtAsk
 	if len(aAsk) < 5 return [] ok
 	nDot = substr(aAsk[5], ".")
-	cSeat1 = upper(left(aAsk[5], nDot - 1))
-	cSeat2 = upper(substr(aAsk[5], nDot + 1))
-	cEntity = ""
+	tSeat1 = upper(left(aAsk[5], nDot - 1))
+	tSeat2 = upper(substr(aAsk[5], nDot + 1))
+	tEntity = ""
 	aC = aFromDecl[4]
 	for i = 1 to len(aC)
-		if aC[i][1] = cSeat1 cEntity = aC[i][3][2] ok
+		if aC[i][1] = tSeat1 tEntity = aC[i][3][2] ok
 	next
-	if cEntity = "" return [] ok
+	if tEntity = "" return [] ok
 	aNames = []
 	for d = 1 to len(aDecls)
-		if aDecls[d][2] != cEntity loop ok
+		if aDecls[d][2] != tEntity loop ok
 		aEC = aDecls[d][4]
 		for i = 1 to len(aEC)
-			if aEC[i][1] != cSeat2 or aEC[i][3][1] != "pairlist" loop ok
+			if aEC[i][1] != tSeat2 or aEC[i][3][1] != "pairlist" loop ok
 			aItems = aEC[i][3][2]
 			for j = 1 to len(aItems)
 				if not CtInList(aItems[j][1], aNames) aNames + aItems[j][1] ok
@@ -275,19 +275,19 @@ func AskSchemaNames(aDecls, aFromDecl)
 	for w = 1 to len($aCourtWalks)
 		aKS = CtKindByDeclName($aCourtWalks[w][3])
 		if isnull(aKS) loop ok
-		cThr = upper($aCourtWalks[w][4])
-		cCmp = upper($aCourtWalks[w][7])
-		if cCmp = "" loop ok
+		tThr = upper($aCourtWalks[w][4])
+		tCmp = upper($aCourtWalks[w][7])
+		if tCmp = "" loop ok
 		for d = 1 to len(aDecls)
 			if aDecls[d][1] != aKS[1] loop ok
 			bThis = false
-			cComputed = ""
+			tComputed = ""
 			aSC = aDecls[d][4]
 			for i = 1 to len(aSC)
-				if aSC[i][1] = cThr and aSC[i][3][2] = aFromDecl[2] bThis = true ok
-				if aSC[i][1] = cCmp cComputed = aSC[i][3][2] ok
+				if aSC[i][1] = tThr and aSC[i][3][2] = aFromDecl[2] bThis = true ok
+				if aSC[i][1] = tCmp tComputed = aSC[i][3][2] ok
 			next
-			if bThis and cComputed != "" and not CtInList(cComputed, aNames) aNames + cComputed ok
+			if bThis and tComputed != "" and not CtInList(tComputed, aNames) aNames + tComputed ok
 		next
 	next
 	return aNames
@@ -309,12 +309,12 @@ func AskRefsOf(aNode)
 	next
 
 # the head of a dotted name: member.first names member
-func AskHead(cPath)
-	nDot = substr(cPath, ".")
-	if nDot = 0 return cPath ok
-	return left(cPath, nDot - 1)
+func AskHead(tPath)
+	nDot = substr(tPath, ".")
+	if nDot = 0 return tPath ok
+	return left(tPath, nDot - 1)
 
-func AskCheckFields(aDecls, aFromDecl, aWhere, cField)
+func AskCheckFields(aDecls, aFromDecl, aWhere, tField)
 	aNames = AskSchemaNames(aDecls, aFromDecl)
 	if len(aNames) = 0 return ok
 	$aAskRefsFound = []
@@ -323,40 +323,40 @@ func AskCheckFields(aDecls, aFromDecl, aWhere, cField)
 	for i = 1 to len(aRefs)
 		if not CtInList(AskHead(aRefs[i]), aNames) AskFieldFail("WHERE", AskHead(aRefs[i]), aFromDecl[2], aNames) ok
 	next
-	if cField != "" and not CtInList(AskHead(cField), aNames) AskFieldFail("ORDER BY", AskHead(cField), aFromDecl[2], aNames) ok
+	if tField != "" and not CtInList(AskHead(tField), aNames) AskFieldFail("ORDER BY", AskHead(tField), aFromDecl[2], aNames) ok
 
-func AskFieldFail(cClause, cName, cDecl, aNames)
-	cOut = cClause + " names '" + cName + "', which " + cDecl + " does not declare (its fields: " + CtJoin(aNames, ", ") + ")"
-	cMsg = CtRefusalMessage("unknown_seat")
-	if cMsg != "" cOut += " -- " + cMsg ok
-	AskFail(cOut)
+func AskFieldFail(tClause, tName, tDecl, aNames)
+	tOut = tClause + " names '" + tName + "', which " + tDecl + " does not declare (its fields: " + CtJoin(aNames, ", ") + ")"
+	tMsg = CtRefusalMessage("unknown_seat")
+	if tMsg != "" tOut += " -- " + tMsg ok
+	AskFail(tOut)
 
 # the order of two records on a field: -1, 0, 1 (zql.zig orderValues)
-func AskOrder(aA, aB, cField)
+func AskOrder(aA, aB, tField)
 	ExSetRecord(aA)
-	va = ExRefGet(cField)
+	xVa = ExRefGet(tField)
 	ExSetRecord(aB)
-	vb = ExRefGet(cField)
-	if not va[1] and not vb[1] return 0 ok
-	if not va[1] return -1 ok
-	if not vb[1] return 1 ok
-	na = ExNumOf(va[2])
-	nb = ExNumOf(vb[2])
-	if na[1] and nb[1]
-		if na[2] < nb[2] return -1 ok
-		if na[2] > nb[2] return 1 ok
+	xVb = ExRefGet(tField)
+	if not xVa[1] and not xVb[1] return 0 ok
+	if not xVa[1] return -1 ok
+	if not xVb[1] return 1 ok
+	xNa = ExNumOf(xVa[2])
+	xNb = ExNumOf(xVb[2])
+	if xNa[1] and xNb[1]
+		if xNa[2] < xNb[2] return -1 ok
+		if xNa[2] > xNb[2] return 1 ok
 		return 0
 	ok
-	return ExStrOrder(ExStr(va[2]), ExStr(vb[2]))
+	return ExStrOrder(ExStr(xVa[2]), ExStr(xVb[2]))
 
 # v0.16: what a question did, recorded as it ran and only when a narration asked: [event, [[key, text], ...]]
-func AskNote(cEvent, aVals)
-	$aAskTrace + [cEvent, aVals]
+func AskNote(tEvent, aVals)
+	$aAskTrace + [tEvent, aVals]
 
-func AskRun(aDecls, cQ, aRows)
-	aQ = AskParse(aDecls, cQ)
+func AskRun(aDecls, tQ, aRows)
+	aQ = AskParse(aDecls, tQ)
 	if not islist(aRows) or ExIsObj(aRows) AskFail("the rows are a JSON list of records") ok
-	if $bAskTrace AskNote("ask", [["question", cQ], ["from", aQ[1]]]) ok
+	if $bAskTrace AskNote("ask", [["question", tQ], ["from", aQ[1]]]) ok
 	aOut = []
 	for i = 1 to len(aRows)
 		if not ExIsObj(aRows[i]) AskFail("row " + string(i) + " is not a JSON object") ok
@@ -390,9 +390,9 @@ func AskRun(aDecls, cQ, aRows)
 		aOut = aSorted
 	ok
 	if $bAskTrace and aQ[3] != ""
-		cDir = "ASC"
-		if aQ[4] cDir = "DESC" ok
-		AskNote("ordered", [["field", aQ[3]], ["direction", cDir]])
+		tDir = "ASC"
+		if aQ[4] tDir = "DESC" ok
+		AskNote("ordered", [["field", aQ[3]], ["direction", tDir]])
 	ok
 	if aQ[5] >= 0 and len(aOut) > aQ[5]
 		# told only when the limit DROPPED rows: "only the first 5 are kept" over three matches would be untrue

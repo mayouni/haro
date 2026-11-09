@@ -24,6 +24,9 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 T = '\t'
 
 CASES = [
+    # v0.47 RE-LETTERED, 2026-11-08, AFTER THIS COURT SPOKE (D55 T2, the author's scope "Yes, as recommended"): every name of these
+    # .haro programs carries its type's letter, by study/v47/reletter.py's rules (c -> t, a single letter or a word by what it holds),
+    # ported here by study/v47/port_cases.py; an output that names a renamed variable names its new name. Each case asks what it asked.
     ('F01', 'S1', 'the normal path: the body, the finally, then on', [
         'try', T + '? "body"', 'catch', T + '? "handler"', 'finally', T + '? "finally"', 'done', '? "after"'],
      ['body', 'finally', 'after']),
@@ -36,8 +39,8 @@ CASES = [
         T + '? "outer: " + cCatchError', 'done'],
      ['finally', 'outer: only']),
     ('F04', 'S2', 'a return in the body: the value is taken, the finally runs (computing as it likes), the value returned is the one taken', [
-        '? f()', '? "after"', 'func f', T + 'n = 1', T + 'try', T * 2 + 'return n', T + 'finally', T * 2 + '? "finally " + string(n) + " " + upper("x")',
-        T * 2 + 'n = 2', T + 'done', T + 'return 99'],
+        '? f()', '? "after"', 'func f', T + 'nN = 1', T + 'try', T * 2 + 'return nN', T + 'finally', T * 2 + '? "finally " + string(nN) + " " + upper("x")',
+        T * 2 + 'nN = 2', T + 'done', T + 'return 99'],
      ['finally 1 X', '1', 'after']),
     ('F05', 'S2', 'a return in the handler: the finally runs, then the return resumes', [
         '? g()', 'func g', T + 'try', T * 2 + 'raise("in g")', T + 'catch', T * 2 + 'return "from handler"', T + 'finally', T * 2 + '? "finally"',
@@ -56,8 +59,8 @@ CASES = [
         T + '? "end " + string(i)', 'next'],
      ['body 1', 'finally 1', 'end 1', 'finally 2', 'body 3', 'finally 3', 'end 3']),
     ('F09', 'S5', '`exit` crossing a try with a catch, in a while loop', [
-        'w()', 'func w', T + 'n = 0', T + 'while true', T * 2 + 'n++', T * 2 + 'try', T * 3 + 'if n = 3 exit ok', T * 2 + 'catch',
-        T * 3 + '? "no"', T * 2 + 'finally', T * 3 + '? "finally " + string(n)', T * 2 + 'done', T + 'end', T + '? "after " + string(n)'],
+        'w()', 'func w', T + 'nN = 0', T + 'while true', T * 2 + 'nN++', T * 2 + 'try', T * 3 + 'if nN = 3 exit ok', T * 2 + 'catch',
+        T * 3 + '? "no"', T * 2 + 'finally', T * 3 + '? "finally " + string(nN)', T * 2 + 'done', T + 'end', T + '? "after " + string(nN)'],
      ['finally 1', 'finally 2', 'finally 3', 'after 3']),
     ('F10', 'S2', 'a return crossing two trys runs the inner finally, then the outer', [
         '? h()', 'func h', T + 'try', T * 2 + 'try', T * 3 + 'return "value"', T * 2 + 'finally', T * 3 + '? "inner finally"', T * 2 + 'done',
@@ -89,8 +92,8 @@ CASES = [
         'for x in [1, 2, 3]', T + 'try', T * 2 + 'if x = 2 exit ok', T + 'finally', T * 2 + '? "finally " + string(x)', T + 'done', 'next', '? "after"'],
      ['finally 1', 'finally 2', 'after']),
     ('F18', 'S5', '`loop` crossing a try in a do-again loop', [
-        'd()', 'func d', T + 'n = 0', T + 'do', T * 2 + 'n++', T * 2 + 'try', T * 3 + 'if n = 2 loop ok', T * 3 + '? "body " + string(n)', T * 2 + 'finally',
-        T * 3 + '? "finally " + string(n)', T * 2 + 'done', T + 'again n < 3'],
+        'd()', 'func d', T + 'nN = 0', T + 'do', T * 2 + 'nN++', T * 2 + 'try', T * 3 + 'if nN = 2 loop ok', T * 3 + '? "body " + string(nN)', T * 2 + 'finally',
+        T * 3 + '? "finally " + string(nN)', T * 2 + 'done', T + 'again nN < 3'],
      ['body 1', 'finally 1', 'finally 2', 'body 3', 'finally 3']),
     ('F19', 'S2', 'a return from a loop inside the try body runs the finally once', [
         '? r()', 'func r', T + 'try', T * 2 + 'for i = 1 to 5', T * 3 + 'if i = 2 return "at " + string(i) ok', T * 2 + 'next', T + 'finally',

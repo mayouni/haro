@@ -8,7 +8,7 @@ func g
 		? e
 	done
 	try
-		x = 1 / 0
+		nX = 1 / 0
 	catch e2
 		? e2.Code()
 	done

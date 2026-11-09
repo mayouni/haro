@@ -1,6 +1,6 @@
 ? "before"
 f()
 func f
-	within $never = 1
+	within $nNever = 1
 		? "body ran"
 	done

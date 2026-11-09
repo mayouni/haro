@@ -1,7 +1,7 @@
 f()
 func f
 	try
-		using o = make()
+		using xO = make()
 			? "body ran"
 		done
 	catch e
@@ -9,7 +9,7 @@ func f
 		? "line " + string(e.Span()[:line]) + ", code [" + e.Code() + "]"
 	done
 	try
-		using n = 42
+		using nN = 42
 			? "body ran"
 		done
 	catch e
@@ -18,4 +18,4 @@ func f
 func make
 	return new Plain
 class Plain
-	x = 1
+	nX = 1

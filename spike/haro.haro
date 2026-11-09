@@ -20,14 +20,14 @@ $nCondPos = 1
 $aCondDeclSeats = []
 $aCondDecls = []
 $aCondVerbOf = []
-$cCondOther = ""
+$tCondOther = ""
 $aCondRefSeats = []
 $aCondFormats = []
 $bCondUnread = false
 $aCondLangs = []
-$cCondLang = ""
+$tCondLang = ""
 $aCourtSentences = []
-$cStzuDir = ""
+$tStzuDir = ""
 $bStzuCollect = false
 $aStzuFound = []
 $aStzuBroken = []
@@ -41,9 +41,9 @@ $nBlkPos = 1
 if len(sysargv) < 3
 	? "usage: haro.haro <file.haro> [all | fmt]"
 else
-	cPath = sysargv[3]
-	cSrc = read(cPath)
-	$cStzuDir = StzuDirOf(cPath)
+	tPath = sysargv[3]
+	tSrc = read(tPath)
+	$tStzuDir = StzuDirOf(tPath)
 	bAll = false
 	bFmt = false
 	if len(sysargv) >= 4
@@ -51,12 +51,12 @@ else
 		if sysargv[4] = "fmt" bFmt = true ok
 	ok
 	if bFmt
-		HaroFmt(cSrc)
+		HaroFmt(tSrc)
 	but bAll
-		HaroAll(cSrc)
+		HaroAll(tSrc)
 	else
 		try
-			aLang = StzuDeclare(cSrc)
+			aLang = StzuDeclare(tSrc)
 			StzuPrintLanguage(aLang)
 		catch
 			? cCatchError
@@ -67,9 +67,9 @@ ok
 # v0.30: `fmt` -- the canonical printing of the declaration (BLOCKS.md 3.2): the one reader of C6 reads it into a
 # block and the one printer prints it; a text the reader refuses prints the refusal line. The meta-court judges
 # nothing here: a declaration is printed before it is judged, so an author sees the spelling of what was written
-func HaroFmt(cText)
+func HaroFmt(tText)
 	try
-		see BlkPrintC6(BlkLoad(cText))
+		see BlkPrintC6(BlkLoad(tText))
 	catch
 		? cCatchError
 	done
@@ -79,18 +79,18 @@ func HaroFmt(cText)
 # name that exists as a global writes the GLOBAL, so the names used here (cE, aL, aFd) must be
 # ones no script-level variable of this file is called -- cErr and aLang are, and StzuDeclare
 # assigns both of its own (found on the oracle: its cErr leaked into the top level's)
-func HaroAll(cText)
+func HaroAll(tText)
 	$bStzuCollect = true
-	cE = ""
+	tE = ""
 	aL = null
 	try
-		aL = StzuDeclare(cText)
+		aL = StzuDeclare(tText)
 	catch
-		cE = cCatchError
+		tE = cCatchError
 	done
 	$bStzuCollect = false
-	if cE != ""
-		$aStzuFound + [StzuLineOf(cE), StzuStripPrefix(cE)]
+	if tE != ""
+		$aStzuFound + [StzuLineOf(tE), StzuStripPrefix(tE)]
 	ok
 	if len($aStzuFound) > 0
 		aFd = StzuSortFound($aStzuFound)

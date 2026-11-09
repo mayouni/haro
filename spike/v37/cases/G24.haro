@@ -3,9 +3,9 @@ func g
 	try
 		raise("orig")
 	catch e
-		t = e + ""
+		xT = e + ""
 		try
-			? t.Message()
+			? xT.Message()
 		catch e2
 			? e2
 		done

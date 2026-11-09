@@ -49,18 +49,23 @@ def refused(cid, line, why, text, called=2, where='function f()'):
 
 B = '? "before"'
 CASES = [
+    # v0.47 RE-LETTERED, 2026-11-08, AFTER THIS COURT SPOKE (D55 T2, the author's scope "Yes, as recommended"): every name of these
+    # .haro programs carries its type's letter, by study/v47/reletter.py's rules (c -> t, a single letter or a word by what it holds),
+    # ported here by study/v47/port_cases.py; an output that names a renamed variable names its new name. Each case asks what it asked.
+    # By hand: oClient held a number, so it is nClient, and the misspellings that are N02, N03 and N19's subject (nclient, $ntotal) stay
+    # misspelled; a name spelled other than its declaration is that fault first, before its letter's.
     ('N01', 'N1', 'every kind of name spelled as declared runs', '.haro', [
-        '$nTotal = 10', 'f()', 'func f', T + 'oClient = 2', T + '? oClient + Twice(3)', T + '? isnull(null)', T + 'o = new Point',
-        T + '? o.GetX()', T + '? $nTotal', 'func Twice nN', T + 'return nN * 2', 'class Point', T + '@nX = 3', T + 'func GetX', T * 2 + 'return @nX'],
+        '$nTotal = 10', 'f()', 'func f', T + 'nClient = 2', T + '? nClient + Twice(3)', T + '? isnull(null)', T + 'oO = new Point',
+        T + '? oO.GetX()', T + '? $nTotal', 'func Twice nN', T + 'return nN * 2', 'class Point', T + '@nX = 3', T + 'func GetX', T * 2 + 'return @nX'],
      ['8', 'true', '3', '10']),
     # N01 CHANGED AFTER ITS COURT SPOKE, 2026-11-08: `isnull(null)` answers a boolean in a .haro file and prints `true` (v0.43, D55 T3,
     # the author's ruling of 2026-11-07); the case asks the same question.
     ('N02', 'N1', 'a local read in another spelling is refused', '.haro', [
-        B, 'f()', 'func f', T + 'oClient = 1', T + '? oclient'],
-     refused('N02', 5, why_decl('oClient', 4), 'oclient'), 1),
+        B, 'f()', 'func f', T + 'nClient = 1', T + '? nclient'],
+     refused('N02', 5, why_decl('nClient', 4), 'nclient'), 1),
     ('N03', 'N2', 'a local assigned in another spelling is no second variable: refused', '.haro', [
-        B, 'f()', 'func f', T + 'oClient = 1', T + 'oclient = 2', T + '? oClient'],
-     refused('N03', 5, why_decl('oClient', 4), 'oclient'), 1),
+        B, 'f()', 'func f', T + 'nClient = 1', T + 'nclient = 2', T + '? nClient'],
+     refused('N03', 5, why_decl('nClient', 4), 'nclient'), 1),
     ('N04', 'N1', 'a parameter used in another spelling is refused', '.haro', [
         B, 'f(1)', 'func f nCount', T + '? ncount'],
      refused('N04', 4, why_decl('nCount', 3), 'ncount'), 1),
@@ -74,16 +79,16 @@ CASES = [
         B, 'f()', 'func f', T + '? isNull(null)'],
      refused('N07', 4, 'a native is spelled in lowercase -- `isnull`; written', 'isNull'), 1),
     ('N08', 'N1', 'a class named in another spelling is refused', '.haro', [
-        B, 'f()', 'func f', T + 'o = new point', 'class Point'],
+        B, 'f()', 'func f', T + 'oO = new point', 'class Point'],
      refused('N08', 4, why_decl('Point', 5), 'point'), 1),
     ('N09', 'N1', 'a global used in another spelling is refused', '.haro', [
         '$nTotal = 1', B, 'f()', 'func f', T + '? $ntotal'],
      refused('N09', 5, why_decl('$nTotal', 1), '$ntotal', called=3), 1),
     ('N10', 'N1', 'an attribute used in another spelling is refused', '.haro', [
-        B, 'o = new Point', '? o.GetX()', 'class Point', T + '@nX = 3', T + 'func GetX', T * 2 + 'return @nx'],
+        B, 'oO = new Point', '? oO.GetX()', 'class Point', T + '@nX = 3', T + 'func GetX', T * 2 + 'return @nx'],
      refused('N10', 7, why_decl('@nX', 5), '@nx', called=3, where='method getx()'), 1),
     ('N11', 'N1', 'a method called in another spelling is refused', '.haro', [
-        B, 'f()', 'func f', T + 'o = new Point', T + '? o.getx()', 'class Point', T + 'func GetX', T * 2 + 'return 3'],
+        B, 'f()', 'func f', T + 'oO = new Point', T + '? oO.getx()', 'class Point', T + 'func GetX', T * 2 + 'return 3'],
      refused('N11', 5, why_decl('GetX', 7), 'getx'), 1),
     ('N12', 'N5', 'a keyword in another case is no name in a .haro file', '.haro', [
         B, 'f()', 'func f', T + 'aNd = 1', T + '? aNd'],
@@ -101,10 +106,10 @@ CASES = [
     # keyword in another case is refused, since a .ring class's keyword-shaped method is declared lowered and a .haro one may not be named so
     # (N16); an eval in a .haro program spells as the root does, its refusal the eval's own error (N17, N18).
     ('N15', 'N1', 'a bare attribute read in a method in another spelling is refused', '.haro', [
-        B, 'o = new App', '? o.GetX()', 'class App', T + 'nX = 3', T + 'func GetX', T * 2 + 'return nx'],
+        B, 'oO = new App', '? oO.GetX()', 'class App', T + 'nX = 3', T + 'func GetX', T * 2 + 'return nx'],
      refused('N15', 7, why_decl('nX', 5), 'nx', called=3, where='method getx()'), 1),
     ('N16', 'N5', 'a member named like a keyword in another case is refused', '.haro', [
-        B, 'f()', 'func f', T + 'o = new App', T + 'x = o.See()', 'class App', T + 'func See', T * 2 + 'return 1'],
+        B, 'f()', 'func f', T + 'oO = new App', T + 'xX = oO.See()', 'class App', T + 'func See', T * 2 + 'return 1'],
      refused('N16', 5, 'a keyword in another case is no name -- `see` is a keyword; written', 'See'), 1),
     ('N17', 'N1', 'an eval in a .haro program spells a local as declared', '.haro', [
         'f()', 'func f', T + 'nA = 4', T + 'eval("? na")'],

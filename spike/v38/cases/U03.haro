@@ -1,15 +1,15 @@
 f()
 func f
 	try
-		using o = new Res("r")
+		using oO = new Res("r")
 			raise("boom")
 		done
 	catch e
 		? "caught " + e
 	done
 class Res
-	cName = ""
-	func init n
-		cName = n
+	tName = ""
+	func init tN
+		tName = tN
 	func release
-		? "release " + cName
+		? "release " + tName

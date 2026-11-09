@@ -1,17 +1,17 @@
 f()
 func f
 	try
-		using $r = new Res("a")
+		using $xR = new Res("a")
 			swap()
 		done
 	catch e
 		? "caught: " + e
 	done
 func swap
-	$r = 5
+	$xR = 5
 class Res
-	cName = ""
-	func init n
-		cName = n
+	tName = ""
+	func init tN
+		tName = tN
 	func release
-		? "release " + cName
+		? "release " + tName

@@ -1,6 +1,6 @@
 ? "before"
-o = new App
-? o.GetX()
+oO = new App
+? oO.GetX()
 class App
 	nX = 3
 	func GetX

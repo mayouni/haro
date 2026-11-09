@@ -1,8 +1,8 @@
 ? "before"
 f()
 func f
-	o = new App
-	x = o.See()
+	oO = new App
+	xX = oO.See()
 class App
 	func See
 		return 1

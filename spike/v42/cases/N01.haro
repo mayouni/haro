@@ -1,11 +1,11 @@
 $nTotal = 10
 f()
 func f
-	oClient = 2
-	? oClient + Twice(3)
+	nClient = 2
+	? nClient + Twice(3)
 	? isnull(null)
-	o = new Point
-	? o.GetX()
+	oO = new Point
+	? oO.GetX()
 	? $nTotal
 func Twice nN
 	return nN * 2

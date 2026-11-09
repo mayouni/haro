@@ -2,6 +2,6 @@
 f()
 func f
 	within
-		$g = 1
+		$nG = 1
 		? "body"
 	done

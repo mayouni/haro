@@ -1,11 +1,11 @@
 ? f()
 ? "after"
 func f
-	n = 1
+	nN = 1
 	try
-		return n
+		return nN
 	finally
-		? "finally " + string(n) + " " + upper("x")
-		n = 2
+		? "finally " + string(nN) + " " + upper("x")
+		nN = 2
 	done
 	return 99

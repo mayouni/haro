@@ -1,15 +1,15 @@
 f()
 func f
-	using a = new OnlyClose
+	using oA = new OnlyClose
 		? "body a"
 	done
-	using b = new DestroyAndClose
+	using oB = new DestroyAndClose
 		? "body b"
 	done
-	using c = new Child
+	using oC = new Child
 		? "body c"
 	done
-	using d = new All
+	using oD = new All
 		? "body d"
 	done
 class OnlyClose

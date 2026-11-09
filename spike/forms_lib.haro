@@ -24,36 +24,36 @@
 #
 # Functions only; the globals are the generated court's.
 
-func FormsFail(nLine, cMsg)
-	CtFailC(nLine, "FORMS", ["rule:forms"], cMsg)
+func FormsFail(nLine, tMsg)
+	CtFailC(nLine, "FORMS", ["rule:forms"], tMsg)
 
-func FormsKindByName(cName)
+func FormsKindByName(tName)
 	for i = 1 to len($aCourtKinds)
-		if $aCourtKinds[i][2] = cName return $aCourtKinds[i] ok
+		if $aCourtKinds[i][2] = tName return $aCourtKinds[i] ok
 	next
 	return null
 
-func FormsIsUpper(c)
-	return ascii(c) >= 65 and ascii(c) <= 90
+func FormsIsUpper(tC)
+	return ascii(tC) >= 65 and ascii(tC) <= 90
 
-func FormsIsVowel(c)
-	return InStrListCs(lower(c), ["a", "e", "i", "o", "u"])
+func FormsIsVowel(tC)
+	return InStrListCs(lower(tC), ["a", "e", "i", "o", "u"])
 
-func InStrListCs(cS, aL)
+func InStrListCs(tS, aL)
 	for i = 1 to len(aL)
-		if aL[i] = cS return true ok
+		if aL[i] = tS return true ok
 	next
 	return false
 
-func FormsEndsWith(cS, cSuf)
-	if len(cSuf) = 0 return false ok
-	if len(cS) < len(cSuf) return false ok
-	return right(cS, len(cSuf)) = cSuf
+func FormsEndsWith(tS, tSuf)
+	if len(tSuf) = 0 return false ok
+	if len(tS) < len(tSuf) return false ok
+	return right(tS, len(tSuf)) = tSuf
 
-func FormsSuffixOf(cKey)
+func FormsSuffixOf(tKey)
 	aP = $aCourtFormset[5]
 	for i = 1 to len(aP)
-		if aP[i][1] = cKey return aP[i][2] ok
+		if aP[i][1] = tKey return aP[i][2] ok
 	next
 	return ""
 
@@ -79,23 +79,23 @@ func FormsFamilies(aDecls)
 	for i = 1 to len(aDecls)
 		aD = aDecls[i]
 		if aD[1] != aKind[1] loop ok
-		cBase = ""
+		tBase = ""
 		aWords = []
 		aC = aD[4]
 		for j = 1 to len(aC)
-			if lower(aC[j][1]) = aF[6][2] and (aC[j][3][1] = "string" or aC[j][3][1] = "word") cBase = aC[j][3][2] ok
+			if lower(aC[j][1]) = aF[6][2] and (aC[j][3][1] = "string" or aC[j][3][1] = "word") tBase = aC[j][3][2] ok
 			if lower(aC[j][1]) = aF[6][3] and aC[j][3][1] = "namelist" aWords = aC[j][3][2] ok
 		next
-		aOut + [aD[2], cBase, aWords, aD[3]]
+		aOut + [aD[2], tBase, aWords, aD[3]]
 	next
 	return aOut
 
 # a collecting court has already refused this word on this line, through the menu that types
 # the seat: the FORMS pass is the second guard and says nothing twice (v0.14)
-func FormsAlreadySaid(nLine, cWord)
+func FormsAlreadySaid(nLine, tWord)
 	if not $bCourtCollect return false ok
 	for i = 1 to len($aCourtFound)
-		if $aCourtFound[i][3] = nLine and $aCourtFound[i][1] = "FORMS" and substr($aCourtFound[i][4], "'" + cWord + "'") > 0 return true ok
+		if $aCourtFound[i][3] = nLine and $aCourtFound[i][1] = "FORMS" and substr($aCourtFound[i][4], "'" + tWord + "'") > 0 return true ok
 	next
 	return false
 
@@ -106,14 +106,14 @@ func FormsCheck(aDecls)
 	for i = 1 to len(aFam)
 		aSeen = []
 		for j = 1 to len(aFam[i][3])
-			cW = aFam[i][3][j]
-			if not InStrListCs(cW, aOffered) and not FormsAlreadySaid(aFam[i][4], cW)
-				FormsFail(aFam[i][4], "FAMILY " + aFam[i][1] + " offers '" + cW + "', which the FORMS " + $aCourtFormset[1] + " declares no form for: it declares " + CtJoin(aOffered, ", "))
+			tW = aFam[i][3][j]
+			if not InStrListCs(tW, aOffered) and not FormsAlreadySaid(aFam[i][4], tW)
+				FormsFail(aFam[i][4], "FAMILY " + aFam[i][1] + " offers '" + tW + "', which the FORMS " + $aCourtFormset[1] + " declares no form for: it declares " + CtJoin(aOffered, ", "))
 			ok
-			if InStrListCs(cW, aSeen)
-				FormsFail(aFam[i][4], "FAMILY " + aFam[i][1] + " offers '" + cW + "' twice")
+			if InStrListCs(tW, aSeen)
+				FormsFail(aFam[i][4], "FAMILY " + aFam[i][1] + " offers '" + tW + "' twice")
 			ok
-			aSeen + cW
+			aSeen + tW
 		next
 		if aFam[i][2] = ""
 			FormsFail(aFam[i][4], "FAMILY " + aFam[i][1] + " has no base verb")
@@ -121,21 +121,21 @@ func FormsCheck(aDecls)
 	next
 
 # the passive inflection of a base verb: Replace -> Replaced, Spacify -> Spacified, Find -> Finded
-func FormsPassive(cBase)
-	cInf = $aCourtFormset[3]
-	if cInf != "ed" return cBase + cInf ok
-	n = len(cBase)
-	if n = 0 return cBase ok
-	cLast = cBase[n]
-	if cLast = "e" return cBase + "d" ok
-	if cLast = "y" and n >= 2
-		if not FormsIsVowel(cBase[n - 1]) return left(cBase, n - 1) + "ied" ok
+func FormsPassive(tBase)
+	tInf = $aCourtFormset[3]
+	if tInf != "ed" return tBase + tInf ok
+	nN = len(tBase)
+	if nN = 0 return tBase ok
+	tLast = tBase[nN]
+	if tLast = "e" return tBase + "d" ok
+	if tLast = "y" and nN >= 2
+		if not FormsIsVowel(tBase[nN - 1]) return left(tBase, nN - 1) + "ied" ok
 	ok
-	return cBase + "ed"
+	return tBase + "ed"
 
 # every member a family generates: each subset of its parameter forms, in the
 # order offered, as the plain name, then the fluent name, then the passive name
-func FormsMembers(cBase, aWords)
+func FormsMembers(tBase, aWords)
 	aKeys = []
 	bFluent = false
 	bPassive = false
@@ -154,15 +154,15 @@ func FormsMembers(cBase, aWords)
 	next
 	aOut = []
 	for m = 0 to nCombos - 1
-		cSuf = ""
-		v = m
+		tSuf = ""
+		nV = m
 		for i = 1 to len(aKeys)
-			if v % 2 = 1 cSuf += FormsSuffixOf(aKeys[i]) ok
-			v = floor(v / 2)
+			if nV % 2 = 1 tSuf += FormsSuffixOf(aKeys[i]) ok
+			nV = floor(nV / 2)
 		next
-		aOut + (cBase + cSuf)
-		if bFluent aOut + (cBase + cSuf + $aCourtFormset[2]) ok
-		if bPassive aOut + (FormsPassive(cBase) + cSuf) ok
+		aOut + (tBase + tSuf)
+		if bFluent aOut + (tBase + tSuf + $aCourtFormset[2]) ok
+		if bPassive aOut + (FormsPassive(tBase) + tSuf) ok
 	next
 	return aOut
 
@@ -178,108 +178,108 @@ func FormsPrintFamilies(aDecls)
 	if len(aFam) = 0 ? "no family declared" ok
 
 # a name split under the FORMS: [base, keys, fluent, statement, why]; why "" when it parses
-func FormsSplit(cName)
+func FormsSplit(tName)
 	aF = $aCourtFormset
-	cRest = cName
+	tRest = tName
 	bStmt = false
-	if FormsEndsWith(cRest, aF[4])
-		cRest = left(cRest, len(cRest) - len(aF[4]))
+	if FormsEndsWith(tRest, aF[4])
+		tRest = left(tRest, len(tRest) - len(aF[4]))
 		bStmt = true
 	ok
 	bFluent = false
-	if FormsEndsWith(cRest, aF[2])
-		cRest = left(cRest, len(cRest) - len(aF[2]))
+	if FormsEndsWith(tRest, aF[2])
+		tRest = left(tRest, len(tRest) - len(aF[2]))
 		bFluent = true
 	ok
 	aKeys = []
 	while true
-		cBest = ""
-		cBestKey = ""
-		for i = 1 to len(aF[5])
-			cSuf = aF[5][i][2]
-			if FormsEndsWith(cRest, cSuf) and len(cSuf) > len(cBest)
-				cBest = cSuf
-				cBestKey = aF[5][i][1]
+		tBest = ""
+		tBestKey = ""
+		for nI = 1 to len(aF[5])
+			tSuf = aF[5][nI][2]
+			if FormsEndsWith(tRest, tSuf) and len(tSuf) > len(tBest)
+				tBest = tSuf
+				tBestKey = aF[5][nI][1]
 			ok
 		next
-		if cBest = "" exit ok
-		if InStrListCs(cBestKey, aKeys)
-			return [cRest, aKeys, bFluent, bStmt, "the suffix " + cBest + " appears twice"]
+		if tBest = "" exit ok
+		if InStrListCs(tBestKey, aKeys)
+			return [tRest, aKeys, bFluent, bStmt, "the suffix " + tBest + " appears twice"]
 		ok
-		cRest = left(cRest, len(cRest) - len(cBest))
-		insert(aKeys, 0, cBestKey)
-		if len(cRest) = 0
-			return [cRest, aKeys, bFluent, bStmt, "nothing is left of the name but suffixes"]
+		tRest = left(tRest, len(tRest) - len(tBest))
+		insert(aKeys, 0, tBestKey)
+		if len(tRest) = 0
+			return [tRest, aKeys, bFluent, bStmt, "nothing is left of the name but suffixes"]
 		ok
 	end
-	if FormsEndsWith(cRest, aF[2])
-		return [cRest, aKeys, bFluent, bStmt, "the fluent form " + aF[2] + " is not last"]
+	if FormsEndsWith(tRest, aF[2])
+		return [tRest, aKeys, bFluent, bStmt, "the fluent form " + aF[2] + " is not last"]
 	ok
-	if FormsEndsWith(cRest, aF[4])
-		return [cRest, aKeys, bFluent, bStmt, "the statement form " + aF[4] + " is not outermost"]
+	if FormsEndsWith(tRest, aF[4])
+		return [tRest, aKeys, bFluent, bStmt, "the statement form " + aF[4] + " is not outermost"]
 	ok
-	n = len(cRest)
-	i = n
-	while i >= 1
-		if not FormsIsUpper(cRest[i]) exit ok
-		i--
+	nN = len(tRest)
+	nI = nN
+	while nI >= 1
+		if not FormsIsUpper(tRest[nI]) exit ok
+		nI--
 	end
-	if i < n and i >= 1
-		cRun = substr(cRest, i + 1)
-		if len(cRun) >= 2
-			return [cRest, aKeys, bFluent, bStmt, "ends in '" + cRun + "', which no declared suffix spells"]
+	if nI < nN and nI >= 1
+		tRun = substr(tRest, nI + 1)
+		if len(tRun) >= 2
+			return [tRest, aKeys, bFluent, bStmt, "ends in '" + tRun + "', which no declared suffix spells"]
 		ok
 	ok
-	return [cRest, aKeys, bFluent, bStmt, ""]
+	return [tRest, aKeys, bFluent, bStmt, ""]
 
 # the plain twin of a fluent name: the name with the fluent form removed
 func FormsPlainTwin(aSplit)
-	cOut = aSplit[1]
+	tOut = aSplit[1]
 	for i = 1 to len(aSplit[2])
-		cOut += FormsSuffixOf(aSplit[2][i])
+		tOut += FormsSuffixOf(aSplit[2][i])
 	next
-	if aSplit[4] cOut += $aCourtFormset[4] ok
-	return cOut
+	if aSplit[4] tOut += $aCourtFormset[4] ok
+	return tOut
 
-func FormsReadNames(cPath)
-	if not fexists(cPath) CtFail(1, "no names file at '" + cPath + "'") ok
-	cText = read(cPath)
+func FormsReadNames(tPath)
+	if not fexists(tPath) CtFail(1, "no names file at '" + tPath + "'") ok
+	tText = read(tPath)
 	aOut = []
-	cL = ""
-	for i = 1 to len(cText)
-		c = cText[i]
-		if c = char(10)
-			FormsTakeName(aOut, cL)
-			cL = ""
+	tL = ""
+	for i = 1 to len(tText)
+		tC = tText[i]
+		if tC = char(10)
+			FormsTakeName(aOut, tL)
+			tL = ""
 		else
-			cL += c
+			tL += tC
 		ok
 	next
-	FormsTakeName(aOut, cL)
+	FormsTakeName(aOut, tL)
 	return aOut
 
-func FormsTakeName(aOut, cRaw)
-	cL = FormsTrim(cRaw)
-	if len(cL) = 0 return ok
-	if cL[1] = "#" return ok
-	aOut + cL
+func FormsTakeName(aOut, tRaw)
+	tL = FormsTrim(tRaw)
+	if len(tL) = 0 return ok
+	if tL[1] = "#" return ok
+	aOut + tL
 
-func FormsTrim(cS)
-	i = 1
-	n = len(cS)
-	while i <= n
-		c = cS[i]
-		if c != " " and c != char(9) and c != char(13) exit ok
-		i++
+func FormsTrim(tS)
+	nI = 1
+	nN = len(tS)
+	while nI <= nN
+		tC = tS[nI]
+		if tC != " " and tC != char(9) and tC != char(13) exit ok
+		nI++
 	end
-	j = n
-	while j >= i
-		c = cS[j]
-		if c != " " and c != char(9) and c != char(13) exit ok
-		j--
+	nJ = nN
+	while nJ >= nI
+		tC = tS[nJ]
+		if tC != " " and tC != char(9) and tC != char(13) exit ok
+		nJ--
 	end
-	if j < i return "" ok
-	return substr(cS, i, j - i + 1)
+	if nJ < nI return "" ok
+	return substr(tS, nI, nJ - nI + 1)
 
 func FormsPrintSpellings(aDecls, aNames)
 	aFam = FormsFamilies(aDecls)
@@ -290,46 +290,46 @@ func FormsPrintSpellings(aDecls, aNames)
 	nAgree = 0
 	nDis = 0
 	for i = 1 to len(aNames)
-		cName = aNames[i]
-		aS = FormsSplit(cName)
-		cWhy = aS[5]
-		cOf = ""
-		if cWhy = "" and aS[3]
-			cTwin = FormsPlainTwin(aS)
-			if not InStrListCs(cTwin, aNames)
-				cWhy = cName + " requires " + cTwin + ": the fluent form stands beside its plain twin"
+		tName = aNames[i]
+		aS = FormsSplit(tName)
+		tWhy = aS[5]
+		tOf = ""
+		if tWhy = "" and aS[3]
+			tTwin = FormsPlainTwin(aS)
+			if not InStrListCs(tTwin, aNames)
+				tWhy = tName + " requires " + tTwin + ": the fluent form stands beside its plain twin"
 			ok
 		ok
-		if cWhy = ""
+		if tWhy = ""
 			for j = 1 to len(aFam)
-				cBase = aFam[j][2]
+				tBase = aFam[j][2]
 				bOfFamily = false
-				if InStrListCs(cName, aMembers[j])
+				if InStrListCs(tName, aMembers[j])
 					bOfFamily = true
-				but aS[1] = cBase
+				but aS[1] = tBase
 					bOfFamily = true
 				but len(aFam[j][3]) > 0
-					if InStrListCs("passive", aFam[j][3]) and aS[1] = FormsPassive(cBase) bOfFamily = true ok
+					if InStrListCs("passive", aFam[j][3]) and aS[1] = FormsPassive(tBase) bOfFamily = true ok
 				ok
 				if bOfFamily
-					if InStrListCs(cName, aMembers[j])
-						cOf = " member of " + aFam[j][1]
+					if InStrListCs(tName, aMembers[j])
+						tOf = " member of " + aFam[j][1]
 					else
-						cWhy = "the family " + aFam[j][1] + " offers [" + CtJoin(aFam[j][3], ", ") + "] and not the forms of " + cName
+						tWhy = "the family " + aFam[j][1] + " offers [" + CtJoin(aFam[j][3], ", ") + "] and not the forms of " + tName
 					ok
 					exit
 				ok
 			next
 		ok
-		if cWhy = ""
+		if tWhy = ""
 			nAgree++
-			cLine = "agree " + cName + " base=" + aS[1] + " forms=[" + CtJoin(aS[2], ", ") + "]"
-			if aS[3] cLine += " fluent" ok
-			if aS[4] cLine += " statement" ok
-			? cLine + cOf
+			tLine = "agree " + tName + " base=" + aS[1] + " forms=[" + CtJoin(aS[2], ", ") + "]"
+			if aS[3] tLine += " fluent" ok
+			if aS[4] tLine += " statement" ok
+			? tLine + tOf
 		else
 			nDis++
-			? "disagree " + cName + ": " + cWhy
+			? "disagree " + tName + ": " + tWhy
 		ok
 	next
 	nMissing = 0

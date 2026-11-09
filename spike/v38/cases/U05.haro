@@ -1,7 +1,7 @@
 f()
 func f
 	try
-		using o = new Bad
+		using oO = new Bad
 			raise("in body")
 		done
 	catch e

@@ -6,15 +6,15 @@
 
 load "expr_lib.haro"
 
-$cExprLang = "z"
+$tExprLang = "z"
 $aExprOperators = ["or", "and", "not", "cmp", "contains", "add", "sub", "mul", "div", "round", "neg"]
 $aExprOperands = ["number", "text", "flag", "ref", "agg"]
 $aExprAggregates = ["sum", "count"]
 $aExprVariables = []
 $aExprContexts = []
-$cExprAbsent = "missing"
-$cExprDivision = "calm"
-$cExprEquality = "value"
+$tExprAbsent = "missing"
+$tExprDivision = "calm"
+$tExprEquality = "value"
 $aExprToks = []
 $nExprPos = 1
 $aExprAllowed = []

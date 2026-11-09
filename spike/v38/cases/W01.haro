@@ -1,8 +1,8 @@
-$cCaller = "nobody"
-within $cCaller = "agent-x"
-	? "in: " + $cCaller
+$tCaller = "nobody"
+within $tCaller = "agent-x"
+	? "in: " + $tCaller
 	who()
 done
-? "after: " + $cCaller
+? "after: " + $tCaller
 func who
-	? "who: " + $cCaller
+	? "who: " + $tCaller

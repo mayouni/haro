@@ -18,27 +18,27 @@ $nBlkPos = 1
 if len(sysargv) < 4
 	? "usage: block.haro load <file> | fmt <file> | same <a> <b> | roundtrip <file> ..."
 else
-	cVerb = sysargv[3]
-	if cVerb = "load"
+	tVerb = sysargv[3]
+	if tVerb = "load"
 		try
 			? BlkDumpAll(BlkLoad(read(sysargv[4])))
 		catch
 			? cCatchError
 		done
-	but cVerb = "fmt"
+	but tVerb = "fmt"
 		try
 			see BlkPrintC6(BlkLoad(read(sysargv[4])))
 		catch
 			? cCatchError
 		done
-	but cVerb = "same"
+	but tVerb = "same"
 		if len(sysargv) < 5
 			? "usage: block.haro same <a> <b>"
 		else
 			try
-				cA = BlkDumpAll(BlkLoad(read(sysargv[4])))
-				cB = BlkDumpAll(BlkLoad(read(sysargv[5])))
-				if cA = cB
+				tA = BlkDumpAll(BlkLoad(read(sysargv[4])))
+				tB = BlkDumpAll(BlkLoad(read(sysargv[5])))
+				if tA = tB
 					? "same"
 				else
 					? "differ"
@@ -47,7 +47,7 @@ else
 				? cCatchError
 			done
 		ok
-	but cVerb = "roundtrip"
+	but tVerb = "roundtrip"
 		for k = 4 to len(sysargv)
 			BlkRoundTrip(sysargv[k])
 		next
@@ -58,17 +58,17 @@ ok
 
 # a function, not top-level code: a name assigned at the top level is a global on this surface, and a function's
 # own names must not be those (haro.haro's note)
-func BlkRoundTrip(cPath)
+func BlkRoundTrip(tPath)
 	try
-		cIn = read(cPath)
-		aA = BlkLoad(cIn)
-		cOut = BlkPrintC6(aA)
-		aB = BlkLoad(cOut)
+		tIn = read(tPath)
+		aA = BlkLoad(tIn)
+		tOut = BlkPrintC6(aA)
+		aB = BlkLoad(tOut)
 		if BlkDumpAll(aA) = BlkDumpAll(aB)
-			? "ok " + cPath + " " + len(aA) + " " + len(cIn) + " " + len(cOut)
+			? "ok " + tPath + " " + len(aA) + " " + len(tIn) + " " + len(tOut)
 		else
-			? "DIFFERS " + cPath
+			? "DIFFERS " + tPath
 		ok
 	catch
-		? "refused " + cPath + ": " + cCatchError
+		? "refused " + tPath + ": " + cCatchError
 	done

@@ -21,14 +21,14 @@ $nCondPos = 1
 $aCondDeclSeats = []
 $aCondDecls = []
 $aCondVerbOf = []
-$cCondOther = ""
+$tCondOther = ""
 $aCondRefSeats = []
 $aCondFormats = []
 $bCondUnread = false
 $aCondLangs = []
-$cCondLang = ""
+$tCondLang = ""
 $aCourtSentences = []
-$cStzuDir = ""
+$tStzuDir = ""
 $bStzuCollect = false
 $aStzuFound = []
 $aStzuBroken = []
@@ -45,39 +45,39 @@ $aStzuNotes = []
 if len(sysargv) < 4
 	? "usage: forge.haro <file.haro> <out dir>"
 else
-	cInPath = sysargv[3]
-	cOutDir = sysargv[4]
-	cStzuText = read(cInPath)
-	$cStzuDir = StzuDirOf(cInPath)
+	tInPath = sysargv[3]
+	tOutDir = sysargv[4]
+	tStzuText = read(tInPath)
+	$tStzuDir = StzuDirOf(tInPath)
 	try
-		aForgedLang = StzuDeclare(cStzuText)
-		cLangName = LangGet(aForgedLang, "name")
-		cForgedWhat = ""
+		aForgedLang = StzuDeclare(tStzuText)
+		tLangName = LangGet(aForgedLang, "name")
+		tForgedWhat = ""
 		if len(LangGet(aForgedLang, "declarations")) > 0 or len(LangGet(aForgedLang, "expressions")) = 0
-			cCourtText = ForgeCourt(aForgedLang)
-			cGbnfText = ForgeGbnf(aForgedLang)
-			write(cOutDir + "/" + cLangName + "_court.haro", cCourtText)
-			write(cOutDir + "/" + cLangName + ".gbnf", cGbnfText)
+			tCourtText = ForgeCourt(aForgedLang)
+			tGbnfText = ForgeGbnf(aForgedLang)
+			write(tOutDir + "/" + tLangName + "_court.haro", tCourtText)
+			write(tOutDir + "/" + tLangName + ".gbnf", tGbnfText)
 			# a string first: a number on the left of + would read the string as a number (R41)
-			cForgedWhat = string(len(LangGet(aForgedLang, "declarations"))) + " kinds, " +
+			tForgedWhat = string(len(LangGet(aForgedLang, "declarations"))) + " kinds, " +
 			  string(len(LangGet(aForgedLang, "forms"))) + " forms, " + string(len(LangGet(aForgedLang, "refusals"))) + " refusals -> " +
-			  cLangName + "_court.haro, " + cLangName + ".gbnf"
+			  tLangName + "_court.haro, " + tLangName + ".gbnf"
 		ok
 		# v0.5: an EXPRESSION language is forged whole -- its court and its
 		# evaluator -- into <lang>_expr.haro, and its grammar into <lang>_expr.gbnf
 		if len(LangGet(aForgedLang, "expressions")) > 0
-			write(cOutDir + "/" + cLangName + "_expr.haro", ForgeExprCourt(aForgedLang))
-			write(cOutDir + "/" + cLangName + "_expr.gbnf", ForgeExprGbnf(aForgedLang))
-			if cForgedWhat != "" cForgedWhat += "; " ok
-			cForgedWhat += string(len(LangGet(aForgedLang, "expressions"))) + " expression(s) -> " + cLangName + "_expr.haro, " + cLangName + "_expr.gbnf"
+			write(tOutDir + "/" + tLangName + "_expr.haro", ForgeExprCourt(aForgedLang))
+			write(tOutDir + "/" + tLangName + "_expr.gbnf", ForgeExprGbnf(aForgedLang))
+			if tForgedWhat != "" tForgedWhat += "; " ok
+			tForgedWhat += string(len(LangGet(aForgedLang, "expressions"))) + " expression(s) -> " + tLangName + "_expr.haro, " + tLangName + "_expr.gbnf"
 		ok
 		# v0.7: an ASK's question grammar, for the decoder
 		if not isnull(LangGet(aForgedLang, "ask"))
-			write(cOutDir + "/" + cLangName + "_ask.gbnf", ForgeAskGbnf(aForgedLang))
-			if cForgedWhat != "" cForgedWhat += "; " ok
-			cForgedWhat += "1 ask -> " + cLangName + "_ask.gbnf"
+			write(tOutDir + "/" + tLangName + "_ask.gbnf", ForgeAskGbnf(aForgedLang))
+			if tForgedWhat != "" tForgedWhat += "; " ok
+			tForgedWhat += "1 ask -> " + tLangName + "_ask.gbnf"
 		ok
-		? "forged " + cLangName + ": " + cForgedWhat
+		? "forged " + tLangName + ": " + tForgedWhat
 	catch
 		? cCatchError
 	done
@@ -85,59 +85,59 @@ ok
 
 # ---- the court, as Ring source -----------------------------------------------
 
-func RingStr(cS)
+func RingStr(tS)
 	# a Ring string literal; the Commons allows no escapes and no double
 	# quote inside a string, so double quotes are safe delimiters unless the
 	# text holds one, in which case single quotes are used
-	if substr(cS, '"') > 0 return "'" + cS + "'" ok
-	return '"' + cS + '"'
+	if substr(tS, '"') > 0 return "'" + tS + "'" ok
+	return '"' + tS + '"'
 
 # what a seat's type name resolves to in the language: prim form expr menu range
 # format decl union sentence -- the meta-court's own answer (haro_lib.haro)
-func TypeKindOf(aLang, cOf)
-	return StzuTypeKindOf(aLang, cOf)
+func TypeKindOf(aLang, tOf)
+	return StzuTypeKindOf(aLang, tOf)
 
-func UnionOf(aLang, cName)
+func UnionOf(aLang, tName)
 	aU = LangGet(aLang, "unions")
 	for i = 1 to len(aU)
-		if aU[i][1] = cName return aU[i] ok
+		if aU[i][1] = tName return aU[i] ok
 	next
 	return null
 
 # a declaration's MESSAGES as [[seat, text], ...]
 func MessagesSource(aMsgs)
-	cBuf = "["
+	tBuf = "["
 	for i = 1 to len(aMsgs)
-		if i > 1 cBuf += ", " ok
-		cBuf += "[" + RingStr(aMsgs[i][1]) + ", " + RingStr(aMsgs[i][2]) + "]"
+		if i > 1 tBuf += ", " ok
+		tBuf += "[" + RingStr(aMsgs[i][1]) + ", " + RingStr(aMsgs[i][2]) + "]"
 	next
-	return cBuf + "]"
+	return tBuf + "]"
 
 # a union's alternatives as [[of, isList, typeKind], ...]
 func AltsSource(aLang, aAlts)
-	cBuf = "["
+	tBuf = "["
 	for i = 1 to len(aAlts)
-		if i > 1 cBuf += ", " ok
-		cBuf += "[" + RingStr(aAlts[i][1]) + ", " + string(aAlts[i][2]) + ", " + RingStr(TypeKindOf(aLang, aAlts[i][1])) + "]"
+		if i > 1 tBuf += ", " ok
+		tBuf += "[" + RingStr(aAlts[i][1]) + ", " + string(aAlts[i][2]) + ", " + RingStr(TypeKindOf(aLang, aAlts[i][1])) + "]"
 	next
-	return cBuf + "]"
+	return tBuf + "]"
 
 # a seat in the court's table is [name, of, isList, optional, typeKind]
 func SeatsSource(aLang, aSeats)
-	cBuf = "["
+	tBuf = "["
 	for i = 1 to len(aSeats)
-		if i > 1 cBuf += ", " ok
-		cBuf += "[" + RingStr(aSeats[i][1]) + ", " + RingStr(aSeats[i][2]) + ", " + string(aSeats[i][3]) + ", " + string(aSeats[i][4]) + ", " + RingStr(TypeKindOf(aLang, aSeats[i][2])) + "]"
+		if i > 1 tBuf += ", " ok
+		tBuf += "[" + RingStr(aSeats[i][1]) + ", " + RingStr(aSeats[i][2]) + ", " + string(aSeats[i][3]) + ", " + string(aSeats[i][4]) + ", " + RingStr(TypeKindOf(aLang, aSeats[i][2])) + "]"
 	next
-	return cBuf + "]"
+	return tBuf + "]"
 
 func NamesSource(aNames)
-	cBuf = "["
+	tBuf = "["
 	for i = 1 to len(aNames)
-		if i > 1 cBuf += ", " ok
-		cBuf += RingStr(aNames[i])
+		if i > 1 tBuf += ", " ok
+		tBuf += RingStr(aNames[i])
 	next
-	return cBuf + "]"
+	return tBuf + "]"
 
 # v0.28 (HARO-MENU-CITES-01): a cites value as Ring source -- the word none as the string "none", a list as a list
 func CitesSource(xCites)
@@ -146,40 +146,40 @@ func CitesSource(xCites)
 
 # v0.28: the CITES a MENU, RANGE, FORMAT or UNION declares rides into the court after its code, and only
 # when declared, so a language that declares none forges the bytes it forged before
-func CitesTail(aRec, n)
-	if len(aRec) < n return "" ok
-	xC = aRec[n]
+func CitesTail(aRec, nN)
+	if len(aRec) < nN return "" ok
+	xC = aRec[nN]
 	if isstring(xC) return ", " + RingStr(xC) ok
 	if len(xC) = 0 return "" ok
 	return ", " + NamesSource(xC)
 
 func PointsSource(aPoints)
-	cBuf = "["
+	tBuf = "["
 	for i = 1 to len(aPoints)
-		if i > 1 cBuf += ", " ok
-		cBuf += "[" + RingStr(aPoints[i][1] + "." + aPoints[i][2]) + ", " + RingStr(aPoints[i][3]) + "]"
+		if i > 1 tBuf += ", " ok
+		tBuf += "[" + RingStr(aPoints[i][1] + "." + aPoints[i][2]) + ", " + RingStr(aPoints[i][3]) + "]"
 	next
-	return cBuf + "]"
+	return tBuf + "]"
 
 # a table of rows as a Ring list literal, one row a line; fnRow is applied by the
 # caller, so this takes the rows' texts
 # v0.27: rows joined on one line
 func JoinRows(aRows)
-	c = ""
+	tC = ""
 	for i = 1 to len(aRows)
-		if i > 1 c += ", " ok
-		c += aRows[i]
+		if i > 1 tC += ", " ok
+		tC += aRows[i]
 	next
-	return c
+	return tC
 
-func RowsSource(aRows, nl)
-	c = "[" + nl
+func RowsSource(aRows, xNl)
+	xC = "[" + xNl
 	for i = 1 to len(aRows)
-		c += "      " + aRows[i]
-		if i < len(aRows) c += "," ok
-		c += nl
+		xC += "      " + aRows[i]
+		if i < len(aRows) xC += "," ok
+		xC += xNl
 	next
-	return c + "    ]"
+	return xC + "    ]"
 
 # an EXPRESSION's tables as the court reads them (v0.6): [name, ops, opds,
 # aggs, vars, contexts, absent, division, equality]
@@ -190,20 +190,20 @@ func ExprSource(aE)
 	if isnull(aVars) aVars = [] ok
 	aCtx = []
 	if len(aE) >= 8 aCtx = aE[8] ok
-	cCtx = "["
+	tCtx = "["
 	for i = 1 to len(aCtx)
-		if i > 1 cCtx += ", " ok
-		cCtx += "[" + RingStr(aCtx[i][1]) + ", " + NamesSource(aCtx[i][2]) + "]"
+		if i > 1 tCtx += ", " ok
+		tCtx += "[" + RingStr(aCtx[i][1]) + ", " + NamesSource(aCtx[i][2]) + "]"
 	next
-	cCtx += "]"
-	cAbsent = "" cDivision = "" cEquality = ""
+	tCtx += "]"
+	tAbsent = "" tDivision = "" tEquality = ""
 	if len(aE) >= 11
-		cAbsent = aE[9]
-		cDivision = aE[10]
-		cEquality = aE[11]
+		tAbsent = aE[9]
+		tDivision = aE[10]
+		tEquality = aE[11]
 	ok
 	return "[" + RingStr(aE[1]) + ", " + NamesSource(aE[2]) + ", " + NamesSource(aE[3]) + ", " + NamesSource(aAgg) + ", " +
-	       NamesSource(aVars) + ", " + cCtx + ", " + RingStr(cAbsent) + ", " + RingStr(cDivision) + ", " + RingStr(cEquality) + "]"
+	       NamesSource(aVars) + ", " + tCtx + ", " + RingStr(tAbsent) + ", " + RingStr(tDivision) + ", " + RingStr(tEquality) + "]"
 
 # a WALK as the court reads it (v0.6): [name, of, steps, through, order,
 # guards, compute, formula, fail]
@@ -219,97 +219,97 @@ func WalkSource(aW)
 # [name, ext, kinds, forms, refusals, menus, ranges, formats, unions,
 # constraints, world, points, floors, views, sentences, expressions, walks, ask, run, symbols]
 func LangSource(aLang)
-	nl = char(10)
+	tNl = char(10)
 	aRows = []
 	aD = LangGet(aLang, "declarations")
 	for i = 1 to len(aD)
 		aCodes = []
 		if len(aD[i]) >= 8 aCodes = aD[i][8] ok
 		# v0.35: the seat severities, a 7th element only where declared -- so every other court keeps its bytes
-		cSevs = ""
+		tSevs = ""
 		if len(aD[i]) >= 10
-			if len(aD[i][10]) > 0 cSevs = ", " + MessagesSource(aD[i][10]) ok
+			if len(aD[i][10]) > 0 tSevs = ", " + MessagesSource(aD[i][10]) ok
 		ok
-		aRows + ("[" + RingStr(aD[i][2]) + ", " + RingStr(aD[i][1]) + ", " + SeatsSource(aLang, aD[i][3]) + ", " + RingStr(aD[i][6]) + ", " + MessagesSource(aD[i][7]) + ", " + MessagesSource(aCodes) + cSevs + "]")
+		aRows + ("[" + RingStr(aD[i][2]) + ", " + RingStr(aD[i][1]) + ", " + SeatsSource(aLang, aD[i][3]) + ", " + RingStr(aD[i][6]) + ", " + MessagesSource(aD[i][7]) + ", " + MessagesSource(aCodes) + tSevs + "]")
 	next
-	cKinds = RowsSource(aRows, nl)
+	tKinds = RowsSource(aRows, tNl)
 	aRows = []
 	aF = LangGet(aLang, "forms")
 	for i = 1 to len(aF)
 		aRows + ("[" + RingStr(aF[i][1]) + ", " + SeatsSource(aLang, aF[i][2]) + "]")
 	next
-	cForms = RowsSource(aRows, nl)
+	tForms = RowsSource(aRows, tNl)
 	aRows = []
 	aR = LangGet(aLang, "refusals")
 	for i = 1 to len(aR)
 		aNamed = []
 		if len(aR[i]) >= 5 aNamed = aR[i][5] ok
-		cRCode = ""
+		tRCode = ""
 		aRCodes = []
 		aRCites = []
 		if len(aR[i]) >= 8
-			cRCode = aR[i][6]
+			tRCode = aR[i][6]
 			aRCodes = aR[i][7]
 			aRCites = aR[i][8]
 		ok
-		cRSevs = ""
+		tRSevs = ""
 		if len(aR[i]) >= 9
-			if len(aR[i][9]) > 0 cRSevs = ", " + MessagesSource(aR[i][9]) ok
+			if len(aR[i][9]) > 0 tRSevs = ", " + MessagesSource(aR[i][9]) ok
 		ok
-		aRows + ("[" + RingStr(aR[i][1]) + ", " + RingStr(aR[i][2]) + ", " + MessagesSource(aNamed) + ", " + RingStr(cRCode) + ", " + MessagesSource(aRCodes) + ", " + CitesSource(aRCites) + cRSevs + "]")
+		aRows + ("[" + RingStr(aR[i][1]) + ", " + RingStr(aR[i][2]) + ", " + MessagesSource(aNamed) + ", " + RingStr(tRCode) + ", " + MessagesSource(aRCodes) + ", " + CitesSource(aRCites) + tRSevs + "]")
 	next
-	cRefusals = RowsSource(aRows, nl)
+	tRefusals = RowsSource(aRows, tNl)
 	aRows = []
 	aM = LangGet(aLang, "menus")
 	for i = 1 to len(aM)
-		cMC = ""
-		if len(aM[i]) >= 5 cMC = aM[i][5] ok
-		aRows + ("[" + RingStr(aM[i][1]) + ", " + NamesSource(aM[i][2]) + ", " + RingStr(aM[i][3]) + ", " + RingStr(cMC) + CitesTail(aM[i], 6) + "]")
+		tMC = ""
+		if len(aM[i]) >= 5 tMC = aM[i][5] ok
+		aRows + ("[" + RingStr(aM[i][1]) + ", " + NamesSource(aM[i][2]) + ", " + RingStr(aM[i][3]) + ", " + RingStr(tMC) + CitesTail(aM[i], 6) + "]")
 	next
-	cMenus = RowsSource(aRows, nl)
+	tMenus = RowsSource(aRows, tNl)
 	aRows = []
 	aRg = LangGet(aLang, "ranges")
 	for i = 1 to len(aRg)
-		cRgC = ""
-		if len(aRg[i]) >= 6 cRgC = aRg[i][6] ok
-		aRows + ("[" + RingStr(aRg[i][1]) + ", " + aRg[i][2] + ", " + aRg[i][3] + ", " + RingStr(aRg[i][4]) + ", " + RingStr(cRgC) + CitesTail(aRg[i], 7) + "]")
+		tRgC = ""
+		if len(aRg[i]) >= 6 tRgC = aRg[i][6] ok
+		aRows + ("[" + RingStr(aRg[i][1]) + ", " + aRg[i][2] + ", " + aRg[i][3] + ", " + RingStr(aRg[i][4]) + ", " + RingStr(tRgC) + CitesTail(aRg[i], 7) + "]")
 	next
-	cRanges = RowsSource(aRows, nl)
+	tRanges = RowsSource(aRows, tNl)
 	aRows = []
 	aFm = LangGet(aLang, "formats")
 	for i = 1 to len(aFm)
-		cFold = ""
-		if len(aFm[i]) >= 5 cFold = aFm[i][5] ok
-		cFmC = ""
-		if len(aFm[i]) >= 6 cFmC = aFm[i][6] ok
-		aRows + ("[" + RingStr(aFm[i][1]) + ", " + RingStr(aFm[i][2]) + ", " + RingStr(aFm[i][3]) + ", " + RingStr(cFold) + ", " + RingStr(cFmC) + CitesTail(aFm[i], 7) + "]")
+		tFold = ""
+		if len(aFm[i]) >= 5 tFold = aFm[i][5] ok
+		tFmC = ""
+		if len(aFm[i]) >= 6 tFmC = aFm[i][6] ok
+		aRows + ("[" + RingStr(aFm[i][1]) + ", " + RingStr(aFm[i][2]) + ", " + RingStr(aFm[i][3]) + ", " + RingStr(tFold) + ", " + RingStr(tFmC) + CitesTail(aFm[i], 7) + "]")
 	next
-	cFormats = RowsSource(aRows, nl)
+	tFormats = RowsSource(aRows, tNl)
 	aRows = []
 	aU = LangGet(aLang, "unions")
 	for i = 1 to len(aU)
-		cUC = ""
-		if len(aU[i]) >= 5 cUC = aU[i][5] ok
-		aRows + ("[" + RingStr(aU[i][1]) + ", " + AltsSource(aLang, aU[i][2]) + ", " + RingStr(aU[i][3]) + ", " + RingStr(cUC) + CitesTail(aU[i], 6) + "]")
+		tUC = ""
+		if len(aU[i]) >= 5 tUC = aU[i][5] ok
+		aRows + ("[" + RingStr(aU[i][1]) + ", " + AltsSource(aLang, aU[i][2]) + ", " + RingStr(aU[i][3]) + ", " + RingStr(tUC) + CitesTail(aU[i], 6) + "]")
 	next
-	cUnions = RowsSource(aRows, nl)
+	tUnions = RowsSource(aRows, tNl)
 	aRows = []
 	aC = LangGet(aLang, "constraints")
 	for i = 1 to len(aC)
-		cCC = ""
-		if len(aC[i]) >= 7 cCC = aC[i][7] ok
+		tCC = ""
+		if len(aC[i]) >= 7 tCC = aC[i][7] ok
 		# v0.23: the CITES a CONSTRAINT declares ride into the court beside its CODE
 		aCCites = []
 		if len(aC[i]) >= 8 aCCites = aC[i][8] ok
 		# v0.25: the SEVERITY (error or warning) rides along as the eighth element
-		cCSev = "error"
-		if len(aC[i]) >= 9 cCSev = aC[i][9] ok
-		aRows + ("[" + RingStr(aC[i][1]) + ", " + RingStr(aC[i][2]) + ", " + RingStr(aC[i][3]) + ", " + RingStr(aC[i][4]) + ", " + RingStr(aC[i][5]) + ", " + RingStr(cCC) + ", " + CitesSource(aCCites) + ", " + RingStr(cCSev) + "]")
+		tCSev = "error"
+		if len(aC[i]) >= 9 tCSev = aC[i][9] ok
+		aRows + ("[" + RingStr(aC[i][1]) + ", " + RingStr(aC[i][2]) + ", " + RingStr(aC[i][3]) + ", " + RingStr(aC[i][4]) + ", " + RingStr(aC[i][5]) + ", " + RingStr(tCC) + ", " + CitesSource(aCCites) + ", " + RingStr(tCSev) + "]")
 	next
-	cConstraints = RowsSource(aRows, nl)
+	tConstraints = RowsSource(aRows, tNl)
 	# v0.32: the PATTERNs [name, over kind, over seat, rule, sets, message, line, code, cites, severity], the language entry's 24th element,
 	# present only where the language declares one -- so a court without a pattern is the court it was
-	cPatterns = ""
+	tPatterns = ""
 	aPt = LangGet(aLang, "patterns")
 	if not isnull(aPt)
 		if len(aPt) > 0
@@ -319,148 +319,148 @@ func LangSource(aLang)
 				for j = 1 to len(aPt[i][5])
 					aSetRows + ("[" + RingStr(aPt[i][5][j][1]) + ", " + RingStr(aPt[i][5][j][2]) + ", " + RingStr(aPt[i][5][j][3]) + ", " + string(aPt[i][5][j][4]) + "]")
 				next
-				cSets = "[]"
+				tSets = "[]"
 				if len(aSetRows) > 0
-					cSets = "["
+					tSets = "["
 					for j = 1 to len(aSetRows)
-						if j > 1 cSets += ", " ok
-						cSets += aSetRows[j]
+						if j > 1 tSets += ", " ok
+						tSets += aSetRows[j]
 					next
-					cSets += "]"
+					tSets += "]"
 				ok
-				aRows + ("[" + RingStr(aPt[i][1]) + ", " + RingStr(aPt[i][2]) + ", " + RingStr(aPt[i][3]) + ", " + RingStr(aPt[i][4]) + ", " + cSets + ", " + RingStr(aPt[i][6]) + ", " + string(aPt[i][7]) + ", " + RingStr(aPt[i][8]) + ", " + CitesSource(aPt[i][9]) + ", " + RingStr(aPt[i][10]) + "]")
+				aRows + ("[" + RingStr(aPt[i][1]) + ", " + RingStr(aPt[i][2]) + ", " + RingStr(aPt[i][3]) + ", " + RingStr(aPt[i][4]) + ", " + tSets + ", " + RingStr(aPt[i][6]) + ", " + string(aPt[i][7]) + ", " + RingStr(aPt[i][8]) + ", " + CitesSource(aPt[i][9]) + ", " + RingStr(aPt[i][10]) + "]")
 			next
-			cPatterns = RowsSource(aRows, nl)
+			tPatterns = RowsSource(aRows, tNl)
 		ok
 	ok
 	aW = LangGet(aLang, "world")
-	cWorld = "[[], " + '""' + ", [], []]"
+	tWorld = "[[], " + '""' + ", [], []]"
 	if not isnull(aW)
 		aEntry = []
 		if len(aW) >= 4 aEntry = aW[4] ok
 		aPublish = []
 		if len(aW) >= 5 aPublish = aW[5] ok
-		cPub = "["
+		tPub = "["
 		for i = 1 to len(aPublish)
-			if i > 1 cPub += ", " ok
-			cPub += "[" + RingStr(aPublish[i][1]) + ", " + RingStr(aPublish[i][2]) + "]"
+			if i > 1 tPub += ", " ok
+			tPub += "[" + RingStr(aPublish[i][1]) + ", " + RingStr(aPublish[i][2]) + "]"
 		next
-		cPub += "]"
-		cWorld = "[" + NamesSource(aW[1]) + ", " + RingStr(aW[2]) + ", " + NamesSource(aEntry) + ", " + cPub + "]"
+		tPub += "]"
+		tWorld = "[" + NamesSource(aW[1]) + ", " + RingStr(aW[2]) + ", " + NamesSource(aEntry) + ", " + tPub + "]"
 	ok
 	aSy = LangGet(aLang, "symbols")
 	if isnull(aSy) aSy = [] ok
-	cSymbols = "["
+	tSymbols = "["
 	for i = 1 to len(aSy)
-		if i > 1 cSymbols += ", " ok
-		cSyC = ""
+		if i > 1 tSymbols += ", " ok
+		tSyC = ""
 		aSyCites = []
 		if len(aSy[i]) >= 7
-			cSyC = aSy[i][6]
+			tSyC = aSy[i][6]
 			aSyCites = aSy[i][7]
 		ok
-		cSymbols += "[" + RingStr(aSy[i][1]) + ", " + RingStr(aSy[i][2]) + ", " + RingStr(aSy[i][3]) + ", " + RingStr(aSy[i][4]) + ", " + RingStr(cSyC) + ", " + CitesSource(aSyCites) + "]"
+		tSymbols += "[" + RingStr(aSy[i][1]) + ", " + RingStr(aSy[i][2]) + ", " + RingStr(aSy[i][3]) + ", " + RingStr(aSy[i][4]) + ", " + RingStr(tSyC) + ", " + CitesSource(aSyCites) + "]"
 	next
-	cSymbols += "]"
+	tSymbols += "]"
 	aRf = LangGet(aLang, "refine")
-	cPoints = "[]"
-	cFloors = "[]"
+	tPoints = "[]"
+	tFloors = "[]"
 	if not isnull(aRf)
-		cPoints = PointsSource(aRf[1])
-		cFloors = PointsSource(aRf[2])
+		tPoints = PointsSource(aRf[1])
+		tFloors = PointsSource(aRf[2])
 	ok
 	aRows = []
 	aV = LangGet(aLang, "views")
 	for i = 1 to len(aV)
 		aRows + ("[" + RingStr(aV[i][1]) + ", " + RingStr(aV[i][2]) + ", " + RingStr(aV[i][3]) + ", " + RingStr(aV[i][4]) + ", " + RingStr(aV[i][5]) + "]")
 	next
-	cViews = RowsSource(aRows, nl)
+	tViews = RowsSource(aRows, tNl)
 	aRows = []
 	aS = LangGet(aLang, "sentences")
 	for i = 1 to len(aS)
-		cInner = ""
-		if not isnull(aS[i][3]) cInner = LangGet(aS[i][3], "name") ok
-		aRows + ("[" + RingStr(aS[i][1]) + ", " + RingStr(cInner) + ", " + RingStr(aS[i][4]) + ", " + RingStr(aS[i][5]) + "]")
+		tInner = ""
+		if not isnull(aS[i][3]) tInner = LangGet(aS[i][3], "name") ok
+		aRows + ("[" + RingStr(aS[i][1]) + ", " + RingStr(tInner) + ", " + RingStr(aS[i][4]) + ", " + RingStr(aS[i][5]) + "]")
 	next
-	cSentences = RowsSource(aRows, nl)
+	tSentences = RowsSource(aRows, tNl)
 	aRows = []
 	aE = LangGet(aLang, "expressions")
 	for i = 1 to len(aE)
 		aRows + ExprSource(aE[i])
 	next
-	cExprs = RowsSource(aRows, nl)
+	tExprs = RowsSource(aRows, tNl)
 	aRows = []
 	aWk = LangGet(aLang, "walks")
 	if isnull(aWk) aWk = [] ok
 	for i = 1 to len(aWk)
 		aRows + WalkSource(aWk[i])
 	next
-	cWalks = RowsSource(aRows, nl)
+	tWalks = RowsSource(aRows, tNl)
 	aAsk = LangGet(aLang, "ask")
-	cAsk = "null"
+	tAsk = "null"
 	if not isnull(aAsk)
-		cAsk = "[" + RingStr(aAsk[1]) + ", " + NamesSource(aAsk[2]) + ", " + RingStr(aAsk[3]) + ", " + NamesSource(aAsk[4])
+		tAsk = "[" + RingStr(aAsk[1]) + ", " + NamesSource(aAsk[2]) + ", " + RingStr(aAsk[3]) + ", " + NamesSource(aAsk[4])
 		# v0.34: the schema path, only where one is declared -- so a court forged from a language without FIELDS keeps the bytes it had
-		if aAsk[7] != "" cAsk += ", " + RingStr(aAsk[7]) ok
-		cAsk += "]"
+		if aAsk[7] != "" tAsk += ", " + RingStr(aAsk[7]) ok
+		tAsk += "]"
 	ok
 	aRun = LangGet(aLang, "run")
-	cRun = "null"
+	tRun = "null"
 	if not isnull(aRun)
-		cRun = "["
+		tRun = "["
 		for i = 1 to len(aRun[2])
-			if i > 1 cRun += ", " ok
-			cRun += "[" + RingStr(aRun[2][i][1]) + ", " + NamesSource(aRun[2][i][2]) + "]"
+			if i > 1 tRun += ", " ok
+			tRun += "[" + RingStr(aRun[2][i][1]) + ", " + NamesSource(aRun[2][i][2]) + "]"
 		next
-		cRun += "]"
+		tRun += "]"
 	ok
 	# v0.12: the FORMS [name, fluent, passive, statement, [[key, suffix], ...], [kind, base, forms]], or NULL
 	aFs = LangGet(aLang, "formset")
-	cFormset = "null"
+	tFormset = "null"
 	if not isnull(aFs)
-		cFormset = "[" + RingStr(aFs[1]) + ", " + RingStr(aFs[2]) + ", " + RingStr(aFs[3]) + ", " + RingStr(aFs[4]) + ", " + MessagesSource(aFs[5]) + ", " + NamesSource(aFs[6]) + "]"
+		tFormset = "[" + RingStr(aFs[1]) + ", " + RingStr(aFs[2]) + ", " + RingStr(aFs[3]) + ", " + RingStr(aFs[4]) + ", " + MessagesSource(aFs[5]) + ", " + NamesSource(aFs[6]) + "]"
 	ok
 	# v0.13: the NARRATE [name, opens, ends, refuses, [[kind, template], ...]], or NULL
 	aNr = LangGet(aLang, "narrate")
-	cNarrate = "null"
+	tNarrate = "null"
 	if not isnull(aNr)
-		cNarrate = "[" + RingStr(aNr[1]) + ", " + RingStr(aNr[2]) + ", " + RingStr(aNr[3]) + ", " + RingStr(aNr[4]) + ", " + MessagesSource(aNr[5]) + ", " + MessagesSource(aNr[8]) + "]"
+		tNarrate = "[" + RingStr(aNr[1]) + ", " + RingStr(aNr[2]) + ", " + RingStr(aNr[3]) + ", " + RingStr(aNr[4]) + ", " + MessagesSource(aNr[5]) + ", " + MessagesSource(aNr[8]) + "]"
 	ok
 	# v0.17: the UNDERSTAND [name, [[role, kind], ...]], or NULL
 	aUn = LangGet(aLang, "understand")
-	cUnderstand = "null"
+	tUnderstand = "null"
 	if not isnull(aUn)
-		cUnderstand = "[" + RingStr(aUn[1]) + ", ["
+		tUnderstand = "[" + RingStr(aUn[1]) + ", ["
 		for i = 1 to len(aUn[2])
-			if i > 1 cUnderstand += ", " ok
-			cUnderstand += "[" + RingStr(aUn[2][i][1]) + ", " + RingStr(aUn[2][i][2][1]) + "]"
+			if i > 1 tUnderstand += ", " ok
+			tUnderstand += "[" + RingStr(aUn[2][i][1]) + ", " + RingStr(aUn[2][i][2][1]) + "]"
 		next
-		cUnderstand += "]]"
+		tUnderstand += "]]"
 	ok
-	c = "  [" + RingStr(LangGet(aLang, "name")) + ", " + RingStr(LangGet(aLang, "extension")) + "," + nl
-	c += "    " + cKinds + "," + nl
-	c += "    " + cForms + "," + nl
-	c += "    " + cRefusals + "," + nl
-	c += "    " + cMenus + "," + nl
-	c += "    " + cRanges + "," + nl
-	c += "    " + cFormats + "," + nl
-	c += "    " + cUnions + "," + nl
-	c += "    " + cConstraints + "," + nl
-	c += "    " + cWorld + "," + nl
-	c += "    " + cPoints + "," + nl
-	c += "    " + cFloors + "," + nl
-	c += "    " + cViews + "," + nl
-	c += "    " + cSentences + "," + nl
-	c += "    " + cExprs + "," + nl
-	c += "    " + cWalks + "," + nl
-	c += "    " + cAsk + "," + nl
-	c += "    " + cRun + "," + nl
-	c += "    " + cSymbols + "," + nl
-	c += "    " + cFormset + "," + nl
-	c += "    " + cNarrate + "," + nl
+	tC = "  [" + RingStr(LangGet(aLang, "name")) + ", " + RingStr(LangGet(aLang, "extension")) + "," + tNl
+	tC += "    " + tKinds + "," + tNl
+	tC += "    " + tForms + "," + tNl
+	tC += "    " + tRefusals + "," + tNl
+	tC += "    " + tMenus + "," + tNl
+	tC += "    " + tRanges + "," + tNl
+	tC += "    " + tFormats + "," + tNl
+	tC += "    " + tUnions + "," + tNl
+	tC += "    " + tConstraints + "," + tNl
+	tC += "    " + tWorld + "," + tNl
+	tC += "    " + tPoints + "," + tNl
+	tC += "    " + tFloors + "," + tNl
+	tC += "    " + tViews + "," + tNl
+	tC += "    " + tSentences + "," + tNl
+	tC += "    " + tExprs + "," + tNl
+	tC += "    " + tWalks + "," + tNl
+	tC += "    " + tAsk + "," + tNl
+	tC += "    " + tRun + "," + tNl
+	tC += "    " + tSymbols + "," + tNl
+	tC += "    " + tFormset + "," + tNl
+	tC += "    " + tNarrate + "," + tNl
 	# v0.40: the doors -- a 25th element only where the language NEEDS, after the patterns (written empty when it has none), so every other
 	# court keeps its bytes: [[needs...], [[verb, word, by seat], ...]]
-	cNeeds = ""
+	tNeeds = ""
 	aDoors = LangGet(aLang, "needs")
 	if not isnull(aDoors)
 		aOpn = LangGet(aLang, "opens")
@@ -468,25 +468,25 @@ func LangSource(aLang)
 		for i = 1 to len(aOpn)
 			aOpRows + ("[" + RingStr(aOpn[i][1]) + ", " + RingStr(aOpn[i][2]) + ", " + string(aOpn[i][3]) + "]")
 		next
-		cNeeds = "[" + NamesSource(aDoors) + ", " + RowsSource(aOpRows, nl) + "]"
-		if cPatterns = "" cPatterns = "[]" ok
+		tNeeds = "[" + NamesSource(aDoors) + ", " + RowsSource(aOpRows, tNl) + "]"
+		if tPatterns = "" tPatterns = "[]" ok
 	ok
-	if cPatterns = ""
-		c += "    " + cUnderstand + nl
-	but cNeeds = ""
-		c += "    " + cUnderstand + "," + nl + "    " + cPatterns + nl
+	if tPatterns = ""
+		tC += "    " + tUnderstand + tNl
+	but tNeeds = ""
+		tC += "    " + tUnderstand + "," + tNl + "    " + tPatterns + tNl
 	else
-		c += "    " + cUnderstand + "," + nl + "    " + cPatterns + "," + nl + "    " + cNeeds + nl
+		tC += "    " + tUnderstand + "," + tNl + "    " + tPatterns + "," + tNl + "    " + tNeeds + tNl
 	ok
-	c += "  ]"
-	return c
+	tC += "  ]"
+	return tC
 
 # the language and, recursively, every language its SENTENCEs name, each once
 func ForgeLangRecords(aLang, aSeen)
 	aOut = []
-	cName = LangGet(aLang, "name")
-	if InStrList(cName, aSeen) return aOut ok
-	aSeen + cName
+	tName = LangGet(aLang, "name")
+	if InStrList(tName, aSeen) return aOut ok
+	aSeen + tName
 	aOut + aLang
 	aS = LangGet(aLang, "sentences")
 	for i = 1 to len(aS)
@@ -500,16 +500,16 @@ func ForgeLangRecords(aLang, aSeen)
 	return aOut
 
 func ForgeCourt(aLang)
-	cForgeName = LangGet(aLang, "name")
-	nl = char(10)
-	c = "# " + cForgeName + "_court.haro -- GENERATED by forge.haro from the " + cForgeName + " declaration; do not edit." + nl
-	c += "# `haro " + cForgeName + "_court.haro check <file" + LangGet(aLang, "extension") + ">` judges one sentence of the language;" + nl
-	c += "# `... refine <file> <file.rfn>` judges one refinement. What the declaration says is judged" + nl
-	c += "# by court_lib.haro over the records below, one per language -- this one first, then" + nl
-	c += "# every language a SENTENCE seat names: kinds [VERB, name, seats, names, messages]," + nl
-	c += "# forms, refusals, menus, ranges, formats, unions, constraints, world, points, floors," + nl
-	c += "# views, sentences, expressions, walks and the ask." + nl + nl
-	c += 'load "court_lib.haro"' + nl
+	tForgeName = LangGet(aLang, "name")
+	tNl = char(10)
+	tC = "# " + tForgeName + "_court.haro -- GENERATED by forge.haro from the " + tForgeName + " declaration; do not edit." + tNl
+	tC += "# `haro " + tForgeName + "_court.haro check <file" + LangGet(aLang, "extension") + ">` judges one sentence of the language;" + tNl
+	tC += "# `... refine <file> <file.rfn>` judges one refinement. What the declaration says is judged" + tNl
+	tC += "# by court_lib.haro over the records below, one per language -- this one first, then" + tNl
+	tC += "# every language a SENTENCE seat names: kinds [VERB, name, seats, names, messages]," + tNl
+	tC += "# forms, refusals, menus, ranges, formats, unions, constraints, world, points, floors," + tNl
+	tC += "# views, sentences, expressions, walks and the ask." + tNl + tNl
+	tC += 'load "court_lib.haro"' + tNl
 	# v0.6: the expression library rides along only when an EXPRESSION is declared
 	# (v0.7: or an ASK, whose rows are JSON); the question library only with an ASK
 	bAsk = not isnull(LangGet(aLang, "ask"))
@@ -531,28 +531,28 @@ func ForgeCourt(aLang)
 	bDoors = not isnull(LangGet(aLang, "needs"))
 	# v0.10: a world is JSON, read and written with expr_lib's reader
 	if len(LangGet(aLang, "expressions")) > 0 or bAsk or bRun or bSym or bDoors
-		c += 'load "expr_lib.haro"' + nl
+		tC += 'load "expr_lib.haro"' + tNl
 	ok
 	# v0.14: the world functions load only where the language declares a world; a stub stands elsewhere
 	if bSym or bDoors
-		c += 'load "world_lib.haro"' + nl
+		tC += 'load "world_lib.haro"' + tNl
 	else
-		c += 'load "world_stub.haro"' + nl
+		tC += 'load "world_stub.haro"' + tNl
 	ok
 	if bAsk
-		c += 'load "ask_lib.haro"' + nl
+		tC += 'load "ask_lib.haro"' + tNl
 	ok
 	if bRun
-		c += 'load "run_lib.haro"' + nl
+		tC += 'load "run_lib.haro"' + tNl
 	ok
 	if bFormset
-		c += 'load "forms_lib.haro"' + nl
+		tC += 'load "forms_lib.haro"' + tNl
 	ok
 	if bNarrate
-		c += 'load "narrate_lib.haro"' + nl
+		tC += 'load "narrate_lib.haro"' + tNl
 	ok
 	if bUnderstand
-		c += 'load "n_lib.haro"' + nl
+		tC += 'load "n_lib.haro"' + tNl
 	ok
 	# v0.32: the pattern engine rides along only where a language the court carries declares a PATTERN
 	bPattern = false
@@ -564,8 +564,8 @@ func ForgeCourt(aLang)
 		ok
 	next
 	if bPattern
-		c += 'load "pattern_lib.haro"' + nl
-		c += 'load "pattern_judge.haro"' + nl
+		tC += 'load "pattern_lib.haro"' + tNl
+		tC += 'load "pattern_judge.haro"' + tNl
 	ok
 	# v0.35: the severity library rides along only where a language the court carries holds a seat or a NAMED word at a severity
 	bSev = false
@@ -583,57 +583,57 @@ func ForgeCourt(aLang)
 			ok
 		next
 	next
-	if bSev c += 'load "severity_lib.haro"' + nl ok
+	if bSev tC += 'load "severity_lib.haro"' + tNl ok
 	# v0.40: the doors library rides along only where a language the court carries NEEDS a door (D51)
 	bNeeds = false
 	for i = 1 to len(aPatRecs)
 		if not isnull(LangGet(aPatRecs[i], "needs")) bNeeds = true ok
 	next
-	if bNeeds c += 'load "needs_lib.haro"' + nl ok
-	c += nl
-	c += "$cCourtLang = " + '""' + nl + "$cCourtExt = " + '""' + nl + "$cCourtDir = " + '""' + nl
-	c += "$aCourtToks = []" + nl + "$nCourtPos = 1" + nl
-	c += "$aCondToks = []" + nl + "$nCondPos = 1" + nl + "$aCondDeclSeats = []" + nl
-	c += "$aCondDecls = []" + nl + "$aCondVerbOf = []" + nl + "$cCondOther = " + '""' + nl
-	c += "$aCondRefSeats = []" + nl + "$aCondFormats = []" + nl + "$bCondUnread = false" + nl
-	c += "$aCondLangs = []" + nl + "$cCondLang = " + '""' + nl + "$aCourtSentences = []" + nl
-	c += "$aCourtKinds = []" + nl + "$aCourtForms = []" + nl + "$aCourtRefusals = []" + nl + "$aCourtMenus = []" + nl
-	c += "$aCourtRanges = []" + nl + "$aCourtFormats = []" + nl + "$aCourtUnions = []" + nl + "$aCourtConstraints = []" + nl
-	c += "$aCourtWorld = [[], " + '""' + ", [], []]" + nl + "$aCourtPoints = []" + nl + "$aCourtFloors = []" + nl
-	c += "$aCourtViews = []" + nl + "$aCourtSentenceKinds = []" + nl
-	c += "$aCourtExprs = []" + nl + "$aCourtWalks = []" + nl + "$aCourtAsk = null" + nl + "$aCourtRun = null" + nl
-	c += "$aCourtSymbols = []" + nl + "$aCourtWorldFile = null" + nl
-	c += "$cCourtCode = " + RingStr("PARSE") + nl + "$aCourtCites = []" + nl
-	c += "$aCourtFormset = null" + nl + "$aCourtNarrate = null" + nl
-	c += "$aCourtUnderstand = null" + nl + "$bNSurfaces = false" + nl
-	c += "$aCourtConstitution = []" + nl
+	if bNeeds tC += 'load "needs_lib.haro"' + tNl ok
+	tC += tNl
+	tC += "$tCourtLang = " + '""' + tNl + "$tCourtExt = " + '""' + tNl + "$tCourtDir = " + '""' + tNl
+	tC += "$aCourtToks = []" + tNl + "$nCourtPos = 1" + tNl
+	tC += "$aCondToks = []" + tNl + "$nCondPos = 1" + tNl + "$aCondDeclSeats = []" + tNl
+	tC += "$aCondDecls = []" + tNl + "$aCondVerbOf = []" + tNl + "$tCondOther = " + '""' + tNl
+	tC += "$aCondRefSeats = []" + tNl + "$aCondFormats = []" + tNl + "$bCondUnread = false" + tNl
+	tC += "$aCondLangs = []" + tNl + "$tCondLang = " + '""' + tNl + "$aCourtSentences = []" + tNl
+	tC += "$aCourtKinds = []" + tNl + "$aCourtForms = []" + tNl + "$aCourtRefusals = []" + tNl + "$aCourtMenus = []" + tNl
+	tC += "$aCourtRanges = []" + tNl + "$aCourtFormats = []" + tNl + "$aCourtUnions = []" + tNl + "$aCourtConstraints = []" + tNl
+	tC += "$aCourtWorld = [[], " + '""' + ", [], []]" + tNl + "$aCourtPoints = []" + tNl + "$aCourtFloors = []" + tNl
+	tC += "$aCourtViews = []" + tNl + "$aCourtSentenceKinds = []" + tNl
+	tC += "$aCourtExprs = []" + tNl + "$aCourtWalks = []" + tNl + "$aCourtAsk = null" + tNl + "$aCourtRun = null" + tNl
+	tC += "$aCourtSymbols = []" + tNl + "$aCourtWorldFile = null" + tNl
+	tC += "$tCourtCode = " + RingStr("PARSE") + tNl + "$aCourtCites = []" + tNl
+	tC += "$aCourtFormset = null" + tNl + "$aCourtNarrate = null" + tNl
+	tC += "$aCourtUnderstand = null" + tNl + "$bNSurfaces = false" + tNl
+	tC += "$aCourtConstitution = []" + tNl
 	# v0.24: the zone of organizational_sovereignty, and the audit chain of visible_state
-	c += "$aCourtZone = []" + nl + "$cCourtAuditFile = " + '""' + nl + "$aCourtAuditProposal = []" + nl
+	tC += "$aCourtZone = []" + tNl + "$tCourtAuditFile = " + '""' + tNl + "$aCourtAuditProposal = []" + tNl
 	# v0.25: the personal seats the chain redacts, and the warnings a court speaks after its verdict
-	c += "$aCourtPersonal = []" + nl + "$aCourtWarnings = []" + nl
-	c += "$aCourtMarks = []" + nl + "$aCourtSafeguards = []" + nl
-	c += "$bCourtCollect = false" + nl + "$aCourtFound = []" + nl + "$aCourtBroken = []" + nl
-	c += "$bRunTrace = false" + nl + "$aRunTrace = []" + nl + "$nRunDepth = 0" + nl + "$bAskTrace = false" + nl + "$aAskTrace = []" + nl
-	c += ExprGlobals()
-	c += "$aCourtLangs = [" + nl
+	tC += "$aCourtPersonal = []" + tNl + "$aCourtWarnings = []" + tNl
+	tC += "$aCourtMarks = []" + tNl + "$aCourtSafeguards = []" + tNl
+	tC += "$bCourtCollect = false" + tNl + "$aCourtFound = []" + tNl + "$aCourtBroken = []" + tNl
+	tC += "$bRunTrace = false" + tNl + "$aRunTrace = []" + tNl + "$nRunDepth = 0" + tNl + "$bAskTrace = false" + tNl + "$aAskTrace = []" + tNl
+	tC += ExprGlobals()
+	tC += "$aCourtLangs = [" + tNl
 	aRecs = ForgeLangRecords(aLang, [])
 	for i = 1 to len(aRecs)
-		c += LangSource(aRecs[i])
-		if i < len(aRecs) c += "," ok
-		c += nl
+		tC += LangSource(aRecs[i])
+		if i < len(aRecs) tC += "," ok
+		tC += tNl
 	next
-	c += "]" + nl
-	c += "CtUseLanguage(" + RingStr(cForgeName) + ")" + nl
-	c += "CtBuildCondLangs()" + nl
+	tC += "]" + tNl
+	tC += "CtUseLanguage(" + RingStr(tForgeName) + ")" + tNl
+	tC += "CtBuildCondLangs()" + tNl
 	# v0.23: the articles the language declares itself under (its CONSTITUTION), read by the
 	# court's refusals through CtUnderArticle; a language under none leaves the list empty
 	aCst = LangGet(aLang, "constitution")
 	if not isnull(aCst)
-		c += "$aCourtConstitution = " + NamesSource(aCst[2]) + nl
+		tC += "$aCourtConstitution = " + NamesSource(aCst[2]) + tNl
 		# v0.24: the zone kind, its sovereign seat and its movement seat, read by the court's refusals
 		if len(aCst) >= 9
 			if aCst[7] != ""
-				c += "$aCourtZone = [" + RingStr(aCst[7]) + ", " + RingStr(aCst[8]) + ", " + RingStr(aCst[9]) + "]" + nl
+				tC += "$aCourtZone = [" + RingStr(aCst[7]) + ", " + RingStr(aCst[8]) + ", " + RingStr(aCst[9]) + "]" + tNl
 			ok
 		ok
 		# v0.25: the personal seats, as point names decl.seat, which the chain redacts
@@ -642,19 +642,19 @@ func ForgeCourt(aLang)
 				aPersNames = []
 				aMarkRows = []
 				for i = 1 to len(aCst[10])
-					cPth = aCst[10][i][1]
-					n1 = substr(cPth, ".")
-					cRest = substr(cPth, n1 + 1)
-					n2 = substr(cRest, ".")
-					if n2 > 0
+					tPth = aCst[10][i][1]
+					nN1 = substr(tPth, ".")
+					tRest = substr(tPth, nN1 + 1)
+					nN2 = substr(tRest, ".")
+					if nN2 > 0
 						# v0.27: a three-part path is a mark -- [kind, seat, markSeat]
-						aMarkRows + ("[" + RingStr(left(cPth, n1 - 1)) + ", " + RingStr(left(cRest, n2 - 1)) + ", " + RingStr(substr(cRest, n2 + 1)) + "]")
+						aMarkRows + ("[" + RingStr(left(tPth, nN1 - 1)) + ", " + RingStr(left(tRest, nN2 - 1)) + ", " + RingStr(substr(tRest, nN2 + 1)) + "]")
 					else
-						aPersNames + cPth
+						aPersNames + tPth
 					ok
 				next
-				if len(aPersNames) > 0 c += "$aCourtPersonal = " + NamesSource(aPersNames) + nl ok
-				if len(aMarkRows) > 0 c += "$aCourtMarks = [" + JoinRows(aMarkRows) + "]" + nl ok
+				if len(aPersNames) > 0 tC += "$aCourtPersonal = " + NamesSource(aPersNames) + tNl ok
+				if len(aMarkRows) > 0 tC += "$aCourtMarks = [" + JoinRows(aMarkRows) + "]" + tNl ok
 			ok
 		ok
 		# v0.27: the safeguards, [path, word]
@@ -664,22 +664,22 @@ func ForgeCourt(aLang)
 				for i = 1 to len(aCst[11])
 					aSgRows + ("[" + RingStr(aCst[11][i][1]) + ", " + RingStr(aCst[11][i][2]) + "]")
 				next
-				c += "$aCourtSafeguards = [" + JoinRows(aSgRows) + "]" + nl
+				tC += "$aCourtSafeguards = [" + JoinRows(aSgRows) + "]" + tNl
 			ok
 		ok
 	ok
-	c += nl + "CtMain()" + nl
-	return c
+	tC += tNl + "CtMain()" + tNl
+	return tC
 
 # the globals expr_lib.haro reads, born empty at a court's top level (v0.6)
 func ExprGlobals()
-	nl = char(10)
-	c = "$cExprLang = " + '""' + nl + "$aExprOperators = []" + nl + "$aExprOperands = []" + nl
-	c += "$aExprAggregates = []" + nl + "$aExprVariables = []" + nl + "$aExprContexts = []" + nl
-	c += "$cExprAbsent = " + '""' + nl + "$cExprDivision = " + '""' + nl + "$cExprEquality = " + '""' + nl
-	c += "$aExprToks = []" + nl + "$nExprPos = 1" + nl + "$aExprAllowed = []" + nl
-	c += "$aExprRecord = []" + nl + "$aExprOverlay = []" + nl
-	return c
+	tNl = char(10)
+	tC = "$tExprLang = " + '""' + tNl + "$aExprOperators = []" + tNl + "$aExprOperands = []" + tNl
+	tC += "$aExprAggregates = []" + tNl + "$aExprVariables = []" + tNl + "$aExprContexts = []" + tNl
+	tC += "$tExprAbsent = " + '""' + tNl + "$tExprDivision = " + '""' + tNl + "$tExprEquality = " + '""' + tNl
+	tC += "$aExprToks = []" + tNl + "$nExprPos = 1" + tNl + "$aExprAllowed = []" + tNl
+	tC += "$aExprRecord = []" + tNl + "$aExprOverlay = []" + tNl
+	return tC
 
 # ---- the expression court, as Ring source (v0.5) -------------------------------
 # One EXPRESSION per language is forged whole: the first declared one. Its
@@ -687,43 +687,43 @@ func ExprGlobals()
 # reads; the court checks and evaluates an expression in a named seat.
 
 func ForgeExprCourt(aLang)
-	nl = char(10)
-	cName = LangGet(aLang, "name")
+	tNl = char(10)
+	tName = LangGet(aLang, "name")
 	aE = LangGet(aLang, "expressions")[1]
-	c = "# " + cName + "_expr.haro -- GENERATED by forge.haro from the " + cName + " declaration; do not edit." + nl
-	c += "# `haro " + cName + "_expr.haro check <seat> <expr>` judges one expression of the language in a seat;" + nl
-	c += "# `... eval <seat> <expr> [input] [init]` evaluates it. What the declaration says is judged" + nl
-	c += "# by expr_lib.haro over the tables below: the operator and operand menus, the" + nl
-	c += "# variables, and the seats with the variables each admits." + nl + nl
-	c += 'load "expr_lib.haro"' + nl + nl
-	c += "$cExprLang = " + RingStr(cName) + nl
-	c += "$aExprOperators = " + NamesSource(aE[2]) + nl
-	c += "$aExprOperands = " + NamesSource(aE[3]) + nl
+	tC = "# " + tName + "_expr.haro -- GENERATED by forge.haro from the " + tName + " declaration; do not edit." + tNl
+	tC += "# `haro " + tName + "_expr.haro check <seat> <expr>` judges one expression of the language in a seat;" + tNl
+	tC += "# `... eval <seat> <expr> [input] [init]` evaluates it. What the declaration says is judged" + tNl
+	tC += "# by expr_lib.haro over the tables below: the operator and operand menus, the" + tNl
+	tC += "# variables, and the seats with the variables each admits." + tNl + tNl
+	tC += 'load "expr_lib.haro"' + tNl + tNl
+	tC += "$tExprLang = " + RingStr(tName) + tNl
+	tC += "$aExprOperators = " + NamesSource(aE[2]) + tNl
+	tC += "$aExprOperands = " + NamesSource(aE[3]) + tNl
 	aAgg = aE[4]
 	if isnull(aAgg) aAgg = [] ok
-	c += "$aExprAggregates = " + NamesSource(aAgg) + nl
+	tC += "$aExprAggregates = " + NamesSource(aAgg) + tNl
 	aVars = aE[5]
 	if isnull(aVars) aVars = [] ok
-	c += "$aExprVariables = " + NamesSource(aVars) + nl
-	c += "$aExprContexts = ["
+	tC += "$aExprVariables = " + NamesSource(aVars) + tNl
+	tC += "$aExprContexts = ["
 	aCtx = []
 	if len(aE) >= 8 aCtx = aE[8] ok
 	for i = 1 to len(aCtx)
-		if i > 1 c += ", " ok
-		c += "[" + RingStr(aCtx[i][1]) + ", " + NamesSource(aCtx[i][2]) + "]"
+		if i > 1 tC += ", " ok
+		tC += "[" + RingStr(aCtx[i][1]) + ", " + NamesSource(aCtx[i][2]) + "]"
 	next
-	c += "]" + nl
-	cAbsent = "" cDivision = "" cEquality = ""
+	tC += "]" + tNl
+	tAbsent = "" tDivision = "" tEquality = ""
 	if len(aE) >= 11
-		cAbsent = aE[9]
-		cDivision = aE[10]
-		cEquality = aE[11]
+		tAbsent = aE[9]
+		tDivision = aE[10]
+		tEquality = aE[11]
 	ok
-	c += "$cExprAbsent = " + RingStr(cAbsent) + nl + "$cExprDivision = " + RingStr(cDivision) + nl + "$cExprEquality = " + RingStr(cEquality) + nl
-	c += "$aExprToks = []" + nl + "$nExprPos = 1" + nl + "$aExprAllowed = []" + nl
-	c += "$aExprRecord = []" + nl + "$aExprOverlay = []" + nl
-	c += nl + "ExMain()" + nl
-	return c
+	tC += "$tExprAbsent = " + RingStr(tAbsent) + tNl + "$tExprDivision = " + RingStr(tDivision) + tNl + "$tExprEquality = " + RingStr(tEquality) + tNl
+	tC += "$aExprToks = []" + tNl + "$nExprPos = 1" + tNl + "$aExprAllowed = []" + tNl
+	tC += "$aExprRecord = []" + tNl + "$aExprOverlay = []" + tNl
+	tC += tNl + "ExMain()" + tNl
+	return tC
 
 # the expression's grammar for the decoder, from its menus: a rule per
 # precedence level, present when its operators are, the operands it admits,
@@ -732,72 +732,72 @@ func ForgeExprGbnf(aLang)
 	return ForgeExprGbnfOf(aLang, LangGet(aLang, "expressions")[1])
 
 func ForgeExprGbnfOf(aLang, aE)
-	nl = char(10)
-	cName = LangGet(aLang, "name")
+	tNl = char(10)
+	tName = LangGet(aLang, "name")
 	aOps = aE[2]
 	aOpd = aE[3]
 	aVars = aE[5]
 	if isnull(aVars) aVars = [] ok
-	q = char(34)
-	bs = char(92)
+	tQ = char(34)
+	tBs = char(92)
 	aAgg = aE[4]
 	if isnull(aAgg) aAgg = [] ok
-	g = "# " + cName + "_expr.gbnf -- GENERATED by forge.haro from the " + cName + " declaration (Haro v0.5, grown in v0.6)." + nl
-	g += "# W's shape: or < and < not < comparison < additive < multiplicative < unary < primary;" + nl
-	g += "# each level is present when the declaration admits its operators." + nl + nl
-	g += "root ::= ws or_expr ws" + nl
+	tG = "# " + tName + "_expr.gbnf -- GENERATED by forge.haro from the " + tName + " declaration (Haro v0.5, grown in v0.6)." + tNl
+	tG += "# W's shape: or < and < not < comparison < additive < multiplicative < unary < primary;" + tNl
+	tG += "# each level is present when the declaration admits its operators." + tNl + tNl
+	tG += "root ::= ws or_expr ws" + tNl
 	# a word operator is set off by at least one space (sp), or `not1` and
 	# `@itemand` would be one word to the tokenizer
 	if InStrList("or", aOps)
-		g += "or_expr ::= and_expr (sp " + q + "or" + q + " sp and_expr)*" + nl
+		tG += "or_expr ::= and_expr (sp " + tQ + "or" + tQ + " sp and_expr)*" + tNl
 	else
-		g += "or_expr ::= and_expr" + nl
+		tG += "or_expr ::= and_expr" + tNl
 	ok
 	if InStrList("and", aOps)
-		g += "and_expr ::= not_expr (sp " + q + "and" + q + " sp not_expr)*" + nl
+		tG += "and_expr ::= not_expr (sp " + tQ + "and" + tQ + " sp not_expr)*" + tNl
 	else
-		g += "and_expr ::= not_expr" + nl
+		tG += "and_expr ::= not_expr" + tNl
 	ok
 	if InStrList("not", aOps)
-		g += "not_expr ::= (" + q + "not" + q + " sp)? comparison" + nl
+		tG += "not_expr ::= (" + tQ + "not" + tQ + " sp)? comparison" + tNl
 	else
-		g += "not_expr ::= comparison" + nl
+		tG += "not_expr ::= comparison" + tNl
 	ok
 	bCmp = InStrList("cmp", aOps)
 	bContains = InStrList("contains", aOps)
 	if bCmp and bContains
-		g += "comparison ::= additive (ws cmpop ws additive | sp " + q + "CONTAINS" + q + " sp additive)?" + nl
+		tG += "comparison ::= additive (ws cmpop ws additive | sp " + tQ + "CONTAINS" + tQ + " sp additive)?" + tNl
 	but bCmp
-		g += "comparison ::= additive (ws cmpop ws additive)?" + nl
+		tG += "comparison ::= additive (ws cmpop ws additive)?" + tNl
 	but bContains
-		g += "comparison ::= additive (sp " + q + "CONTAINS" + q + " sp additive)?" + nl
+		tG += "comparison ::= additive (sp " + tQ + "CONTAINS" + tQ + " sp additive)?" + tNl
 	else
-		g += "comparison ::= additive" + nl
+		tG += "comparison ::= additive" + tNl
 	ok
 	if bCmp
-		g += "cmpop ::= " + q + ">=" + q + " | " + q + "<=" + q + " | " + q + "!=" + q + " | " + q + "<>" + q + " | " + q + "=" + q + " | " + q + ">" + q + " | " + q + "<" + q + nl
+		tG += "cmpop ::= " + tQ + ">=" + tQ + " | " + tQ + "<=" + tQ + " | " + tQ + "!=" + tQ + " | " + tQ + "<>" + tQ + " | " + tQ + "=" + tQ + " | " + tQ + ">" + tQ + " | " + tQ + "<" + tQ + tNl
 	ok
 	aAdd = []
-	if InStrList("add", aOps) aAdd + (q + "+" + q) ok
-	if InStrList("sub", aOps) aAdd + (q + "-" + q) ok
+	if InStrList("add", aOps) aAdd + (tQ + "+" + tQ) ok
+	if InStrList("sub", aOps) aAdd + (tQ + "-" + tQ) ok
 	if len(aAdd) > 0
-		g += "additive ::= multiplicative (ws (" + StzuJoin(aAdd, " | ") + ") ws multiplicative)*" + nl
+		tG += "additive ::= multiplicative (ws (" + StzuJoin(aAdd, " | ") + ") ws multiplicative)*" + tNl
 	else
-		g += "additive ::= multiplicative" + nl
+		tG += "additive ::= multiplicative" + tNl
 	ok
 	aMul = []
-	if InStrList("mul", aOps) aMul + (q + "*" + q) ok
-	if InStrList("div", aOps) aMul + (q + "/" + q) ok
-	if InStrList("mod", aOps) aMul + (q + "%" + q) ok
+	if InStrList("mul", aOps) aMul + (tQ + "*" + tQ) ok
+	if InStrList("div", aOps) aMul + (tQ + "/" + tQ) ok
+	if InStrList("mod", aOps) aMul + (tQ + "%" + tQ) ok
 	if len(aMul) > 0
-		g += "multiplicative ::= unary (ws (" + StzuJoin(aMul, " | ") + ") ws unary)*" + nl
+		tG += "multiplicative ::= unary (ws (" + StzuJoin(aMul, " | ") + ") ws unary)*" + tNl
 	else
-		g += "multiplicative ::= unary" + nl
+		tG += "multiplicative ::= unary" + tNl
 	ok
 	if InStrList("neg", aOps)
-		g += "unary ::= (" + q + "-" + q + " ws)? primary" + nl
+		tG += "unary ::= (" + tQ + "-" + tQ + " ws)? primary" + tNl
 	else
-		g += "unary ::= primary" + nl
+		tG += "unary ::= primary" + tNl
 	ok
 	aPrim = []
 	if InStrList("number", aOpd) aPrim + "number" ok
@@ -806,72 +806,72 @@ func ForgeExprGbnfOf(aLang, aE)
 	if InStrList("var", aOpd) and len(aVars) > 0 aPrim + "variable" ok
 	if InStrList("agg", aOpd) and len(aAgg) > 0 aPrim + "aggregate" ok
 	if InStrList("ref", aOpd) aPrim + "reference" ok
-	if InStrList("round", aOps) aPrim + (q + "ROUND" + q + " ws " + q + "(" + q + " ws or_expr ws " + q + ")" + q) ok
-	aPrim + (q + "(" + q + " ws or_expr ws " + q + ")" + q)
-	g += "primary ::= " + StzuJoin(aPrim, " | ") + nl
+	if InStrList("round", aOps) aPrim + (tQ + "ROUND" + tQ + " ws " + tQ + "(" + tQ + " ws or_expr ws " + tQ + ")" + tQ) ok
+	aPrim + (tQ + "(" + tQ + " ws or_expr ws " + tQ + ")" + tQ)
+	tG += "primary ::= " + StzuJoin(aPrim, " | ") + tNl
 	if InStrList("flag", aOpd)
-		g += "flag ::= " + q + "true" + q + " | " + q + "false" + q + nl
+		tG += "flag ::= " + tQ + "true" + tQ + " | " + tQ + "false" + tQ + tNl
 	ok
 	if InStrList("agg", aOpd) and len(aAgg) > 0
 		aA = []
 		for i = 1 to len(aAgg)
-			aA + (q + upper(aAgg[i]) + q)
+			aA + (tQ + upper(aAgg[i]) + tQ)
 		next
-		g += "aggregate ::= (" + StzuJoin(aA, " | ") + ") ws " + q + "(" + q + " ws reference ws " + q + ")" + q + nl
+		tG += "aggregate ::= (" + StzuJoin(aA, " | ") + ") ws " + tQ + "(" + tQ + " ws reference ws " + tQ + ")" + tQ + tNl
 	ok
 	if InStrList("ref", aOpd) or (InStrList("agg", aOpd) and len(aAgg) > 0)
-		g += "reference ::= [a-z_] [a-z0-9_]* (" + q + "." + q + " [a-z_] [a-z0-9_]*)*" + nl
+		tG += "reference ::= [a-z_] [a-z0-9_]* (" + tQ + "." + tQ + " [a-z_] [a-z0-9_]*)*" + tNl
 	ok
-	g += "number ::= [0-9]+ (" + q + "." + q + " [0-9]+)?" + nl
-	g += "string ::= " + q + "'" + q + " [^']* " + q + "'" + q + " | " + q + bs + q + q + " [^" + q + "]* " + q + bs + q + q + nl
+	tG += "number ::= [0-9]+ (" + tQ + "." + tQ + " [0-9]+)?" + tNl
+	tG += "string ::= " + tQ + "'" + tQ + " [^']* " + tQ + "'" + tQ + " | " + tQ + tBs + tQ + tQ + " [^" + tQ + "]* " + tQ + tBs + tQ + tQ + tNl
 	if len(aVars) > 0
 		aV = []
 		for i = 1 to len(aVars)
-			aV + (q + aVars[i] + q)
+			aV + (tQ + aVars[i] + tQ)
 		next
-		g += "variable ::= " + q + "@" + q + " (" + StzuJoin(aV, " | ") + ")" + nl
+		tG += "variable ::= " + tQ + "@" + tQ + " (" + StzuJoin(aV, " | ") + ")" + tNl
 	ok
-	g += "sp ::= [ " + bs + "t]+" + nl
-	g += "ws ::= [ " + bs + "t]*" + nl
-	return g
+	tG += "sp ::= [ " + tBs + "t]+" + tNl
+	tG += "ws ::= [ " + tBs + "t]*" + tNl
+	return tG
 
 # ---- the question grammar, for the decoder (v0.7) ------------------------------
 # the ASK's frame -- SELECT * FROM name, then the clauses it admits -- over the
 # WHERE expression's own grammar, its root renamed where_expr
 func ForgeAskGbnf(aLang)
-	nl = char(10)
-	q = char(34)
-	cName = LangGet(aLang, "name")
+	tNl = char(10)
+	tQ = char(34)
+	tName = LangGet(aLang, "name")
 	aAsk = LangGet(aLang, "ask")
 	aCl = aAsk[4]
-	g = "# " + cName + "_ask.gbnf -- GENERATED by forge.haro from the " + cName + " declaration (Haro v0.7)." + nl
-	g += "# The Q letter: SELECT * FROM name, then the clauses the ASK admits, in this order." + nl + nl
-	cRoot = "root ::= ws " + q + "SELECT" + q + " sp " + q + "*" + q + " sp " + q + "FROM" + q + " sp ident"
-	if InStrList("where", aCl) cRoot += " (sp " + q + "WHERE" + q + " sp where_expr)?" ok
-	if InStrList("order", aCl) cRoot += " (sp " + q + "ORDER" + q + " sp " + q + "BY" + q + " sp reference (sp (" + q + "ASC" + q + " | " + q + "DESC" + q + "))?)?" ok
-	if InStrList("limit", aCl) cRoot += " (sp " + q + "LIMIT" + q + " sp number)?" ok
-	g += cRoot + " ws" + nl
-	g += "ident ::= [a-z_] [a-z0-9_]*" + nl
-	cBody = ""
+	tG = "# " + tName + "_ask.gbnf -- GENERATED by forge.haro from the " + tName + " declaration (Haro v0.7)." + tNl
+	tG += "# The Q letter: SELECT * FROM name, then the clauses the ASK admits, in this order." + tNl + tNl
+	tRoot = "root ::= ws " + tQ + "SELECT" + tQ + " sp " + tQ + "*" + tQ + " sp " + tQ + "FROM" + tQ + " sp ident"
+	if InStrList("where", aCl) tRoot += " (sp " + tQ + "WHERE" + tQ + " sp where_expr)?" ok
+	if InStrList("order", aCl) tRoot += " (sp " + tQ + "ORDER" + tQ + " sp " + tQ + "BY" + tQ + " sp reference (sp (" + tQ + "ASC" + tQ + " | " + tQ + "DESC" + tQ + "))?)?" ok
+	if InStrList("limit", aCl) tRoot += " (sp " + tQ + "LIMIT" + tQ + " sp number)?" ok
+	tG += tRoot + " ws" + tNl
+	tG += "ident ::= [a-z_] [a-z0-9_]*" + tNl
+	tBody = ""
 	if aAsk[3] != ""
 		aE = null
 		aEs = LangGet(aLang, "expressions")
 		for i = 1 to len(aEs)
 			if aEs[i][1] = aAsk[3] aE = aEs[i] ok
 		next
-		cExpr = ForgeExprGbnfOf(aLang, aE)
+		tExpr = ForgeExprGbnfOf(aLang, aE)
 		# keep the rules, drop the header and the root
-		nAt = substr(cExpr, "root ::= ws or_expr ws" + nl)
-		if nAt > 0 cBody = substr(cExpr, nAt + len("root ::= ws or_expr ws" + nl)) ok
-		g += "where_expr ::= or_expr" + nl + cBody
+		nAt = substr(tExpr, "root ::= ws or_expr ws" + tNl)
+		if nAt > 0 tBody = substr(tExpr, nAt + len("root ::= ws or_expr ws" + tNl)) ok
+		tG += "where_expr ::= or_expr" + tNl + tBody
 	ok
-	if substr(cBody, "reference ::=") = 0
-		g += "reference ::= [a-z_] [a-z0-9_]* (" + q + "." + q + " [a-z_] [a-z0-9_]*)*" + nl
+	if substr(tBody, "reference ::=") = 0
+		tG += "reference ::= [a-z_] [a-z0-9_]* (" + tQ + "." + tQ + " [a-z_] [a-z0-9_]*)*" + tNl
 	ok
-	if substr(cBody, "number ::=") = 0 g += "number ::= [0-9]+" + nl ok
-	if substr(cBody, "sp ::=") = 0 g += "sp ::= [ " + char(92) + "t]+" + nl ok
-	if substr(cBody, "ws ::=") = 0 g += "ws ::= [ " + char(92) + "t]*" + nl ok
-	return g
+	if substr(tBody, "number ::=") = 0 tG += "number ::= [0-9]+" + tNl ok
+	if substr(tBody, "sp ::=") = 0 tG += "sp ::= [ " + char(92) + "t]+" + tNl ok
+	if substr(tBody, "ws ::=") = 0 tG += "ws ::= [ " + char(92) + "t]*" + tNl ok
+	return tG
 
 # ---- the grammar, for the decoder --------------------------------------------
 # One rule per kind, one alternative per clause with the clause's own value
@@ -880,21 +880,21 @@ func ForgeAskGbnf(aLang)
 # cannot say "at most once" without enumerating orders).
 
 func GbnfShape(aSeat, aLang)
-	cOf = aSeat[2]
-	cK = TypeKindOf(aLang, cOf)
-	if cK = "union"
+	tOf = aSeat[2]
+	tK = TypeKindOf(aLang, tOf)
+	if tK = "union"
 		# one alternative per shape, in the union's order (v0.3)
-		aU = UnionOf(aLang, cOf)
-		cOut = "("
+		aU = UnionOf(aLang, tOf)
+		tOut = "("
 		for i = 1 to len(aU[2])
-			if i > 1 cOut += " | " ok
-			cOut += GbnfShape([aU[2][i][1], aU[2][i][1], aU[2][i][2], 0], aLang)
+			if i > 1 tOut += " | " ok
+			tOut += GbnfShape([aU[2][i][1], aU[2][i][1], aU[2][i][2], 0], aLang)
 		next
-		return cOut + ")"
+		return tOut + ")"
 	ok
 	if aSeat[3]
-		if cK = "form"
-			aF = FormOf(aLang, cOf)
+		if tK = "form"
+			aF = FormOf(aLang, tOf)
 			aFS = aF[2]
 			aDeclaredK = []
 			aDL = LangGet(aLang, "declarations")
@@ -906,57 +906,57 @@ func GbnfShape(aSeat, aLang)
 		ok
 		return "namelist"
 	ok
-	if cOf = "text" or cK = "format" or cK = "sentence" or cK = "expr" return "string" ok
-	if cOf = "number" or cK = "range" return "number" ok
+	if tOf = "text" or tK = "format" or tK = "sentence" or tK = "expr" return "string" ok
+	if tOf = "number" or tK = "range" return "number" ok
 	return "ident"   # a name, a flag, a MENU word, a reference, a SYMBOL
 
-func FormOf(aLang, cName)
+func FormOf(aLang, tName)
 	aF = LangGet(aLang, "forms")
 	for i = 1 to len(aF)
-		if aF[i][1] = cName return aF[i] ok
+		if aF[i][1] = tName return aF[i] ok
 	next
 	return null
 
 func ForgeGbnf(aLang)
-	nl = char(10)
-	cName = LangGet(aLang, "name")
+	tNl = char(10)
+	tName = LangGet(aLang, "name")
 	aD = LangGet(aLang, "declarations")
-	g = "# " + cName + ".gbnf -- GENERATED by forge.haro from the " + cName + " declaration (stzu v0.1)." + nl
-	g += "# The Commons' lexical form (C6): -- comments, double-quoted strings, UPPER_SNAKE keywords," + nl
-	g += "# lower_snake identifiers, trailing commas. A clause given twice and a required seat" + nl
-	g += "# absent are the court's to refuse; the decoder holds the shape." + nl + nl
-	g += "root ::= ws decl (ws decl)* ws" + nl
-	g += "decl ::= "
+	tG = "# " + tName + ".gbnf -- GENERATED by forge.haro from the " + tName + " declaration (stzu v0.1)." + tNl
+	tG += "# The Commons' lexical form (C6): -- comments, double-quoted strings, UPPER_SNAKE keywords," + tNl
+	tG += "# lower_snake identifiers, trailing commas. A clause given twice and a required seat" + tNl
+	tG += "# absent are the court's to refuse; the decoder holds the shape." + tNl + tNl
+	tG += "root ::= ws decl (ws decl)* ws" + tNl
+	tG += "decl ::= "
 	for i = 1 to len(aD)
-		if i > 1 g += " | " ok
-		g += "decl_" + aD[i][2]
+		if i > 1 tG += " | " ok
+		tG += "decl_" + aD[i][2]
 	next
-	g += nl
+	tG += tNl
 	# Ring has no string escapes (F-55): the grammar's own quotes and
 	# backslashes are spelled with char(), never with \" or \n
-	q = char(34)
-	bs = char(92)
+	tQ = char(34)
+	tBs = char(92)
 	for i = 1 to len(aD)
-		cK = aD[i][2]
+		tK = aD[i][2]
 		aS = aD[i][3]
 		# a declaration is [name, verb, seats, rationale, line]: the VERB is spoken
-		g += "decl_" + cK + ' ::= "DEFINE" sp "' + cK + '" sp ident sp "AS" ws "(" ws (clause_' + cK + ' (ws "," ws clause_' + cK + ')* (ws ",")?)? ws ")" ws "RATIONALE" sp string' + nl
-		g += "clause_" + cK + " ::= "
+		tG += "decl_" + tK + ' ::= "DEFINE" sp "' + tK + '" sp ident sp "AS" ws "(" ws (clause_' + tK + ' (ws "," ws clause_' + tK + ')* (ws ",")?)? ws ")" ws "RATIONALE" sp string' + tNl
+		tG += "clause_" + tK + " ::= "
 		if len(aS) = 0
-			g += '"NOTHING"'
+			tG += '"NOTHING"'
 		ok
 		for j = 1 to len(aS)
-			if j > 1 g += " | " ok
-			g += '"' + upper(aS[j][1]) + '" sp ' + GbnfShape(aS[j], aLang)
+			if j > 1 tG += " | " ok
+			tG += '"' + upper(aS[j][1]) + '" sp ' + GbnfShape(aS[j], aLang)
 		next
-		g += nl
+		tG += tNl
 	next
-	g += nl
-	g += 'ident ::= [a-z_] [a-z0-9_]*' + nl
-	g += "string ::= " + q + bs + q + q + " [^" + q + "]* " + q + bs + q + q + nl
-	g += 'number ::= [0-9]+' + nl
-	g += 'namelist ::= "[" ws (ident (ws "," ws ident)* (ws ",")?)? ws "]"' + nl
-	g += 'stringlist ::= "[" ws (string (ws "," ws string)* (ws ",")?)? ws "]"' + nl
+	tG += tNl
+	tG += 'ident ::= [a-z_] [a-z0-9_]*' + tNl
+	tG += "string ::= " + tQ + tBs + tQ + tQ + " [^" + tQ + "]* " + tQ + tBs + tQ + tQ + tNl
+	tG += 'number ::= [0-9]+' + tNl
+	tG += 'namelist ::= "[" ws (ident (ws "," ws ident)* (ws ",")?)? ws "]"' + tNl
+	tG += 'stringlist ::= "[" ws (string (ws "," ws string)* (ws ",")?)? ws "]"' + tNl
 	# v0.6: a pair list, emitted when a kind writes one
 	bPairs = false
 	for i = 1 to len(aD)
@@ -966,7 +966,7 @@ func ForgeGbnf(aLang)
 		next
 	next
 	if bPairs
-		g += 'pairlist ::= "[" ws (pair (ws "," ws pair)* (ws ",")?)? ws "]"' + nl
+		tG += 'pairlist ::= "[" ws (pair (ws "," ws pair)* (ws ",")?)? ws "]"' + tNl
 		# v0.27: a pair form with a mark seat writes the mark after the value
 		bMark = false
 		aDeclaredM = []
@@ -979,11 +979,11 @@ func ForgeGbnf(aLang)
 			if StzuHasMarkSeat(aFm[i][2], aDeclaredM) bMark = true ok
 		next
 		if bMark
-			g += 'pair ::= ident ws ":" ws (ident | string | number) (sp ident)?' + nl
+			tG += 'pair ::= ident ws ":" ws (ident | string | number) (sp ident)?' + tNl
 		else
-			g += 'pair ::= ident ws ":" ws (ident | string | number)' + nl
+			tG += 'pair ::= ident ws ":" ws (ident | string | number)' + tNl
 		ok
 	ok
-	g += "sp ::= [ " + bs + "t]+" + nl
-	g += "ws ::= ([ " + bs + "t" + bs + "r" + bs + "n] | " + q + "--" + q + " [^" + bs + "n]* " + q + bs + "n" + q + ")*" + nl
-	return g
+	tG += "sp ::= [ " + tBs + "t]+" + tNl
+	tG += "ws ::= ([ " + tBs + "t" + tBs + "r" + tBs + "n] | " + tQ + "--" + tQ + " [^" + tBs + "n]* " + tQ + tBs + "n" + tQ + ")*" + tNl
+	return tG

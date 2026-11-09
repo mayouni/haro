@@ -46,7 +46,7 @@ func NdCheck(aDecls, aDoors)
 					next
 					if not bNeeded
 						try
-							CtFailC(aD[4][j][2], "CAPABILITY_NOT_NEEDED", [], aD[1] + " " + aD[2] + " opens '" + aW[m] + "', and the language " + $cCourtLang + " does not NEED it")
+							CtFailC(aD[4][j][2], "CAPABILITY_NOT_NEEDED", [], aD[1] + " " + aD[2] + " opens '" + aW[m] + "', and the language " + $tCourtLang + " does not NEED it")
 						catch
 							CtNote(cCatchError)
 						done
@@ -57,12 +57,12 @@ func NdCheck(aDecls, aDoors)
 	next
 
 # the world rows: each declaration of a kind that opens, with what it opens -- [] when it lists nothing
-func NdRows(aDecls, aDoors, cFile)
+func NdRows(aDecls, aDoors, tFile)
 	aRows = []
 	for i = 1 to len(aDecls)
 		aD = aDecls[i]
 		aO = NdOpens(aDoors, aD)
 		if isnull(aO) loop ok
-		aRows + [ExObjMark(), ["verb", aD[1]], ["name", aD[2]], ["opens", aO], ["span", [ExObjMark(), ["file", cFile], ["line", aD[3]]]]]
+		aRows + [ExObjMark(), ["verb", aD[1]], ["name", aD[2]], ["opens", aO], ["span", [ExObjMark(), ["file", tFile], ["line", aD[3]]]]]
 	next
 	return aRows

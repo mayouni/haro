@@ -3,7 +3,7 @@
 # resolve, and costs the compiler a handful of lines instead of a hundred (HF-49).
 # Functions only; the globals are the generated court's.
 
-func CtSymbolByName(cName)
+func CtSymbolByName(tName)
 	return null
 
 func CtSymbolSites(aDecls)
@@ -15,11 +15,11 @@ func CtResolveWorld(aDecls)
 func CtSymbolCode(aSy)
 	return ["UNRESOLVED", []]
 
-func CtWorldStem(cPath)
-	return cPath
+func CtWorldStem(tPath)
+	return tPath
 
-func CtWorldLoad(cPath)
+func CtWorldLoad(tPath)
 	CtFail(1, "this language declares no SYMBOL and no PUBLISH, so it has no world to read")
 
-func CtWorldRows(aDecls, cFile)
+func CtWorldRows(aDecls, tFile)
 	CtFail(1, "this language declares no SYMBOL and no PUBLISH, so it publishes no world")

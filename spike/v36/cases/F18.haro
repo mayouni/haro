@@ -1,12 +1,12 @@
 d()
 func d
-	n = 0
+	nN = 0
 	do
-		n++
+		nN++
 		try
-			if n = 2 loop ok
-			? "body " + string(n)
+			if nN = 2 loop ok
+			? "body " + string(nN)
 		finally
-			? "finally " + string(n)
+			? "finally " + string(nN)
 		done
-	again n < 3
+	again nN < 3

@@ -18,25 +18,25 @@ else
 	CondRtRun(read(sysargv[3]))
 ok
 
-func CondRtRun(cBody)
-	aLines = str2list(cBody)
+func CondRtRun(tBody)
+	aLines = str2list(tBody)
 	for i = 1 to len(aLines)
-		cLine = aLines[i]
-		if len(cLine) > 0 and cLine[len(cLine)] = char(13) cLine = left(cLine, len(cLine) - 1) ok
-		if len(cLine) = 0 loop ok
-		cOne = ""
+		tLine = aLines[i]
+		if len(tLine) > 0 and tLine[len(tLine)] = char(13) tLine = left(tLine, len(tLine) - 1) ok
+		if len(tLine) = 0 loop ok
+		tOne = ""
 		try
-			aA = CondParse(cLine)
-			cP = CondPrint(aA)
-			aB = CondParse(cP)
-			cP2 = CondPrint(aB)
-			if CondDump(aA) = CondDump(aB) and cP = cP2
-				cOne = "ok " + cP
+			aA = CondParse(tLine)
+			tP = CondPrint(aA)
+			aB = CondParse(tP)
+			tP2 = CondPrint(aB)
+			if CondDump(aA) = CondDump(aB) and tP = tP2
+				tOne = "ok " + tP
 			else
-				cOne = "DIFFERS " + cLine + " => " + cP
+				tOne = "DIFFERS " + tLine + " => " + tP
 			ok
 		catch
-			cOne = "unreadable " + cLine
+			tOne = "unreadable " + tLine
 		done
-		? cOne
+		? tOne
 	next

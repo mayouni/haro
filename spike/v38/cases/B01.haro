@@ -1,21 +1,21 @@
-$g = 0
+$nG = 0
 try
-	within $g = 1
-		within $g = 2
-			? "inner " + string($g)
+	within $nG = 1
+		within $nG = 2
+			? "inner " + string($nG)
 		done
-		? "outer " + string($g)
+		? "outer " + string($nG)
 	done
 	raise("go")
 catch
-	within $g = 3
+	within $nG = 3
 		try
-			? "in catch " + string($g)
+			? "in catch " + string($nG)
 			raise("again")
 		catch
-			? "nested catch " + string($g)
+			? "nested catch " + string($nG)
 		done
 	done
-	? "after catch block " + string($g)
+	? "after catch block " + string($nG)
 done
-? "end " + string($g)
+? "end " + string($nG)

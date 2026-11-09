@@ -1,6 +1,6 @@
 ? "before"
-o = new Point
-? o.GetX()
+oO = new Point
+? oO.GetX()
 class Point
 	@nX = 3
 	func GetX

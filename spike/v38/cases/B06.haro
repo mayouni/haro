@@ -1,7 +1,7 @@
 ? "before"
 f()
 func f
-	within $g = 1
+	within $nG = 1
 		? "body"
 	catch
 		? "c"

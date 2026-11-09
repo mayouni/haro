@@ -15,18 +15,18 @@
 
 # ---- the canonical text of a condition ----------------------------------------------------------------------------------------
 
-func CondIsBareWord(cV)
-	if len(cV) = 0 return false ok
-	for i = 1 to len(cV)
-		if not CondIsWordChar(cV[i]) return false ok
+func CondIsBareWord(tV)
+	if len(tV) = 0 return false ok
+	for i = 1 to len(tV)
+		if not CondIsWordChar(tV[i]) return false ok
 	next
 	return true
 
 # a value: a number, or a bare word where a bare word is a value (the right of = and != and a quantifier's named, and after contains), else quoted
-func CondPrintVal(cV, bBare)
-	if CondIsNumberText(cV) return cV ok
-	if bBare and CondIsBareWord(cV) and cV != "this" and cV != "self" return cV ok
-	return "'" + cV + "'"
+func CondPrintVal(tV, bBare)
+	if CondIsNumberText(tV) return tV ok
+	if bBare and CondIsBareWord(tV) and tV != "this" and tV != "self" return tV ok
+	return "'" + tV + "'"
 
 func CondPrintRight(aR, bBare)
 	if aR[1] = "path" return CondPathText(aR) ok
@@ -37,50 +37,50 @@ func CondPrint(aAst)
 
 # nCtx is the precedence the context needs: or 1, and 2, not 3, an atom 4; a node of lower precedence is parenthesised
 func CondPrintP(aAst, nCtx)
-	k = aAst[1]
-	if k = "or"
-		c = CondPrintP(aAst[2], 1) + " or " + CondPrintP(aAst[3], 2)
-		if nCtx > 1 return "(" + c + ")" ok
-		return c
+	xK = aAst[1]
+	if xK = "or"
+		tC = CondPrintP(aAst[2], 1) + " or " + CondPrintP(aAst[3], 2)
+		if nCtx > 1 return "(" + tC + ")" ok
+		return tC
 	ok
-	if k = "and"
-		c = CondPrintP(aAst[2], 2) + " and " + CondPrintP(aAst[3], 3)
-		if nCtx > 2 return "(" + c + ")" ok
-		return c
+	if xK = "and"
+		tC = CondPrintP(aAst[2], 2) + " and " + CondPrintP(aAst[3], 3)
+		if nCtx > 2 return "(" + tC + ")" ok
+		return tC
 	ok
-	if k = "not" return "not " + CondPrintP(aAst[2], 3) ok
-	if k = "exists" return "exists " + aAst[2] ok
-	if k = "quant"
-		c = "(" + aAst[2] + " " + CondPathText(aAst[3])
-		if not isnull(aAst[4]) c += " named " + CondPrintRight(aAst[4], true) ok
-		if not isnull(aAst[5]) c += " where " + CondPrintP(aAst[5], 0) ok
-		return c + ")"
+	if xK = "not" return "not " + CondPrintP(aAst[2], 3) ok
+	if xK = "exists" return "exists " + aAst[2] ok
+	if xK = "quant"
+		tC = "(" + aAst[2] + " " + CondPathText(aAst[3])
+		if not isnull(aAst[4]) tC += " named " + CondPrintRight(aAst[4], true) ok
+		if not isnull(aAst[5]) tC += " where " + CondPrintP(aAst[5], 0) ok
+		return tC + ")"
 	ok
-	if k = "cmp"
+	if xK = "cmp"
 		if aAst[2] = ">" or aAst[2] = "<" return CondPathText(aAst[3]) + " " + aAst[2] + " " + aAst[4][2] ok
 		return CondPathText(aAst[3]) + " " + aAst[2] + " " + CondPrintRight(aAst[4], true)
 	ok
-	if k = "has" return CondPathText(aAst[3]) + " " + aAst[2] ok
-	if k = "contains" return CondPathText(aAst[2]) + " contains " + CondPrintVal(aAst[3], true) ok
-	if k = "rel" return CondPathText(aAst[3]) + " " + aAst[2] + " " + CondPrintRight(aAst[4], false) ok
-	if k = "cyclic" return CondPathText(aAst[2]) + " cyclic" ok
-	if k = "matches" return CondPathText(aAst[2]) + " matches " + aAst[3] ok
-	if k = "is" return "self is " + aAst[2] ok
-	if k = "reach" return CondPathText(aAst[2]) + " reachable" ok
-	if k = "refd" return CondPathText(aAst[2]) + " referenced" ok
-	if k = "keyed" return CondPathText(aAst[2]) + " keyed_by " + CondPrintRight(aAst[3], false) ok
-	raise("condition: no printing for a node of kind '" + k + "'")
+	if xK = "has" return CondPathText(aAst[3]) + " " + aAst[2] ok
+	if xK = "contains" return CondPathText(aAst[2]) + " contains " + CondPrintVal(aAst[3], true) ok
+	if xK = "rel" return CondPathText(aAst[3]) + " " + aAst[2] + " " + CondPrintRight(aAst[4], false) ok
+	if xK = "cyclic" return CondPathText(aAst[2]) + " cyclic" ok
+	if xK = "matches" return CondPathText(aAst[2]) + " matches " + aAst[3] ok
+	if xK = "is" return "self is " + aAst[2] ok
+	if xK = "reach" return CondPathText(aAst[2]) + " reachable" ok
+	if xK = "refd" return CondPathText(aAst[2]) + " referenced" ok
+	if xK = "keyed" return CondPathText(aAst[2]) + " keyed_by " + CondPrintRight(aAst[3], false) ok
+	raise("condition: no printing for a node of kind '" + xK + "'")
 
 # a parsed condition as one line, every string length-free and quoted: two conditions are one when their dumps are
-func CondDump(x)
-	if isnull(x) return "NULL" ok
-	if isstring(x) return '"' + x + '"' ok
-	cOut = "["
-	for i = 1 to len(x)
-		if i > 1 cOut += " " ok
-		cOut += CondDump(x[i])
+func CondDump(xX)
+	if isnull(xX) return "NULL" ok
+	if isstring(xX) return '"' + xX + '"' ok
+	tOut = "["
+	for i = 1 to len(xX)
+		if i > 1 tOut += " " ok
+		tOut += CondDump(xX[i])
 	next
-	return cOut + "]"
+	return tOut + "]"
 
 # ---- the kinds that include a FORM ---------------------------------------------------------------------------------------------
 
@@ -102,17 +102,17 @@ func StzuFormTable(aDecls)
 	next
 	return aTab
 
-func StzuFormAt(aTab, cName)
+func StzuFormAt(aTab, tName)
 	for i = 1 to len(aTab)
-		if aTab[i][1] = cName return i ok
+		if aTab[i][1] = tName return i ok
 	next
 	return 0
 
 # ---- INCLUDES -----------------------------------------------------------------------------------------------------------------
 
-func StzuSeatSource(cForm)
-	if cForm = "" return "its own SEATS" ok
-	return "the FORM '" + cForm + "'"
+func StzuSeatSource(tForm)
+	if tForm = "" return "its own SEATS" ok
+	return "the FORM '" + tForm + "'"
 
 # each declaration that includes FORMs gets the seats of the FORMs first, then its own; a refusal marks the declaration unresolved
 func StzuExpandIncludes(aDecls, aForms, aDeclared)
@@ -124,25 +124,25 @@ func StzuExpandIncludes(aDecls, aForms, aDeclared)
 			aNew = []
 			aSrc = []
 			for j = 1 to len(aInc)
-				cF = aInc[j]
-				cK = DeclaredKind(aDeclared, cF)
-				if cK = "" StzuFail(aDecls[i][5], "INCLUDES: '" + cF + "' resolves to nothing in this declaration") ok
-				if cK != "FORM" StzuFail(aDecls[i][5], "INCLUDES must name a FORM; '" + cF + "' is a " + cK) ok
+				tF = aInc[j]
+				tK = DeclaredKind(aDeclared, tF)
+				if tK = "" StzuFail(aDecls[i][5], "INCLUDES: '" + tF + "' resolves to nothing in this declaration") ok
+				if tK != "FORM" StzuFail(aDecls[i][5], "INCLUDES must name a FORM; '" + tF + "' is a " + tK) ok
 				for m = 1 to j - 1
-					if aInc[m] = cF StzuFail(aDecls[i][5], "INCLUDES names '" + cF + "' twice") ok
+					if aInc[m] = tF StzuFail(aDecls[i][5], "INCLUDES names '" + tF + "' twice") ok
 				next
 				aFS = []
 				for m = 1 to len(aForms)
-					if aForms[m][1] = cF aFS = aForms[m][2] ok
+					if aForms[m][1] = tF aFS = aForms[m][2] ok
 				next
 				for m = 1 to len(aFS)
 					for q = 1 to len(aNew)
 						if aNew[q][1] = aFS[m][1]
-							StzuFail(aDecls[i][5], "seat '" + aFS[m][1] + "' of " + aDecls[i][1] + " comes twice: from " + StzuSeatSource(aSrc[q]) + " and from " + StzuSeatSource(cF))
+							StzuFail(aDecls[i][5], "seat '" + aFS[m][1] + "' of " + aDecls[i][1] + " comes twice: from " + StzuSeatSource(aSrc[q]) + " and from " + StzuSeatSource(tF))
 						ok
 					next
 					aNew + aFS[m]
-					aSrc + cF
+					aSrc + tF
 				next
 			next
 			aOwn = aDecls[i][3]
@@ -166,28 +166,28 @@ func StzuExpandIncludes(aDecls, aForms, aDeclared)
 # ---- a quantifier over a FORM, and ON a FORM -----------------------------------------------------------------------------------
 
 # the fold of one node per kind: or (and, for all) in the order the kinds are declared
-func StzuFoldNodes(cOp, aNodes)
+func StzuFoldNodes(tOp, aNodes)
 	aR = aNodes[1]
 	for j = 2 to len(aNodes)
-		aN = [cOp, aR, aNodes[j]]
+		aN = [tOp, aR, aNodes[j]]
 		aR = aN
 	next
 	return aR
 
-func StzuFormAst(aAst, cOn, aTab, aDecls)
-	k = aAst[1]
-	if k = "or" or k = "and"
-		aL = StzuFormAst(aAst[2], cOn, aTab, aDecls)
-		aR = StzuFormAst(aAst[3], cOn, aTab, aDecls)
-		aN = [k, aL, aR]
+func StzuFormAst(aAst, tOn, aTab, aDecls)
+	xK = aAst[1]
+	if xK = "or" or xK = "and"
+		aL = StzuFormAst(aAst[2], tOn, aTab, aDecls)
+		aR = StzuFormAst(aAst[3], tOn, aTab, aDecls)
+		aN = [xK, aL, aR]
 		return aN
 	ok
-	if k = "not"
-		aC = StzuFormAst(aAst[2], cOn, aTab, aDecls)
+	if xK = "not"
+		aC = StzuFormAst(aAst[2], tOn, aTab, aDecls)
 		aN = ["not", aC]
 		return aN
 	ok
-	if k = "exists"
+	if xK = "exists"
 		nF = StzuFormAt(aTab, aAst[2])
 		if nF > 0
 			$bFormChanged = true
@@ -200,16 +200,16 @@ func StzuFormAst(aAst, cOn, aTab, aDecls)
 		ok
 		return aAst
 	ok
-	if k = "quant"
+	if xK = "quant"
 		aCond = aAst[5]
-		if not isnull(aCond) aCond = StzuFormAst(aCond, cOn, aTab, aDecls) ok
-		cHead = ""
-		if len(aAst[3][2]) = 1 cHead = aAst[3][2][1] ok
+		if not isnull(aCond) aCond = StzuFormAst(aCond, tOn, aTab, aDecls) ok
+		tHead = ""
+		if len(aAst[3][2]) = 1 tHead = aAst[3][2][1] ok
 		nF = 0
-		if cHead != "" nF = StzuFormAt(aTab, cHead) ok
+		if tHead != "" nF = StzuFormAt(aTab, tHead) ok
 		# a name that is a seat of the constraint's kind keeps the meaning it had
-		if nF > 0 and cOn != ""
-			if not isnull(StzuSeatNamed(StzuSeatsOf(aDecls, cOn), cHead)) nF = 0 ok
+		if nF > 0 and tOn != ""
+			if not isnull(StzuSeatNamed(StzuSeatsOf(aDecls, tOn), tHead)) nF = 0 ok
 		ok
 		if nF > 0
 			$bFormChanged = true
@@ -219,9 +219,9 @@ func StzuFormAst(aAst, cOn, aTab, aDecls)
 				aQ = ["quant", aAst[2], aP, aAst[4], aCond]
 				aNodes + aQ
 			next
-			cOp = "or"
-			if aAst[2] = "all" cOp = "and" ok
-			return StzuFoldNodes(cOp, aNodes)
+			tOp = "or"
+			if aAst[2] = "all" tOp = "and" ok
+			return StzuFoldNodes(tOp, aNodes)
 		ok
 		aQ = ["quant", aAst[2], aAst[3], aAst[4], aCond]
 		return aQ
@@ -229,25 +229,25 @@ func StzuFormAst(aAst, cOn, aTab, aDecls)
 	return aAst
 
 # a condition as written, or its expansion in the canonical text when it quantifies over a FORM some kind includes
-func StzuExpandCond(cCond, cOn, aTab, aDecls)
-	if len(aTab) = 0 return cCond ok
+func StzuExpandCond(tCond, tOn, aTab, aDecls)
+	if len(aTab) = 0 return tCond ok
 	$bFormChanged = false
 	aAst = null
-	cErr = ""
+	tErr = ""
 	try
-		aAst = CondParse(cCond)
+		aAst = CondParse(tCond)
 	catch
-		cErr = cCatchError
+		tErr = cCatchError
 	done
 	# an unreadable condition is the validator's to speak of, in its own words
-	if cErr != "" return cCond ok
-	aNew = StzuFormAst(aAst, cOn, aTab, aDecls)
-	if not $bFormChanged return cCond ok
+	if tErr != "" return tCond ok
+	aNew = StzuFormAst(aAst, tOn, aTab, aDecls)
+	if not $bFormChanged return tCond ok
 	return CondPrint(aNew)
 
-func StzuNameIn(cName, aRecs)
+func StzuNameIn(tName, aRecs)
 	for i = 1 to len(aRecs)
-		if aRecs[i][1] = cName return true ok
+		if aRecs[i][1] = tName return true ok
 	next
 	return false
 
@@ -260,7 +260,7 @@ func StzuExpandConstraints(aCons, aTab, aDecls, aDeclared)
 		aExc = []
 		if len(aC) >= 10 aExc = aC[10] ok
 		nF = StzuFormAt(aTab, aC[2])
-		cOnKind = DeclaredKind(aDeclared, aC[2])
+		tOnKind = DeclaredKind(aDeclared, aC[2])
 		if nF > 0
 			aKinds = aTab[nF][2]
 			# EXCEPT: the kinds the constraint is not made for, each a kind that includes the FORM, named once, and not all of them
@@ -285,17 +285,17 @@ func StzuExpandConstraints(aCons, aTab, aDecls, aDeclared)
 			if bErr loop ok
 			aKinds = aKept
 			for k = 1 to len(aKinds)
-				cNm = aC[1] + "_" + aKinds[k]
-				if DeclaredKind(aDeclared, cNm) != "" or StzuNameIn(cNm, aOut)
+				tNm = aC[1] + "_" + aKinds[k]
+				if DeclaredKind(aDeclared, tNm) != "" or StzuNameIn(tNm, aOut)
 					try
-						StzuFail(aC[6], "the constraint '" + cNm + "' that ON " + aC[2] + " makes for " + aKinds[k] + " is already declared -- one namespace, one name, one meaning")
+						StzuFail(aC[6], "the constraint '" + tNm + "' that ON " + aC[2] + " makes for " + aKinds[k] + " is already declared -- one namespace, one name, one meaning")
 					catch
 						StzuNote(cCatchError)
 					done
 					loop
 				ok
 				aR = aC
-				aR[1] = cNm
+				aR[1] = tNm
 				aR[2] = aKinds[k]
 				aR[3] = StzuExpandCond(aC[3], aKinds[k], aTab, aDecls)
 				if aC[4] != "" aR[4] = StzuExpandCond(aC[4], aKinds[k], aTab, aDecls) ok
@@ -303,11 +303,11 @@ func StzuExpandConstraints(aCons, aTab, aDecls, aDeclared)
 			next
 		else
 			# EXCEPT has something to except only ON a FORM some kind includes; ON anything else it is refused (an unknown ON is the ON check's to speak of)
-			if len(aExc) > 0 and cOnKind != ""
-				cWhy = "and '" + aC[2] + "' is a " + cOnKind
-				if cOnKind = "FORM" cWhy = "and no DECLARATION includes '" + aC[2] + "'" ok
+			if len(aExc) > 0 and tOnKind != ""
+				tWhy = "and '" + aC[2] + "' is a " + tOnKind
+				if tOnKind = "FORM" tWhy = "and no DECLARATION includes '" + aC[2] + "'" ok
 				try
-					StzuFail(aC[6], "EXCEPT belongs to a constraint ON a FORM, " + cWhy)
+					StzuFail(aC[6], "EXCEPT belongs to a constraint ON a FORM, " + tWhy)
 				catch
 					StzuNote(cCatchError)
 				done

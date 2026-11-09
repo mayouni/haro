@@ -1,9 +1,9 @@
 f()
 func f
-	e = "outer"
+	tE = "outer"
 	try
 		raise("z")
 	catch
-		e
-		? "e is still " + e
+		tE
+		? "e is still " + tE
 	done

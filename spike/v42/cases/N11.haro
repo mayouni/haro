@@ -1,8 +1,8 @@
 ? "before"
 f()
 func f
-	o = new Point
-	? o.getx()
+	oO = new Point
+	? oO.getx()
 class Point
 	func GetX
 		return 3

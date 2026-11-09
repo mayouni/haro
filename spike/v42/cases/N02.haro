@@ -1,5 +1,5 @@
 ? "before"
 f()
 func f
-	oClient = 1
-	? oclient
+	nClient = 1
+	? nclient

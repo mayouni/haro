@@ -2,6 +2,6 @@ p()
 func p
 	try
 		raise("plugin failed")
-	catch cError
-		? "handled: " + cError
+	catch tError
+		? "handled: " + tError
 	done

@@ -9,8 +9,8 @@
 # (pattern_lib.haro, which the generated court loads only for such a language). The sets MEMBER draws from are collected here, from the
 # sentence's own declarations and the language's menus -- data, never code. A seat the sentence does not write is not judged. The
 # finding stands at the line of the seat's clause, and it refuses, or warns, as a CONSTRAINT's does
-func CtCheckPatterns(aDecls, cSrc)
-	aE = CtLangEntry($cCourtLang)
+func CtCheckPatterns(aDecls, tSrc)
+	aE = CtLangEntry($tCourtLang)
 	if isnull(aE) return ok
 	if len(aE) < 24 return ok
 	aPats = aE[24]
@@ -35,17 +35,17 @@ func CtCheckPatterns(aDecls, cSrc)
 		aP = aPats[i]
 		aK = CtKindByDeclName(aP[2])
 		if isnull(aK) loop ok
-		cClause = upper(aP[3])
+		tClause = upper(aP[3])
 		for j = 1 to len(aDecls)
 			aD = aDecls[j]
 			if aD[1] != aK[1] loop ok
 			if CtIsBroken(j) loop ok
-			aCl = CtClauseNamed(aD, cClause)
+			aCl = CtClauseNamed(aD, tClause)
 			if isnull(aCl) loop ok
-			cText = substr(cSrc, aCl[3][3], aCl[3][4] - aCl[3][3])
+			tText = substr(tSrc, aCl[3][3], aCl[3][4] - aCl[3][3])
 			bHolds = false
 			try
-				aR = PatRun(aP[1], cText)
+				aR = PatRun(aP[1], tText)
 				bHolds = aR[1]
 			catch
 				bHolds = false
@@ -69,26 +69,26 @@ func CtCheckPatterns(aDecls, cSrc)
 		next
 	next
 
-func CtClauseNamed(aD, cClause)
+func CtClauseNamed(aD, tClause)
 	for i = 1 to len(aD[4])
-		if aD[4][i][1] = cClause return aD[4][i] ok
+		if aD[4][i][1] = tClause return aD[4][i] ok
 	next
 	return null
 
 # the values of a seat across every declaration of a kind: a word, a string or a number is one, a list its items (a list of pairs is refused by the meta-court)
-func CtSetMembers(aDecls, cDecl, cSeat)
+func CtSetMembers(aDecls, tDecl, tSeat)
 	aOut = []
-	aK = CtKindByDeclName(cDecl)
+	aK = CtKindByDeclName(tDecl)
 	if isnull(aK) return aOut ok
-	cClause = upper(cSeat)
+	tClause = upper(tSeat)
 	for j = 1 to len(aDecls)
 		if aDecls[j][1] != aK[1] loop ok
 		if CtIsBroken(j) loop ok
-		aCl = CtClauseNamed(aDecls[j], cClause)
+		aCl = CtClauseNamed(aDecls[j], tClause)
 		if isnull(aCl) loop ok
-		cShape = aCl[3][1]
+		tShape = aCl[3][1]
 		xPay = aCl[3][2]
-		if cShape = "word" or cShape = "string" or cShape = "number"
+		if tShape = "word" or tShape = "string" or tShape = "number"
 			aOut + xPay
 		else
 			for k = 1 to len(xPay)

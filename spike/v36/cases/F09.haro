@@ -1,14 +1,14 @@
 w()
 func w
-	n = 0
+	nN = 0
 	while true
-		n++
+		nN++
 		try
-			if n = 3 exit ok
+			if nN = 3 exit ok
 		catch
 			? "no"
 		finally
-			? "finally " + string(n)
+			? "finally " + string(nN)
 		done
 	end
-	? "after " + string(n)
+	? "after " + string(nN)

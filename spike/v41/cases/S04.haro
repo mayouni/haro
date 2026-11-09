@@ -2,5 +2,5 @@ f()
 func f
 	? :Name
 	? :name
-	x = :Name
-	? x = "Name"
+	xX = :Name
+	? xX = "Name"

@@ -26,86 +26,86 @@
 
 # ---- the lexer -----------------------------------------------------------------------------------------------------
 
-func BlkIsDigit(c)
-	n = ascii(c)
-	return (n >= 48 and n <= 57)
+func BlkIsDigit(tC)
+	nN = ascii(tC)
+	return (nN >= 48 and nN <= 57)
 
-func BlkIsLower(c)
-	n = ascii(c)
-	return (n >= 97 and n <= 122)
+func BlkIsLower(tC)
+	nN = ascii(tC)
+	return (nN >= 97 and nN <= 122)
 
-func BlkIsUpper(c)
-	n = ascii(c)
-	return (n >= 65 and n <= 90)
+func BlkIsUpper(tC)
+	nN = ascii(tC)
+	return (nN >= 65 and nN <= 90)
 
-func BlkIsWordChar(c)
-	return BlkIsLower(c) or BlkIsUpper(c) or BlkIsDigit(c) or ascii(c) = 95
+func BlkIsWordChar(tC)
+	return BlkIsLower(tC) or BlkIsUpper(tC) or BlkIsDigit(tC) or ascii(tC) = 95
 
-func BlkTrim(cS)
+func BlkTrim(tS)
 	nA = 1
-	nB = len(cS)
-	while nA <= nB and (cS[nA] = " " or cS[nA] = char(9) or cS[nA] = char(13))
+	nB = len(tS)
+	while nA <= nB and (tS[nA] = " " or tS[nA] = char(9) or tS[nA] = char(13))
 		nA++
 	end
-	while nB >= nA and (cS[nB] = " " or cS[nB] = char(9) or cS[nB] = char(13))
+	while nB >= nA and (tS[nB] = " " or tS[nB] = char(9) or tS[nB] = char(13))
 		nB--
 	end
 	if nB < nA return "" ok
-	return substr(cS, nA, nB - nA + 1)
+	return substr(tS, nA, nB - nA + 1)
 
-func BlkTokenize(cSrc)
+func BlkTokenize(tSrc)
 	aToks = []
-	n = len(cSrc)
-	i = 1
+	nN = len(tSrc)
+	nI = 1
 	nLine = 1
 	# a byte-order mark at the start of the text is layout (C6 3.10)
-	if n >= 3 and ascii(cSrc[1]) = 239 and ascii(cSrc[2]) = 187 and ascii(cSrc[3]) = 191 i = 4 ok
-	while i <= n
-		c = cSrc[i]
-		if c = char(10)
+	if nN >= 3 and ascii(tSrc[1]) = 239 and ascii(tSrc[2]) = 187 and ascii(tSrc[3]) = 191 nI = 4 ok
+	while nI <= nN
+		tC = tSrc[nI]
+		if tC = char(10)
 			nLine++
-			i++
-		but c = " " or c = char(9) or c = char(13)
-			i++
-		but c = "-" and i < n and cSrc[i+1] = "-"
+			nI++
+		but tC = " " or tC = char(9) or tC = char(13)
+			nI++
+		but tC = "-" and nI < nN and tSrc[nI+1] = "-"
 			# a comment runs to the line's end; it is a value of the block, in its place
-			j = i + 2
-			while j <= n and cSrc[j] != char(10)
-				j++
+			nJ = nI + 2
+			while nJ <= nN and tSrc[nJ] != char(10)
+				nJ++
 			end
-			aToks + ["comment", BlkTrim(substr(cSrc, i + 2, j - i - 2)), nLine, i, j]
-			i = j
-		but c = '"'
+			aToks + ["comment", BlkTrim(substr(tSrc, nI + 2, nJ - nI - 2)), nLine, nI, nJ]
+			nI = nJ
+		but tC = '"'
 			# C6 3.2: a continuation line's leading whitespace folds to one space; what stands before the
 			# newline is kept, and \r is dropped (block.py and the courts' reading; the meta-court's old lexer
 			# also dropped the whitespace before the newline -- HF-135)
 			nStart = nLine
-			nBeg = i
-			cBuf = ""
-			i++
+			nBeg = nI
+			tBuf = ""
+			nI++
 			bClosed = false
-			while i <= n
-				d = cSrc[i]
-				if d = '"'
+			while nI <= nN
+				tD = tSrc[nI]
+				if tD = '"'
 					bClosed = true
-					i++
+					nI++
 					exit
 				ok
-				if d = char(10)
+				if tD = char(10)
 					nLine++
-					i++
-					while i <= n and (cSrc[i] = " " or cSrc[i] = char(9) or cSrc[i] = char(13))
-						i++
+					nI++
+					while nI <= nN and (tSrc[nI] = " " or tSrc[nI] = char(9) or tSrc[nI] = char(13))
+						nI++
 					end
-					cBuf += " "
+					tBuf += " "
 					loop
 				ok
-				if d = char(13)
-					i++
+				if tD = char(13)
+					nI++
 					loop
 				ok
-				cBuf += d
-				i++
+				tBuf += tD
+				nI++
 			end
 			if not bClosed
 				aToks + ["error", "unterminated_string", nStart, ""]
@@ -114,84 +114,84 @@ func BlkTokenize(cSrc)
 			# Q-B2 (ruled 2026-11-02): a doubled quote inside a string is a C6 amendment Ringua writes. Until its
 			# text lands, a quote that closes one string and opens the next at once is refused by name, so the
 			# old reading (two adjacent strings) never stands in for the amendment
-			if i <= n and cSrc[i] = '"'
+			if nI <= nN and tSrc[nI] = '"'
 				aToks + ["error", "doubled_quote", nStart, ""]
 				return aToks
 			ok
-			aToks + ["string", cBuf, nStart, nBeg, i]
-		but c = "'"
-			aToks + ["error", "single_quote", nLine, c]
+			aToks + ["string", tBuf, nStart, nBeg, nI]
+		but tC = "'"
+			aToks + ["error", "single_quote", nLine, tC]
 			return aToks
-		but BlkIsDigit(c) or (c = "-" and i < n and BlkIsDigit(cSrc[i+1]))
+		but BlkIsDigit(tC) or (tC = "-" and nI < nN and BlkIsDigit(tSrc[nI+1]))
 			# C6 3.3: an optional sign, digits, an optional fraction
-			j = i
-			if cSrc[j] = "-" j++ ok
-			while j <= n and BlkIsDigit(cSrc[j])
-				j++
+			nJ = nI
+			if tSrc[nJ] = "-" nJ++ ok
+			while nJ <= nN and BlkIsDigit(tSrc[nJ])
+				nJ++
 			end
-			if j < n and cSrc[j] = "." and BlkIsDigit(cSrc[j+1])
-				j++
-				while j <= n and BlkIsDigit(cSrc[j])
-					j++
+			if nJ < nN and tSrc[nJ] = "." and BlkIsDigit(tSrc[nJ+1])
+				nJ++
+				while nJ <= nN and BlkIsDigit(tSrc[nJ])
+					nJ++
 				end
 			ok
-			if j <= n and BlkIsWordChar(cSrc[j])
-				while j <= n and BlkIsWordChar(cSrc[j])
-					j++
+			if nJ <= nN and BlkIsWordChar(tSrc[nJ])
+				while nJ <= nN and BlkIsWordChar(tSrc[nJ])
+					nJ++
 				end
-				aToks + ["error", "number_glued", nLine, substr(cSrc, i, j - i)]
+				aToks + ["error", "number_glued", nLine, substr(tSrc, nI, nJ - nI)]
 				return aToks
 			ok
-			aToks + ["number", substr(cSrc, i, j - i), nLine, i, j]
-			i = j
-		but BlkIsWordChar(c)
+			aToks + ["number", substr(tSrc, nI, nJ - nI), nLine, nI, nJ]
+			nI = nJ
+		but BlkIsWordChar(tC)
 			# C6 3.4, 3.5: a lower_snake word or an UPPER_SNAKE keyword; case is meaning, and mixed case is neither
-			j = i
-			while j <= n and BlkIsWordChar(cSrc[j])
-				j++
+			nJ = nI
+			while nJ <= nN and BlkIsWordChar(tSrc[nJ])
+				nJ++
 			end
-			cW = substr(cSrc, i, j - i)
+			tW = substr(tSrc, nI, nJ - nI)
 			bLower = true
 			bUpper = true
-			for k = 1 to len(cW)
-				if BlkIsLower(cW[k]) bUpper = false ok
-				if BlkIsUpper(cW[k]) bLower = false ok
+			for k = 1 to len(tW)
+				if BlkIsLower(tW[k]) bUpper = false ok
+				if BlkIsUpper(tW[k]) bLower = false ok
 			next
 			if bLower
-				aToks + ["ident", cW, nLine, i, j]
+				aToks + ["ident", tW, nLine, nI, nJ]
 			but bUpper
-				aToks + ["keyword", cW, nLine, i, j]
+				aToks + ["keyword", tW, nLine, nI, nJ]
 			else
-				aToks + ["error", "mixed_case", nLine, cW]
+				aToks + ["error", "mixed_case", nLine, tW]
 				return aToks
 			ok
-			i = j
+			nI = nJ
 		else
-			cT = ""
-			if c = "(" cT = "lparen"
-			but c = ")" cT = "rparen"
-			but c = "[" cT = "lbracket"
-			but c = "]" cT = "rbracket"
-			but c = "," cT = "comma"
-			but c = ":" cT = "colon"
-			but c = "?" cT = "question"
-			but c = "." cT = "dot"
+			tT = ""
+			if tC = "(" tT = "lparen"
+			but tC = ")" tT = "rparen"
+			but tC = "[" tT = "lbracket"
+			but tC = "]" tT = "rbracket"
+			but tC = "," tT = "comma"
+			but tC = ":" tT = "colon"
+			but tC = "?" tT = "question"
+			but tC = "." tT = "dot"
 			ok
-			if cT = ""
-				aToks + ["error", "unexpected_character", nLine, c]
+			if tT = ""
+				aToks + ["error", "unexpected_character", nLine, tC]
 				return aToks
 			ok
-			aToks + [cT, c, nLine, i, i + 1]
-			i++
+			aToks + [tT, tC, nLine, nI, nI + 1]
+			nI++
 		ok
 	end
-	aToks + ["eof", "", nLine, n + 1, n + 1]
+	aToks + ["eof", "", nLine, nN + 1, nN + 1]
 	return aToks
 
 # the last token, when it is an error; NULL otherwise
 func BlkLexError(aToks)
-	t = aToks[len(aToks)]
-	if t[1] = "error" return t ok
+	aT = aToks[len(aToks)]
+	if aT[1] = "error" return aT ok
 	return null
 
 # the tokens without their comments: what a court's parser reads (a comment is layout to a court, a value to the block)
@@ -204,31 +204,31 @@ func BlkWithoutComments(aToks)
 
 # ---- the block loader --------------------------------------------------------------------------------------------------
 
-func BlkFail(nLine, cMsg)
-	raise("block (line " + string(nLine) + "): " + cMsg)
+func BlkFail(nLine, tMsg)
+	raise("block (line " + string(nLine) + "): " + tMsg)
 
-func BlkLexMessage(t)
-	cCat = t[2]
-	if cCat = "unterminated_string" return "a string opened and not closed" ok
-	if cCat = "doubled_quote" return "a doubled quote inside a string waits for C6's amendment (Q-B2): Ringua writes it; today a C6 string has no escape" ok
-	if cCat = "single_quote" return "a single quote; C6 strings are double-quoted (.zql's D-ZQL-1 is a divergence)" ok
-	if cCat = "mixed_case" return "'" + t[4] + "' is neither a lower_snake identifier nor an UPPER_SNAKE keyword" ok
-	if cCat = "number_glued" return "'" + t[4] + "' is neither a number nor a word" ok
-	return "the character '" + t[4] + "' is not part of C6"
+func BlkLexMessage(xT)
+	tCat = xT[2]
+	if tCat = "unterminated_string" return "a string opened and not closed" ok
+	if tCat = "doubled_quote" return "a doubled quote inside a string waits for C6's amendment (Q-B2): Ringua writes it; today a C6 string has no escape" ok
+	if tCat = "single_quote" return "a single quote; C6 strings are double-quoted (.zql's D-ZQL-1 is a divergence)" ok
+	if tCat = "mixed_case" return "'" + xT[4] + "' is neither a lower_snake identifier nor an UPPER_SNAKE keyword" ok
+	if tCat = "number_glued" return "'" + xT[4] + "' is neither a number nor a word" ok
+	return "the character '" + xT[4] + "' is not part of C6"
 
 func BlkPeek()
 	return $aBlkToks[$nBlkPos]
 
-func BlkPeekAt(k)
-	j = $nBlkPos + k
-	if j > len($aBlkToks) return $aBlkToks[len($aBlkToks)] ok
-	return $aBlkToks[j]
+func BlkPeekAt(nK)
+	nJ = $nBlkPos + nK
+	if nJ > len($aBlkToks) return $aBlkToks[len($aBlkToks)] ok
+	return $aBlkToks[nJ]
 
 # C6 text -> the top-level sequence of values
-func BlkLoad(cSrc)
-	$aBlkToks = BlkTokenize(cSrc)
-	tE = BlkLexError($aBlkToks)
-	if not isnull(tE) BlkFail(tE[3], BlkLexMessage(tE)) ok
+func BlkLoad(tSrc)
+	$aBlkToks = BlkTokenize(tSrc)
+	aE = BlkLexError($aBlkToks)
+	if not isnull(aE) BlkFail(aE[3], BlkLexMessage(aE)) ok
 	$nBlkPos = 1
 	aOut = []
 	while BlkPeek()[1] != "eof"
@@ -243,79 +243,79 @@ func BlkLoad(cSrc)
 
 # a name is a word or a keyword, or a path: words joined by dots with no space between (deposit.amount)
 func BlkName()
-	t = BlkPeek()
+	aT = BlkPeek()
 	$nBlkPos++
-	aParts = [t[2]]
-	nEnd = t[5]
+	aParts = [aT[2]]
+	nEnd = aT[5]
 	while BlkPeek()[1] = "dot" and BlkPeek()[4] = nEnd and BlkPeekAt(1)[1] = "ident" and BlkPeekAt(1)[4] = BlkPeek()[5]
 		$nBlkPos++
-		t2 = BlkPeek()
+		aT2 = BlkPeek()
 		$nBlkPos++
-		aParts + t2[2]
-		nEnd = t2[5]
+		aParts + aT2[2]
+		nEnd = aT2[5]
 	end
 	if len(aParts) > 1 return ["path", aParts] ok
-	if t[1] = "keyword" return ["kw", t[2]] ok
-	return ["word", t[2]]
+	if aT[1] = "keyword" return ["kw", aT[2]] ok
+	return ["word", aT[2]]
 
-func BlkNameText(v)
-	if v[1] = "path" return BlkJoin(v[2], ".") ok
-	return v[2]
+func BlkNameText(xV)
+	if xV[1] = "path" return BlkJoin(xV[2], ".") ok
+	return xV[2]
 
 func BlkValue()
-	v = BlkValue1()
+	aV = BlkValue1()
 	while BlkPeek()[1] = "question"
 		$nBlkPos++
-		v = ["opt", v]
+		aV = ["opt", aV]
 	end
-	return v
+	return aV
 
 func BlkValue1()
-	t = BlkPeek()
-	if t[1] = "ident" or t[1] = "keyword"
-		vKey = BlkName()
+	aT = BlkPeek()
+	if aT[1] = "ident" or aT[1] = "keyword"
+		xKey = BlkName()
 		if BlkPeek()[1] = "colon"
 			$nBlkPos++
-			cNx = BlkPeek()[1]
-			if cNx = "comma" or cNx = "rparen" or cNx = "rbracket" or cNx = "eof"
-				BlkFail(t[3], "a pair with no value after " + BlkNameText(vKey) + ":")
+			tNx = BlkPeek()[1]
+			if tNx = "comma" or tNx = "rparen" or tNx = "rbracket" or tNx = "eof"
+				BlkFail(aT[3], "a pair with no value after " + BlkNameText(xKey) + ":")
 			ok
-			return ["pair", vKey, BlkValue()]
+			return ["pair", xKey, BlkValue()]
 		ok
-		return vKey
+		return xKey
 	ok
-	if t[1] = "string"
+	if aT[1] = "string"
 		$nBlkPos++
 		if BlkPeek()[1] = "colon"
 			# Q-B2 (ruled 2026-11-02): a string as a pair's key is a C6 amendment Ringua writes; refused by name until its text lands
-			BlkFail(t[3], "a string as a pair's key waits for C6's amendment (Q-B2): Ringua writes it; today a key is a word, a keyword or a path")
+			BlkFail(aT[3], "a string as a pair's key waits for C6's amendment (Q-B2): Ringua writes it; today a key is a word, a keyword or a path")
 		ok
-		return ["str", t[2]]
+		return ["str", aT[2]]
 	ok
-	if t[1] = "number"
+	if aT[1] = "number"
 		$nBlkPos++
-		return ["num", t[2]]
+		return ["num", aT[2]]
 	ok
-	if t[1] = "lbracket"
+	if aT[1] = "lbracket"
 		$nBlkPos++
-		return ["list", BlkContainer("rbracket", "list", t[3])]
+		return ["list", BlkContainer("rbracket", "list", aT[3])]
 	ok
-	if t[1] = "lparen"
+	if aT[1] = "lparen"
 		$nBlkPos++
-		return ["group", BlkContainer("rparen", "group", t[3])]
+		return ["group", BlkContainer("rparen", "group", aT[3])]
 	ok
-	if t[1] = "comma" BlkFail(t[3], "a comma outside a list or a group") ok
-	if t[1] = "eof" BlkFail(t[3], "the text ends inside a value") ok
-	if t[1] = "dot" BlkFail(t[3], "unexpected '.': a dot joins the words of a path, with no space on either side") ok
-	if t[1] = "question" BlkFail(t[3], "unexpected '?': the mark stands after the value it makes optional, and nothing stands before this one") ok
-	BlkFail(t[3], "unexpected '" + t[2] + "'")
+	if aT[1] = "comma" BlkFail(aT[3], "a comma outside a list or a group") ok
+	if aT[1] = "eof" BlkFail(aT[3], "the text ends inside a value") ok
+	if aT[1] = "dot" BlkFail(aT[3], "unexpected '.': a dot joins the words of a path, with no space on either side") ok
+	if aT[1] = "question" BlkFail(aT[3], "unexpected '?': the mark stands after the value it makes optional, and nothing stands before this one") ok
+	BlkFail(aT[3], "unexpected '" + aT[2] + "'")
 
 func BlkCountValues(aSeg)
-	n = 0
+	nN = 0
 	for i = 1 to len(aSeg)
-		if aSeg[i][1] != "comment" n++ ok
+		if aSeg[i][1] != "comment" nN++ ok
 	next
-	return n
+	return nN
 
 # one item of a container, closed by a comma or the closing bracket: its comments before the first value lead,
 # the ones after follow; one value is that value, several are a row
@@ -325,16 +325,16 @@ func BlkFlush(aItems, aSeg)
 	aTrail = []
 	bSeen = false
 	for i = 1 to len(aSeg)
-		v = aSeg[i]
-		if v[1] = "comment"
+		xV = aSeg[i]
+		if xV[1] = "comment"
 			if bSeen
-				aTrail + v
+				aTrail + xV
 			else
-				aLead + v
+				aLead + xV
 			ok
 		else
 			bSeen = true
-			aVals + v
+			aVals + xV
 		ok
 	next
 	for i = 1 to len(aLead)
@@ -350,31 +350,31 @@ func BlkFlush(aItems, aSeg)
 	next
 	return aItems
 
-func BlkContainer(cClose, cWhat, nLine0)
+func BlkContainer(tClose, tWhat, nLine0)
 	aItems = []
 	aSeg = []
 	while true
-		t = BlkPeek()
-		if t[1] = "eof"
-			BlkFail(nLine0, "a " + cWhat + " not closed")
+		aT = BlkPeek()
+		if aT[1] = "eof"
+			BlkFail(nLine0, "a " + tWhat + " not closed")
 		ok
-		if t[1] = cClose
+		if aT[1] = tClose
 			$nBlkPos++
 			aItems = BlkFlush(aItems, aSeg)
 			return aItems
 		ok
-		if t[1] = "comma"
+		if aT[1] = "comma"
 			$nBlkPos++
 			if BlkCountValues(aSeg) = 0
-				BlkFail(t[3], "an empty item before a comma")
+				BlkFail(aT[3], "an empty item before a comma")
 			ok
 			aItems = BlkFlush(aItems, aSeg)
 			aSeg = []
 			loop
 		ok
-		if t[1] = "comment"
+		if aT[1] = "comment"
 			$nBlkPos++
-			aSeg + ["comment", t[2]]
+			aSeg + ["comment", aT[2]]
 			loop
 		ok
 		aSeg + BlkValue()
@@ -382,37 +382,37 @@ func BlkContainer(cClose, cWhat, nLine0)
 
 # ---- equality: one spelling of a block, for comparing two ------------------------------------------------------------
 
-func BlkJoin(aParts, cSep)
-	cOut = ""
+func BlkJoin(aParts, tSep)
+	tOut = ""
 	for i = 1 to len(aParts)
-		if i > 1 cOut += cSep ok
-		cOut += aParts[i]
+		if i > 1 tOut += tSep ok
+		tOut += aParts[i]
 	next
-	return cOut
+	return tOut
 
 # a block dumped as one line: every kind tagged, every text length-prefixed, so two blocks are equal exactly when
 # their dumps are. `block.haro load` prints it; `same` compares it
-func BlkDump(v)
-	k = v[1]
-	if k = "word" or k = "kw" or k = "num" or k = "str" or k = "comment"
-		return "(" + string(k) + " " + string(len(v[2])) + ":" + string(v[2]) + ")"
+func BlkDump(xV)
+	xK = xV[1]
+	if xK = "word" or xK = "kw" or xK = "num" or xK = "str" or xK = "comment"
+		return "(" + string(xK) + " " + string(len(xV[2])) + ":" + string(xV[2]) + ")"
 	ok
-	if k = "path" return "(path " + BlkJoin(v[2], ".") + ")" ok
-	if k = "pair" return "(pair " + BlkDump(v[2]) + " " + BlkDump(v[3]) + ")" ok
-	if k = "opt" return "(opt " + BlkDump(v[2]) + ")" ok
-	cOut = "(" + k
-	for i = 1 to len(v[2])
-		cOut += " " + BlkDump(v[2][i])
+	if xK = "path" return "(path " + BlkJoin(xV[2], ".") + ")" ok
+	if xK = "pair" return "(pair " + BlkDump(xV[2]) + " " + BlkDump(xV[3]) + ")" ok
+	if xK = "opt" return "(opt " + BlkDump(xV[2]) + ")" ok
+	tOut = "(" + xK
+	for i = 1 to len(xV[2])
+		tOut += " " + BlkDump(xV[2][i])
 	next
-	return cOut + ")"
+	return tOut + ")"
 
 func BlkDumpAll(aVals)
-	cOut = ""
+	tOut = ""
 	for i = 1 to len(aVals)
-		if i > 1 cOut += " " ok
-		cOut += BlkDump(aVals[i])
+		if i > 1 tOut += " " ok
+		tOut += BlkDump(aVals[i])
 	next
-	return cOut
+	return tOut
 
 # ---- the canonical printing (BLOCKS.md 3.2) ----------------------------------------------------------------------------
 # One spelling per block: a declaration a paragraph and a blank line between them; a group's items one a line, two
@@ -425,64 +425,64 @@ func BlkHoldsCommentOrGroup(aItems)
 	next
 	return false
 
-func BlkPrint(v, nInd)
-	k = v[1]
-	if k = "word" or k = "kw" or k = "num" return v[2] ok
-	if k = "str"
-		for i = 1 to len(v[2])
-			if v[2][i] = '"' BlkFail(0, "a string holding a double quote has no C6 printing (C6 strings have no escape)") ok
+func BlkPrint(xV, nInd)
+	xK = xV[1]
+	if xK = "word" or xK = "kw" or xK = "num" return xV[2] ok
+	if xK = "str"
+		for i = 1 to len(xV[2])
+			if xV[2][i] = '"' BlkFail(0, "a string holding a double quote has no C6 printing (C6 strings have no escape)") ok
 		next
-		return '"' + v[2] + '"'
+		return '"' + xV[2] + '"'
 	ok
-	if k = "path" return BlkJoin(v[2], ".") ok
-	if k = "pair" return BlkPrint(v[2], nInd) + ": " + BlkPrint(v[3], nInd) ok
-	if k = "row"
+	if xK = "path" return BlkJoin(xV[2], ".") ok
+	if xK = "pair" return BlkPrint(xV[2], nInd) + ": " + BlkPrint(xV[3], nInd) ok
+	if xK = "row"
 		aP = []
-		for i = 1 to len(v[2])
-			aP + BlkPrint(v[2][i], nInd)
+		for i = 1 to len(xV[2])
+			aP + BlkPrint(xV[2][i], nInd)
 		next
 		return BlkJoin(aP, " ")
 	ok
-	if k = "opt" return BlkPrint(v[2], nInd) + "?" ok
-	if k = "comment"
-		if v[2] = "" return "--" ok
-		return "-- " + v[2]
+	if xK = "opt" return BlkPrint(xV[2], nInd) + "?" ok
+	if xK = "comment"
+		if xV[2] = "" return "--" ok
+		return "-- " + xV[2]
 	ok
-	if k = "list"
-		if len(v[2]) = 0 return "[]" ok
-		if BlkHoldsCommentOrGroup(v[2]) return "[" + BlkLines(v[2], nInd) + "]" ok
+	if xK = "list"
+		if len(xV[2]) = 0 return "[]" ok
+		if BlkHoldsCommentOrGroup(xV[2]) return "[" + BlkLines(xV[2], nInd) + "]" ok
 		aP = []
-		for i = 1 to len(v[2])
-			aP + BlkPrint(v[2][i], nInd)
+		for i = 1 to len(xV[2])
+			aP + BlkPrint(xV[2][i], nInd)
 		next
 		return "[" + BlkJoin(aP, ", ") + "]"
 	ok
-	if k = "group"
-		if len(v[2]) = 0 return "()" ok
-		return "(" + BlkLines(v[2], nInd) + ")"
+	if xK = "group"
+		if len(xV[2]) = 0 return "()" ok
+		return "(" + BlkLines(xV[2], nInd) + ")"
 	ok
-	BlkFail(0, "no printing for a value of kind '" + k + "'")
+	BlkFail(0, "no printing for a value of kind '" + xK + "'")
 
-func BlkSpaces(n)
-	cOut = ""
-	for i = 1 to n
-		cOut += " "
+func BlkSpaces(nN)
+	tOut = ""
+	for i = 1 to nN
+		tOut += " "
 	next
-	return cOut
+	return tOut
 
 func BlkLines(aItems, nInd)
-	cPad = BlkSpaces(nInd + 2)
+	tPad = BlkSpaces(nInd + 2)
 	nLastReal = 0
 	for j = 1 to len(aItems)
 		if aItems[j][1] != "comment" nLastReal = j ok
 	next
-	cOut = char(10)
+	tOut = char(10)
 	for j = 1 to len(aItems)
-		cComma = ""
-		if aItems[j][1] != "comment" and j != nLastReal cComma = "," ok
-		cOut += cPad + BlkPrint(aItems[j], nInd + 2) + cComma + char(10)
+		tComma = ""
+		if aItems[j][1] != "comment" and j != nLastReal tComma = "," ok
+		tOut += tPad + BlkPrint(aItems[j], nInd + 2) + tComma + char(10)
 	next
-	return cOut + BlkSpaces(nInd)
+	return tOut + BlkSpaces(nInd)
 
 # the whole text: a paragraph per declaration (each DEFINE opens one), a comment on a line of its own, a blank line
 # between paragraphs
@@ -490,29 +490,29 @@ func BlkPrintC6(aVals)
 	aParas = []
 	aCur = []
 	for i = 1 to len(aVals)
-		v = aVals[i]
-		if v[1] = "kw" and v[2] = "DEFINE" and len(aCur) > 0
+		xV = aVals[i]
+		if xV[1] = "kw" and xV[2] = "DEFINE" and len(aCur) > 0
 			aParas + aCur
 			aCur = []
 		ok
-		if v[1] = "comment"
+		if xV[1] = "comment"
 			if len(aCur) > 0
 				aParas + aCur
 				aCur = []
 			ok
-			aParas + [v]
+			aParas + [xV]
 			loop
 		ok
-		aCur + v
+		aCur + xV
 	next
 	if len(aCur) > 0 aParas + aCur ok
-	cOut = ""
+	tOut = ""
 	for p = 1 to len(aParas)
-		if p > 1 cOut += char(10) ok
+		if p > 1 tOut += char(10) ok
 		aP = []
 		for i = 1 to len(aParas[p])
 			aP + BlkPrint(aParas[p][i], 0)
 		next
-		cOut += BlkJoin(aP, " ") + char(10)
+		tOut += BlkJoin(aP, " ") + char(10)
 	next
-	return cOut
+	return tOut

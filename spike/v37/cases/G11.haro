@@ -1,10 +1,10 @@
 h()
 func h
 	try
-		x = 1
+		nX = 1
 		raise("here")
 	catch e
-		s = e.Span()
-		? s[:line]
-		? s[:file]
+		xS = e.Span()
+		? xS[:line]
+		? xS[:file]
 	done

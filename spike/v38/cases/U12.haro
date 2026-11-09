@@ -1,12 +1,12 @@
 f()
 func f
-	eval("using o = new Res(" + char(34) + "e" + char(34) + ")" + nl + "? " + char(34) + "in eval " + char(34) + " + o.cName" + nl + "done")
-	$g = "a"
-	eval("within $g = " + char(34) + "b" + char(34) + nl + "? $g" + nl + "done")
-	? $g
+	eval("using oRes = new Res(" + char(34) + "e" + char(34) + ")" + nl + "? " + char(34) + "in eval " + char(34) + " + oRes.tName" + nl + "done")
+	$tG = "a"
+	eval("within $tG = " + char(34) + "b" + char(34) + nl + "? $tG" + nl + "done")
+	? $tG
 class Res
-	cName = ""
-	func init n
-		cName = n
+	tName = ""
+	func init tN
+		tName = tN
 	func release
-		? "release " + cName
+		? "release " + tName

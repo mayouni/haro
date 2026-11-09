@@ -1,12 +1,12 @@
-within $g = 1
-? $g
+within $nG = 1
+? $nG
 done
 try
-within $h = 2
-$x = 1
+within $nH = 2
+$nX = 1
 done
 catch
-using $o   =   new K
-? $o
+using $oO   =   new K
+? $oO
 done
 done

@@ -27,7 +27,7 @@ ONE_EXCLUDED = [
     ('a call by name', 'R01', 'call F()\n'),
     ('a brace block', 'R01', 'return n { x }\n'),
     ('a write to a global the point does not name', 'R16', '$nOther = 1\n'),
-    ('no newline at the end', 'R01', 'return n'),
+    ('no newline at the end', 'R01', 'return xN'),
 ]
 LINES_EXCLUDED = [
     ('a call the point does not allow', 'R01', 'return floor(n)\n<<END>>\n'),
@@ -35,7 +35,7 @@ LINES_EXCLUDED = [
     ('a double quote', 'R01', 'return "x"\n<<END>>\n'),
     ('a comment', 'R01', '# fast\nreturn n\n<<END>>\n'),
     ('a write to a global the point does not name', 'R16', '$nOther = 1\n<<END>>\n'),
-    ('no sentinel', 'R01', 'return n\n'),
+    ('no sentinel', 'R01', 'return nN\n'),
     ('a blank line', 'R01', 'nS = 0\n\nreturn nS\n<<END>>\n'),
     ('indentation deeper than the grammar counts', 'R01', 'if a\n\tif b\n\t\tif c\n\t\t\tif d\n\t\t\t\treturn 1\n\t\t\tok\n\t\tok\n\tok\nok\n<<END>>\n'),
     ('a block closed by the wrong word', 'R01', 'for i = 1 to n\n\tnS += i\nend\n<<END>>\n'),

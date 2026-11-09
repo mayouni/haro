@@ -1,5 +1,5 @@
 ? "before"
 f()
 func f
-	o = new point
+	oO = new point
 class Point

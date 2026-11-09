@@ -1,8 +1,8 @@
 ? "before"
 f()
 func f
-	using o = new Plain
+	using oO = new Plain
 		? "body"
 	done
 class Plain
-	x = 1
+	nX = 1

@@ -47,67 +47,67 @@ else
 ok
 
 # the first word of a line and the rest after one space
-func PatSplit1(cLine)
-	n = len(cLine)
-	i = 1
-	while i <= n and cLine[i] != " "
-		i++
+func PatSplit1(tLine)
+	nN = len(tLine)
+	nI = 1
+	while nI <= nN and tLine[nI] != " "
+		nI++
 	end
-	if i > n return [cLine, ""] ok
-	return [left(cLine, i - 1), substr(cLine, i + 1)]
+	if nI > nN return [tLine, ""] ok
+	return [left(tLine, nI - 1), substr(tLine, nI + 1)]
 
-func PatWords(cText)
+func PatWords(tText)
 	aOut = []
-	cW = ""
-	for i = 1 to len(cText)
-		if cText[i] = " "
-			if len(cW) > 0
-				aOut + cW
-				cW = ""
+	tW = ""
+	for i = 1 to len(tText)
+		if tText[i] = " "
+			if len(tW) > 0
+				aOut + tW
+				tW = ""
 			ok
 		else
-			cW += cText[i]
+			tW += tText[i]
 		ok
 	next
-	if len(cW) > 0 aOut + cW ok
+	if len(tW) > 0 aOut + tW ok
 	return aOut
 
-func PatCases(cBody)
-	aLines = str2list(cBody)
-	cId = ""
+func PatCases(tBody)
+	aLines = str2list(tBody)
+	tId = ""
 	aNames = []
 	aTexts = []
 	aSetN = []
 	aSetM = []
-	cStart = "main"
+	tStart = "main"
 	nInput = 0
-	cInput = ""
-	cFile = ""
+	tInput = ""
+	tFile = ""
 	bOpen = false
 	for i = 1 to len(aLines)
-		cLine = aLines[i]
-		if len(cLine) > 0 and cLine[len(cLine)] = char(13)
-			cLine = left(cLine, len(cLine) - 1)
+		tLine = aLines[i]
+		if len(tLine) > 0 and tLine[len(tLine)] = char(13)
+			tLine = left(tLine, len(tLine) - 1)
 		ok
-		aP = PatSplit1(cLine)
-		cCmd = aP[1]
-		if cCmd = "case"
-			if bOpen PatOneCase(cId, aNames, aTexts, aSetN, aSetM, cStart, nInput, cInput, cFile) ok
+		aP = PatSplit1(tLine)
+		tCmd = aP[1]
+		if tCmd = "case"
+			if bOpen PatOneCase(tId, aNames, aTexts, aSetN, aSetM, tStart, nInput, tInput, tFile) ok
 			bOpen = true
-			cId = aP[2]
+			tId = aP[2]
 			aNames = []
 			aTexts = []
 			aSetN = []
 			aSetM = []
-			cStart = "main"
+			tStart = "main"
 			nInput = 0
-			cInput = ""
-			cFile = ""
-		but cCmd = "rule"
+			tInput = ""
+			tFile = ""
+		but tCmd = "rule"
 			aQ = PatSplit1(aP[2])
 			aNames + aQ[1]
 			aTexts + aQ[2]
-		but cCmd = "set"
+		but tCmd = "set"
 			aW = PatWords(aP[2])
 			aSetN + aW[1]
 			aMem = []
@@ -115,30 +115,30 @@ func PatCases(cBody)
 				aMem + aW[k]
 			next
 			aSetM + aMem
-		but cCmd = "start"
-			cStart = aP[2]
-		but cCmd = "input"
+		but tCmd = "start"
+			tStart = aP[2]
+		but tCmd = "input"
 			nInput = 1
-			cInput = aP[2]
-		but cCmd = "file"
+			tInput = aP[2]
+		but tCmd = "file"
 			nInput = 2
-			cFile = aP[2]
+			tFile = aP[2]
 		ok
 	next
-	if bOpen PatOneCase(cId, aNames, aTexts, aSetN, aSetM, cStart, nInput, cInput, cFile) ok
+	if bOpen PatOneCase(tId, aNames, aTexts, aSetN, aSetM, tStart, nInput, tInput, tFile) ok
 
-func PatOneCase(cId, aNames, aTexts, aSetN, aSetM, cStart, nInput, cInput, cFile)
+func PatOneCase(tId, aNames, aTexts, aSetN, aSetM, tStart, nInput, tInput, tFile)
 	try
 		PatDeclare(aNames, aTexts, aSetN, aSetM)
 		if nInput = 0
-			? cId + " declared"
+			? tId + " declared"
 		else
-			if nInput = 2 cInput = read(cFile) ok
-			aR = PatRun(cStart, cInput)
-			cWhole = "0"
-			if aR[1] cWhole = "1" ok
-			? cId + " match " + cWhole + " steps " + string(aR[3]) + " bound " + string(aR[4]) + " kept " + PatPrintKept(aR[2])
+			if nInput = 2 tInput = read(tFile) ok
+			aR = PatRun(tStart, tInput)
+			tWhole = "0"
+			if aR[1] tWhole = "1" ok
+			? tId + " match " + tWhole + " steps " + string(aR[3]) + " bound " + string(aR[4]) + " kept " + PatPrintKept(aR[2])
 		ok
 	catch
-		? cId + " refused " + cCatchError
+		? tId + " refused " + cCatchError
 	done

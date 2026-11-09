@@ -6,15 +6,15 @@
 
 load "expr_lib.haro"
 
-$cExprLang = "w"
+$tExprLang = "w"
 $aExprOperators = ["or", "and", "not", "cmp", "add", "sub", "mul", "div", "mod", "neg"]
 $aExprOperands = ["number", "text", "var"]
 $aExprAggregates = []
 $aExprVariables = ["item", "accumulator"]
 $aExprContexts = [["eval", []], ["map", ["item"]], ["filter", ["item"]], ["count", ["item"]], ["partition", ["item"]], ["groupby", ["item"]], ["reduce", ["accumulator", "item"]], ["reduce_noinit", ["accumulator", "item"]]]
-$cExprAbsent = ""
-$cExprDivision = ""
-$cExprEquality = ""
+$tExprAbsent = ""
+$tExprDivision = ""
+$tExprEquality = ""
 $aExprToks = []
 $nExprPos = 1
 $aExprAllowed = []

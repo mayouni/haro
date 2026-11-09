@@ -3,9 +3,9 @@ func g
 	try
 		raise("travels")
 	catch e
-		f = e
-		? f.Message()
+		xF = e
+		? xF.Message()
 		? show(e)
 	done
-func show x
-	return x.Message() + " from " + string(x.Span()[:line])
+func show xX
+	return xX.Message() + " from " + string(xX.Span()[:line])

@@ -77,7 +77,7 @@
    "line": "W3",
    "why": "a global with no value yet cannot be saved: R24 at the within line, the body unrun",
    "file": "cases/W08.haro",
-   "stdout": "before\n\nLine 4 Error (R24) : Using uninitialized variable: $never \nIn function f() in file W08.haro\n\nCalled from line 2 in file W08.haro ",
+   "stdout": "before\n\nLine 4 Error (R24) : Using uninitialized variable: $nnever \nIn function f() in file W08.haro\n\nCalled from line 2 in file W08.haro ",
    "exit": 1
   },
   {
@@ -86,7 +86,7 @@
    "line": "W4",
    "why": "a local is refused: it needs no restore",
    "file": "cases/W09.haro",
-   "stdout": "before\n\nLine 5 Haro refused this statement (within needs a global (D52 A2) `x`, line 5 of W09.haro) and did not compile it -- running past it would give a wrong answer \nIn function f() in file W09.haro\n\nCalled from line 2 in file W09.haro ",
+   "stdout": "before\n\nLine 5 Haro refused this statement (within needs a global (D52 A2) `nX`, line 5 of W09.haro) and did not compile it -- running past it would give a wrong answer \nIn function f() in file W09.haro\n\nCalled from line 2 in file W09.haro ",
    "exit": 1
   },
   {
@@ -95,7 +95,7 @@
    "line": "W4",
    "why": "a parameter is refused",
    "file": "cases/W10.haro",
-   "stdout": "before\n\nLine 4 Haro refused this statement (within needs a global (D52 A2) `p`, line 4 of W10.haro) and did not compile it -- running past it would give a wrong answer \nIn function f() in file W10.haro\n\nCalled from line 2 in file W10.haro ",
+   "stdout": "before\n\nLine 4 Haro refused this statement (within needs a global (D52 A2) `xP`, line 4 of W10.haro) and did not compile it -- running past it would give a wrong answer \nIn function f() in file W10.haro\n\nCalled from line 2 in file W10.haro ",
    "exit": 1
   },
   {
@@ -161,7 +161,7 @@
    "line": "U3",
    "why": "any other value with none -- an object, a number -- is raised at entry, before the body, and caught",
    "file": "cases/U07.haro",
-   "stdout": "caught: using: o answers none of Release, Destroy, Close\nline 4, code []\ncaught: using: n answers none of Release, Destroy, Close\n"
+   "stdout": "caught: using: xO answers none of Release, Destroy, Close\nline 4, code []\ncaught: using: nN answers none of Release, Destroy, Close\n"
   },
   {
    "id": "U08",
@@ -169,7 +169,7 @@
    "line": "U3",
    "why": "uncaught, the refusal at entry is reported at the using line, and names no raise()",
    "file": "cases/U08.haro",
-   "stdout": "before\n\nLine 4 using: o answers none of Release, Destroy, Close \nIn function f() in file U08.haro\n\nCalled from line 2 in file U08.haro ",
+   "stdout": "before\n\nLine 4 using: xO answers none of Release, Destroy, Close \nIn function f() in file U08.haro\n\nCalled from line 2 in file U08.haro ",
    "exit": 1
   },
   {
@@ -178,7 +178,7 @@
    "line": "U4",
    "why": "the name rebound in the block is refused at compile time",
    "file": "cases/U09.haro",
-   "stdout": "before\n\nLine 4 Haro refused this statement (using rebinds its name inside its block (D52 A3) `o = new Res(\"b\")`, line 5 of U09.haro) and did not compile it -- running past it would give a wrong answer \nIn function f() in file U09.haro\n\nCalled from line 2 in file U09.haro ",
+   "stdout": "before\n\nLine 4 Haro refused this statement (using rebinds its name inside its block (D52 A3) `oO = new Res(\"b\")`, line 5 of U09.haro) and did not compile it -- running past it would give a wrong answer \nIn function f() in file U09.haro\n\nCalled from line 2 in file U09.haro ",
    "exit": 1
   },
   {
@@ -187,7 +187,7 @@
    "line": "U3",
    "why": "a global using name a callee rebinds to a value with none is raised at the exit",
    "file": "cases/U10.haro",
-   "stdout": "caught: using: $r answers none of Release, Destroy, Close\n"
+   "stdout": "caught: using: $xR answers none of Release, Destroy, Close\n"
   },
   {
    "id": "B01",
@@ -210,7 +210,7 @@
    "kind": "run",
    "line": "B2",
    "why": "`within` and `using` assigned, called, or an attribute, are what they were",
-   "file": "cases/B03.haro",
+   "file": "cases/B03.ring",
    "stdout": "a word 2\nattribute\nUsing called with 5\n"
   },
   {
@@ -288,7 +288,7 @@
    "line": "B3",
    "why": "`haro fmt` prints both blocks, the header on one line and the body a level in, inside a try and its catch",
    "file": "cases/K01.haro",
-   "stdout": "within $g = 1\n\t? $g\ndone\ntry\n\twithin $h = 2\n\t\t$x = 1\n\tdone\ncatch\n\tusing $o = new K\n\t\t? $o\n\tdone\ndone\n"
+   "stdout": "within $nG = 1\n\t? $nG\ndone\ntry\n\twithin $nH = 2\n\t\t$nX = 1\n\tdone\ncatch\n\tusing $oO = new K\n\t\t? $oO\n\tdone\ndone\n"
   }
  ]
 }

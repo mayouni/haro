@@ -1,11 +1,11 @@
-$g = "kept"
+$tG = "kept"
 try
-	within $g = boom()
+	within $tG = boom()
 		? "body ran"
 	done
 catch e
 	? "caught " + e
 done
-? $g
+? $tG
 func boom
 	raise("no value")

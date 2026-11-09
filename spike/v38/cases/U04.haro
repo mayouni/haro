@@ -2,20 +2,20 @@
 h()
 ? "end"
 func g
-	using o = new Res("g")
-		return "returned " + o.cName
+	using oO = new Res("g")
+		return "returned " + oO.tName
 	done
 func h
 	for i = 1 to 3
-		using o = new Res("i" + string(i))
+		using oO = new Res("i" + string(i))
 			if i = 1 loop ok
 			if i = 3 exit ok
 			? "body " + string(i)
 		done
 	next
 class Res
-	cName = ""
-	func init n
-		cName = n
+	tName = ""
+	func init tN
+		tName = tN
 	func release
-		? "release " + cName
+		? "release " + tName

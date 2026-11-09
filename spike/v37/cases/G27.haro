@@ -1,13 +1,13 @@
 g()
 func g
-	m = "held"
+	tM = "held"
 	try
-		raise(m)
+		raise(tM)
 	catch e
 		? e.Message()
 	done
 	try
-		? m.Message()
+		? tM.Message()
 	catch e2
 		? e2
 	done

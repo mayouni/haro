@@ -29,6 +29,9 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 T = '\t'
 
 CASES = [
+    # v0.47 RE-LETTERED, 2026-11-08, AFTER THIS COURT SPOKE (D55 T2, the author's scope "Yes, as recommended"): every name of these
+    # .haro programs carries its type's letter, by study/v47/reletter.py's rules (c -> t, a single letter or a word by what it holds),
+    # ported here by study/v47/port_cases.py; an output that names a renamed variable names its new name. Each case asks what it asked.
     ('G01', 'E1', '`catch e` binds the error to e', [
         'try', T + 'raise("x1")', 'catch e', T + '? "e=" + e', 'done'],
      ['e=x1']),
@@ -36,7 +39,7 @@ CASES = [
         'try', T + 'raise("x2")', 'catch e', T + '? e', T + '? cCatchError', 'finally', T + '? "f"', 'done'],
      ['x2', 'x2', 'f']),
     ('G03', 'E1', 'a name on the line AFTER `catch` stays a statement: it does not bind', [
-        'f()', 'func f', T + 'e = "outer"', T + 'try', T * 2 + 'raise("z")', T + 'catch', T * 2 + 'e', T * 2 + '? "e is still " + e', T + 'done'],
+        'f()', 'func f', T + 'tE = "outer"', T + 'try', T * 2 + 'raise("z")', T + 'catch', T * 2 + 'tE', T * 2 + '? "e is still " + tE', T + 'done'],
      ['e is still outer']),
     # G04 CHANGED after the court spoke (v0.41, HARO-SURFACE-01): in a .haro file a keyword is lowercase, so `Catch` is a name -- the case
     # was `Catch err` and now spells the keyword as Haro does; what it pins (a comment after the binding) is unchanged.
@@ -44,7 +47,7 @@ CASES = [
         'try', T + 'raise("x4")', 'catch err   # the error', T + '? "err=" + err', 'done'],
      ['err=x4']),
     ('G05', 'E1', 'the shape of stzlib\'s recovered plugin code: `catch cError` in a function binds cError', [
-        'p()', 'func p', T + 'try', T * 2 + 'raise("plugin failed")', T + 'catch cError', T * 2 + '? "handled: " + cError', T + 'done'],
+        'p()', 'func p', T + 'try', T * 2 + 'raise("plugin failed")', T + 'catch tError', T * 2 + '? "handled: " + tError', T + 'done'],
      ['handled: plugin failed']),
     ('G06', 'E2', 'in a text context the error is its message, byte for byte', [
         'try', T + 'raise("boom")', 'catch e', T + '? "caught: " + e', T + '? e + "!"', T + '? len(e)', T + '? type(e)', T + '? e = "boom"',
@@ -61,7 +64,7 @@ CASES = [
     # the author's ruling of 2026-11-07); the case asks the same question.
     ('G08', 'E3', 'Code() of an error the VM raised is Ring\'s code', [
         'g()', 'func g', T + 'aL = [1]', T + 'try', T * 2 + '? aL[5]', T + 'catch e', T * 2 + '? e.Code()', T * 2 + '? e', T + 'done', T + 'try',
-        T * 2 + 'x = 1 / 0', T + 'catch e2', T * 2 + '? e2.Code()', T + 'done'],
+        T * 2 + 'nX = 1 / 0', T + 'catch e2', T * 2 + '? e2.Code()', T + 'done'],
      ['R2', 'Error (R2) : Array Access (Index out of range)', 'R1']),
     ('G09', 'E3', 'Code() of a raise() is empty', [
         'try', T + 'raise("mine")', 'catch e', T + '? "[" + e.Code() + "]"', 'done'],
@@ -70,8 +73,8 @@ CASES = [
         'try', T + 'raise("cased")', 'catch e', T + '? e.MESSAGE()', T + '? e.message()', T + '? "[" + e.code() + "]"', 'done'],
      ['cased', 'cased', '[]']),
     ('G11', 'E4', 'Span() is the file and the line where the error was raised', [
-        'h()', 'func h', T + 'try', T * 2 + 'x = 1', T * 2 + 'raise("here")', T + 'catch e', T * 2 + 's = e.Span()', T * 2 + '? s[:line]',
-        T * 2 + '? s[:file]', T + 'done'],
+        'h()', 'func h', T + 'try', T * 2 + 'nX = 1', T * 2 + 'raise("here")', T + 'catch e', T * 2 + 'xS = e.Span()', T * 2 + '? xS[:line]',
+        T * 2 + '? xS[:file]', T + 'done'],
      ['5', 'G11.haro']),
     ('G12', 'E4', 'Span() of a VM error inside a called function is the line of the fault', [
         'h()', 'func h', T + 'try', T * 2 + 'deep()', T + 'catch e', T * 2 + '? e.Span()[:line]', T + 'done', 'func deep', T + 'aL = []',
@@ -121,15 +124,15 @@ CASES = [
         T + 'done'],
      ['300 returns from a finally', 'later caught at top: later']),
     ('G23', 'E6', 'a plain string refuses a method, as it did', [
-        'g()', 'func g', T + 'try', T * 2 + 's = "abc"', T * 2 + '? s.Message()', T + 'catch e', T * 2 + '? e', T + 'done'],
+        'g()', 'func g', T + 'try', T * 2 + 'tS = "abc"', T * 2 + '? tS.Message()', T + 'catch e', T * 2 + '? e', T + 'done'],
      ['Bad parameter type!']),
     ('G24', 'E6', 'a string made from an error is a plain string', [
-        'g()', 'func g', T + 'try', T * 2 + 'raise("orig")', T + 'catch e', T * 2 + 't = e + ""', T * 2 + 'try', T * 3 + '? t.Message()', T * 2 + 'catch e2',
+        'g()', 'func g', T + 'try', T * 2 + 'raise("orig")', T + 'catch e', T * 2 + 'xT = e + ""', T * 2 + 'try', T * 3 + '? xT.Message()', T * 2 + 'catch e2',
         T * 3 + '? e2', T * 2 + 'done', T * 2 + 'try', T * 3 + '? e.Message().Message()', T * 2 + 'catch e3', T * 3 + '? e3', T * 2 + 'done', T + 'done'],
      ['Bad parameter type!', 'Bad parameter type!']),
     ('G25', 'E2', 'the error value is assigned, passed and returned as itself', [
-        'g()', 'func g', T + 'try', T * 2 + 'raise("travels")', T + 'catch e', T * 2 + 'f = e', T * 2 + '? f.Message()', T * 2 + '? show(e)', T + 'done',
-        'func show x', T + 'return x.Message() + " from " + string(x.Span()[:line])'],
+        'g()', 'func g', T + 'try', T * 2 + 'raise("travels")', T + 'catch e', T * 2 + 'xF = e', T * 2 + '? xF.Message()', T * 2 + '? show(e)', T + 'done',
+        'func show xX', T + 'return xX.Message() + " from " + string(xX.Span()[:line])'],
      ['travels', 'travels from 4']),
     ('G26', 'E2', 'cCatchError read after the handler is the last error, still its message', [
         'try', T + 'raise("last one")', 'catch e', 'done', '? cCatchError'],
@@ -137,8 +140,8 @@ CASES = [
     # G27-G30 were written AFTER the VM change, found by designing the plants (plants.py): no case raised a string a variable still held, made a
     # cause point back at its own error, called a method with an argument, or let a rethrown VM error go uncaught.
     ('G27', 'E6', 'raising a variable\'s string makes the ERROR, not the variable, answer the methods', [
-        'g()', 'func g', T + 'm = "held"', T + 'try', T * 2 + 'raise(m)', T + 'catch e', T * 2 + '? e.Message()', T + 'done', T + 'try',
-        T * 2 + '? m.Message()', T + 'catch e2', T * 2 + '? e2', T + 'done'],
+        'g()', 'func g', T + 'tM = "held"', T + 'try', T * 2 + 'raise(tM)', T + 'catch e', T * 2 + '? e.Message()', T + 'done', T + 'try',
+        T * 2 + '? tM.Message()', T + 'catch e2', T * 2 + '? e2', T + 'done'],
      ['held', 'Bad parameter type!']),
     ('G28', 'E5', 'a finally that raises the held error again gives it no cause: a cause never points back at its own error', [
         'try', T + 'try', T * 2 + 'raise("a")', T + 'finally', T * 2 + 'raise(cCatchError)', T + 'done', 'catch e', T + '? e',

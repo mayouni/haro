@@ -1,7 +1,7 @@
-$g = "a"
+$tG = "a"
 ? f()
-? $g
+? $tG
 func f
-	within $g = "b"
-		return "returned " + $g
+	within $tG = "b"
+		return "returned " + $tG
 	done

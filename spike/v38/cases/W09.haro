@@ -1,7 +1,7 @@
 ? "before"
 f()
 func f
-	x = 1
-	within x = 2
-		? x
+	nX = 1
+	within nX = 2
+		? nX
 	done

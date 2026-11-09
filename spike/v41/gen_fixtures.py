@@ -59,7 +59,7 @@ CASES = [
         'f()', 'func f', T + 'x = 1', T + 'If x = 1', T * 2 + 'See "yes" + nl', T + 'Ok', T + 'oK = "fine"'],
      ['yes']),
     ('S04', 'S3', 'in a .haro file a symbol keeps its spelling', '.haro', [
-        'f()', 'func f', T + '? :Name', T + '? :name', T + 'x = :Name', T + '? x = "Name"'],
+        'f()', 'func f', T + '? :Name', T + '? :name', T + 'xX = :Name', T + '? xX = "Name"'],
      ['Name', 'name', 'true']),
     # S04 CHANGED AFTER ITS COURT SPOKE, 2026-11-08: `x = "Name"` answers a boolean in a .haro file and prints `true` (v0.43, D55 T3,
     # the author's ruling of 2026-11-07); the case asks the same question.
@@ -90,11 +90,14 @@ CASES = [
         'f()', 'func f', T + 'See "Ok, If and NULL" + nl', T + '? \'Return\''],
      ['Ok, If and NULL', 'Return']),
     ('S13', 'S4', 'in a .haro file `:key = value` given to a call is refused too', '.haro', [
-        '? "before"', 'f()', 'func f', T + 'g(:k = 1)', 'func g x', T + 'return x'],
+        '? "before"', 'f()', 'func f', T + 'g(:k = 1)', 'func g xX', T + 'return xX'],
      refused('S13', '.haro', 4, R_PAIR, ':k = 1', 4, 2), 1),
     ('S14', 'S1', 'in a .haro file Haro\'s block words are lowercase too: a lone `Using` is a name', '.haro', [
         'f()', 'func f', T + 'Using = 5', T + 'Using', T + '? Using'],
-     ['5']),
+     ['', "Line 3 Haro refused this statement (a name begins with its type's letter -- `Using` has none; written `Using`, line 3 of S14.haro) "
+      + REFUSED, 'In function f() in file S14.haro', '', 'Called from line 1 in file S14.haro '], 1),
+    # S14 CHANGED AFTER ITS COURT SPOKE, 2026-11-08 (v0.47, D55 T2): `Using` is still read as a name and never as the block word -- and a
+    # name with no letter is now refused, which is how the case shows it was read as one.
     # S14 RESTORED the same day, before v0.42 was built: Haro's block words are contextual -- v0.38's B03 keeps `within`, `using`, `Within`
     # and `Using` names where they open no block -- so they are no keywords in PRINCIPLES 2.2's sense, and ruling (e) does not reach them.
 ]

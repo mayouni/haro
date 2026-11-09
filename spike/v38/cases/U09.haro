@@ -1,12 +1,12 @@
 ? "before"
 f()
 func f
-	using o = new Res("a")
-		o = new Res("b")
+	using oO = new Res("a")
+		oO = new Res("b")
 	done
 class Res
-	cName = ""
-	func init n
-		cName = n
+	tName = ""
+	func init tN
+		tName = tN
 	func release
-		? "release " + cName
+		? "release " + tName

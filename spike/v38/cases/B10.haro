@@ -1,9 +1,9 @@
-$g = "a"
-within $g = "b"
+$tG = "a"
+within $tG = "b"
 	try
 		raise("x")
 	catch
-		? "caught in " + $g
+		? "caught in " + $tG
 	end
 done
-? $g
+? $tG

@@ -1,8 +1,8 @@
-$depth = 0
+$xDepth = 0
 nest(3)
-? "depth after: " + string($depth)
-func nest n
-	within $depth = $depth + 1
-		? "depth " + string($depth)
-		if n > 1 nest(n - 1) ok
+? "depth after: " + string($xDepth)
+func nest nN
+	within $xDepth = $xDepth + 1
+		? "depth " + string($xDepth)
+		if nN > 1 nest(nN - 1) ok
 	done

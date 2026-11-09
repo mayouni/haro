@@ -1,20 +1,20 @@
-$g = "a"
+$tG = "a"
 f()
 func f
-	within $g = "b"
-		using o = new Res("r")
+	within $tG = "b"
+		using oO = new Res("r")
 			try
 				raise("x")
 			catch e
 				? "span line " + string(e.Span()[:line])
 			done
-			? "g " + $g
+			? "g " + $tG
 		done
 	done
-	? "g " + $g
+	? "g " + $tG
 class Res
-	cName = ""
-	func init n
-		cName = n
+	tName = ""
+	func init tN
+		tName = tN
 	func release
-		? "release " + cName
+		? "release " + tName
