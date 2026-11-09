@@ -1917,6 +1917,10 @@ D58, the Principal's ruling of 2026-11-09 ("ParentClassName"), revising v0.42's 
 
 **Results.** 9 of 9 cases on both builds; 5 of 5 plants; v36 to v48's courts green. Haro's 2,172 calls re-spelled by a tool (20fc236, listed in v20/tool_commits.txt).
 
+## The forty-ninth rung -- Haro v0.49, zip.zig retired -- 2026-11-09
+
+D59: Softanza's engine carries ZIP (stz_compress, stzlib cb6f5de65); the twelve zip_ natives are no longer the VM's, and a call of one is Ring's R3. 3 of 3 cases on both builds; stzlib's zip guard 305 of 305 on haro.exe without zip.zig. v0.44's zip cases and plants retired with it. **v0.46's sixth round** the same day: `systemcmd` as Haro's own native, `a == b` refused naming `==`, and stdout written streaming (HARO-PIPEWRITE-01: a pipe Git Bash makes repeated and lost a program's output past 64 KB) -- 23 of 23, N18-N23.
+
 ## The names -- `.haro`, not `.stzu` -- corrected 2026-10-02
 
 **At the author's word ("we agreed to use .haro instead of .stzu, no?").** D1 was ratified

@@ -13,6 +13,9 @@ K08 written after the plants, both said so). Every run case was read off Ring 1.
 | K2 | `haro check`: a call whose statement follows a lone `.` is a call on a receiver, and the class's own method's arity is not its (HARO-ARITY-RECEIVER-01) | K03, K04 |
 | K4 | an error unwound out of a call leaves no uncounted borrow behind: the unwind clears from the first unwound frame's base, its call window (HARO-CLONEDEEP-01) | K13 |
 | K5 | `parentclassname(o)` answers the parent's name as Ring stores it, folded, `""` with none, Bad parameter type for anything else (Ring 1.27, meta_e.c; HARO-PARENTCLASSNAME-01) | K16, K17 |
+| K6 | `systemcmd(cCommand)` answers what the command writes to its standard output, its last line end dropped; a .haro file calls it `SystemCmd`; no text is Bad parameter type (HARO-SYSTEMCMD-01 (a)) | K18, K19, K22 |
+| K7 | a statement holding a node the parser's recovery put where nothing was written is refused; `a == b` names `==` (HARO-SYSTEMCMD-01 (b)) | K20, K21 |
+| K8 | a program's output past its 64 KB buffer reaches a pipe whole and once: stdout is written streaming (HARO-PIPEWRITE-01) | K23 |
 | K3 | `object2pointer(o)` is an OBJECTPOINTER, `pointer2object(p)` that same object, shared; two pointers to one object are equal; `ptrcmp` and `pointercompare` answer it, `obj2ptr` and `ptr2obj` are the short forms; anything else Bad parameter type!, as Ring's (HARO-OBJECT2POINTER-01, HARO-PTRCMP-01) | K05-K08, K10-K12 |
 
 ## How it is built
@@ -41,6 +44,8 @@ K08 written after the plants, both said so). Every run case was read off Ring 1.
   K1 pattern). **CORRECTED 2026-11-08, second round**: the 185 of 185 first written here was measured on stzlib c4f6f85ea, a ref OLDER than the guard that reaches the MutualInformation loop, and named no ref -- stzlib's port caught it. At stzlib origin/main 4fdffce2c, after the second round, the guard passes 185 of 185 with its three MutualInformation scenarios run.
 
 ## The protections, each switched off (`plants.py`)
+
+**The sixth round** (haro e56949e, ddcb88d, e63a4b5 fixtures; f29db68 code): HARO-SYSTEMCMD-01 from lookout, through central. (a) `systemcmd` is Ring's LIBRARY code (stdlibcore.ring: `System(cmd + "> " + tempname())`, the file read back, a last `\n` dropped), and Haro carries no part of Ring's library (D50), so it was R3: it is Haro's own native now (`syscmd.zig`), C's popen as Ring's `system()` runs the shell, read in binary; the desk's named divergence -- the whole last line end goes, where Ring's leaves a `\r` on Windows. (b) `a == b`: the parser's recovery put a MISSING identifier between the two `=`, and the compiler read it as a variable named "" (R24 naming nothing); a missing node now refuses its statement, naming `==`. **HARO-PIPEWRITE-01**, found reproducing HARO-CHECKPIPE-01 (stzlib-haroport: `haro check` through a pipe ended "error: WriteFailed"): not a reader closing early -- through `cat` the checker failed after 932 lines, and a PROGRAM's output through a pipe Git Bash makes, past the 64 KB buffer, was repeated and lost lines (20,000 printed, 557,632 carried, 12,925 distinct); a pipe Python or cmd.exe makes carried it whole, which is why no court saw it. Zig's file writer starts positional; every stdout writer is streaming now. K23 runs through Git Bash's pipe (NOT RUN where that bash is absent). Plants N18 to N23 caught; 23 of 23 cases.
 
 **The fifth round** (haro b6aea26 fixtures, 66354e5 code): HARO-PARENTCLASSNAME-01, from stzlib's sound_mu3 guard (stzlib 44103f717): `parentclassname` raised R3. Built beside `classname`, on its op with c = 1, reading the class's parent; a report names it. Plants N15, N16, N17 caught.
 

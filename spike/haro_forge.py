@@ -3737,6 +3737,23 @@ def stage52():
         return 1
     return 0
 
+ZIP_COURT = os.path.join(HERE, 'v49', 'zip_court.py')
+
+
+def stage53():
+    """Haro v0.49, zip.zig retired (D59; v49/GRAMMAR.md): a zip_ call is Ring's R3, as Ring with its zip extension not loaded; ZIP is
+    Softanza's engine's, judged by stzlib's own guard. v49/zip_court.py on haro and its checked build."""
+    print('stage 53 -- zip.zig retired: v49/zip_court.py on haro and its checked build')
+    p = subprocess.run([sys.executable, ZIP_COURT] + (['--plant'] if PLANT else []), capture_output=True, cwd=HERE, timeout=600)
+    out = p.stdout.decode('utf-8', 'replace').replace(chr(13) + chr(10), chr(10))
+    for line in out.splitlines():
+        if line.startswith('  FAIL') or line.startswith('       ') or line.startswith('ZIP COURT'):
+            print(line)
+    if p.returncode != 0:
+        print(f'  FAIL the zip court exited {p.returncode}' + ('' if out.strip() else ': ' + p.stderr.decode('utf-8', 'replace')[-400:]))
+        return 1
+    return 0
+
 SENTENCE_TARGET = 50.0     # D42: a sentence edited, its court's image reused -- what a person editing a sentence waits for
 COLD_CEILING = 150.0       # D42: the court compiled from scratch -- a ceiling that catches the court library growing
 
@@ -3936,5 +3953,7 @@ if __name__ == '__main__':
         failures += stage51()
     if stage in (None, 52) and os.path.exists(BUILTIN_COURT):
         failures += stage52()
+    if stage in (None, 53) and os.path.exists(ZIP_COURT):
+        failures += stage53()
     print(f'haro_forge: {"FAIL" if failures else "PASS"} ({failures} failure(s), {time.perf_counter()-t0:.1f} s)')
     sys.exit(1 if failures else 0)

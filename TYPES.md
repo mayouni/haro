@@ -280,7 +280,7 @@ v0.49, judged types v0.50.
 2. **v0.43 -- boolean, and no coercion** (T1, T3): `true`/`false` a type, conditions boolean only, comparisons across types refused, integer
    overflow raised.
 3. **v0.44 -- the letters, checked** (T2), and Haro's own code re-lettered. **Built as v0.47, 2026-11-09** (`spike/v47/GRAMMAR.md`): the checked letters b i n f t v o h; the others accepted until their rungs; `a` until v0.50.
-4. **v0.45 -- numbers** (T4): decimal and float apart, `near`. **Renumbered 2026-11-09**: v0.48 went to the built-ins' spelling (D58), so numbers are v0.49, absence v0.50, structure v0.51, judged types v0.52 -- and the `a` names wait for structure, v0.51.
+4. **v0.45 -- numbers** (T4): decimal and float apart, `near`. **Renumbered 2026-11-09**: v0.48 went to the built-ins' spelling (D58), so numbers are v0.49, absence v0.50, structure v0.51, judged types v0.52 -- and the `a` names wait for structure, v0.51. **And again the same day**: v0.49 went to zip.zig's retirement (D59) and the next to `haro check --facts` (HARO-FACTS-01), so numbers are v0.51, absence v0.52, structure v0.53, judged types v0.54.
 5. **v0.46 -- absence** (T5): `maybe`, `else`.
 6. **v0.47 -- vector, map and record** (T6), and v0.41's `todo` pointing at them.
 7. **v0.48 -- judged types** (T7): sentences as values, `unjudged`, handles by door, and the seat types of section 5.
