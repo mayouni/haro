@@ -532,7 +532,9 @@ The records: `CHARTER.md` (section 13 the decisions, D1 to D55; section 15 the v
   type's letter (the sixteen, or `a` until v0.50); b i n f t v o h are checked -- a literal when compiling, any other value where it is
   given (TYPE_LETTER); `c` refused with `t` as its todo; a single letter only as a for counter or a catch name; null passes; `.ring`
   untouched. Haro's code re-lettered by `study/v47/reletter.py` (a tool commit). Write new Haro code lettered: `tName`, `nCount`,
-  `bOk`, `aRows`, `oP`, `xAny`.
+  `bOk`, `aRows`, `oP`, `xAny`. **v0.48 is built** (D58, HF-154, stage 52): the Principal's "ParentClassName" (2026-11-09, revising
+  2026-11-07's lowercase) -- in a `.haro` file a built-in is spelled as Softanza writes a name, one spelling each from
+  `study/v48/builtin_names.py`: `Len`, `IsNull`, `SubStr`, `FOpen`, `TUISize`. Numbers are v0.49 now.
 - D43 is the twin-court clause. Of BLOCKS.md's four questions: Q-B1 is built (`?` is C6, and `OPTIONAL` sees it in a rule); Q-B2's two amendments are refused by name until Ringua's text
   lands; Q-B3 the block export of a program is not started; Q-B4 the round-trip court the elders waited for exists -- asking their owners is Central's.
 - **Answered 2026-11-05**: HARO-DISTANCE-01 (HF-141; D50, the author's ruling: no part of Ring is carried with Haro), HARO-ONEHOUR-01 (D51) and -02 (D52). **Next**: what stzlib's sweep on haro.exe sends; zip.zig out (stzlib calls no zip_* since cb6f5de65) with

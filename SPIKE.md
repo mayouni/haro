@@ -1905,6 +1905,18 @@ D55 T2, on the author's scope of 2026-11-08 ("Yes, as recommended"): in a `.haro
 
 **Results.** 16 of 16 cases on both builds; 15 of 15 plants. Haro's code re-lettered by a tool (a11646b, listed in v20/tool_commits.txt); five earlier rungs' cases re-lettered after their courts spoke, each saying so, and green. Stage 6 unchanged by the rung (143.5 / 144.4 ms alternating). **v0.46, fourth and fifth rounds** (stzlib's port): HARO-ARITY-RECEIVER-02 (664fee2) and HARO-PARENTCLASSNAME-01 (66354e5), 17 of 17 cases, N14-N17 caught.
 
+## The forty-eighth rung -- Haro v0.48, a built-in spelled as Softanza writes a name -- 2026-11-09
+
+D58, the Principal's ruling of 2026-11-09 ("ParentClassName"), revising v0.42's lowercase natives: one spelling per built-in in a `.haro` file, any other refused naming it.
+
+    v48/fixtures.json, cases/           9 cases (542edea: 8, 2 holding; P08 corrected before its code; P09 after the code, before the plants)
+    v48/builtin_court.py                on haro and its checked build
+    v48/plants.py                       5 protections switched off in turn
+    v48/GRAMMAR.md                      the ruling, the table's rule, how it is built, the re-spelling, what was measured
+    study/v48/                          builtin_names.py (the table, --zig), respell.py (the tool)
+
+**Results.** 9 of 9 cases on both builds; 5 of 5 plants; v36 to v48's courts green. Haro's 2,172 calls re-spelled by a tool (20fc236, listed in v20/tool_commits.txt).
+
 ## The names -- `.haro`, not `.stzu` -- corrected 2026-10-02
 
 **At the author's word ("we agreed to use .haro instead of .stzu, no?").** D1 was ratified
