@@ -5,8 +5,8 @@ func d
 		nN++
 		try
 			if nN = 2 loop ok
-			? "body " + string(nN)
+			? "body " + String(nN)
 		finally
-			? "finally " + string(nN)
+			? "finally " + String(nN)
 		done
 	again nN < 3

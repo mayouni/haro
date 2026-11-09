@@ -2,7 +2,7 @@ g()
 func g
 	tM = "held"
 	try
-		raise(tM)
+		Raise(tM)
 	catch e
 		? e.Message()
 	done

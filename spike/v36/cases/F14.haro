@@ -1,9 +1,9 @@
 try
 	try
-		raise("outer")
+		Raise("outer")
 	finally
 		try
-			raise("inner")
+			Raise("inner")
 		catch
 		done
 	done

@@ -8,5 +8,5 @@ func k
 		return "value"
 	finally
 		? "finally"
-		raise("from finally")
+		Raise("from finally")
 	done

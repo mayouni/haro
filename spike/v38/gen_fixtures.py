@@ -65,6 +65,9 @@ R_CLASS = 'using a class that answers none of Release, Destroy, Close (D52 A3)'
 R_REBIND = 'using rebinds its name inside its block (D52 A3)'
 
 CASES = [
+    # v0.48 RE-SPELLED, 2026-11-09, AFTER THIS COURT SPOKE (the Principal's ruling, "ParentClassName"): a .haro program's calls of
+    # built-ins are spelled as Softanza writes a name (Len, IsNull, SubStr), by study/v48/respell.py, ported here by
+    # study/v47/port_cases.py --respell. A report still names a built-in as the VM registers it. Each case asks what it asked.
     # v0.47 RE-LETTERED, 2026-11-08, AFTER THIS COURT SPOKE (D55 T2, the author's scope "Yes, as recommended"): every name of these
     # .haro programs carries its type's letter, by study/v47/reletter.py's rules (c -> t, a single letter or a word by what it holds),
     # ported here by study/v47/port_cases.py; an output that names a renamed variable names its new name. Each case asks what it asked.
@@ -76,27 +79,27 @@ CASES = [
         'func who', T + '? "who: " + $tCaller'],
      ['in: agent-x', 'who: agent-x', 'after: nobody']),
     ('W02', 'W2', 'a raise out of the block restores the global before the handler runs', [
-        '$nG = 1', 'try', T + 'within $nG = 2', T * 2 + '? $nG', T * 2 + 'raise("boom")', T + 'done', 'catch e', T + '? "caught " + e + ", g=" + string($nG)',
+        '$nG = 1', 'try', T + 'within $nG = 2', T * 2 + '? $nG', T * 2 + 'Raise("boom")', T + 'done', 'catch e', T + '? "caught " + e + ", g=" + String($nG)',
         'done'],
      ['2', 'caught boom, g=1']),
     ('W03', 'W2', 'a return out of the block restores the global; the value returned was computed inside it', [
         '$tG = "a"', '? f()', '? $tG', 'func f', T + 'within $tG = "b"', T * 2 + 'return "returned " + $tG', T + 'done'],
      ['returned b', 'a']),
     ('W04', 'W2', 'a loop and an exit crossing the block restore the global', [
-        '$nG = 0', 'for i = 1 to 3', T + '? "top g=" + string($nG)', T + 'within $nG = i * 10', T * 2 + 'if i = 1 loop ok', T * 2 + '? "i=" + string(i) + " g=" + string($nG)',
-        T * 2 + 'if i = 2 exit ok', T + 'done', 'next', '? "g=" + string($nG)'],
+        '$nG = 0', 'for i = 1 to 3', T + '? "top g=" + String($nG)', T + 'within $nG = i * 10', T * 2 + 'if i = 1 loop ok', T * 2 + '? "i=" + String(i) + " g=" + String($nG)',
+        T * 2 + 'if i = 2 exit ok', T + 'done', 'next', '? "g=" + String($nG)'],
      ['top g=0', 'top g=0', 'i=2 g=20', 'g=0']),
     ('W05', 'W2', 'a write by the body and by a callee is undone; a callee\'s raise restores too', [
         '$tG = "start"', 'try', T + 'within $tG = "mid"', T * 2 + '$tG = "changed in body"', T * 2 + 'setG()', T + 'done', 'catch e', T + '? e', 'done',
-        '? $tG', 'func setG', T + '$tG = "changed by callee"', T + 'raise("from callee " + $tG)'],
+        '? $tG', 'func setG', T + '$tG = "changed by callee"', T + 'Raise("from callee " + $tG)'],
      ['from callee changed by callee', 'start']),
     ('W06', 'W3', 'the value may read the global: a depth that counts its own recursion and ends where it began', [
-        '$xDepth = 0', 'nest(3)', '? "depth after: " + string($xDepth)', 'func nest nN', T + 'within $xDepth = $xDepth + 1', T * 2 + '? "depth " + string($xDepth)',
+        '$xDepth = 0', 'nest(3)', '? "depth after: " + String($xDepth)', 'func nest nN', T + 'within $xDepth = $xDepth + 1', T * 2 + '? "depth " + String($xDepth)',
         T * 2 + 'if nN > 1 nest(nN - 1) ok', T + 'done'],
      ['depth 1', 'depth 2', 'depth 3', 'depth after: 0']),
     ('W07', 'W3', 'a value that raises leaves the global unchanged and the body unrun', [
         '$tG = "kept"', 'try', T + 'within $tG = boom()', T * 2 + '? "body ran"', T + 'done', 'catch e', T + '? "caught " + e', 'done', '? $tG',
-        'func boom', T + 'raise("no value")'],
+        'func boom', T + 'Raise("no value")'],
      ['caught no value', 'kept']),
     ('W08', 'W3', 'a global with no value yet cannot be saved: R24 at the within line, the body unrun', [
         '? "before"', 'f()', 'func f', T + 'within $nNever = 1', T * 2 + '? "body ran"', T + 'done'],
@@ -109,7 +112,7 @@ CASES = [
         '? "before"', 'f(1)', 'func f xP', T + 'within xP = 2', T * 2 + '? xP', T + 'done'],
      refused('W10', 4, R_GLOBAL, 'xP', 4, 2), 1),
     ('W11', 'W2', 'a list global grown in place inside the block is the old list after it', [
-        '$aL = [1, 2]', 'within $aL = $aL', T + 'add($aL, 3)', T + '? len($aL)', 'done', '? len($aL)'],
+        '$aL = [1, 2]', 'within $aL = $aL', T + 'Add($aL, 3)', T + '? Len($aL)', 'done', '? Len($aL)'],
      ['3', '2']),
 
     ('U01', 'U1', 'the name holds the value in the body; Release at the end, once', [
@@ -126,24 +129,24 @@ CASES = [
         T * 2 + '? "release"'],
      ['body a', 'close', 'body b', 'destroy', 'body c', 'release (inherited)', 'body d', 'release']),
     ('U03', 'U2', 'a raise out of the block releases before the handler runs', [
-        'f()', 'func f', T + 'try', T * 2 + 'using oO = new Res("r")', T * 3 + 'raise("boom")', T * 2 + 'done', T + 'catch e',
+        'f()', 'func f', T + 'try', T * 2 + 'using oO = new Res("r")', T * 3 + 'Raise("boom")', T * 2 + 'done', T + 'catch e',
         T * 2 + '? "caught " + e', T + 'done'] + RES,
      ['release r', 'caught boom']),
     ('U04', 'U2', 'a return, a loop and an exit release, once each', [
         '? g()', 'h()', '? "end"', 'func g', T + 'using oO = new Res("g")', T * 2 + 'return "returned " + oO.tName', T + 'done', 'func h',
-        T + 'for i = 1 to 3', T * 2 + 'using oO = new Res("i" + string(i))', T * 3 + 'if i = 1 loop ok', T * 3 + 'if i = 3 exit ok', T * 3 + '? "body " + string(i)',
+        T + 'for i = 1 to 3', T * 2 + 'using oO = new Res("i" + String(i))', T * 3 + 'if i = 1 loop ok', T * 3 + 'if i = 3 exit ok', T * 3 + '? "body " + String(i)',
         T * 2 + 'done', T + 'next'] + RES,
      ['release g', 'returned g', 'release i1', 'body 2', 'release i2', 'release i3', 'end']),
     ('U05', 'U2', 'a raise in the release replaces the held raise, which is its cause', [
-        'f()', 'func f', T + 'try', T * 2 + 'using oO = new Bad', T * 3 + 'raise("in body")', T * 2 + 'done', T + 'catch e',
-        T * 2 + '? "caught " + e', T * 2 + '? "cause " + e.Cause()', T + 'done', 'class Bad', T + 'func release', T * 2 + 'raise("in release")'],
+        'f()', 'func f', T + 'try', T * 2 + 'using oO = new Bad', T * 3 + 'Raise("in body")', T * 2 + 'done', T + 'catch e',
+        T * 2 + '? "caught " + e', T * 2 + '? "cause " + e.Cause()', T + 'done', 'class Bad', T + 'func release', T * 2 + 'Raise("in release")'],
      ['caught in release', 'cause in body']),
     ('U06', 'U3', '`new K` of a class the unit defines with none of the three is refused at compile time', [
         '? "before"', 'f()', 'func f', T + 'using oO = new Plain', T * 2 + '? "body"', T + 'done'] + PLAIN,
      refused('U06', 4, R_CLASS, 'Plain', 4, 2), 1),
     ('U07', 'U3', 'any other value with none -- an object, a number -- is raised at entry, before the body, and caught', [
         'f()', 'func f', T + 'try', T * 2 + 'using xO = make()', T * 3 + '? "body ran"', T * 2 + 'done', T + 'catch e', T * 2 + '? "caught: " + e',
-        T * 2 + '? "line " + string(e.Span()[:line]) + ", code [" + e.Code() + "]"', T + 'done', T + 'try', T * 2 + 'using nN = 42', T * 3 + '? "body ran"',
+        T * 2 + '? "line " + String(e.Span()[:line]) + ", code [" + e.Code() + "]"', T + 'done', T + 'try', T * 2 + 'using nN = 42', T * 3 + '? "body ran"',
         T * 2 + 'done', T + 'catch e', T * 2 + '? "caught: " + e', T + 'done', 'func make', T + 'return new Plain'] + PLAIN,
      ['caught: using: xO answers none of Release, Destroy, Close', 'line 4, code []', 'caught: using: nN answers none of Release, Destroy, Close']),
     ('U08', 'U3', 'uncaught, the refusal at entry is reported at the using line, and names no raise()', [
@@ -159,13 +162,13 @@ CASES = [
      ['caught: using: $xR answers none of Release, Destroy, Close']),
 
     ('B01', 'B1', 'within inside a try body, inside a catch clause, inside itself; a try inside within', [
-        '$nG = 0', 'try', T + 'within $nG = 1', T * 2 + 'within $nG = 2', T * 3 + '? "inner " + string($nG)', T * 2 + 'done', T * 2 + '? "outer " + string($nG)', T + 'done',
-        T + 'raise("go")', 'catch', T + 'within $nG = 3', T * 2 + 'try', T * 3 + '? "in catch " + string($nG)', T * 3 + 'raise("again")', T * 2 + 'catch',
-        T * 3 + '? "nested catch " + string($nG)', T * 2 + 'done', T + 'done', T + '? "after catch block " + string($nG)', 'done', '? "end " + string($nG)'],
+        '$nG = 0', 'try', T + 'within $nG = 1', T * 2 + 'within $nG = 2', T * 3 + '? "inner " + String($nG)', T * 2 + 'done', T * 2 + '? "outer " + String($nG)', T + 'done',
+        T + 'Raise("go")', 'catch', T + 'within $nG = 3', T * 2 + 'try', T * 3 + '? "in catch " + String($nG)', T * 3 + 'Raise("again")', T * 2 + 'catch',
+        T * 3 + '? "nested catch " + String($nG)', T * 2 + 'done', T + 'done', T + '? "after catch block " + String($nG)', 'done', '? "end " + String($nG)'],
      ['inner 2', 'outer 1', 'in catch 3', 'nested catch 3', 'after catch block 0', 'end 0']),
     ('B02', 'B1', 'using inside within, a try inside both; a raise keeps its own line', [
-        '$tG = "a"', 'f()', 'func f', T + 'within $tG = "b"', T * 2 + 'using oO = new Res("r")', T * 3 + 'try', T * 4 + 'raise("x")', T * 3 + 'catch e',
-        T * 4 + '? "span line " + string(e.Span()[:line])', T * 3 + 'done', T * 3 + '? "g " + $tG', T * 2 + 'done', T + 'done', T + '? "g " + $tG'] + RES,
+        '$tG = "a"', 'f()', 'func f', T + 'within $tG = "b"', T * 2 + 'using oO = new Res("r")', T * 3 + 'try', T * 4 + 'Raise("x")', T * 3 + 'catch e',
+        T * 4 + '? "span line " + String(e.Span()[:line])', T * 3 + 'done', T * 3 + '? "g " + $tG', T * 2 + 'done', T + 'done', T + '? "g " + $tG'] + RES,
      ['span line 7', 'g b', 'release r', 'g a']),
     ('B03', 'B2', '`within` and `using` assigned, called, or an attribute, are what they were', [
         'f()', 'func f', T + 'within = "a word"', T + 'using = 2', T + '? within + " " + string(using)', T + 'o = new App', T + '? o.Within', T + 'Using(5)',
@@ -187,11 +190,11 @@ CASES = [
     # word, and a bare word as a try's first statement (each refused as a block without its parts, and not as a try's own catch).
     ('U11', 'U3', 'a using whose value raises releases nothing: the raise is the one caught', [
         'f()', 'func f', T + 'try', T * 2 + 'using xO = boom()', T * 3 + '? "body ran"', T * 2 + 'done', T + 'catch e', T * 2 + '? "caught " + e',
-        T + 'done', 'func boom', T + 'raise("no value")'],
+        T + 'done', 'func boom', T + 'Raise("no value")'],
      ['caught no value']),
     ('U12', 'U1', 'both blocks inside an eval string: the release runs, though the program never names Destroy or Close', [
-        'f()', 'func f', T + 'eval("using oRes = new Res(" + char(34) + "e" + char(34) + ")" + nl + "? " + char(34) + "in eval " + char(34) + " + oRes.tName" + nl + "done")',
-        T + '$tG = "a"', T + 'eval("within $tG = " + char(34) + "b" + char(34) + nl + "? $tG" + nl + "done")', T + '? $tG'] + RES,
+        'f()', 'func f', T + 'Eval("using oRes = new Res(" + Char(34) + "e" + Char(34) + ")" + nl + "? " + Char(34) + "in eval " + Char(34) + " + oRes.tName" + nl + "done")',
+        T + '$tG = "a"', T + 'Eval("within $tG = " + Char(34) + "b" + Char(34) + nl + "? $tG" + nl + "done")', T + '? $tG'] + RES,
      ['in eval e', 'release e', 'b', 'a']),
     ('B07', 'B2', 'a bare word as the first statement of a try, its block unclosed, is refused as a block without its parts', [
         '? "before"', 'f()', 'func f', T + 'try', T * 2 + 'within $nG = 1', T * 2 + '? "x"', T + 'catch', T + 'done'],
@@ -200,7 +203,7 @@ CASES = [
         '? "before"', 'f()', 'func f', T + 'within', T * 2 + '$nG = 1', T * 2 + '? "body"', T + 'done'],
      refused('B08', 4, R_BARE, 'within', 4, 2), 1),
     ('B10', 'B1', 'a try closed by `end` inside a block', [
-        '$tG = "a"', 'within $tG = "b"', T + 'try', T * 2 + 'raise("x")', T + 'catch', T * 2 + '? "caught in " + $tG', T + 'end', 'done', '? $tG'],
+        '$tG = "a"', 'within $tG = "b"', T + 'try', T * 2 + 'Raise("x")', T + 'catch', T * 2 + '? "caught in " + $tG', T + 'end', 'done', '? $tG'],
      ['caught in b', 'a']),
 ]
 

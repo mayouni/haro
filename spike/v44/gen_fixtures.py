@@ -49,22 +49,27 @@ def err(cid, ext, line, msg, where=None, called=None):
 
 R51 = 'Error (R51) : Value Error'
 CASES = [
+    # v0.48 RE-SPELLED, 2026-11-09, AFTER THIS COURT SPOKE (the Principal's ruling, "ParentClassName"): a .haro program's calls of
+    # built-ins are spelled as Softanza writes a name (Len, IsNull, SubStr), by study/v48/respell.py, ported here by
+    # study/v47/port_cases.py --respell. A report still names a built-in as the VM registers it. Each case asks what it asked.
     ('Q01', 'P1', 'sqrt of a negative raises R51, as Ring does', '.ring', ['? "before"', 'x = sqrt(-2)', '? x'],
      ['before', '', f'Line 2 {R51} ', 'In sqrt() in file Q01.ring '], 1),
     ('Q02', 'P1', 'every domain error raises R51; a value at the edge or an overflow is none', '.haro', [
         'f()', 'func f',
-        T + 'for tE in ["log(-1)", "log(0)", "log10(0)", "acos(2)", "asin(2)", "pow(-8, 0.5)", "pow(0, -1)", "sqrt(-3)"]',
-        T * 2 + 'try', T * 3 + 'eval("x = " + tE)', T * 3 + '? tE + " answered"', T * 2 + 'catch e', T * 3 + '? tE + " " + e.Code()', T * 2 + 'done',
+        T + 'for tE in ["Log(-1)", "Log(0)", "Log10(0)", "ACos(2)", "ASin(2)", "Pow(-8, 0.5)", "Pow(0, -1)", "Sqrt(-3)"]',
+        T * 2 + 'try', T * 3 + 'Eval("x = " + tE)', T * 3 + '? tE + " answered"', T * 2 + 'catch e', T * 3 + '? tE + " " + e.Code()', T * 2 + 'done',
         T + 'next',
-        T + '? sqrt(0)', T + '? pow(-8, 3)', T + '? pow(0, 0)', T + '? sqrt(-0.0)', T + '? pow(2, 2000)', T + '? acos(1)'],
-     ['log(-1) R51', 'log(0) R51', 'log10(0) R51', 'acos(2) R51', 'asin(2) R51', 'pow(-8, 0.5) R51', 'pow(0, -1) R51', 'sqrt(-3) R51',
+        T + '? Sqrt(0)', T + '? Pow(-8, 3)', T + '? Pow(0, 0)', T + '? Sqrt(-0.0)', T + '? Pow(2, 2000)', T + '? ACos(1)'],
+     ['Log(-1) R51', 'Log(0) R51', 'Log10(0) R51', 'ACos(2) R51', 'ASin(2) R51', 'Pow(-8, 0.5) R51', 'Pow(0, -1) R51', 'Sqrt(-3) R51',
       '0', '-512', '1', '0', 'inf', '0']),
+    # Q02 RE-SPELLED AFTER ITS COURT SPOKE, 2026-11-09 (v0.48): its expressions are eval'd in a .haro program, which spells a built-in as
+    # the Principal ruled (Log, ACos, Pow); the case asks what it asked.
     ('Q03', 'P2', 'a NaN is unordered in a .ring file: Ring\'s answers', '.ring', [
         'x = exp(1000)', 'y = x - x', '? y <= 0', '? y >= 0', '? y < 0', '? y > 0', '? y = y', '? y != y', '? y = 0',
         'if y >= 0 ? "ge" else ? "not ge" ok', 'if y < 0 ? "lt" else ? "not lt" ok', 'if y <= y ? "le" else ? "not le" ok'],
      ['0', '0', '0', '0', '0', '1', '0', 'not ge', 'not lt', 'not le']),
     ('Q04', 'P2', 'a NaN is unordered in a .haro file', '.haro', [
-        'f()', 'func f', T + 'nX = exp(1000)', T + 'nY = nX - nX', T + '? nY <= 0', T + '? nY >= 0', T + '? nY < 0', T + '? nY > 0',
+        'f()', 'func f', T + 'nX = Exp(1000)', T + 'nY = nX - nX', T + '? nY <= 0', T + '? nY >= 0', T + '? nY < 0', T + '? nY > 0',
         T + '? nY = nY', T + '? nY != nY', T + 'if nY >= 0', T * 2 + '? "ge"', T + 'else', T * 2 + '? "not ge"', T + 'ok'],
      ['false', 'false', 'false', 'false', 'false', 'true', 'not ge']),
     ('Q05', 'P3', 'a letter of a local text is written as Ring writes it, and a copy does not move', '.ring', [

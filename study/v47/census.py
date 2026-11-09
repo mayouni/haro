@@ -13,7 +13,7 @@ if "--vm" in args:
     VM = os.path.abspath(args[args.index("--vm") + 1])
 LISTING = "--list" in args
 
-LETTER = re.compile(r"^\s+(\d+)x (a name begins with its type's letter|`c` is Softanza's letter|[a-z] is the letter of)")
+LETTER = re.compile(r"^\s+(\d+)x (a name begins with its type's letter|`c` is Softanza's letter|[a-z] is the letter of|a built-in is spelled)")
 
 
 def code_files():

@@ -3,13 +3,13 @@ for i = 1 to 300
 next
 ? "300 returns from a finally"
 try
-	raise("later")
+	Raise("later")
 catch e
 	? "later caught at top: " + e
 done
 func m
 	try
-		raise("dropped")
+		Raise("dropped")
 	finally
 		return "from finally"
 	done

@@ -258,7 +258,7 @@
    "line": "E7",
    "why": "`haro fmt` prints `catch e` as `catch(e)`, and a name on the next line as a statement",
    "file": "cases/K01.haro",
-   "stdout": "try\n\traise(\"x\")\ncatch(e)\n\t? e\ndone\ntry\n\traise(\"y\")\ncatch\n\te\ndone\n"
+   "stdout": "try\n\tRaise(\"x\")\ncatch(e)\n\t? e\ndone\ntry\n\tRaise(\"y\")\ncatch\n\te\ndone\n"
   }
  ]
 }

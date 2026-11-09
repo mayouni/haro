@@ -2,10 +2,10 @@ h()
 func h
 	try
 		try
-			raise("orig")
+			Raise("orig")
 		catch e
-			raise(e)
+			Raise(e)
 		done
 	catch e2
-		? e2 + " " + string(e2.Span()[:line])
+		? e2 + " " + String(e2.Span()[:line])
 	done

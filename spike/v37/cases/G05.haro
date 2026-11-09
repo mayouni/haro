@@ -1,7 +1,7 @@
 p()
 func p
 	try
-		raise("plugin failed")
+		Raise("plugin failed")
 	catch tError
 		? "handled: " + tError
 	done

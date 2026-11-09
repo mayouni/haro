@@ -28,31 +28,31 @@ func FormsFail(nLine, tMsg)
 	CtFailC(nLine, "FORMS", ["rule:forms"], tMsg)
 
 func FormsKindByName(tName)
-	for i = 1 to len($aCourtKinds)
+	for i = 1 to Len($aCourtKinds)
 		if $aCourtKinds[i][2] = tName return $aCourtKinds[i] ok
 	next
 	return null
 
 func FormsIsUpper(tC)
-	return ascii(tC) >= 65 and ascii(tC) <= 90
+	return Ascii(tC) >= 65 and Ascii(tC) <= 90
 
 func FormsIsVowel(tC)
-	return InStrListCs(lower(tC), ["a", "e", "i", "o", "u"])
+	return InStrListCs(Lower(tC), ["a", "e", "i", "o", "u"])
 
 func InStrListCs(tS, aL)
-	for i = 1 to len(aL)
+	for i = 1 to Len(aL)
 		if aL[i] = tS return true ok
 	next
 	return false
 
 func FormsEndsWith(tS, tSuf)
-	if len(tSuf) = 0 return false ok
-	if len(tS) < len(tSuf) return false ok
-	return right(tS, len(tSuf)) = tSuf
+	if Len(tSuf) = 0 return false ok
+	if Len(tS) < Len(tSuf) return false ok
+	return Right(tS, Len(tSuf)) = tSuf
 
 func FormsSuffixOf(tKey)
 	aP = $aCourtFormset[5]
-	for i = 1 to len(aP)
+	for i = 1 to Len(aP)
 		if aP[i][1] = tKey return aP[i][2] ok
 	next
 	return ""
@@ -61,7 +61,7 @@ func FormsSuffixOf(tKey)
 func FormsOffered()
 	aOut = []
 	aF = $aCourtFormset
-	for i = 1 to len(aF[5])
+	for i = 1 to Len(aF[5])
 		aOut + aF[5][i][1]
 	next
 	if aF[2] != "" aOut + "fluent" ok
@@ -72,19 +72,19 @@ func FormsOffered()
 func FormsFamilies(aDecls)
 	aOut = []
 	aF = $aCourtFormset
-	if len(aF) < 6 return aOut ok
-	if len(aF[6]) < 3 return aOut ok
+	if Len(aF) < 6 return aOut ok
+	if Len(aF[6]) < 3 return aOut ok
 	aKind = FormsKindByName(aF[6][1])
-	if isnull(aKind) return aOut ok
-	for i = 1 to len(aDecls)
+	if IsNull(aKind) return aOut ok
+	for i = 1 to Len(aDecls)
 		aD = aDecls[i]
 		if aD[1] != aKind[1] loop ok
 		tBase = ""
 		aWords = []
 		aC = aD[4]
-		for j = 1 to len(aC)
-			if lower(aC[j][1]) = aF[6][2] and (aC[j][3][1] = "string" or aC[j][3][1] = "word") tBase = aC[j][3][2] ok
-			if lower(aC[j][1]) = aF[6][3] and aC[j][3][1] = "namelist" aWords = aC[j][3][2] ok
+		for j = 1 to Len(aC)
+			if Lower(aC[j][1]) = aF[6][2] and (aC[j][3][1] = "string" or aC[j][3][1] = "word") tBase = aC[j][3][2] ok
+			if Lower(aC[j][1]) = aF[6][3] and aC[j][3][1] = "namelist" aWords = aC[j][3][2] ok
 		next
 		aOut + [aD[2], tBase, aWords, aD[3]]
 	next
@@ -94,8 +94,8 @@ func FormsFamilies(aDecls)
 # the seat: the FORMS pass is the second guard and says nothing twice (v0.14)
 func FormsAlreadySaid(nLine, tWord)
 	if not $bCourtCollect return false ok
-	for i = 1 to len($aCourtFound)
-		if $aCourtFound[i][3] = nLine and $aCourtFound[i][1] = "FORMS" and substr($aCourtFound[i][4], "'" + tWord + "'") > 0 return true ok
+	for i = 1 to Len($aCourtFound)
+		if $aCourtFound[i][3] = nLine and $aCourtFound[i][1] = "FORMS" and SubStr($aCourtFound[i][4], "'" + tWord + "'") > 0 return true ok
 	next
 	return false
 
@@ -103,9 +103,9 @@ func FormsAlreadySaid(nLine, tWord)
 func FormsCheck(aDecls)
 	aFam = FormsFamilies(aDecls)
 	aOffered = FormsOffered()
-	for i = 1 to len(aFam)
+	for i = 1 to Len(aFam)
 		aSeen = []
-		for j = 1 to len(aFam[i][3])
+		for j = 1 to Len(aFam[i][3])
 			tW = aFam[i][3][j]
 			if not InStrListCs(tW, aOffered) and not FormsAlreadySaid(aFam[i][4], tW)
 				FormsFail(aFam[i][4], "FAMILY " + aFam[i][1] + " offers '" + tW + "', which the FORMS " + $aCourtFormset[1] + " declares no form for: it declares " + CtJoin(aOffered, ", "))
@@ -124,12 +124,12 @@ func FormsCheck(aDecls)
 func FormsPassive(tBase)
 	tInf = $aCourtFormset[3]
 	if tInf != "ed" return tBase + tInf ok
-	nN = len(tBase)
+	nN = Len(tBase)
 	if nN = 0 return tBase ok
 	tLast = tBase[nN]
 	if tLast = "e" return tBase + "d" ok
 	if tLast = "y" and nN >= 2
-		if not FormsIsVowel(tBase[nN - 1]) return left(tBase, nN - 1) + "ied" ok
+		if not FormsIsVowel(tBase[nN - 1]) return Left(tBase, nN - 1) + "ied" ok
 	ok
 	return tBase + "ed"
 
@@ -139,7 +139,7 @@ func FormsMembers(tBase, aWords)
 	aKeys = []
 	bFluent = false
 	bPassive = false
-	for i = 1 to len(aWords)
+	for i = 1 to Len(aWords)
 		if aWords[i] = "fluent"
 			bFluent = true
 		but aWords[i] = "passive"
@@ -149,16 +149,16 @@ func FormsMembers(tBase, aWords)
 		ok
 	next
 	nCombos = 1
-	for i = 1 to len(aKeys)
+	for i = 1 to Len(aKeys)
 		nCombos = nCombos * 2
 	next
 	aOut = []
 	for m = 0 to nCombos - 1
 		tSuf = ""
 		nV = m
-		for i = 1 to len(aKeys)
+		for i = 1 to Len(aKeys)
 			if nV % 2 = 1 tSuf += FormsSuffixOf(aKeys[i]) ok
-			nV = floor(nV / 2)
+			nV = Floor(nV / 2)
 		next
 		aOut + (tBase + tSuf)
 		if bFluent aOut + (tBase + tSuf + $aCourtFormset[2]) ok
@@ -168,14 +168,14 @@ func FormsMembers(tBase, aWords)
 
 func FormsPrintFamilies(aDecls)
 	aFam = FormsFamilies(aDecls)
-	for i = 1 to len(aFam)
+	for i = 1 to Len(aFam)
 		aM = FormsMembers(aFam[i][2], aFam[i][3])
-		? "family " + string(aFam[i][1]) + ": " + string(aFam[i][2]) + " offering [" + CtJoin(aFam[i][3], ", ") + "], " + string(len(aM)) + " members"
-		for j = 1 to len(aM)
+		? "family " + String(aFam[i][1]) + ": " + String(aFam[i][2]) + " offering [" + CtJoin(aFam[i][3], ", ") + "], " + String(Len(aM)) + " members"
+		for j = 1 to Len(aM)
 			? "  " + aM[j]
 		next
 	next
-	if len(aFam) = 0 ? "no family declared" ok
+	if Len(aFam) = 0 ? "no family declared" ok
 
 # a name split under the FORMS: [base, keys, fluent, statement, why]; why "" when it parses
 func FormsSplit(tName)
@@ -183,21 +183,21 @@ func FormsSplit(tName)
 	tRest = tName
 	bStmt = false
 	if FormsEndsWith(tRest, aF[4])
-		tRest = left(tRest, len(tRest) - len(aF[4]))
+		tRest = Left(tRest, Len(tRest) - Len(aF[4]))
 		bStmt = true
 	ok
 	bFluent = false
 	if FormsEndsWith(tRest, aF[2])
-		tRest = left(tRest, len(tRest) - len(aF[2]))
+		tRest = Left(tRest, Len(tRest) - Len(aF[2]))
 		bFluent = true
 	ok
 	aKeys = []
 	while true
 		tBest = ""
 		tBestKey = ""
-		for nI = 1 to len(aF[5])
+		for nI = 1 to Len(aF[5])
 			tSuf = aF[5][nI][2]
-			if FormsEndsWith(tRest, tSuf) and len(tSuf) > len(tBest)
+			if FormsEndsWith(tRest, tSuf) and Len(tSuf) > Len(tBest)
 				tBest = tSuf
 				tBestKey = aF[5][nI][1]
 			ok
@@ -206,9 +206,9 @@ func FormsSplit(tName)
 		if InStrListCs(tBestKey, aKeys)
 			return [tRest, aKeys, bFluent, bStmt, "the suffix " + tBest + " appears twice"]
 		ok
-		tRest = left(tRest, len(tRest) - len(tBest))
-		insert(aKeys, 0, tBestKey)
-		if len(tRest) = 0
+		tRest = Left(tRest, Len(tRest) - Len(tBest))
+		Insert(aKeys, 0, tBestKey)
+		if Len(tRest) = 0
 			return [tRest, aKeys, bFluent, bStmt, "nothing is left of the name but suffixes"]
 		ok
 	end
@@ -218,15 +218,15 @@ func FormsSplit(tName)
 	if FormsEndsWith(tRest, aF[4])
 		return [tRest, aKeys, bFluent, bStmt, "the statement form " + aF[4] + " is not outermost"]
 	ok
-	nN = len(tRest)
+	nN = Len(tRest)
 	nI = nN
 	while nI >= 1
 		if not FormsIsUpper(tRest[nI]) exit ok
 		nI--
 	end
 	if nI < nN and nI >= 1
-		tRun = substr(tRest, nI + 1)
-		if len(tRun) >= 2
+		tRun = SubStr(tRest, nI + 1)
+		if Len(tRun) >= 2
 			return [tRest, aKeys, bFluent, bStmt, "ends in '" + tRun + "', which no declared suffix spells"]
 		ok
 	ok
@@ -235,20 +235,20 @@ func FormsSplit(tName)
 # the plain twin of a fluent name: the name with the fluent form removed
 func FormsPlainTwin(aSplit)
 	tOut = aSplit[1]
-	for i = 1 to len(aSplit[2])
+	for i = 1 to Len(aSplit[2])
 		tOut += FormsSuffixOf(aSplit[2][i])
 	next
 	if aSplit[4] tOut += $aCourtFormset[4] ok
 	return tOut
 
 func FormsReadNames(tPath)
-	if not fexists(tPath) CtFail(1, "no names file at '" + tPath + "'") ok
-	tText = read(tPath)
+	if not FExists(tPath) CtFail(1, "no names file at '" + tPath + "'") ok
+	tText = Read(tPath)
 	aOut = []
 	tL = ""
-	for i = 1 to len(tText)
+	for i = 1 to Len(tText)
 		tC = tText[i]
-		if tC = char(10)
+		if tC = Char(10)
 			FormsTakeName(aOut, tL)
 			tL = ""
 		else
@@ -260,36 +260,36 @@ func FormsReadNames(tPath)
 
 func FormsTakeName(aOut, tRaw)
 	tL = FormsTrim(tRaw)
-	if len(tL) = 0 return ok
+	if Len(tL) = 0 return ok
 	if tL[1] = "#" return ok
 	aOut + tL
 
 func FormsTrim(tS)
 	nI = 1
-	nN = len(tS)
+	nN = Len(tS)
 	while nI <= nN
 		tC = tS[nI]
-		if tC != " " and tC != char(9) and tC != char(13) exit ok
+		if tC != " " and tC != Char(9) and tC != Char(13) exit ok
 		nI++
 	end
 	nJ = nN
 	while nJ >= nI
 		tC = tS[nJ]
-		if tC != " " and tC != char(9) and tC != char(13) exit ok
+		if tC != " " and tC != Char(9) and tC != Char(13) exit ok
 		nJ--
 	end
 	if nJ < nI return "" ok
-	return substr(tS, nI, nJ - nI + 1)
+	return SubStr(tS, nI, nJ - nI + 1)
 
 func FormsPrintSpellings(aDecls, aNames)
 	aFam = FormsFamilies(aDecls)
 	aMembers = []
-	for i = 1 to len(aFam)
+	for i = 1 to Len(aFam)
 		aMembers + FormsMembers(aFam[i][2], aFam[i][3])
 	next
 	nAgree = 0
 	nDis = 0
-	for i = 1 to len(aNames)
+	for i = 1 to Len(aNames)
 		tName = aNames[i]
 		aS = FormsSplit(tName)
 		tWhy = aS[5]
@@ -301,14 +301,14 @@ func FormsPrintSpellings(aDecls, aNames)
 			ok
 		ok
 		if tWhy = ""
-			for j = 1 to len(aFam)
+			for j = 1 to Len(aFam)
 				tBase = aFam[j][2]
 				bOfFamily = false
 				if InStrListCs(tName, aMembers[j])
 					bOfFamily = true
 				but aS[1] = tBase
 					bOfFamily = true
-				but len(aFam[j][3]) > 0
+				but Len(aFam[j][3]) > 0
 					if InStrListCs("passive", aFam[j][3]) and aS[1] = FormsPassive(tBase) bOfFamily = true ok
 				ok
 				if bOfFamily
@@ -333,12 +333,12 @@ func FormsPrintSpellings(aDecls, aNames)
 		ok
 	next
 	nMissing = 0
-	for i = 1 to len(aFam)
-		for j = 1 to len(aMembers[i])
+	for i = 1 to Len(aFam)
+		for j = 1 to Len(aMembers[i])
 			if not InStrListCs(aMembers[i][j], aNames)
 				nMissing++
 				? "missing " + aMembers[i][j] + " (family " + aFam[i][1] + ")"
 			ok
 		next
 	next
-	? "spellings: " + string(nAgree) + " agree, " + string(nDis) + " disagree of " + string(len(aNames)) + "; " + string(nMissing) + " declared members missing"
+	? "spellings: " + String(nAgree) + " agree, " + String(nDis) + " disagree of " + String(Len(aNames)) + "; " + String(nMissing) + " declared members missing"

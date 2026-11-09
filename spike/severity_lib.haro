@@ -14,8 +14,8 @@
 
 # the severity a kind holds a seat at: "warning", "error", or "" (an error, as every seat is)
 func SevSeatIs(aKind, tSeat)
-	if len(aKind) < 7 return "" ok
-	for i = 1 to len(aKind[7])
+	if Len(aKind) < 7 return "" ok
+	for i = 1 to Len(aKind[7])
 		if aKind[7][i][1] = tSeat return aKind[7][i][2] ok
 	next
 	return ""
@@ -25,7 +25,7 @@ func SevSeatIs(aKind, tSeat)
 func SevWarnClause(aDecl, aSeat, aClause)
 	aV = aClause[3]
 	if aV[1] = "namelist" or aV[1] = "pairlist" or aV[1] = "stringlist"
-		for i = 1 to len(aV[2])
+		for i = 1 to Len(aV[2])
 			aSubV = [aV[1], [aV[2][i]], aV[3], aV[4]]
 			SevWarnOne(aDecl, aSeat, [aClause[1], aClause[2], aSubV, aClause[4], aClause[5]])
 		next
@@ -43,9 +43,9 @@ func SevWarnOne(aDecl, aSeat, aClause)
 # and said in the NAMED words, with the refusal's code and cites. 1 when read past; 0 leaves the refusal to the court. What is read past is
 # not declared: it counts nowhere and a reference to it resolves to nothing
 func SevSkipNamed(aRow, aK)
-	tWord = lower(CtShown(aK))
+	tWord = Lower(CtShown(aK))
 	tSev = ""
-	for i = 1 to len(aRow[7])
+	for i = 1 to Len(aRow[7])
 		if aRow[7][i][1] = tWord tSev = aRow[7][i][2] ok
 	next
 	if tSev != "warning" return false ok
@@ -61,14 +61,14 @@ func SevSkipNamed(aRow, aK)
 	while nDepth > 0
 		aT = CtNext()
 		if aT[1] = "eof"
-			CtFail(aK[3], upper(tWord) + " " + aName[2] + " opens '(' and never closes it: a kind read past is still a declaration")
+			CtFail(aK[3], Upper(tWord) + " " + aName[2] + " opens '(' and never closes it: a kind read past is still a declaration")
 		ok
 		if aT[1] = "lparen" nDepth++ ok
 		if aT[1] = "rparen" nDepth-- ok
 	end
 	aR = CtNext()
 	if not (aR[1] = "keyword" and aR[2] = "RATIONALE")
-		CtFail(aR[3], "RATIONALE is mandatory on every declaration (" + upper(tWord) + " " + aName[2] + " has none)")
+		CtFail(aR[3], "RATIONALE is mandatory on every declaration (" + Upper(tWord) + " " + aName[2] + " has none)")
 	ok
 	CtExpect("string", "the RATIONALE string")
 	$aCourtWarnings + [aCC[1], aCC[2], aK[3], tNamed]

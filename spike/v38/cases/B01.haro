@@ -2,20 +2,20 @@ $nG = 0
 try
 	within $nG = 1
 		within $nG = 2
-			? "inner " + string($nG)
+			? "inner " + String($nG)
 		done
-		? "outer " + string($nG)
+		? "outer " + String($nG)
 	done
-	raise("go")
+	Raise("go")
 catch
 	within $nG = 3
 		try
-			? "in catch " + string($nG)
-			raise("again")
+			? "in catch " + String($nG)
+			Raise("again")
 		catch
-			? "nested catch " + string($nG)
+			? "nested catch " + String($nG)
 		done
 	done
-	? "after catch block " + string($nG)
+	? "after catch block " + String($nG)
 done
-? "end " + string($nG)
+? "end " + String($nG)

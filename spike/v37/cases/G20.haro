@@ -8,5 +8,5 @@ func k
 	try
 		return "value"
 	finally
-		raise("instead")
+		Raise("instead")
 	done

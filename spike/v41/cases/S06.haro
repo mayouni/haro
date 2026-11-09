@@ -2,4 +2,4 @@
 f()
 func f
 	aL = [:a = 1]
-	? len(aL)
+	? Len(aL)

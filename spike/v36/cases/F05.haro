@@ -1,7 +1,7 @@
 ? g()
 func g
 	try
-		raise("in g")
+		Raise("in g")
 	catch
 		return "from handler"
 	finally

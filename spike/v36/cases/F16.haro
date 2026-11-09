@@ -1,7 +1,7 @@
 ? m2()
 func m2
 	try
-		raise("dropped")
+		Raise("dropped")
 	finally
 		return "from finally"
 	done

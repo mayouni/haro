@@ -15,29 +15,29 @@ load "block_lib.haro"
 $aBlkToks = []
 $nBlkPos = 1
 
-if len(sysargv) < 4
+if Len(sysargv) < 4
 	? "usage: block.haro load <file> | fmt <file> | same <a> <b> | roundtrip <file> ..."
 else
 	tVerb = sysargv[3]
 	if tVerb = "load"
 		try
-			? BlkDumpAll(BlkLoad(read(sysargv[4])))
+			? BlkDumpAll(BlkLoad(Read(sysargv[4])))
 		catch
 			? cCatchError
 		done
 	but tVerb = "fmt"
 		try
-			see BlkPrintC6(BlkLoad(read(sysargv[4])))
+			see BlkPrintC6(BlkLoad(Read(sysargv[4])))
 		catch
 			? cCatchError
 		done
 	but tVerb = "same"
-		if len(sysargv) < 5
+		if Len(sysargv) < 5
 			? "usage: block.haro same <a> <b>"
 		else
 			try
-				tA = BlkDumpAll(BlkLoad(read(sysargv[4])))
-				tB = BlkDumpAll(BlkLoad(read(sysargv[5])))
+				tA = BlkDumpAll(BlkLoad(Read(sysargv[4])))
+				tB = BlkDumpAll(BlkLoad(Read(sysargv[5])))
 				if tA = tB
 					? "same"
 				else
@@ -48,7 +48,7 @@ else
 			done
 		ok
 	but tVerb = "roundtrip"
-		for k = 4 to len(sysargv)
+		for k = 4 to Len(sysargv)
 			BlkRoundTrip(sysargv[k])
 		next
 	else
@@ -60,12 +60,12 @@ ok
 # own names must not be those (haro.haro's note)
 func BlkRoundTrip(tPath)
 	try
-		tIn = read(tPath)
+		tIn = Read(tPath)
 		aA = BlkLoad(tIn)
 		tOut = BlkPrintC6(aA)
 		aB = BlkLoad(tOut)
 		if BlkDumpAll(aA) = BlkDumpAll(aB)
-			? "ok " + tPath + " " + len(aA) + " " + len(tIn) + " " + len(tOut)
+			? "ok " + tPath + " " + Len(aA) + " " + Len(tIn) + " " + Len(tOut)
 		else
 			? "DIFFERS " + tPath
 		ok

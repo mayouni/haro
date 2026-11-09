@@ -1,5 +1,5 @@
 try
-	raise("x2")
+	Raise("x2")
 catch e
 	? e
 	? cCatchError

@@ -2,7 +2,7 @@ try
 	try
 		? "ok"
 	finally
-		raise("late")
+		Raise("late")
 	done
 catch e
 	? e

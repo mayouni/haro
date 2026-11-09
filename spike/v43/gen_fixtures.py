@@ -77,11 +77,14 @@ def mismatch(a, op, b):
 
 B = '? "before"'
 CASES = [
+    # v0.48 RE-SPELLED, 2026-11-09, AFTER THIS COURT SPOKE (the Principal's ruling, "ParentClassName"): a .haro program's calls of
+    # built-ins are spelled as Softanza writes a name (Len, IsNull, SubStr), by study/v48/respell.py, ported here by
+    # study/v47/port_cases.py --respell. A report still names a built-in as the VM registers it. Each case asks what it asked.
     ('B01', 'B1', 'true and false print as themselves and are typed BOOLEAN', '.haro', [
-        '? true', '? false', '? type(true)', '? [true, false]'],
+        '? true', '? false', '? Type(true)', '? [true, false]'],
      ['true', 'false', 'BOOLEAN', 'true', 'false', '']),
     ('B02', 'B2', 'a comparison and and, or, not answer a boolean', '.haro', [
-        'f()', 'func f', T + 'bA = 1 < 2', T + '? bA', T + '? not (1 = 2)', T + '? (1 < 2) and (3 < 2)', T + '? "a" = "a"', T + '? type(2 > 1)'],
+        'f()', 'func f', T + 'bA = 1 < 2', T + '? bA', T + '? not (1 = 2)', T + '? (1 < 2) and (3 < 2)', T + '? "a" = "a"', T + '? Type(2 > 1)'],
      ['true', 'true', 'false', 'true', 'BOOLEAN']),
     ('B03', 'B3', 'a condition that is a literal of another type is refused when compiling', '.haro', [
         B, 'f()', 'func f', T + 'while 1', T * 2 + 'exit', T + 'end'],
@@ -99,13 +102,13 @@ CASES = [
         B, 'f()', 'func f', T + 'nA = 1', T + '? true and nA'],
      err('B07', 5, 'BOOLEAN_EXPECTED', cond('an integer', 'x != 0')), 1),
     ('B08', 'B4', 'the yes-or-no natives answer a boolean', '.haro', [
-        'f()', 'func f', T + '? isstring("a")', T + '? isnumber("a")', T + '? islist([])', T + 'if isnull(null)', T * 2 + '? "none"', T + 'ok'],
+        'f()', 'func f', T + '? IsString("a")', T + '? IsNumber("a")', T + '? IsList([])', T + 'if IsNull(null)', T * 2 + '? "none"', T + 'ok'],
      ['true', 'false', 'true', 'none']),
     ('B09', 'B5', 'a boolean in arithmetic raises NO_COERCION', '.haro', [
         B, 'f()', 'func f', T + '? true + 1'],
      err('B09', 4, 'NO_COERCION', coerce('boolean', '+', 'integer', 'a comparison, or string(b)')), 1),
     ('B10', 'B5', 'string() of a boolean is its word', '.haro', [
-        'f()', 'func f', T + 'bReady = 2 > 1', T + '? "ready: " + string(bReady)'],
+        'f()', 'func f', T + 'bReady = 2 > 1', T + '? "ready: " + String(bReady)'],
      ['ready: true']),
     ('B11', 'B6', 'a text plus an integer raises NO_COERCION', '.haro', [
         B, 'f()', 'func f', T + 'nLine = 3', T + '? "line " + nLine'],

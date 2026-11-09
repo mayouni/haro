@@ -7,13 +7,13 @@ func f
 	tName = "ada"
 	vItems = [1, 2]
 	oP = new P
-	hF = fopen("Y01.txt", "w")
-	fclose(hF)
+	hF = FOpen("Y01.txt", "w")
+	FClose(hF)
 	? bOk
 	? iN + 1
 	? nX
 	? tName
-	? len(vItems)
+	? Len(vItems)
 	? oP.iX
 class P
 	iX = 7

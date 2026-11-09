@@ -2,7 +2,7 @@ f()
 func f
 	try
 		using oO = new Bad
-			raise("in body")
+			Raise("in body")
 		done
 	catch e
 		? "caught " + e
@@ -10,4 +10,4 @@ func f
 	done
 class Bad
 	func release
-		raise("in release")
+		Raise("in release")

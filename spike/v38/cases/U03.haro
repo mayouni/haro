@@ -2,7 +2,7 @@ f()
 func f
 	try
 		using oO = new Res("r")
-			raise("boom")
+			Raise("boom")
 		done
 	catch e
 		? "caught " + e

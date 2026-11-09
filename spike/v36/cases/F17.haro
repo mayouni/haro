@@ -2,7 +2,7 @@ for x in [1, 2, 3]
 	try
 		if x = 2 exit ok
 	finally
-		? "finally " + string(x)
+		? "finally " + String(x)
 	done
 next
 ? "after"

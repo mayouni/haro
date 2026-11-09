@@ -1,4 +1,4 @@
 f()
 func f
 	bReady = 2 > 1
-	? "ready: " + string(bReady)
+	? "ready: " + String(bReady)

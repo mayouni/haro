@@ -1,7 +1,7 @@
 ? t()
 func t
 	try
-		raise("why")
+		Raise("why")
 	catch(e)
 		return "handled " + e
 	finally

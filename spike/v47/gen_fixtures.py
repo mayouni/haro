@@ -45,10 +45,13 @@ def letter_err(cid, line, name, letter, word, got, called=2, where='function f()
 
 B = '? "before"'
 CASES = [
+    # v0.48 RE-SPELLED, 2026-11-09, AFTER THIS COURT SPOKE (the Principal's ruling, "ParentClassName"): a .haro program's calls of
+    # built-ins are spelled as Softanza writes a name (Len, IsNull, SubStr), by study/v48/respell.py, ported here by
+    # study/v47/port_cases.py --respell. A report still names a built-in as the VM registers it. Each case asks what it asked.
     ('Y01', 'Y3', 'every checked letter holding its own type runs', '.haro', [
         'f()', 'func f', T + 'bOk = 1 < 2', T + 'iN = 3', T + 'nX = 2.5', T + 'fX = 0.5', T + 'tName = "ada"', T + 'vItems = [1, 2]',
-        T + 'oP = new P', T + 'hF = fopen("Y01.txt", "w")', T + 'fclose(hF)', T + '? bOk', T + '? iN + 1', T + '? nX', T + '? tName',
-        T + '? len(vItems)', T + '? oP.iX', 'class P', T + 'iX = 7'],
+        T + 'oP = new P', T + 'hF = FOpen("Y01.txt", "w")', T + 'FClose(hF)', T + '? bOk', T + '? iN + 1', T + '? nX', T + '? tName',
+        T + '? Len(vItems)', T + '? oP.iX', 'class P', T + 'iX = 7'],
      ['true', '4', '2.50', 'ada', '2', '7']),
     ('Y02', 'Y1', 'a name with no letter is refused when compiling', '.haro', [B, 'f()', 'func f', T + 'count = 3'],
      refused('Y02', 4, 'a name begins with its type\'s letter -- `count` has none; written', 'count'), 1),
@@ -64,15 +67,15 @@ CASES = [
       'Called from line 4 In function f() in file Y06.haro', '', 'Called from line 2 in file Y06.haro '], 1),
     ('Y07', 'Y2', 'a single letter is a for counter, of either form, and a catch name', '.haro', [
         'f()', 'func f', T + 'for i = 1 to 2', T * 2 + '? i', T + 'next', T + 'for x in [5, 6]', T * 2 + '? x', T + 'next', T + 'try',
-        T * 2 + 'raise("no")', T + 'catch e', T * 2 + '? e.Message()', T + 'done'],
+        T * 2 + 'Raise("no")', T + 'catch e', T * 2 + '? e.Message()', T + 'done'],
      ['1', '2', '5', '6', 'no']),
     ('Y08', 'Y2', 'a single letter anywhere else is refused', '.haro', [B, 'f()', 'func f', T + 'x = 3'],
      refused('Y08', 4, 'a name begins with its type\'s letter -- `x` has none; written', 'x'), 1),
     ('Y09', 'Y4', 'a letter whose type is not built yet is accepted and not checked', '.haro', [
-        'f()', 'func f', T + 'aRows = 5', T + 'mIndex = "k"', T + 'rUser = [1]', T + '? aRows', T + '? mIndex', T + '? len(rUser)'],
+        'f()', 'func f', T + 'aRows = 5', T + 'mIndex = "k"', T + 'rUser = [1]', T + '? aRows', T + '? mIndex', T + '? Len(rUser)'],
      ['5', 'k', '1']),
     ('Y10', 'Y5', 'null is absence until v0.49, and passes any letter', '.haro', [
-        'f()', 'func f', T + 'oDoc = null', T + 'vItems = null', T + 'iN = null', T + '? isnull(oDoc) and isnull(vItems) and isnull(iN)'],
+        'f()', 'func f', T + 'oDoc = null', T + 'vItems = null', T + 'iN = null', T + '? IsNull(oDoc) and IsNull(vItems) and IsNull(iN)'],
      ['true']),
     ('Y11', 'Y1', 'a .ring file is untouched: no letter, Softanza\'s c, a single letter', '.ring', [
         'f()', 'func f', T + 'count = 3', T + 'cName = 5', T + 'x = "a"', T + 'tName = 3', T + '? count + cName', T + '? x + tName'],

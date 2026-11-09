@@ -26,7 +26,7 @@
    "line": "P1",
    "why": "every domain error raises R51; a value at the edge or an overflow is none",
    "file": "cases/Q02.haro",
-   "stdout": "log(-1) R51\nlog(0) R51\nlog10(0) R51\nacos(2) R51\nasin(2) R51\npow(-8, 0.5) R51\npow(0, -1) R51\nsqrt(-3) R51\n0\n-512\n1\n0\ninf\n0\n"
+   "stdout": "Log(-1) R51\nLog(0) R51\nLog10(0) R51\nACos(2) R51\nASin(2) R51\nPow(-8, 0.5) R51\nPow(0, -1) R51\nSqrt(-3) R51\n0\n-512\n1\n0\ninf\n0\n"
   },
   {
    "id": "Q03",

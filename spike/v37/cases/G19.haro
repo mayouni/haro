@@ -1,10 +1,10 @@
 try
 	try
-		raise("handled")
+		Raise("handled")
 	catch
 		? "handled it"
 	finally
-		raise("after")
+		Raise("after")
 	done
 catch e
 	? e

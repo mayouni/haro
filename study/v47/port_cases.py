@@ -9,6 +9,13 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 ROOT = os.path.dirname(os.path.dirname(HERE))
 sys.path.insert(0, HERE)
 import reletter as R  # noqa: E402
+# v0.48: `--respell` ports with study/v48/respell.py (the built-ins' spelling) instead of the letters' rules
+if '--respell' in sys.argv:
+    sys.argv.remove('--respell')
+    sys.path.insert(0, os.path.join(ROOT, 'study', 'v48'))
+    import respell as TOOL  # noqa: E402
+else:
+    TOOL = R
 
 
 def literals(s):
@@ -40,7 +47,7 @@ def main():
             continue
         rel = f"spike/{rung}/cases/{cid}.haro"
         old = open(cf, encoding="utf-8").read()
-        new, _, _, conflicts = R.rewrite(rel, old)
+        new, _, _, conflicts = TOOL.rewrite(rel, old)
         if conflicts:
             print(f"{cid}: CONFLICT {conflicts}")
             continue

@@ -12,18 +12,18 @@ load "form_expand.haro"
 $aCondToks = []
 $nCondPos = 1
 
-if len(sysargv) < 3
+if Len(sysargv) < 3
 	? "usage: cond_rt.haro <file>"
 else
-	CondRtRun(read(sysargv[3]))
+	CondRtRun(Read(sysargv[3]))
 ok
 
 func CondRtRun(tBody)
-	aLines = str2list(tBody)
-	for i = 1 to len(aLines)
+	aLines = Str2List(tBody)
+	for i = 1 to Len(aLines)
 		tLine = aLines[i]
-		if len(tLine) > 0 and tLine[len(tLine)] = char(13) tLine = left(tLine, len(tLine) - 1) ok
-		if len(tLine) = 0 loop ok
+		if Len(tLine) > 0 and tLine[Len(tLine)] = Char(13) tLine = Left(tLine, Len(tLine) - 1) ok
+		if Len(tLine) = 0 loop ok
 		tOne = ""
 		try
 			aA = CondParse(tLine)

@@ -1,5 +1,5 @@
 try
-	raise("x1")
+	Raise("x1")
 catch e
 	? "e=" + e
 done

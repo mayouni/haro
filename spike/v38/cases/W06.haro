@@ -1,8 +1,8 @@
 $xDepth = 0
 nest(3)
-? "depth after: " + string($xDepth)
+? "depth after: " + String($xDepth)
 func nest nN
 	within $xDepth = $xDepth + 1
-		? "depth " + string($xDepth)
+		? "depth " + String($xDepth)
 		if nN > 1 nest(nN - 1) ok
 	done

@@ -61,11 +61,19 @@ sysunset Sys-Unset | tan Tan | tanh TanH | tempfile Temp-File | tempname Temp-Na
 timelist Time-List | trim Trim | type Type | ungetc Un-Get-C | unsigned Unsigned | upper Upper
 uptime Up-Time | variablepointer Variable-Pointer | varptr Var-Ptr | version Version | windowsnl Windows-NL | write Write
 """
+# the VM's own natives (compile.zig's builtin_table, beyond Ring's 258): the resident VM's, the terminal's, the browser's -- one rule for
+# every native the VM registers (the desk's reading)
+SPLIT_VM = """
+admitapp Admit-App | admitcode Admit-Code | admitfile Admit-File | admitfinish Admit-Finish | admitstart Admit-Start | admitstate Admit-State
+releasecode Release-Code | releasefile Release-File | replaceapp Replace-App | replacecode Replace-Code | replacefile Replace-File
+tui_done TUI-Done | tui_init TUI-Init | tui_key TUI-Key | tui_size TUI-Size | web_bye Web-Bye | web_done Web-Done | web_serve Web-Serve
+web_wait Web-Wait
+"""
 
 
 def table():
     out = {}
-    for cell in re.split(r"[|\n]", SPLIT):
+    for cell in re.split(r"[|\n]", SPLIT + SPLIT_VM):
         cell = cell.strip()
         if not cell:
             continue
@@ -101,11 +109,12 @@ def code_calls():
 if __name__ == "__main__":
     t = table()
     names = zig_names()
+    vm_own = [c.split()[0] for c in re.split(r"[|\n]", SPLIT_VM) if c.strip()]
     missing = sorted(set(names) - set(t))
-    extra = sorted(set(t) - set(names))
+    extra = sorted(set(t) - set(names) - set(vm_own))
     assert not missing and not extra, (missing, extra)
     if "--zig" in sys.argv:
-        for low in names:
+        for low in names + vm_own:
             print(f'    .{{ "{low}", "{t[low]}" }},')
         sys.exit(0)
     calls = code_calls()

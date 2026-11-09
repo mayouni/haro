@@ -116,7 +116,8 @@ for py in sorted(glob.glob(os.path.join(ROOT, "spike", "**", "*.py"), recursive=
         new = renamed(val)
         how = "file"
         if new is None:
-            if not SOFT.search(val) or val.strip() == "cCatchError":
+            # --files-only (v0.48): only a span of a renamed file is ported; the letters' uniform rule was v0.47's alone
+            if "--files-only" in sys.argv or not SOFT.search(val) or val.strip() == "cCatchError":
                 continue
             new = uniform(val)
             how = "uniform"

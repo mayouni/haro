@@ -1,10 +1,10 @@
 try
-	raise("boom")
+	Raise("boom")
 catch e
 	? "caught: " + e
 	? e + "!"
-	? len(e)
-	? type(e)
+	? Len(e)
+	? Type(e)
 	? e = "boom"
-	? isstring(e)
+	? IsString(e)
 done

@@ -11,6 +11,7 @@ THE LINES.
   N2  a second spelling of a name in one scope is the same refusal: `oclient = 2` after `oClient = 1` is not a second variable
   N3  two functions whose names differ only by case are refused at a call of either, naming both
   N4  a native is spelled in lowercase, as the VM registers it: `isnull`, not `isNull`
+      -- REVISED 2026-11-09 by the Principal ("ParentClassName", v0.48): a native is spelled as Softanza writes a name, `IsNull`
   N5  a keyword in another case is no name in a .haro file (aNd, If, NULL; and Haro's block words, Using): refused, not read as a name
   N6  a .ring file folds case as Ring does, and a .haro file calls a .ring file's function by the spelling its definition gives
 
@@ -49,13 +50,16 @@ def refused(cid, line, why, text, called=2, where='function f()'):
 
 B = '? "before"'
 CASES = [
+    # v0.48 RE-SPELLED, 2026-11-09, AFTER THIS COURT SPOKE (the Principal's ruling, "ParentClassName"): a .haro program's calls of
+    # built-ins are spelled as Softanza writes a name (Len, IsNull, SubStr), by study/v48/respell.py, ported here by
+    # study/v47/port_cases.py --respell. A report still names a built-in as the VM registers it. Each case asks what it asked.
     # v0.47 RE-LETTERED, 2026-11-08, AFTER THIS COURT SPOKE (D55 T2, the author's scope "Yes, as recommended"): every name of these
     # .haro programs carries its type's letter, by study/v47/reletter.py's rules (c -> t, a single letter or a word by what it holds),
     # ported here by study/v47/port_cases.py; an output that names a renamed variable names its new name. Each case asks what it asked.
     # By hand: oClient held a number, so it is nClient, and the misspellings that are N02, N03 and N19's subject (nclient, $ntotal) stay
     # misspelled; a name spelled other than its declaration is that fault first, before its letter's.
     ('N01', 'N1', 'every kind of name spelled as declared runs', '.haro', [
-        '$nTotal = 10', 'f()', 'func f', T + 'nClient = 2', T + '? nClient + Twice(3)', T + '? isnull(null)', T + 'oO = new Point',
+        '$nTotal = 10', 'f()', 'func f', T + 'nClient = 2', T + '? nClient + Twice(3)', T + '? IsNull(null)', T + 'oO = new Point',
         T + '? oO.GetX()', T + '? $nTotal', 'func Twice nN', T + 'return nN * 2', 'class Point', T + '@nX = 3', T + 'func GetX', T * 2 + 'return @nX'],
      ['8', 'true', '3', '10']),
     # N01 CHANGED AFTER ITS COURT SPOKE, 2026-11-08: `isnull(null)` answers a boolean in a .haro file and prints `true` (v0.43, D55 T3,
@@ -75,9 +79,11 @@ CASES = [
     ('N06', 'N3', 'two functions differing only by case: a call of either is refused, naming both', '.haro', [
         B, 'f()', 'func f', T + '? Foo()', 'func Foo', T + 'return 1', 'func foo', T + 'return 2'],
      refused('N06', 4, 'two functions differ only by case -- `Foo` at line 5 and `foo` at line 7; written', 'Foo'), 1),
-    ('N07', 'N4', 'a native in another case is refused: natives are lowercase', '.haro', [
+    # N07 CHANGED AFTER ITS COURT SPOKE, 2026-11-09 (v0.48): the Principal ruled a built-in in a .haro file spelled as Softanza writes a
+    # name ("ParentClassName"), revising 2026-11-07's lowercase -- `isNull` is still refused, and now names `IsNull`.
+    ('N07', 'N4', 'a native in another case is refused, naming its one spelling', '.haro', [
         B, 'f()', 'func f', T + '? isNull(null)'],
-     refused('N07', 4, 'a native is spelled in lowercase -- `isnull`; written', 'isNull'), 1),
+     refused('N07', 4, 'a built-in is spelled `IsNull`; written', 'isNull'), 1),
     ('N08', 'N1', 'a class named in another spelling is refused', '.haro', [
         B, 'f()', 'func f', T + 'oO = new point', 'class Point'],
      refused('N08', 4, why_decl('Point', 5), 'point'), 1),
@@ -112,11 +118,11 @@ CASES = [
         B, 'f()', 'func f', T + 'oO = new App', T + 'xX = oO.See()', 'class App', T + 'func See', T * 2 + 'return 1'],
      refused('N16', 5, 'a keyword in another case is no name -- `see` is a keyword; written', 'See'), 1),
     ('N17', 'N1', 'an eval in a .haro program spells a local as declared', '.haro', [
-        'f()', 'func f', T + 'nA = 4', T + 'eval("? na")'],
+        'f()', 'func f', T + 'nA = 4', T + 'Eval("? na")'],
      ['', 'Line 4 Error (E1) : one spelling per name -- declared `nA`; written `na` ', 'In function f() in file N17.haro', '',
       'Called from line 1 in file N17.haro '], 1),
     ('N18', 'N5', 'an eval in a .haro program refuses a keyword in another case', '.haro', [
-        'f()', 'func f', T + 'eval("aNd = 4")'],
+        'f()', 'func f', T + 'Eval("aNd = 4")'],
      ['', 'Line 3 Error (E1) : a keyword in another case is no name -- `and` is a keyword; written `aNd` ', 'In function f() in file N18.haro', '',
       'Called from line 1 in file N18.haro '], 1),
     # WRITTEN AFTER THE PLANTS: plant P7 (the hook where a global is written) MISSED, because every case read its global; N19 writes one.

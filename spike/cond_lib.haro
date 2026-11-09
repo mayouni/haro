@@ -58,43 +58,43 @@
 # Functions only.
 
 func CondIsWordChar(tC)
-	nN = ascii(tC)
+	nN = Ascii(tC)
 	return (nN >= 97 and nN <= 122) or (nN >= 65 and nN <= 90) or nN = 95 or (nN >= 48 and nN <= 57)
 
 func CondIsDigit(tC)
-	nN = ascii(tC)
+	nN = Ascii(tC)
 	return (nN >= 48 and nN <= 57)
 
 # tokens: [type, text]; types: word number string eq ne gt lt lparen rparen dot eof
 func CondTokenize(tS)
 	aT = []
-	nN = len(tS)
+	nN = Len(tS)
 	nI = 1
 	while nI <= nN
 		tC = tS[nI]
-		if tC = " " or tC = char(9)
+		if tC = " " or tC = Char(9)
 			nI++
 		but tC = "'"
 			nJ = nI + 1
 			while nJ <= nN and tS[nJ] != "'"
 				nJ++
 			end
-			if nJ > nN raise("condition: unterminated quote in '" + tS + "'") ok
-			aT + ["string", substr(tS, nI + 1, nJ - nI - 1)]
+			if nJ > nN Raise("condition: unterminated quote in '" + tS + "'") ok
+			aT + ["string", SubStr(tS, nI + 1, nJ - nI - 1)]
 			nI = nJ + 1
 		but CondIsDigit(tC)
 			nJ = nI
 			while nJ <= nN and CondIsDigit(tS[nJ])
 				nJ++
 			end
-			aT + ["number", substr(tS, nI, nJ - nI)]
+			aT + ["number", SubStr(tS, nI, nJ - nI)]
 			nI = nJ
 		but CondIsWordChar(tC)
 			nJ = nI
 			while nJ <= nN and CondIsWordChar(tS[nJ])
 				nJ++
 			end
-			aT + ["word", substr(tS, nI, nJ - nI)]
+			aT + ["word", SubStr(tS, nI, nJ - nI)]
 			nI = nJ
 		but tC = "!" and nI < nN and tS[nI+1] = "="
 			aT + ["ne", "!="]
@@ -118,7 +118,7 @@ func CondTokenize(tS)
 			aT + ["dot", "."]
 			nI++
 		else
-			raise("condition: the character '" + tC + "' is not part of the condition language")
+			Raise("condition: the character '" + tC + "' is not part of the condition language")
 		ok
 	end
 	aT + ["eof", ""]
@@ -137,7 +137,7 @@ func CondParse(tS)
 	$nCondPos = 1
 	aAst = CondOr()
 	if CondPeek()[1] != "eof"
-		raise("condition: unexpected '" + CondPeek()[2] + "' in '" + tS + "'")
+		Raise("condition: unexpected '" + CondPeek()[2] + "' in '" + tS + "'")
 	ok
 	return aAst
 
@@ -146,9 +146,9 @@ func CondParsePathText(tS)
 	$aCondToks = CondTokenize(tS)
 	$nCondPos = 1
 	aT = CondNext()
-	if aT[1] != "word" raise("path: expected a name, found '" + aT[2] + "'") ok
+	if aT[1] != "word" Raise("path: expected a name, found '" + aT[2] + "'") ok
 	aP = CondParsePath(aT)
-	if CondPeek()[1] != "eof" raise("path: unexpected '" + CondPeek()[2] + "' in '" + tS + "'") ok
+	if CondPeek()[1] != "eof" Raise("path: unexpected '" + CondPeek()[2] + "' in '" + tS + "'") ok
 	return aP
 
 # a value or a path on its own (a VIEW's NAMED), from its text
@@ -156,7 +156,7 @@ func CondParseRightText(tS)
 	$aCondToks = CondTokenize(tS)
 	$nCondPos = 1
 	aR = CondCmpRight()
-	if CondPeek()[1] != "eof" raise("named: unexpected '" + CondPeek()[2] + "' in '" + tS + "'") ok
+	if CondPeek()[1] != "eof" Raise("named: unexpected '" + CondPeek()[2] + "' in '" + tS + "'") ok
 	return aR
 
 # A node is built in a fresh variable and assigned after: `aL = ["or", aL,
@@ -194,7 +194,7 @@ func CondTerm()
 func CondValue()
 	aT = CondNext()
 	if aT[1] = "word" or aT[1] = "number" or aT[1] = "string" return aT[2] ok
-	raise("condition: expected a value, found '" + aT[2] + "'")
+	Raise("condition: expected a value, found '" + aT[2] + "'")
 
 # a path, its first word already consumed as t
 func CondParsePath(xT)
@@ -202,7 +202,7 @@ func CondParsePath(xT)
 	while CondPeek()[1] = "dot"
 		CondNext()
 		aS = CondNext()
-		if aS[1] != "word" raise("condition: expected a name after '.'") ok
+		if aS[1] != "word" Raise("condition: expected a name after '.'") ok
 		aSegs + aS[2]
 	end
 	return ["path", aSegs]
@@ -212,7 +212,7 @@ func CondParsePath(xT)
 func CondCmpRight()
 	aT = CondNext()
 	if aT[1] = "string" or aT[1] = "number" return ["val", aT[2]] ok
-	if aT[1] != "word" raise("condition: expected a value or a place, found '" + aT[2] + "'") ok
+	if aT[1] != "word" Raise("condition: expected a value or a place, found '" + aT[2] + "'") ok
 	if CondPeek()[1] = "dot" or aT[2] = "this" or aT[2] = "self" return CondParsePath(aT) ok
 	return ["val", aT[2]]
 
@@ -221,27 +221,27 @@ func CondCmpRight()
 func CondRelRight()
 	aT = CondNext()
 	if aT[1] = "string" or aT[1] = "number" return ["val", aT[2]] ok
-	if aT[1] != "word" raise("condition: expected a seat or a value, found '" + aT[2] + "'") ok
+	if aT[1] != "word" Raise("condition: expected a seat or a value, found '" + aT[2] + "'") ok
 	return CondParsePath(aT)
 
 func CondAtom()
 	aT = CondNext()
 	if aT[1] = "lparen"
 		aC = CondOr()
-		if CondNext()[1] != "rparen" raise("condition: expected ')'") ok
+		if CondNext()[1] != "rparen" Raise("condition: expected ')'") ok
 		return aC
 	ok
 	if aT[1] != "word"
-		raise("condition: expected a seat, found '" + aT[2] + "'")
+		Raise("condition: expected a seat, found '" + aT[2] + "'")
 	ok
 	if aT[2] = "exists"
 		aD = CondNext()
-		if aD[1] != "word" raise("condition: exists names a declaration") ok
+		if aD[1] != "word" Raise("condition: exists names a declaration") ok
 		return ["exists", aD[2]]
 	ok
 	if aT[2] = "some" or aT[2] = "all" or aT[2] = "earlier"
 		aD = CondNext()
-		if aD[1] != "word" raise("condition: " + aT[2] + " names a declaration kind or a list of references") ok
+		if aD[1] != "word" Raise("condition: " + aT[2] + " names a declaration kind or a list of references") ok
 		aTarget = CondParsePath(aD)
 		aNamed = null
 		if CondPeek()[1] = "word" and CondPeek()[2] = "named"
@@ -259,9 +259,9 @@ func CondAtom()
 	if CondPeek()[1] = "word" and CondPeek()[2] = "is"
 		CondNext()
 		aV = CondNext()
-		if aV[1] != "word" raise("condition: is names a VIEW") ok
-		if len(aPath[2]) != 1 or aPath[2][1] != "self"
-			raise("condition: is asks whether self is a VIEW's declaration; write self is " + aV[2])
+		if aV[1] != "word" Raise("condition: is names a VIEW") ok
+		if Len(aPath[2]) != 1 or aPath[2][1] != "self"
+			Raise("condition: is asks whether self is a VIEW's declaration; write self is " + aV[2])
 		ok
 		return ["is", aV[2]]
 	ok
@@ -272,7 +272,7 @@ func CondAtom()
 	if aOp[1] = "gt" or aOp[1] = "lt"
 		aV = CondValue()
 		if not CondIsNumberText(aV)
-			raise("condition: " + aOp[2] + " compares numbers, and '" + aV + "' is not one")
+			Raise("condition: " + aOp[2] + " compares numbers, and '" + aV + "' is not one")
 		ok
 		return ["cmp", aOp[2], aPath, ["val", aV]]
 	ok
@@ -301,29 +301,29 @@ func CondAtom()
 		ok
 		if aOp[2] = "matches"
 			aF = CondNext()
-			if aF[1] != "word" raise("condition: matches names a FORMAT") ok
+			if aF[1] != "word" Raise("condition: matches names a FORMAT") ok
 			return ["matches", aPath, aF[2]]
 		ok
 	ok
-	raise("condition: '" + aOp[2] + "' is not an operator of the condition language")
+	Raise("condition: '" + aOp[2] + "' is not an operator of the condition language")
 
 func CondIsNumberText(xV)
-	if len(xV) = 0 return false ok
-	for i = 1 to len(xV)
+	if Len(xV) = 0 return false ok
+	for i = 1 to Len(xV)
 		if not CondIsDigit(xV[i]) return false ok
 	next
 	return true
 
 func CondPathText(aP)
 	tOut = ""
-	for i = 1 to len(aP[2])
+	for i = 1 to Len(aP[2])
 		if i > 1 tOut += "." ok
 		tOut += aP[2][i]
 	next
 	return tOut
 
 func CondInList(tS, aL)
-	for i = 1 to len(aL)
+	for i = 1 to Len(aL)
 		if aL[i] = tS return true ok
 	next
 	return false
@@ -331,7 +331,7 @@ func CondInList(tS, aL)
 # ---- the language tables, read by both readers --------------------------------------
 
 func CondLang(tLang)
-	for i = 1 to len($aCondLangs)
+	for i = 1 to Len($aCondLangs)
 		if $aCondLangs[i][1] = tLang return $aCondLangs[i] ok
 	next
 	return null
@@ -339,17 +339,17 @@ func CondLang(tLang)
 # the seats of a declaration kind of a language, or NULL when no such kind
 func CondSeatsIn(tLang, tDecl)
 	aL = CondLang(tLang)
-	if isnull(aL) return null ok
+	if IsNull(aL) return null ok
 	aD = aL[2]
-	for i = 1 to len(aD)
+	for i = 1 to Len(aD)
 		if aD[i][1] = tDecl return aD[i][2] ok
 	next
 	return null
 
 func CondSeatInfoIn(tLang, tDecl, tSeat)
 	aS = CondSeatsIn(tLang, tDecl)
-	if isnull(aS) return null ok
-	for i = 1 to len(aS)
+	if IsNull(aS) return null ok
+	for i = 1 to Len(aS)
 		if aS[i][1] = tSeat return aS[i] ok
 	next
 	return null
@@ -357,15 +357,15 @@ func CondSeatInfoIn(tLang, tDecl, tSeat)
 # v0.8: the WORLD's ENTRY kinds and the forms of a language
 func CondEntryIn(tLang)
 	aL = CondLang(tLang)
-	if isnull(aL) return [] ok
-	if len(aL) < 6 return [] ok
+	if IsNull(aL) return [] ok
+	if Len(aL) < 6 return [] ok
 	return aL[6]
 
 func CondFormIn(tLang, tName)
 	aL = CondLang(tLang)
-	if isnull(aL) return null ok
-	if len(aL) < 7 return null ok
-	for i = 1 to len(aL[7])
+	if IsNull(aL) return null ok
+	if Len(aL) < 7 return null ok
+	for i = 1 to Len(aL[7])
 		if aL[7][i][1] = tName return aL[7][i] ok
 	next
 	return null
@@ -373,45 +373,45 @@ func CondFormIn(tLang, tName)
 # a form's seat infos [[seat, of, kind], ...] describe a pair when there are two
 # scalar seats and the first is a name, a MENU or a DECLARATION
 func CondIsPairFormInfo(aInfo)
-	if len(aInfo) != 2 return false ok
+	if Len(aInfo) != 2 return false ok
 	tK1 = aInfo[1][3]
 	if not ((aInfo[1][2] = "name" and tK1 = "prim") or tK1 = "menu" or tK1 = "decl") return false ok
 	return true
 
 func CondIsOneIn(tLang, tDecl)
 	aL = CondLang(tLang)
-	if isnull(aL) return false ok
+	if IsNull(aL) return false ok
 	return CondInList(tDecl, aL[3])
 
 func CondViewIn(tLang, tName)
 	aL = CondLang(tLang)
-	if isnull(aL) return null ok
+	if IsNull(aL) return null ok
 	aV = aL[4]
-	for i = 1 to len(aV)
+	for i = 1 to Len(aV)
 		if aV[i][1] = tName return aV[i] ok
 	next
 	return null
 
 func CondVerbIn(tLang, tDecl)
 	aL = CondLang(tLang)
-	if isnull(aL) return "" ok
+	if IsNull(aL) return "" ok
 	aV = aL[5]
-	for i = 1 to len(aV)
+	for i = 1 to Len(aV)
 		if aV[i][1] = tDecl return aV[i][2] ok
 	next
 	return ""
 
 func CondDeclNameIn(tLang, tVerb)
 	aL = CondLang(tLang)
-	if isnull(aL) return "" ok
+	if IsNull(aL) return "" ok
 	aV = aL[5]
-	for i = 1 to len(aV)
+	for i = 1 to Len(aV)
 		if aV[i][2] = tVerb return aV[i][1] ok
 	next
 	return ""
 
 func CondFormatShape(tName)
-	for i = 1 to len($aCondFormats)
+	for i = 1 to Len($aCondFormats)
 		if $aCondFormats[i][1] = tName return $aCondFormats[i][2] ok
 	next
 	return ""
@@ -452,18 +452,18 @@ func CondTypeHead(tSeg, aCtx)
 	ok
 	if tDecl != ""
 		aV = CondViewIn(tLang, tSeg)
-		if not isnull(aV)
+		if not IsNull(aV)
 			if aV[2] = "" or aV[2] = tDecl return aV[3] ok
 		ok
 		aInfo = CondSeatInfoIn(tLang, tDecl, tSeg)
-		if not isnull(aInfo) return CondSeatType(aInfo, tLang) ok
+		if not IsNull(aInfo) return CondSeatType(aInfo, tLang) ok
 	else
 		aV = CondViewIn(tLang, tSeg)
-		if not isnull(aV)
+		if not IsNull(aV)
 			if aV[2] = "" return aV[3] ok
 		ok
 	ok
-	if not isnull(CondSeatsIn(tLang, tSeg))
+	if not IsNull(CondSeatsIn(tLang, tSeg))
 		if CondIsOneIn(tLang, tSeg) return ["decl", tLang, tSeg] ok
 		return ["set", tLang, tSeg]
 	ok
@@ -472,10 +472,10 @@ func CondTypeHead(tSeg, aCtx)
 	# (fleet.link from a peer); a seat of the ON declaration is this.SEAT
 	if aCtx[4] != "" and aCtx[1] != tLang
 		aV = CondViewIn(aCtx[1], tSeg)
-		if not isnull(aV)
+		if not IsNull(aV)
 			if aV[2] = "" return aV[3] ok
 		ok
-		if not isnull(CondSeatsIn(aCtx[1], tSeg))
+		if not IsNull(CondSeatsIn(aCtx[1], tSeg))
 			if CondIsOneIn(aCtx[1], tSeg) return ["decl", aCtx[1], tSeg] ok
 			return ["set", aCtx[1], tSeg]
 		ok
@@ -487,16 +487,16 @@ func CondTypeStep(aT, tPrev, tSeg, aCtx)
 	tK = aT[1]
 	if tK = "decl"
 		aInfo = CondSeatInfoIn(aT[2], aT[3], tSeg)
-		if not isnull(aInfo) return CondSeatType(aInfo, aT[2]) ok
+		if not IsNull(aInfo) return CondSeatType(aInfo, aT[2]) ok
 		# a VIEW on that declaration's kind reads as one of its seats
 		aV = CondViewIn(aT[2], tSeg)
-		if not isnull(aV)
+		if not IsNull(aV)
 			if aV[2] = aT[3] return aV[3] ok
 		ok
 		return "no seat '" + tSeg + "' on " + aT[3]
 	ok
 	if tK = "sentence"
-		if isnull(CondSeatsIn(aT[2], tSeg))
+		if IsNull(CondSeatsIn(aT[2], tSeg))
 			return "'" + tSeg + "' is neither a seat nor a kind of " + aT[2]
 		ok
 		if CondIsOneIn(aT[2], tSeg) return ["decl", aT[2], tSeg] ok
@@ -512,10 +512,10 @@ func CondTypeStep(aT, tPrev, tSeg, aCtx)
 func CondTypePath(aP, aCtx)
 	aSegs = aP[2]
 	aT = CondTypeHead(aSegs[1], aCtx)
-	if isstring(aT) return aT ok
-	for i = 2 to len(aSegs)
+	if IsString(aT) return aT ok
+	for i = 2 to Len(aSegs)
 		aT = CondTypeStep(aT, aSegs[i-1], aSegs[i], aCtx)
-		if isstring(aT) return aT ok
+		if IsString(aT) return aT ok
 	next
 	return aT
 
@@ -539,22 +539,22 @@ func CondValidateIn(aAst, aCtx)
 	but tK = "not"
 		return CondValidateIn(aAst[2], aCtx)
 	but tK = "exists"
-		if isnull(CondSeatsIn(aCur[1], aAst[2]))
+		if IsNull(CondSeatsIn(aCur[1], aAst[2]))
 			return "'" + aAst[2] + "' resolves to nothing: exists names a declaration of this language"
 		ok
 		return ""
 	but tK = "cmp"
 		aT = CondTypePath(aAst[3], aCtx)
-		if isstring(aT) return aT ok
+		if IsString(aT) return aT ok
 		if aT[1] = "set" return "'" + CondPathText(aAst[3]) + "' is a set of declarations, and = compares one value" ok
 		if aT[1] = "sentence" return "'" + CondPathText(aAst[3]) + "' is a file, and = compares one value" ok
 		aR = CondTypeRight(aAst[4], aCtx)
-		if isstring(aR) return aR ok
+		if IsString(aR) return aR ok
 		if aR[1] = "set" or aR[1] = "sentence" return "'" + CondPathText(aAst[4]) + "' is not one value" ok
 		return ""
 	but tK = "has"
 		aT = CondTypePath(aAst[3], aCtx)
-		if isstring(aT) return aT ok
+		if IsString(aT) return aT ok
 		tTest = aAst[2]
 		if tTest = "empty" or tTest = "nonempty" or tTest = "distinct"
 			# a list of values, a list of references (a set), or a UNION seat one
@@ -563,17 +563,17 @@ func CondValidateIn(aAst, aCtx)
 		ok
 		if tTest = "unique"
 			if aT[1] != "value" and aT[1] != "sentence" return "unique reads a scalar seat, and '" + CondPathText(aAst[3]) + "' is not one" ok
-			if len(aAst[3][2]) != 1 return "unique reads a seat of this declaration, and '" + CondPathText(aAst[3]) + "' is a path" ok
+			if Len(aAst[3][2]) != 1 return "unique reads a seat of this declaration, and '" + CondPathText(aAst[3]) + "' is a path" ok
 		ok
 		return ""
 	but tK = "contains"
 		aT = CondTypePath(aAst[2], aCtx)
-		if isstring(aT) return aT ok
+		if IsString(aT) return aT ok
 		if not CondTypeIsListish(aT, aCtx) return "contains reads a list seat, and '" + CondPathText(aAst[2]) + "' is not one" ok
 		return ""
 	but tK = "rel"
 		aT = CondTypePath(aAst[3], aCtx)
-		if isstring(aT) return aT ok
+		if IsString(aT) return aT ok
 		if aAst[2] = "covers"
 			# a list seat, or a UNION seat (one of whose alternatives may be a
 			# list; a word written there covers nothing)
@@ -582,14 +582,14 @@ func CondValidateIn(aAst, aCtx)
 			if aT[1] != "value" return aAst[2] + " reads a scalar seat, and '" + CondPathText(aAst[3]) + "' is not one" ok
 		ok
 		aR = CondTypeRight(aAst[4], aCtx)
-		if isstring(aR) return aR ok
+		if IsString(aR) return aR ok
 		return ""
 	but tK = "cyclic"
 		aSegs = aAst[2][2]
 		bOk = false
-		if len(aSegs) = 1
+		if Len(aSegs) = 1
 			aInfo = CondSeatInfoIn(aCur[1], aCur[2], aSegs[1])
-			if not isnull(aInfo)
+			if not IsNull(aInfo)
 				if aInfo[3] and aInfo[4] = "decl" and aInfo[2] = aCur[2] bOk = true ok
 			ok
 		ok
@@ -599,31 +599,31 @@ func CondValidateIn(aAst, aCtx)
 		tWord = "reachable"
 		if tK = "refd" tWord = "referenced" ok
 		aSegs = aAst[2][2]
-		if len(aSegs) != 1 or aSegs[1] != "self"
+		if Len(aSegs) != 1 or aSegs[1] != "self"
 			return tWord + " asks whether self is " + tWord + "; write self " + tWord
 		ok
-		if tK = "reach" and len(CondEntryIn(aCur[1])) = 0
+		if tK = "reach" and Len(CondEntryIn(aCur[1])) = 0
 			return "reachable walks from the WORLD's ENTRY kinds, and none are declared"
 		ok
 		return ""
 	but tK = "keyed"
 		aSegs = aAst[2][2]
 		bPairs = false
-		if len(aSegs) = 1
+		if Len(aSegs) = 1
 			aInfo = CondSeatInfoIn(aCur[1], aCur[2], aSegs[1])
-			if not isnull(aInfo)
+			if not IsNull(aInfo)
 				if aInfo[3] and aInfo[4] = "form"
 					aF = CondFormIn(aCur[1], aInfo[2])
-					if not isnull(aF) and CondIsPairFormInfo(aF[2]) bPairs = true ok
+					if not IsNull(aF) and CondIsPairFormInfo(aF[2]) bPairs = true ok
 				ok
 			ok
 		ok
 		if not bPairs return "keyed_by reads a list of pairs on its left, and '" + CondPathText(aAst[2]) + "' is not one" ok
 		aR = aAst[3]
 		bList = false
-		if aR[1] = "path" and len(aR[2]) = 1
+		if aR[1] = "path" and Len(aR[2]) = 1
 			aInfo = CondSeatInfoIn(aCur[1], aCur[2], aR[2][1])
-			if not isnull(aInfo)
+			if not IsNull(aInfo)
 				if aInfo[3] bList = true ok
 			ok
 		ok
@@ -631,46 +631,46 @@ func CondValidateIn(aAst, aCtx)
 		return ""
 	but tK = "matches"
 		aT = CondTypePath(aAst[2], aCtx)
-		if isstring(aT) return aT ok
+		if IsString(aT) return aT ok
 		if aT[1] != "value" and aT[1] != "decl" return "matches reads a value, and '" + CondPathText(aAst[2]) + "' is not one" ok
 		if CondFormatShape(aAst[3]) = "" return "'" + aAst[3] + "' must name a FORMAT of this language: matches tests a shape" ok
 		return ""
 	but tK = "is"
-		if isnull(CondViewIn(aCur[1], aAst[2])) return "'" + aAst[2] + "' must name a VIEW: is asks whether self is the VIEW's declaration" ok
+		if IsNull(CondViewIn(aCur[1], aAst[2])) return "'" + aAst[2] + "' must name a VIEW: is asks whether self is the VIEW's declaration" ok
 		return ""
 	but tK = "quant"
 		tQ = aAst[2]
 		aSegs = aAst[3][2]
 		if tQ = "earlier"
-			if len(aSegs) != 1 or isnull(CondSeatsIn(aCur[1], aSegs[1]))
+			if Len(aSegs) != 1 or IsNull(CondSeatsIn(aCur[1], aSegs[1]))
 				return "earlier quantifies over a kind of this language, the declarations before this one, and '" + CondPathText(aAst[3]) + "' is not one"
 			ok
 			aT = ["set", aCur[1], aSegs[1]]
 		else
 			# a quantifier wants a set, so one name that is both a seat and a kind
 			# (a RETIREMENT's member, the kind member) is the kind here
-			if len(aSegs) = 1 and not isnull(CondSeatsIn(aCur[1], aSegs[1]))
+			if Len(aSegs) = 1 and not IsNull(CondSeatsIn(aCur[1], aSegs[1]))
 				aT = ["set", aCur[1], aSegs[1]]
 			else
 				aT = CondTypePath(aAst[3], aCtx)
-				if isstring(aT)
-					if len(aSegs) = 1 return "'" + aSegs[1] + "' names neither a declaration kind nor a list of references: some and all quantify over a declaration kind or a list of references" ok
+				if IsString(aT)
+					if Len(aSegs) = 1 return "'" + aSegs[1] + "' names neither a declaration kind nor a list of references: some and all quantify over a declaration kind or a list of references" ok
 					return aT
 				ok
 				if aT[1] != "set" return "'" + CondPathText(aAst[3]) + "' is not a set of declarations: some and all quantify over a declaration kind, a list of references, or a kind inside a SENTENCE" ok
 			ok
 		ok
-		if not isnull(aAst[4])
-			if len(aSegs) = 1
+		if not IsNull(aAst[4])
+			if Len(aSegs) = 1
 				aInfo = CondSeatInfoIn(aCur[1], aCur[2], aSegs[1])
-				if not isnull(aInfo)
+				if not IsNull(aInfo)
 					if aInfo[4] = "decl" and aInfo[3] return "named goes with a kind, and '" + aSegs[1] + "' is a list of references, already named" ok
 				ok
 			ok
 			aR = CondTypeRight(aAst[4], aCtx)
-			if isstring(aR) return aR ok
+			if IsString(aR) return aR ok
 		ok
-		if not isnull(aAst[5])
+		if not IsNull(aAst[5])
 			return CondValidateIn(aAst[5], [aCtx[1], aCtx[2], aT[2], aT[3]])
 		ok
 		return ""
@@ -684,12 +684,12 @@ func CondValidateView(aView, tLang, aOut)
 	aCtx = [tLang, tOn, tLang, ""]
 	aP = CondParsePathText(aView[3])
 	aT = CondTypePath(aP, aCtx)
-	if isstring(aT) return aT ok
+	if IsString(aT) return aT ok
 	if aT[1] != "set" return "ONE names a set of declarations, and '" + aView[3] + "' is " + CondTypeWord(aT) ok
 	if aView[4] != ""
 		aR = CondParseRightText(aView[4])
 		aRT = CondTypeRight(aR, aCtx)
-		if isstring(aRT) return aRT ok
+		if IsString(aRT) return aRT ok
 	ok
 	if aView[5] != ""
 		aC = CondParse(aView[5])
@@ -711,7 +711,7 @@ func CondTypeIsListish(aT, aCtx)
 	if aT[1] = "value"
 		aCur = CondCtxCur(aCtx)
 		aInfo = CondSeatInfoIn(aCur[1], aCur[2], aT[2])
-		if not isnull(aInfo)
+		if not IsNull(aInfo)
 			if aInfo[4] = "union" return true ok
 		ok
 	ok
@@ -726,8 +726,8 @@ func CondTypeIsListish(aT, aCtx)
 
 func CondClauseOf(aDecl, tSeat)
 	aC = aDecl[4]
-	tN = upper(tSeat)
-	for i = 1 to len(aC)
+	tN = Upper(tSeat)
+	for i = 1 to Len(aC)
 		if aC[i][1] = tN return aC[i] ok
 	next
 	return null
@@ -735,20 +735,20 @@ func CondClauseOf(aDecl, tSeat)
 # the text of a scalar value, or NULL when the seat is absent or a list
 func CondScalar(aDecl, tSeat)
 	aC = CondClauseOf(aDecl, tSeat)
-	if isnull(aC) return null ok
+	if IsNull(aC) return null ok
 	tShape = aC[3][1]
 	if tShape = "word" or tShape = "string" or tShape = "number" return aC[3][2] ok
 	return null
 
 func CondListOf(aDecl, tSeat)
 	aC = CondClauseOf(aDecl, tSeat)
-	if isnull(aC) return null ok
+	if IsNull(aC) return null ok
 	tShape = aC[3][1]
 	if tShape = "namelist" or tShape = "stringlist" return aC[3][2] ok
 	if tShape = "pairlist"
 		# v0.6: a list of name: value pairs reads as its names
 		aNames = []
-		for i = 1 to len(aC[3][2])
+		for i = 1 to Len(aC[3][2])
 			aNames + aC[3][2][i][1]
 		next
 		return aNames
@@ -762,36 +762,36 @@ func CondSameDecl(xA, xB)
 	return xA[1] = xB[1] and xA[2] = xB[2] and xA[3] = xB[3]
 
 func CondCur(aOuter, aInner)
-	if isnull(aInner) return aOuter ok
+	if IsNull(aInner) return aOuter ok
 	return aInner
 
 func CondPoolOf(aC)
-	if isnull(aC) return $aCondDecls ok
+	if IsNull(aC) return $aCondDecls ok
 	return aC[4]
 
 func CondLangOf(aC)
-	if isnull(aC) return $tCondLang ok
+	if IsNull(aC) return $tCondLang ok
 	return aC[2]
 
 # the declarations of a kind in a pool
 func CondOfKind(tLang, tDecl, aPool)
 	tVerb = CondVerbIn(tLang, tDecl)
 	aOut = []
-	for i = 1 to len(aPool)
+	for i = 1 to Len(aPool)
 		if aPool[i][1] = tVerb aOut + aPool[i] ok
 	next
 	return aOut
 
 func CondFindIn(tLang, tDecl, tName, aPool)
 	tVerb = CondVerbIn(tLang, tDecl)
-	for i = 1 to len(aPool)
+	for i = 1 to Len(aPool)
 		if aPool[i][1] = tVerb and aPool[i][2] = tName return aPool[i] ok
 	next
 	return null
 
 # the judged file of a SENTENCE seat: [ownerlang, VERB, name, seat, path, decls, lang]
 func CondSentenceOf(tLang, aDecl, tSeat)
-	for i = 1 to len($aCourtSentences)
+	for i = 1 to Len($aCourtSentences)
 		aS = $aCourtSentences[i]
 		if aS[1] = tLang and aS[2] = aDecl[1] and aS[3] = aDecl[2] and aS[4] = tSeat return aS ok
 	next
@@ -803,25 +803,25 @@ func CondSeatCursor(aC, tSeat)
 	aDecl = aC[3]
 	tDeclName = CondDeclNameIn(tLang, aDecl[1])
 	aInfo = CondSeatInfoIn(tLang, tDeclName, tSeat)
-	if isnull(aInfo) return ["none"] ok
+	if IsNull(aInfo) return ["none"] ok
 	if aInfo[4] = "decl"
 		if aInfo[3]
 			aL = CondListOf(aDecl, tSeat)
-			if isnull(aL) aL = [] ok
+			if IsNull(aL) aL = [] ok
 			aOut = []
-			for i = 1 to len(aL)
+			for i = 1 to Len(aL)
 				aT = CondFindIn(tLang, aInfo[2], aL[i], aC[4])
-				if not isnull(aT) aOut + aT ok
+				if not IsNull(aT) aOut + aT ok
 			next
 			return ["set", tLang, aOut, aC[4]]
 		ok
 		xV = CondScalar(aDecl, tSeat)
-		if isnull(xV)
+		if IsNull(xV)
 			$bCondUnread = true
 			return null
 		ok
 		aT = CondFindIn(tLang, aInfo[2], xV, aC[4])
-		if isnull(aT)
+		if IsNull(aT)
 			$bCondUnread = true
 			return null
 		ok
@@ -829,7 +829,7 @@ func CondSeatCursor(aC, tSeat)
 	ok
 	if aInfo[4] = "sentence"
 		aS = CondSentenceOf(tLang, aDecl, tSeat)
-		if isnull(aS) return ["none"] ok
+		if IsNull(aS) return ["none"] ok
 		return ["sentence", aS[7], aS[6]]
 	ok
 	if aInfo[3]
@@ -840,14 +840,14 @@ func CondSeatCursor(aC, tSeat)
 func CondHeadCursor(tSeg, aOuter, aInner)
 	aCur = CondCur(aOuter, aInner)
 	if tSeg = "self"
-		if isnull(aCur)
+		if IsNull(aCur)
 			$bCondUnread = true
 			return null
 		ok
 		return aCur
 	ok
 	if tSeg = "this"
-		if isnull(aOuter)
+		if IsNull(aOuter)
 			$bCondUnread = true
 			return null
 		ok
@@ -855,38 +855,38 @@ func CondHeadCursor(tSeg, aOuter, aInner)
 	ok
 	tLang = CondLangOf(aCur)
 	aV = CondViewIn(tLang, tSeg)
-	if not isnull(aV)
+	if not IsNull(aV)
 		return CondViewCursor(aV, aCur)
 	ok
-	if not isnull(aCur)
+	if not IsNull(aCur)
 		tDeclName = CondDeclNameIn(tLang, aCur[3][1])
-		if not isnull(CondSeatInfoIn(tLang, tDeclName, tSeg))
+		if not IsNull(CondSeatInfoIn(tLang, tDeclName, tSeg))
 			return CondSeatCursor(aCur, tSeg)
 		ok
 	ok
 	aPool = CondPoolOf(aCur)
-	if not isnull(CondSeatsIn(tLang, tSeg))
+	if not IsNull(CondSeatsIn(tLang, tSeg))
 		aK = CondOfKind(tLang, tSeg, aPool)
 		if CondIsOneIn(tLang, tSeg)
-			if len(aK) = 0 return ["none"] ok
+			if Len(aK) = 0 return ["none"] ok
 			return ["decl", tLang, aK[1], aPool]
 		ok
 		return ["set", tLang, aK, aPool]
 	ok
 	# inside a quantifier over another language's declarations, a KIND or a
 	# whole-sentence VIEW of the ON declaration's language is still in reach
-	if not isnull(aInner) and not isnull(aOuter)
+	if not IsNull(aInner) and not IsNull(aOuter)
 		if aOuter[2] != tLang
 			tOL = aOuter[2]
 			aV = CondViewIn(tOL, tSeg)
-			if not isnull(aV)
+			if not IsNull(aV)
 				if aV[2] = "" return CondViewCursor(aV, aOuter) ok
 			ok
-			if not isnull(CondSeatsIn(tOL, tSeg))
+			if not IsNull(CondSeatsIn(tOL, tSeg))
 				aPoolO = aOuter[4]
 				aK = CondOfKind(tOL, tSeg, aPoolO)
 				if CondIsOneIn(tOL, tSeg)
-					if len(aK) = 0 return ["none"] ok
+					if Len(aK) = 0 return ["none"] ok
 					return ["decl", tOL, aK[1], aPoolO]
 				ok
 				return ["set", tOL, aK, aPoolO]
@@ -896,13 +896,13 @@ func CondHeadCursor(tSeg, aOuter, aInner)
 	return ["none"]
 
 func CondStepCursor(aC, tSeg)
-	if isnull(aC) return null ok
+	if IsNull(aC) return null ok
 	tK = aC[1]
 	if tK = "decl"
 		tDeclName = CondDeclNameIn(aC[2], aC[3][1])
-		if not isnull(CondSeatInfoIn(aC[2], tDeclName, tSeg)) return CondSeatCursor(aC, tSeg) ok
+		if not IsNull(CondSeatInfoIn(aC[2], tDeclName, tSeg)) return CondSeatCursor(aC, tSeg) ok
 		aV = CondViewIn(aC[2], tSeg)
-		if not isnull(aV)
+		if not IsNull(aV)
 			if aV[2] = tDeclName return CondViewCursor(aV, aC) ok
 		ok
 		return ["none"]
@@ -911,7 +911,7 @@ func CondStepCursor(aC, tSeg)
 		tLang = aC[2]
 		aK = CondOfKind(tLang, tSeg, aC[3])
 		if CondIsOneIn(tLang, tSeg)
-			if len(aK) = 0 return ["none"] ok
+			if Len(aK) = 0 return ["none"] ok
 			return ["decl", tLang, aK[1], aC[3]]
 		ok
 		return ["set", tLang, aK, aC[3]]
@@ -922,8 +922,8 @@ func CondStepCursor(aC, tSeg)
 func CondWalk(aP, aOuter, aInner)
 	aSegs = aP[2]
 	aC = CondHeadCursor(aSegs[1], aOuter, aInner)
-	for i = 2 to len(aSegs)
-		if isnull(aC) return null ok
+	for i = 2 to Len(aSegs)
+		if IsNull(aC) return null ok
 		if aC[1] = "none" return aC ok
 		aC = CondStepCursor(aC, aSegs[i])
 	next
@@ -932,11 +932,11 @@ func CondWalk(aP, aOuter, aInner)
 # a path's text value: a declaration's name, a scalar's text; NULL otherwise
 func CondPathScalar(aP, aOuter, aInner)
 	aC = CondWalk(aP, aOuter, aInner)
-	if isnull(aC) return null ok
+	if IsNull(aC) return null ok
 	if aC[1] = "decl" return aC[3][2] ok
 	if aC[1] = "value"
-		if isnull(aC[2]) return null ok
-		if islist(aC[2]) return null ok
+		if IsNull(aC[2]) return null ok
+		if IsList(aC[2]) return null ok
 		return aC[2]
 	ok
 	return null
@@ -946,24 +946,24 @@ func CondPathScalar(aP, aOuter, aInner)
 func CondPathList(aP, aOuter, aInner)
 	aSegs = aP[2]
 	aCur = CondCur(aOuter, aInner)
-	if len(aSegs) = 1 and not isnull(aCur)
+	if Len(aSegs) = 1 and not IsNull(aCur)
 		if aSegs[1] != "self" and aSegs[1] != "this"
 			tDeclName = CondDeclNameIn(aCur[2], aCur[3][1])
-			if not isnull(CondSeatInfoIn(aCur[2], tDeclName, aSegs[1]))
+			if not IsNull(CondSeatInfoIn(aCur[2], tDeclName, aSegs[1]))
 				return CondListOf(aCur[3], aSegs[1])
 			ok
 		ok
 	ok
 	aC = CondWalk(aP, aOuter, aInner)
-	if isnull(aC) return null ok
+	if IsNull(aC) return null ok
 	if aC[1] = "value"
-		if isnull(aC[2]) return null ok
-		if islist(aC[2]) return aC[2] ok
+		if IsNull(aC[2]) return null ok
+		if IsList(aC[2]) return aC[2] ok
 		return null
 	ok
 	if aC[1] = "set"
 		aOut = []
-		for i = 1 to len(aC[3])
+		for i = 1 to Len(aC[3])
 			aOut + aC[3][i][2]
 		next
 		return aOut
@@ -974,7 +974,7 @@ func CondRightText(aR, aOuter, aInner)
 	if aR[1] = "val"
 		if aR[2] = "self"
 			aCur = CondCur(aOuter, aInner)
-			if isnull(aCur) return null ok
+			if IsNull(aCur) return null ok
 			return aCur[3][2]
 		ok
 		return aR[2]
@@ -988,27 +988,27 @@ func CondViewCursor(aV, aCur)
 	if tOn = ""
 		aOuter = null
 	else
-		if isnull(aCur) return ["none"] ok
+		if IsNull(aCur) return ["none"] ok
 		if CondDeclNameIn(aCur[2], aCur[3][1]) != tOn return ["none"] ok
 	ok
 	aP = CondParsePathText(aV[4])
 	aSet = CondWalk(aP, aOuter, null)
-	if isnull(aSet) return ["none"] ok
+	if IsNull(aSet) return ["none"] ok
 	if aSet[1] != "set" return ["none"] ok
 	tNamed = null
 	if aV[5] != ""
 		tNamed = CondRightText(CondParseRightText(aV[5]), aOuter, null)
-		if isnull(tNamed) return ["none"] ok
+		if IsNull(tNamed) return ["none"] ok
 	ok
 	aWhere = null
 	if aV[6] != "" aWhere = CondParse(aV[6]) ok
-	for i = 1 to len(aSet[3])
+	for i = 1 to Len(aSet[3])
 		aD = aSet[3][i]
-		if not isnull(tNamed)
+		if not IsNull(tNamed)
 			if aD[2] != tNamed loop ok
 		ok
 		aIn = ["decl", aSet[2], aD, aSet[4]]
-		if not isnull(aWhere)
+		if not IsNull(aWhere)
 			if not CondEvalIn(aWhere, aOuter, aIn) loop ok
 		ok
 		return aIn
@@ -1030,27 +1030,27 @@ func CondEvalIn(aAst, aOuter, aInner)
 	but tK = "not"
 		return not CondEvalIn(aAst[2], aOuter, aInner)
 	but tK = "exists"
-		return len(CondOfKind(CondLangOf(aCur), aAst[2], CondPoolOf(aCur))) > 0
+		return Len(CondOfKind(CondLangOf(aCur), aAst[2], CondPoolOf(aCur))) > 0
 	but tK = "cmp"
 		xOp = aAst[2]
 		xV = CondPathScalar(aAst[3], aOuter, aInner)
-		if isnull(xV) return false ok
+		if IsNull(xV) return false ok
 		tW = CondRightText(aAst[4], aOuter, aInner)
-		if isnull(tW) return false ok
+		if IsNull(tW) return false ok
 		if xOp = "="  return CondSameText(xV, tW) ok
 		if xOp = "!=" return not CondSameText(xV, tW) ok
 		if not CondIsNumberText(xV) return false ok
-		if xOp = ">" return number(xV) > number(tW) ok
-		return number(xV) < number(tW)
+		if xOp = ">" return Number(xV) > Number(tW) ok
+		return Number(xV) < Number(tW)
 	but tK = "contains"
 		aL = CondPathList(aAst[2], aOuter, aInner)
-		if isnull(aL) return false ok
+		if IsNull(aL) return false ok
 		tW = aAst[3]
 		if tW = "self"
-			if isnull(aCur) return false ok
+			if IsNull(aCur) return false ok
 			tW = aCur[3][2]
 		ok
-		for i = 1 to len(aL)
+		for i = 1 to Len(aL)
 			if aL[i] = tW return true ok
 		next
 		return false
@@ -1058,41 +1058,41 @@ func CondEvalIn(aAst, aOuter, aInner)
 		tRel = aAst[2]
 		if tRel = "covers"
 			aL = CondPathList(aAst[3], aOuter, aInner)
-			if isnull(aL) return false ok
+			if IsNull(aL) return false ok
 			tR = CondRightText(aAst[4], aOuter, aInner)
-			if isnull(tR) return false ok
+			if IsNull(tR) return false ok
 			return CondCovers(aL, tR)
 		ok
 		xV = CondPathScalar(aAst[3], aOuter, aInner)
-		if isnull(xV) return false ok
+		if IsNull(xV) return false ok
 		tR = CondRightText(aAst[4], aOuter, aInner)
-		if isnull(tR) return false ok
+		if IsNull(tR) return false ok
 		if tRel = "within" return CondWithin(xV, tR) ok
 		if tRel = "host_of" return CondHostOf(xV, tR) ok
 		return CondUnder(xV, tR)
 	but tK = "reach"
 		aCur = CondCur(aOuter, aInner)
-		if isnull(aCur) return false ok
+		if IsNull(aCur) return false ok
 		return CondReachable(aCur)
 	but tK = "refd"
 		aCur = CondCur(aOuter, aInner)
-		if isnull(aCur) return false ok
+		if IsNull(aCur) return false ok
 		return CondReferenced(aCur)
 	but tK = "keyed"
 		aCur = CondCur(aOuter, aInner)
-		if isnull(aCur) return false ok
+		if IsNull(aCur) return false ok
 		return CondKeyedBy(aCur, aAst[2][2][1], aAst[3][2][1])
 	but tK = "cyclic"
-		if isnull(aCur) return false ok
+		if IsNull(aCur) return false ok
 		return CondCyclic(aCur, aAst[2][2][1])
 	but tK = "matches"
 		xV = CondPathScalar(aAst[2], aOuter, aInner)
-		if isnull(xV) return false ok
+		if IsNull(xV) return false ok
 		return CondHasShape(xV, CondFormatShape(aAst[3]))
 	but tK = "is"
-		if isnull(aCur) return false ok
+		if IsNull(aCur) return false ok
 		aV = CondViewIn(CondLangOf(aCur), aAst[2])
-		if isnull(aV) return false ok
+		if IsNull(aV) return false ok
 		aD = CondViewCursor(aV, aCur)
 		if aD[1] != "decl" return false ok
 		return CondSameDecl(aD[3], aCur[3])
@@ -1105,18 +1105,18 @@ func CondEvalIn(aAst, aOuter, aInner)
 			# against the declarations BEFORE this one, so the later of two
 			# is the one refused and {other} names the earlier ("already a's");
 			# the clause's own text, so a SENTENCE seat's path counts too
-			if isnull(aCur) return true ok
+			if IsNull(aCur) return true ok
 			tSeat = aAst[3][2][1]
 			aD = aCur[3]
 			xV = CondScalar(aD, tSeat)
-			if isnull(xV) return true ok
+			if IsNull(xV) return true ok
 			aPool = aCur[4]
-			for i = 1 to len(aPool)
+			for i = 1 to Len(aPool)
 				aO = aPool[i]
 				if CondSameDecl(aO, aD) exit ok
 				if aO[1] = aD[1]
 					tW = CondScalar(aO, tSeat)
-					if not isnull(tW) and tW = xV
+					if not IsNull(tW) and tW = xV
 						$tCondOther = aO[2]
 						return false
 					ok
@@ -1128,15 +1128,15 @@ func CondEvalIn(aAst, aOuter, aInner)
 			# the list as written: a list of references reads its names, resolved or not
 			aL = CondPathList(aAst[3], aOuter, aInner)
 			if tTest = "empty"
-				if isnull(aL) return false ok
-				return len(aL) = 0
+				if IsNull(aL) return false ok
+				return Len(aL) = 0
 			ok
 			if tTest = "nonempty"
-				if isnull(aL) return false ok
-				return len(aL) > 0
+				if IsNull(aL) return false ok
+				return Len(aL) > 0
 			ok
-			if isnull(aL) return true ok
-			for i = 1 to len(aL)
+			if IsNull(aL) return true ok
+			for i = 1 to Len(aL)
 				for j = 1 to i - 1
 					if aL[i] = aL[j]
 						$tCondOther = aL[i]
@@ -1150,18 +1150,18 @@ func CondEvalIn(aAst, aOuter, aInner)
 		# clause is WRITTEN (a list of references is present when written, even
 		# empty or unresolved); on a view or a kind, whether it resolves
 		aSegs = aAst[3][2]
-		if len(aSegs) = 1 and not isnull(aCur)
+		if Len(aSegs) = 1 and not IsNull(aCur)
 			if aSegs[1] != "self" and aSegs[1] != "this"
 				tDeclName = CondDeclNameIn(aCur[2], aCur[3][1])
-				if not isnull(CondSeatInfoIn(aCur[2], tDeclName, aSegs[1]))
-					bWritten = not isnull(CondClauseOf(aCur[3], aSegs[1]))
+				if not IsNull(CondSeatInfoIn(aCur[2], tDeclName, aSegs[1]))
+					bWritten = not IsNull(CondClauseOf(aCur[3], aSegs[1]))
 					if tTest = "present" return bWritten ok
 					return not bWritten
 				ok
 			ok
 		ok
 		aC = CondWalk(aAst[3], aOuter, aInner)
-		if isnull(aC) return false ok
+		if IsNull(aC) return false ok
 		if aC[1] = "none"
 			return tTest = "absent"
 		ok
@@ -1170,13 +1170,13 @@ func CondEvalIn(aAst, aOuter, aInner)
 			return false
 		ok
 		if aC[1] = "set"
-			if tTest = "present" return len(aC[3]) > 0 ok
-			if tTest = "absent" return len(aC[3]) = 0 ok
+			if tTest = "present" return Len(aC[3]) > 0 ok
+			if tTest = "absent" return Len(aC[3]) = 0 ok
 			return false
 		ok
 		xV = aC[2]
-		if tTest = "present" return not isnull(xV) ok
-		if tTest = "absent" return isnull(xV) ok
+		if tTest = "present" return not IsNull(xV) ok
+		if tTest = "absent" return IsNull(xV) ok
 		return false
 	ok
 
@@ -1192,23 +1192,23 @@ func CondRefNames(tLang, aDecl)
 	aOut = []
 	tDeclName = CondDeclNameIn(tLang, aDecl[1])
 	aSeats = CondSeatsIn(tLang, tDeclName)
-	if isnull(aSeats) return aOut ok
-	for i = 1 to len(aSeats)
+	if IsNull(aSeats) return aOut ok
+	for i = 1 to Len(aSeats)
 		aInfo = aSeats[i]
 		aC = CondClauseOf(aDecl, aInfo[1])
-		if isnull(aC) loop ok
+		if IsNull(aC) loop ok
 		tShape = aC[3][1]
 		if aInfo[4] = "decl" or aInfo[4] = "union"
 			if tShape = "word" aOut + aC[3][2] ok
 			if tShape = "namelist"
-				for j = 1 to len(aC[3][2]) aOut + aC[3][2][j] next
+				for j = 1 to Len(aC[3][2]) aOut + aC[3][2][j] next
 			ok
 		but aInfo[4] = "form" and tShape = "pairlist"
 			aF = CondFormIn(tLang, aInfo[2])
-			if isnull(aF) loop ok
+			if IsNull(aF) loop ok
 			bKey = aF[2][1][3] = "decl"
 			bVal = aF[2][2][3] = "decl" or aF[2][2][3] = "union"
-			for j = 1 to len(aC[3][2])
+			for j = 1 to Len(aC[3][2])
 				if bKey aOut + aC[3][2][j][1] ok
 				if bVal aOut + aC[3][2][j][2] ok
 			next
@@ -1224,11 +1224,11 @@ func CondReachable(aCur)
 	aPool = aCur[4]
 	aEntry = CondEntryIn(tLang)
 	aVerbs = []
-	for i = 1 to len(aEntry)
+	for i = 1 to Len(aEntry)
 		aVerbs + CondVerbIn(tLang, aEntry[i])
 	next
 	tStart = ""
-	for i = 1 to len(aPool)
+	for i = 1 to Len(aPool)
 		if CondInList(aPool[i][1], aVerbs)
 			tStart = aPool[i][2]
 			exit
@@ -1237,14 +1237,14 @@ func CondReachable(aCur)
 	if tStart = "" return false ok
 	aSeen = [tStart]
 	nN = 1
-	while nN <= len(aSeen)
+	while nN <= Len(aSeen)
 		tCur = aSeen[nN]
 		nN++
-		for i = 1 to len(aPool)
+		for i = 1 to Len(aPool)
 			if aPool[i][2] != tCur loop ok
 			if not CondInList(aPool[i][1], aVerbs) loop ok
 			aNames = CondRefNames(tLang, aPool[i])
-			for j = 1 to len(aNames)
+			for j = 1 to Len(aNames)
 				if not CondInList(aNames[j], aSeen) aSeen + aNames[j] ok
 			next
 		next
@@ -1256,7 +1256,7 @@ func CondReferenced(aCur)
 	tLang = aCur[2]
 	aPool = aCur[4]
 	tMe = aCur[3][2]
-	for i = 1 to len(aPool)
+	for i = 1 to Len(aPool)
 		aNames = CondRefNames(tLang, aPool[i])
 		if CondInList(tMe, aNames) return true ok
 	next
@@ -1267,15 +1267,15 @@ func CondReferenced(aCur)
 func CondKeyedBy(aCur, tPairs, tNames)
 	aKeys = CondListOf(aCur[3], tPairs)
 	aNames = CondListOf(aCur[3], tNames)
-	if isnull(aKeys) aKeys = [] ok
-	if isnull(aNames) aNames = [] ok
-	for i = 1 to len(aKeys)
+	if IsNull(aKeys) aKeys = [] ok
+	if IsNull(aNames) aNames = [] ok
+	for i = 1 to Len(aKeys)
 		if not CondInList(aKeys[i], aNames)
 			$tCondOther = aKeys[i]
 			return false
 		ok
 	next
-	for i = 1 to len(aNames)
+	for i = 1 to Len(aNames)
 		if not CondInList(aNames[i], aKeys)
 			$tCondOther = aNames[i]
 			return false
@@ -1288,41 +1288,41 @@ func CondQuant(aAst, aOuter, aInner)
 	tQ = aAst[2]
 	aItems = []
 	if tQ = "earlier"
-		if isnull(aCur) return false ok
+		if IsNull(aCur) return false ok
 		aPool = aCur[4]
 		tVerb = CondVerbIn(aCur[2], aAst[3][2][1])
-		for i = 1 to len(aPool)
+		for i = 1 to Len(aPool)
 			if CondSameDecl(aPool[i], aCur[3]) exit ok
 			if aPool[i][1] = tVerb aItems + ["decl", aCur[2], aPool[i], aPool] ok
 		next
 	else
 		aSegs = aAst[3][2]
 		aSet = null
-		if len(aSegs) = 1 and not isnull(aCur)
+		if Len(aSegs) = 1 and not IsNull(aCur)
 			# a name that is both a seat and a kind is the kind to a quantifier
-			if not isnull(CondSeatsIn(aCur[2], aSegs[1]))
+			if not IsNull(CondSeatsIn(aCur[2], aSegs[1]))
 				aSet = ["set", aCur[2], CondOfKind(aCur[2], aSegs[1], aCur[4]), aCur[4]]
 			ok
 		ok
-		if isnull(aSet) aSet = CondWalk(aAst[3], aOuter, aInner) ok
-		if isnull(aSet) return false ok
+		if IsNull(aSet) aSet = CondWalk(aAst[3], aOuter, aInner) ok
+		if IsNull(aSet) return false ok
 		if aSet[1] != "set" return false ok
-		for i = 1 to len(aSet[3])
+		for i = 1 to Len(aSet[3])
 			aItems + ["decl", aSet[2], aSet[3][i], aSet[4]]
 		next
 	ok
 	tNamed = null
-	if not isnull(aAst[4])
+	if not IsNull(aAst[4])
 		tNamed = CondRightText(aAst[4], aOuter, aInner)
-		if isnull(tNamed) return false ok
+		if IsNull(tNamed) return false ok
 	ok
 	aCond = aAst[5]
 	if tQ = "all"
-		for i = 1 to len(aItems)
-			if not isnull(tNamed)
+		for i = 1 to Len(aItems)
+			if not IsNull(tNamed)
 				if aItems[i][3][2] != tNamed loop ok
 			ok
-			if not isnull(aCond)
+			if not IsNull(aCond)
 				if not CondEvalIn(aCond, aOuter, aItems[i])
 					$tCondOther = aItems[i][3][2]
 					return false
@@ -1331,11 +1331,11 @@ func CondQuant(aAst, aOuter, aInner)
 		next
 		return true
 	ok
-	for i = 1 to len(aItems)
-		if not isnull(tNamed)
+	for i = 1 to Len(aItems)
+		if not IsNull(tNamed)
 			if aItems[i][3][2] != tNamed loop ok
 		ok
-		if isnull(aCond)
+		if IsNull(aCond)
 			$tCondOther = aItems[i][3][2]
 			return true
 		ok
@@ -1351,7 +1351,7 @@ func CondQuant(aAst, aOuter, aInner)
 func CondSplit(tS, tSep)
 	aOut = []
 	tCur = ""
-	for i = 1 to len(tS)
+	for i = 1 to Len(tS)
 		if tS[i] = tSep
 			aOut + tCur
 			tCur = ""
@@ -1363,37 +1363,37 @@ func CondSplit(tS, tSep)
 	return aOut
 
 func CondIsHexChar(tC)
-	nN = ascii(tC)
+	nN = Ascii(tC)
 	return (nN >= 48 and nN <= 57) or (nN >= 97 and nN <= 102) or (nN >= 65 and nN <= 70)
 
 func CondIsLowerHexChar(tC)
-	nN = ascii(tC)
+	nN = Ascii(tC)
 	return (nN >= 48 and nN <= 57) or (nN >= 97 and nN <= 102)
 
 func CondIsLabelChar(tC)
-	nN = ascii(tC)
+	nN = Ascii(tC)
 	return (nN >= 97 and nN <= 122) or (nN >= 48 and nN <= 57) or nN = 45
 
 func CondIsIpv4(tS)
 	aParts = CondSplit(tS, ".")
-	if len(aParts) != 4 return false ok
+	if Len(aParts) != 4 return false ok
 	for i = 1 to 4
 		xP = aParts[i]
-		if len(xP) = 0 or len(xP) > 3 return false ok
-		for j = 1 to len(xP)
+		if Len(xP) = 0 or Len(xP) > 3 return false ok
+		for j = 1 to Len(xP)
 			if not CondIsDigit(xP[j]) return false ok
 		next
-		if number(xP) > 255 return false ok
+		if Number(xP) > 255 return false ok
 	next
 	return true
 
 func CondIsLabel(tS)
-	if len(tS) = 0 return false ok
-	for i = 1 to len(tS)
+	if Len(tS) = 0 return false ok
+	for i = 1 to Len(tS)
 		if not CondIsLabelChar(tS[i]) return false ok
 	next
 	if tS[1] = "-" return false ok
-	if tS[len(tS)] = "-" return false ok
+	if tS[Len(tS)] = "-" return false ok
 	return true
 
 # a duration is a number and a unit: seconds, minutes, hours, days, working
@@ -1402,8 +1402,8 @@ func CondIsLabel(tS)
 func CondWordsOf(tS)
 	aW = []
 	tCur = ""
-	for i = 1 to len(tS)
-		if tS[i] = " " or tS[i] = char(9)
+	for i = 1 to Len(tS)
+		if tS[i] = " " or tS[i] = Char(9)
 			if tCur != "" aW + tCur ok
 			tCur = ""
 		else
@@ -1414,33 +1414,33 @@ func CondWordsOf(tS)
 	return aW
 
 func CondIsAllDigits(tS)
-	if len(tS) = 0 return false ok
-	for i = 1 to len(tS)
+	if Len(tS) = 0 return false ok
+	for i = 1 to Len(tS)
 		if not CondIsDigit(tS[i]) return false ok
 	next
 	return true
 
 func CondIsDuration(tS)
 	aW = CondWordsOf(tS)
-	if len(aW) < 2 return false ok
+	if Len(aW) < 2 return false ok
 	if not CondIsAllDigits(aW[1]) return false ok
-	if len(aW) = 2
+	if Len(aW) = 2
 		return CondInList(aW[2], ["seconds", "minutes", "hours", "days"])
 	ok
-	if len(aW) = 3
+	if Len(aW) = 3
 		return aW[2] = "working" and (aW[3] = "day" or aW[3] = "days")
 	ok
 	return false
 
 func CondIsLandmark(tS)
 	aW = CondWordsOf(tS)
-	if len(aW) != 7 return false ok
+	if Len(aW) != 7 return false ok
 	if aW[1] != "the" or aW[3] != "working" or aW[4] != "day" or aW[5] != "of" or aW[6] != "next" or aW[7] != "month" return false ok
 	tOrd = aW[2]
-	if len(tOrd) < 3 return false ok
-	tSuffix = right(tOrd, 2)
+	if Len(tOrd) < 3 return false ok
+	tSuffix = Right(tOrd, 2)
 	if not CondInList(tSuffix, ["st", "nd", "rd", "th"]) return false ok
-	return CondIsAllDigits(left(tOrd, len(tOrd) - 2))
+	return CondIsAllDigits(Left(tOrd, Len(tOrd) - 2))
 
 # the shapes of a FORMAT: absolute_path, ipv4, cidr, mac, label, domain,
 # hex64, hex64_lower (v0.4); duration, landmark, deadline (v0.8)
@@ -1449,24 +1449,24 @@ func CondHasShape(tS, tShape)
 	if tShape = "landmark" return CondIsLandmark(tS) ok
 	if tShape = "deadline" return CondIsDuration(tS) or CondIsLandmark(tS) ok
 	if tShape = "absolute_path"
-		if len(tS) = 0 return false ok
+		if Len(tS) = 0 return false ok
 		return tS[1] = "/"
 	but tShape = "ipv4"
 		return CondIsIpv4(tS)
 	but tShape = "cidr"
 		aP = CondSplit(tS, "/")
-		if len(aP) != 2 return false ok
+		if Len(aP) != 2 return false ok
 		if not CondIsIpv4(aP[1]) return false ok
-		if len(aP[2]) = 0 or len(aP[2]) > 2 return false ok
-		for j = 1 to len(aP[2])
+		if Len(aP[2]) = 0 or Len(aP[2]) > 2 return false ok
+		for j = 1 to Len(aP[2])
 			if not CondIsDigit(aP[2][j]) return false ok
 		next
-		return number(aP[2]) <= 32
+		return Number(aP[2]) <= 32
 	but tShape = "mac"
 		aP = CondSplit(tS, ":")
-		if len(aP) != 6 return false ok
+		if Len(aP) != 6 return false ok
 		for i = 1 to 6
-			if len(aP[i]) != 2 return false ok
+			if Len(aP[i]) != 2 return false ok
 			if not (CondIsHexChar(aP[i][1]) and CondIsHexChar(aP[i][2])) return false ok
 		next
 		return true
@@ -1474,18 +1474,18 @@ func CondHasShape(tS, tShape)
 		return CondIsLabel(tS)
 	but tShape = "domain"
 		aP = CondSplit(tS, ".")
-		for i = 1 to len(aP)
+		for i = 1 to Len(aP)
 			if not CondIsLabel(aP[i]) return false ok
 		next
 		return true
 	but tShape = "hex64"
-		if len(tS) != 64 return false ok
+		if Len(tS) != 64 return false ok
 		for i = 1 to 64
 			if not CondIsHexChar(tS[i]) return false ok
 		next
 		return true
 	but tShape = "hex64_lower"
-		if len(tS) != 64 return false ok
+		if Len(tS) != 64 return false ok
 		for i = 1 to 64
 			if not CondIsLowerHexChar(tS[i]) return false ok
 		next
@@ -1497,7 +1497,7 @@ func CondHasShape(tS, tShape)
 func CondIpNum(tS)
 	if not CondIsIpv4(tS) return -1 ok
 	aP = CondSplit(tS, ".")
-	return ((number(aP[1])) * 16777216) + ((number(aP[2])) * 65536) + ((number(aP[3])) * 256) + (number(aP[4]))
+	return ((Number(aP[1])) * 16777216) + ((Number(aP[2])) * 65536) + ((Number(aP[3])) * 256) + (Number(aP[4]))
 
 func CondBlock(nBits)
 	nN = 1
@@ -1511,7 +1511,7 @@ func CondCidrRange(tS)
 	if not CondHasShape(tS, "cidr") return null ok
 	aP = CondSplit(tS, "/")
 	nIp = CondIpNum(aP[1])
-	nBlock = CondBlock(32 - (number(aP[2])))
+	nBlock = CondBlock(32 - (Number(aP[2])))
 	nLo = nIp - (nIp % nBlock)
 	return [nLo, nLo + nBlock - 1]
 
@@ -1519,7 +1519,7 @@ func CondWithin(tIp, tCidr)
 	xN = CondIpNum(tIp)
 	if xN < 0 return false ok
 	aR = CondCidrRange(tCidr)
-	if isnull(aR) return false ok
+	if IsNull(aR) return false ok
 	return xN >= aR[1] and xN <= aR[2]
 
 func CondHostOf(tIp, tCidr)
@@ -1532,37 +1532,37 @@ func CondHostOf(tIp, tCidr)
 # a path under a directory: the directory itself, or a path that continues
 # past it at a slash; "/" keeps every absolute path (harb's rule)
 func CondUnder(tPath, tDir)
-	if len(tDir) = 0 return false ok
+	if Len(tDir) = 0 return false ok
 	if tDir = "/"
-		if len(tPath) = 0 return false ok
+		if Len(tPath) = 0 return false ok
 		return tPath[1] = "/"
 	ok
 	if tPath = tDir return true ok
-	if len(tPath) <= len(tDir) return false ok
-	if left(tPath, len(tDir)) != tDir return false ok
-	return tPath[len(tDir) + 1] = "/"
+	if Len(tPath) <= Len(tDir) return false ok
+	if Left(tPath, Len(tDir)) != tDir return false ok
+	return tPath[Len(tDir) + 1] = "/"
 
 # a list of prefixes covers a prefix when their ranges, taken together, hold
 # every address of it: sweep the ranges in order of their first address
 func CondCovers(aList, tCidr)
 	aT = CondCidrRange(tCidr)
-	if isnull(aT) return false ok
+	if IsNull(aT) return false ok
 	aR = []
-	for i = 1 to len(aList)
+	for i = 1 to Len(aList)
 		xR = CondCidrRange(aList[i])
-		if not isnull(xR)
-			nAt = len(aR) + 1
-			for j = 1 to len(aR)
+		if not IsNull(xR)
+			nAt = Len(aR) + 1
+			for j = 1 to Len(aR)
 				if aR[j][1] > xR[1]
 					nAt = j
 					exit
 				ok
 			next
-			insert(aR, nAt - 1, xR)
+			Insert(aR, nAt - 1, xR)
 		ok
 	next
 	nCur = aT[1]
-	for i = 1 to len(aR)
+	for i = 1 to Len(aR)
 		if aR[i][1] <= nCur and aR[i][2] >= nCur
 			nCur = aR[i][2] + 1
 			if nCur > aT[2] return true ok
@@ -1577,19 +1577,19 @@ func CondCyclic(aC, tSeat)
 	aDecl = aC[3]
 	tDeclName = CondDeclNameIn(tLang, aDecl[1])
 	aInfo = CondSeatInfoIn(tLang, tDeclName, tSeat)
-	if isnull(aInfo) return false ok
+	if IsNull(aInfo) return false ok
 	aSeen = []
 	return CondReaches(aDecl, tSeat, aDecl[2], tLang, aInfo[2], aC[4], aSeen)
 
 func CondReaches(aFrom, tSeat, tStart, tLang, tTargetKind, aPool, aSeen)
 	aL = CondListOf(aFrom, tSeat)
-	if isnull(aL) return false ok
-	for i = 1 to len(aL)
+	if IsNull(aL) return false ok
+	for i = 1 to Len(aL)
 		if aL[i] = tStart return true ok
 		if CondInList(aL[i], aSeen) loop ok
 		aSeen + aL[i]
 		aT = CondFindIn(tLang, tTargetKind, aL[i], aPool)
-		if isnull(aT) loop ok
+		if IsNull(aT) loop ok
 		if CondReaches(aT, tSeat, tStart, tLang, tTargetKind, aPool, aSeen) return true ok
 	next
 	return false

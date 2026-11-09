@@ -1,4 +1,4 @@
 ? true
 ? false
-? type(true)
+? Type(true)
 ? [true, false]

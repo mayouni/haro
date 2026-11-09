@@ -1,6 +1,6 @@
 try
 	try
-		raise("only")
+		Raise("only")
 	finally
 		? "finally"
 	done

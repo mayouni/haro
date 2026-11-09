@@ -1,4 +1,4 @@
 f()
 func f
-	eval("? :Name")
-	eval("nA = 4  ? nA")
+	Eval("? :Name")
+	Eval("nA = 4  ? nA")

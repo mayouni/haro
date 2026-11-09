@@ -5,7 +5,7 @@ func f
 	try
 		return nN
 	finally
-		? "finally " + string(nN) + " " + upper("x")
+		? "finally " + String(nN) + " " + Upper("x")
 		nN = 2
 	done
 	return 99

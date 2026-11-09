@@ -1,12 +1,12 @@
 try
 	try
 		try
-			raise("a")
+			Raise("a")
 		finally
-			raise("b")
+			Raise("b")
 		done
 	finally
-		raise("c")
+		Raise("c")
 	done
 catch e
 	? e + " <- " + e.Cause() + " <- " + e.Cause().Cause()

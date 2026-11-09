@@ -1,10 +1,10 @@
 try
-	raise("x")
+	Raise("x")
 catch e
 	? e
 done
 try
-	raise("y")
+	Raise("y")
 catch
 	e
 done

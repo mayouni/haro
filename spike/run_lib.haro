@@ -22,7 +22,7 @@
 # Functions only; the globals are the generated court's.
 
 func RunRole(tRole)
-	for i = 1 to len($aCourtRun)
+	for i = 1 to Len($aCourtRun)
 		if $aCourtRun[i][1] = tRole return $aCourtRun[i][2] ok
 	next
 	return null
@@ -33,11 +33,11 @@ func RunFail(tMsg)
 # the construct a declaration plays: COMPUTE COLLECT GROUP BRANCH ITERATE, or ""
 func RunConstructOf(aDecl)
 	aKind = CtKindByVerb(aDecl[1])
-	if isnull(aKind) return "" ok
+	if IsNull(aKind) return "" ok
 	aRoles = ["COMPUTE", "COLLECT", "GROUP", "BRANCH", "ITERATE"]
-	for i = 1 to len(aRoles)
+	for i = 1 to Len(aRoles)
 		aR = RunRole(aRoles[i])
-		if not isnull(aR)
+		if not IsNull(aR)
 			if aR[1] = aKind[2] return aRoles[i] ok
 		ok
 	next
@@ -46,7 +46,7 @@ func RunConstructOf(aDecl)
 # the names a step list seat of a declaration holds, as written
 func RunStepsOf(aDecl, tSeat)
 	aL = CondListOf(aDecl, tSeat)
-	if isnull(aL) return [] ok
+	if IsNull(aL) return [] ok
 	return aL
 
 # the step lists a declaration owns: its construct's list seats
@@ -67,13 +67,13 @@ func RunChildLists(aDecl)
 
 func RunCheckAcyclic(aDecls)
 	aOf = RunRole("OF")
-	if isnull(aOf) return ok
+	if IsNull(aOf) return ok
 	aK = CtKindByDeclName(aOf[1])
-	if isnull(aK) return ok
-	for i = 1 to len(aDecls)
+	if IsNull(aK) return ok
+	for i = 1 to Len(aDecls)
 		if aDecls[i][1] != aK[1] loop ok
 		aSteps = RunStepsOf(aDecls[i], aOf[2])
-		for j = 1 to len(aSteps)
+		for j = 1 to Len(aSteps)
 			RunWalkCheck(aDecls, aSteps[j], [aDecls[i][2]])
 		next
 	next
@@ -84,13 +84,13 @@ func RunWalkCheck(aDecls, tName, aPath)
 		RunFail("step '" + tName + "' re-enters itself through " + CtJoin(aPath, " > ") + ": an algorithm's steps form a tree, and no step may lead back to one on the way down")
 	ok
 	aD = CtDeclNamed(aDecls, tName)
-	if isnull(aD) return ok
+	if IsNull(aD) return ok
 	aLists = RunChildLists(aD)
 	aNext = []
-	for i = 1 to len(aPath) aNext + aPath[i] next
+	for i = 1 to Len(aPath) aNext + aPath[i] next
 	aNext + tName
-	for i = 1 to len(aLists)
-		for j = 1 to len(aLists[i])
+	for i = 1 to Len(aLists)
+		for j = 1 to Len(aLists[i])
 			RunWalkCheck(aDecls, aLists[i][j], aNext)
 		next
 	next
@@ -102,7 +102,7 @@ func RunExprNode(aDecl, tSeat)
 
 # the record is $aExprRecord; a name is set in place
 func RunSet(tName, xV)
-	for i = 2 to len($aExprRecord)
+	for i = 2 to Len($aExprRecord)
 		if $aExprRecord[i][1] = tName
 			$aExprRecord[i][2] = xV
 			return
@@ -122,18 +122,18 @@ func RunDepth(nN)
 	$nRunDepth = $nRunDepth + nN
 
 func RunSteps(aDecls, aSteps, aPath)
-	for i = 1 to len(aSteps)
+	for i = 1 to Len(aSteps)
 		RunStep(aDecls, aSteps[i], aPath)
 	next
 
 func RunStep(aDecls, tName, aPath)
 	if CtInList(tName, aPath) RunFail("step '" + tName + "' re-enters itself") ok
 	aD = CtDeclNamed(aDecls, tName)
-	if isnull(aD) RunFail("step '" + tName + "' is not declared") ok
+	if IsNull(aD) RunFail("step '" + tName + "' is not declared") ok
 	tC = RunConstructOf(aD)
 	if tC = "" RunFail(aD[1] + " " + tName + " is not a step: it plays no construct of this language") ok
 	aNext = []
-	for i = 1 to len(aPath) aNext + aPath[i] next
+	for i = 1 to Len(aPath) aNext + aPath[i] next
 	aNext + tName
 	if tC = "COMPUTE"
 		aR = RunRole("COMPUTE")
@@ -150,7 +150,7 @@ func RunStep(aDecls, tName, aPath)
 		aGot = RunGet(tInto)
 		aList = []
 		if aGot[1]
-			if not islist(aGot[2]) or ExIsObj(aGot[2]) RunFail("COLLECT " + tName + " into '" + tInto + "', which is not a list") ok
+			if not IsList(aGot[2]) or ExIsObj(aGot[2]) RunFail("COLLECT " + tName + " into '" + tInto + "', which is not a list") ok
 			aList = aGot[2]
 		ok
 		aList + xV
@@ -161,16 +161,16 @@ func RunStep(aDecls, tName, aPath)
 		tInto = CondScalar(aD, aR[2])
 		xK = ExEval(RunExprNode(aD, aR[3]), [])
 		xV = ExEval(RunExprNode(aD, aR[4]), [])
-		tKey = string(xK)
-		if isnumber(xK) tKey = ExNumText(xK) ok
+		tKey = String(xK)
+		if IsNumber(xK) tKey = ExNumText(xK) ok
 		aGot = RunGet(tInto)
 		aGroups = []
 		if aGot[1]
-			if not islist(aGot[2]) or ExIsObj(aGot[2]) RunFail("GROUP " + tName + " into '" + tInto + "', which is not a list of groups") ok
+			if not IsList(aGot[2]) or ExIsObj(aGot[2]) RunFail("GROUP " + tName + " into '" + tInto + "', which is not a list of groups") ok
 			aGroups = aGot[2]
 		ok
 		nAt = 0
-		for j = 1 to len(aGroups)
+		for j = 1 to Len(aGroups)
 			if aGroups[j][1] = tKey nAt = j ok
 		next
 		if nAt = 0
@@ -201,14 +201,14 @@ func RunStep(aDecls, tName, aPath)
 		tAs = CondScalar(aD, aR[3])
 		aGot = RunGet(tOver)
 		if not aGot[1] RunFail("ITERATE " + tName + " over '" + tOver + "', which the record does not hold") ok
-		if not islist(aGot[2]) or ExIsObj(aGot[2]) RunFail("ITERATE " + tName + " over '" + tOver + "', which is not a list") ok
+		if not IsList(aGot[2]) or ExIsObj(aGot[2]) RunFail("ITERATE " + tName + " over '" + tOver + "', which is not a list") ok
 		# a snapshot: the walk is as long as the list was when it began
 		aSnap = []
-		for j = 1 to len(aGot[2]) aSnap + aGot[2][j] next
+		for j = 1 to Len(aGot[2]) aSnap + aGot[2][j] next
 		aBody = RunStepsOf(aD, aR[4])
-		if $bRunTrace RunNote(tName, "", "", "", string(len(aSnap))) ok
+		if $bRunTrace RunNote(tName, "", "", "", String(Len(aSnap))) ok
 		RunDepth(1)
-		for j = 1 to len(aSnap)
+		for j = 1 to Len(aSnap)
 			RunSet(tAs, aSnap[j])
 			RunSteps(aDecls, aBody, aNext)
 		next
@@ -217,21 +217,21 @@ func RunStep(aDecls, tName, aPath)
 
 func RunAlgorithm(aDecls, tName, aRecord)
 	aOf = RunRole("OF")
-	if isnull(aOf) RunFail("this language declares no RUN, so nothing in it runs") ok
+	if IsNull(aOf) RunFail("this language declares no RUN, so nothing in it runs") ok
 	aD = CtDeclNamed(aDecls, tName)
-	if isnull(aD) RunFail("no declaration named '" + tName + "' in this file") ok
+	if IsNull(aD) RunFail("no declaration named '" + tName + "' in this file") ok
 	aK = CtKindByDeclName(aOf[1])
-	if isnull(aK) or aD[1] != aK[1] RunFail(aD[1] + " " + tName + " is not an " + aK[1] + ", and only an " + aK[1] + " runs") ok
+	if IsNull(aK) or aD[1] != aK[1] RunFail(aD[1] + " " + tName + " is not an " + aK[1] + ", and only an " + aK[1] + " runs") ok
 	if not ExIsObj(aRecord) RunFail("the record is a JSON object") ok
 	ExSetRecord(aRecord)
 	RunSteps(aDecls, RunStepsOf(aD, aOf[2]), [tName])
 	aNames = RunStepsOf(aD, aOf[3])
-	if len(aNames) = 0 return $aExprRecord ok
+	if Len(aNames) = 0 return $aExprRecord ok
 	aVals = []
-	for i = 1 to len(aNames)
+	for i = 1 to Len(aNames)
 		aGot = RunGet(aNames[i])
 		if not aGot[1] RunFail("the result '" + aNames[i] + "' was never computed") ok
 		aVals + aGot[2]
 	next
-	if len(aVals) = 1 return aVals[1] ok
+	if Len(aVals) = 1 return aVals[1] ok
 	return aVals

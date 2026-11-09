@@ -11,38 +11,38 @@
 # finding stands at the line of the seat's clause, and it refuses, or warns, as a CONSTRAINT's does
 func CtCheckPatterns(aDecls, tSrc)
 	aE = CtLangEntry($tCourtLang)
-	if isnull(aE) return ok
-	if len(aE) < 24 return ok
+	if IsNull(aE) return ok
+	if Len(aE) < 24 return ok
 	aPats = aE[24]
 	aNames = []
 	aTexts = []
 	aSetN = []
 	aSetM = []
-	for i = 1 to len(aPats)
+	for i = 1 to Len(aPats)
 		aNames + aPats[i][1]
 		aTexts + aPats[i][4]
-		for j = 1 to len(aPats[i][5])
+		for j = 1 to Len(aPats[i][5])
 			aSetN + aPats[i][5][j][3]
 			aSetM + CtSetMembers(aDecls, aPats[i][5][j][1], aPats[i][5][j][2])
 		next
 	next
-	for i = 1 to len($aCourtMenus)
+	for i = 1 to Len($aCourtMenus)
 		aSetN + $aCourtMenus[i][1]
 		aSetM + $aCourtMenus[i][2]
 	next
 	PatDeclare(aNames, aTexts, aSetN, aSetM)
-	for i = 1 to len(aPats)
+	for i = 1 to Len(aPats)
 		aP = aPats[i]
 		aK = CtKindByDeclName(aP[2])
-		if isnull(aK) loop ok
-		tClause = upper(aP[3])
-		for j = 1 to len(aDecls)
+		if IsNull(aK) loop ok
+		tClause = Upper(aP[3])
+		for j = 1 to Len(aDecls)
 			aD = aDecls[j]
 			if aD[1] != aK[1] loop ok
 			if CtIsBroken(j) loop ok
 			aCl = CtClauseNamed(aD, tClause)
-			if isnull(aCl) loop ok
-			tText = substr(tSrc, aCl[3][3], aCl[3][4] - aCl[3][3])
+			if IsNull(aCl) loop ok
+			tText = SubStr(tSrc, aCl[3][3], aCl[3][4] - aCl[3][3])
 			bHolds = false
 			try
 				aR = PatRun(aP[1], tText)
@@ -52,9 +52,9 @@ func CtCheckPatterns(aDecls, tSrc)
 			done
 			if bHolds loop ok
 			aCC = CtElementCode(aP[8], "PATTERN", aP[1])
-			if isstring(aP[9])
+			if IsString(aP[9])
 				aCC[2] = []
-			but len(aP[9]) > 0
+			but Len(aP[9]) > 0
 				aCC[2] = aP[9]
 			ok
 			if aP[10] = "warning"
@@ -70,7 +70,7 @@ func CtCheckPatterns(aDecls, tSrc)
 	next
 
 func CtClauseNamed(aD, tClause)
-	for i = 1 to len(aD[4])
+	for i = 1 to Len(aD[4])
 		if aD[4][i][1] = tClause return aD[4][i] ok
 	next
 	return null
@@ -79,19 +79,19 @@ func CtClauseNamed(aD, tClause)
 func CtSetMembers(aDecls, tDecl, tSeat)
 	aOut = []
 	aK = CtKindByDeclName(tDecl)
-	if isnull(aK) return aOut ok
-	tClause = upper(tSeat)
-	for j = 1 to len(aDecls)
+	if IsNull(aK) return aOut ok
+	tClause = Upper(tSeat)
+	for j = 1 to Len(aDecls)
 		if aDecls[j][1] != aK[1] loop ok
 		if CtIsBroken(j) loop ok
 		aCl = CtClauseNamed(aDecls[j], tClause)
-		if isnull(aCl) loop ok
+		if IsNull(aCl) loop ok
 		tShape = aCl[3][1]
 		xPay = aCl[3][2]
 		if tShape = "word" or tShape = "string" or tShape = "number"
 			aOut + xPay
 		else
-			for k = 1 to len(xPay)
+			for k = 1 to Len(xPay)
 				aOut + xPay[k]
 			next
 		ok

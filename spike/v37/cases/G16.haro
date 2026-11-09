@@ -1,10 +1,10 @@
 try
 	try
-		raise("body")
+		Raise("body")
 	catch
-		raise("handler")
+		Raise("handler")
 	finally
-		raise("cleanup")
+		Raise("cleanup")
 	done
 catch e
 	? e

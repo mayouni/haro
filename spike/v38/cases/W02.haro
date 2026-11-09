@@ -2,8 +2,8 @@ $nG = 1
 try
 	within $nG = 2
 		? $nG
-		raise("boom")
+		Raise("boom")
 	done
 catch e
-	? "caught " + e + ", g=" + string($nG)
+	? "caught " + e + ", g=" + String($nG)
 done

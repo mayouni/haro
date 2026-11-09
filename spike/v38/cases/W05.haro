@@ -10,4 +10,4 @@ done
 ? $tG
 func setG
 	$tG = "changed by callee"
-	raise("from callee " + $tG)
+	Raise("from callee " + $tG)

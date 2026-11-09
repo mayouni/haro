@@ -12,25 +12,25 @@
 # symbols; a SYMBOL seat resolves against it in the court's last pass.
 
 func CtSymbolByName(tName)
-	for i = 1 to len($aCourtSymbols)
+	for i = 1 to Len($aCourtSymbols)
 		if $aCourtSymbols[i][1] = tName return $aCourtSymbols[i] ok
 	next
 	return null
 
 func CtWorldLoad(tPath)
-	if not fexists(tPath) CtFail(1, "no world artifact at '" + tPath + "'") ok
-	aW = ExJsonParse(read(tPath))
+	if not FExists(tPath) CtFail(1, "no world artifact at '" + tPath + "'") ok
+	aW = ExJsonParse(Read(tPath))
 	if not ExIsObj(aW) CtFail(1, "'" + tPath + "' is not a C1 world: not a JSON object") ok
 	aGot = ExObjGet(aW, "symbols")
 	if not aGot[1] CtFail(1, "'" + tPath + "' has no symbols table; it is not a C1 world") ok
 	return aGot[2]
 
 func CtWorldHas(aSymbols, tKind, tName)
-	for i = 1 to len(aSymbols)
+	for i = 1 to Len(aSymbols)
 		aK = ExObjGet(aSymbols[i], "kind")
 		aN = ExObjGet(aSymbols[i], "name")
 		if aK[1] and aN[1]
-			if lower(string(aK[2])) = lower(tKind) and lower(string(aN[2])) = lower(tName) return true ok
+			if Lower(String(aK[2])) = Lower(tKind) and Lower(String(aN[2])) = Lower(tName) return true ok
 		ok
 	next
 	return false
@@ -38,13 +38,13 @@ func CtWorldHas(aSymbols, tKind, tName)
 # every SYMBOL seat of the sentence, as [decl, seat, value, line]
 func CtSymbolSites(aDecls)
 	aOut = []
-	for i = 1 to len(aDecls)
+	for i = 1 to Len(aDecls)
 		aD = aDecls[i]
 		aKind = CtKindByVerb(aD[1])
 		aC = aD[4]
-		for j = 1 to len(aC)
+		for j = 1 to Len(aC)
 			aSeat = CtSeatByClause(aKind, aC[j][1])
-			if isnull(aSeat) loop ok
+			if IsNull(aSeat) loop ok
 			if CtTypeKind(aSeat) != "symbol" loop ok
 			if aC[j][3][1] != "word" loop ok
 			aOut + [aD, aSeat, aC[j][3][2], aC[j][2]]
@@ -56,16 +56,16 @@ func CtSymbolSites(aDecls)
 # does not is refused in the SYMBOL's own words
 func CtResolveWorld(aDecls)
 	aSites = CtSymbolSites(aDecls)
-	for i = 1 to len(aSites)
+	for i = 1 to Len(aSites)
 		aSy = CtSymbolByName(aSites[i][2][2])
-		if isnull(aSy) loop ok
+		if IsNull(aSy) loop ok
 		if CtWorldHas($aCourtWorldFile, aSy[2], aSites[i][3]) loop ok
 		tMsg = aSy[4]
 		if tMsg = "" tMsg = "{VERB} {name} names '{value}', and the world declares no " + aSy[2] + ":{value}" ok
 		aCC = CtSymbolCode(aSy)
 		# v0.35: a SYMBOL seat held at warning is spoken after the verdict (severity_lib.haro)
 		aKW = CtKindByVerb(aSites[i][1][1])
-		if len(aKW) >= 7
+		if Len(aKW) >= 7
 			if SevSeatIs(aKW, aSites[i][2][1]) = "warning"
 				$aCourtWarnings + [aCC[1], aCC[2], aSites[i][4], CtFill(tMsg, aSites[i][1], aSites[i][3])]
 				loop
@@ -82,12 +82,12 @@ func CtResolveWorld(aDecls)
 func CtSymbolCode(aSy)
 	tCode = "UNRESOLVED"
 	aCites = ["rule:" + aSy[1]]
-	if len(aSy) >= 6
+	if Len(aSy) >= 6
 		if aSy[5] != "" tCode = aSy[5] ok
 		# v0.28: CITES none -- the row's "none" -- cites nothing
-		if isstring(aSy[6])
+		if IsString(aSy[6])
 			aCites = []
-		but len(aSy[6]) > 0
+		but Len(aSy[6]) > 0
 			aCites = aSy[6]
 		ok
 	ok
@@ -95,17 +95,17 @@ func CtSymbolCode(aSy)
 
 func CtWorldStem(tPath)
 	tName = tPath
-	for i = len(tPath) to 1 step -1
-		if tPath[i] = "/" or tPath[i] = char(92)
-			tName = substr(tPath, i + 1)
+	for i = Len(tPath) to 1 step -1
+		if tPath[i] = "/" or tPath[i] = Char(92)
+			tName = SubStr(tPath, i + 1)
 			exit
 		ok
 	next
 	nN = 0
-	for i = 1 to len(tName)
+	for i = 1 to Len(tName)
 		if tName[i] = "." nN = i ok
 	next
-	if nN > 1 tName = left(tName, nN - 1) ok
+	if nN > 1 tName = Left(tName, nN - 1) ok
 	return tName
 
 # the sentence's own C1 rows: a symbol per declaration of a PUBLISH kind, a ref
@@ -113,14 +113,14 @@ func CtWorldStem(tPath)
 # symbol it names -- and nothing else: a court emits only what it can prove
 func CtWorldRows(aDecls, tFile)
 	aPublish = []
-	if len($aCourtWorld) >= 4 aPublish = $aCourtWorld[4] ok
+	if Len($aCourtWorld) >= 4 aPublish = $aCourtWorld[4] ok
 	aSymbols = []
 	tFrom = ""
-	for i = 1 to len(aDecls)
+	for i = 1 to Len(aDecls)
 		aD = aDecls[i]
-		for j = 1 to len(aPublish)
+		for j = 1 to Len(aPublish)
 			aK = CtKindByDeclName(aPublish[j][1])
-			if isnull(aK) or aK[1] != aD[1] loop ok
+			if IsNull(aK) or aK[1] != aD[1] loop ok
 			aRow = [ExObjMark(), ["kind", aPublish[j][2]], ["name", aD[2]], ["span", [ExObjMark(), ["file", tFile], ["line", aD[3]]]], ["rationale", aD[5]]]
 			aSymbols + aRow
 			if tFrom = "" tFrom = aPublish[j][2] + ":" + aD[2] ok
@@ -129,9 +129,9 @@ func CtWorldRows(aDecls, tFile)
 	if tFrom = "" tFrom = $tCourtLang + ":" + CtWorldStem(tFile) ok
 	aRefs = []
 	aSites = CtSymbolSites(aDecls)
-	for i = 1 to len(aSites)
+	for i = 1 to Len(aSites)
 		aSy = CtSymbolByName(aSites[i][2][2])
-		if isnull(aSy) loop ok
+		if IsNull(aSy) loop ok
 		tRef = aSy[3]
 		if tRef = "" tRef = "cites" ok
 		aRow = [ExObjMark(), ["from", tFrom], ["to", aSy[2] + ":" + aSites[i][3]], ["kind", tRef], ["span", [ExObjMark(), ["file", tFile], ["line", aSites[i][4]]]]]

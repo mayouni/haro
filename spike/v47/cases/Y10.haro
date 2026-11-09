@@ -3,4 +3,4 @@ func f
 	oDoc = null
 	vItems = null
 	iN = null
-	? isnull(oDoc) and isnull(vItems) and isnull(iN)
+	? IsNull(oDoc) and IsNull(vItems) and IsNull(iN)

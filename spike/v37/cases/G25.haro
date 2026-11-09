@@ -1,11 +1,11 @@
 g()
 func g
 	try
-		raise("travels")
+		Raise("travels")
 	catch e
 		xF = e
 		? xF.Message()
 		? show(e)
 	done
 func show xX
-	return xX.Message() + " from " + string(xX.Span()[:line])
+	return xX.Message() + " from " + String(xX.Span()[:line])

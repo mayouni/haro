@@ -1,9 +1,9 @@
 for i = 1 to 3
 	try
 		if i = 2 loop ok
-		? "body " + string(i)
+		? "body " + String(i)
 	finally
-		? "finally " + string(i)
+		? "finally " + String(i)
 	done
-	? "end " + string(i)
+	? "end " + String(i)
 next

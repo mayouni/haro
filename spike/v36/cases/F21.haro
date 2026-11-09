@@ -1,11 +1,11 @@
 for i = 1 to 2
 	try
-		raise("e" + string(i))
+		Raise("e" + String(i))
 	catch
 		? "caught " + cCatchError
 		loop
 	finally
-		? "finally " + string(i)
+		? "finally " + String(i)
 	done
 	? "not reached " + i
 next

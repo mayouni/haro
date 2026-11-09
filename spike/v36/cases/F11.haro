@@ -4,11 +4,11 @@ for i = 1 to 2
 			try
 				exit 2
 			finally
-				? "inner " + string(i) + string(j)
+				? "inner " + String(i) + String(j)
 			done
 		next
 	finally
-		? "outer " + string(i)
+		? "outer " + String(i)
 	done
 next
 ? "after"

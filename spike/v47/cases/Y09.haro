@@ -5,4 +5,4 @@ func f
 	rUser = [1]
 	? aRows
 	? mIndex
-	? len(rUser)
+	? Len(rUser)

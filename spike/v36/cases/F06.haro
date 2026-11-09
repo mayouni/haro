@@ -1,8 +1,8 @@
 try
 	try
-		raise("in body")
+		Raise("in body")
 	catch
-		raise("in handler")
+		Raise("in handler")
 	finally
 		? "finally after handler raise"
 	done

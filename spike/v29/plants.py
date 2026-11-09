@@ -41,7 +41,7 @@ PLANTS = [
     ('P9', ['R7', 'A3'], 'W8.5 never looks at a policy point floored llm',
      'if aFlS[k][1] = aPtS[j][1] and aFlS[k][2] = aPtS[j][2] and aFlS[k][3] = "llm"', 'if 0'),
     ('P10', ['R9'], 'a weave none of whose rules is judged is no longer refused by name',
-     'if len(aWR[1]) + len(aWR[2]) = 0', 'if len(aWR[1]) + len(aWR[2]) = 99'),
+     'if Len(aWR[1]) + Len(aWR[2]) = 0', 'if Len(aWR[1]) + Len(aWR[2]) = 99'),
     ('P11', ['A1', 'A2', 'A3', 'A4', 'A5', 'A7'], 'the court prints no line of the rules it judges',
      '? "judged " + tJudged', '? "judgedx " + tJudged'),
     ('P12', ['A1', 'A4', 'A5', 'A7'], 'W1.2 and W7.1 are no longer named as held by construction',
@@ -49,7 +49,7 @@ PLANTS = [
     ('P13', ['A1'], 'W2.2 and W2.3 are not both named',
      'return [["W2.2", "W2.3"], [], [', 'return [["W2.2"], [], ['),
     ('P14', ['A8'], 'a cite is read without its kind: any cite names an article',
-     'if left(tCite, 8) != "article:" return 0 ok', ''),
+     'if Left(tCite, 8) != "article:" return 0 ok', ''),
     ('P15', ['R8'], 'Art. 4 is demoted to a note: the article no longer refuses the model on a policy point',
      'StzuFail(aFls[k][4], "Art. 4 predictable_authority', 'StzuWeave("advisory", aFls[k][4], "Art. 4 predictable_authority'),
 ]

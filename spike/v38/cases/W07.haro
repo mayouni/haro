@@ -8,4 +8,4 @@ catch e
 done
 ? $tG
 func boom
-	raise("no value")
+	Raise("no value")

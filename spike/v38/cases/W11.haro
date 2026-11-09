@@ -1,6 +1,6 @@
 $aL = [1, 2]
 within $aL = $aL
-	add($aL, 3)
-	? len($aL)
+	Add($aL, 3)
+	? Len($aL)
 done
-? len($aL)
+? Len($aL)

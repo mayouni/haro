@@ -5,8 +5,8 @@ try
 		catch
 			? "own catch: " + cCatchError
 		finally
-			? "finally " + string(i)
-			raise("from finally")
+			? "finally " + String(i)
+			Raise("from finally")
 		done
 	next
 catch

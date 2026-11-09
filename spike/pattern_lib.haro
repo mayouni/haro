@@ -18,7 +18,7 @@
 load "block_lib.haro"
 
 func PatFail(tMsg)
-	raise(tMsg)
+	Raise(tMsg)
 
 func PatReset()
 	$aPatNodes = []
@@ -78,10 +78,10 @@ func PatNew(tKind, xA, xB, xC)
 # a list's items, the rows spread into their values and the comments dropped
 func PatFlat(aItems)
 	aOut = []
-	for i = 1 to len(aItems)
+	for i = 1 to Len(aItems)
 		xV = aItems[i]
 		if xV[1] = "row"
-			for j = 1 to len(xV[2])
+			for j = 1 to Len(xV[2])
 				aOut + xV[2][j]
 			next
 		but xV[1] != "comment"
@@ -91,22 +91,22 @@ func PatFlat(aItems)
 	return aOut
 
 func PatCount(tText, tWhere)
-	bOk = len(tText) > 0
-	for i = 1 to len(tText)
+	bOk = Len(tText) > 0
+	for i = 1 to Len(tText)
 		if not BlkIsDigit(tText[i]) bOk = false ok
 	next
 	if not bOk
 		PatFail("pattern " + tWhere + ": REPEAT takes a whole count of zero or more, found " + tText)
 	ok
-	return number(tText)
+	return Number(tText)
 
 func PatCompileRule(tText, tWhere)
 	aAll = BlkLoad(tText)
 	aVals = []
-	for i = 1 to len(aAll)
+	for i = 1 to Len(aAll)
 		if aAll[i][1] != "comment" aVals + aAll[i] ok
 	next
-	if len(aVals) != 1 or aVals[1][1] != "list"
+	if Len(aVals) != 1 or aVals[1][1] != "list"
 		PatFail("pattern " + tWhere + " is not a list: a rule is written [ ... ]")
 	ok
 	return PatAlt(PatFlat(aVals[1][2]), tWhere)
@@ -114,7 +114,7 @@ func PatCompileRule(tText, tWhere)
 func PatAlt(aSeq, tWhere)
 	aBranches = []
 	aCur = []
-	for i = 1 to len(aSeq)
+	for i = 1 to Len(aSeq)
 		xV = aSeq[i]
 		if xV[1] = "kw" and xV[2] = "OR"
 			aBranches + aCur
@@ -124,18 +124,18 @@ func PatAlt(aSeq, tWhere)
 		ok
 	next
 	aBranches + aCur
-	if len(aBranches) > 1
-		for i = 1 to len(aBranches)
-			if len(aBranches[i]) = 0
+	if Len(aBranches) > 1
+		for i = 1 to Len(aBranches)
+			if Len(aBranches[i]) = 0
 				PatFail("pattern " + tWhere + ": OR needs a rule on each side")
 			ok
 		next
 	ok
 	aNodes = []
-	for i = 1 to len(aBranches)
+	for i = 1 to Len(aBranches)
 		aNodes + PatSequence(aBranches[i], tWhere)
 	next
-	if len(aNodes) = 1 return aNodes[1] ok
+	if Len(aNodes) = 1 return aNodes[1] ok
 	return PatNew("alt", aNodes, 0, 0)
 
 func PatSequence(aSeq, tWhere)
@@ -151,7 +151,7 @@ func PatSequence(aSeq, tWhere)
 
 # one item of a sequence: [node id, the next position], or [0, ...] when the sequence is spent
 func PatItem(aSeq, nPos, tWhere)
-	if nPos > len(aSeq) return [0, nPos] ok
+	if nPos > Len(aSeq) return [0, nPos] ok
 	xV = aSeq[nPos]
 	nPos++
 	tK = xV[1]
@@ -169,10 +169,10 @@ func PatItem(aSeq, nPos, tWhere)
 			if aX[1] = 0
 				PatFail("pattern " + tWhere + ": " + tW + " takes a rule")
 			ok
-			return [PatNew(lower(tW), aX[1], 0, 0), aX[2]]
+			return [PatNew(Lower(tW), aX[1], 0, 0), aX[2]]
 		ok
 		if tW = "REPEAT"
-			if nPos > len(aSeq)
+			if nPos > Len(aSeq)
 				PatFail("pattern " + tWhere + ": REPEAT takes a count, then a rule")
 			ok
 			if aSeq[nPos][1] != "num"
@@ -181,14 +181,14 @@ func PatItem(aSeq, nPos, tWhere)
 			nMin = PatCount(aSeq[nPos][2], tWhere)
 			nPos++
 			nMax = nMin
-			if nPos <= len(aSeq)
+			if nPos <= Len(aSeq)
 				if aSeq[nPos][1] = "num"
 					nMax = PatCount(aSeq[nPos][2], tWhere)
 					nPos++
 				ok
 			ok
 			if nMax < nMin
-				PatFail("pattern " + tWhere + ": REPEAT " + string(nMin) + " " + string(nMax) + ": its minimum is above its maximum")
+				PatFail("pattern " + tWhere + ": REPEAT " + String(nMin) + " " + String(nMax) + ": its minimum is above its maximum")
 			ok
 			aX = PatItem(aSeq, nPos, tWhere)
 			if aX[1] = 0
@@ -197,7 +197,7 @@ func PatItem(aSeq, nPos, tWhere)
 			return [PatNew("repeat", nMin, nMax, aX[1]), aX[2]]
 		ok
 		if tW = "RULE" or tW = "MEMBER"
-			if nPos > len(aSeq)
+			if nPos > Len(aSeq)
 				PatFail("pattern " + tWhere + ": " + tW + " takes a name")
 			ok
 			if aSeq[nPos][1] != "word"
@@ -209,7 +209,7 @@ func PatItem(aSeq, nPos, tWhere)
 			return [PatNew("member", tName, 0, 0), nPos]
 		ok
 		if tW = "LIT"
-			if nPos > len(aSeq)
+			if nPos > Len(aSeq)
 				PatFail("pattern " + tWhere + ": LIT takes a value")
 			ok
 			xX = aSeq[nPos]
@@ -234,7 +234,7 @@ func PatChildren(nNode)
 	if tK = "seq" or tK = "alt" return aN[2] ok
 	if tK = "sub" return [aN[2]] ok
 	if tK = "repeat" return [aN[4]] ok
-	if PatIsUnary(upper(tK)) return [aN[2]] ok
+	if PatIsUnary(Upper(tK)) return [aN[2]] ok
 	return []
 
 # the names a node refers to, as RULE (cWhat "ref") or as MEMBER ("member"), in the order the reference finds them
@@ -243,9 +243,9 @@ func PatNamesIn(nNode, tWhat)
 	aN = $aPatNodes[nNode]
 	if aN[1] = tWhat aOut + aN[2] ok
 	aKids = PatChildren(nNode)
-	for i = 1 to len(aKids)
+	for i = 1 to Len(aKids)
 		aMore = PatNamesIn(aKids[i], tWhat)
-		for j = 1 to len(aMore)
+		for j = 1 to Len(aMore)
 			aOut + aMore[j]
 		next
 	next
@@ -262,19 +262,19 @@ func PatNullable(nNode)
 		return PatNullable(aN[4])
 	ok
 	if tK = "seq"
-		for i = 1 to len(aN[2])
+		for i = 1 to Len(aN[2])
 			if not PatNullable(aN[2][i]) return false ok
 		next
 		return true
 	ok
 	if tK = "alt"
-		for i = 1 to len(aN[2])
+		for i = 1 to Len(aN[2])
 			if PatNullable(aN[2][i]) return true ok
 		next
 		return false
 	ok
 	if tK = "ref"
-		nR = find($aPatNames, aN[2])
+		nR = Find($aPatNames, aN[2])
 		if $aPatNull[nR] = 0
 			if PatNullable($aPatRoots[nR])
 				$aPatNull[nR] = 1
@@ -291,20 +291,20 @@ func PatCheck(nNode, tName)
 	tK = aN[1]
 	if tK = "any" or tK = "some" or tK = "to"
 		if PatNullable(aN[2])
-			PatFail("pattern " + tName + ": " + upper(tK) + " over a rule that can match nothing: it would never move, so it is refused")
+			PatFail("pattern " + tName + ": " + Upper(tK) + " over a rule that can match nothing: it would never move, so it is refused")
 		ok
 	ok
 	aKids = PatChildren(nNode)
-	for i = 1 to len(aKids)
+	for i = 1 to Len(aKids)
 		PatCheck(aKids[i], tName)
 	next
 
 func PatVisit(nRule, aPath)
 	if $aPatState[nRule] = 1
 		tName = $aPatNames[nRule]
-		nAt = find(aPath, tName)
+		nAt = Find(aPath, tName)
 		aCyc = []
-		for i = nAt to len(aPath)
+		for i = nAt to Len(aPath)
 			aCyc + aPath[i]
 		next
 		aCyc + tName
@@ -316,8 +316,8 @@ func PatVisit(nRule, aPath)
 	aRefs = PatNamesIn($aPatRoots[nRule], "ref")
 	aNext = aPath
 	aNext + $aPatNames[nRule]
-	for i = 1 to len(aRefs)
-		PatVisit(find($aPatNames, aRefs[i]), aNext)
+	for i = 1 to Len(aRefs)
+		PatVisit(Find($aPatNames, aRefs[i]), aNext)
 	next
 	$aPatState[nRule] = 2
 
@@ -326,30 +326,30 @@ func PatDeclare(aNames, aTexts, aSetNames, aSetMembers)
 	PatReset()
 	$aPatSetNames = aSetNames
 	$aPatSetMembers = aSetMembers
-	for i = 1 to len(aNames)
+	for i = 1 to Len(aNames)
 		$aPatNames + aNames[i]
 		$aPatRoots + PatCompileRule(aTexts[i], aNames[i])
 		$aPatNull + 0
 		$aPatState + 0
 	next
-	for i = 1 to len(aNames)
+	for i = 1 to Len(aNames)
 		aRefs = PatNamesIn($aPatRoots[i], "ref")
-		for j = 1 to len(aRefs)
-			if find($aPatNames, aRefs[j]) = 0
+		for j = 1 to Len(aRefs)
+			if Find($aPatNames, aRefs[j]) = 0
 				PatFail("pattern " + aNames[i] + ": RULE " + aRefs[j] + " names no pattern")
 			ok
 		next
 		aMems = PatNamesIn($aPatRoots[i], "member")
-		for j = 1 to len(aMems)
-			if find($aPatSetNames, aMems[j]) = 0
+		for j = 1 to Len(aMems)
+			if Find($aPatSetNames, aMems[j]) = 0
 				PatFail("pattern " + aNames[i] + ": MEMBER " + aMems[j] + " names no set")
 			ok
 		next
 	next
-	for i = 1 to len(aNames)
+	for i = 1 to Len(aNames)
 		PatVisit(i, [])
 	next
-	for i = 1 to len(aNames)
+	for i = 1 to Len(aNames)
 		PatCheck($aPatRoots[i], aNames[i])
 	next
 
@@ -357,7 +357,7 @@ func PatDeclare(aNames, aTexts, aSetNames, aSetMembers)
 
 # a sequence of values becomes an id; its memo is a block of (length + 1) x nodes slots in $aPatMemo
 func PatNewSeq(aValues)
-	nN = len(aValues)
+	nN = Len(aValues)
 	aKinds = []
 	for i = 1 to nN
 		aKinds + aValues[i][1]
@@ -367,22 +367,22 @@ func PatNewSeq(aValues)
 	$aPatSeqLen + nN
 	$aPatSeqBase + $nPatMemoTop
 	if nN > 0
-		$aPatSeqKids + list(nN)
+		$aPatSeqKids + List(nN)
 	else
 		$aPatSeqKids + []
 	ok
 	$nPatMemoTop += (nN + 1) * $nPatNodes
-	return len($aPatSeqLen)
+	return Len($aPatSeqLen)
 
 func PatExtend(aKept, aMore)
-	for i = 1 to len(aMore)
+	for i = 1 to Len(aMore)
 		aKept + aMore[i]
 	next
 	return aKept
 
 func PatPositions(aVals)
 	nTotal = 1
-	for i = 1 to len(aVals)
+	for i = 1 to Len(aVals)
 		xV = aVals[i]
 		tK = xV[1]
 		if tK != "comment"
@@ -401,7 +401,7 @@ func PatPositions(aVals)
 func PatM(nNode, nSeq, nI)
 	nIdx = $aPatSeqBase[nSeq] + nI * $nPatNodes + nNode
 	aMemo = $aPatMemo[nIdx]
-	if islist(aMemo) return aMemo ok
+	if IsList(aMemo) return aMemo ok
 	$nPatSteps++
 	aR = PatBody(nNode, nSeq, nI)
 	$aPatMemo[nIdx] = aR
@@ -414,7 +414,7 @@ func PatBody(nNode, nSeq, nI)
 	if tK = "seq"
 		aKept = []
 		nJ = nI
-		for c = 1 to len(aN[2])
+		for c = 1 to Len(aN[2])
 			aR = PatM(aN[2][c], nSeq, nJ)
 			if not aR[1] return [false, nI, []] ok
 			nJ = aR[2]
@@ -429,7 +429,7 @@ func PatBody(nNode, nSeq, nI)
 		return [false, nI, []]
 	ok
 	if tK = "ref"
-		return PatM($aPatRoots[find($aPatNames, aN[2])], nSeq, nI)
+		return PatM($aPatRoots[Find($aPatNames, aN[2])], nSeq, nI)
 	ok
 	if tK = "lit"
 		if nI < nLen
@@ -440,7 +440,7 @@ func PatBody(nNode, nSeq, nI)
 		return [false, nI, []]
 	ok
 	if tK = "alt"
-		for c = 1 to len(aN[2])
+		for c = 1 to Len(aN[2])
 			aR = PatM(aN[2][c], nSeq, nI)
 			if aR[1] return aR ok
 		next
@@ -473,7 +473,7 @@ func PatBody(nNode, nSeq, nI)
 			xV = $aPatSeqVals[nSeq][nI + 1]
 			aInner = []
 			if tKind = "list" or tKind = "group"
-				for q = 1 to len(xV[2])
+				for q = 1 to Len(xV[2])
 					if xV[2][q][1] != "comment" aInner + xV[2][q] ok
 				next
 			but tKind = "row"
@@ -498,8 +498,8 @@ func PatBody(nNode, nSeq, nI)
 		if nI < nLen
 			tKind = $aPatSeqKinds[nSeq][nI + 1]
 			if tKind = "word" or tKind = "str" or tKind = "kw" or tKind = "num"
-				nSet = find($aPatSetNames, aN[2])
-				if find($aPatSetMembers[nSet], $aPatSeqVals[nSeq][nI + 1][2]) > 0 return [true, nI + 1, []] ok
+				nSet = Find($aPatSetNames, aN[2])
+				if Find($aPatSetMembers[nSet], $aPatSeqVals[nSeq][nI + 1][2]) > 0 return [true, nI + 1, []] ok
 			ok
 		ok
 		return [false, nI, []]
@@ -562,17 +562,17 @@ func PatBody(nNode, nSeq, nI)
 # match the text against the rule named cStart (the rules declared by PatDeclare); returns
 # [whole, [the values kept], steps, bound]
 func PatRun(tStart, tText)
-	nRule = find($aPatNames, tStart)
+	nRule = Find($aPatNames, tStart)
 	if nRule = 0
 		PatFail("pattern " + tStart + " names no pattern")
 	ok
 	aAll = BlkLoad(tText)
 	aVals = []
-	for i = 1 to len(aAll)
+	for i = 1 to Len(aAll)
 		if aAll[i][1] != "comment" aVals + aAll[i] ok
 	next
 	nBound = $nPatNodes * PatPositions(aVals)
-	$aPatMemo = list(nBound)
+	$aPatMemo = List(nBound)
 	$aPatSeqVals = []
 	$aPatSeqKinds = []
 	$aPatSeqLen = []
@@ -583,10 +583,10 @@ func PatRun(tStart, tText)
 	nSeq = PatNewSeq(aVals)
 	nRoot = $aPatRoots[nRule]
 	aR = PatM(nRoot, nSeq, 0)
-	bWhole = aR[1] and aR[2] = len(aVals)
+	bWhole = aR[1] and aR[2] = Len(aVals)
 	aKept = aR[3]
 	aRoot = $aPatNodes[nRoot]
-	if bWhole and aRoot[1] = "seq" and len(aRoot[2]) = 1 and len(aKept) = 1
+	if bWhole and aRoot[1] = "seq" and Len(aRoot[2]) = 1 and Len(aKept) = 1
 		if $aPatNodes[aRoot[2][1]][1] = "collect"
 			aKept = aKept[1][2]
 		ok
@@ -595,7 +595,7 @@ func PatRun(tStart, tText)
 
 func PatPrintKept(aKept)
 	aP = []
-	for i = 1 to len(aKept)
+	for i = 1 to Len(aKept)
 		aP + BlkPrint(aKept[i], 0)
 	next
-	return BlkJoin(aP, char(9))
+	return BlkJoin(aP, Char(9))

@@ -45,6 +45,9 @@ def refused(cid, ext, line, why, text, at, called):
 
 # (id, line, why, ext, program, expected, exit, extra files)
 CASES = [
+    # v0.48 RE-SPELLED, 2026-11-09, AFTER THIS COURT SPOKE (the Principal's ruling, "ParentClassName"): a .haro program's calls of
+    # built-ins are spelled as Softanza writes a name (Len, IsNull, SubStr), by study/v48/respell.py, ported here by
+    # study/v47/port_cases.py --respell. A report still names a built-in as the VM registers it. Each case asks what it asked.
     # CHANGED AFTER THE COURT SPOKE, 2026-11-07, by the author's ruling (TYPES.md decision (e)): a keyword in another case is refused in a .haro
     # file, as PRINCIPLES 2.2 reads it, not read as a name as v0.41 first built it. S01 and S02 now expect v0.42's refusal; the misreading
     # the author ruled against stays closed either way. S02's `isNull` is `isnull`, a native spelled as the VM registers it (v0.42's N4); S09's
@@ -53,7 +56,7 @@ CASES = [
         '? "before"', 'f()', 'func f', T + 'aNd = 1', T + 'oN = 2', T + '? aNd + oN'],
      refused('S01', '.haro', 4, KEYWORD('and'), 'aNd', 4, 2), 1),
     ('S02', 'S1', 'in a .haro file a Capital or UPPER keyword is refused; the lowercase word is the keyword', '.haro', [
-        '? "before"', 'f()', 'func f', T + 'if isnull(null)', T * 2 + '? "null is the keyword"', T + 'ok', T + 'If = "a name"'],
+        '? "before"', 'f()', 'func f', T + 'if IsNull(null)', T * 2 + '? "null is the keyword"', T + 'ok', T + 'If = "a name"'],
      ['before', 'null is the keyword', ''] + refused('S02', '.haro', 7, KEYWORD('if'), 'If', 7, 2)[2:], 1),
     ('S03', 'S2', 'in a .ring file the keywords are Ring\'s in any case: If, See, Ok -- and oK, as Ring reads it', '.ring', [
         'f()', 'func f', T + 'x = 1', T + 'If x = 1', T * 2 + 'See "yes" + nl', T + 'Ok', T + 'oK = "fine"'],
@@ -67,16 +70,16 @@ CASES = [
         'f()', 'func f', T + '? :Name', T + 'x = :Name', T + '? x = "name"'],
      ['name', '1']),
     ('S06', 'S4', 'in a .haro file `:key = value` is refused by name', '.haro', [
-        '? "before"', 'f()', 'func f', T + 'aL = [:a = 1]', T + '? len(aL)'],
+        '? "before"', 'f()', 'func f', T + 'aL = [:a = 1]', T + '? Len(aL)'],
      refused('S06', '.haro', 4, R_PAIR, ':a = 1', 4, 2), 1),
     ('S07', 'S4', 'in a .haro file the pair is written as a list', '.haro', [
-        'f()', 'func f', T + 'aL = [[:a, 1], [:Key, 2]]', T + '? aL[2][1]', T + '? len(aL)'],
+        'f()', 'func f', T + 'aL = [[:a, 1], [:Key, 2]]', T + '? aL[2][1]', T + '? Len(aL)'],
      ['Key', '2']),
     ('S08', 'S4', 'in a .ring file `:key = value` is Ring\'s pair, and its key lowered', '.ring', [
         'f()', 'func f', T + 'aL = [:a = 1, :Key = 2]', T + '? aL[2][1]', T + '? len(aL)'],
      ['key', '2']),
     ('S09', 'S5', 'an eval in a .haro program reads by Haro\'s rules', '.haro', [
-        'f()', 'func f', T + 'eval("? :Name")', T + 'eval("nA = 4  ? nA")'],
+        'f()', 'func f', T + 'Eval("? :Name")', T + 'Eval("nA = 4  ? nA")'],
      ['Name', '4']),
     ('S10', 'S5', 'an eval in a .ring program reads by Ring\'s', '.ring', [
         'f()', 'func f', T + 'eval("? :Name")', T + 'eval("If 1 See \'ring\' + nl Ok")'],

@@ -1,7 +1,7 @@
 g()
 func g
 	try
-		raise("orig")
+		Raise("orig")
 	catch e
 		xT = e + ""
 		try

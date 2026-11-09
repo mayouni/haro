@@ -38,15 +38,15 @@ $aStzuNotes = []
 $aBlkToks = []
 $nBlkPos = 1
 
-if len(sysargv) < 3
+if Len(sysargv) < 3
 	? "usage: haro.haro <file.haro> [all | fmt]"
 else
 	tPath = sysargv[3]
-	tSrc = read(tPath)
+	tSrc = Read(tPath)
 	$tStzuDir = StzuDirOf(tPath)
 	bAll = false
 	bFmt = false
-	if len(sysargv) >= 4
+	if Len(sysargv) >= 4
 		if sysargv[4] = "all" bAll = true ok
 		if sysargv[4] = "fmt" bFmt = true ok
 	ok
@@ -92,10 +92,10 @@ func HaroAll(tText)
 	if tE != ""
 		$aStzuFound + [StzuLineOf(tE), StzuStripPrefix(tE)]
 	ok
-	if len($aStzuFound) > 0
+	if Len($aStzuFound) > 0
 		aFd = StzuSortFound($aStzuFound)
-		for k = 1 to len(aFd)
-			? "haro (line " + string(aFd[k][1]) + "): " + string(aFd[k][2])
+		for k = 1 to Len(aFd)
+			? "haro (line " + String(aFd[k][1]) + "): " + String(aFd[k][2])
 		next
 	else
 		StzuPrintLanguage(aL)

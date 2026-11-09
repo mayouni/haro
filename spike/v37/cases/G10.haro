@@ -1,5 +1,5 @@
 try
-	raise("cased")
+	Raise("cased")
 catch e
 	? e.MESSAGE()
 	? e.message()

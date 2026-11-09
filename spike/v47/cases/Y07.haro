@@ -7,7 +7,7 @@ func f
 		? x
 	next
 	try
-		raise("no")
+		Raise("no")
 	catch e
 		? e.Message()
 	done

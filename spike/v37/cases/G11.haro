@@ -2,7 +2,7 @@ h()
 func h
 	try
 		nX = 1
-		raise("here")
+		Raise("here")
 	catch e
 		xS = e.Span()
 		? xS[:line]

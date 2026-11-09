@@ -1,8 +1,8 @@
 try
 	try
-		raise("a")
+		Raise("a")
 	finally
-		raise(cCatchError)
+		Raise(cCatchError)
 	done
 catch e
 	? e

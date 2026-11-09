@@ -16,8 +16,8 @@
 # ---- the canonical text of a condition ----------------------------------------------------------------------------------------
 
 func CondIsBareWord(tV)
-	if len(tV) = 0 return false ok
-	for i = 1 to len(tV)
+	if Len(tV) = 0 return false ok
+	for i = 1 to Len(tV)
 		if not CondIsWordChar(tV[i]) return false ok
 	next
 	return true
@@ -52,8 +52,8 @@ func CondPrintP(aAst, nCtx)
 	if xK = "exists" return "exists " + aAst[2] ok
 	if xK = "quant"
 		tC = "(" + aAst[2] + " " + CondPathText(aAst[3])
-		if not isnull(aAst[4]) tC += " named " + CondPrintRight(aAst[4], true) ok
-		if not isnull(aAst[5]) tC += " where " + CondPrintP(aAst[5], 0) ok
+		if not IsNull(aAst[4]) tC += " named " + CondPrintRight(aAst[4], true) ok
+		if not IsNull(aAst[5]) tC += " where " + CondPrintP(aAst[5], 0) ok
 		return tC + ")"
 	ok
 	if xK = "cmp"
@@ -69,14 +69,14 @@ func CondPrintP(aAst, nCtx)
 	if xK = "reach" return CondPathText(aAst[2]) + " reachable" ok
 	if xK = "refd" return CondPathText(aAst[2]) + " referenced" ok
 	if xK = "keyed" return CondPathText(aAst[2]) + " keyed_by " + CondPrintRight(aAst[3], false) ok
-	raise("condition: no printing for a node of kind '" + xK + "'")
+	Raise("condition: no printing for a node of kind '" + xK + "'")
 
 # a parsed condition as one line, every string length-free and quoted: two conditions are one when their dumps are
 func CondDump(xX)
-	if isnull(xX) return "NULL" ok
-	if isstring(xX) return '"' + xX + '"' ok
+	if IsNull(xX) return "NULL" ok
+	if IsString(xX) return '"' + xX + '"' ok
 	tOut = "["
-	for i = 1 to len(xX)
+	for i = 1 to Len(xX)
 		if i > 1 tOut += " " ok
 		tOut += CondDump(xX[i])
 	next
@@ -87,10 +87,10 @@ func CondDump(xX)
 # [[form, [kind, ...]], ...] in the order the kinds are declared; only a FORM some kind includes is in it (a name that is no FORM is a finding of INCLUDES, and the language is refused)
 func StzuFormTable(aDecls)
 	aTab = []
-	for i = 1 to len(aDecls)
-		if len(aDecls[i]) < 9 loop ok
+	for i = 1 to Len(aDecls)
+		if Len(aDecls[i]) < 9 loop ok
 		aInc = aDecls[i][9]
-		for j = 1 to len(aInc)
+		for j = 1 to Len(aInc)
 			nAt = StzuFormAt(aTab, aInc[j])
 			if nAt = 0
 				aNew = [aInc[j], [aDecls[i][1]]]
@@ -103,7 +103,7 @@ func StzuFormTable(aDecls)
 	return aTab
 
 func StzuFormAt(aTab, tName)
-	for i = 1 to len(aTab)
+	for i = 1 to Len(aTab)
 		if aTab[i][1] = tName return i ok
 	next
 	return 0
@@ -116,14 +116,14 @@ func StzuSeatSource(tForm)
 
 # each declaration that includes FORMs gets the seats of the FORMs first, then its own; a refusal marks the declaration unresolved
 func StzuExpandIncludes(aDecls, aForms, aDeclared)
-	for i = 1 to len(aDecls)
-		if len(aDecls[i]) < 9 loop ok
+	for i = 1 to Len(aDecls)
+		if Len(aDecls[i]) < 9 loop ok
 		aInc = aDecls[i][9]
-		if len(aInc) = 0 loop ok
+		if Len(aInc) = 0 loop ok
 		try
 			aNew = []
 			aSrc = []
-			for j = 1 to len(aInc)
+			for j = 1 to Len(aInc)
 				tF = aInc[j]
 				tK = DeclaredKind(aDeclared, tF)
 				if tK = "" StzuFail(aDecls[i][5], "INCLUDES: '" + tF + "' resolves to nothing in this declaration") ok
@@ -132,11 +132,11 @@ func StzuExpandIncludes(aDecls, aForms, aDeclared)
 					if aInc[m] = tF StzuFail(aDecls[i][5], "INCLUDES names '" + tF + "' twice") ok
 				next
 				aFS = []
-				for m = 1 to len(aForms)
+				for m = 1 to Len(aForms)
 					if aForms[m][1] = tF aFS = aForms[m][2] ok
 				next
-				for m = 1 to len(aFS)
-					for q = 1 to len(aNew)
+				for m = 1 to Len(aFS)
+					for q = 1 to Len(aNew)
 						if aNew[q][1] = aFS[m][1]
 							StzuFail(aDecls[i][5], "seat '" + aFS[m][1] + "' of " + aDecls[i][1] + " comes twice: from " + StzuSeatSource(aSrc[q]) + " and from " + StzuSeatSource(tF))
 						ok
@@ -146,8 +146,8 @@ func StzuExpandIncludes(aDecls, aForms, aDeclared)
 				next
 			next
 			aOwn = aDecls[i][3]
-			for m = 1 to len(aOwn)
-				for q = 1 to len(aNew)
+			for m = 1 to Len(aOwn)
+				for q = 1 to Len(aNew)
 					if aNew[q][1] = aOwn[m][1]
 						StzuFail(aDecls[i][5], "seat '" + aOwn[m][1] + "' of " + aDecls[i][1] + " comes twice: from " + StzuSeatSource(aSrc[q]) + " and from " + StzuSeatSource(""))
 					ok
@@ -168,7 +168,7 @@ func StzuExpandIncludes(aDecls, aForms, aDeclared)
 # the fold of one node per kind: or (and, for all) in the order the kinds are declared
 func StzuFoldNodes(tOp, aNodes)
 	aR = aNodes[1]
-	for j = 2 to len(aNodes)
+	for j = 2 to Len(aNodes)
 		aN = [tOp, aR, aNodes[j]]
 		aR = aN
 	next
@@ -192,7 +192,7 @@ func StzuFormAst(aAst, tOn, aTab, aDecls)
 		if nF > 0
 			$bFormChanged = true
 			aNodes = []
-			for j = 1 to len(aTab[nF][2])
+			for j = 1 to Len(aTab[nF][2])
 				aE = ["exists", aTab[nF][2][j]]
 				aNodes + aE
 			next
@@ -202,19 +202,19 @@ func StzuFormAst(aAst, tOn, aTab, aDecls)
 	ok
 	if xK = "quant"
 		aCond = aAst[5]
-		if not isnull(aCond) aCond = StzuFormAst(aCond, tOn, aTab, aDecls) ok
+		if not IsNull(aCond) aCond = StzuFormAst(aCond, tOn, aTab, aDecls) ok
 		tHead = ""
-		if len(aAst[3][2]) = 1 tHead = aAst[3][2][1] ok
+		if Len(aAst[3][2]) = 1 tHead = aAst[3][2][1] ok
 		nF = 0
 		if tHead != "" nF = StzuFormAt(aTab, tHead) ok
 		# a name that is a seat of the constraint's kind keeps the meaning it had
 		if nF > 0 and tOn != ""
-			if not isnull(StzuSeatNamed(StzuSeatsOf(aDecls, tOn), tHead)) nF = 0 ok
+			if not IsNull(StzuSeatNamed(StzuSeatsOf(aDecls, tOn), tHead)) nF = 0 ok
 		ok
 		if nF > 0
 			$bFormChanged = true
 			aNodes = []
-			for j = 1 to len(aTab[nF][2])
+			for j = 1 to Len(aTab[nF][2])
 				aP = ["path", [aTab[nF][2][j]]]
 				aQ = ["quant", aAst[2], aP, aAst[4], aCond]
 				aNodes + aQ
@@ -230,7 +230,7 @@ func StzuFormAst(aAst, tOn, aTab, aDecls)
 
 # a condition as written, or its expansion in the canonical text when it quantifies over a FORM some kind includes
 func StzuExpandCond(tCond, tOn, aTab, aDecls)
-	if len(aTab) = 0 return tCond ok
+	if Len(aTab) = 0 return tCond ok
 	$bFormChanged = false
 	aAst = null
 	tErr = ""
@@ -246,19 +246,19 @@ func StzuExpandCond(tCond, tOn, aTab, aDecls)
 	return CondPrint(aNew)
 
 func StzuNameIn(tName, aRecs)
-	for i = 1 to len(aRecs)
+	for i = 1 to Len(aRecs)
 		if aRecs[i][1] = tName return true ok
 	next
 	return false
 
 # the CONSTRAINTs, each ON a FORM made once for each including kind, every condition expanded
 func StzuExpandConstraints(aCons, aTab, aDecls, aDeclared)
-	if len(aTab) = 0 return aCons ok
+	if Len(aTab) = 0 return aCons ok
 	aOut = []
-	for i = 1 to len(aCons)
+	for i = 1 to Len(aCons)
 		aC = aCons[i]
 		aExc = []
-		if len(aC) >= 10 aExc = aC[10] ok
+		if Len(aC) >= 10 aExc = aC[10] ok
 		nF = StzuFormAt(aTab, aC[2])
 		tOnKind = DeclaredKind(aDeclared, aC[2])
 		if nF > 0
@@ -267,24 +267,24 @@ func StzuExpandConstraints(aCons, aTab, aDecls, aDeclared)
 			bErr = false
 			aKept = []
 			try
-				for e = 1 to len(aExc)
+				for e = 1 to Len(aExc)
 					if DeclaredKind(aDeclared, aExc[e]) = "" StzuFail(aC[6], "EXCEPT: '" + aExc[e] + "' resolves to nothing in this declaration") ok
 					if not InStrList(aExc[e], aKinds) StzuFail(aC[6], "EXCEPT names '" + aExc[e] + "', which does not include the FORM '" + aC[2] + "'") ok
 					for m = 1 to e - 1
 						if aExc[m] = aExc[e] StzuFail(aC[6], "EXCEPT names '" + aExc[e] + "' twice") ok
 					next
 				next
-				for k = 1 to len(aKinds)
+				for k = 1 to Len(aKinds)
 					if not InStrList(aKinds[k], aExc) aKept + aKinds[k] ok
 				next
-				if len(aKept) = 0 StzuFail(aC[6], "EXCEPT leaves no kind for ON " + aC[2]) ok
+				if Len(aKept) = 0 StzuFail(aC[6], "EXCEPT leaves no kind for ON " + aC[2]) ok
 			catch
 				bErr = true
 				StzuNote(cCatchError)
 			done
 			if bErr loop ok
 			aKinds = aKept
-			for k = 1 to len(aKinds)
+			for k = 1 to Len(aKinds)
 				tNm = aC[1] + "_" + aKinds[k]
 				if DeclaredKind(aDeclared, tNm) != "" or StzuNameIn(tNm, aOut)
 					try
@@ -303,7 +303,7 @@ func StzuExpandConstraints(aCons, aTab, aDecls, aDeclared)
 			next
 		else
 			# EXCEPT has something to except only ON a FORM some kind includes; ON anything else it is refused (an unknown ON is the ON check's to speak of)
-			if len(aExc) > 0 and tOnKind != ""
+			if Len(aExc) > 0 and tOnKind != ""
 				tWhy = "and '" + aC[2] + "' is a " + tOnKind
 				if tOnKind = "FORM" tWhy = "and no DECLARATION includes '" + aC[2] + "'" ok
 				try
@@ -322,8 +322,8 @@ func StzuExpandConstraints(aCons, aTab, aDecls, aDeclared)
 
 # the VIEWs' WHERE, [name, on, one, named, where, line]
 func StzuExpandViews(aViews, aTab, aDecls)
-	if len(aTab) = 0 return aViews ok
-	for i = 1 to len(aViews)
+	if Len(aTab) = 0 return aViews ok
+	for i = 1 to Len(aViews)
 		if aViews[i][5] != ""
 			aViews[i][5] = StzuExpandCond(aViews[i][5], aViews[i][2], aTab, aDecls)
 		ok

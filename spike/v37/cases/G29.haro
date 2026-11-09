@@ -1,7 +1,7 @@
 g()
 func g
 	try
-		raise("x")
+		Raise("x")
 	catch e
 		try
 			? e.Message(1)

@@ -3,11 +3,11 @@ func h
 	aL = []
 	try
 		try
-			raise("held")
+			Raise("held")
 		finally
 			? aL[3]
 		done
 	catch e
 		? e.Code()
-		? string(e.Cause()) + " " + string(e.Cause().Span()[:line])
+		? String(e.Cause()) + " " + String(e.Cause().Span()[:line])
 	done

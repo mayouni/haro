@@ -27,53 +27,53 @@
 # ---- the lexer -----------------------------------------------------------------------------------------------------
 
 func BlkIsDigit(tC)
-	nN = ascii(tC)
+	nN = Ascii(tC)
 	return (nN >= 48 and nN <= 57)
 
 func BlkIsLower(tC)
-	nN = ascii(tC)
+	nN = Ascii(tC)
 	return (nN >= 97 and nN <= 122)
 
 func BlkIsUpper(tC)
-	nN = ascii(tC)
+	nN = Ascii(tC)
 	return (nN >= 65 and nN <= 90)
 
 func BlkIsWordChar(tC)
-	return BlkIsLower(tC) or BlkIsUpper(tC) or BlkIsDigit(tC) or ascii(tC) = 95
+	return BlkIsLower(tC) or BlkIsUpper(tC) or BlkIsDigit(tC) or Ascii(tC) = 95
 
 func BlkTrim(tS)
 	nA = 1
-	nB = len(tS)
-	while nA <= nB and (tS[nA] = " " or tS[nA] = char(9) or tS[nA] = char(13))
+	nB = Len(tS)
+	while nA <= nB and (tS[nA] = " " or tS[nA] = Char(9) or tS[nA] = Char(13))
 		nA++
 	end
-	while nB >= nA and (tS[nB] = " " or tS[nB] = char(9) or tS[nB] = char(13))
+	while nB >= nA and (tS[nB] = " " or tS[nB] = Char(9) or tS[nB] = Char(13))
 		nB--
 	end
 	if nB < nA return "" ok
-	return substr(tS, nA, nB - nA + 1)
+	return SubStr(tS, nA, nB - nA + 1)
 
 func BlkTokenize(tSrc)
 	aToks = []
-	nN = len(tSrc)
+	nN = Len(tSrc)
 	nI = 1
 	nLine = 1
 	# a byte-order mark at the start of the text is layout (C6 3.10)
-	if nN >= 3 and ascii(tSrc[1]) = 239 and ascii(tSrc[2]) = 187 and ascii(tSrc[3]) = 191 nI = 4 ok
+	if nN >= 3 and Ascii(tSrc[1]) = 239 and Ascii(tSrc[2]) = 187 and Ascii(tSrc[3]) = 191 nI = 4 ok
 	while nI <= nN
 		tC = tSrc[nI]
-		if tC = char(10)
+		if tC = Char(10)
 			nLine++
 			nI++
-		but tC = " " or tC = char(9) or tC = char(13)
+		but tC = " " or tC = Char(9) or tC = Char(13)
 			nI++
 		but tC = "-" and nI < nN and tSrc[nI+1] = "-"
 			# a comment runs to the line's end; it is a value of the block, in its place
 			nJ = nI + 2
-			while nJ <= nN and tSrc[nJ] != char(10)
+			while nJ <= nN and tSrc[nJ] != Char(10)
 				nJ++
 			end
-			aToks + ["comment", BlkTrim(substr(tSrc, nI + 2, nJ - nI - 2)), nLine, nI, nJ]
+			aToks + ["comment", BlkTrim(SubStr(tSrc, nI + 2, nJ - nI - 2)), nLine, nI, nJ]
 			nI = nJ
 		but tC = '"'
 			# C6 3.2: a continuation line's leading whitespace folds to one space; what stands before the
@@ -91,16 +91,16 @@ func BlkTokenize(tSrc)
 					nI++
 					exit
 				ok
-				if tD = char(10)
+				if tD = Char(10)
 					nLine++
 					nI++
-					while nI <= nN and (tSrc[nI] = " " or tSrc[nI] = char(9) or tSrc[nI] = char(13))
+					while nI <= nN and (tSrc[nI] = " " or tSrc[nI] = Char(9) or tSrc[nI] = Char(13))
 						nI++
 					end
 					tBuf += " "
 					loop
 				ok
-				if tD = char(13)
+				if tD = Char(13)
 					nI++
 					loop
 				ok
@@ -139,10 +139,10 @@ func BlkTokenize(tSrc)
 				while nJ <= nN and BlkIsWordChar(tSrc[nJ])
 					nJ++
 				end
-				aToks + ["error", "number_glued", nLine, substr(tSrc, nI, nJ - nI)]
+				aToks + ["error", "number_glued", nLine, SubStr(tSrc, nI, nJ - nI)]
 				return aToks
 			ok
-			aToks + ["number", substr(tSrc, nI, nJ - nI), nLine, nI, nJ]
+			aToks + ["number", SubStr(tSrc, nI, nJ - nI), nLine, nI, nJ]
 			nI = nJ
 		but BlkIsWordChar(tC)
 			# C6 3.4, 3.5: a lower_snake word or an UPPER_SNAKE keyword; case is meaning, and mixed case is neither
@@ -150,10 +150,10 @@ func BlkTokenize(tSrc)
 			while nJ <= nN and BlkIsWordChar(tSrc[nJ])
 				nJ++
 			end
-			tW = substr(tSrc, nI, nJ - nI)
+			tW = SubStr(tSrc, nI, nJ - nI)
 			bLower = true
 			bUpper = true
-			for k = 1 to len(tW)
+			for k = 1 to Len(tW)
 				if BlkIsLower(tW[k]) bUpper = false ok
 				if BlkIsUpper(tW[k]) bLower = false ok
 			next
@@ -190,14 +190,14 @@ func BlkTokenize(tSrc)
 
 # the last token, when it is an error; NULL otherwise
 func BlkLexError(aToks)
-	aT = aToks[len(aToks)]
+	aT = aToks[Len(aToks)]
 	if aT[1] = "error" return aT ok
 	return null
 
 # the tokens without their comments: what a court's parser reads (a comment is layout to a court, a value to the block)
 func BlkWithoutComments(aToks)
 	aOut = []
-	for i = 1 to len(aToks)
+	for i = 1 to Len(aToks)
 		if aToks[i][1] != "comment" aOut + aToks[i] ok
 	next
 	return aOut
@@ -205,7 +205,7 @@ func BlkWithoutComments(aToks)
 # ---- the block loader --------------------------------------------------------------------------------------------------
 
 func BlkFail(nLine, tMsg)
-	raise("block (line " + string(nLine) + "): " + tMsg)
+	Raise("block (line " + String(nLine) + "): " + tMsg)
 
 func BlkLexMessage(xT)
 	tCat = xT[2]
@@ -221,14 +221,14 @@ func BlkPeek()
 
 func BlkPeekAt(nK)
 	nJ = $nBlkPos + nK
-	if nJ > len($aBlkToks) return $aBlkToks[len($aBlkToks)] ok
+	if nJ > Len($aBlkToks) return $aBlkToks[Len($aBlkToks)] ok
 	return $aBlkToks[nJ]
 
 # C6 text -> the top-level sequence of values
 func BlkLoad(tSrc)
 	$aBlkToks = BlkTokenize(tSrc)
 	aE = BlkLexError($aBlkToks)
-	if not isnull(aE) BlkFail(aE[3], BlkLexMessage(aE)) ok
+	if not IsNull(aE) BlkFail(aE[3], BlkLexMessage(aE)) ok
 	$nBlkPos = 1
 	aOut = []
 	while BlkPeek()[1] != "eof"
@@ -254,7 +254,7 @@ func BlkName()
 		aParts + aT2[2]
 		nEnd = aT2[5]
 	end
-	if len(aParts) > 1 return ["path", aParts] ok
+	if Len(aParts) > 1 return ["path", aParts] ok
 	if aT[1] = "keyword" return ["kw", aT[2]] ok
 	return ["word", aT[2]]
 
@@ -312,7 +312,7 @@ func BlkValue1()
 
 func BlkCountValues(aSeg)
 	nN = 0
-	for i = 1 to len(aSeg)
+	for i = 1 to Len(aSeg)
 		if aSeg[i][1] != "comment" nN++ ok
 	next
 	return nN
@@ -324,7 +324,7 @@ func BlkFlush(aItems, aSeg)
 	aLead = []
 	aTrail = []
 	bSeen = false
-	for i = 1 to len(aSeg)
+	for i = 1 to Len(aSeg)
 		xV = aSeg[i]
 		if xV[1] = "comment"
 			if bSeen
@@ -337,15 +337,15 @@ func BlkFlush(aItems, aSeg)
 			aVals + xV
 		ok
 	next
-	for i = 1 to len(aLead)
+	for i = 1 to Len(aLead)
 		aItems + aLead[i]
 	next
-	if len(aVals) = 1
+	if Len(aVals) = 1
 		aItems + aVals[1]
-	but len(aVals) > 1
+	but Len(aVals) > 1
 		aItems + ["row", aVals]
 	ok
-	for i = 1 to len(aTrail)
+	for i = 1 to Len(aTrail)
 		aItems + aTrail[i]
 	next
 	return aItems
@@ -384,7 +384,7 @@ func BlkContainer(tClose, tWhat, nLine0)
 
 func BlkJoin(aParts, tSep)
 	tOut = ""
-	for i = 1 to len(aParts)
+	for i = 1 to Len(aParts)
 		if i > 1 tOut += tSep ok
 		tOut += aParts[i]
 	next
@@ -395,20 +395,20 @@ func BlkJoin(aParts, tSep)
 func BlkDump(xV)
 	xK = xV[1]
 	if xK = "word" or xK = "kw" or xK = "num" or xK = "str" or xK = "comment"
-		return "(" + string(xK) + " " + string(len(xV[2])) + ":" + string(xV[2]) + ")"
+		return "(" + String(xK) + " " + String(Len(xV[2])) + ":" + String(xV[2]) + ")"
 	ok
 	if xK = "path" return "(path " + BlkJoin(xV[2], ".") + ")" ok
 	if xK = "pair" return "(pair " + BlkDump(xV[2]) + " " + BlkDump(xV[3]) + ")" ok
 	if xK = "opt" return "(opt " + BlkDump(xV[2]) + ")" ok
 	tOut = "(" + xK
-	for i = 1 to len(xV[2])
+	for i = 1 to Len(xV[2])
 		tOut += " " + BlkDump(xV[2][i])
 	next
 	return tOut + ")"
 
 func BlkDumpAll(aVals)
 	tOut = ""
-	for i = 1 to len(aVals)
+	for i = 1 to Len(aVals)
 		if i > 1 tOut += " " ok
 		tOut += BlkDump(aVals[i])
 	next
@@ -420,7 +420,7 @@ func BlkDumpAll(aVals)
 # line; a comment on its own line.
 
 func BlkHoldsCommentOrGroup(aItems)
-	for i = 1 to len(aItems)
+	for i = 1 to Len(aItems)
 		if aItems[i][1] = "comment" or aItems[i][1] = "group" return true ok
 	next
 	return false
@@ -429,7 +429,7 @@ func BlkPrint(xV, nInd)
 	xK = xV[1]
 	if xK = "word" or xK = "kw" or xK = "num" return xV[2] ok
 	if xK = "str"
-		for i = 1 to len(xV[2])
+		for i = 1 to Len(xV[2])
 			if xV[2][i] = '"' BlkFail(0, "a string holding a double quote has no C6 printing (C6 strings have no escape)") ok
 		next
 		return '"' + xV[2] + '"'
@@ -438,7 +438,7 @@ func BlkPrint(xV, nInd)
 	if xK = "pair" return BlkPrint(xV[2], nInd) + ": " + BlkPrint(xV[3], nInd) ok
 	if xK = "row"
 		aP = []
-		for i = 1 to len(xV[2])
+		for i = 1 to Len(xV[2])
 			aP + BlkPrint(xV[2][i], nInd)
 		next
 		return BlkJoin(aP, " ")
@@ -449,16 +449,16 @@ func BlkPrint(xV, nInd)
 		return "-- " + xV[2]
 	ok
 	if xK = "list"
-		if len(xV[2]) = 0 return "[]" ok
+		if Len(xV[2]) = 0 return "[]" ok
 		if BlkHoldsCommentOrGroup(xV[2]) return "[" + BlkLines(xV[2], nInd) + "]" ok
 		aP = []
-		for i = 1 to len(xV[2])
+		for i = 1 to Len(xV[2])
 			aP + BlkPrint(xV[2][i], nInd)
 		next
 		return "[" + BlkJoin(aP, ", ") + "]"
 	ok
 	if xK = "group"
-		if len(xV[2]) = 0 return "()" ok
+		if Len(xV[2]) = 0 return "()" ok
 		return "(" + BlkLines(xV[2], nInd) + ")"
 	ok
 	BlkFail(0, "no printing for a value of kind '" + xK + "'")
@@ -473,14 +473,14 @@ func BlkSpaces(nN)
 func BlkLines(aItems, nInd)
 	tPad = BlkSpaces(nInd + 2)
 	nLastReal = 0
-	for j = 1 to len(aItems)
+	for j = 1 to Len(aItems)
 		if aItems[j][1] != "comment" nLastReal = j ok
 	next
-	tOut = char(10)
-	for j = 1 to len(aItems)
+	tOut = Char(10)
+	for j = 1 to Len(aItems)
 		tComma = ""
 		if aItems[j][1] != "comment" and j != nLastReal tComma = "," ok
-		tOut += tPad + BlkPrint(aItems[j], nInd + 2) + tComma + char(10)
+		tOut += tPad + BlkPrint(aItems[j], nInd + 2) + tComma + Char(10)
 	next
 	return tOut + BlkSpaces(nInd)
 
@@ -489,14 +489,14 @@ func BlkLines(aItems, nInd)
 func BlkPrintC6(aVals)
 	aParas = []
 	aCur = []
-	for i = 1 to len(aVals)
+	for i = 1 to Len(aVals)
 		xV = aVals[i]
-		if xV[1] = "kw" and xV[2] = "DEFINE" and len(aCur) > 0
+		if xV[1] = "kw" and xV[2] = "DEFINE" and Len(aCur) > 0
 			aParas + aCur
 			aCur = []
 		ok
 		if xV[1] = "comment"
-			if len(aCur) > 0
+			if Len(aCur) > 0
 				aParas + aCur
 				aCur = []
 			ok
@@ -505,14 +505,14 @@ func BlkPrintC6(aVals)
 		ok
 		aCur + xV
 	next
-	if len(aCur) > 0 aParas + aCur ok
+	if Len(aCur) > 0 aParas + aCur ok
 	tOut = ""
-	for p = 1 to len(aParas)
-		if p > 1 tOut += char(10) ok
+	for p = 1 to Len(aParas)
+		if p > 1 tOut += Char(10) ok
 		aP = []
-		for i = 1 to len(aParas[p])
+		for i = 1 to Len(aParas[p])
 			aP + BlkPrint(aParas[p][i], 0)
 		next
-		tOut += BlkJoin(aP, " ") + char(10)
+		tOut += BlkJoin(aP, " ") + Char(10)
 	next
 	return tOut

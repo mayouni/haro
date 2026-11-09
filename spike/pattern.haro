@@ -36,11 +36,11 @@ $aPatMemo = []
 $nPatMemoTop = 0
 $nPatSteps = 0
 
-if len(sysargv) < 4
+if Len(sysargv) < 4
 	? "usage: pattern.haro cases <file>"
 else
 	if sysargv[3] = "cases"
-		PatCases(read(sysargv[4]))
+		PatCases(Read(sysargv[4]))
 	else
 		? "usage: pattern.haro cases <file>"
 	ok
@@ -48,20 +48,20 @@ ok
 
 # the first word of a line and the rest after one space
 func PatSplit1(tLine)
-	nN = len(tLine)
+	nN = Len(tLine)
 	nI = 1
 	while nI <= nN and tLine[nI] != " "
 		nI++
 	end
 	if nI > nN return [tLine, ""] ok
-	return [left(tLine, nI - 1), substr(tLine, nI + 1)]
+	return [Left(tLine, nI - 1), SubStr(tLine, nI + 1)]
 
 func PatWords(tText)
 	aOut = []
 	tW = ""
-	for i = 1 to len(tText)
+	for i = 1 to Len(tText)
 		if tText[i] = " "
-			if len(tW) > 0
+			if Len(tW) > 0
 				aOut + tW
 				tW = ""
 			ok
@@ -69,11 +69,11 @@ func PatWords(tText)
 			tW += tText[i]
 		ok
 	next
-	if len(tW) > 0 aOut + tW ok
+	if Len(tW) > 0 aOut + tW ok
 	return aOut
 
 func PatCases(tBody)
-	aLines = str2list(tBody)
+	aLines = Str2List(tBody)
 	tId = ""
 	aNames = []
 	aTexts = []
@@ -84,10 +84,10 @@ func PatCases(tBody)
 	tInput = ""
 	tFile = ""
 	bOpen = false
-	for i = 1 to len(aLines)
+	for i = 1 to Len(aLines)
 		tLine = aLines[i]
-		if len(tLine) > 0 and tLine[len(tLine)] = char(13)
-			tLine = left(tLine, len(tLine) - 1)
+		if Len(tLine) > 0 and tLine[Len(tLine)] = Char(13)
+			tLine = Left(tLine, Len(tLine) - 1)
 		ok
 		aP = PatSplit1(tLine)
 		tCmd = aP[1]
@@ -111,7 +111,7 @@ func PatCases(tBody)
 			aW = PatWords(aP[2])
 			aSetN + aW[1]
 			aMem = []
-			for k = 2 to len(aW)
+			for k = 2 to Len(aW)
 				aMem + aW[k]
 			next
 			aSetM + aMem
@@ -133,11 +133,11 @@ func PatOneCase(tId, aNames, aTexts, aSetN, aSetM, tStart, nInput, tInput, tFile
 		if nInput = 0
 			? tId + " declared"
 		else
-			if nInput = 2 tInput = read(tFile) ok
+			if nInput = 2 tInput = Read(tFile) ok
 			aR = PatRun(tStart, tInput)
 			tWhole = "0"
 			if aR[1] tWhole = "1" ok
-			? tId + " match " + tWhole + " steps " + string(aR[3]) + " bound " + string(aR[4]) + " kept " + PatPrintKept(aR[2])
+			? tId + " match " + tWhole + " steps " + String(aR[3]) + " bound " + String(aR[4]) + " kept " + PatPrintKept(aR[2])
 		ok
 	catch
 		? tId + " refused " + cCatchError

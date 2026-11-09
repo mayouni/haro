@@ -1,6 +1,6 @@
 ? s()
 try
-	raise("later")
+	Raise("later")
 catch
 	? "later caught at top: " + cCatchError
 done

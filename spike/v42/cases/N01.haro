@@ -3,7 +3,7 @@ f()
 func f
 	nClient = 2
 	? nClient + Twice(3)
-	? isnull(null)
+	? IsNull(null)
 	oO = new Point
 	? oO.GetX()
 	? $nTotal

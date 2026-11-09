@@ -2,7 +2,7 @@ f()
 func f
 	tE = "outer"
 	try
-		raise("z")
+		Raise("z")
 	catch
 		tE
 		? "e is still " + tE

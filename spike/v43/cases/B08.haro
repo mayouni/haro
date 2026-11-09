@@ -1,8 +1,8 @@
 f()
 func f
-	? isstring("a")
-	? isnumber("a")
-	? islist([])
-	if isnull(null)
+	? IsString("a")
+	? IsNumber("a")
+	? IsList([])
+	if IsNull(null)
 		? "none"
 	ok

@@ -1,7 +1,7 @@
 try
-	raise("boom")
+	Raise("boom")
 catch e
 	? e.Message()
-	? type(e.Message())
+	? Type(e.Message())
 	? e.Message() = e
 done

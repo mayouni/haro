@@ -1,7 +1,7 @@
 $tG = "a"
 within $tG = "b"
 	try
-		raise("x")
+		Raise("x")
 	catch
 		? "caught in " + $tG
 	end

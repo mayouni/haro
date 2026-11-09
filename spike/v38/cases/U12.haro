@@ -1,8 +1,8 @@
 f()
 func f
-	eval("using oRes = new Res(" + char(34) + "e" + char(34) + ")" + nl + "? " + char(34) + "in eval " + char(34) + " + oRes.tName" + nl + "done")
+	Eval("using oRes = new Res(" + Char(34) + "e" + Char(34) + ")" + nl + "? " + Char(34) + "in eval " + Char(34) + " + oRes.tName" + nl + "done")
 	$tG = "a"
-	eval("within $tG = " + char(34) + "b" + char(34) + nl + "? $tG" + nl + "done")
+	Eval("within $tG = " + Char(34) + "b" + Char(34) + nl + "? $tG" + nl + "done")
 	? $tG
 class Res
 	tName = ""

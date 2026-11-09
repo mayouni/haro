@@ -28,28 +28,28 @@
 
 func NarBaseName(tPath)
 	nCut = 0
-	for i = 1 to len(tPath)
-		if tPath[i] = "/" or ascii(tPath[i]) = 92 nCut = i ok
+	for i = 1 to Len(tPath)
+		if tPath[i] = "/" or Ascii(tPath[i]) = 92 nCut = i ok
 	next
-	return substr(tPath, nCut + 1)
+	return SubStr(tPath, nCut + 1)
 
 # a seat's value as text, verbatim
 func NarSeatText(aDecl, tSeat)
 	aC = aDecl[4]
-	for i = 1 to len(aC)
-		if lower(aC[i][1]) = tSeat
+	for i = 1 to Len(aC)
+		if Lower(aC[i][1]) = tSeat
 			aV = aC[i][3]
 			tK = aV[1]
 			if tK = "word" or tK = "string" or tK = "number" return aV[2] ok
 			tOut = ""
 			if tK = "pairlist"
-				for j = 1 to len(aV[2])
+				for j = 1 to Len(aV[2])
 					if j > 1 tOut += ", " ok
 					tOut += aV[2][j][1] + " -> " + aV[2][j][2]
 				next
 				return tOut
 			ok
-			for j = 1 to len(aV[2])
+			for j = 1 to Len(aV[2])
 				if j > 1 tOut += ", " ok
 				tOut += aV[2][j]
 			next
@@ -61,7 +61,7 @@ func NarSeatText(aDecl, tSeat)
 # fill a template: aVals is [[key, text], ...]; an unknown key fills as nothing
 func NarFill(tT, aVals)
 	tOut = ""
-	nN = len(tT)
+	nN = Len(tT)
 	nI = 1
 	while nI <= nN
 		tC = tT[nI]
@@ -72,7 +72,7 @@ func NarFill(tT, aVals)
 				tW += tT[nJ]
 				nJ++
 			end
-			for k = 1 to len(aVals)
+			for k = 1 to Len(aVals)
 				if aVals[k][1] = tW tOut += aVals[k][2] ok
 			next
 			nI = nJ
@@ -85,13 +85,13 @@ func NarFill(tT, aVals)
 
 func NarSays(tKind)
 	aS = $aCourtNarrate[5]
-	for i = 1 to len(aS)
+	for i = 1 to Len(aS)
 		if aS[i][1] = tKind return aS[i][2] ok
 	next
 	return ""
 
 func NarrateRun(tFile)
-	tSrc = read(tFile)
+	tSrc = Read(tFile)
 	CtSetCode("PARSE", [])
 	tErr = ""
 	aDecls = null
@@ -105,30 +105,30 @@ func NarrateRun(tFile)
 		tRefuses = $aCourtNarrate[4]
 		if tRefuses = "" tRefuses = "I stopped at line {line}: {message}" ok
 		tCites = ""
-		for i = 1 to len($aCourtCites)
+		for i = 1 to Len($aCourtCites)
 			if i > 1 tCites += ", " ok
 			tCites += $aCourtCites[i]
 		next
-		? NarFill(tRefuses, [["language", $tCourtLang], ["file", tBase], ["line", string(CtLineOf(tErr))], ["code", $tCourtCode], ["message", CtStripPrefix(tErr)], ["cites", tCites]])
+		? NarFill(tRefuses, [["language", $tCourtLang], ["file", tBase], ["line", String(CtLineOf(tErr))], ["code", $tCourtCode], ["message", CtStripPrefix(tErr)], ["cites", tCites]])
 		return
 	ok
 	tOpens = $aCourtNarrate[2]
 	if tOpens = "" tOpens = "{file} is a sentence of {language}, {count} declarations." ok
 	tEnds = $aCourtNarrate[3]
 	if tEnds = "" tEnds = "That is all of it." ok
-	aTop = [["language", $tCourtLang], ["file", tBase], ["count", string(len(aDecls))]]
+	aTop = [["language", $tCourtLang], ["file", tBase], ["count", String(Len(aDecls))]]
 	? NarFill(tOpens, aTop)
-	for i = 1 to len(aDecls)
+	for i = 1 to Len(aDecls)
 		aD = aDecls[i]
 		aKind = CtKindByVerb(aD[1])
 		tT = ""
-		if not isnull(aKind) tT = NarSays(aKind[2]) ok
+		if not IsNull(aKind) tT = NarSays(aKind[2]) ok
 		if tT = ""
-			? lower(aD[1]) + " " + aD[2] + ": " + aD[5]
+			? Lower(aD[1]) + " " + aD[2] + ": " + aD[5]
 		else
-			aVals = [["name", aD[2]], ["verb", aD[1]], ["rationale", aD[5]], ["line", string(aD[3])]]
-			if not isnull(aKind)
-				for j = 1 to len(aKind[3])
+			aVals = [["name", aD[2]], ["verb", aD[1]], ["rationale", aD[5]], ["line", String(aD[3])]]
+			if not IsNull(aKind)
+				for j = 1 to Len(aKind[3])
 					aVals + [aKind[3][j][1], NarSeatText(aD, aKind[3][j][1])]
 				next
 			ok
@@ -152,7 +152,7 @@ func NarrateRun(tFile)
 
 func NarTellText(tKey)
 	aT = $aCourtNarrate[6]
-	for i = 1 to len(aT)
+	for i = 1 to Len(aT)
 		if aT[i][1] = tKey return aT[i][2] ok
 	next
 	return ""
@@ -169,21 +169,21 @@ func NarRefuse(tErr, tBase)
 	tRefuses = $aCourtNarrate[4]
 	if tRefuses = "" tRefuses = "I stopped at line {line}: {message}" ok
 	tCites = ""
-	for i = 1 to len($aCourtCites)
+	for i = 1 to Len($aCourtCites)
 		if i > 1 tCites += ", " ok
 		tCites += $aCourtCites[i]
 	next
-	? NarFill(tRefuses, [["language", $tCourtLang], ["file", tBase], ["line", string(CtLineOf(tErr))], ["code", $tCourtCode], ["message", CtStripPrefix(tErr)], ["cites", tCites]])
+	? NarFill(tRefuses, [["language", $tCourtLang], ["file", tBase], ["line", String(CtLineOf(tErr))], ["code", $tCourtCode], ["message", CtStripPrefix(tErr)], ["cites", tCites]])
 
 # one step of a run, told: [depth, name, value, key, taken, count]
 func NarTellStep(aDecls, aE)
 	aD = CtDeclNamed(aDecls, aE[2])
 	aKind = CtKindByVerb(aD[1])
 	tT = ""
-	if not isnull(aKind) tT = NarTellText(aKind[2]) ok
+	if not IsNull(aKind) tT = NarTellText(aKind[2]) ok
 	if tT = ""
 		# a step the voice does not tell: its verb and name, and what it DID, read off the event's own fields
-		tL = lower(aD[1]) + " " + aD[2]
+		tL = Lower(aD[1]) + " " + aD[2]
 		if aE[5] != ""
 			tL += ": " + aE[5]
 		but aE[6] != ""
@@ -195,15 +195,15 @@ func NarTellStep(aDecls, aE)
 		ok
 		return tL
 	ok
-	aVals = [["name", aD[2]], ["verb", aD[1]], ["rationale", aD[5]], ["line", string(aD[3])], ["value", aE[3]], ["key", aE[4]], ["taken", aE[5]], ["count", aE[6]]]
+	aVals = [["name", aD[2]], ["verb", aD[1]], ["rationale", aD[5]], ["line", String(aD[3])], ["value", aE[3]], ["key", aE[4]], ["taken", aE[5]], ["count", aE[6]]]
 	# what the step DID is told before what was written: a seat that shares a name with one of the
 	# event's own placeholders ({value} of a compute is the number it made, not the expression
 	# that made it) is shadowed, so no key is filled twice
-	if not isnull(aKind)
-		for j = 1 to len(aKind[3])
+	if not IsNull(aKind)
+		for j = 1 to Len(aKind[3])
 			tSeatKey = aKind[3][j][1]
 			bTaken = false
-			for m = 1 to len(aVals)
+			for m = 1 to Len(aVals)
 				if aVals[m][1] = tSeatKey bTaken = true ok
 			next
 			if not bTaken
@@ -219,7 +219,7 @@ func NarTellRun(tFile, tAlg, tRec)
 	tErr = ""
 	aDecls = null
 	try
-		aDecls = CtDeclare(read(tFile))
+		aDecls = CtDeclare(Read(tFile))
 	catch
 		tErr = cCatchError
 	done
@@ -251,7 +251,7 @@ func NarTellRun(tFile, tAlg, tRec)
 	tT = NarTellText("run")
 	if tT = "" tT = "Running {algorithm}." ok
 	? NarFill(tT, [["language", $tCourtLang], ["file", tBase], ["algorithm", tAlg], ["record", tRecText]])
-	for i = 1 to len($aRunTrace)
+	for i = 1 to Len($aRunTrace)
 		aE = $aRunTrace[i]
 		? NarIndent(aE[1]) + NarTellStep(aDecls, aE)
 	next
@@ -276,7 +276,7 @@ func NarTellAsk(tFile, tQ, tRows)
 	tErr = ""
 	aDecls = null
 	try
-		aDecls = CtDeclare(read(tFile))
+		aDecls = CtDeclare(Read(tFile))
 	catch
 		tErr = cCatchError
 	done
@@ -302,14 +302,14 @@ func NarTellAsk(tFile, tQ, tRows)
 		tErr = cCatchError
 	done
 	$bAskTrace = false
-	for i = 1 to len($aAskTrace)
+	for i = 1 to Len($aAskTrace)
 		aE = $aAskTrace[i]
 		tT = NarTellText(aE[1])
 		if tT = "" tT = NarAskDefault(aE[1]) ok
 		aVals = [["language", $tCourtLang], ["file", tBase]]
-		for j = 1 to len(aE[2])
+		for j = 1 to Len(aE[2])
 			aV2 = aE[2][j]
-			if islist(aV2[2])
+			if IsList(aV2[2])
 				# v0.27: the rows a told answer carries leave redacted under the voice's safeguard
 				aRows2 = aV2[2]
 				if CtSafeguard("voice") = "redaction" aRows2 = CtRedactRows(aRows2, CtMarkedFields(aDecls)) ok

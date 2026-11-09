@@ -4,9 +4,9 @@ func f
 	within $tG = "b"
 		using oO = new Res("r")
 			try
-				raise("x")
+				Raise("x")
 			catch e
-				? "span line " + string(e.Span()[:line])
+				? "span line " + String(e.Span()[:line])
 			done
 			? "g " + $tG
 		done
