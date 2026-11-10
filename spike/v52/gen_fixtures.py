@@ -112,13 +112,38 @@ CASES = [
     ('N21', 'N3', 'past 64 bits of digits, DECIMAL_OVERFLOW', '.haro',
      ['? 99999999999999999.9 * 1000'],
      err(1, 'DECIMAL_OVERFLOW', 'decimal * integer leaves 64 bits of digits', 'N21.haro'), 1),
+    # N22 CHANGED AFTER THE CODE, said so: String(0.125) added -- Ring's two places print 12.50 too, so only a digit past them shows
+    # that String is the decimal's own text
     ('N22', 'N1', 'a decimal is text only when asked; asked, it is its digits', '.haro',
-     ['? "price " + String(12.50)', '? "x" + 1.5'],
-     'price 12.50\n' + err(2, 'NO_COERCION', 'text + decimal -- a value changes type only when asked: string(x) or number(x)', 'N22.haro'), 1),
+     ['? "price " + String(12.50)', '? String(0.125)', '? "x" + 1.5'],
+     'price 12.50\n0.125\n' + err(3, 'NO_COERCION', 'text + decimal -- a value changes type only when asked: string(x) or number(x)', 'N22.haro'), 1),
     ('N23', 'N4', 'a decimal divided by zero is Ring\'s R1', '.haro',
      ['? 1.5 / 0'],
      err(1, 'R1', 'Can\'t divide by zero', 'N23.haro'), 1),
+    # N24 to N29 were ADDED AFTER THE CODE, said so: the plants found six protections no case asked about
+    ('N24', 'N2', 'a float\'s arithmetic stays a float, never narrowed to an integer', '.haro',
+     ['fX = 2f * 0.5f', 'fY = fX + 1f', '? fY'],
+     '2\n', 0),
+    ('N25', 'N1', 'decimals are equal and ordered exactly, past a double\'s seventeen digits', '.haro',
+     ['? 1234567890.12345678 = 1234567890.12345679', '? 1234567890.12345678 < 1234567890.12345679'],
+     'false\ntrue\n', 0),
+    ('N26', 'N10', 'a .ring file has none of Haro\'s number built-ins: near() is Ring\'s R3 there', '.ring',
+     ['? "before"', '? near(1, 2, 3)'],
+     'before\n\nLine 2 Error (R3) : Calling Function without definition: near \nin file N26.ring ', 1),
+    ('N27', 'N5', 'a float\'s operator is named as written; a float is negated', '.haro',
+     ['fX = 0.5f', '? -fX', '? fX - 1'],
+     '-0.50\n' + err(3, 'NUMBER_MIX', 'float - integer -- an integer and a float do not mix; convert one: Float(i)', 'N27.haro'), 1),
+    ('N28', 'N3', '% on decimals is exact, the dividend\'s sign', '.haro',
+     ['? 7.5 % 2', '? -7 % 2.5', '? 7.5f % 2f'],
+     '1.5\n-2.0\n1.50\n', 0),
+    ('N29', 'N1', 'a decimal keeps its digits through the compiled image: the second run reads it back', '.haro',
+     ['? 12.50', '? 0.005'],
+     '12.50\n0.005\n', 0),
+    ('N30', 'N9', 'an f name refuses an integer given when the program runs', '.haro',
+     ['fX = 1.5f', '? "before"', 'fX = Len("ab")'],
+     'before\n' + err(3, 'TYPE_LETTER', '`fX` is lettered f, a float, and is given an integer', 'N30.haro'), 1),
 ]
+CACHED = {'N29'}
 
 LIB = {'N20': ('lib.ring', ['func half x', T + 'return x / 2'])}
 
@@ -138,7 +163,7 @@ def main():
             stdout = ('before\n\nLine 2 Haro refused this statement (i is the letter '
                       'of an integer, and this literal is a decimal; written `iN`, line 2 of N19.haro) and did not compile it -- running past it '
                       'would give a wrong answer \nin file N19.haro ')
-        row = {'id': cid, 'kind': 'run', 'line': line, 'why': why, 'file': name, 'stdout': stdout}
+        row = {'id': cid, 'kind': 'cached' if cid in CACHED else 'run', 'line': line, 'why': why, 'file': name, 'stdout': stdout}
         if code:
             row['exit'] = code
         out.append(row)

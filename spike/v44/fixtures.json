@@ -42,7 +42,7 @@
    "line": "P2",
    "why": "a NaN is unordered in a .haro file",
    "file": "cases/Q04.haro",
-   "stdout": "false\nfalse\nfalse\nfalse\nfalse\ntrue\nnot ge\n"
+   "stdout": "false\nfalse\nfalse\nfalse\nnot ge\n"
   },
   {
    "id": "Q05",

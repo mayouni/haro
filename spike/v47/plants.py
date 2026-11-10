@@ -26,7 +26,7 @@ PLANTS = [
      '        if (l == 0 or std.mem.indexOfScalar(u8, LETTERS, l) == null)', '        if (false and (l == 0 or std.mem.indexOfScalar(u8, LETTERS, l) == null))'),
     ('L2', 'Y03', LETTER, COMP, "Softanza's c is refused as any unknown letter, its todo lost", "        if (l == 'c')", "        if (false and l == 'c')"),
     ('L3', 'Y04', LETTER, COMP, 'a literal of another type is accepted', '        if (letterTakes(l, lit)) return true;', '        if (true or letterTakes(l, lit)) return true;'),
-    ('L4', 'Y12', LETTER, COMP, 'an integer letter takes a number with a point', "            else => lit == l,", "            else => lit == l or (l == 'i' and lit == 'n'),"),
+    ('L4', 'Y12', LETTER, COMP, 'an integer letter takes a number with a point', "            else => lit == l,", "            else => lit == l or (l == 'i' and lit == 'd'),"),
     ('L5', 'Y10', LETTER, COMP, 'null is a text literal like any other', "        if (lit == '0') return true;", "        if (false and lit == '0') return true;"),
     ('L6', 'Y05', LETTER, MAIN, 'lchk lets any value through', '                if (!ok) {\n                    const nm = konst[@intCast(in.d)];',
      '                if (false and !ok) {\n                    const nm = konst[@intCast(in.d)];'),

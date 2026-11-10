@@ -18,6 +18,21 @@ import paths
 
 def run(exe, path, kind='run'):
     env = dict(os.environ)
+    if kind == 'cached':
+        # N29: the image cache on, in a folder of the case's own; the first run writes the compiled image, the second reads it back
+        import tempfile
+        with tempfile.TemporaryDirectory() as cache:
+            env.pop('HARO_NOCACHE', None)
+            env['LOCALAPPDATA'] = cache
+            env['XDG_CACHE_HOME'] = cache
+            for _ in range(2):
+                try:
+                    r = subprocess.run([exe, os.path.basename(path)], capture_output=True, env=env, timeout=30, cwd=os.path.dirname(path))
+                except subprocess.TimeoutExpired:
+                    return 'TIMEOUT', -1
+            images = sum(len(fs) for _, _, fs in os.walk(cache))
+            out = r.stdout.decode('utf-8', 'replace').replace('\r\n', '\n')
+            return (out if images else 'NO IMAGE WRITTEN: ' + out), r.returncode
     env['HARO_NOCACHE'] = '1'
     try:
         r = subprocess.run([exe] + (['fmt'] if kind == 'fmt' else []) + [os.path.basename(path)], capture_output=True, env=env, timeout=30, cwd=os.path.dirname(path))

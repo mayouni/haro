@@ -159,7 +159,7 @@
    "line": "B6",
    "why": "what is one type compares, and an integer meets a number",
    "file": "cases/B17.haro",
-   "stdout": "true\ntrue\ntrue\n3.50\nab\n"
+   "stdout": "true\ntrue\ntrue\n3.5\nab\n"
   },
   {
    "id": "B18",

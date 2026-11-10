@@ -13,6 +13,7 @@
 //! is the mechanism, visible.
 
 const std = @import("std");
+const decimal = @import("decimal.zig");
 const ts = @import("ts.zig");
 const vm = @import("main.zig");
 const lift = @import("lift.zig");
@@ -76,6 +77,13 @@ const builtin_table = [_]BuiltinEntry{
     .{ .name = "sqrt", .id = .sqrt, .argc = 1 },
     .{ .name = "strcmp", .id = .strcmp, .argc = 2 },
     .{ .name = "fexists", .id = .fexists, .argc = 1 },
+    // v0.52 (D55 T4): Haro's own, a .haro file's only (haroOnlyBuiltin)
+    .{ .name = "float", .id = .float1, .argc = 1 },
+    .{ .name = "decimal", .id = .decimal1, .argc = 1 },
+    .{ .name = "decimal", .id = .decimal2, .argc = 2 },
+    .{ .name = "integer", .id = .integer1, .argc = 1 },
+    .{ .name = "divide", .id = .divide3, .argc = 3 },
+    .{ .name = "near", .id = .near3, .argc = 3 },
     .{ .name = "read", .id = .readf, .argc = 1 },
     .{ .name = "write", .id = .writef, .argc = 2 },
     .{ .name = "LoadLib", .id = .loadlib, .argc = 1 },
@@ -242,6 +250,14 @@ const builtin_table = [_]BuiltinEntry{
     .{ .name = "admitstate", .id = .admitstate1, .argc = 1 },
     .{ .name = "admitfinish", .id = .admitfinish, .argc = 0 },
 };
+
+/// v0.52: a built-in of Haro's own numbers -- a .ring file reads these names as Ring reads them, no built-in
+fn haroOnlyBuiltin(id: vm.Builtin) bool {
+    return switch (id) {
+        .float1, .decimal1, .decimal2, .integer1, .divide3, .near3 => true,
+        else => false,
+    };
+}
 
 /// Is this callee one of the builtins codegen compiles to a `bcall`?
 fn builtinNamed(name: []const u8) bool {
@@ -3509,6 +3525,14 @@ pub const Compiler = struct {
                 _ = try self.emit(.loadk, dst, 0, 0, try self.konstNum(@floatFromInt(v)));
                 return;
             } else |_| {}
+            // v0.52 (D55 T4): in a .haro file a literal with a point is an exact decimal, and one ending in f a float
+            if (self.haroNode(n)) {
+                if (try haroNumber(self, t, false)) |ki| {
+                    _ = try self.emit(.loadk, dst, 0, 0, ki);
+                    return;
+                }
+                return self.nopeKind(n, "a decimal holds 18 digits after its point and 64 bits of digits");
+            }
             const d = std.fmt.parseFloat(f64, t) catch return self.nope(n);
             _ = try self.emit(.loadk, dst, 0, 0, try self.konstNum(d));
             return;
@@ -4315,7 +4339,8 @@ pub const Compiler = struct {
         // operator("r*", 5) for `5 * o`, and the fold would call "*".
         const may_obj_l = self.classOf(ln) == .ref;
         const may_obj_r = self.classOf(rn) == .ref;
-        if (immOf(rn)) |k| if (!divd and !(minus and may_obj_l)) {
+        const haro_num = self.haroNode(n);
+        if (immOf(rn)) |k| if (!divd and !(minus and may_obj_l) and !(haro_num and self.classOf(ln) != .int)) {
             const src = try self.borrowOperand(ln, dst);
             if (plus) {
                 _ = try self.emit(.addi, dst, src, 0, k);
@@ -4337,7 +4362,7 @@ pub const Compiler = struct {
         // `"5" + 1` is "51", and folding the 1 to the right made rnx say
         // 51 (found 2026-09-11, C-8). So `+` folds a left constant only
         // for a right operand proved numeric.
-        if (((plus and self.classOf(rn) == .int) or times) and immOf(ln) != null and !may_obj_r) {
+        if (((plus and self.classOf(rn) == .int) or times) and immOf(ln) != null and !may_obj_r and !(haro_num and self.classOf(rn) != .int)) {
             const k = immOf(ln).?;
             const src = try self.borrowOperand(rn, dst);
             _ = try self.emit(if (plus) .addi else .muli, dst, src, 0, k);
@@ -5044,6 +5069,8 @@ pub const Compiler = struct {
         var name_seen = false;
         for (table) |bi| {
             if (!std.ascii.eqlIgnoreCase(callee, bi.name)) continue;
+            // v0.52: Float, Decimal, Integer, Divide, Near are a .haro file's; a .ring file calls whatever it defines by those names
+            if (haroOnlyBuiltin(bi.id) and !self.haroNode(n)) continue;
             // one name can carry two arities (find, sort); a name with
             // no matching arity is refused after the loop
             if (argc != bi.argc) {
@@ -5469,7 +5496,7 @@ pub const Compiler = struct {
         const yes_no = [_][]const u8{ "isalnum", "isalpha", "isandroid", "isattribute", "iscfunction", "isclass", "iscntrl", "isdigit", "isfreebsd",
             "isfunction", "isglobal", "isgraph", "islinux", "islist", "islocal", "islower", "ismacosx", "ismethod", "ismsdos", "isnull", "isnumber",
             "isobject", "ispackage", "ispackageclass", "ispointer", "isprint", "isprivateattribute", "isprivatemethod", "ispunct", "isspace",
-            "isstring", "isunix", "isupper", "iswindows", "iswindows64", "isxdigit", "fexists", "direxists", "feof" };
+            "isstring", "isunix", "isupper", "iswindows", "iswindows64", "isxdigit", "fexists", "direxists", "feof", "near" };
         for (yes_no) |w| {
             if (std.ascii.eqlIgnoreCase(name, w)) return self.findFunc(name) == null;
         }
@@ -5519,6 +5546,16 @@ pub const Compiler = struct {
             if (k.tag == .int and k.p.i == v) return @as(i32, @intCast(i)) + kb;
         }
         self.konst.append(self.alloc, vm.Value.int(v)) catch return Error.OutOfMemory;
+        return @as(i32, @intCast(self.konst.items.len - 1)) + kb;
+    }
+
+    /// v0.52: a decimal constant, 12.50 and 12.5 two constants (each prints as written)
+    fn konstDec(self: *Compiler, coeff: i64, scale: u32) Error!i32 {
+        const kb: i32 = if (self.eval) |ev| ev.konst_base else 0;
+        for (self.konst.items, 0..) |k, i| {
+            if (k.tag == .dec and k.p.i == coeff and k._r == scale) return @as(i32, @intCast(i)) + kb;
+        }
+        self.konst.append(self.alloc, vm.Value.dec(coeff, scale)) catch return Error.OutOfMemory;
         return @as(i32, @intCast(self.konst.items.len - 1)) + kb;
     }
 
@@ -6642,7 +6679,7 @@ pub const Compiler = struct {
         const hc = self.haroNode(n);
         if (hc and self.spellIn(n.text())) {
             const lit: ?[]const u8 = if (std.mem.eql(u8, k, "number"))
-                (if (std.mem.indexOfScalar(u8, n.text(), '.') != null) "a number" else "an integer")
+                (if (floatLiteral(std.mem.trim(u8, n.text(), " \t\r\n")) != null) "a float" else if (std.mem.indexOfScalar(u8, n.text(), '.') != null) "a decimal" else "an integer")
             else if (std.mem.eql(u8, k, "string") or std.mem.eql(u8, k, "null"))
                 "a text"
             else if (std.mem.eql(u8, k, "list_literal"))
@@ -6652,8 +6689,10 @@ pub const Compiler = struct {
             if (lit) |what| {
                 self.spellSet(std.mem.trim(u8, n.text(), " \t\r\n"), if (std.mem.eql(u8, what, "an integer"))
                     "a condition takes a boolean -- this literal is an integer; written"
-                else if (std.mem.eql(u8, what, "a number"))
-                    "a condition takes a boolean -- this literal is a number; written"
+                else if (std.mem.eql(u8, what, "a decimal"))
+                    "a condition takes a boolean -- this literal is a decimal; written"
+                else if (std.mem.eql(u8, what, "a float"))
+                    "a condition takes a boolean -- this literal is a float; written"
                 else if (std.mem.eql(u8, what, "a text"))
                     "a condition takes a boolean -- this literal is a text; written"
                 else
@@ -6722,7 +6761,7 @@ pub const Compiler = struct {
     // refused when compiling (the statement's fault, as a misspelling is); any other value given a checked letter is checked where
     // it is given, by `lchk`. A .ring file is untouched.
     const LETTERS = "bidfntxkvmroehswa";
-    const CHECKED = "bintfvoh";
+    const CHECKED = "bidntfvoh";
 
     fn letterCore(name: []const u8) []const u8 {
         return if (name.len > 0 and (name[0] == '$' or name[0] == '@')) name[1..] else name;
@@ -6740,6 +6779,7 @@ pub const Compiler = struct {
             'b' => "a boolean",
             'i' => "an integer",
             'n' => "a number",
+            'd' => "a decimal",
             'f' => "a float",
             't' => "a text",
             'v' => "a vector",
@@ -6774,7 +6814,8 @@ pub const Compiler = struct {
         const k = n.kind();
         if (std.mem.eql(u8, k, "number")) {
             const s = std.mem.trim(u8, n.text(), " \t\r\n");
-            _ = std.fmt.parseInt(i64, s, 10) catch return 'n';
+            if (floatLiteral(s) != null) return 'f';
+            _ = std.fmt.parseInt(i64, s, 10) catch return 'd';
             return 'i';
         }
         if (std.mem.eql(u8, k, "unary_expression") and n.namedChildCount() == 1 and std.mem.eql(u8, n.namedChild(0).kind(), "number")) {
@@ -6793,7 +6834,8 @@ pub const Compiler = struct {
     fn letterTakes(l: u8, lit: u8) bool {
         if (lit == '0') return true;
         return switch (l) {
-            'n', 'f' => lit == 'i' or lit == 'n',
+            // v0.52 (D55 T4): n is any number; d and f take their own kind only
+            'n' => lit == 'i' or lit == 'd' or lit == 'f',
             else => lit == l,
         };
     }
@@ -6805,7 +6847,8 @@ pub const Compiler = struct {
         if (!self.spellIn(use)) return true;
         const lw: []const u8 = switch (lit) {
             'i' => "an integer",
-            'n' => "a number",
+            'd' => "a decimal",
+            'f' => "a float",
             't' => "a text",
             'b' => "a boolean",
             'v' => "a vector",
@@ -11469,8 +11512,32 @@ fn constNumber(c: *Compiler, t: []const u8, neg: bool, haro: bool) Error!?ConstV
         if (haro) return .{ .konst = try c.konstInt(v) };
         return .{ .konst = try c.konstNum(@floatFromInt(v)) };
     } else |_| {}
+    if (haro) return .{ .konst = (try haroNumber(c, t, neg)) orelse return null };
     const d = std.fmt.parseFloat(f64, t) catch return null;
     return .{ .konst = try c.konstNum(if (neg) -d else d) };
+}
+
+/// v0.52: `2.5f`, `2f` -- a float literal's digits, or null (a hex literal's F is a digit)
+fn floatLiteral(t: []const u8) ?[]const u8 {
+    if (t.len < 2 or (t[t.len - 1] != 'f' and t[t.len - 1] != 'F')) return null;
+    if (t.len > 2 and t[0] == '0' and (t[1] == 'x' or t[1] == 'X')) return null;
+    return t[0 .. t.len - 1];
+}
+
+/// v0.52 (D55 T4): a .haro file's number literal that is no plain integer -- a float when it ends in f, else an exact decimal --
+/// as a constant; null when it is neither, or a decimal past 18 digits after its point or 64 bits of digits
+fn haroNumber(c: *Compiler, t: []const u8, neg: bool) Error!?i32 {
+    // a hex literal reads as it did
+    if (t.len > 2 and t[0] == '0' and (t[1] == 'x' or t[1] == 'X')) {
+        const h = std.fmt.parseFloat(f64, t) catch return null;
+        return try c.konstNum(if (neg) -h else h);
+    }
+    if (floatLiteral(t)) |digits| {
+        const f = std.fmt.parseFloat(f64, digits) catch return null;
+        return try c.konstNum(if (neg) -f else f);
+    }
+    const dv = (decimal.parse(t) catch return null) orelse return null;
+    return try c.konstDec(if (neg) -dv.c else dv.c, dv.s);
 }
 
 /// THE RESIDENT VM, RUNG 7: a replaced class that lays out MORE attributes

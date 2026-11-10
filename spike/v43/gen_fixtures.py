@@ -128,9 +128,10 @@ CASES = [
     ('B16', 'B6', 'a boolean equal to an integer raises TYPE_MISMATCH', '.haro', [
         B, 'f()', 'func f', T + '? true = 1'],
      err('B16', 4, 'TYPE_MISMATCH', mismatch('boolean', '=', 'integer')), 1),
+    # B17 CHANGED AFTER v0.52's code, said so (v52/GRAMMAR.md): 3 + 0.5 is the exact decimal 3.5, no longer the double 3.50
     ('B17', 'B6', 'what is one type compares, and an integer meets a number', '.haro', [
         'f()', 'func f', T + '? 2 = 2.0', T + '? "a" < "b"', T + '? true = true', T + '? 3 + 0.5', T + '? "a" + "b"'],
-     ['true', 'true', 'true', '3.50', 'ab']),
+     ['true', 'true', 'true', '3.5', 'ab']),
     ('B18', 'B7', 'an integer stays exact past 2^53', '.haro', [
         'f()', 'func f', T + 'nBig = 9007199254740993', T + '? nBig + 0', T + '? nBig * 2'],
      ['9007199254740993', '18014398509481986']),

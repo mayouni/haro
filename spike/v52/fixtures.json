@@ -200,7 +200,7 @@
    "line": "N1",
    "why": "a decimal is text only when asked; asked, it is its digits",
    "file": "cases/N22.haro",
-   "stdout": "price 12.50\n\nLine 2 Error (NO_COERCION) : text + decimal -- a value changes type only when asked: string(x) or number(x) \nin file N22.haro ",
+   "stdout": "price 12.50\n0.125\n\nLine 3 Error (NO_COERCION) : text + decimal -- a value changes type only when asked: string(x) or number(x) \nin file N22.haro ",
    "exit": 1
   },
   {
@@ -210,6 +210,65 @@
    "why": "a decimal divided by zero is Ring's R1",
    "file": "cases/N23.haro",
    "stdout": "\nLine 1 Error (R1) : Can't divide by zero \nin file N23.haro ",
+   "exit": 1
+  },
+  {
+   "id": "N24",
+   "kind": "run",
+   "line": "N2",
+   "why": "a float's arithmetic stays a float, never narrowed to an integer",
+   "file": "cases/N24.haro",
+   "stdout": "2\n"
+  },
+  {
+   "id": "N25",
+   "kind": "run",
+   "line": "N1",
+   "why": "decimals are equal and ordered exactly, past a double's seventeen digits",
+   "file": "cases/N25.haro",
+   "stdout": "false\ntrue\n"
+  },
+  {
+   "id": "N26",
+   "kind": "run",
+   "line": "N10",
+   "why": "a .ring file has none of Haro's number built-ins: near() is Ring's R3 there",
+   "file": "cases/N26.ring",
+   "stdout": "before\n\nLine 2 Error (R3) : Calling Function without definition: near \nin file N26.ring ",
+   "exit": 1
+  },
+  {
+   "id": "N27",
+   "kind": "run",
+   "line": "N5",
+   "why": "a float's operator is named as written; a float is negated",
+   "file": "cases/N27.haro",
+   "stdout": "-0.50\n\nLine 3 Error (NUMBER_MIX) : float - integer -- an integer and a float do not mix; convert one: Float(i) \nin file N27.haro ",
+   "exit": 1
+  },
+  {
+   "id": "N28",
+   "kind": "run",
+   "line": "N3",
+   "why": "% on decimals is exact, the dividend's sign",
+   "file": "cases/N28.haro",
+   "stdout": "1.5\n-2.0\n1.50\n"
+  },
+  {
+   "id": "N29",
+   "kind": "cached",
+   "line": "N1",
+   "why": "a decimal keeps its digits through the compiled image: the second run reads it back",
+   "file": "cases/N29.haro",
+   "stdout": "12.50\n0.005\n"
+  },
+  {
+   "id": "N30",
+   "kind": "run",
+   "line": "N9",
+   "why": "an f name refuses an integer given when the program runs",
+   "file": "cases/N30.haro",
+   "stdout": "before\n\nLine 3 Error (TYPE_LETTER) : `fX` is lettered f, a float, and is given an integer \nin file N30.haro ",
    "exit": 1
   }
  ]

@@ -1,2 +1,3 @@
 ? "price " + String(12.50)
+? String(0.125)
 ? "x" + 1.5

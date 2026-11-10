@@ -71,10 +71,12 @@ CASES = [
         'x = exp(1000)', 'y = x - x', '? y <= 0', '? y >= 0', '? y < 0', '? y > 0', '? y = y', '? y != y', '? y = 0',
         'if y >= 0 ? "ge" else ? "not ge" ok', 'if y < 0 ? "lt" else ? "not lt" ok', 'if y <= y ? "le" else ? "not le" ok'],
      ['0', '0', '0', '0', '0', '1', '0', 'not ge', 'not lt', 'not le']),
+    # Q04 CHANGED AFTER v0.52's code, said so (v52/GRAMMAR.md): in a .haro file a float meets only a float, so the NaN is ordered
+    # against 0f, and = and != on two floats are refused (FLOAT_EQUALITY, v0.52's N12 and N13) -- the two lines that asked them go
     ('Q04', 'P2', 'a NaN is unordered in a .haro file', '.haro', [
-        'f()', 'func f', T + 'nX = Exp(1000)', T + 'nY = nX - nX', T + '? nY <= 0', T + '? nY >= 0', T + '? nY < 0', T + '? nY > 0',
-        T + '? nY = nY', T + '? nY != nY', T + 'if nY >= 0', T * 2 + '? "ge"', T + 'else', T * 2 + '? "not ge"', T + 'ok'],
-     ['false', 'false', 'false', 'false', 'false', 'true', 'not ge']),
+        'f()', 'func f', T + 'nX = Exp(1000)', T + 'nY = nX - nX', T + '? nY <= 0f', T + '? nY >= 0f', T + '? nY < 0f', T + '? nY > 0f',
+        T + 'if nY >= 0f', T * 2 + '? "ge"', T + 'else', T * 2 + '? "not ge"', T + 'ok'],
+     ['false', 'false', 'false', 'false', 'not ge']),
     ('Q05', 'P3', 'a letter of a local text is written as Ring writes it, and a copy does not move', '.ring', [
         'f()', 'func f', T + 's = "abc"', T + 's[2] = "x"', T + '? s', T + 't = s', T + 's[1] = "z"', T + '? t', T + '? s', T + 's[3] = 66',
         T + '? s', T + '? len(s)'],

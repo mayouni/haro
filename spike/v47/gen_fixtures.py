@@ -48,11 +48,13 @@ CASES = [
     # v0.48 RE-SPELLED, 2026-11-09, AFTER THIS COURT SPOKE (the Principal's ruling, "ParentClassName"): a .haro program's calls of
     # built-ins are spelled as Softanza writes a name (Len, IsNull, SubStr), by study/v48/respell.py, ported here by
     # study/v47/port_cases.py --respell. A report still names a built-in as the VM registers it. Each case asks what it asked.
+    # Y01 and Y12 CHANGED AFTER v0.52's code, said so (v52/GRAMMAR.md): a literal with a point is a decimal (`nX = 2.5` prints 2.5) and
+    # a float is written 0.5f; Y12's literal is "a decimal"
     ('Y01', 'Y3', 'every checked letter holding its own type runs', '.haro', [
-        'f()', 'func f', T + 'bOk = 1 < 2', T + 'iN = 3', T + 'nX = 2.5', T + 'fX = 0.5', T + 'tName = "ada"', T + 'vItems = [1, 2]',
+        'f()', 'func f', T + 'bOk = 1 < 2', T + 'iN = 3', T + 'nX = 2.5', T + 'fX = 0.5f', T + 'tName = "ada"', T + 'vItems = [1, 2]',
         T + 'oP = new P', T + 'hF = FOpen("Y01.txt", "w")', T + 'FClose(hF)', T + '? bOk', T + '? iN + 1', T + '? nX', T + '? tName',
         T + '? Len(vItems)', T + '? oP.iX', 'class P', T + 'iX = 7'],
-     ['true', '4', '2.50', 'ada', '2', '7']),
+     ['true', '4', '2.5', 'ada', '2', '7']),
     ('Y02', 'Y1', 'a name with no letter is refused when compiling', '.haro', [B, 'f()', 'func f', T + 'count = 3'],
      refused('Y02', 4, 'a name begins with its type\'s letter -- `count` has none; written', 'count'), 1),
     ('Y03', 'Y1', 'Softanza\'s c is no letter in a .haro file', '.haro', [B, 'f()', 'func f', T + 'cName = "ada"'],
@@ -81,7 +83,7 @@ CASES = [
         'f()', 'func f', T + 'count = 3', T + 'cName = 5', T + 'x = "a"', T + 'tName = 3', T + '? count + cName', T + '? x + tName'],
      ['8', 'a3']),
     ('Y12', 'Y3', 'an integer letter refuses a number with a point when compiling', '.haro', [B, 'f()', 'func f', T + 'iN = 2.5'],
-     refused('Y12', 4, 'i is the letter of an integer, and this literal is a number; written', 'iN'), 1),
+     refused('Y12', 4, 'i is the letter of an integer, and this literal is a decimal; written', 'iN'), 1),
     ('Y13', 'Y1', 'a global and an attribute are lettered too', '.haro', [
         '$iTotal = 1', 'oP = new P', '? $iTotal', 'class P', T + 'count = 2'],
      ['', 'Line 5 Haro refused this statement (a name begins with its type\'s letter -- `count` has none; written `count`, line 5 of Y13.haro) '

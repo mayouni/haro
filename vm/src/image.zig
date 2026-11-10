@@ -45,7 +45,7 @@ const vm = @import("main.zig");
 
 /// Bumped by hand when the layout below changes in a way the executable's
 /// own fingerprint would not catch (it nearly always would).
-pub const VERSION: u32 = 4; // 2: class_parent and fn_owner (2026-09-23); 3: the locals tables and class_attrs_fn, for eval (2026-09-25); 4: the accessor tables, for getters and setters (2026-09-26)
+pub const VERSION: u32 = 5; // 5: a decimal constant, its scale in the length field (v0.52, 2026-11-10); 2: class_parent and fn_owner (2026-09-23); 3: the locals tables and class_attrs_fn, for eval (2026-09-25); 4: the accessor tables, for getters and setters (2026-09-26)
 const MAGIC: [8]u8 = "RNXIMG\x00\x00".*;
 
 /// One source file as it was when the image was written.
@@ -244,7 +244,8 @@ pub fn writeKonst(w: *W, k: []const vm.Value) !void {
     }
     for (k) |v| {
         try w.u32v(@intFromEnum(v.tag));
-        const n: u32 = if (v.tag == .str) v.p.s.len else 0;
+        // v0.52: a decimal's scale rides in the length field, which only a string uses otherwise
+        const n: u32 = if (v.tag == .str) v.p.s.len else if (v.tag == .dec) v._r else 0;
         try w.u32v(n);
         const payload: u64 = if (v.tag == .str) 0 else @bitCast(v.p.i);
         try w.u64v(payload);
@@ -542,7 +543,7 @@ pub fn readKonst(r: *R, a: std.mem.Allocator) ![]vm.Value {
     for (out, 0..) |*v, i| {
         const tag: vm.Tag = @enumFromInt(ents[i].tag);
         if (tag != .str) {
-            v.* = .{ .p = .{ .i = @bitCast(ents[i].payload) }, .tag = tag };
+            v.* = .{ .p = .{ .i = @bitCast(ents[i].payload) }, .tag = tag, ._r = if (tag == .dec) ents[i].len else 0 };
             continue;
         }
         const l: usize = ents[i].len;

@@ -361,6 +361,11 @@ pub const pascal = [_][2][]const u8{
     .{ "web_serve", "WebServe" },
     .{ "web_wait", "WebWait" },
     .{ "systemcmd", "SystemCmd" },
+    .{ "decimal", "Decimal" },
+    .{ "divide", "Divide" },
+    .{ "float", "Float" },
+    .{ "integer", "Integer" },
+    .{ "near", "Near" },
 };
 
 /// The spelling a .haro file writes for the native registered as `low` (lowercase, underscores as registered), or null for no native

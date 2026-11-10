@@ -16,7 +16,7 @@
    "line": "Y3",
    "why": "every checked letter holding its own type runs",
    "file": "cases/Y01.haro",
-   "stdout": "true\n4\n2.50\nada\n2\n7\n"
+   "stdout": "true\n4\n2.5\nada\n2\n7\n"
   },
   {
    "id": "Y02",
@@ -110,7 +110,7 @@
    "line": "Y3",
    "why": "an integer letter refuses a number with a point when compiling",
    "file": "cases/Y12.haro",
-   "stdout": "before\n\nLine 4 Haro refused this statement (i is the letter of an integer, and this literal is a number; written `iN`, line 4 of Y12.haro) and did not compile it -- running past it would give a wrong answer \nIn function f() in file Y12.haro\n\nCalled from line 2 in file Y12.haro ",
+   "stdout": "before\n\nLine 4 Haro refused this statement (i is the letter of an integer, and this literal is a decimal; written `iN`, line 4 of Y12.haro) and did not compile it -- running past it would give a wrong answer \nIn function f() in file Y12.haro\n\nCalled from line 2 in file Y12.haro ",
    "exit": 1
   },
   {

@@ -15,6 +15,7 @@
 // Kill criterion (study 4.6/8): any compute row worse than 3x Lua -> stop.
 
 const std = @import("std");
+const decimal = @import("decimal.zig");
 const web = @import("web.zig");
 pub const native = @import("native.zig");
 const builtins = @import("builtins.zig");
@@ -114,7 +115,8 @@ fn hostListTag(l: native.RppList, i: u32) callconv(.c) u32 {
     const it = hostItem(l, i) orelse return @intFromEnum(native.Tag.nil);
     return @intFromEnum(switch (it.tag) {
         .int => native.Tag.int,
-        .num => native.Tag.num,
+        // v0.52: a decimal in a list is a number to the engine
+        .num, .dec => native.Tag.num,
         .str => native.Tag.str,
         .vec => native.Tag.list,
         .obj => native.Tag.obj,
@@ -127,6 +129,7 @@ fn hostListNum(l: native.RppList, i: u32) callconv(.c) f64 {
     return switch (it.tag) {
         .int => @floatFromInt(it.p.i),
         .num => it.p.d,
+        .dec => VM.asF64Pub(it),
         else => 0,
     };
 }
@@ -601,6 +604,7 @@ fn describeValue(v: Value) []const u8 {
         .dll => "dll",
         .cptr => "cptr",
         .boolean => if (v.p.i != 0) "boolean true" else "boolean false",
+        .dec => std.fmt.bufPrint(&tr_buf, "dec {d} scale {d}", .{ v.p.i, v._r }) catch "dec ?",
     };
 }
 
@@ -624,7 +628,9 @@ fn describeValue(v: Value) []const u8 {
 /// (bench/exec/file_stdio.ring): type "file", isPointer 1, isList 0, never
 /// equal to "", R21 in arithmetic, printed as address / kind / status.
 /// `boolean` is Haro's (v0.43, D55 T3): only code from a .haro file makes one; Ring's code reads it as 1 or 0.
-pub const Tag = enum(u32) { nil, int, num, str, vec, obj, dll, cptr, boolean };
+/// `dec` is Haro's too (v0.52, D55 T4): an exact base-10 number, the coefficient in `p.i` and the digits after its point in `_r`; only code
+/// from a .haro file makes one, and Ring's code reads it as the double it is nearest.
+pub const Tag = enum(u32) { nil, int, num, str, vec, obj, dll, cptr, boolean, dec };
 
 /// An object: a class id plus a flat slot array, one slot per attribute.
 ///
@@ -1179,6 +1185,13 @@ pub const Builtin = enum(u16) {
     islist,
     isstring,
     isnumber,
+    // v0.52 (D55 T4): Haro's own conversions and arithmetic of numbers, compiled in a .haro file only
+    float1, // Float(x): an integer, a decimal, a float or a numeric text, as a float
+    decimal1, // Decimal(x): an integer, a decimal or a text, exactly; a float is refused
+    decimal2, // Decimal(x, iPlaces): rounded half to even
+    integer1, // Integer(x): a whole number
+    divide3, // Divide(a, b, iPlaces): the quotient rounded half to even
+    near3, // Near(fA, fB, fTolerance): |a - b| <= tolerance
     isnull, // isNull(x)     -> 1 for "" and for the string "NULL" in any case, else 0 (probed on 1.27: 0, [], an object are 0)
     string, // string(x)      -> decimal text of a number
     typeof, // type(x)        -> NUMBER / STRING / LIST / OBJECT, as Ring names them
@@ -1417,6 +1430,8 @@ pub const Builtin = enum(u16) {
 pub fn builtinRingName(b: Builtin) ?[]const u8 {
     return switch (b) {
         .sysargv, .stdinv, .stdoutv, .stderrv, .catchlast, .bye, .giveline, .eval => null,
+        // v0.52: Haro's own, no C function of Ring's: an error inside one names the line alone
+        .float1, .decimal1, .decimal2, .integer1, .divide3, .near3 => null,
         .copystr => "copy",
         .typeof => "type",
         .find2, .find3, .find4 => "find",
@@ -1561,6 +1576,10 @@ pub const Value = extern struct {
     /// v0.43: the payload is 1 or 0, so code that reads `p.i` reads Ring's 1 or 0.
     pub inline fn boolean(b: bool) Value {
         return .{ .p = .{ .i = @intFromBool(b) }, .tag = .boolean };
+    }
+    /// v0.52: a decimal, `coeff` times ten to the minus `scale`
+    pub inline fn dec(coeff: i64, scale: u32) Value {
+        return .{ .p = .{ .i = coeff }, .tag = .dec, ._r = scale };
     }
     pub inline fn vec(v: *Vec) Value {
         return .{ .p = .{ .v = v }, .tag = .vec };
@@ -2737,6 +2756,8 @@ pub const VM = struct {
     /// simply always print two.
     pub fn numText(v: Value, buf: []u8) []const u8 {
         if (v.tag == .int) return std.fmt.bufPrint(buf, "{d}", .{v.p.i}) catch "0";
+        // v0.52: a decimal is its digits, as many after the point as it holds
+        if (v.tag == .dec) return decimal.text(.{ .c = v.p.i, .s = v._r }, buf);
         const f = asF64(v);
         if (f == @floor(f) and @abs(f) <= 9007199254740991.0) {
             return std.fmt.bufPrint(buf, "{d}", .{@as(i64, @intFromFloat(f))}) catch "0";
@@ -3827,7 +3848,8 @@ pub const VM = struct {
         return switch (v.tag) {
             .boolean => "boolean",
             .int => "integer",
-            .num => "number",
+            .num => "float",
+            .dec => "decimal",
             .str => "text",
             .vec => if (v.p.v.closure) "function" else "vector",
             .obj => "object",
@@ -3839,7 +3861,8 @@ pub const VM = struct {
         return switch (v.tag) {
             .boolean => "a boolean",
             .int => "an integer",
-            .num => "a number",
+            .num => "a float",
+            .dec => "a decimal",
             .str => "a text",
             .vec => if (v.p.v.closure) "a function" else "a vector",
             .obj => "an object",
@@ -3853,6 +3876,7 @@ pub const VM = struct {
             'b' => "a boolean",
             'i' => "an integer",
             'n' => "a number",
+            'd' => "a decimal",
             'f' => "a float",
             't' => "a text",
             'v' => "a vector",
@@ -3964,18 +3988,91 @@ pub const VM = struct {
     }
     /// `=` and `!=` between two types, in Haro's code.
     fn preEq(self: *VM, pc: u32, x: Value, y: Value, op: []const u8) ?[]const u8 {
+        // v0.52 (D55 T4): two floats are never claimed equal in Haro's code; a float meets no other number
+        if (x.tag == .num and y.tag == .num) {
+            if (!self.strictAt(pc)) return null;
+            return self.haroMsg("Error (FLOAT_EQUALITY) : float {s} float claims a sameness binary floating point does not keep -- say how near: Near(fA, fB, fTolerance)", .{op});
+        }
         if (x.tag == y.tag) return null;
-        if (isNum(x) and isNum(y)) return null;
+        if (isNum(x) and isNum(y)) {
+            if ((x.tag == .num or y.tag == .num) and self.strictAt(pc)) return self.mixErr(op, x, y);
+            return null;
+        }
         if (!self.strictAt(pc)) return null;
         return self.mismatchErr(op, x, y);
     }
     /// The orderings between two types, or of booleans, in Haro's code.
     fn preCmp(self: *VM, pc: u32, x: Value, y: Value, op: []const u8) ?[]const u8 {
+        // v0.52: a float is ordered against a float only, in Haro's code
+        if (x.tag != y.tag and (x.tag == .num or y.tag == .num) and isNum(x) and isNum(y) and self.strictAt(pc)) return self.mixErr(op, x, y);
         const same = (x.tag == y.tag and x.tag != .boolean) or (isNum(x) and isNum(y));
         if (same) return null;
         if (!self.strictAt(pc)) return null;
         return self.mismatchErr(op, x, y);
     }
+    /// v0.52 (D55 T4): an arithmetic operator on two numbers of Haro's code -- exact for integers and decimals, a float only with a
+    /// float, never narrowed to an integer -- answering the value or the error.
+    const HaroNum = union(enum) { val: Value, err: []const u8 };
+
+    /// A decimal or a float meets an arithmetic operator in Haro's code; two integers keep their own path
+    inline fn haroNum(self: *VM, pc: u32, x: Value, y: Value) bool {
+        return (x.tag == .dec or y.tag == .dec or x.tag == .num or y.tag == .num) and self.strictAt(pc);
+    }
+
+    fn decOf(v: Value) decimal.Dec {
+        return if (v.tag == .dec) .{ .c = v.p.i, .s = v._r } else .{ .c = v.p.i, .s = 0 };
+    }
+
+    fn mixErr(self: *VM, op: []const u8, x: Value, y: Value) []const u8 {
+        const other = if (x.tag == .num) y else x;
+        if (other.tag == .dec)
+            return self.haroMsg("Error (NUMBER_MIX) : {s} {s} {s} -- a decimal and a float do not mix; convert one: Float(d), or Decimal(f, iPlaces)", .{ typeWord(x), op, typeWord(y) });
+        return self.haroMsg("Error (NUMBER_MIX) : {s} {s} {s} -- an integer and a float do not mix; convert one: Float(i)", .{ typeWord(x), op, typeWord(y) });
+    }
+
+    const DEC_INEXACT = "Error (DECIMAL_INEXACT) : this quotient has no exact decimal -- round it, Divide(a, b, iPlaces), or divide floats, Float(a) / Float(b)";
+
+    /// `unary`: the compiler's `0 - y`, a negation
+    fn haroArith(self: *VM, op: u8, x: Value, y: Value, unary: bool) HaroNum {
+        const sym: []const u8 = switch (op) {
+            '+' => "+",
+            '-' => "-",
+            '*' => "*",
+            '/' => "/",
+            else => "%",
+        };
+        if (unary and y.tag == .num) return .{ .val = Value.num(-y.p.d) };
+        if (unary and y.tag == .dec) return .{ .val = Value.dec(0 -% y.p.i, y._r) };
+        if (x.tag == .num or y.tag == .num) {
+            if (x.tag != .num or y.tag != .num) return .{ .err = self.mixErr(sym, x, y) };
+            const a = x.p.d;
+            const b = y.p.d;
+            if ((op == '/' or op == '%') and b == 0) return .{ .err = R1 };
+            const r: f64 = switch (op) {
+                '+' => a + b,
+                '-' => a - b,
+                '*' => a * b,
+                '/' => a / b,
+                else => @rem(a, b),
+            };
+            return .{ .val = Value.num(r) };
+        }
+        const a = decOf(x);
+        const b = decOf(y);
+        const r = (switch (op) {
+            '+' => decimal.add(a, b),
+            '-' => decimal.sub(a, b),
+            '*' => decimal.mul(a, b),
+            '/' => decimal.div(a, b),
+            else => decimal.rem(a, b),
+        }) catch |e| return .{ .err = switch (e) {
+            error.zero => R1,
+            error.inexact => DEC_INEXACT,
+            error.overflow => self.haroMsg("Error (DECIMAL_OVERFLOW) : {s} {s} {s} leaves 64 bits of digits", .{ typeWord(x), sym, typeWord(y) }),
+        } };
+        return .{ .val = Value.dec(r.c, r.s) };
+    }
+
     /// Integer arithmetic past Ring's exact range, in Haro's code: exact to 64
     /// bits, then INTEGER_OVERFLOW (signalled by a none). Null in Ring's code.
     fn intStrict(self: *VM, pc: u32, x: i64, y: i64, comptime op: u8) ?Value {
@@ -4012,6 +4109,8 @@ pub const VM = struct {
         // The A/B suite never caught it because its modules compare integers.
         // Found 2026-09-12 from perf/tracing_tail, where the estate asks
         // `aT[1][:durMs] = 1.5` and got false for a value that printed 1.50.
+        // v0.52: a decimal against an integer or a decimal is compared exactly (0.10 = 0.1)
+        if ((a.tag == .dec or b.tag == .dec) and a.tag != .num and b.tag != .num and isNum(a) and isNum(b)) return decimal.cmp(decOf(a), decOf(b)) == 0;
         if (isNum(a) and isNum(b)) return asF64(a) == asF64(b);
         // Ring's implicit conversion: a numeric string equals its number.
         if (a.tag == .str and isNum(b)) return strNumEq(a.p.s, asF64(b));
@@ -4073,6 +4172,7 @@ pub const VM = struct {
             if (a.p.i > b.p.i) return 1;
             return 0;
         }
+        if ((a.tag == .dec or b.tag == .dec) and a.tag != .num and b.tag != .num and isNum(a) and isNum(b)) return decimal.cmp(decOf(a), decOf(b));
         if (isNum(a) and isNum(b)) {
             const x = asF64(a);
             const y = asF64(b);
@@ -4170,6 +4270,11 @@ pub const VM = struct {
                 outPrint("{X:0>16}\n{s}\n0\n{s}", .{ @intFromPtr(cptrOf(v)), kind, end });
             },
             .int => outPrint("{d}{s}", .{ v.p.i, end }),
+            // v0.52: a decimal prints its digits, as many after the point as it holds
+            .dec => {
+                var db: [48]u8 = undefined;
+                outPrint("{s}{s}", .{ decimal.text(.{ .c = v.p.i, .s = v._r }, &db), end });
+            },
             // v0.43: a boolean prints its word wherever it is printed
             .boolean => outPrint("{s}{s}", .{ if (v.p.i != 0) "true" else "false", end }),
             // Ring prints a whole-valued number without a point (`? 1.5*2`
@@ -4309,6 +4414,7 @@ pub const VM = struct {
             .nil => false,
             .int, .boolean => v.p.i != 0,
             .num => v.p.d != 0,
+            .dec => v.p.i != 0,
             .str => v.p.s.len != 0,
             .vec => v.p.v.len != 0,
             .obj, .dll => true,
@@ -4324,18 +4430,23 @@ pub const VM = struct {
         if (x.tag == .int) return x.p.i;
         if (x.tag == .num) return @intFromFloat(x.p.d);
         if (x.tag == .boolean) return x.p.i;
+        if (x.tag == .dec) return @intFromFloat(@trunc(decimal.toF64(.{ .c = x.p.i, .s = x._r })));
         @panic("expected a number");
     }
 
     inline fn isNum(x: Value) bool {
-        return x.tag == .int or x.tag == .num;
+        return x.tag == .int or x.tag == .num or x.tag == .dec;
     }
 
+    pub fn asF64Pub(x: Value) f64 {
+        return asF64(x);
+    }
     inline fn asF64(x: Value) f64 {
         return switch (x.tag) {
             .int => @floatFromInt(x.p.i),
             .num => x.p.d,
             .boolean => @floatFromInt(x.p.i),
+            .dec => decimal.toF64(.{ .c = x.p.i, .s = x._r }),
             else => @panic("expected a number"),
         };
     }
@@ -4693,7 +4804,15 @@ pub const VM = struct {
                         } else self.setRegU(base + in.a, intSlow(r, 0, x.p.i, y.p.i, '+'), op == .add_u);
                     }
                 } else if (isNum(x) and isNum(y)) {
-                    self.setRegU(base + in.a, narrow(asF64(x) + asF64(y)), op == .add_u);
+                    if (self.haroNum(pc, x, y)) {
+                        switch (self.haroArith('+', x, y, false)) {
+                            .val => |v| self.setRegU(base + in.a, v, op == .add_u),
+                            .err => |e| {
+                                self.pending = e;
+                                continue :dispatch .raise;
+                            },
+                        }
+                    } else self.setRegU(base + in.a, narrow(asF64(x) + asF64(y)), op == .add_u);
                 } else {
                     // Not both numbers. This PANICKED, which meant every
                     // string concatenation and every list append written
@@ -4723,7 +4842,16 @@ pub const VM = struct {
                 const in = code[pc];
                 const x = regs[base + in.b];
                 const y = regs[base + in.c];
-                if (isNum(x) and isNum(y) and asF64(y) != 0) {
+                // v0.52: in Haro's code every division of numbers is Haro's -- two integers give the exact decimal
+                if (isNum(x) and isNum(y) and self.strictAt(pc)) {
+                    switch (self.haroArith('/', x, y, false)) {
+                        .val => |v| self.setRegB(base + in.a, v, false),
+                        .err => |e| {
+                            self.pending = e;
+                            continue :dispatch .raise;
+                        },
+                    }
+                } else if (isNum(x) and isNum(y) and asF64(y) != 0) {
                     self.setRegB(base + in.a, narrow(asF64(x) / asF64(y)), false);
                 } else if (self.opWant(x, y, "/", "r/")) {
                     continue :dispatch .opcall;
@@ -4763,7 +4891,15 @@ pub const VM = struct {
                         } else self.setRegU(base + in.a, intSlow(r, 0, x.p.i, y.p.i, '-'), op == .sub_u);
                     }
                 } else if (isNum(x) and isNum(y)) {
-                    self.setRegU(base + in.a, narrow(asF64(x) - asF64(y)), op == .sub_u);
+                    if (self.haroNum(pc, x, y)) {
+                        switch (self.haroArith('-', x, y, in.d == 1)) {
+                            .val => |v| self.setRegU(base + in.a, v, op == .sub_u),
+                            .err => |e| {
+                                self.pending = e;
+                                continue :dispatch .raise;
+                            },
+                        }
+                    } else self.setRegU(base + in.a, narrow(asF64(x) - asF64(y)), op == .sub_u);
                 } else if (in.d == 1 and y.tag == .obj) {
                     // a UNARY minus (the compiler's `0 - x` with d = 1):
                     // Ring calls operator("neg", 0)
@@ -4852,7 +4988,15 @@ pub const VM = struct {
                         } else self.setRegU(base + in.a, intSlow(rr[0], rr[1], x.p.i, y.p.i, '*'), op == .mul_u);
                     }
                 } else if (isNum(x) and isNum(y)) {
-                    self.setRegU(base + in.a, narrow(asF64(x) * asF64(y)), op == .mul_u);
+                    if (self.haroNum(pc, x, y)) {
+                        switch (self.haroArith('*', x, y, false)) {
+                            .val => |v| self.setRegU(base + in.a, v, op == .mul_u),
+                            .err => |e| {
+                                self.pending = e;
+                                continue :dispatch .raise;
+                            },
+                        }
+                    } else self.setRegU(base + in.a, narrow(asF64(x) * asF64(y)), op == .mul_u);
                 } else if (self.opWant(x, y, "*", "r*")) {
                     continue :dispatch .opcall;
                 } else if (arithDone(self.preArith(pc, base + in.a, .mul, x, y) orelse self.arithSlow(base + in.a, .mul, x, y))) |e| {
@@ -4884,6 +5028,14 @@ pub const VM = struct {
                         continue :dispatch .raise;
                     }
                     self.setRegB(base + in.a, Value.int(@rem(xv.p.i, yv.p.i)), false);
+                } else if (isNum(xv) and isNum(yv) and self.haroNum(pc, xv, yv)) {
+                    switch (self.haroArith('%', xv, yv, false)) {
+                        .val => |v| self.setRegB(base + in.a, v, false),
+                        .err => |e| {
+                            self.pending = e;
+                            continue :dispatch .raise;
+                        },
+                    }
                 } else if (arithDone(self.preArith(pc, base + in.a, .mod, xv, yv) orelse self.arithSlow(base + in.a, .mod, xv, yv))) |e| {
                     // F-144: a real operand was truncated to an integer, so
                     // `7 % 2.5` answered 1 and `2.07 % 0.39` raised R1
@@ -4973,7 +5125,15 @@ pub const VM = struct {
                         pc += 1;
                         continue :dispatch code[pc].op;
                     }
-                    self.setRegU(base + in.a, narrow(asF64(x) + @as(f64, @floatFromInt(in.d))), op == .addi_u);
+                    if (self.haroNum(pc, x, x)) {
+                        switch (self.haroArith('+', x, Value.int(in.d), false)) {
+                            .val => |v| self.setRegU(base + in.a, v, op == .addi_u),
+                            .err => |e| {
+                                self.pending = e;
+                                continue :dispatch .raise;
+                            },
+                        }
+                    } else self.setRegU(base + in.a, narrow(asF64(x) + @as(f64, @floatFromInt(in.d))), op == .addi_u);
                     pc += 1;
                     continue :dispatch code[pc].op;
                 }
@@ -5017,7 +5177,15 @@ pub const VM = struct {
                         pc += 1;
                         continue :dispatch code[pc].op;
                     }
-                    self.setRegU(base + in.a, narrow(asF64(x) * @as(f64, @floatFromInt(in.d))), op == .muli_u);
+                    if (self.haroNum(pc, x, x)) {
+                        switch (self.haroArith('*', x, Value.int(in.d), false)) {
+                            .val => |v| self.setRegU(base + in.a, v, op == .muli_u),
+                            .err => |e| {
+                                self.pending = e;
+                                continue :dispatch .raise;
+                            },
+                        }
+                    } else self.setRegU(base + in.a, narrow(asF64(x) * @as(f64, @floatFromInt(in.d))), op == .muli_u);
                     pc += 1;
                     continue :dispatch code[pc].op;
                 }
@@ -5055,7 +5223,15 @@ pub const VM = struct {
                         pc += 1;
                         continue :dispatch code[pc].op;
                     }
-                    self.setRegU(base + in.a, narrow(@rem(asF64(x), @as(f64, @floatFromInt(in.d)))), op == .modi_u);
+                    if (self.haroNum(pc, x, x)) {
+                        switch (self.haroArith('%', x, Value.int(in.d), false)) {
+                            .val => |v| self.setRegU(base + in.a, v, op == .modi_u),
+                            .err => |e| {
+                                self.pending = e;
+                                continue :dispatch .raise;
+                            },
+                        }
+                    } else self.setRegU(base + in.a, narrow(@rem(asF64(x), @as(f64, @floatFromInt(in.d)))), op == .modi_u);
                     pc += 1;
                     continue :dispatch code[pc].op;
                 }
@@ -6182,6 +6358,8 @@ pub const VM = struct {
                     buf[i] = switch (v.tag) {
                         .int => native.RppVal.int(v.p.i),
                         .num => native.RppVal.num(v.p.d),
+                        // v0.52: the engine reads a decimal as the double it is nearest -- converted here, never passed through
+                        .dec => native.RppVal.num(asF64(v)),
                         .str => native.RppVal.str(v.p.s.ptr[0..v.p.s.len]),
                         // BORROWED for the call: the caller's register holds
                         // it, so it cannot go away while the engine reads it.
@@ -6514,7 +6692,101 @@ pub const VM = struct {
                     // a lambda is a STRING on Ring and answers so here (Vec.closure)
                     .islist => out = Value.int(if (regs[A].tag == .vec and !regs[A].p.v.closure) 1 else 0),
                     .isstring => out = Value.int(if (regs[A].tag == .str or (regs[A].tag == .vec and regs[A].p.v.closure)) 1 else 0),
-                    .isnumber => out = Value.int(if (regs[A].tag == .int or regs[A].tag == .num) 1 else 0),
+                    .isnumber => out = Value.int(if (regs[A].tag == .int or regs[A].tag == .num or regs[A].tag == .dec) 1 else 0),
+                    .float1 => {
+                        const v = regs[A];
+                        if (v.tag == .str) {
+                            out = Value.num(coerceNum(v) orelse {
+                                self.pending = R41;
+                                continue :dispatch .raise;
+                            });
+                        } else if (isNum(v)) {
+                            out = Value.num(asF64(v));
+                        } else {
+                            self.pending = BADPARAM;
+                            continue :dispatch .raise;
+                        }
+                    },
+                    .decimal1, .decimal2 => {
+                        const v = regs[A];
+                        var places: ?u32 = null;
+                        if (which == .decimal2) {
+                            const pv = regs[A + 1];
+                            if (pv.tag != .int or pv.p.i < 0 or pv.p.i > decimal.MAX_SCALE) {
+                                self.pending = BADPARAM;
+                                continue :dispatch .raise;
+                            }
+                            places = @intCast(pv.p.i);
+                        }
+                        const got: decimal.Fail!?decimal.Dec = switch (v.tag) {
+                            .int, .dec => decOf(v),
+                            .num => if (places) |pl| decimal.fromF64Opt(v.p.d, pl) else null,
+                            .str => decimal.parse(std.mem.trim(u8, strOf(v), " \t\r\n")),
+                            else => {
+                                self.pending = BADPARAM;
+                                continue :dispatch .raise;
+                            },
+                        };
+                        const dv = (got catch {
+                            self.pending = "Error (DECIMAL_OVERFLOW) : the decimal leaves 64 bits of digits";
+                            continue :dispatch .raise;
+                        }) orelse {
+                            self.pending = if (v.tag == .num) "Error (DECIMAL_INEXACT) : a float has no exact decimal -- say how many places: Decimal(f, iPlaces)" else R41;
+                            continue :dispatch .raise;
+                        };
+                        const rv = if (places) |pl| decimal.round(dv, pl) catch {
+                            self.pending = "Error (DECIMAL_OVERFLOW) : the decimal leaves 64 bits of digits";
+                            continue :dispatch .raise;
+                        } else dv;
+                        out = Value.dec(rv.c, rv.s);
+                    },
+                    .integer1 => {
+                        const v = regs[A];
+                        const NOT_WHOLE = "Error (NOT_WHOLE) : this number is not whole -- round it first: Decimal(d, 0)";
+                        switch (v.tag) {
+                            .int => out = v,
+                            .dec => out = Value.int(decimal.whole(decOf(v)) orelse {
+                                self.pending = NOT_WHOLE;
+                                continue :dispatch .raise;
+                            }),
+                            .num => {
+                                if (v.p.d != @trunc(v.p.d) or @abs(v.p.d) > 9.0e18) {
+                                    self.pending = NOT_WHOLE;
+                                    continue :dispatch .raise;
+                                }
+                                out = Value.int(@intFromFloat(v.p.d));
+                            },
+                            .str => out = Value.int(std.fmt.parseInt(i64, std.mem.trim(u8, strOf(v), " \t\r\n"), 10) catch {
+                                self.pending = R41;
+                                continue :dispatch .raise;
+                            }),
+                            else => {
+                                self.pending = BADPARAM;
+                                continue :dispatch .raise;
+                            },
+                        }
+                    },
+                    .divide3 => {
+                        const a = regs[A];
+                        const b = regs[A + 1];
+                        const pv = regs[A + 2];
+                        if (!(a.tag == .int or a.tag == .dec) or !(b.tag == .int or b.tag == .dec) or pv.tag != .int or pv.p.i < 0 or pv.p.i > decimal.MAX_SCALE) {
+                            self.pending = BADPARAM;
+                            continue :dispatch .raise;
+                        }
+                        const q = decimal.divRound(decOf(a), decOf(b), @intCast(pv.p.i)) catch |e| {
+                            self.pending = if (e == error.zero) R1 else "Error (DECIMAL_OVERFLOW) : the decimal leaves 64 bits of digits";
+                            continue :dispatch .raise;
+                        };
+                        out = Value.dec(q.c, q.s);
+                    },
+                    .near3 => {
+                        if (!isNum(regs[A]) or !isNum(regs[A + 1]) or !isNum(regs[A + 2])) {
+                            self.pending = BADPARAM;
+                            continue :dispatch .raise;
+                        }
+                        out = Value.int(@intFromBool(@abs(asF64(regs[A]) - asF64(regs[A + 1])) <= asF64(regs[A + 2])));
+                    },
                     .isnull => out = Value.int(switch (regs[A].tag) {
                         .nil => @as(i64, 1),
                         .str => @as(i64, if (regs[A].p.s.len == 0 or std.ascii.eqlIgnoreCase(strOf(regs[A]), "null")) 1 else 0),
@@ -6563,6 +6835,7 @@ pub const VM = struct {
                         // builtin and the call was "without definition".
                         const nm: []const u8 = switch (regs[A].tag) {
                             .int, .num => "NUMBER",
+                            .dec => "DECIMAL",
                             .boolean => "BOOLEAN",
                             .str, .nil => "STRING",
                             .vec => if (regs[A].p.v.closure) "STRING" else "LIST",
@@ -8488,7 +8761,10 @@ pub const VM = struct {
                 const ok = switch (in.b) {
                     'b' => v.tag == .boolean,
                     'i' => v.tag == .int,
-                    'n', 'f' => v.tag == .int or v.tag == .num,
+                    // v0.52 (D55 T4): a number of any kind, a decimal, a float
+                    'n' => v.tag == .int or v.tag == .num or v.tag == .dec,
+                    'd' => v.tag == .dec,
+                    'f' => v.tag == .num,
                     't' => v.tag == .str,
                     'v' => v.tag == .vec and !v.p.v.closure,
                     'o' => v.tag == .obj,

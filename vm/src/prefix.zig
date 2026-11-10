@@ -40,7 +40,7 @@ const image = @import("image.zig");
 /// (F-111); the path alone cannot say where the folder ends.
 /// 4: each function's `replaced_by` -- the resident VM's rung 3, a function
 /// whose body a later admission replaced (always none in a library prefix).
-pub const VERSION: u32 = 4;
+pub const VERSION: u32 = 5; // 5: a decimal constant (v0.52, image.zig)
 const MAGIC: [8]u8 = "RNXPFX\x00\x00".*;
 const NONE: u32 = 0xFFFFFFFF;
 

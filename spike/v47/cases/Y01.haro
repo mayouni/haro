@@ -3,7 +3,7 @@ func f
 	bOk = 1 < 2
 	iN = 3
 	nX = 2.5
-	fX = 0.5
+	fX = 0.5f
 	tName = "ada"
 	vItems = [1, 2]
 	oP = new P

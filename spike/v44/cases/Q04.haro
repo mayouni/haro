@@ -2,13 +2,11 @@ f()
 func f
 	nX = Exp(1000)
 	nY = nX - nX
-	? nY <= 0
-	? nY >= 0
-	? nY < 0
-	? nY > 0
-	? nY = nY
-	? nY != nY
-	if nY >= 0
+	? nY <= 0f
+	? nY >= 0f
+	? nY < 0f
+	? nY > 0f
+	if nY >= 0f
 		? "ge"
 	else
 		? "not ge"
