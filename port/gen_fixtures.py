@@ -80,6 +80,43 @@ CASES = [
         'main.ring': ['func f', T + 'count = 1', T + 'nCount = 2', T + '? count + nCount']},
      [("'\\tcount = 1' in applied['main.haro']", True),
       ("any(r['old'] == 'count' and r['new'] == 'nCount' and 'already' in r['why'] for r in plan['refused'])", True)]),
+    # ---- the second round (stzlib-haroport 2026-11-10 15:32), written before its code
+    # HARO-PORTTOOL-ATTR-01: an attribute assigned WITH its @ in a method is no bare assignment
+    ('H13', 'L', 'an attribute written with its @ in a method is no refusal; Softanza\'s c is t there too', {
+        'main.ring': ['class P', T + '@cLast = ""', T + 'func Set cWhy', T + T + '@cLast = cWhy', T + 'func Get', T + T + 'return @cLast']},
+     [("any(r['old'] in ('@cLast', '@tLast') for r in plan['refused'])", False),
+      ("'@tLast = tWhy' in applied['main.haro']", True)]),
+    # HARO-PORTTOOL-BOM-01: a load on the first line after a byte order mark
+    ('H14', '-', 'a load on a first line after a byte order mark is rewritten, the mark kept', {
+        'main.ring': ['﻿load "lib.ring"', '? Two()'], 'lib.ring': ['func Two', T + 'return 2']},
+     [("applied['main.haro'].splitlines()[0]", '﻿load "lib.haro"')]),
+    # HARO-PORTTOOL-NEXT-01 (a): $_name, a library-internal global, is $name
+    ('H15', 'G', 'a $_name global is $name in every file', {
+        'main.ring': ['load "lib.ring"', '$_cCount = "1"', '? Show()'], 'lib.ring': ['func Show', T + 'return $_cCount']},
+     [("'$tCount = \"1\"' in applied['main.haro']", True), ("'return $tCount' in applied['lib.haro']", True)]),
+    ('H16', 'G', 'a $_name landing on a $name already in the tree is refused, named', {
+        'main.ring': ['$_tTotal = 1', '$tTotal = 2', '? $_tTotal + $tTotal']},
+     [("'$_tTotal = 1' in applied['main.haro']", True),
+      ("any(r['old'] == '$_tTotal' and 'already' in r['why'] for r in plan['refused'])", True)]),
+    # (b) a call to a function the tree declares, as declared
+    ('H17', 'D', 'a call to a function the tree declares is written as it is declared', {
+        'main.ring': ['load "lib.ring"', '? shout("a")', '? SHOUT("b")', '? o.shout()'], 'lib.ring': ['func Shout x', T + 'return x']},
+     [("'? Shout(\"a\")' in applied['main.haro'] and '? Shout(\"b\")' in applied['main.haro']", True),
+      ("'? o.shout()' in applied['main.haro']", True)]),
+    ('H18', 'D', 'a name the tree declares in two spellings is refused, named', {
+        'main.ring': ['? mix()'], 'a.ring': ['func Mix', T + 'return 1'], 'b.ring': ['func mIX', T + 'return 2']},
+     [("'? mix()' in applied['main.haro']", True),
+      ("any(r['old'] == 'mix' and 'two spellings' in r['why'] for r in plan['refused'])", True)]),
+    # (c) HARO-SURFACE-01: `:key = value` is the pair [:key, value]
+    ('H19', 'P', ':key = value is the pair [:key, value], the value read to its depth\'s comma or bracket', {
+        'main.ring': ['aX = [ :a = 1, :b = "x, y", :c = [1, 2], :d = max(3, 4) ]', '? :k = 5']},
+     [("applied['main.haro'].splitlines()[0]", 'aX = [ [:a, 1], [:b, "x, y"], [:c, [1, 2]], [:d, Max(3, 4)] ]'),
+      ("applied['main.haro'].splitlines()[1]", '? [:k, 5]')]),
+    # (d) --unit FILE: a function only a file the unit never loads defines does not keep a built-in as it is
+    ('H20', 'B', 'with --unit, a function in a file the unit never loads leaves the built-in respelled', {
+        'main.ring': ['load "lib.ring"', '? len("ab")', '? half(4)'], 'lib.ring': ['func half n', T + 'return n / 2'],
+        'tools/extra.ring': ['func len x', T + 'return 0']},
+     [("'? Len(\"ab\")' in applied['main.haro']", True), ("'? half(4)' in applied['main.haro']", True)], 'main.ring'),
     ('H11', '-', 'the ported tree runs on haro and prints what the classic Ring surface printed', {
         'main.ring': ['load "lib.ring"', 'cName = Greet("ada")', '? cName', '? Len(cName)'],
         'lib.ring': ['func Greet cWho', T + 'cOut = "hi " + cWho', T + 'return cOut']},
@@ -89,14 +126,20 @@ CASES = [
 
 def main():
     out = []
-    for cid, line, why, tree, asserts in CASES:
+    for case in CASES:
+        cid, line, why, tree, asserts = case[:5]
+        unit = case[5] if len(case) > 5 else None
         folder = os.path.join(HERE, 'cases', cid)
         os.makedirs(folder, exist_ok=True)
         for name, lines in tree.items():
+            os.makedirs(os.path.dirname(os.path.join(folder, name)), exist_ok=True)
             with open(os.path.join(folder, name), 'w', encoding='utf-8', newline='\n') as fh:
                 fh.write('\n'.join(lines) + '\n')
-        out.append({'id': cid, 'line': line, 'why': why, 'folder': 'cases/' + cid, 'files': sorted(tree),
-                    'asserts': [[e, v] for e, v in asserts]})
+        row = {'id': cid, 'line': line, 'why': why, 'folder': 'cases/' + cid, 'files': sorted(tree),
+               'asserts': [[e, v] for e, v in asserts]}
+        if unit:
+            row['unit'] = unit
+        out.append(row)
     doc = {'tool': 'port/haroport.py', 'ask': 'HARO-PORTTOOL-01 (stzlib-haroport, 2026-11-10)',
            'class': 'each case: `plan ROOT --json` read as `plan` (and `plan_wrote`: whether it wrote any file), `apply ROOT --out DIR` read '
                     'as `applied` (published name -> text); for H11 each tree run on haro: `ran` (the ported) and `ran_ring` (the original)',

@@ -31,7 +31,8 @@ def main():
             src = os.path.join(td, 'tree')
             shutil.copytree(os.path.join(HERE, c['folder']), src)
             before = listing(src)
-            p = subprocess.run([sys.executable, TOOL, 'plan', src, '--json'], capture_output=True)
+            unit = ['--unit', c['unit']] if c.get('unit') else []
+            p = subprocess.run([sys.executable, TOOL, 'plan', src, '--json'] + unit, capture_output=True)
             plan_wrote = listing(src) != before
             try:
                 plan = json.loads(p.stdout.decode('utf-8'))
@@ -39,7 +40,7 @@ def main():
                 plan = None
                 bad.append(f'plan is no JSON: {p.stdout[-300:]!r} {p.stderr[-300:]!r}')
             out = os.path.join(td, 'out')
-            q = subprocess.run([sys.executable, TOOL, 'apply', src, '--out', out], capture_output=True)
+            q = subprocess.run([sys.executable, TOOL, 'apply', src, '--out', out] + unit, capture_output=True)
             if q.returncode != 0:
                 bad.append(f'apply exited {q.returncode}: {q.stderr[-300:]!r}')
             applied = {}

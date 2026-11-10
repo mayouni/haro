@@ -250,6 +250,162 @@
    ]
   },
   {
+   "id": "H13",
+   "line": "L",
+   "why": "an attribute written with its @ in a method is no refusal; Softanza's c is t there too",
+   "folder": "cases/H13",
+   "files": [
+    "main.ring"
+   ],
+   "asserts": [
+    [
+     "any(r['old'] in ('@cLast', '@tLast') for r in plan['refused'])",
+     false
+    ],
+    [
+     "'@tLast = tWhy' in applied['main.haro']",
+     true
+    ]
+   ]
+  },
+  {
+   "id": "H14",
+   "line": "-",
+   "why": "a load on a first line after a byte order mark is rewritten, the mark kept",
+   "folder": "cases/H14",
+   "files": [
+    "lib.ring",
+    "main.ring"
+   ],
+   "asserts": [
+    [
+     "applied['main.haro'].splitlines()[0]",
+     "\ufeffload \"lib.haro\""
+    ]
+   ]
+  },
+  {
+   "id": "H15",
+   "line": "G",
+   "why": "a $_name global is $name in every file",
+   "folder": "cases/H15",
+   "files": [
+    "lib.ring",
+    "main.ring"
+   ],
+   "asserts": [
+    [
+     "'$tCount = \"1\"' in applied['main.haro']",
+     true
+    ],
+    [
+     "'return $tCount' in applied['lib.haro']",
+     true
+    ]
+   ]
+  },
+  {
+   "id": "H16",
+   "line": "G",
+   "why": "a $_name landing on a $name already in the tree is refused, named",
+   "folder": "cases/H16",
+   "files": [
+    "main.ring"
+   ],
+   "asserts": [
+    [
+     "'$_tTotal = 1' in applied['main.haro']",
+     true
+    ],
+    [
+     "any(r['old'] == '$_tTotal' and 'already' in r['why'] for r in plan['refused'])",
+     true
+    ]
+   ]
+  },
+  {
+   "id": "H17",
+   "line": "D",
+   "why": "a call to a function the tree declares is written as it is declared",
+   "folder": "cases/H17",
+   "files": [
+    "lib.ring",
+    "main.ring"
+   ],
+   "asserts": [
+    [
+     "'? Shout(\"a\")' in applied['main.haro'] and '? Shout(\"b\")' in applied['main.haro']",
+     true
+    ],
+    [
+     "'? o.shout()' in applied['main.haro']",
+     true
+    ]
+   ]
+  },
+  {
+   "id": "H18",
+   "line": "D",
+   "why": "a name the tree declares in two spellings is refused, named",
+   "folder": "cases/H18",
+   "files": [
+    "a.ring",
+    "b.ring",
+    "main.ring"
+   ],
+   "asserts": [
+    [
+     "'? mix()' in applied['main.haro']",
+     true
+    ],
+    [
+     "any(r['old'] == 'mix' and 'two spellings' in r['why'] for r in plan['refused'])",
+     true
+    ]
+   ]
+  },
+  {
+   "id": "H19",
+   "line": "P",
+   "why": ":key = value is the pair [:key, value], the value read to its depth's comma or bracket",
+   "folder": "cases/H19",
+   "files": [
+    "main.ring"
+   ],
+   "asserts": [
+    [
+     "applied['main.haro'].splitlines()[0]",
+     "aX = [ [:a, 1], [:b, \"x, y\"], [:c, [1, 2]], [:d, Max(3, 4)] ]"
+    ],
+    [
+     "applied['main.haro'].splitlines()[1]",
+     "? [:k, 5]"
+    ]
+   ]
+  },
+  {
+   "id": "H20",
+   "line": "B",
+   "why": "with --unit, a function in a file the unit never loads leaves the built-in respelled",
+   "folder": "cases/H20",
+   "files": [
+    "lib.ring",
+    "main.ring",
+    "tools/extra.ring"
+   ],
+   "asserts": [
+    [
+     "'? Len(\"ab\")' in applied['main.haro']",
+     true
+    ],
+    [
+     "'? half(4)' in applied['main.haro']",
+     true
+    ]
+   ],
+   "unit": "main.ring"
+  },
+  {
    "id": "H11",
    "line": "-",
    "why": "the ported tree runs on haro and prints what the classic Ring surface printed",

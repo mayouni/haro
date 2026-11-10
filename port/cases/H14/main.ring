@@ -1,0 +1,2 @@
+﻿load "lib.ring"
+? Two()
