@@ -1,0 +1,216 @@
+{
+ "rung": "v0.52",
+ "decision": "D55 T4, numbers (TYPES.md, ruled 2026-11-07); the desk's readings inside it are D64",
+ "class": "exact: the program's whole stdout and its exit code, byte for byte, on haro and on its checked build",
+ "lines": {
+  "N1": "a literal with a point is an exact decimal",
+  "N2": "a literal ending in f is a float",
+  "N3": "+ - * exact; an integer joins a decimal; DECIMAL_OVERFLOW",
+  "N4": "/ exact or DECIMAL_INEXACT; Divide rounds half to even",
+  "N5": "a float mixes with neither: NUMBER_MIX",
+  "N6": "= and != on floats: FLOAT_EQUALITY",
+  "N7": "Near",
+  "N8": "Float, Decimal, Integer",
+  "N9": "d, f, n",
+  "N10": "a .ring file untouched; a decimal is a double in .ring code"
+ },
+ "cases": [
+  {
+   "id": "N01",
+   "kind": "run",
+   "line": "N1",
+   "why": "a literal with a point is an exact decimal, printed as its digits",
+   "file": "cases/N01.haro",
+   "stdout": "0.3\ntrue\n12.50\nDECIMAL\ntrue\n"
+  },
+  {
+   "id": "N02",
+   "kind": "run",
+   "line": "N3",
+   "why": "an integer joins a decimal; + and - keep the larger scale, * adds them; a negative decimal",
+   "file": "cases/N02.haro",
+   "stdout": "3.0\n2.25\n9.25\n1.500\n-1.50\n"
+  },
+  {
+   "id": "N03",
+   "kind": "run",
+   "line": "N1",
+   "why": "decimals compare by value, with each other and with integers",
+   "file": "cases/N03.haro",
+   "stdout": "true\ntrue\ntrue\ntrue\nfalse\n"
+  },
+  {
+   "id": "N04",
+   "kind": "run",
+   "line": "N4",
+   "why": "/ on integers and decimals is the exact decimal in the fewest digits",
+   "file": "cases/N04.haro",
+   "stdout": "3.5\n0.125\n2\n3\nDECIMAL\n"
+  },
+  {
+   "id": "N05",
+   "kind": "run",
+   "line": "N4",
+   "why": "a quotient with no end raises DECIMAL_INEXACT, naming the ways",
+   "file": "cases/N05.haro",
+   "stdout": "before\n\nLine 2 Error (DECIMAL_INEXACT) : this quotient has no exact decimal -- round it, Divide(a, b, iPlaces), or divide floats, Float(a) / Float(b) \nin file N05.haro ",
+   "exit": 1
+  },
+  {
+   "id": "N06",
+   "kind": "run",
+   "line": "N4",
+   "why": "Divide rounds half to even, to the places asked",
+   "file": "cases/N06.haro",
+   "stdout": "0.3333\n0.67\n0.12\n0.62\n2\n-0.33\n"
+  },
+  {
+   "id": "N07",
+   "kind": "run",
+   "line": "N10",
+   "why": "a .ring file reads numbers as it did",
+   "file": "cases/N07.ring",
+   "stdout": "0\n3.50\nNUMBER\n3\n"
+  },
+  {
+   "id": "N08",
+   "kind": "run",
+   "line": "N2",
+   "why": "a literal ending in f is a float",
+   "file": "cases/N08.haro",
+   "stdout": "NUMBER\n0.75\n1\ntrue\n"
+  },
+  {
+   "id": "N09",
+   "kind": "run",
+   "line": "N5",
+   "why": "a decimal and a float do not mix",
+   "file": "cases/N09.haro",
+   "stdout": "before\n\nLine 2 Error (NUMBER_MIX) : decimal + float -- a decimal and a float do not mix; convert one: Float(d), or Decimal(f, iPlaces) \nin file N09.haro ",
+   "exit": 1
+  },
+  {
+   "id": "N10",
+   "kind": "run",
+   "line": "N5",
+   "why": "an integer and a float do not mix",
+   "file": "cases/N10.haro",
+   "stdout": "\nLine 1 Error (NUMBER_MIX) : integer * float -- an integer and a float do not mix; convert one: Float(i) \nin file N10.haro ",
+   "exit": 1
+  },
+  {
+   "id": "N11",
+   "kind": "run",
+   "line": "N5",
+   "why": "a decimal is not ordered against a float",
+   "file": "cases/N11.haro",
+   "stdout": "\nLine 1 Error (NUMBER_MIX) : decimal < float -- a decimal and a float do not mix; convert one: Float(d), or Decimal(f, iPlaces) \nin file N11.haro ",
+   "exit": 1
+  },
+  {
+   "id": "N12",
+   "kind": "run",
+   "line": "N6",
+   "why": "two floats are ordered, never claimed equal",
+   "file": "cases/N12.haro",
+   "stdout": "true\n\nLine 2 Error (FLOAT_EQUALITY) : float = float claims a sameness binary floating point does not keep -- say how near: Near(fA, fB, fTolerance) \nin file N12.haro ",
+   "exit": 1
+  },
+  {
+   "id": "N13",
+   "kind": "run",
+   "line": "N6",
+   "why": "!= on two floats is refused too",
+   "file": "cases/N13.haro",
+   "stdout": "\nLine 1 Error (FLOAT_EQUALITY) : float != float claims a sameness binary floating point does not keep -- say how near: Near(fA, fB, fTolerance) \nin file N13.haro ",
+   "exit": 1
+  },
+  {
+   "id": "N14",
+   "kind": "run",
+   "line": "N7",
+   "why": "Near says how near two floats are",
+   "file": "cases/N14.haro",
+   "stdout": "true\nfalse\ntrue\n"
+  },
+  {
+   "id": "N15",
+   "kind": "run",
+   "line": "N8",
+   "why": "Float, Decimal and Integer convert",
+   "file": "cases/N15.haro",
+   "stdout": "1.75\n2.5\n12.50\n0.10\n2.68\n4\n2\n3\n"
+  },
+  {
+   "id": "N16",
+   "kind": "run",
+   "line": "N8",
+   "why": "a float has no exact decimal unless the places are said",
+   "file": "cases/N16.haro",
+   "stdout": "\nLine 1 Error (DECIMAL_INEXACT) : a float has no exact decimal -- say how many places: Decimal(f, iPlaces) \nin file N16.haro ",
+   "exit": 1
+  },
+  {
+   "id": "N17",
+   "kind": "run",
+   "line": "N8",
+   "why": "Integer of a number that is not whole is refused",
+   "file": "cases/N17.haro",
+   "stdout": "\nLine 1 Error (NOT_WHOLE) : this number is not whole -- round it first: Decimal(d, 0) \nin file N17.haro ",
+   "exit": 1
+  },
+  {
+   "id": "N18",
+   "kind": "run",
+   "line": "N9",
+   "why": "the letters: d holds a decimal, f a float, n any number; d given a float is refused",
+   "file": "cases/N18.haro",
+   "stdout": "12.50\n\nLine 6 Error (TYPE_LETTER) : `dBad` is lettered d, a decimal, and is given a float \nin file N18.haro ",
+   "exit": 1
+  },
+  {
+   "id": "N19",
+   "kind": "run",
+   "line": "N9",
+   "why": "an integer letter refuses a decimal literal when compiling",
+   "file": "cases/N19.haro",
+   "stdout": "before\n\nLine 2 Haro refused this statement (i is the letter of an integer, and this literal is a decimal; written `iN`, line 2 of N19.haro) and did not compile it -- running past it would give a wrong answer \nin file N19.haro ",
+   "exit": 1
+  },
+  {
+   "id": "N20",
+   "kind": "run",
+   "line": "N10",
+   "why": "a decimal is a double in .ring code",
+   "file": "cases/N20.haro",
+   "stdout": "0.75\nNUMBER\n"
+  },
+  {
+   "id": "N21",
+   "kind": "run",
+   "line": "N3",
+   "why": "past 64 bits of digits, DECIMAL_OVERFLOW",
+   "file": "cases/N21.haro",
+   "stdout": "\nLine 1 Error (DECIMAL_OVERFLOW) : decimal * integer leaves 64 bits of digits \nin file N21.haro ",
+   "exit": 1
+  },
+  {
+   "id": "N22",
+   "kind": "run",
+   "line": "N1",
+   "why": "a decimal is text only when asked; asked, it is its digits",
+   "file": "cases/N22.haro",
+   "stdout": "price 12.50\n\nLine 2 Error (NO_COERCION) : text + decimal -- a value changes type only when asked: string(x) or number(x) \nin file N22.haro ",
+   "exit": 1
+  },
+  {
+   "id": "N23",
+   "kind": "run",
+   "line": "N4",
+   "why": "a decimal divided by zero is Ring's R1",
+   "file": "cases/N23.haro",
+   "stdout": "\nLine 1 Error (R1) : Can't divide by zero \nin file N23.haro ",
+   "exit": 1
+  }
+ ]
+}

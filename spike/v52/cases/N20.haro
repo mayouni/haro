@@ -1,0 +1,3 @@
+load "lib.ring"
+? half(1.5)
+? Type(half(1.5))

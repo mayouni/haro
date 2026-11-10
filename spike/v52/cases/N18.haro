@@ -1,0 +1,6 @@
+dPrice = 12.50
+fRatio = 0.5f
+nAny = 1.5
+nAny = 2f
+? dPrice
+dBad = Float(1)
