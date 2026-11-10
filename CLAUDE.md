@@ -373,8 +373,12 @@ grammar family in which a world is declared, constrained, asked, moved, stepped 
 sentence judged by a court the forge emits from its declaration, every refusal named and cited, refinement the change model at
 every altitude. It runs on its own VM, `haro`. This file is the whole brief for an AI session working here; `CHARTER.md` is the law.
 
-**PRIVATE.** This repository (`github.com/mayouni/haro`, private) is never made public, and nothing of it is published, until the
-author says so. Haro's announcement is his to write and send.
+**PUBLIC since 2026-11-10, on the author's word** ("you should have proposed to make Haro public and I would agree! remove this
+haro-releases and work on one repo"). `github.com/mayouni/haro` is public, its history whole; its releases page carries the builds
+(D63). Every file here is now public text: PRINCIPAL-AFFIRM-01 and PRINCIPAL-HAROINDEPENDENT-01 bind it, and the Ring wording this
+repository still carries is cleaned after, as NORING's scope ruling says (the author: "Public now, clean after"), the README
+first. A secret was never typed here and must never be: the history was scanned before the switch (none found). Haro's
+announcement is still his to write and send.
 
 ---
 
@@ -494,8 +498,8 @@ The records: `CHARTER.md` (section 13 the decisions, D1 to D55; section 15 the v
   refused, stdout written streaming (a Git Bash pipe lost output past 64 KB). **v0.50** (D60, HF-156, stage 54): a program that
   serves another -- `give` sends the output before it waits and reads a line whole, `stdin`/`stdout`/`stderr` are Ring's file
   handles, `FFlush(stdout)`, `FEOF(stdin)` a boolean in .haro. The release builds are `release/` (HARO-RELEASE-ADOPT-01, D63:
-  MIT; PUBLISHED at github.com/mayouni/haro-releases, public, holding archives and sums only, v0.51-269f15a windows and linux;
-  macos joins when accepted on a Mac; this repository stays private). **v0.51** (D61, HF-157, stage 55):
+  MIT; PUBLISHED on this repository's releases page, v0.51-269f15a windows and linux, tagged at the commit that built them;
+  macos joins when accepted on a Mac). **v0.51** (D61, HF-157, stage 55):
   `haro check --facts`, one JSON record per unit -- the checker's commit (baked in by build.zig), each file's sha256, every
   function's lines, findings, calls, first direct impurity, whether it compiled. Next: numbers v0.52.
 - D43 is the twin-court clause. Of BLOCKS.md's four questions: Q-B1 is built (`?` is C6, and `OPTIONAL` sees it in a rule); Q-B2's two amendments are refused by name until Ringua's text
