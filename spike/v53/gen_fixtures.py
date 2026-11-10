@@ -51,7 +51,7 @@ CASES = [
      [L, 'iN = 0', 'while OldNo()', T + 'iN = iN + 1', 'end', '? iN'],
      '0\n', 0),
     ('V05', 'R3', 'a method dispatched by name answers 1 and 0 as true and false', '.haro',
-     [L, 'oK = new OldK', 'if oK.IsOn()', T + '? "on"', 'ok', 'bOff = oK.IsOff()', '? bOff', '? not oK.IsOff()'],
+     [L, 'oThing = new OldK', 'if oThing.IsOn()', T + '? "on"', 'ok', 'bOff = oThing.IsOff()', '? bOff', '? not oThing.IsOff()'],
      'on\nfalse\ntrue\n', 0),
     ('V06', 'R4', 'any other integer at a b name is refused, as before', '.haro',
      [L, '? "before"', 'bX = OldSeven()'],
@@ -71,8 +71,10 @@ CASES = [
     ('V11', 'R5', 'arithmetic sees the integer: only a boolean place converts', '.haro',
      [L, '? OldFlag() + 1', 'iN = OldFlag()', '? iN'],
      '2\n1\n', 0),
+    # V12 CHANGED AFTER THE CODE, said so: Len("ab") answers 2, which is never converted, so it could not tell a built-in proven Haro's
+    # from one that is not; Len("a") answers 1. V05 too: its `oK` was the keyword `ok` in another case, now `oThing`
     ('V12', 'R5', 'a built-in answering an integer stays strict in a condition', '.haro',
-     ['if Len("ab")', T + '? "len"', 'ok'],
+     ['if Len("a")', T + '? "len"', 'ok'],
      err(1, 'BOOLEAN_EXPECTED', 'a condition takes a boolean, and this is an integer -- say what is meant: x != 0', 'V12.haro'), 1),
     ('V13', 'R5', 'a method of the .haro class through this stays strict', '.haro',
      ['oP = new P', 'oP.Run()', 'class P', 'func Run', T + 'if this.One()', T + T + '? "one"', T + 'ok', 'func One', T + 'return 1'],

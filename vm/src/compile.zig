@@ -2047,6 +2047,8 @@ pub const Compiler = struct {
     fail_kind: []const u8 = "",
     fail_row: u32 = 0,
     fail_text: []const u8 = "",
+    /// v0.53 (D65): the call whose answer a b name is given -- its source and start, 0 for none
+    bool_call: usize = 0,
     fail_fn: []const u8 = "",
     /// The LAST refusal recorded, where `fail_*` above keeps the FIRST of
     /// the whole compile for the Program-level report. A refusal trap needs
@@ -4203,7 +4205,7 @@ pub const Compiler = struct {
             const save = self.temp;
             defer self.temp = save;
             const t = try self.tmp();
-            try self.expr(n.namedChild(0), t);
+            try self.boolExpr(n.namedChild(0), t);
             _ = try self.emit(.lnot, dst, t, if (self.haroNode(n)) 1 else 0, 0);
             return;
         }
@@ -4237,12 +4239,50 @@ pub const Compiler = struct {
         }
         if (std.mem.eql(u8, k, "call_expression")) {
             try self.call(n, dst);
+            // v0.53 (D65): the call a b name is given, marked by assign
+            if (self.bool_call != 0 and self.bool_call == @intFromPtr(n.src.ptr) +% n.startByte()) {
+                self.bool_call = 0;
+                _ = try self.emit(.truth, dst, dst, 4, 0);
+            }
             // v0.43 (D55 T3, B4): a native that answers yes or no answers a boolean to a .haro file
             if (self.yesNoNative(n) and self.haroNode(n)) _ = try self.emit(.truth, dst, dst, 2, 0);
             return;
         }
 
         return self.nope(n);
+    }
+
+    /// v0.53 (TYPES.md section 6, D65): the answer of a call the compiler cannot prove is Haro's -- a function declared in a .ring
+    /// file, a native, a method dispatched by name. A function of a .haro file, a built-in, and a method reached through `this` in a
+    /// .haro file are Haro's.
+    fn unprovenCall(self: *Compiler, n0: ts.Node) bool {
+        var n = n0;
+        while (std.mem.eql(u8, n.kind(), "parenthesized_expression") and n.namedChildCount() == 1) n = n.namedChild(0);
+        if (!std.mem.eql(u8, n.kind(), "call_expression") or n.namedChildCount() == 0) return false;
+        const callee = n.namedChild(0);
+        if (std.mem.eql(u8, callee.kind(), "identifier")) {
+            const name = callee.text();
+            if (self.findFunc(name)) |f| return !self.haroNode(f.node);
+            // a built-in -- Ring's 258, the VM's own natives and Haro's -- is Haro's; Softanza's engine natives are not
+            if (builtinNamed(name)) return false;
+            var lb: [64]u8 = undefined;
+            if (name.len <= lb.len) {
+                const low = std.ascii.lowerString(&lb, name);
+                if (builtins.isBuiltin(low) or builtins.pascalOf(low) != null) return false;
+            }
+            return true;
+        }
+        if (std.mem.eql(u8, callee.kind(), "member_expression") and callee.namedChildCount() > 0) {
+            if (self.isThis(callee.namedChild(0))) return false;
+            return true;
+        }
+        return false;
+    }
+
+    /// `n` compiled into `dst` where a boolean is wanted: Ring's 1 or 0 answered by an unproven call becomes true or false (D65)
+    fn boolExpr(self: *Compiler, n: ts.Node, dst: u8) Error!void {
+        try self.expr(n, dst);
+        if (self.haroNode(n) and self.unprovenCall(n)) _ = try self.emit(.truth, dst, dst, 4, 0);
     }
 
     fn binary(self: *Compiler, n: ts.Node, dst: u8) Error!void {
@@ -4260,10 +4300,10 @@ pub const Compiler = struct {
         if (is_and or is_or) {
             const hb: u8 = if (self.haroNode(n)) 1 else 0;
             const t = try self.tmp();
-            try self.expr(ln, t);
+            try self.boolExpr(ln, t);
             const shortcut = try self.emit(if (is_and) .jfalsy else .jtruthy, t, 0, hb, 0);
             const t2 = try self.tmp();
-            try self.expr(rn, t2);
+            try self.boolExpr(rn, t2);
             _ = try self.emit(.truth, dst, t2, hb, 0);
             const done = try self.emit(.jmp, 0, 0, 0, 0);
             self.land(shortcut);
@@ -6706,7 +6746,7 @@ pub const Compiler = struct {
         const save = self.temp;
         defer self.temp = save;
         const t = try self.tmp();
-        try self.expr(n, t);
+        try self.boolExpr(n, t);
         try out.append(self.scratch, try self.emit(.jfalsy, t, 0, if (hc) 1 else 0, 0));
     }
 
@@ -6900,6 +6940,10 @@ pub const Compiler = struct {
                 else => false,
             };
         }
+        // v0.53 (D65): `bX = OldFlag()` -- the call answers Ring's 1 or 0, made true or false as it is compiled, wherever it is stored
+        const want_bool = l == 'b' and std.mem.eql(u8, op, "=") and self.unprovenCall(rhs);
+        if (want_bool) self.bool_call = @intFromPtr(rhs.src.ptr) +% rhs.startByte();
+        defer self.bool_call = 0;
         try self.assignBody(n);
         if (settled or self.spell_fault != null or self.braces.items.len > 0) return;
         // the statement's own line: Ring's F-114 row (the next token's, after a statement's last call) is not a .haro statement's

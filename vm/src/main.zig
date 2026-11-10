@@ -5690,6 +5690,14 @@ pub const VM = struct {
             },
             .truth => {
                 const in = code[pc];
+                // v0.53 (TYPES.md section 6, D65): c = 4 -- the answer of a call the compiler cannot prove is Haro's, in a place that
+                // wants a boolean: Ring's 1 and 0 become true and false, and anything else stays as it is for the check that stands
+                if (in.c == 4) {
+                    const v = regs[base + in.b];
+                    if (v.tag == .int and (v.p.i == 0 or v.p.i == 1)) self.setRegB(base + in.a, Value.boolean(v.p.i == 1), false);
+                    pc += 1;
+                    continue :dispatch code[pc].op;
+                }
                 if (in.c == 1 and regs[base + in.b].tag != .boolean) {
                     self.pending = self.condErr(regs[base + in.b]);
                     continue :dispatch .raise;
