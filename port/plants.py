@@ -45,6 +45,11 @@ PLANTS = [
     ('T19', 'H19', 'a pair\'s value ends at any comma', [("                    elif ke == 'op' and ve == ',' and depth == 0:",
                                                          "                    elif ke == 'op' and ve == ',':")]),
     ('T20', 'H20', 'the unit is the whole tree', [("    reach = loaded(root, rels, srcs, unit) if unit else set(rels)", "    reach = set(rels)")]),
+    ('T22', 'H21', 'a pair\'s value ends at a line that ends in an operator', [
+        ("                    if ke == 'nl' and depth == 0 and not (last is not None and (",
+         "                    if ke == 'nl' and depth == 0 and not (False and last is not None and (")]),
+    ('T23', 'H22', 'an unwrapped c name keeps its c', [("                if len(core) >= 2 and core[1].isupper() and core[0] in 'cv':",
+                                                        "                if False:")]),
     ('T21', 'H17', 'a call through a receiver is respelled', [
         ("        if k != 'id' or v.startswith(('$', '@')) or is_member(toks, i) or is_symbol(toks, i):",
          "        if k != 'id' or v.startswith(('$', '@')) or is_symbol(toks, i):")]),

@@ -203,7 +203,10 @@ def port_file(rel, src, tree_funcs, tree_names, c_map, refused):
                 letter = kinds.pop() if len(kinds) == 1 else 'x'
                 new = lettered(letter, base)
             elif core:
+                # an unwrapped name takes Softanza's c and v rule as well: _cPath_ -> tPath
                 new = core
+                if len(core) >= 2 and core[1].isupper() and core[0] in 'cv':
+                    new = ('t' if core[0] == 'c' else 'x') + core[1:]
             if new is None or new == v:
                 continue
             why = None
@@ -293,7 +296,9 @@ def pair_lists(toks):
                 last = None
                 while e < n:
                     ke, ve = toks[e]
-                    if ke == 'nl' and depth == 0:
+                    # a line ending in an operator goes on, as Ring reads it: `"a" + "|" +` then the next line
+                    if ke == 'nl' and depth == 0 and not (last is not None and (
+                            (toks[last][0] == 'op' and toks[last][1] in '+-*/%&|^=<>!') or toks[last][1].lower() in ('and', 'or', 'not'))):
                         break
                     if ke == 'op' and ve in '([{':
                         depth += 1

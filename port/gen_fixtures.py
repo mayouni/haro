@@ -117,6 +117,15 @@ CASES = [
         'main.ring': ['load "lib.ring"', '? len("ab")', '? half(4)'], 'lib.ring': ['func half n', T + 'return n / 2'],
         'tools/extra.ring': ['func len x', T + 'return 0']},
      [("'? Len(\"ab\")' in applied['main.haro']", True), ("'? half(4)' in applied['main.haro']", True)], 'main.ring'),
+    # H21 and H22 ADDED AFTER THE SECOND ROUND'S CODE, said so: its run on stzlib 4e354d7cc found a pair whose value goes on past a line
+    # ending in an operator closed at the line's end (291 statements no longer parsed), and an unwrapped _cName_ left as cName
+    ('H21', 'P', 'a pair\'s value goes on past a line that ends in an operator, as Ring reads it', {
+        'main.ring': ['aX = [ :q = "a" + "|" +', T + '"b", :r = 2 ]', '? aX[1][2]']},
+     [("applied['main.haro'].splitlines()[0]", 'aX = [ [:q, "a" + "|" +'),
+      ("applied['main.haro'].splitlines()[1]", '\t"b"], [:r, 2] ]')]),
+    ('H22', 'U', 'an unwrapped _cName_ takes Softanza\'s c rule too: tName', {
+        'main.ring': ['func f', T + '_cPath_ = "a"', T + '? _cPath_']},
+     [("'tPath = \"a\"' in applied['main.haro'] and '? tPath' in applied['main.haro']", True)]),
     ('H11', '-', 'the ported tree runs on haro and prints what the classic Ring surface printed', {
         'main.ring': ['load "lib.ring"', 'cName = Greet("ada")', '? cName', '? Len(cName)'],
         'lib.ring': ['func Greet cWho', T + 'cOut = "hi " + cWho', T + 'return cOut']},

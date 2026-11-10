@@ -406,6 +406,40 @@
    "unit": "main.ring"
   },
   {
+   "id": "H21",
+   "line": "P",
+   "why": "a pair's value goes on past a line that ends in an operator, as Ring reads it",
+   "folder": "cases/H21",
+   "files": [
+    "main.ring"
+   ],
+   "asserts": [
+    [
+     "applied['main.haro'].splitlines()[0]",
+     "aX = [ [:q, \"a\" + \"|\" +"
+    ],
+    [
+     "applied['main.haro'].splitlines()[1]",
+     "\t\"b\"], [:r, 2] ]"
+    ]
+   ]
+  },
+  {
+   "id": "H22",
+   "line": "U",
+   "why": "an unwrapped _cName_ takes Softanza's c rule too: tName",
+   "folder": "cases/H22",
+   "files": [
+    "main.ring"
+   ],
+   "asserts": [
+    [
+     "'tPath = \"a\"' in applied['main.haro'] and '? tPath' in applied['main.haro']",
+     true
+    ]
+   ]
+  },
+  {
    "id": "H11",
    "line": "-",
    "why": "the ported tree runs on haro and prints what the classic Ring surface printed",
