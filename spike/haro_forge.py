@@ -3811,6 +3811,44 @@ def stage56():
         return 1
     return 0
 
+
+BOUND_COURT = os.path.join(HERE, 'v53', 'bound_court.py')
+
+
+def stage57():
+    """Haro v0.53, the classic Ring surface's 1 and 0 (TYPES.md section 6, D65; v53/GRAMMAR.md): where a .haro file wants a boolean, an
+    unproven call's 1 or 0 is true or false; anything else is refused as before; a call proven Haro's stays strict. v53/bound_court.py on
+    haro and its checked build."""
+    print('stage 57 -- the classic Ring surface\'s 1 and 0: v53/bound_court.py on haro and its checked build')
+    p = subprocess.run([sys.executable, BOUND_COURT] + (['--plant'] if PLANT else []), capture_output=True, cwd=HERE, timeout=900)
+    out = p.stdout.decode('utf-8', 'replace').replace(chr(13) + chr(10), chr(10))
+    for line in out.splitlines():
+        if line.startswith('  FAIL') or line.startswith('       ') or line.startswith('BOUNDARY COURT'):
+            print(line)
+    if p.returncode != 0:
+        print(f'  FAIL the boundary court exited {p.returncode}' + ('' if out.strip() else ': ' + p.stderr.decode('utf-8', 'replace')[-400:]))
+        return 1
+    return 0
+
+
+PORT_COURT = os.path.join(os.path.dirname(HERE), 'port', 'port_court.py')
+
+
+def stage58():
+    """haroport (HARO-PORTTOOL-01; port/haroport.py): a tree of the classic Ring surface ported to .haro mechanically, every rename that
+    would land on a keyword, a name already there or a class's attribute refused and listed; the ported tree prints what the original
+    printed. port/port_court.py."""
+    print('stage 58 -- haroport: port/port_court.py')
+    p = subprocess.run([sys.executable, PORT_COURT] + (['--plant'] if PLANT else []), capture_output=True, cwd=HERE, timeout=900)
+    out = p.stdout.decode('utf-8', 'replace').replace(chr(13) + chr(10), chr(10))
+    for line in out.splitlines():
+        if line.startswith('  FAIL') or line.startswith('       ') or line.startswith('PORT COURT'):
+            print(line)
+    if p.returncode != 0:
+        print(f'  FAIL the port court exited {p.returncode}' + ('' if out.strip() else ': ' + p.stderr.decode('utf-8', 'replace')[-400:]))
+        return 1
+    return 0
+
 SENTENCE_TARGET = 50.0     # D42: a sentence edited, its court's image reused -- what a person editing a sentence waits for
 COLD_CEILING = 150.0       # D42: the court compiled from scratch -- a ceiling that catches the court library growing
 
@@ -4018,5 +4056,9 @@ if __name__ == '__main__':
         failures += stage55()
     if stage in (None, 56) and os.path.exists(NUM_COURT):
         failures += stage56()
+    if stage in (None, 57) and os.path.exists(BOUND_COURT):
+        failures += stage57()
+    if stage in (None, 58) and os.path.exists(PORT_COURT):
+        failures += stage58()
     print(f'haro_forge: {"FAIL" if failures else "PASS"} ({failures} failure(s), {time.perf_counter()-t0:.1f} s)')
     sys.exit(1 if failures else 0)

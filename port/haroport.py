@@ -142,23 +142,28 @@ def port_file(rel, src, tree_funcs, tree_names, c_map, refused):
         if k == 'id' and v.lower() in KW and v != v.lower() and not is_symbol(toks, i):
             toks[i][1] = v.lower()
             renames.append(('K', v, v.lower()))
-    for s, e, kind, nm, cls in scopes(toks):
+    # the scopes once, and each class's declared attributes (names assigned in its body) once: asked per method, they made a file
+    # of thousands of methods quadratic (stzlib's sweep ran past ten minutes)
+    scs = scopes(toks)
+    class_attrs = {}
+    for s2, e2, k2, n2, c2 in scs:
+        if k2 != 'class':
+            continue
+        found = class_attrs.setdefault(n2, set())
+        line_start = True
+        for i in range(s2, e2):
+            if toks[i][0] == 'nl':
+                line_start = True
+                continue
+            if toks[i][0] in ('ws', 'cm'):
+                continue
+            if line_start and toks[i][0] == 'id' and rhs_text(toks, i) is not None:
+                found.add(toks[i][1])
+            line_start = False
+    refused_here = set()
+    for s, e, kind, nm, cls in scs:
         idents = {toks[i][1] for i in range(s, e) if toks[i][0] == 'id'}
-        attrs = set()
-        if kind == 'method':
-            # the class's declared attributes: names assigned in its body
-            for s2, e2, k2, n2, c2 in scopes(toks):
-                if k2 == 'class' and n2 == cls:
-                    line_start = True
-                    for i in range(s2, e2):
-                        if toks[i][0] == 'nl':
-                            line_start = True
-                            continue
-                        if toks[i][0] in ('ws', 'cm'):
-                            continue
-                        if line_start and toks[i][0] == 'id' and rhs_text(toks, i) is not None:
-                            attrs.add(toks[i][1])
-                        line_start = False
+        attrs = class_attrs.get(cls, set()) if kind == 'method' else set()
         # U then L: the declared bare names of a function or a method
         decl = {}
         if kind in ('func', 'method'):
@@ -205,6 +210,7 @@ def port_file(rel, src, tree_funcs, tree_names, c_map, refused):
                 why = 'attribute: `%s` is an attribute of class %s' % (v, cls)
             if why:
                 refused.append({'file': rel, 'scope': nm, 'old': v, 'new': new, 'why': why})
+                refused_here.add((nm, v))
                 plan[v] = v
             else:
                 plan[v] = new
@@ -218,8 +224,8 @@ def port_file(rel, src, tree_funcs, tree_names, c_map, refused):
                     continue
                 if k in ('ws', 'cm'):
                     continue
-                if line_start and k == 'id' and v in attrs and rhs_text(toks, i) is not None and not any(
-                        r['old'] == v and r['scope'] == nm and r['file'] == rel for r in refused):
+                if line_start and k == 'id' and v in attrs and rhs_text(toks, i) is not None and (nm, v) not in refused_here:
+                    refused_here.add((nm, v))
                     refused.append({'file': rel, 'scope': nm, 'old': v, 'new': v,
                                     'why': 'attribute: `%s` is an attribute of class %s, written bare -- write @%s' % (v, cls, v)})
                 line_start = False
