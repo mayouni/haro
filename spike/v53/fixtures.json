@@ -1,0 +1,134 @@
+{
+ "rung": "v0.53",
+ "decision": "TYPES.md section 6 (D55); HARO-RINGBOUNDARY-BOOL-01; the desk's reading is D65",
+ "class": "exact: the program's whole stdout and its exit code, byte for byte, on haro and on its checked build",
+ "lines": {
+  "R1": "a .ring 1 or 0 given to a b name is true or false",
+  "R2": "... in a condition and as an operand of not, and, or",
+  "R3": "... from a method dispatched by name",
+  "R4": "any other answer refused by the check that stood",
+  "R5": "a call proven Haro's stays strict; no later conversion; arithmetic sees the integer",
+  "R6": "a .ring file reads as it did"
+ },
+ "cases": [
+  {
+   "id": "V01",
+   "kind": "run",
+   "line": "R1",
+   "why": "a .ring 1 and 0 given to b names are true and false",
+   "file": "cases/V01.haro",
+   "stdout": "true\nfalse\nBOOLEAN\n"
+  },
+  {
+   "id": "V02",
+   "kind": "run",
+   "line": "R2",
+   "why": "a .ring 1 and 0 as conditions: if, elseif",
+   "file": "cases/V02.haro",
+   "stdout": "if\nelseif\n"
+  },
+  {
+   "id": "V03",
+   "kind": "run",
+   "line": "R2",
+   "why": "a .ring 1 and 0 as operands of not, and, or",
+   "file": "cases/V03.haro",
+   "stdout": "true\nfalse\ntrue\ntrue\n"
+  },
+  {
+   "id": "V04",
+   "kind": "run",
+   "line": "R2",
+   "why": "a .ring answer as a while condition",
+   "file": "cases/V04.haro",
+   "stdout": "0\n"
+  },
+  {
+   "id": "V05",
+   "kind": "run",
+   "line": "R3",
+   "why": "a method dispatched by name answers 1 and 0 as true and false",
+   "file": "cases/V05.haro",
+   "stdout": "on\nfalse\ntrue\n"
+  },
+  {
+   "id": "V06",
+   "kind": "run",
+   "line": "R4",
+   "why": "any other integer at a b name is refused, as before",
+   "file": "cases/V06.haro",
+   "stdout": "before\n\nLine 3 Error (TYPE_LETTER) : `bX` is lettered b, a boolean, and is given an integer \nin file V06.haro ",
+   "exit": 1
+  },
+  {
+   "id": "V07",
+   "kind": "run",
+   "line": "R4",
+   "why": "any other integer in a condition is refused, as before",
+   "file": "cases/V07.haro",
+   "stdout": "before\n\nLine 3 Error (BOOLEAN_EXPECTED) : a condition takes a boolean, and this is an integer -- say what is meant: x != 0 \nin file V07.haro ",
+   "exit": 1
+  },
+  {
+   "id": "V08",
+   "kind": "run",
+   "line": "R4",
+   "why": "a text in a condition is refused, as before",
+   "file": "cases/V08.haro",
+   "stdout": "\nLine 2 Error (BOOLEAN_EXPECTED) : a condition takes a boolean, and this is a text -- say what is meant: x != \"\" \nin file V08.haro ",
+   "exit": 1
+  },
+  {
+   "id": "V09",
+   "kind": "run",
+   "line": "R5",
+   "why": "a .haro function answering 1 stays strict: the compiler proves it is Haro's",
+   "file": "cases/V09.haro",
+   "stdout": "before\n\nLine 2 Error (BOOLEAN_EXPECTED) : a condition takes a boolean, and this is an integer -- say what is meant: x != 0 \nin file V09.haro ",
+   "exit": 1
+  },
+  {
+   "id": "V10",
+   "kind": "run",
+   "line": "R5",
+   "why": "a value no longer a call's answer is not converted: an integer name holding the 1 stays an integer",
+   "file": "cases/V10.haro",
+   "stdout": "2\nbefore\n\nLine 5 Error (BOOLEAN_EXPECTED) : a condition takes a boolean, and this is an integer -- say what is meant: x != 0 \nin file V10.haro ",
+   "exit": 1
+  },
+  {
+   "id": "V11",
+   "kind": "run",
+   "line": "R5",
+   "why": "arithmetic sees the integer: only a boolean place converts",
+   "file": "cases/V11.haro",
+   "stdout": "2\n1\n"
+  },
+  {
+   "id": "V12",
+   "kind": "run",
+   "line": "R5",
+   "why": "a built-in answering an integer stays strict in a condition",
+   "file": "cases/V12.haro",
+   "stdout": "\nLine 1 Error (BOOLEAN_EXPECTED) : a condition takes a boolean, and this is an integer -- say what is meant: x != 0 \nin file V12.haro ",
+   "exit": 1
+  },
+  {
+   "id": "V13",
+   "kind": "run",
+   "line": "R5",
+   "why": "a method of the .haro class through this stays strict",
+   "file": "cases/V13.haro",
+   "stdout": "\nLine 5 Error (BOOLEAN_EXPECTED) : a condition takes a boolean, and this is an integer -- say what is meant: x != 0 \nIn method run() in file V13.haro\n\nCalled from line 2 in file V13.haro ",
+   "exit": 1
+  },
+  {
+   "id": "V14",
+   "kind": "run",
+   "line": "R6",
+   "why": "a .ring file reads its own answers as it did",
+   "file": "cases/V14.ring",
+   "stdout": "ring\n7\nseven\n"
+  }
+ ]
+}

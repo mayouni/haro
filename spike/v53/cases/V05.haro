@@ -1,0 +1,8 @@
+load "old.ring"
+oK = new OldK
+if oK.IsOn()
+	? "on"
+ok
+bOff = oK.IsOff()
+? bOff
+? not oK.IsOff()

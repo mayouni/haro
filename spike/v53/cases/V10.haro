@@ -1,0 +1,7 @@
+load "old.ring"
+iX = OldFlag()
+? iX + 1
+? "before"
+if iX
+	? "x"
+ok

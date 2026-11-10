@@ -1,0 +1,9 @@
+oP = new P
+oP.Run()
+class P
+func Run
+	if this.One()
+		? "one"
+	ok
+func One
+	return 1

@@ -1,0 +1,9 @@
+load "old.ring"
+if OldFlag()
+	? "if"
+ok
+if OldNo()
+	? "no"
+elseif OldFlag()
+	? "elseif"
+ok

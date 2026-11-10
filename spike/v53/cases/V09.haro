@@ -1,0 +1,6 @@
+? "before"
+if HaroOne()
+	? "one"
+ok
+func HaroOne
+	return 1

@@ -1,0 +1,6 @@
+load "old.ring"
+bFlag = OldFlag()
+bNo = OldNo()
+? bFlag
+? bNo
+? Type(bFlag)

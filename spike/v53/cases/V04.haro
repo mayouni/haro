@@ -1,0 +1,6 @@
+load "old.ring"
+iN = 0
+while OldNo()
+	iN = iN + 1
+end
+? iN

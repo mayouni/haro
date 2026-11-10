@@ -1,0 +1,6 @@
+load "old.ring"
+? not OldNo()
+? OldFlag() and OldNo()
+? OldNo() or OldFlag()
+bBoth = OldFlag() and OldFlag()
+? bBoth

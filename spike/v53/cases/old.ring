@@ -1,0 +1,13 @@
+func OldFlag
+	return 1
+func OldNo
+	return 0
+func OldSeven
+	return 7
+func OldText
+	return "yes"
+class OldK
+	func IsOn
+		return 1
+	func IsOff
+		return 0

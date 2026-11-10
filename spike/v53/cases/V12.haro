@@ -1,0 +1,3 @@
+if Len("ab")
+	? "len"
+ok

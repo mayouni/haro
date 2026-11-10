@@ -1,0 +1,3 @@
+load "old.ring"
+? "before"
+bX = OldSeven()

@@ -1,0 +1,4 @@
+load "old.ring"
+? OldFlag() + 1
+iN = OldFlag()
+? iN
