@@ -2,6 +2,7 @@
 
   python port/haroport.py plan  ROOT [--json]       what it would do, file by file; writes nothing
   python port/haroport.py apply ROOT --out DIR      the ported tree in DIR: each .ring file as .haro, each load rewritten to it
+  ... --unit FILE                                   the functions a call can reach read from FILE and what it loads (B, D)
 
 THE REWRITES, in this order, each on code only (a string, a comment, a symbol's name are never touched):
   K  a keyword in any case is written in lowercase -- the keywords are vm/src/lift.zig's ring_keywords, read from there
@@ -9,7 +10,10 @@ THE REWRITES, in this order, each on code only (a string, a comment, a symbol's 
   C  Softanza's c (text) is t and its v (any value) is x: cName -> tName, $cX -> $tX, @cX -> @tX -- one decision for the whole tree
   L  a bare name declared in a function (assigned, a parameter) is lettered by what it holds: n a number, t a text, a a list, o an object,
      x anything else or two kinds -- never at the top level or in a class body, never a name the class declares as an attribute
+  G  a library-internal global $_name is $name -- one decision for the whole tree
   B  a built-in called by name is written in its one spelling (study/v48/builtin_names.py), unless the tree defines a function of that name
+  D  a call to a function the tree declares at a file's top level is written as it is declared; a name declared in two spellings is refused
+  P  `:key = value` is the pair [:key, value] (HARO-SURFACE-01), the value read to the comma or closing bracket at its own depth
 A RENAME IS REFUSED, and listed, when its new name is a keyword in any case, is already a name in its scope (for C: anywhere in the tree),
 or is in a method an attribute its class declares (a bare assignment to one writes the attribute in Ring; a local would change the
 program). The name is then left as it was written.
@@ -134,6 +138,7 @@ def lettered(letter, core):
 
 
 def port_file(rel, src, tree_funcs, tree_names, c_map, refused):
+    # tree_funcs: lowercase name -> the spellings the tree (or the unit) declares it in, at a file's top level
     """(new text, [renames]) for one file"""
     toks = tokens(src)
     renames = []
@@ -224,7 +229,7 @@ def port_file(rel, src, tree_funcs, tree_names, c_map, refused):
                     continue
                 if k in ('ws', 'cm'):
                     continue
-                if line_start and k == 'id' and v in attrs and rhs_text(toks, i) is not None and (nm, v) not in refused_here:
+                if line_start and k == 'id' and not v.startswith('@') and v in attrs and rhs_text(toks, i) is not None and (nm, v) not in refused_here:
                     refused_here.add((nm, v))
                     refused.append({'file': rel, 'scope': nm, 'old': v, 'new': v,
                                     'why': 'attribute: `%s` is an attribute of class %s, written bare -- write @%s' % (v, cls, v)})
@@ -238,19 +243,87 @@ def port_file(rel, src, tree_funcs, tree_names, c_map, refused):
                 renames.append(('L' if not unwrapped(v) else 'U', v, plan[v]))
             elif v in c_map:
                 toks[i][1] = c_map[v]
-                renames.append(('C', v, c_map[v]))
+                renames.append(('G' if v.startswith('$_') else 'C', v, c_map[v]))
     # B: a built-in called by name, in its one spelling
     for i, (k, v) in enumerate(toks):
         if k != 'id' or v.startswith(('$', '@')) or is_member(toks, i) or is_symbol(toks, i):
             continue
         j = sig(toks, i, 1)
-        if j is None or toks[j][1] != '(' or v.lower() in tree_funcs:
+        if j is None or toks[j][1] != '(':
+            continue
+        if v.lower() in tree_funcs:
+            # D: a call to a function the tree declares, as it is declared; two spellings refused
+            spellings = tree_funcs[v.lower()]
+            if len(spellings) > 1:
+                if (rel, v) not in refused_here:
+                    refused_here.add((rel, v))
+                    refused.append({'file': rel, 'scope': '-', 'old': v, 'new': v,
+                                    'why': 'two spellings: the tree declares %s' % ', '.join(sorted(spellings))})
+            else:
+                want = next(iter(spellings))
+                if want != v:
+                    toks[i][1] = want
+                    renames.append(('D', v, want))
             continue
         want = SPELL.get(v.lower().replace('_', ''))
         if want and want != v:
             toks[i][1] = want
             renames.append(('B', v, want))
+    toks, pairs = pair_lists(toks)
+    renames.extend(('P', ':' + k, '[:' + k + ', ...]') for k in pairs)
     return ''.join(v for _, v in toks), renames
+
+
+def pair_lists(toks):
+    """P (HARO-SURFACE-01): `:key = value` is the pair [:key, value] -- the value read to the comma or the closing bracket at its own depth,
+    or the line's end"""
+    out = []
+    pairs = []
+    i = 0
+    n = len(toks)
+    while i < n:
+        k, v = toks[i]
+        if k == 'op' and v == ':' and i + 1 < n and toks[i + 1][0] == 'id':
+            j = sig(toks, i + 1, 1)
+            jn = sig(toks, j, 1) if j is not None else None
+            if j is not None and toks[j][1] == '=' and (jn is None or toks[jn][1] != '='):
+                # the value: from after `=` to its end at depth 0
+                depth = 0
+                e = j + 1
+                last = None
+                while e < n:
+                    ke, ve = toks[e]
+                    if ke == 'nl' and depth == 0:
+                        break
+                    if ke == 'op' and ve in '([{':
+                        depth += 1
+                    elif ke == 'op' and ve in ')]}':
+                        if depth == 0:
+                            break
+                        depth -= 1
+                    elif ke == 'op' and ve == ',' and depth == 0:
+                        break
+                    if ke not in ('ws', 'cm', 'nl'):
+                        last = e
+                    e += 1
+                if last is not None:
+                    pairs.append(toks[i + 1][1])
+                    out.append(['op', '['])
+                    out.append(toks[i])
+                    out.append(toks[i + 1])
+                    out.append(['op', ','])
+                    # what stood between `=` and the value (its spaces), then the value
+                    rest = toks[j + 1:last + 1]
+                    while rest and rest[0][0] == 'ws':
+                        rest = rest[1:]
+                    out.append(['ws', ' '])
+                    out.extend(rest)
+                    out.append(['op', ']'])
+                    i = last + 1
+                    continue
+        out.append(toks[i])
+        i += 1
+    return out, pairs
 
 
 def files_of(root):
@@ -262,20 +335,56 @@ def files_of(root):
     return sorted(out)
 
 
-def port_tree(root):
+def loaded(root, rels, srcs, unit):
+    """the files `unit` loads, itself and transitively: a load resolved from the loading file's folder, as Ring resolves it"""
+    have = set(rels)
+    seen = set()
+    todo = [unit]
+    while todo:
+        r = todo.pop()
+        if r in seen or r not in have:
+            continue
+        seen.add(r)
+        for m in re.finditer(r'(?mi)^\ufeff?\s*load\s+["\']([^"\'\n]+)["\']', srcs[r]):
+            target = os.path.normpath(os.path.join(os.path.dirname(r), m.group(1))).replace(os.sep, '/')
+            todo.append(target)
+    return seen
+
+
+def top_funcs(src):
+    """the functions a file declares at its top level, before any class, as written"""
+    return [nm for s, e, kind, nm, cls in scopes(tokens(src)) if kind == 'func']
+
+
+def port_tree(root, unit=None):
     rels = files_of(root)
     srcs = {r: open(os.path.join(root, r), 'rb').read().decode('utf-8', 'surrogateescape').replace('\r\n', '\n') for r in rels}
-    tree_funcs = set()
+    # the functions a call can reach: the unit's files when one is named, else the whole tree -- lowercase name -> its spellings
+    reach = loaded(root, rels, srcs, unit) if unit else set(rels)
+    tree_funcs = {}
+    for r in reach:
+        for nm in top_funcs(srcs[r]):
+            tree_funcs.setdefault(nm.lower(), set()).add(nm)
     tree_names = set()
     for src in srcs.values():
-        tree_funcs |= {m.group(1).lower() for m in re.finditer(r'(?mi)^\s*(?:func|def)\s+(\w+)', src)}
         tree_names |= {v for k, v in tokens(src) if k == 'id'}
     refused = []
     c_map = {}
     for name in sorted(tree_names):
-        core = name.lstrip('$@')
-        pre = name[:len(name) - len(core)]
-        if len(core) >= 2 and core[1].isupper() and core[0] in 'cv' and name != 'cCatchError':
+        # G (NEXT-01 (a)): $_name, a library-internal global, is $name
+        g = name
+        if name.startswith('$_') and len(name) > 2 and name[2] != '_' and not name.endswith('_'):
+            g = '$' + name[2:]
+            if g in tree_names:
+                refused.append({'file': '*', 'scope': 'tree', 'old': name, 'new': g, 'why': 'already: `%s` is a name in the tree' % g})
+                continue
+        core = g.lstrip('$@')
+        pre = g[:len(g) - len(core)]
+        if not (len(core) >= 2 and core[1].isupper() and core[0] in 'cv' and g != 'cCatchError'):
+            if g != name:
+                c_map[name] = g
+            continue
+        if True:
             new = pre + ('t' if core[0] == 'c' else 'x') + core[1:]
             if new.lower() in KW:
                 refused.append({'file': '*', 'scope': 'tree', 'old': name, 'new': new, 'why': 'keyword: `%s` is a keyword' % new.lower()})
@@ -295,7 +404,8 @@ def haro_name(rel):
 
 
 def loads_to_haro(text):
-    return re.sub(r'(?m)^(\s*load\s+["\'][^"\'\n]*?)\.ring(["\'])', r'\1.haro\2', text)
+    # a first line may begin with a byte order mark (BOM-01)
+    return re.sub(r'(?m)^(\ufeff?\s*load\s+["\'][^"\'\n]*?)\.ring(["\'])', r'\1.haro\2', text)
 
 
 def main():
@@ -303,7 +413,8 @@ def main():
     if len(a) < 2 or a[0] not in ('plan', 'apply'):
         sys.exit(__doc__)
     root = os.path.abspath(a[1])
-    rels, out, renames, refused = port_tree(root)
+    unit = a[a.index('--unit') + 1].replace(os.sep, '/') if '--unit' in a else None
+    rels, out, renames, refused = port_tree(root, unit)
     counts = {}
     for r in rels:
         for kind, _, _ in renames[r]:

@@ -16,8 +16,8 @@ PLANTS = [
                                                           "        if False and k == 'id' and v.lower() in KW and v != v.lower() and not is_symbol(toks, i):")]),
     ('T2', 'H01', 'a symbol\'s name is lowered too', [("        if k == 'id' and v.lower() in KW and v != v.lower() and not is_symbol(toks, i):",
                                                        "        if k == 'id' and v.lower() in KW and v != v.lower():")]),
-    ('T3', 'H02', 'a function the tree defines is respelled as the built-in', [("        if j is None or toks[j][1] != '(' or v.lower() in tree_funcs:",
-                                                                                "        if j is None or toks[j][1] != '(':")]),
+    ('T3', 'H02', 'a function the tree defines is respelled as the built-in', [("        if v.lower() in tree_funcs:",
+                                                                                "        if False:")]),
     ('T4', 'H03', 'Softanza\'s c and v are left', [("                c_map[name] = new", "                pass")]),
     ('T5', 'H04', 'the top level and a class body are lettered too', [("        if kind in ('func', 'method'):", "        if True:")]),
     ('T6', 'H05', 'a method\'s attribute is made a local', [
@@ -28,8 +28,26 @@ PLANTS = [
     ('T8', 'H08', 'an unwrapped name lands on a keyword', [("            if new.lower() in KW:\n                why = 'keyword:",
                                                            "            if False:\n                why = 'keyword:")]),
     ('T9', 'H06', 'a c name lands on a name already in the tree', [("            elif new in tree_names:", "            elif False:")]),
-    ('T10', 'H10', 'a load keeps .ring', [("    return re.sub(r'(?m)^(\\s*load\\s+[\"\\'][^\"\\'\\n]*?)\\.ring([\"\\'])', r'\\1.haro\\2', text)", "    return text")]),
+    ('T10', 'H10', 'a load keeps .ring', [("    return re.sub(r'(?m)^(", "    return text or re.sub(r'(?m)^(")]),
     ('T11', 'H07', '_name_ is not unwrapped', [("    return v[1:-1] if len(v) > 2", "    return None if len(v) > 2")]),
+    # the second round
+    ('T12', 'H13', 'an @-attribute in a method is refused as bare', [
+        ("if line_start and k == 'id' and not v.startswith('@') and v in attrs", "if line_start and k == 'id' and v in attrs")]),
+    ('T13', 'H14', 'a load after a byte order mark keeps .ring', [
+        ("    return re.sub(r'(?m)^(\\ufeff?\\s*load", "    return re.sub(r'(?m)^(\\s*load")]),
+    ('T14', 'H15', '$_name is left', [("            g = '$' + name[2:]", "            g = name")]),
+    ('T15', 'H16', '$_name lands on a $name already in the tree', [("            if g in tree_names:", "            if False:")]),
+    ('T16', 'H17', 'a call keeps its spelling against the declaration', [
+        ("                if want != v:\n                    toks[i][1] = want\n                    renames.append(('D', v, want))",
+         "                if False:\n                    toks[i][1] = want\n                    renames.append(('D', v, want))")]),
+    ('T17', 'H18', 'a name declared in two spellings takes one of them', [("            if len(spellings) > 1:", "            if False:")]),
+    ('T18', 'H19', ':key = value is left', [("    toks, pairs = pair_lists(toks)", "    pairs = []")]),
+    ('T19', 'H19', 'a pair\'s value ends at any comma', [("                    elif ke == 'op' and ve == ',' and depth == 0:",
+                                                         "                    elif ke == 'op' and ve == ',':")]),
+    ('T20', 'H20', 'the unit is the whole tree', [("    reach = loaded(root, rels, srcs, unit) if unit else set(rels)", "    reach = set(rels)")]),
+    ('T21', 'H17', 'a call through a receiver is respelled', [
+        ("        if k != 'id' or v.startswith(('$', '@')) or is_member(toks, i) or is_symbol(toks, i):",
+         "        if k != 'id' or v.startswith(('$', '@')) or is_symbol(toks, i):")]),
 ]
 
 
