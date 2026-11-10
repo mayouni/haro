@@ -66,7 +66,13 @@ T4 rules the three kinds, the literal, the one widening, and float equality. Wha
 - **Measurement 2** (owed before the rung, TYPES.md section 8): Haro's own `.haro` code holds 15 literals with a point in 274 files, and
   a `.ring` file never reads a decimal, so stzMax -- a `.ring` program -- carries none: the cost of "a literal with a point is a decimal"
   falls on 15 literals.
-- **The court**: 30 of 30 on haro and its checked build (stage 56).
+- **The court**: 30 of 30 on haro and its checked build (stage 56). **The guard**: 56 stages on the committed tree (d62f05c), PASS, 0
+  failures, 1,557 s -- Haro's own courts and forge, `.haro` code all, unchanged by the rung.
+- **Plants**: P1 to P28, each one protection switched off: 28 of 28 caught -- P23 after N27 was changed (its `fX - 1` never folds: a
+  name may hold an object, and a minus beside one is not folded; `0.5f - 1` is what folds into `+ -1`).
+- **The cost** (heartbeat fit to measure, best of 5, each run's start included): a million additions in a `.haro` loop -- integers
+  0.035 s, decimals 0.042 s, floats 0.038 s; the same float loop in a `.ring` file 0.037 s before the rung (1f1ad87) and 0.036 s after
+  it: Ring's code pays nothing measurable for the checks it passes.
 - **Radar on it**: a fresh clone of stzradar (d39413d), `haro tools/guard.haro` 62 passed 0 failed, `haro tools/feed.haro check` problems 0.
 
 ## Named

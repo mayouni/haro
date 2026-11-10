@@ -1917,6 +1917,10 @@ D58, the Principal's ruling of 2026-11-09 ("ParentClassName"), revising v0.42's 
 
 **Results.** 9 of 9 cases on both builds; 5 of 5 plants; v36 to v48's courts green. Haro's 2,172 calls re-spelled by a tool (20fc236, listed in v20/tool_commits.txt).
 
+## The fifty-second rung -- Haro v0.52, numbers -- 2026-11-10
+
+D64, D55 T4: in a .haro file a literal with a point is an exact decimal, `0.5f` a float; an integer joins a decimal; `/` is exact or DECIMAL_INEXACT, `Divide` rounds half to even; a float mixes with neither, and `=` on two floats is refused with `Near`. 30 of 30 on both builds, plants P1-P28 caught (P23 after N27's change), the 56-stage guard PASS; N22 changed and N24-N30 added after the code, and v0.43's B17, v0.44's Q04, v0.47's Y01/Y12 changed by the ruling, each said so. With it, `haro census` groups its refusals by family, uncapped (HARO-CENSUS-KINDS-01).
+
 ## The fifty-first rung -- Haro v0.51, `haro check --facts` -- 2026-11-10
 
 D61, HARO-FACTS-01 answering stzlib-testoor's HARO-PROOF-01 (a): one JSON record per unit of what the checker and the compiler establish, per function, with the checker's commit and each file's sha256. 15 of 15 on both builds, plants G1-G15 caught (G3 and G8 rewritten after their first runs, said so); X13 changed after the code. On stzlib cb6f5de65: 26.6 s for 720 files and 48,756 functions, once a walk per function (cubic, past ten minutes) became one walk per file.
