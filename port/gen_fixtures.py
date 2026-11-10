@@ -74,6 +74,12 @@ CASES = [
         'main.ring': ['load "lib.ring"', '? Half(4)'], 'lib.ring': ['func Half n', T + 'return n / 2']},
      [("sorted(applied)", ['lib.haro', 'main.haro']), ("applied['main.haro'].splitlines()[0]", 'load "lib.haro"'),
       ("plan_wrote", False), ("plan['files']", 2)]),
+    # H12 ADDED AFTER THE TOOL, said so: H06's refusal is the tree-wide one (C); a lettered local landing on a name already in its
+    # function (L) had no case
+    ('H12', 'L', 'a lettered local landing on a name already in its function is refused, named', {
+        'main.ring': ['func f', T + 'count = 1', T + 'nCount = 2', T + '? count + nCount']},
+     [("'\\tcount = 1' in applied['main.haro']", True),
+      ("any(r['old'] == 'count' and r['new'] == 'nCount' and 'already' in r['why'] for r in plan['refused'])", True)]),
     ('H11', '-', 'the ported tree runs on haro and prints what the classic Ring surface printed', {
         'main.ring': ['load "lib.ring"', 'cName = Greet("ada")', '? cName', '? Len(cName)'],
         'lib.ring': ['func Greet cWho', T + 'cOut = "hi " + cWho', T + 'return cOut']},

@@ -231,6 +231,25 @@
    ]
   },
   {
+   "id": "H12",
+   "line": "L",
+   "why": "a lettered local landing on a name already in its function is refused, named",
+   "folder": "cases/H12",
+   "files": [
+    "main.ring"
+   ],
+   "asserts": [
+    [
+     "'\\tcount = 1' in applied['main.haro']",
+     true
+    ],
+    [
+     "any(r['old'] == 'count' and r['new'] == 'nCount' and 'already' in r['why'] for r in plan['refused'])",
+     true
+    ]
+   ]
+  },
+  {
    "id": "H11",
    "line": "-",
    "why": "the ported tree runs on haro and prints what the classic Ring surface printed",
