@@ -3531,7 +3531,11 @@ pub const Compiler = struct {
                     _ = try self.emit(.loadk, dst, 0, 0, ki);
                     return;
                 }
-                return self.nopeKind(n, "a decimal holds 18 digits after its point and 64 bits of digits");
+                // an integer literal past 64 bits, or a decimal past its digits: named as what it was written as
+                return self.nopeKind(n, if (std.mem.indexOfScalar(u8, t, '.') == null)
+                    "an integer holds 64 bits: this literal is past them"
+                else
+                    "a decimal holds 18 digits after its point and 64 bits of digits");
             }
             const d = std.fmt.parseFloat(f64, t) catch return self.nope(n);
             _ = try self.emit(.loadk, dst, 0, 0, try self.konstNum(d));

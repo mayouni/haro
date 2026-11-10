@@ -130,8 +130,10 @@ CASES = [
     ('N26', 'N10', 'a .ring file has none of Haro\'s number built-ins: near() is Ring\'s R3 there', '.ring',
      ['? "before"', '? near(1, 2, 3)'],
      'before\n\nLine 2 Error (R3) : Calling Function without definition: near \nin file N26.ring ', 1),
+    # N27 CHANGED AFTER ITS FIRST PLANT RUN, said so: it asked `fX - 1`, which never folds (a name may hold an object, and a minus
+    # beside one is not folded), so plant P23 missed; a float literal on the left of - is what folds into `+ -1`
     ('N27', 'N5', 'a float\'s operator is named as written; a float is negated', '.haro',
-     ['fX = 0.5f', '? -fX', '? fX - 1'],
+     ['fX = 0.5f', '? -fX', '? 0.5f - 1'],
      '-0.50\n' + err(3, 'NUMBER_MIX', 'float - integer -- an integer and a float do not mix; convert one: Float(i)', 'N27.haro'), 1),
     ('N28', 'N3', '% on decimals is exact, the dividend\'s sign', '.haro',
      ['? 7.5 % 2', '? -7 % 2.5', '? 7.5f % 2f'],

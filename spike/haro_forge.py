@@ -3792,6 +3792,25 @@ def stage55():
         return 1
     return 0
 
+
+NUM_COURT = os.path.join(HERE, 'v52', 'num_court.py')
+
+
+def stage56():
+    """Haro v0.52, numbers (D55 T4, D64; v52/GRAMMAR.md): in a .haro file a literal with a point an exact decimal, 0.5f a float, an
+    integer joining a decimal, / exact or DECIMAL_INEXACT, a float mixing with neither, = on floats refused with Near; a .ring file as it
+    was. v52/num_court.py on haro and its checked build."""
+    print('stage 56 -- numbers: v52/num_court.py on haro and its checked build')
+    p = subprocess.run([sys.executable, NUM_COURT] + (['--plant'] if PLANT else []), capture_output=True, cwd=HERE, timeout=900)
+    out = p.stdout.decode('utf-8', 'replace').replace(chr(13) + chr(10), chr(10))
+    for line in out.splitlines():
+        if line.startswith('  FAIL') or line.startswith('       ') or line.startswith('NUMBER COURT'):
+            print(line)
+    if p.returncode != 0:
+        print(f'  FAIL the number court exited {p.returncode}' + ('' if out.strip() else ': ' + p.stderr.decode('utf-8', 'replace')[-400:]))
+        return 1
+    return 0
+
 SENTENCE_TARGET = 50.0     # D42: a sentence edited, its court's image reused -- what a person editing a sentence waits for
 COLD_CEILING = 150.0       # D42: the court compiled from scratch -- a ceiling that catches the court library growing
 
@@ -3997,5 +4016,7 @@ if __name__ == '__main__':
         failures += stage54()
     if stage in (None, 55) and os.path.exists(FACTS_COURT):
         failures += stage55()
+    if stage in (None, 56) and os.path.exists(NUM_COURT):
+        failures += stage56()
     print(f'haro_forge: {"FAIL" if failures else "PASS"} ({failures} failure(s), {time.perf_counter()-t0:.1f} s)')
     sys.exit(1 if failures else 0)

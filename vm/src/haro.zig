@@ -889,24 +889,25 @@ fn printCensus(cs: co.Census, w: *std.Io.Writer, alloc: std.mem.Allocator) !void
         return;
     }
 
-    // group by node kind, most frequent first
-    var kinds: [64][]const u8 = undefined;
-    var counts: [64]u32 = undefined;
-    var nk: usize = 0;
-    for (cs.refusals) |r| {
-        var seen = false;
-        for (kinds[0..nk], 0..) |kk, i| {
-            if (std.mem.eql(u8, kk, r.kind)) {
-                counts[i] += 1;
-                seen = true;
-            }
+    // group by FAMILY, most frequent first, uncapped (HARO-CENSUS-KINDS-01, 2026-11-10): a .haro file's refusal names what it refuses in
+    // backticks, so a kind's text with each quoted name blanked is its family. 64 rows of exact text held 64 NAMES and dropped every
+    // kind met after them -- on stzlib read as .haro, three quarters of the refusals went uncounted.
+    var fam_index = std.StringArrayHashMapUnmanaged(usize){};
+    var kinds = std.ArrayListUnmanaged([]const u8){};
+    var counts = std.ArrayListUnmanaged(u32){};
+    var examples = std.ArrayListUnmanaged(usize){};
+    for (cs.refusals, 0..) |r, ri| {
+        const fam = try censusFamily(alloc, r.kind);
+        const g = try fam_index.getOrPut(alloc, fam);
+        if (!g.found_existing) {
+            g.value_ptr.* = kinds.items.len;
+            try kinds.append(alloc, fam);
+            try counts.append(alloc, 0);
+            try examples.append(alloc, ri);
         }
-        if (!seen and nk < kinds.len) {
-            kinds[nk] = r.kind;
-            counts[nk] = 1;
-            nk += 1;
-        }
+        counts.items[g.value_ptr.*] += 1;
     }
+    const nk = kinds.items.len;
     // Which NAMES are refused, and of what shape. `$x` is Ring's explicit
     // global, `@x` an attribute Softanza declares by convention, `_x_` its
     // method-local convention -- and a BARE name is the one that needs a
@@ -1017,28 +1018,60 @@ fn printCensus(cs: co.Census, w: *std.Io.Writer, alloc: std.mem.Allocator) !void
     while (printed < nk) : (printed += 1) {
         var best: usize = 0;
         var bestc: u32 = 0;
-        for (counts[0..nk], 0..) |cn, i| {
+        for (counts.items, 0..) |cn, i| {
             if (cn > bestc) {
                 bestc = cn;
                 best = i;
             }
         }
         if (bestc == 0) break;
-        // an example of this kind, for the reader
-        var ex: []const u8 = "";
-        var exrow: u32 = 0;
-        var exfn: []const u8 = "";
-        for (cs.refusals) |r| {
-            if (std.mem.eql(u8, r.kind, kinds[best])) {
-                ex = r.text;
-                exrow = r.row;
-                exfn = r.func;
-                break;
-            }
-        }
-        try w.print("  {d:>3}x {s:<24} e.g. {s}() line {d}: {s}\n", .{ bestc, kinds[best], exfn, exrow, ex });
-        counts[best] = 0;
+        // an example of this family, for the reader: its first refusal
+        const er = cs.refusals[examples.items[best]];
+        try w.print("  {d:>3}x {s:<24} e.g. {s}() line {d}: {s}\n", .{ bestc, kinds.items[best], er.func, er.row, er.text });
+        counts.items[best] = 0;
     }
+    try w.print("  ({d} famil{s}; a name the refusal quotes is written `...`. Each refused statement is counted once, under its first refusal,\n" ++
+        "   and drops only itself: the statements around it compile. Its function is marked unfinished, and the callers that marks\n" ++
+        "   are not counted here -- these are causes, statement by statement, not a cascade.)\n", .{ nk, if (nk == 1) "y" else "ies" });
+}
+
+/// HARO-CENSUS-KINDS-01: a refusal's family -- its kind with what names one site blanked: each `quoted` name to `...`, a run of digits
+/// (a line) to N, a file of the unit to <file>, and the name a letter's todo proposes ("text is t: tName") to ...
+fn censusFamily(alloc: std.mem.Allocator, kind: []const u8) ![]const u8 {
+    var out = std.ArrayListUnmanaged(u8){};
+    var quoted = false;
+    var i: usize = 0;
+    while (i < kind.len) : (i += 1) {
+        const ch = kind[i];
+        if (ch == '`') {
+            if (!quoted) try out.appendSlice(alloc, "`...`");
+            quoted = !quoted;
+            continue;
+        }
+        if (quoted) continue;
+        if (std.ascii.isDigit(ch) and std.mem.endsWith(u8, out.items, "line ")) {
+            try out.append(alloc, 'N');
+            while (i + 1 < kind.len and std.ascii.isDigit(kind[i + 1])) i += 1;
+            continue;
+        }
+        // a word: a file of the unit, or the name proposed after "t: "
+        if (std.ascii.isAlphabetic(ch) or ch == '_' or ch == '$' or ch == '@') {
+            var j = i;
+            while (j < kind.len and (std.ascii.isAlphanumeric(kind[j]) or kind[j] == '_' or kind[j] == '.' or kind[j] == '$' or kind[j] == '@')) j += 1;
+            var word = kind[i..j];
+            while (word.len > 0 and word[word.len - 1] == '.') word = word[0 .. word.len - 1];
+            const after_t = std.mem.endsWith(u8, out.items, "t: ");
+            if (std.mem.endsWith(u8, word, ".haro") or std.mem.endsWith(u8, word, ".ring")) {
+                try out.appendSlice(alloc, "<file>");
+            } else if (after_t) {
+                try out.appendSlice(alloc, "...");
+            } else try out.appendSlice(alloc, word);
+            i = i + word.len - 1;
+            continue;
+        }
+        try out.append(alloc, ch);
+    }
+    return out.items;
 }
 
 fn ms(best_ns: u64) struct { w: u64, f: u64 } {
