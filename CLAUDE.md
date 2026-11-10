@@ -538,8 +538,10 @@ The records: `CHARTER.md` (section 13 the decisions, D1 to D55; section 15 the v
   engine's (stz_compress), a zip_ call is R3. v0.46's sixth round: `systemcmd` (`SystemCmd` in .haro) is Haro's own native, `a == b`
   refused, stdout written streaming (a Git Bash pipe lost output past 64 KB). **v0.50** (D60, HF-156, stage 54): a program that
   serves another -- `give` sends the output before it waits and reads a line whole, `stdin`/`stdout`/`stderr` are Ring's file
-  handles, `FFlush(stdout)`, `FEOF(stdin)` a boolean in .haro. Next: the release builds (HARO-RELEASE-ADOPT-01), then
-  `haro check --facts` (HARO-FACTS-01, v0.51); numbers v0.52.
+  handles, `FFlush(stdout)`, `FEOF(stdin)` a boolean in .haro. The release builds are `release/` (HARO-RELEASE-ADOPT-01: windows
+  and linux accepted on Radar, macos owed a Mac; licence and place the Principal's). **v0.51** (D61, HF-157, stage 55):
+  `haro check --facts`, one JSON record per unit -- the checker's commit (baked in by build.zig), each file's sha256, every
+  function's lines, findings, calls, first direct impurity, whether it compiled. Next: numbers v0.52.
 - D43 is the twin-court clause. Of BLOCKS.md's four questions: Q-B1 is built (`?` is C6, and `OPTIONAL` sees it in a rule); Q-B2's two amendments are refused by name until Ringua's text
   lands; Q-B3 the block export of a program is not started; Q-B4 the round-trip court the elders waited for exists -- asking their owners is Central's.
 - **Answered 2026-11-05**: HARO-DISTANCE-01 (HF-141; D50, the author's ruling: no part of Ring is carried with Haro), HARO-ONEHOUR-01 (D51) and -02 (D52). **Next**: what stzlib's sweep on haro.exe sends; zip.zig out (stzlib calls no zip_* since cb6f5de65) with

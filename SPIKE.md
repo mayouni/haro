@@ -1917,6 +1917,10 @@ D58, the Principal's ruling of 2026-11-09 ("ParentClassName"), revising v0.42's 
 
 **Results.** 9 of 9 cases on both builds; 5 of 5 plants; v36 to v48's courts green. Haro's 2,172 calls re-spelled by a tool (20fc236, listed in v20/tool_commits.txt).
 
+## The fifty-first rung -- Haro v0.51, `haro check --facts` -- 2026-11-10
+
+D61, HARO-FACTS-01 answering stzlib-testoor's HARO-PROOF-01 (a): one JSON record per unit of what the checker and the compiler establish, per function, with the checker's commit and each file's sha256. 15 of 15 on both builds, plants G1-G15 caught (G3 and G8 rewritten after their first runs, said so); X13 changed after the code. On stzlib cb6f5de65: 26.6 s for 720 files and 48,756 functions, once a walk per function (cubic, past ten minutes) became one walk per file.
+
 ## The fiftieth rung -- Haro v0.50, a program that serves another -- 2026-11-09
 
 D60, HARO-STDIOFLUSH-01 from the Radar desk, whose MCP server runs on Haro: `give` sends the output before it waits and reads a line whole; `stdin`, `stdout`, `stderr` are Ring's file handles, `fflush(stdout)` sends the output; `feof(stdin)` says the input ended (a boolean in a .haro file). 14 of 14 on both builds, dialog cases driven on pipes as a client drives a server; plants F1-F10 caught, F9 after D07 was changed to ask from a function (said so); D14 added after the code. The guard: 53 of 54 stages; stage 6 over its cold ceiling (154.3 ms) for the machine, not the rung -- the VM before it reads 164.0 ms beside its 161.9 ms (study/v50/stage6_ab.py).
