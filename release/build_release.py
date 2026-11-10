@@ -1,16 +1,21 @@
-"""Haro's release builds (HARO-RELEASE-ADOPT-01 (b) (c)): one target per run, never two at once (the machine's build caps), each
-archive holding the binary and THIRD-PARTY-NOTICES.txt, its SHA-256 written beside it.
+"""Haro's release builds (HARO-RELEASE-ADOPT-01; D63): one target per run, never two at once (the machine's build caps), each archive
+holding the binary, LICENSE and THIRD-PARTY-NOTICES.txt, its SHA-256 written beside it.
 
   python release/build_release.py windows     x86_64-windows-gnu
   python release/build_release.py linux       x86_64-linux-gnu.2.28 (glibc 2.28 and later)
   python release/build_release.py macos       aarch64-macos
-  python release/build_release.py notices     write runtime/release/THIRD-PARTY-NOTICES.txt only
+  python release/build_release.py notices     write runtime/release/<version>/THIRD-PARTY-NOTICES-<platform>.txt only
+  python release/build_release.py public windows linux
+                                              the public page for the named (accepted) builds: runtime/release/<version>/public/
+                                              README.md and SHA256SUMS, refused if its text breaks the public-text rules
 
-The notices are assembled from the licence files themselves -- the vendored ones, Zig's own and its C runtime's from the Zig that
-builds, and tree-sitter's (release/licenses/, fetched at v0.25.10, the version that regenerated the vendored parser) -- never typed.
-Output: runtime/release/<version>/ (gitignored). The release's licence and its public place are the Principal's (a) (d).
+LICENSE is MIT, "Copyright (c) 2020-<year> Mansour Ayouni", the year read from the clock (D63, PRINCIPAL-COPYRIGHTYEARS-01): the text is
+stzlib's LICENSE (release/licenses/MIT-LICENSE, from stzlib origin/main), its copyright line rewritten. The notices are assembled from
+the licence files themselves -- the vendored ones, Zig's own and its C runtime's from the Zig that builds, and tree-sitter's
+(release/licenses/, fetched at v0.25.10, the version that regenerated the vendored parser) -- never typed. Output:
+runtime/release/<version>/ (gitignored); <version> is the latest rung and the commit that built it.
 """
-import hashlib, io, os, shutil, subprocess, sys, tarfile, zipfile
+import datetime, glob, hashlib, io, os, re, shutil, subprocess, sys, tarfile, zipfile
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 ROOT = os.path.dirname(HERE)
@@ -53,9 +58,84 @@ def notices(platform):
     return '\n'.join(out)
 
 
+def rung():
+    """the latest rung built: the highest spike/vNN that holds its fixtures"""
+    nums = [int(os.path.basename(os.path.dirname(p))[1:]) for p in glob.glob(os.path.join(ROOT, 'spike', 'v[0-9][0-9]', 'fixtures.json'))]
+    return f'v0.{max(nums)}'
+
+
 def version():
     head = subprocess.run(['git', 'rev-parse', '--short', 'HEAD'], cwd=ROOT, capture_output=True, text=True, check=True).stdout.strip()
-    return f'v0.50-{head}'  # the rung, and the commit that built it
+    return f'{rung()}-{head}'  # the rung, and the commit that built it
+
+
+def licence():
+    """MIT, the estate's text, the copyright's end year read from the clock"""
+    text = read(os.path.join(HERE, 'licenses', 'MIT-LICENSE'))
+    line = f'Copyright (c) 2020-{datetime.date.today().year} Mansour Ayouni'
+    out, n = re.subn(r'^Copyright \(c\) .*$', line, text, count=1, flags=re.M)
+    if n != 1:
+        sys.exit('release/licenses/MIT-LICENSE has no copyright line')
+    return out
+
+
+# PRINCIPAL-AFFIRM-01 (a public page says what the project IS and DOES; no line lists what has not been done) and
+# PRINCIPAL-HAROINDEPENDENT-01 (the release's public text names no other language). Each phrase is refused anywhere in the page.
+REFUSED = [r'\bnot yet\b', r'\bnobody has\b', r'\bnever been\b', r'\bLimit:', r'\buntested\b', r'\bunmeasured\b', r'\bnot tested\b',
+           r'\bnot been\b', r'\bRing\b', r'\bRing\+\+', r'\.ring\b']
+SITE = 'https://mayouni.github.io/stzsite/'
+PLATFORM_WORDS = {'windows-x86_64': 'Windows, x86-64', 'linux-x86_64': 'Linux, x86-64 (glibc 2.28 and later)',
+                  'macos-aarch64': 'macOS, Apple silicon'}
+
+
+def public(ver, out_dir, which):
+    rows, sums = [], []
+    for w in which:
+        _, platform, _, kind = TARGETS[w]
+        name = f'haro-{ver}-{platform}.{kind}'
+        path = os.path.join(out_dir, name)
+        if not os.path.exists(path):
+            sys.exit(f'no archive {name}: build it first')
+        d = sha(path)
+        rows.append(f'| {PLATFORM_WORDS[platform]} | `{name}` | `{d}` |')
+        sums.append(f'{d}  {name}')
+    page = '\n'.join([
+        '# Haro',
+        '',
+        'Haro is the foundational language of the Softanza project: a language of languages, in which a world is declared, '
+        'constrained, asked and spoken to, and every sentence is judged by a court built from its declaration.',
+        '',
+        f'## Downloads -- {ver}',
+        '',
+        '| platform | archive | SHA-256 |',
+        '|---|---|---|',
+        *rows,
+        '',
+        'Each archive holds the `haro` binary, its LICENSE and THIRD-PARTY-NOTICES.txt. SHA256SUMS lists every sum.',
+        '',
+        '## Use',
+        '',
+        '```',
+        'haro prog.haro                    runs a program',
+        'haro check prog.haro              checks it without running it',
+        'haro check --facts prog.haro      prints what the checker establishes, per function, as JSON',
+        '```',
+        '',
+        '## Licence',
+        '',
+        f'MIT. Copyright (c) 2020-{datetime.date.today().year} Mansour Ayouni. Haro is a Softanza project: {SITE}',
+        '',
+    ])
+    bad = [(p, m.group(0)) for p in REFUSED for m in [re.search(p, page)] if m]
+    if bad:
+        sys.exit('the public page is refused: ' + '; '.join(f'{p} matched {t!r}' for p, t in bad))
+    pub = os.path.join(out_dir, 'public')
+    os.makedirs(pub, exist_ok=True)
+    open(os.path.join(pub, 'README.md'), 'w', encoding='utf-8', newline='\n').write(page)
+    open(os.path.join(pub, 'SHA256SUMS'), 'w', encoding='utf-8', newline='\n').write('\n'.join(sums) + '\n')
+    open(os.path.join(pub, 'LICENSE'), 'w', encoding='utf-8', newline='\n').write(licence())
+    print('public page written to', pub)
+    return 0
 
 
 def sha(path):
@@ -63,6 +143,9 @@ def sha(path):
 
 
 def main():
+    if len(sys.argv) >= 3 and sys.argv[1] == 'public' and all(w in TARGETS for w in sys.argv[2:]):
+        ver = version()
+        return public(ver, os.path.join(ROOT, 'runtime', 'release', ver), sys.argv[2:])
     if len(sys.argv) != 2 or sys.argv[1] not in list(TARGETS) + ['notices']:
         sys.exit(__doc__)
     which = sys.argv[1]
@@ -81,12 +164,13 @@ def main():
     subprocess.run(cmd, cwd=VM, check=True)
     binary = os.path.join(prefix, 'bin', exe)
     name = f'haro-{ver}-{platform}'
-    text = notices(which).encode('utf-8')
+    texts = [('LICENSE', licence().encode('utf-8')), ('THIRD-PARTY-NOTICES.txt', notices(which).encode('utf-8'))]
     archive = os.path.join(out_dir, f'{name}.{kind}')
     if kind == 'zip':
         with zipfile.ZipFile(archive, 'w', zipfile.ZIP_DEFLATED) as z:
             z.write(binary, f'{name}/{exe}')
-            z.writestr(f'{name}/THIRD-PARTY-NOTICES.txt', text)
+            for fname, text in texts:
+                z.writestr(f'{name}/{fname}', text)
     else:
         with tarfile.open(archive, 'w:gz') as t:
             info = t.gettarinfo(binary, f'{name}/{exe}')
@@ -95,10 +179,11 @@ def main():
             info.uname = info.gname = ''
             with open(binary, 'rb') as fh:
                 t.addfile(info, fh)
-            info = tarfile.TarInfo(f'{name}/THIRD-PARTY-NOTICES.txt')
-            info.size = len(text)
-            info.mode = 0o644
-            t.addfile(info, io.BytesIO(text))
+            for fname, text in texts:
+                info = tarfile.TarInfo(f'{name}/{fname}')
+                info.size = len(text)
+                info.mode = 0o644
+                t.addfile(info, io.BytesIO(text))
     digest = sha(archive)
     open(archive + '.sha256', 'w', newline='\n').write(f'{digest}  {os.path.basename(archive)}\n')
     print(f'{os.path.basename(archive)}  {os.path.getsize(archive):,} bytes  sha256 {digest}')
