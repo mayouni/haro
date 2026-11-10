@@ -198,10 +198,9 @@
    "id": "B22",
    "kind": "run",
    "line": "B8",
-   "why": "a boolean read by .ring code is 1 or 0; a .ring 1 is an integer to a .haro condition",
+   "why": "a boolean read by .ring code is 1 or 0; a .ring 1 crossing into a .haro condition is true (v0.53)",
    "file": "cases/B22.haro",
-   "stdout": "2\n\nLine 5 Error (BOOLEAN_EXPECTED) : a condition takes a boolean, and this is an integer -- say what is meant: x != 0 \nIn function f() in file B22.haro\n\nCalled from line 2 in file B22.haro ",
-   "exit": 1
+   "stdout": "2\nready\n"
   },
   {
    "id": "B23",

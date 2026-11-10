@@ -506,7 +506,9 @@ The records: `CHARTER.md` (section 13 the decisions, D1 to D55; section 15 the v
   function's lines, findings, calls, first direct impurity, whether it compiled. **v0.52 is built** (D64, HF-158, stage 56):
   numbers -- in a .haro file `12.50` is an exact decimal (d), `0.5f` a float (f); `7 / 2` is 3.5 or DECIMAL_INEXACT, `Divide`
   rounds half to even; a float mixes with no other number (NUMBER_MIX), `=` on floats is refused (use `Near`); `Float`, `Decimal`,
-  `Integer`. Write money as decimals. `haro census` groups refusals by family. Next: absence (D55 T5), v0.53.
+  `Integer`. Write money as decimals. `haro census` groups refusals by family. **v0.53 is built** (D65, HF-159, stage 57): a
+  .ring function's 1 or 0 is true or false where a .haro file wants a boolean. **haroport** (`port/haroport.py`, stage 58)
+  ports a tree to .haro: `plan ROOT`, `apply ROOT --out DIR`. Next: absence (D55 T5), v0.54.
 - D43 is the twin-court clause. Of BLOCKS.md's four questions: Q-B1 is built (`?` is C6, and `OPTIONAL` sees it in a rule); Q-B2's two amendments are refused by name until Ringua's text
   lands; Q-B3 the block export of a program is not started; Q-B4 the round-trip court the elders waited for exists -- asking their owners is Central's.
 - **Answered 2026-11-05**: HARO-DISTANCE-01 (HF-141; D50, the author's ruling: no part of Ring is carried with Haro), HARO-ONEHOUR-01 (D51) and -02 (D52). **Next**: what stzlib's sweep on haro.exe sends; zip.zig out (stzlib calls no zip_* since cb6f5de65) with

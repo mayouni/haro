@@ -1917,6 +1917,10 @@ D58, the Principal's ruling of 2026-11-09 ("ParentClassName"), revising v0.42's 
 
 **Results.** 9 of 9 cases on both builds; 5 of 5 plants; v36 to v48's courts green. Haro's 2,172 calls re-spelled by a tool (20fc236, listed in v20/tool_commits.txt).
 
+## The fifty-third rung -- Haro v0.53, the classic Ring surface's 1 and 0; and haroport -- 2026-11-10
+
+D65, from stzlib-haroport's two asks for its move to .haro. HARO-RINGBOUNDARY-BOOL-01: a .ring answer 1 or 0 is true or false where a .haro file wants a boolean, after a call the compiler cannot prove is Haro's; 14 of 14 on both builds, plants Q1-Q11 caught, V05 and V12 changed after the code (said so). HARO-PORTTOOL-01: `port/haroport.py`, plan and apply over a tree root, 12 of 12 cases, plants T1-T11 caught, H12 added after the tool; on stzlib cb6f5de65 the ported tree compiles 67% of its statements as .haro, 24% by the rename alone. The 58-stage guard on the committed tree.
+
 ## The fifty-second rung -- Haro v0.52, numbers -- 2026-11-10
 
 D64, D55 T4: in a .haro file a literal with a point is an exact decimal, `0.5f` a float; an integer joins a decimal; `/` is exact or DECIMAL_INEXACT, `Divide` rounds half to even; a float mixes with neither, and `=` on two floats is refused with `Near`. 30 of 30 on both builds, plants P1-P28 caught (P23 after N27's change), the 56-stage guard PASS; N22 changed and N24-N30 added after the code, and v0.43's B17, v0.44's Q04, v0.47's Y01/Y12 changed by the ruling, each said so. With it, `haro census` groups its refusals by family, uncapped (HARO-CENSUS-KINDS-01).

@@ -37,6 +37,23 @@ compiled to an opcode of its own, was not in the built-in table the first test a
   global and an attribute alike receive the boolean.
 - `main.zig`: `truth` with `c = 4` -- a 1 or 0 becomes a boolean, anything else stays.
 
+## Measured
+
+- **The court**: 14 of 14 on haro and its checked build (stage 57).
+- **Plants**: Q1 to Q11, each one protection switched off: 11 of 11 caught. **The guard**: 58 stages, 1,519 s, every stage passing but stage 48, whose B22 asserted the old crossing (a .ring 1 an integer to a .haro condition); B22 changed by the ruling, said so, and stage 48 then passes on the committed tree.
+
+## haroport, beside the rung (HARO-PORTTOOL-01)
+
+`port/haroport.py`, stzlib-haroport's second ask: one command over a tree root -- `plan ROOT [--json]` writes nothing, `apply ROOT --out
+DIR` writes the ported tree beside the original, each `.ring` file as `.haro` and each load rewritten to it. It lowers keywords
+(`lift.zig`'s list and the scanner's `to`, `in`, `step`), respells built-ins unless the tree defines the name, makes Softanza's `c` and `v`
+into `t` and `x` across the whole tree, letters a function's bare locals by what they hold, and unwraps Softanza's `_name_`; a rename
+landing on a keyword, a name already there or a class's attribute is refused and listed. Fixtures first (8ff5486: 11 cases); the tool
+40d76b9; H12 added after the tool, said so; 12 of 12, plants T1 to T11 caught (stage 58). On stzlib cb6f5de65: 6,936 files, 501,043
+rewrites, 4,475 refused (4,272 a class's attribute written bare in a method, 109 a keyword, 94 a name already there); the ported tree
+compiles 95,388 of 140,737 statements (67%), where the rename alone compiled 24%. The 21 families left lead with a name that has no type
+letter (26,581: globals and names at the top level or in a class body, which the tool leaves) and a `b` name given 1 or 0 (5,051).
+
 ## Named
 
 - A `b` parameter given an unproven call's answer as an argument is not converted: the binding is the callee's, and no case asks it yet.

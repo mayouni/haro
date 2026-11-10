@@ -144,10 +144,11 @@ CASES = [
     ('B21', 'B8', 'a .ring file reads as Ring reads: coercion and truth unchanged', '.ring', [
         'f()', 'func f', T + '? 1 + "2"', T + '? "a" + 1', T + 'if 5 ? "yes" ok', T + '? 1 = 1', T + '? true'],
      ['3', 'a1', 'yes', '1', '1']),
-    ('B22', 'B8', 'a boolean read by .ring code is 1 or 0; a .ring 1 is an integer to a .haro condition', '.haro', [
+    # B22 CHANGED AFTER v0.53's code, said so (v53/GRAMMAR.md, D65): TYPES.md section 6 makes a .ring 1 true where a .haro condition
+    # wants a boolean, so `if Ready()` takes its branch where it raised BOOLEAN_EXPECTED
+    ('B22', 'B8', 'a boolean read by .ring code is 1 or 0; a .ring 1 crossing into a .haro condition is true (v0.53)', '.haro', [
         'load "B22_lib.ring"', 'f()', 'func f', T + '? Plus1(2 > 1)', T + 'if Ready()', T * 2 + '? "ready"', T + 'ok'],
-     ['2', '', 'Line 5 Error (BOOLEAN_EXPECTED) : ' + cond('an integer', 'x != 0') + ' ', 'In function f() in file B22.haro', '',
-      'Called from line 2 in file B22.haro '], 1, {'B22_lib.ring': ['func Plus1 x', T + 'return x + 1', 'func Ready', T + 'return 1']}),
+     ['2', 'ready'], 0, {'B22_lib.ring': ['func Plus1 x', T + 'return x + 1', 'func Ready', T + 'return 1']}),
     # WRITTEN AFTER THE CODE, before the plants, found while writing them: no case reached the left of `or` (a jtruthy the VM judges, B23), nor a
     # comparison whose operand may be an object, which the VM answers through cmpv rather than a jump (B24).
     ('B23', 'B3', 'an integer on the left of or raises BOOLEAN_EXPECTED', '.haro', [
