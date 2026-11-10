@@ -1,0 +1,254 @@
+{
+ "tool": "port/haroport.py",
+ "ask": "HARO-PORTTOOL-01 (stzlib-haroport, 2026-11-10)",
+ "class": "each case: `plan ROOT --json` read as `plan` (and `plan_wrote`: whether it wrote any file), `apply ROOT --out DIR` read as `applied` (published name -> text); for H11 each tree run on haro: `ran` (the ported) and `ran_ring` (the original)",
+ "cases": [
+  {
+   "id": "H01",
+   "line": "K",
+   "why": "a keyword in another case is lowered; a symbol, a string and a comment are not",
+   "folder": "cases/H01",
+   "files": [
+    "main.ring"
+   ],
+   "asserts": [
+    [
+     "applied['main.haro']",
+     "if 1 = 1 see \"If\" ok   # If stays in a comment\nx = :Next\nfor i = 1 to 2 next\n"
+    ]
+   ]
+  },
+  {
+   "id": "H02",
+   "line": "B",
+   "why": "a built-in is spelled as Haro writes it; a function the tree defines is left as written",
+   "folder": "cases/H02",
+   "files": [
+    "lib.ring",
+    "main.ring"
+   ],
+   "asserts": [
+    [
+     "'? Len(\"ab\")' in applied['main.haro']",
+     true
+    ],
+    [
+     "'? Upper(\"a\")' in applied['main.haro']",
+     true
+    ],
+    [
+     "'? IsNull(1)' in applied['main.haro']",
+     true
+    ],
+    [
+     "'? trim(\" a \")' in applied['main.haro']",
+     true
+    ]
+   ]
+  },
+  {
+   "id": "H03",
+   "line": "C",
+   "why": "Softanza's c is t and its v is x, the same in every file",
+   "folder": "cases/H03",
+   "files": [
+    "lib.ring",
+    "main.ring"
+   ],
+   "asserts": [
+    [
+     "'$tTitle = \"a\"' in applied['main.haro']",
+     true
+    ],
+    [
+     "'xAny = 1' in applied['main.haro']",
+     true
+    ],
+    [
+     "'func Shout tWord' in applied['lib.haro']",
+     true
+    ],
+    [
+     "'return tWord + $tTitle' in applied['lib.haro']",
+     true
+    ]
+   ]
+  },
+  {
+   "id": "H04",
+   "line": "L",
+   "why": "a bare name in a function is lettered by what it holds; the top level and a class body are not",
+   "folder": "cases/H04",
+   "files": [
+    "main.ring"
+   ],
+   "asserts": [
+    [
+     "applied['main.haro'].splitlines()[0]",
+     "count = 1"
+    ],
+    [
+     "'nCount = 3' in applied['main.haro'] and 'tName = \"a\"' in applied['main.haro'] and 'aItems = [1, 2]' in applied['main.haro']",
+     true
+    ],
+    [
+     "'oO = new P' in applied['main.haro'] and '? nCount + 1' in applied['main.haro']",
+     true
+    ],
+    [
+     "applied['main.haro'].splitlines()[-1]",
+     "\tsize = 2"
+    ]
+   ]
+  },
+  {
+   "id": "H05",
+   "line": "L",
+   "why": "a method's bare assignment to an attribute of its class is not made a local: refused, named",
+   "folder": "cases/H05",
+   "files": [
+    "main.ring"
+   ],
+   "asserts": [
+    [
+     "'\\t\\tcount = count + 1' in applied['main.haro']",
+     true
+    ],
+    [
+     "any(r['old'] == 'count' and 'attribute' in r['why'] for r in plan['refused'])",
+     true
+    ]
+   ]
+  },
+  {
+   "id": "H06",
+   "line": "L",
+   "why": "a rename landing on a name already in the scope is refused, named",
+   "folder": "cases/H06",
+   "files": [
+    "main.ring"
+   ],
+   "asserts": [
+    [
+     "'cName = \"a\"' in applied['main.haro']",
+     true
+    ],
+    [
+     "any(r['old'] == 'cName' and r['new'] == 'tName' and 'already' in r['why'] for r in plan['refused'])",
+     true
+    ]
+   ]
+  },
+  {
+   "id": "H07",
+   "line": "U",
+   "why": "Softanza's method-local _name_ is unwrapped and lettered as any local",
+   "folder": "cases/H07",
+   "files": [
+    "main.ring"
+   ],
+   "asserts": [
+    [
+     "'nCount = 1' in applied['main.haro'] and 'tNew = \"a\"' in applied['main.haro']",
+     true
+    ],
+    [
+     "'? nCount + 1' in applied['main.haro'] and '? tNew' in applied['main.haro']",
+     true
+    ]
+   ]
+  },
+  {
+   "id": "H08",
+   "line": "U",
+   "why": "an unwrapped name that stands bare and is a keyword in any case is refused, named (the _new_ -> new kind)",
+   "folder": "cases/H08",
+   "files": [
+    "main.ring"
+   ],
+   "asserts": [
+    [
+     "'_new_ = 1' in applied['main.haro'] and '_Try_ = 2' in applied['main.haro']",
+     true
+    ],
+    [
+     "'size = 3' in applied['main.haro']",
+     true
+    ],
+    [
+     "sorted(r['old'] for r in plan['refused'] if 'keyword' in r['why'])",
+     [
+      "_Try_",
+      "_new_"
+     ]
+    ]
+   ]
+  },
+  {
+   "id": "H09",
+   "line": "C",
+   "why": "a c name whose t name is a keyword-free word is renamed: tAnd is no keyword",
+   "folder": "cases/H09",
+   "files": [
+    "main.ring"
+   ],
+   "asserts": [
+    [
+     "'tAnd = 1' in applied['main.haro']",
+     true
+    ]
+   ]
+  },
+  {
+   "id": "H10",
+   "line": "-",
+   "why": "plan writes nothing; apply writes every .ring as .haro, and rewrites its loads",
+   "folder": "cases/H10",
+   "files": [
+    "lib.ring",
+    "main.ring"
+   ],
+   "asserts": [
+    [
+     "sorted(applied)",
+     [
+      "lib.haro",
+      "main.haro"
+     ]
+    ],
+    [
+     "applied['main.haro'].splitlines()[0]",
+     "load \"lib.haro\""
+    ],
+    [
+     "plan_wrote",
+     false
+    ],
+    [
+     "plan['files']",
+     2
+    ]
+   ]
+  },
+  {
+   "id": "H11",
+   "line": "-",
+   "why": "the ported tree runs on haro and prints what the classic Ring surface printed",
+   "folder": "cases/H11",
+   "files": [
+    "lib.ring",
+    "main.ring"
+   ],
+   "asserts": [
+    [
+     "ran['main.haro']",
+     "hi ada\n6\n"
+    ],
+    [
+     "ran_ring['main.ring']",
+     "hi ada\n6\n"
+    ]
+   ]
+  }
+ ]
+}
