@@ -1917,6 +1917,10 @@ D58, the Principal's ruling of 2026-11-09 ("ParentClassName"), revising v0.42's 
 
 **Results.** 9 of 9 cases on both builds; 5 of 5 plants; v36 to v48's courts green. Haro's 2,172 calls re-spelled by a tool (20fc236, listed in v20/tool_commits.txt).
 
+## The fifty-eighth rung -- Haro v0.58, absence -- 2026-11-11
+
+D70, TYPES.md T5 with the Principal's spelling: `func Find(kId) maybe`, `oParent = none maybe`, `x = E else D`. `none` stands only where a maybe is declared; a maybe is resolved where it lands or refused; `E else D` takes D when E is none. No grammar change: the lift reads both words. 16 of 16 on both builds, plants A1-A12 (64c0f87). With it, HARO-CHAIN-COMMENT-01: a dot is a trailing period only when it ends its line.
+
 ## The fifty-seventh rung -- Haro v0.57, one way to print -- 2026-11-11
 
 D69, HARO-PRINT-01, on the Principal's "a unique keyword (print for example) along with a useful shortuct like '?'": `print` and `?` write a value and end the line, `see` and `put` are refused, output that ends no line goes through `FWrite(stdout, ...)`. The lift writes `print` as `?` in place; the grammar is unchanged. 7 of 7 on both builds, plants P1-P4; haroport (cdf968e, H34, T52-T55); Haro's code by `study/v57/printing.py` (61bffdf).

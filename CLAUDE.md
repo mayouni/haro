@@ -526,7 +526,9 @@ Each `%NAME%` in this file is a folder of this machine; its value is in `.centra
   the program's statements in any order, a chain across lines continues with its dot at the next line's start. Build work in progress
   into runtime/vNN/ and judge it with HARO_VM/HARO_TWIN: vm/zig-out is every desk's runtime. **v0.57 is built** (D69,
   HF-163, stage 62): `print v` and `?` write v and end the line; `see` and `put` are refused; `FWrite(stdout, t)` writes
-  without ending it. Next: absence (D55 T5, `maybe` a trailing word), v0.58.
+  without ending it. **v0.58 is built** (D70, HF-164, stage 63):
+  absence -- `func Find(kId) maybe`, `oParent = none maybe`, `x = E else D`; `none` only where a maybe is declared. Next: Haro's own `null`
+  and `IsNull` migrated and `null` refused in a .haro file (the Principal's "Right after absence"), v0.59.
 - D43 is the twin-court clause. Of BLOCKS.md's four questions: Q-B1 is built (`?` is C6, and `OPTIONAL` sees it in a rule); Q-B2's two amendments are refused by name until Ringua's text
   lands; Q-B3 the block export of a program is not started; Q-B4 the round-trip court the elders waited for exists -- asking their owners is Central's.
 - **Answered 2026-11-05**: HARO-DISTANCE-01 (HF-141; D50, the author's ruling: no part of Ring is carried with Haro), HARO-ONEHOUR-01 (D51) and -02 (D52). **Next**: what stzlib's sweep on haro.exe sends; zip.zig out (stzlib calls no zip_* since cb6f5de65) with
