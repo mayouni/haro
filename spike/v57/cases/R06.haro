@@ -1,0 +1,3 @@
+FWrite(stdout, "a")
+FWrite(stdout, "b")
+print "c"

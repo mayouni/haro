@@ -1,0 +1,71 @@
+{
+ "rung": "v0.57",
+ "decision": "HARO-PRINT-01: the Principal, 2026-11-11 (one keyword, print, and the shortcut ?); the desk's reading is D69",
+ "class": "exact: the program's whole stdout and its exit code, byte for byte, on haro and on its checked build",
+ "lines": {
+  "P1": "print, and ? its shortcut",
+  "P2": "see and put refused",
+  "P3": "output that ends no line",
+  "P4": "a .ring file untouched"
+ },
+ "cases": [
+  {
+   "id": "R01",
+   "kind": "run",
+   "line": "P1",
+   "why": "print writes a value and ends the line",
+   "file": "cases/R01.haro",
+   "stdout": "a\n5\n1\n2\n\n"
+  },
+  {
+   "id": "R02",
+   "kind": "run",
+   "line": "P1",
+   "why": "? is print's shortcut: the same bytes (a list: its items, then an empty line, as `?` writes it)",
+   "file": "cases/R02.haro",
+   "stdout": "a\n5\n1\n2\n\n"
+  },
+  {
+   "id": "R03",
+   "kind": "run",
+   "line": "P1",
+   "why": "print in a one-line if, in a function, in a method",
+   "file": "cases/R03.haro",
+   "stdout": "f\ng\n"
+  },
+  {
+   "id": "R04",
+   "kind": "run",
+   "line": "P2",
+   "why": "see is refused: print",
+   "file": "cases/R04.haro",
+   "stdout": "before\n\nLine 4 Haro refused this statement (one spelling: `print`; written `see`, line 4 of R04.haro) and did not compile it -- running past it would give a wrong answer \nIn function f() in file R04.haro\n\nCalled from line 2 in file R04.haro ",
+   "exit": 1
+  },
+  {
+   "id": "R05",
+   "kind": "run",
+   "line": "P2",
+   "why": "put is refused: print",
+   "file": "cases/R05.haro",
+   "stdout": "before\n\nLine 4 Haro refused this statement (one spelling: `print`; written `put`, line 4 of R05.haro) and did not compile it -- running past it would give a wrong answer \nIn function f() in file R05.haro\n\nCalled from line 2 in file R05.haro ",
+   "exit": 1
+  },
+  {
+   "id": "R06",
+   "kind": "run",
+   "line": "P3",
+   "why": "output that ends no line goes through the stream",
+   "file": "cases/R06.haro",
+   "stdout": "abc\n"
+  },
+  {
+   "id": "R07",
+   "kind": "run",
+   "line": "P4",
+   "why": "a .ring file: see, put, ? as Ring reads them, and print(...) is the function it calls",
+   "file": "cases/R07.ring",
+   "stdout": "abc\n[d]\n"
+  }
+ ]
+}

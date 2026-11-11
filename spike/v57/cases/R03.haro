@@ -1,0 +1,11 @@
+f()
+oP = new P
+oP.g()
+func f
+	if true print "f" end
+end
+class P
+	def g
+		print "g"
+	end
+end
