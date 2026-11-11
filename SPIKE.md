@@ -1917,6 +1917,15 @@ D58, the Principal's ruling of 2026-11-09 ("ParentClassName"), revising v0.42's 
 
 **Results.** 9 of 9 cases on both builds; 5 of 5 plants; v36 to v48's courts green. Haro's 2,172 calls re-spelled by a tool (20fc236, listed in v20/tool_commits.txt).
 
+## The fifty-fifth rung -- Haro v0.55, one form for each construct -- 2026-11-11
+
+D67, HARO-ONEFORM-01, on the Principal's "Opt for a strict one form": in a .haro file every block ends with `end`, a definition has no end
+word, one word each where Ring has several, parameters in parentheses and none without, no trailing period; a .ring file reads every
+spelling as before. 30 of 30 on both builds (845d588 and 48bd6e4 fixtures, 27 failing before the code), plants N1-N16. Haro's own code
+rewritten by haroport's rule O (`study/v55/oneform.py`, a tool commit): 156 files, 3,929 lines in place, every line keeping its number;
+v36's F23 and v38's U12 hold code in a string and were changed by hand. haroport's rule O: H28-H30, plants T33-T43; H01, H03, H23 changed
+by the ruling.
+
 ## The fifty-fourth rung -- Haro v0.54, the p mark and a vector's element letter; and haroport's third round -- 2026-11-11
 
 D66, HARO-LETTER-SOFTANZA-01, carrying the Principal's HAROPORT-SPELLINGS-02 (a), (c), (d); taken before absence on his "Letters first".
