@@ -1,0 +1,13 @@
+tT = Outer(true) else "x"
+print tT
+tT = Outer(false) else "x"
+print tT
+func Outer(bHas) maybe
+	return Title(bHas)
+end
+func Title(bHas) maybe
+	if bHas
+		return "Haro"
+	end
+	return none
+end

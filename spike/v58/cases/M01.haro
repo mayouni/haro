@@ -1,0 +1,13 @@
+f()
+func f
+	tT = Title(true) else "untitled"
+	print tT
+	tT = Title(false) else "untitled"
+	print tT
+end
+func Title(bHas) maybe
+	if bHas
+		return "Haro"
+	end
+	return none
+end

@@ -1,0 +1,10 @@
+f()
+func f
+	tT = Find(2) else "nothing"
+	print tT
+end
+func Find(iK) maybe
+	if iK = 1
+		return "one"
+	end
+end

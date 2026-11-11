@@ -1,0 +1,9 @@
+print "before"
+f()
+func f
+	oU = Find(9) else Raise("no user 9")
+	print "never"
+end
+func Find(iK) maybe
+	return none
+end

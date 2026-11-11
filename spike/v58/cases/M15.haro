@@ -1,0 +1,7 @@
+print Title(false) else "no title"
+func Title(bHas) maybe
+	if bHas
+		return "Haro"
+	end
+	return none
+end

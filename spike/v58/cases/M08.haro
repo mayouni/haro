@@ -1,0 +1,19 @@
+oA = new Node("a")
+oB = new Node("b")
+oB.SetParent(oA)
+print oB.ParentName()
+print oA.ParentName()
+class Node
+	oParent = none maybe
+	tName = ""
+	def init(tN)
+		tName = tN
+	end
+	def SetParent(oP)
+		oParent = oP
+	end
+	def ParentName
+		oP = oParent else new Node("-")
+		return oP.tName
+	end
+end

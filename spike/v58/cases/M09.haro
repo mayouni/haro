@@ -1,0 +1,9 @@
+print "before"
+oA = new Node
+oA.Bad()
+class Node
+	oParent = none maybe
+	def Bad
+		oP = oParent
+	end
+end

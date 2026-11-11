@@ -1,0 +1,5 @@
+f()
+func f
+	if false tT = "x" else tT = "y" end
+	print tT
+end

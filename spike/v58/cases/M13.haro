@@ -1,0 +1,10 @@
+print Name()
+func Name
+	return Title(false) else "anon"
+end
+func Title(bHas) maybe
+	if bHas
+		return "Haro"
+	end
+	return none
+end

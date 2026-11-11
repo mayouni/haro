@@ -1,0 +1,8 @@
+print "before"
+f()
+func f
+	print g()
+end
+func g
+	return none
+end

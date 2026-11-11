@@ -1,0 +1,5 @@
+print "before"
+f()
+func f
+	tT = "a" else "b"
+end
