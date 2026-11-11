@@ -408,12 +408,13 @@ fn findCatch(alloc: std.mem.Allocator, n: ts.Node, out: *std.ArrayListUnmanaged(
     while (i < n.namedChildCount()) : (i += 1) try findCatch(alloc, n.namedChild(i), out);
 }
 
-/// `within` and `using` (D52 rung 3, A2 and A3). `within $g = v ... done` is rewritten, on the same lines, to `try within $g = v ... finally
-/// done`, and `using` alike: a try whose body opens with the word and its header, and whose empty `finally` the compiler fills -- the restore,
+/// `within` and `using` (D52 rung 3, A2 and A3). `within $g = v ... end` (v0.55, D67: every block ends with `end`; `done` before it) is
+/// rewritten, on the same lines, to `try within $g = v ... finally end`, and `using` alike: a try whose body opens with the word and its header, and whose empty `finally` the compiler fills -- the restore,
 /// the release (compile.zig, `blockSite`). The grammar reads both words as bare names, and reads a `done` as a bare name too, except inside a
-/// try's catch or finally, where it ends that try (v38 B01). So the tree cannot say which `done` closes which block; the tokens can. In
-/// document order every `try` and every block opens, and every `done` -- keyword or bare name -- and every other end of a try closes,
-/// innermost first. A word with no header on its line, or with no `done`, is left as it was, and the compiler refuses it by name (B04, B05).
+/// try's catch or finally, where it ends that try (v38 B01). The grammar reads an `end` after them as the end of the
+/// definition around them. So the tree cannot say which end closes which block; the tokens can. In document order every block statement's
+/// first token and every `within` or `using` opens; every block statement's last token, every `done` -- keyword or bare name -- and every
+/// end word a definition took closes, innermost first. A word with no header on its line, or with no `done`, is left as it was, and the compiler refuses it by name (B04, B05).
 pub fn soleChild(n: ts.Node) ?ts.Node {
     var one: ?ts.Node = null;
     var i: u32 = 0;
@@ -469,10 +470,26 @@ fn nextStatement(n: ts.Node) ?ts.Node {
 fn isBareDone(n: ts.Node) bool {
     if (!eq(n.kind(), "expression_statement")) return false;
     const id = soleChild(n) orelse return false;
-    return eq(id.kind(), "identifier") and std.mem.eql(u8, id.text(), "done");
+    // where the grammar finds no block or definition for it, an `end` is a bare name, as `done` is (v0.55)
+    return eq(id.kind(), "identifier") and (std.mem.eql(u8, id.text(), "done") or std.mem.eql(u8, id.text(), "end"));
 }
 
-const Tok = struct { pos: u32, what: enum { block, try_, close } };
+const Tok = struct { pos: u32, what: enum { block, open, close } };
+
+/// v0.55 (D67): a statement that opens a block closed by its last token
+fn opensBlock(k: []const u8) bool {
+    for ([_][]const u8{ "if_statement", "while_statement", "for_statement", "switch_statement", "try_statement", "do_again_statement" }) |b|
+        if (eq(k, b)) return true;
+    return false;
+}
+
+/// The last token of a definition, when it is an end word: in a .haro file a definition has none, so the grammar's reading of an `end`
+/// there is a block's `end` the definition took (v0.55: `within $g = v ... end`)
+fn defEnd(parent: []const u8, k: []const u8) bool {
+    if (!eq(parent, "function_definition") and !eq(parent, "class_definition") and !eq(parent, "package_definition") and !eq(parent, "ERROR"))
+        return false;
+    return eq(k, "end") or eq(k, "endfunc") or eq(k, "endfunction") or eq(k, "endclass") or eq(k, "endpackage");
+}
 
 fn blockTokens(alloc: std.mem.Allocator, n: ts.Node, out: *std.ArrayListUnmanaged(Tok)) !void {
     const cnt = n.childCount();
@@ -492,9 +509,9 @@ fn blockTokens(alloc: std.mem.Allocator, n: ts.Node, out: *std.ArrayListUnmanage
                 continue;
             }
             try blockTokens(alloc, ch, out);
-        } else if (eq(k, "try")) {
-            try out.append(alloc, .{ .pos = ch.startByte(), .what = .try_ });
-        } else if (eq(k, "done") or ((eq(k, "end") or eq(k, "endtry") or eq(k, "}")) and eq(n.kind(), "try_statement") and i + 1 == cnt)) {
+        } else if (i == 0 and opensBlock(n.kind())) {
+            try out.append(alloc, .{ .pos = ch.startByte(), .what = .open });
+        } else if (eq(k, "done") or (i + 1 == cnt and opensBlock(n.kind())) or defEnd(n.kind(), k)) {
             try out.append(alloc, .{ .pos = ch.startByte(), .what = .close });
         }
     }
@@ -507,7 +524,7 @@ fn findBlocks(alloc: std.mem.Allocator, root: ts.Node, out: *std.ArrayListUnmana
     var open = std.ArrayListUnmanaged(Tok){};
     defer open.deinit(alloc);
     for (toks.items) |t| switch (t.what) {
-        .block, .try_ => try open.append(alloc, t),
+        .block, .open => try open.append(alloc, t),
         .close => if (open.pop()) |o| if (o.what == .block) {
             try out.append(alloc, .{ .pos = o.pos, .close = false, .text = "try " });
             try out.append(alloc, .{ .pos = t.pos, .close = true, .text = "finally " });

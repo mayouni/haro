@@ -1,1 +1,1 @@
-? Eval("try" + nl + "return 6" + nl + "finally" + nl + "? :f" + nl + "done")
+? Eval("try" + nl + "return 6" + nl + "finally" + nl + "? :f" + nl + "end")

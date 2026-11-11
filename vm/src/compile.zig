@@ -2254,6 +2254,8 @@ pub const Compiler = struct {
     /// v0.47: a parameter whose shape is refused, carried to its function's first statement (Y15)
     entry_fault: ?[]const u8 = null,
     entry_use: []const u8 = "",
+    /// v0.55: the one-form walk is inside a brace object, where `self` is the brace's object
+    brace_walk: bool = false,
     ln_block_quirk: bool = false,
     /// F-114: the statement being compiled ends in a postfix construct and a
     /// newline follows it -- what it still emits after that construct takes
@@ -2721,6 +2723,150 @@ pub const Compiler = struct {
         while (i < n.childCount()) : (i += 1) self.spellKeywords(n.child(i));
     }
 
+    // v0.55 (D67, HARO-ONEFORM-01, the Principal's "Opt for a strict one form", 2026-11-11): one form for each construct in a .haro file
+    const R_END = "a block ends with `end`; written";
+    const R_BRACE = "a block has no braces -- it ends with `end`; written";
+    const R_DEF = "a definition has no end word -- it ends where the next begins; written";
+    const R_DEF_BRACE = "a definition has no braces -- it ends where the next begins; written";
+    const R_NOPARAMS = "a definition without parameters has no parentheses; written";
+    const R_PARAMS = "a definition's parameters stand in parentheses; written";
+    const R_PERIOD = "a statement has no trailing period; written";
+
+    fn isBlock(k: []const u8) bool {
+        for ([_][]const u8{ "if_statement", "while_statement", "for_statement", "switch_statement", "try_statement" }) |b|
+            if (std.mem.eql(u8, k, b)) return true;
+        return false;
+    }
+
+    /// The one spelling where Ring has more than one: the refusal naming it, or null when `k` (a token whose parent is `parent`) is the one.
+    fn oneWord(k: []const u8, parent: []const u8) ?[]const u8 {
+        const W = struct { w: []const u8, p: []const u8, why: []const u8 };
+        const table = [_]W{
+            .{ .w = "but", .p = "", .why = "one spelling: `elseif`; written" },
+            .{ .w = "other", .p = "", .why = "one spelling: `else`; written" },
+            .{ .w = "on", .p = "case_clause", .why = "one spelling: `case`; written" },
+            .{ .w = "foreach", .p = "", .why = "one spelling: `for`; written" },
+            .{ .w = "put", .p = "see_statement", .why = "one spelling: `see`; written" },
+            .{ .w = "get", .p = "give_statement", .why = "one spelling: `give`; written" },
+            .{ .w = "break", .p = "", .why = "one spelling: `exit`; written" },
+            .{ .w = "continue", .p = "", .why = "one spelling: `loop`; written" },
+            .{ .w = "&&", .p = "", .why = "one spelling: `and`; written" },
+            .{ .w = "||", .p = "", .why = "one spelling: `or`; written" },
+            .{ .w = "!", .p = "unary_expression", .why = "one spelling: `not`; written" },
+            .{ .w = "def", .p = "", .why = "one spelling: `func`; written" },
+            .{ .w = "function", .p = "", .why = "one spelling: `func`; written" },
+        };
+        for (table) |e| if (std.mem.eql(u8, k, e.w) and (e.p.len == 0 or std.mem.eql(u8, parent, e.p))) return e.why;
+        return null;
+    }
+
+    fn oldEnd(k: []const u8) bool {
+        for ([_][]const u8{ "ok", "next", "off", "done", "endif", "endwhile", "endfor", "endswitch", "endtry" }) |w|
+            if (std.mem.eql(u8, k, w)) return true;
+        return false;
+    }
+
+    fn slashComment(n: ts.Node) bool {
+        return std.mem.eql(u8, n.kind(), "comment") and std.mem.startsWith(u8, n.text(), "//");
+    }
+
+    /// v0.55: a statement's words, each in its one form -- a block's end, a block without braces, one word each, `this` outside a brace,
+    /// `#` for a comment, no trailing period. The first fault is set for the statement (spellSet).
+    fn oneForm(self: *Compiler, n: ts.Node) void {
+        if (self.spell_fault != null) return;
+        const k = n.kind();
+        if (n.isNamed()) {
+            if (std.mem.eql(u8, k, "identifier")) return self.spellKeywords(n);
+            if (std.mem.eql(u8, k, "comment")) {
+                if (slashComment(n)) self.spellSet(n.text(), "one spelling: `#`; written");
+                return;
+            }
+            if (std.mem.eql(u8, k, "self")) {
+                if (std.mem.eql(u8, n.text(), "self") and !self.brace_walk and self.braces.items.len == 0)
+                    self.spellSet(n.text(), "one spelling: `this`; written");
+                return;
+            }
+        }
+        const block = isBlock(k);
+        var brace = false;
+        const cnt = n.childCount();
+        var i: u32 = 0;
+        while (i < cnt) : (i += 1) {
+            const ch = n.child(i);
+            if (!ch.isNamed()) {
+                const t = ch.kind();
+                if (block and (std.mem.eql(u8, t, "{") or std.mem.eql(u8, t, "}"))) return self.spellSet(ch.text(), R_BRACE);
+                if (block and i + 1 == cnt and oldEnd(t)) return self.spellSet(ch.text(), R_END);
+                if (oneWord(t, k)) |why| return self.spellSet(ch.text(), why);
+                if (std.mem.eql(u8, k, "expression_statement") and i + 1 == cnt and std.mem.eql(u8, t, "."))
+                    return self.spellSet(ch.text(), R_PERIOD);
+                if (std.mem.eql(u8, t, "{")) brace = true;
+                if (std.mem.eql(u8, t, "}")) brace = false;
+                continue;
+            }
+            const save = self.brace_walk;
+            if (brace) self.brace_walk = true;
+            self.oneForm(ch);
+            self.brace_walk = save;
+            if (self.spell_fault != null) return;
+        }
+    }
+
+    /// v0.55: a definition's own words -- `func`, no end word, no braces, parameters in parentheses and none without, `from` before a
+    /// class's parent, `#` for a comment -- for the function `d` and every class and package around it. Its fault is the function's first
+    /// statement's, as a parameter's shape is (entry_fault).
+    fn defForm(self: *Compiler, d: ts.Node) ?[2][]const u8 {
+        _ = self;
+        var n = d;
+        while (!n.isNull()) : (n = n.parent()) {
+            const k = n.kind();
+            const func = std.mem.eql(u8, k, "function_definition");
+            if (!func and !std.mem.eql(u8, k, "class_definition") and !std.mem.eql(u8, k, "package_definition")) {
+                if (std.mem.eql(u8, k, "source_file")) break;
+                continue;
+            }
+            var rparen: ?ts.Node = null;
+            const cnt = n.childCount();
+            var i: u32 = 0;
+            while (i < cnt) : (i += 1) {
+                const ch = n.child(i);
+                const t = ch.kind();
+                if (ch.isNamed()) {
+                    if (slashComment(ch)) return .{ "one spelling: `#`; written", ch.text() };
+                    if (std.mem.eql(u8, t, "class_parent")) {
+                        var j: u32 = 0;
+                        while (j < ch.childCount()) : (j += 1) {
+                            const m = ch.child(j);
+                            if (!m.isNamed() and (std.mem.eql(u8, m.kind(), ":") or std.mem.eql(u8, m.kind(), "<")))
+                                return .{ "one spelling: `from`; written", m.text() };
+                        }
+                    }
+                    continue;
+                }
+                if (oneWord(t, k)) |why| return .{ why, ch.text() };
+                if (std.mem.eql(u8, t, "end") or std.mem.eql(u8, t, "endfunc") or std.mem.eql(u8, t, "endfunction") or
+                    std.mem.eql(u8, t, "endclass") or std.mem.eql(u8, t, "endpackage")) return .{ R_DEF, ch.text() };
+                if (std.mem.eql(u8, t, "{") or std.mem.eql(u8, t, "}")) return .{ R_DEF_BRACE, ch.text() };
+                if (func and std.mem.eql(u8, t, ")")) rparen = ch;
+            }
+            if (func) {
+                const p = n.field("parameters");
+                if (!p.isNull() and rparen == null) return .{ R_PARAMS, p.text() };
+                if (p.isNull()) if (rparen) |r| {
+                    const s = r.startByte();
+                    const src = r.src;
+                    const from: u32 = if (s > 0 and src[s - 1] == '(') s - 1 else s;
+                    return .{ R_NOPARAMS, src[from..r.endByte()] };
+                };
+                // a comment after the definition's last statement stands beside it in the tree
+                var s = n.nextNamedSibling();
+                while (!s.isNull() and std.mem.eql(u8, s.kind(), "comment")) : (s = s.nextNamedSibling())
+                    if (slashComment(s)) return .{ "one spelling: `#`; written", s.text() };
+            }
+        }
+        return null;
+    }
+
     /// One statement of a function's body. In a .haro file it is refused when a keyword in it stands in another case, or a name in it is
     /// spelled other than its declaration (D55): the first fault names the declared spelling and its line. `what` is what is compiled --
     /// the statement, a rejoined return's expression, or a piece of a re-read span -- and `st` the statement the body loop holds.
@@ -2745,7 +2891,8 @@ pub const Compiler = struct {
                 self.spellSet(self.entry_use, why);
                 return self.nopeSpelled(why);
             }
-            self.spellKeywords(what);
+            // one walk: the keywords' case (v0.41) at each name, the one forms (v0.55) at every token
+            self.oneForm(what);
             if (self.spell_fault) |why| return self.nopeSpelled(why);
         }
         if (as_return) try self.returnExpr(what) else try self.stmt(what);
@@ -13330,6 +13477,11 @@ fn emitOne(c: *Compiler, f: *Func) Error!void {
                 if (c.lookup(p)) |lp| try c.emitLetterCheck(lp.reg, pl, p);
             }
         }
+        // v0.55 (D67): the definition's own words, each in its one form
+        if (c.entry_fault == null and !f.is_main and c.eval == null and c.haroNode(f.node)) if (c.defForm(f.node)) |ff| {
+            c.entry_fault = ff[0];
+            c.entry_use = ff[1];
+        };
         const ln_lo = c.here();
         // the function body is a sequence too (structure pass, shareFunction)
         const bseq: ?usize = if (f.stmts.items.len > 0) c.seqOpen(f.stmts.items[0]) else null;
