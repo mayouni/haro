@@ -72,18 +72,18 @@
    "id": "E08",
    "kind": "run",
    "line": "G1",
-   "why": "endfunc is refused: end",
+   "why": "endfunc refuses the program: end",
    "file": "cases/E08.haro",
-   "stdout": "before\n\nLine 5 Haro refused this statement (one spelling: `end`; written `endfunc`, line 5 of E08.haro) and did not compile it -- running past it would give a wrong answer \nIn function f() in file E08.haro\n\nCalled from line 2 in file E08.haro ",
+   "stdout": "\nLine 5 Haro refused this statement (one spelling: `end`; written `endfunc`, line 5 of E08.haro) and did not compile it -- running past it would give a wrong answer \nin file E08.haro ",
    "exit": 1
   },
   {
    "id": "E09",
    "kind": "run",
    "line": "G1",
-   "why": "endclass is refused: end",
+   "why": "endclass refuses the program: end",
    "file": "cases/E09.haro",
-   "stdout": "before\n\nLine 8 Haro refused this statement (one spelling: `end`; written `endclass`, line 8 of E09.haro) and did not compile it -- running past it would give a wrong answer \nIn method f() in file E09.haro\n\nCalled from line 3 in file E09.haro ",
+   "stdout": "\nLine 8 Haro refused this statement (one spelling: `end`; written `endclass`, line 8 of E09.haro) and did not compile it -- running past it would give a wrong answer \nin file E09.haro ",
    "exit": 1
   },
   {
@@ -120,6 +120,58 @@
    "file": "cases/E14.haro",
    "stdout": "before\n\nLine 5 Haro refused this statement (a chain across lines continues with its dot at the start of the next line; written `.`, line 5 of E14.haro) and did not compile it -- running past it would give a wrong answer \nIn function f() in file E14.haro\n\nCalled from line 2 in file E14.haro ",
    "exit": 1
+  },
+  {
+   "id": "E15",
+   "kind": "run",
+   "line": "G1",
+   "why": "a method whose last line holds a + keeps its end, and the class its own",
+   "file": "cases/E15.haro",
+   "stdout": "rx\nafter\n"
+  },
+  {
+   "id": "E16",
+   "kind": "run",
+   "line": "G1",
+   "why": "an end that closes nothing refuses the program",
+   "file": "cases/E16.haro",
+   "stdout": "\nLine 6 Haro refused this statement (an `end` closes nothing here; written `end`, line 6 of E16.haro) and did not compile it -- running past it would give a wrong answer \nin file E16.haro ",
+   "exit": 1
+  },
+  {
+   "id": "E17",
+   "kind": "run",
+   "line": "G1",
+   "why": "a definition's body on its header's line refuses the program",
+   "file": "cases/E17.haro",
+   "stdout": "\nLine 3 Haro refused this statement (a definition's body starts on the line after its header; written `f`, line 3 of E17.haro) and did not compile it -- running past it would give a wrong answer \nin file E17.haro ",
+   "exit": 1
+  },
+  {
+   "id": "E18",
+   "kind": "run",
+   "line": "G1",
+   "why": "a block closed by ok inside a definition is refused at its statement, naming end",
+   "file": "cases/E18.haro",
+   "stdout": "before\n\nLine 6 Haro refused this statement (a block ends with `end`; written `ok`, line 6 of E18.haro) and did not compile it -- running past it would give a wrong answer \nIn function f() in file E18.haro\n\nCalled from line 2 in file E18.haro ",
+   "exit": 1
+  },
+  {
+   "id": "E19",
+   "kind": "run",
+   "line": "G1",
+   "why": "a block in braces inside a definition is refused at its statement",
+   "file": "cases/E19.haro",
+   "stdout": "before\n\nLine 4 Haro refused this statement (a block has no braces -- it ends with `end`; written `{`, line 4 of E19.haro) and did not compile it -- running past it would give a wrong answer \nIn function f() in file E19.haro\n\nCalled from line 2 in file E19.haro ",
+   "exit": 1
+  },
+  {
+   "id": "E20",
+   "kind": "run",
+   "line": "G1",
+   "why": "an eval's text: a within closed by end restores its global",
+   "file": "cases/E20.haro",
+   "stdout": "b\na\n"
   },
   {
    "id": "E12",

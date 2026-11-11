@@ -6,3 +6,4 @@ func f
 	catch
 		? 2
 	done
+end

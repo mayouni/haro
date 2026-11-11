@@ -101,7 +101,7 @@
    "args": [
     "--validators=IsSafe"
    ],
-   "stdout": "T05.haro\n  6:2  error  haro/text-run-as-code\n          eval() runs text that is not a literal, and nothing in this body passed it to a validator\n\n  1 error, 0 warn, 0 perf, 0 note   in 1 file(s)\n  undefined-function, unknown-class/-package: NOT checked -- the unit calls loadlib() or eval()\n  listener-binds-all: no listening native named (--listeners=), so no call was looked at\n"
+   "stdout": "T05.haro\n  7:2  error  haro/text-run-as-code\n          eval() runs text that is not a literal, and nothing in this body passed it to a validator\n\n  1 error, 0 warn, 0 perf, 0 note   in 1 file(s)\n  undefined-function, unknown-class/-package: NOT checked -- the unit calls loadlib() or eval()\n  listener-binds-all: no listening native named (--listeners=), so no call was looked at\n"
   },
   {
    "id": "N01",

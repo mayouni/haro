@@ -94,36 +94,35 @@
    "id": "O09",
    "kind": "run",
    "line": "F2",
-   "why": "a function closed by end is refused",
+   "why": "a function closed by end runs (v0.56: a definition ends with end)",
    "file": "cases/O09.haro",
-   "stdout": "before\n\nLine 5 Haro refused this statement (a definition has no end word -- it ends where the next begins; written `end`, line 5 of O09.haro) and did not compile it -- running past it would give a wrong answer \nIn function f() in file O09.haro\n\nCalled from line 2 in file O09.haro ",
-   "exit": 1
+   "stdout": "before\n1\n"
   },
   {
    "id": "O10",
    "kind": "run",
    "line": "F2",
-   "why": "a function closed by endfunc is refused",
+   "why": "a function closed by endfunc is refused: end",
    "file": "cases/O10.haro",
-   "stdout": "before\n\nLine 5 Haro refused this statement (a definition has no end word -- it ends where the next begins; written `endfunc`, line 5 of O10.haro) and did not compile it -- running past it would give a wrong answer \nIn function f() in file O10.haro\n\nCalled from line 2 in file O10.haro ",
+   "stdout": "\nLine 5 Haro refused this statement (one spelling: `end`; written `endfunc`, line 5 of O10.haro) and did not compile it -- running past it would give a wrong answer \nin file O10.haro ",
    "exit": 1
   },
   {
    "id": "O11",
    "kind": "run",
    "line": "F2",
-   "why": "a class closed by endclass is refused where its method is entered",
+   "why": "a class closed by endclass is refused where its method is entered: end",
    "file": "cases/O11.haro",
-   "stdout": "before\n\nLine 7 Haro refused this statement (a definition has no end word -- it ends where the next begins; written `endclass`, line 7 of O11.haro) and did not compile it -- running past it would give a wrong answer \nIn method f() in file O11.haro\n\nCalled from line 3 in file O11.haro ",
+   "stdout": "\nLine 8 Haro refused this statement (one spelling: `end`; written `endclass`, line 8 of O11.haro) and did not compile it -- running past it would give a wrong answer \nin file O11.haro ",
    "exit": 1
   },
   {
    "id": "O12",
    "kind": "run",
    "line": "F3",
-   "why": "def is refused: func",
+   "why": "def outside a class is refused: a function is func (v0.56)",
    "file": "cases/O12.haro",
-   "stdout": "before\n\nLine 3 Haro refused this statement (one spelling: `func`; written `def`, line 3 of O12.haro) and did not compile it -- running past it would give a wrong answer \nIn function f() in file O12.haro\n\nCalled from line 2 in file O12.haro ",
+   "stdout": "before\n\nLine 3 Haro refused this statement (a function is defined with `func`; written `def`, line 3 of O12.haro) and did not compile it -- running past it would give a wrong answer \nIn function f() in file O12.haro\n\nCalled from line 2 in file O12.haro ",
    "exit": 1
   },
   {
@@ -213,7 +212,7 @@
    "line": "F3",
    "why": "a parent after : is refused: from",
    "file": "cases/O22.haro",
-   "stdout": "before\n\nLine 5 Haro refused this statement (one spelling: `from`; written `:`, line 5 of O22.haro) and did not compile it -- running past it would give a wrong answer \nIn method f() in file O22.haro\n\nCalled from line 3 in file O22.haro ",
+   "stdout": "before\n\nLine 4 Haro refused this statement (one spelling: `from`; written `:`, line 4 of O22.haro) and did not compile it -- running past it would give a wrong answer \nIn method f() in file O22.haro\n\nCalled from line 3 in file O22.haro ",
    "exit": 1
   },
   {

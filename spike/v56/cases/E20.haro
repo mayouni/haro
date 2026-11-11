@@ -1,0 +1,6 @@
+$tG = "a"
+f()
+? $tG
+func f
+	Eval("within $tG = " + Char(34) + "b" + Char(34) + nl + "? $tG" + nl + "end")
+end

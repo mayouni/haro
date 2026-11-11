@@ -72,11 +72,13 @@ CASES = [
     ('E07', 'G1', 'a class without its end: the program is refused before it runs, naming it', [
         '? "before"', 'oP = new P', 'oP.f()', 'class P', T + 'def f', T + T + '? 1', T + 'end'],
      top('E07', 4, NONE, 'P'), 1),
-    ('E08', 'G1', 'endfunc is refused: end', ['? "before"', 'f()', 'func f', T + '? 1', 'endfunc'],
-     refused('E08', 5, 'one spelling: `end`; written', 'endfunc'), 1),
-    ('E09', 'G1', 'endclass is refused: end', ['? "before"', 'oP = new P', 'oP.f()', 'class P', T + 'def f', T + T + '? 1', T + 'end',
-                                               'endclass'],
-     refused('E09', 8, 'one spelling: `end`; written', 'endclass', called=3, where='method f()'), 1),
+    # E08 and E09 changed after the code: a definition's structure is read from its tokens before the parse (lift.zig, defBraces), so
+    # an end word in another spelling refuses the program, as a missing end does
+    ('E08', 'G1', 'endfunc refuses the program: end', ['? "before"', 'f()', 'func f', T + '? 1', 'endfunc'],
+     top('E08', 5, 'one spelling: `end`; written', 'endfunc'), 1),
+    ('E09', 'G1', 'endclass refuses the program: end', ['? "before"', 'oP = new P', 'oP.f()', 'class P', T + 'def f', T + T + '? 1',
+                                                        T + 'end', 'endclass'],
+     top('E09', 8, 'one spelling: `end`; written', 'endclass'), 1),
     # G2 -- func a function, def a method
     ('E10', 'G2', 'func inside a class is refused: a method is def', [
         '? "before"', 'oP = new P', 'oP.f()', 'class P', T + 'func f', T + T + '? 1', T + 'end', 'end'],
@@ -93,6 +95,24 @@ CASES = [
         '? "before"', 'f()', 'func f', T + 'oP = new P', T + 'oP.AQ(1).', T + T + 'SQ(3)', 'end', 'class P', T + 'def AQ(xX)',
         T + T + 'return this', T + 'end', T + 'def SQ(iN)', T + T + '? iN', T + 'end', 'end'],
      refused('E14', 5, 'a chain across lines continues with its dot at the start of the next line; written', '.'), 1),
+    # E15-E19 written after the code, said so: the definitions' structure is read from the tokens before the parse (lift.zig, defBraces)
+    ('E15', 'G1', 'a method whose last line holds a + keeps its end, and the class its own', [
+        'oRes = new Res', 'oRes.Show(1)', '? "after"', 'class Res', T + 'tName = "x"', T + 'def a', T + T + '? 2', T + 'end', T + 'def Show(iX)',
+        T + T + '? "r" + tName', T + 'end', 'end'],
+     'rx\nafter\n', 0),
+    ('E16', 'G1', 'an end that closes nothing refuses the program', ['? "before"', 'f()', 'func f', T + '? 1', 'end', 'end'],
+     top('E16', 6, 'an `end` closes nothing here; written', 'end'), 1),
+    ('E17', 'G1', 'a definition\'s body on its header\'s line refuses the program', ['? "before"', '? f()', 'func f() return 1 end'],
+     top('E17', 3, 'a definition\'s body starts on the line after its header; written', 'f'), 1),
+    ('E18', 'G1', 'a block closed by ok inside a definition is refused at its statement, naming end', [
+        '? "before"', 'f()', 'func f', T + 'if true', T + T + '? 1', T + 'ok', 'end'],
+     refused('E18', 6, 'a block ends with `end`; written', 'ok'), 1),
+    ('E19', 'G1', 'a block in braces inside a definition is refused at its statement', [
+        '? "before"', 'f()', 'func f', T + 'if true {', T + T + '? 1', T + '}', 'end'],
+     refused('E19', 4, 'a block has no braces -- it ends with `end`; written', '{'), 1),
+    ('E20', 'G1', 'an eval\'s text: a within closed by end restores its global', [
+        '$tG = "a"', 'f()', '? $tG', 'func f', T + 'Eval("within $tG = " + Char(34) + "b" + Char(34) + nl + "? $tG" + nl + "end")', 'end'],
+     'b\na\n', 0),
     # G4 -- a .ring file reads as Ring reads it
     ('E12', 'G4', 'a .ring file: a func after a class is its method, a statement after a func belongs to it', [
         'o = new P', 'o.g()', 'f()', 'func f', '? "f"', '? "still f"', 'class P', 'func g', '? "g, a method"'],

@@ -1,7 +1,10 @@
 ? "before"
 oP = new Q
 oP.f()
-class P
 class Q : P
-	func f
+	def f
 		? 1
+	end
+end
+class P
+end

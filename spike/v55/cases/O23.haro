@@ -2,3 +2,4 @@
 f()
 func f
 	? 1 // one
+end

@@ -7,3 +7,4 @@ func f
 	other
 		? 2
 	end
+end

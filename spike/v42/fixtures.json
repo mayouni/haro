@@ -51,7 +51,7 @@
    "line": "N1",
    "why": "a function called in another spelling is refused",
    "file": "cases/N05.haro",
-   "stdout": "before\n\nLine 4 Haro refused this statement (one spelling per name -- declared `Twice` at line 5; written `twice`, line 4 of N05.haro) and did not compile it -- running past it would give a wrong answer \nIn function f() in file N05.haro\n\nCalled from line 2 in file N05.haro ",
+   "stdout": "before\n\nLine 4 Haro refused this statement (one spelling per name -- declared `Twice` at line 6; written `twice`, line 4 of N05.haro) and did not compile it -- running past it would give a wrong answer \nIn function f() in file N05.haro\n\nCalled from line 2 in file N05.haro ",
    "exit": 1
   },
   {
@@ -60,7 +60,7 @@
    "line": "N3",
    "why": "two functions differing only by case: a call of either is refused, naming both",
    "file": "cases/N06.haro",
-   "stdout": "before\n\nLine 4 Haro refused this statement (two functions differ only by case -- `Foo` at line 5 and `foo` at line 7; written `Foo`, line 4 of N06.haro) and did not compile it -- running past it would give a wrong answer \nIn function f() in file N06.haro\n\nCalled from line 2 in file N06.haro ",
+   "stdout": "before\n\nLine 4 Haro refused this statement (two functions differ only by case -- `Foo` at line 6 and `foo` at line 9; written `Foo`, line 4 of N06.haro) and did not compile it -- running past it would give a wrong answer \nIn function f() in file N06.haro\n\nCalled from line 2 in file N06.haro ",
    "exit": 1
   },
   {
@@ -78,7 +78,7 @@
    "line": "N1",
    "why": "a class named in another spelling is refused",
    "file": "cases/N08.haro",
-   "stdout": "before\n\nLine 4 Haro refused this statement (one spelling per name -- declared `Point` at line 5; written `point`, line 4 of N08.haro) and did not compile it -- running past it would give a wrong answer \nIn function f() in file N08.haro\n\nCalled from line 2 in file N08.haro ",
+   "stdout": "before\n\nLine 4 Haro refused this statement (one spelling per name -- declared `Point` at line 6; written `point`, line 4 of N08.haro) and did not compile it -- running past it would give a wrong answer \nIn function f() in file N08.haro\n\nCalled from line 2 in file N08.haro ",
    "exit": 1
   },
   {
@@ -105,7 +105,7 @@
    "line": "N1",
    "why": "a method called in another spelling is refused",
    "file": "cases/N11.haro",
-   "stdout": "before\n\nLine 5 Haro refused this statement (one spelling per name -- declared `GetX` at line 7; written `getx`, line 5 of N11.haro) and did not compile it -- running past it would give a wrong answer \nIn function f() in file N11.haro\n\nCalled from line 2 in file N11.haro ",
+   "stdout": "before\n\nLine 5 Haro refused this statement (one spelling per name -- declared `GetX` at line 8; written `getx`, line 5 of N11.haro) and did not compile it -- running past it would give a wrong answer \nIn function f() in file N11.haro\n\nCalled from line 2 in file N11.haro ",
    "exit": 1
   },
   {

@@ -1921,7 +1921,7 @@ pub fn format(a: Alloc, parser: ts.Parser, src: []const u8, haro: bool) Err!?[]c
         return null;
     }
     // `within` and `using` are read as the lift reads them (D52 rung 3), and sTry prints them back
-    const lb = lift.blocks(a, parser, tree0, pl.src);
+    const lb = lift.blocks(a, parser, tree0, pl.src, &.{});
     defer lb.tree.deinit();
     // a name is printed as the file wrote it: where nothing was put in, the file's own bytes stand under the same spans -- the leaves read
     // them too, so a .ring file's `o.Get()` is not printed as the lowered `o.get()` (HARO-SURFACE-01)

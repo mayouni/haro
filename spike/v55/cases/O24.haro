@@ -2,5 +2,7 @@
 oP = new P
 oP.f()
 class P
-	func f
+	def f
 		? ClassName(self)
+	end
+end

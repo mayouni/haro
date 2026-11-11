@@ -4,3 +4,4 @@ func f
 	for iI = 1 to 2
 		? iI
 	next
+end

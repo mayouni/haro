@@ -60,7 +60,7 @@
    "line": "Y3",
    "why": "a parameter is checked on entry",
    "file": "cases/Y06.haro",
-   "stdout": "before\n\nLine 5 Error (TYPE_LETTER) : `iN` is lettered i, an integer, and is given a text \nIn function twice() in file Y06.haro\n\nCalled from line 4 In function f() in file Y06.haro\n\nCalled from line 2 in file Y06.haro ",
+   "stdout": "before\n\nLine 6 Error (TYPE_LETTER) : `iN` is lettered i, an integer, and is given a text \nIn function twice() in file Y06.haro\n\nCalled from line 4 In function f() in file Y06.haro\n\nCalled from line 2 in file Y06.haro ",
    "exit": 1
   },
   {
@@ -137,7 +137,7 @@
    "line": "Y1",
    "why": "a parameter is lettered too, refused at its function's first statement",
    "file": "cases/Y15.haro",
-   "stdout": "before\n\nLine 5 Haro refused this statement (a name begins with its type's letter -- `count` has none; written `count`, line 5 of Y15.haro) and did not compile it -- running past it would give a wrong answer \nIn function twice() in file Y15.haro\n\nCalled from line 4 In function f() in file Y15.haro\n\nCalled from line 2 in file Y15.haro ",
+   "stdout": "before\n\nLine 6 Haro refused this statement (a name begins with its type's letter -- `count` has none; written `count`, line 6 of Y15.haro) and did not compile it -- running past it would give a wrong answer \nIn function twice() in file Y15.haro\n\nCalled from line 4 In function f() in file Y15.haro\n\nCalled from line 2 in file Y15.haro ",
    "exit": 1
   },
   {

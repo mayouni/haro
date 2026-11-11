@@ -1,0 +1,7 @@
+? "before"
+f()
+func f
+	if true
+		? 1
+	ok
+end

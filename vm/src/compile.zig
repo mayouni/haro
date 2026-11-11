@@ -535,9 +535,23 @@ fn gatherPieces(n: ts.Node, out: *std.ArrayListUnmanaged(Piece), alloc: std.mem.
             try out.append(alloc, .{ .node = ch, .off = ch.startByte(), .kind = .stmt });
             try gatherPieces(ch, out, alloc);
         } else {
+            // v0.56: an end word the grammar read as a bare name closes nothing -- inert on Ring after a definition (v18/probes/
+            // closers.py), and in a .haro file the lift has already given each definition its braces
+            if (inertCloser(ch)) continue;
             try out.append(alloc, .{ .node = ch, .off = ch.startByte(), .kind = .stmt });
         }
     }
+}
+
+fn inertCloser(n: ts.Node) bool {
+    if (!std.mem.eql(u8, n.kind(), "expression_statement") or n.namedChildCount() != 1) return false;
+    const e = n.namedChild(0);
+    if (!std.mem.eql(u8, e.kind(), "identifier")) return false;
+    const w = e.text();
+    for ([_][]const u8{ "end", "endfunc", "endfunction", "endclass", "endpackage" }) |k| {
+        if (std.ascii.eqlIgnoreCase(w, k)) return true;
+    }
+    return false;
 }
 
 /// The bare word `private` on its own line inside a class. Ring treats it as
@@ -691,6 +705,8 @@ fn spliceOne(
     // Everything after the first `func`/`class` belongs to it, not to the
     // file -- the same rule the piece walk applies. Loads still count
     // wherever they sit, because Ring processes them as it parses.
+    // v0.56 (D68): a .haro file's definitions end with `end`, and every statement at its top level is the program's, wherever it stands.
+    const haro_file = ri < load_paths.len and lift.isHaro(load_paths[ri]);
     var seen_def = false;
     var i: u32 = 0;
     while (i < root.namedChildCount()) : (i += 1) {
@@ -699,7 +715,7 @@ fn spliceOne(
         if (std.mem.eql(u8, k, "function_definition") or
             std.mem.eql(u8, k, "class_definition"))
         {
-            seen_def = true;
+            seen_def = !haro_file;
             continue;
         }
         if (std.mem.eql(u8, k, "comment")) continue;
@@ -1310,7 +1326,10 @@ fn spliceMain(c: *Compiler, roots: []const ts.Node, start: u32, alloc: std.mem.A
         while (i < root.namedChildCount()) : (i += 1) {
             const ch = root.namedChild(i);
             const k = ch.kind();
-            if (std.mem.eql(u8, k, "function_definition") or std.mem.eql(u8, k, "class_definition")) seen_def = true;
+            if (std.mem.eql(u8, k, "function_definition") or std.mem.eql(u8, k, "class_definition")) {
+                if (!(ri < load_paths.len and lift.isHaro(load_paths[ri]))) seen_def = true;
+                continue;
+            }
             if (seen_def or std.mem.eql(u8, k, "load_statement")) continue;
             markNestedLoads(alloc, @intCast(ri), ch, visited, nested);
         }
@@ -2254,6 +2273,12 @@ pub const Compiler = struct {
     /// v0.47: a parameter whose shape is refused, carried to its function's first statement (Y15)
     entry_fault: ?[]const u8 = null,
     entry_use: []const u8 = "",
+    /// the text `entry_use` stands in, when it is not the statement's own file (v0.56: a file's missing end, reported by the program)
+    entry_src: ?[]const u8 = null,
+    /// v0.56 (D68): the first definition of a .haro file without its `end`. The grammar then ends that definition where it can, and the
+    /// rest of its body falls to the top level, so nothing of the program runs: its first statement is refused, naming the definition.
+    file_fault: ?[2][]const u8 = null,
+    file_fault_src: []const u8 = "",
     /// v0.55: the one-form walk is inside a brace object, where `self` is the brace's object
     brace_walk: bool = false,
     ln_block_quirk: bool = false,
@@ -2726,11 +2751,12 @@ pub const Compiler = struct {
     // v0.55 (D67, HARO-ONEFORM-01, the Principal's "Opt for a strict one form", 2026-11-11): one form for each construct in a .haro file
     const R_END = "a block ends with `end`; written";
     const R_BRACE = "a block has no braces -- it ends with `end`; written";
-    const R_DEF = "a definition has no end word -- it ends where the next begins; written";
-    const R_DEF_BRACE = "a definition has no braces -- it ends where the next begins; written";
+    const R_METHOD = "a method is defined with `def`; written";
+    const R_FUNCTION = "a function is defined with `func`; written";
     const R_NOPARAMS = "a definition without parameters has no parentheses; written";
     const R_PARAMS = "a definition's parameters stand in parentheses; written";
     const R_PERIOD = "a statement has no trailing period; written";
+    const R_CHAIN = "a chain across lines continues with its dot at the start of the next line; written";
 
     fn isBlock(k: []const u8) bool {
         for ([_][]const u8{ "if_statement", "while_statement", "for_statement", "switch_statement", "try_statement" }) |b|
@@ -2753,8 +2779,6 @@ pub const Compiler = struct {
             .{ .w = "&&", .p = "", .why = "one spelling: `and`; written" },
             .{ .w = "||", .p = "", .why = "one spelling: `or`; written" },
             .{ .w = "!", .p = "unary_expression", .why = "one spelling: `not`; written" },
-            .{ .w = "def", .p = "", .why = "one spelling: `func`; written" },
-            .{ .w = "function", .p = "", .why = "one spelling: `func`; written" },
         };
         for (table) |e| if (std.mem.eql(u8, k, e.w) and (e.p.len == 0 or std.mem.eql(u8, parent, e.p))) return e.why;
         return null;
@@ -2800,6 +2824,9 @@ pub const Compiler = struct {
                 if (oneWord(t, k)) |why| return self.spellSet(ch.text(), why);
                 if (std.mem.eql(u8, k, "expression_statement") and i + 1 == cnt and std.mem.eql(u8, t, "."))
                     return self.spellSet(ch.text(), R_PERIOD);
+                // v0.56 (D68): a chain across lines continues with its dot at the start of the next line, never at the end of this one
+                if (std.mem.eql(u8, k, "member_expression") and std.mem.eql(u8, t, ".") and i + 1 < cnt and
+                    n.child(i + 1).start().row > ch.start().row) return self.spellSet(ch.text(), R_CHAIN);
                 if (std.mem.eql(u8, t, "{")) brace = true;
                 if (std.mem.eql(u8, t, "}")) brace = false;
                 continue;
@@ -2821,6 +2848,16 @@ pub const Compiler = struct {
         while (!n.isNull()) : (n = n.parent()) {
             const k = n.kind();
             const func = std.mem.eql(u8, k, "function_definition");
+            var method = false;
+            if (func) {
+                var up = n.parent();
+                while (!up.isNull()) : (up = up.parent()) {
+                    if (std.mem.eql(u8, up.kind(), "class_definition")) {
+                        method = true;
+                        break;
+                    }
+                }
+            }
             if (!func and !std.mem.eql(u8, k, "class_definition") and !std.mem.eql(u8, k, "package_definition")) {
                 if (std.mem.eql(u8, k, "source_file")) break;
                 continue;
@@ -2843,10 +2880,13 @@ pub const Compiler = struct {
                     }
                     continue;
                 }
+                // v0.56 (D68, the Principal): `func` a function, `def` a method
+                if (func and i == 0) {
+                    if (method and !std.mem.eql(u8, t, "def")) return .{ R_METHOD, ch.text() };
+                    if (!method and !std.mem.eql(u8, t, "func")) return .{ R_FUNCTION, ch.text() };
+                }
                 if (oneWord(t, k)) |why| return .{ why, ch.text() };
-                if (std.mem.eql(u8, t, "end") or std.mem.eql(u8, t, "endfunc") or std.mem.eql(u8, t, "endfunction") or
-                    std.mem.eql(u8, t, "endclass") or std.mem.eql(u8, t, "endpackage")) return .{ R_DEF, ch.text() };
-                if (std.mem.eql(u8, t, "{") or std.mem.eql(u8, t, "}")) return .{ R_DEF_BRACE, ch.text() };
+                // a definition's braces and end word are the lift's (lift.zig, defBraces): it hands the parser braces for `end`
                 if (func and std.mem.eql(u8, t, ")")) rparen = ch;
             }
             if (func) {
@@ -2888,6 +2928,8 @@ pub const Compiler = struct {
             self.spell_src = st.src;
             if (self.entry_fault) |why| {
                 self.entry_fault = null;
+                if (self.entry_src) |es| self.spell_src = es;
+                self.entry_src = null;
                 self.spellSet(self.entry_use, why);
                 return self.nopeSpelled(why);
             }
@@ -10893,7 +10935,51 @@ fn compileFinish(c: *Compiler, alloc: std.mem.Allocator) Error!Program {
 /// the only one this grammar respects: it scatters a construct's later
 /// statements after the function, after the method, and after a nested
 /// class back into the enclosing one.
+/// v0.56 (D68): where the tree puts a piece of a .haro file -- the function or method whose body holds it, else the class whose region holds
+/// it, else the program
+fn haroOwner(c: *Compiler, n: ts.Node) struct { func: ?usize, class: ?u16 } {
+    var a = n.parent();
+    while (!a.isNull()) : (a = a.parent()) {
+        const k = a.kind();
+        if (std.mem.eql(u8, k, "function_definition")) {
+            var i = c.funcs.items.len;
+            while (i > 0) {
+                i -= 1;
+                const g = c.funcs.items[i];
+                if (!g.is_main and g.node.startByte() == a.startByte() and g.node.src.ptr == a.src.ptr) return .{ .func = i, .class = g.owner };
+            }
+            return .{ .func = null, .class = null };
+        }
+        if (std.mem.eql(u8, k, "class_definition")) {
+            for (c.classes.items) |ci| {
+                if (ci.node.startByte() == a.startByte() and ci.node.src.ptr == a.src.ptr) return .{ .func = null, .class = ci.id };
+            }
+            return .{ .func = null, .class = null };
+        }
+    }
+    return .{ .func = null, .class = null };
+}
+
+/// `word` as it stands on line `row` (from 0) of `src`, for a refusal's line; the word itself when the line does not hold it
+fn wordAt(src: []const u8, row: u32, word: []const u8) []const u8 {
+    var r: u32 = 0;
+    var i: usize = 0;
+    while (r < row) : (r += 1) {
+        i = (std.mem.indexOfScalarPos(u8, src, i, '\n') orelse return word) + 1;
+    }
+    const e = std.mem.indexOfScalarPos(u8, src, i, '\n') orelse src.len;
+    const at = std.mem.indexOf(u8, src[i..e], word) orelse return word;
+    return src[i + at .. i + at + word.len];
+}
+
 fn collectAll(c: *Compiler, root: ts.Node, alloc: std.mem.Allocator) Error!void {
+    // v0.56 (D68): the lift matched this .haro file's definitions to their ends by the tokens; a fault it found refuses the program
+    if (c.file_fault == null and c.eval == null and c.haroNode(root)) if (c.fileOf(root.src.ptr)) |fi| if (fi < load_paths.len) {
+        if (lift.faults.get(load_paths[fi])) |f| {
+            c.file_fault = .{ f.why, wordAt(root.src, f.row, f.word) };
+            c.file_fault_src = root.src;
+        }
+    };
     // This runs ONCE PER FILE, and the unit is 606 of them. Everything below
     // that walks `c.funcs` walks only the functions THIS file adds -- the
     // lambda lowering and the Rule A scan used to start from 0, so each
@@ -11061,6 +11147,14 @@ fn collectAll(c: *Compiler, root: ts.Node, alloc: std.mem.Allocator) Error!void 
     // The prologue must exist before pass 2 can be walked twice, so the
     // inheritance graft happens after it, below.
     for (pieces.items) |p| {
+        // v0.56 (D68): in a .haro file every definition ends with `end`, so the tree says where each piece belongs -- a function after a
+        // class is a function, a statement after a definition is the program's -- and no position rule is read (the Principal, 2026-11-11)
+        const by_tree = c.haroNode(p.node);
+        if (by_tree and p.kind != .class) {
+            const o = haroOwner(c, p.node);
+            cur_fn = if (p.kind == .stmt) o.func else null;
+            cur_class = o.class;
+        }
         switch (p.kind) {
             .class => {
                 cur_fn = null;
@@ -12493,7 +12587,7 @@ pub fn compileEval(c: *Compiler, src: []const u8, ev: *EvalCtx, locals: []const 
         return Error.Unsupported;
     }
     // a `not` that leads a chain is read as Ring reads it, here as in a file (C-32)
-    tree = lift.apply(c.scratch, c.eval_parser.?, tree, snippet, "eval").tree;
+    tree = lift.apply(c.scratch, c.eval_parser.?, tree, snippet, "eval", &.{}, false).tree;
     const root = tree.root();
 
     // ONE Func, reused: its lists keep their buffers
@@ -13477,6 +13571,12 @@ fn emitOne(c: *Compiler, f: *Func) Error!void {
                 if (c.lookup(p)) |lp| try c.emitLetterCheck(lp.reg, pl, p);
             }
         }
+        // v0.56 (D68): a .haro file with a definition that has no end -- the program refuses its first statement, naming it
+        if (f.is_main and c.eval == null) if (c.file_fault) |ff| {
+            c.entry_fault = ff[0];
+            c.entry_use = ff[1];
+            c.entry_src = c.file_fault_src;
+        };
         // v0.55 (D67): the definition's own words, each in its one form
         if (c.entry_fault == null and !f.is_main and c.eval == null and c.haroNode(f.node)) if (c.defForm(f.node)) |ff| {
             c.entry_fault = ff[0];

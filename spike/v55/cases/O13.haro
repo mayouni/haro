@@ -6,3 +6,4 @@ func f
 	but true
 		? 2
 	end
+end

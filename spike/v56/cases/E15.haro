@@ -1,0 +1,12 @@
+oRes = new Res
+oRes.Show(1)
+? "after"
+class Res
+	tName = "x"
+	def a
+		? 2
+	end
+	def Show(iX)
+		? "r" + tName
+	end
+end

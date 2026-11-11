@@ -594,9 +594,11 @@ fn loadUnit(
         var tp = std.time.Timer.start() catch unreachable;
         // HARO-SURFACE-01: a .haro file by Haro's rules, any other by Ring's (lift.parse)
         if (qi == 0) lift.haro_root = lift.isHaro(p);
-        const pl = lift.parse(alloc, parser, src, lift.isHaro(p)) orelse continue;
+        // v0.56 (D68): a .haro file's definitions reach its one parse in braces (lift.parseHaro); a dump reads the file as written
+        const braced = u.lift and lift.isHaro(p);
+        const pl = (if (braced) lift.parseHaro(alloc, parser, src, p) else lift.parse(alloc, parser, src, lift.isHaro(p))) orelse continue;
         t_parse_ns += tp.read();
-        const lf: lift.Lifted = if (u.lift) lift.apply(alloc, parser, pl.tree, pl.src, p) else pl;
+        const lf: lift.Lifted = if (u.lift) lift.apply(alloc, parser, pl.tree, pl.src, p, pl.inserts, braced) else pl;
         const tree = lf.tree;
         try u.trees.append(alloc, tree);
         try u.roots.append(alloc, tree.root());

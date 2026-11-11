@@ -2,3 +2,4 @@
 f(1, 2)
 func f iA, iB
 	? iA + iB
+end

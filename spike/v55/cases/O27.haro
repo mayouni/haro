@@ -2,5 +2,7 @@
 f()
 func f
 	g().
+end
 func g
 	? 1
+end

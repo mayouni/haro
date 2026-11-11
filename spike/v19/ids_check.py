@@ -188,7 +188,17 @@ def revisions(repo, path, n):
         elif ln and rev:
             out.append((rev, ln))
             rev = None
-    return list(reversed(out))[-n:]
+    # the last n HUMAN revisions, with the tool commits among them (v0.56): a tool commit is no human edit, so it must not take a slot of
+    # the window -- the v0.55 rewrite (16e50a0) was the newest revision of every file and pushed an older human edit out of each window,
+    # leaving a sample of small edits that even the position control kept 99.4% of
+    picked, human = [], 0
+    for r in out:
+        picked.append(r)
+        if r[0] not in TOOLS:
+            human += 1
+            if human >= n:
+                break
+    return list(reversed(picked))
 
 
 def graph_at(repo, rev, path):

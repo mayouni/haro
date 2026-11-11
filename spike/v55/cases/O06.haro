@@ -4,3 +4,4 @@ func f
 	if true {
 		? 1
 	}
+end

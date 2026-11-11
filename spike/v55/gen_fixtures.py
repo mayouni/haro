@@ -21,9 +21,22 @@ THE TABLE (D67):
 
   python spike/v55/gen_fixtures.py
 """
-import json, os
+import json, os, sys
 
 HERE = os.path.dirname(os.path.abspath(__file__))
+sys.path.insert(0, os.path.join(os.path.dirname(os.path.dirname(HERE)), 'port'))
+import haroport as H
+
+# written with their definitions' ends by hand: v0.56 changed what they judge (O09-O12), or where a line stands (O22)
+HAND = {'O09', 'O10', 'O11', 'O12', 'O22'}
+
+
+def top(cid, line, why, text):
+    """v0.56: a definition's end word is read from the tokens before the parse, so an end word in another spelling refuses the program"""
+    return (f'\nLine {line} Haro refused this statement ({why} `{text}`, line {line} of {cid}.haro) and did not compile it -- running '
+            f'past it would give a wrong answer \nin file {cid}.haro ')
+
+
 T = '\t'
 
 
@@ -71,16 +84,17 @@ CASES = [
     ('O08', 'F1', 'within closed by done is refused', HEAD + [T + '$iG = 1', T + 'within $iG = 2', T + T + '? $iG', T + 'done'],
      refused('O08', 7, END, 'done'), 1),
     # F2 -- a definition has no end word
-    ('O09', 'F2', 'a function closed by end is refused', HEAD + [T + '? 1', 'end'],
-     refused('O09', 5, DEF, 'end'), 1),
-    ('O10', 'F2', 'a function closed by endfunc is refused', HEAD + [T + '? 1', 'endfunc'],
-     refused('O10', 5, DEF, 'endfunc'), 1),
-    ('O11', 'F2', 'a class closed by endclass is refused where its method is entered', ['? "before"', 'oP = new P', 'oP.f()', 'class P',
-                                                                                        T + 'func f', T + T + '? 1', 'endclass'],
-     refused('O11', 7, DEF, 'endclass', called=3, where='method f()'), 1),
+    # O09-O12 changed by v0.56 (D68, the Principal 2026-11-11): a definition ends with `end`, `func` a function and `def` a method
+    ('O09', 'F2', 'a function closed by end runs (v0.56: a definition ends with end)', HEAD + [T + '? 1', 'end'],
+     'before\n1\n', 0),
+    ('O10', 'F2', 'a function closed by endfunc is refused: end', HEAD + [T + '? 1', 'endfunc'],
+     top('O10', 5, one('end'), 'endfunc'), 1),
+    ('O11', 'F2', 'a class closed by endclass is refused where its method is entered: end', ['? "before"', 'oP = new P', 'oP.f()', 'class P',
+                                                                                             T + 'def f', T + T + '? 1', T + 'end', 'endclass'],
+     top('O11', 8, one('end'), 'endclass'), 1),
     # F3 -- one word each
-    ('O12', 'F3', 'def is refused: func', ['? "before"', 'f()', 'def f', T + '? 1'],
-     refused('O12', 3, one('func'), 'def'), 1),
+    ('O12', 'F3', 'def outside a class is refused: a function is func (v0.56)', ['? "before"', 'f()', 'def f', T + '? 1', 'end'],
+     refused('O12', 3, 'a function is defined with `func`; written', 'def'), 1),
     ('O13', 'F3', 'but is refused: elseif', HEAD + [T + 'if false', T + T + '? 1', T + 'but true', T + T + '? 2', T + 'end'],
      refused('O13', 6, one('elseif'), 'but'), 1),
     ('O14', 'F3', 'other is refused in a switch: else', HEAD + [T + 'switch 2', T + 'case 1', T + T + '? 1', T + 'other', T + T + '? 2',
@@ -100,9 +114,9 @@ CASES = [
      refused('O20', 4, one('and'), '&&'), 1),
     ('O21', 'F3', '! is refused: not', HEAD + [T + 'if !false', T + T + '? 1', T + 'end'],
      refused('O21', 4, one('not'), '!'), 1),
-    ('O22', 'F3', 'a parent after : is refused: from', ['? "before"', 'oP = new Q', 'oP.f()', 'class P', 'class Q : P', T + 'func f',
-                                                        T + T + '? 1'],
-     refused('O22', 5, one('from'), ':', called=3, where='method f()'), 1),
+    ('O22', 'F3', 'a parent after : is refused: from', ['? "before"', 'oP = new Q', 'oP.f()', 'class Q : P', T + 'def f', T + T + '? 1',
+                                                        T + 'end', 'end', 'class P', 'end'],
+     refused('O22', 4, one('from'), ':', called=3, where='method f()'), 1),
     ('O23', 'F3', 'a comment after // is refused: #', HEAD + [T + '? 1 // one'],
      refused('O23', 4, one('#'), '// one'), 1),
     ('O24', 'F3', 'self outside a brace is refused: this', ['? "before"', 'oP = new P', 'oP.f()', 'class P', T + 'func f',
@@ -139,8 +153,13 @@ def main():
     for cid, line, why, src, stdout, code in CASES:
         ext = '.ring' if cid == 'O29' else '.haro'
         name = f'cases/{cid}{ext}'
+        text = '\n'.join(src) + '\n'
+        if ext == '.haro' and cid not in HAND:
+            # v0.56 (D68): every definition ends with `end`, a method is `def` -- added by haroport's rule, each end after its definition's
+            # last line, so the lines a case names keep their numbers
+            text = ''.join(v for _, v in H.def_ends(H.tokens(text), []))
         with open(os.path.join(HERE, name), 'w', encoding='utf-8', newline='\n') as fh:
-            fh.write('\n'.join(src) + '\n')
+            fh.write(text)
         row = {'id': cid, 'kind': 'run', 'line': line, 'why': why, 'file': name, 'stdout': stdout}
         if code:
             row['exit'] = code

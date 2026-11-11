@@ -483,13 +483,6 @@ fn opensBlock(k: []const u8) bool {
     return false;
 }
 
-/// The last token of a definition, when it is an end word: in a .haro file a definition has none, so the grammar's reading of an `end`
-/// there is a block's `end` the definition took (v0.55: `within $g = v ... end`)
-fn defEnd(parent: []const u8, k: []const u8) bool {
-    if (!eq(parent, "function_definition") and !eq(parent, "class_definition") and !eq(parent, "package_definition") and !eq(parent, "ERROR"))
-        return false;
-    return eq(k, "end") or eq(k, "endfunc") or eq(k, "endfunction") or eq(k, "endclass") or eq(k, "endpackage");
-}
 
 fn blockTokens(alloc: std.mem.Allocator, n: ts.Node, out: *std.ArrayListUnmanaged(Tok)) !void {
     const cnt = n.childCount();
@@ -517,6 +510,14 @@ fn blockTokens(alloc: std.mem.Allocator, n: ts.Node, out: *std.ArrayListUnmanage
     }
 }
 
+/// The last token of a definition or of a broken span, when it is an end word: a block's `end` the grammar gave to what holds it -- in an
+/// eval's text, or a .ring file -- closes that block (a .haro file's definitions reach the parser in braces, so theirs never does)
+fn defEnd(parent: []const u8, k: []const u8) bool {
+    if (!eq(parent, "function_definition") and !eq(parent, "class_definition") and !eq(parent, "package_definition") and !eq(parent, "ERROR"))
+        return false;
+    return eq(k, "end") or eq(k, "endfunc") or eq(k, "endfunction") or eq(k, "endclass") or eq(k, "endpackage");
+}
+
 fn findBlocks(alloc: std.mem.Allocator, root: ts.Node, out: *std.ArrayListUnmanaged(Edit)) !void {
     var toks = std.ArrayListUnmanaged(Tok){};
     defer toks.deinit(alloc);
@@ -532,15 +533,248 @@ fn findBlocks(alloc: std.mem.Allocator, root: ts.Node, out: *std.ArrayListUnmana
     };
 }
 
+/// v0.56 (D68, the Principal 2026-11-11: no position rule; `func` a function, `def` a method). In a .haro file every block and every
+/// definition ends with `end`, so the file's structure is in its tokens: each opener -- if, while, for, switch, try, do, `within`/`using`
+/// before a header, func, def, class, package -- is closed by the next `end` (`again` for a do) that no inner opener took. The grammar,
+/// which also reads Ring's surface, cannot tell a definition's `end` from its class's in every shape (a method whose last line holds a `+`
+/// lost its `end` to the class); so each definition is given to the parser in braces, which it reads one way only: ` {` after its header,
+/// `}` in place of its `end`. Nothing else moves, and no line changes its number.
+///
+/// A file whose structure the tokens do not close is not rewritten, and the first fault is kept for the compiler, which refuses the
+/// program's first statement with it: a definition without its `end`, an `end` that closes nothing, a definition's body on its header's
+/// line, or an end word in another spelling.
+pub const Fault = struct { why: []const u8, word: []const u8, row: u32 };
+
+/// the fault of each .haro file read, by its name
+pub var faults: std.StringHashMapUnmanaged(Fault) = .{};
+
+pub const R_NOEND = "a definition ends with `end`, and this one has none; written";
+pub const R_STRAY = "an `end` closes nothing here; written";
+pub const R_ONELINE = "a definition's body starts on the line after its header; written";
+pub const R_ENDWORD = "one spelling: `end`; written";
+
+const Open = struct { def: bool, row: u32, head_end: u32, name: []const u8, braced: bool = false };
+
+fn wordByte(b: u8) bool {
+    return std.ascii.isAlphanumeric(b) or b == '_';
+}
+
+const Braced = struct { text: []const u8, inserts: []const Insert };
+
+/// A .haro file read once, its definitions already in braces (v0.56): the load path's parse, so a file is never parsed twice
+pub fn parseHaro(alloc: std.mem.Allocator, parser: ts.Parser, src: []const u8, name: []const u8) ?Lifted {
+    if (bracesText(alloc, src, name)) |b| {
+        const tree = parser.parse(b.text) orelse return null;
+        def_files += 1;
+        return .{ .tree = tree, .src = b.text, .inserts = b.inserts };
+    }
+    return .{ .tree = parser.parse(src) orelse return null, .src = src };
+}
+
+fn defBraces(alloc: std.mem.Allocator, parser: ts.Parser, src: []const u8, name: []const u8) ?Lifted {
+    const b = bracesText(alloc, src, name) orelse return null;
+    const tree = parser.parse(b.text) orelse return null;
+    def_files += 1;
+    return .{ .tree = tree, .src = b.text, .inserts = b.inserts };
+}
+
+fn bracesText(alloc: std.mem.Allocator, src: []const u8, name: []const u8) ?Braced {
+    var stack = std.ArrayListUnmanaged(Open){};
+    defer stack.deinit(alloc);
+    var ends = std.ArrayListUnmanaged(u32){};
+    defer ends.deinit(alloc);
+    var heads = std.ArrayListUnmanaged(u32){};
+    defer heads.deinit(alloc);
+    var fault: ?Fault = null;
+    const n = src.len;
+    var i: usize = 0;
+    var row: u32 = 0;
+    var prev: u8 = '\n'; // the last byte of code before this one, blanks left out
+    scan: while (i < n) {
+        const ch = src[i];
+        if (ch == '\n') {
+            row += 1;
+            prev = '\n';
+            i += 1;
+            continue;
+        }
+        if (ch == ' ' or ch == '\t' or ch == '\r') {
+            i += 1;
+            continue;
+        }
+        if (ch == '"' or ch == '\'' or ch == '`') {
+            const close = std.mem.indexOfScalarPos(u8, src, i + 1, ch) orelse break :scan;
+            for (src[i..close]) |b| {
+                if (b == '\n') row += 1;
+            }
+            i = close + 1;
+            prev = ch;
+            continue;
+        }
+        if (ch == '#' or (ch == '/' and i + 1 < n and src[i + 1] == '/')) {
+            while (i < n and src[i] != '\n') i += 1;
+            continue;
+        }
+        if (ch == '/' and i + 1 < n and src[i + 1] == '*') {
+            const close = std.mem.indexOfPos(u8, src, i + 2, "*/") orelse break :scan;
+            for (src[i .. close + 2]) |b| {
+                if (b == '\n') row += 1;
+            }
+            i = close + 2;
+            continue;
+        }
+        if (!wordByte(ch) and ch != '$' and ch != '@') {
+            // a block opened with a brace on its own line is closed by a brace (the compiler refuses both, naming `end`)
+            if (ch == '{') {
+                if (stack.items.len > 0 and !stack.items[stack.items.len - 1].def and stack.items[stack.items.len - 1].row == row)
+                    stack.items[stack.items.len - 1].braced = true;
+            } else if (ch == '}') {
+                if (stack.items.len > 0 and stack.items[stack.items.len - 1].braced) _ = stack.pop();
+            }
+            prev = ch;
+            i += 1;
+            continue;
+        }
+        const s = i;
+        if (ch == '$' or ch == '@') i += 1;
+        while (i < n and wordByte(src[i])) i += 1;
+        const w = src[s..i];
+        const named = !(prev == '.' or prev == ':' or ch == '$' or ch == '@' or std.ascii.isDigit(ch));
+        prev = 'a';
+        if (!named) continue;
+        const def = eq(w, "func") or eq(w, "def") or eq(w, "class") or eq(w, "package");
+        if (def) {
+            // the header's code ends before the line's comment or its end
+            var j = i;
+            var last: usize = i;
+            while (j < n and src[j] != '\n') : (j += 1) {
+                const b = src[j];
+                if (b == '#' or (b == '/' and j + 1 < n and src[j + 1] == '/')) break;
+                if (b == '"' or b == '\'' or b == '`') {
+                    const close = std.mem.indexOfScalarPos(u8, src, j + 1, b) orelse break;
+                    j = close;
+                    last = close + 1;
+                    continue;
+                }
+                if (b != ' ' and b != '\t' and b != '\r') last = j + 1;
+            }
+            // its name: the word after it
+            var k = i;
+            while (k < n and (src[k] == ' ' or src[k] == '\t')) k += 1;
+            var e = k;
+            while (e < n and wordByte(src[e])) e += 1;
+            try_push(alloc, &stack, .{ .def = true, .row = row, .head_end = @intCast(last), .name = if (e > k) src[k..e] else w }) orelse return null;
+            continue;
+        }
+        if (eq(w, "if") or eq(w, "while") or eq(w, "for") or eq(w, "foreach") or eq(w, "switch") or eq(w, "try") or eq(w, "do")) {
+            try_push(alloc, &stack, .{ .def = false, .row = row, .head_end = 0, .name = w }) orelse return null;
+            continue;
+        }
+        if (eq(w, "within") or eq(w, "using")) {
+            // a block when a header follows on its line: a name, then `=`
+            var k = i;
+            while (k < n and (src[k] == ' ' or src[k] == '\t')) k += 1;
+            var e = k;
+            if (e < n and (src[e] == '$' or src[e] == '@')) e += 1;
+            while (e < n and wordByte(src[e])) e += 1;
+            var q = e;
+            while (q < n and (src[q] == ' ' or src[q] == '\t')) q += 1;
+            if (e > k and q < n and src[q] == '=' and !(q + 1 < n and src[q + 1] == '='))
+                try_push(alloc, &stack, .{ .def = false, .row = row, .head_end = 0, .name = w }) orelse return null;
+            continue;
+        }
+        if (eq(w, "endfunc") or eq(w, "endfunction") or eq(w, "endclass") or eq(w, "endpackage")) {
+            if (fault == null) fault = .{ .why = R_ENDWORD, .word = w, .row = row };
+            break :scan;
+        }
+        if (eq(w, "again")) {
+            _ = stack.pop();
+            continue;
+        }
+        // a block's end word in another spelling closes the block (the compiler refuses it, naming `end`, v0.55)
+        if (eq(w, "ok") or eq(w, "next") or eq(w, "off") or eq(w, "done") or eq(w, "endif") or eq(w, "endwhile") or eq(w, "endfor") or
+            eq(w, "endswitch") or eq(w, "endtry"))
+        {
+            if (stack.items.len > 0 and !stack.items[stack.items.len - 1].def) _ = stack.pop();
+            continue;
+        }
+        if (eq(w, "end")) {
+            const o = stack.pop() orelse {
+                if (fault == null) fault = .{ .why = R_STRAY, .word = w, .row = row };
+                break :scan;
+            };
+            if (o.def) {
+                if (o.row == row) {
+                    if (fault == null) fault = .{ .why = R_ONELINE, .word = o.name, .row = row };
+                    break :scan;
+                }
+                ends.append(alloc, @intCast(s)) catch return null;
+                heads.append(alloc, o.head_end) catch return null;
+            }
+            continue;
+        }
+    }
+    if (fault == null) {
+        for (stack.items) |o| {
+            if (!o.def) continue;
+            fault = .{ .why = R_NOEND, .word = o.name, .row = o.row };
+            break;
+        }
+    }
+    // the table lives as long as the program, never in an eval's scratch (which is reset between evals), and an eval keeps none:
+    // the compiler reads it for a file only
+    const keep = !eq(name, "eval");
+    if (fault) |f| {
+        if (keep) faults.put(std.heap.page_allocator, name, f) catch {};
+        return null;
+    }
+    if (keep) _ = faults.remove(name);
+    if (heads.items.len == 0) return null;
+    // the text: ` {` after each header, `}` for each definition's `end` -- the inserts in file order
+    std.mem.sort(u32, heads.items, {}, std.sort.asc(u32));
+    const text = alloc.alloc(u8, n + 2 * heads.items.len) catch return null;
+    const ins = alloc.alloc(Insert, heads.items.len) catch return null;
+    var at: usize = 0;
+    var from: usize = 0;
+    for (heads.items, 0..) |h, hi| {
+        @memcpy(text[at .. at + (h - from)], src[from..h]);
+        at += h - from;
+        text[at] = ' ';
+        text[at + 1] = '{';
+        at += 2;
+        from = h;
+        ins[hi] = .{ .pos = h, .len = 2 };
+    }
+    @memcpy(text[at..], src[from..]);
+    for (ends.items) |e| {
+        var shift: usize = 0;
+        for (heads.items) |h| {
+            if (h <= e) shift += 2;
+        }
+        const p = e + shift;
+        text[p] = '}';
+        text[p + 1] = ' ';
+        text[p + 2] = ' ';
+    }
+    return .{ .text = text, .inserts = ins };
+}
+
+fn try_push(alloc: std.mem.Allocator, stack: *std.ArrayListUnmanaged(Open), o: Open) ?void {
+    stack.append(alloc, o) catch return null;
+}
+
+/// the .haro files whose definitions were given to the parser in braces, for the census
+pub var def_files: u32 = 0;
+
 /// The blocks pass alone, for `haro fmt`, which prints the blocks back as they were written (fmt.zig, `sTry`).
-pub fn blocks(alloc: std.mem.Allocator, parser: ts.Parser, tree: ts.Tree, src: []const u8) Lifted {
+pub fn blocks(alloc: std.mem.Allocator, parser: ts.Parser, tree: ts.Tree, src: []const u8, prior: []const Insert) Lifted {
     if (std.ascii.indexOfIgnoreCase(src, "within") == null and std.ascii.indexOfIgnoreCase(src, "using") == null)
-        return .{ .tree = tree, .src = src };
+        return .{ .tree = tree, .src = src, .inserts = prior };
     var edits = std.ArrayListUnmanaged(Edit){};
     defer edits.deinit(alloc);
-    findBlocks(alloc, tree.root(), &edits) catch return .{ .tree = tree, .src = src };
-    if (edits.items.len == 0) return .{ .tree = tree, .src = src };
-    const r = splice(alloc, parser, tree, src, edits.items, &.{}) orelse return .{ .tree = tree, .src = src };
+    findBlocks(alloc, tree.root(), &edits) catch return .{ .tree = tree, .src = src, .inserts = prior };
+    if (edits.items.len == 0) return .{ .tree = tree, .src = src, .inserts = prior };
+    const r = splice(alloc, parser, tree, src, edits.items, prior) orelse return .{ .tree = tree, .src = src, .inserts = prior };
     tree.deinit();
     block_sites += @intCast(edits.items.len / 2);
     return r;
@@ -579,11 +813,23 @@ fn splice(alloc: std.mem.Allocator, parser: ts.Parser, tree: ts.Tree, src: []con
     return .{ .tree = again, .src = text, .inserts = ins };
 }
 
-pub fn apply(alloc: std.mem.Allocator, parser: ts.Parser, tree_in: ts.Tree, src_in: []const u8, name: []const u8) Lifted {
+pub fn apply(alloc: std.mem.Allocator, parser: ts.Parser, tree_in: ts.Tree, src_in: []const u8, name: []const u8, prior: []const Insert, braced: bool) Lifted {
     file_name = name;
     var t0 = std.time.Timer.start() catch return .{ .tree = tree_in, .src = src_in };
     defer ns += t0.read();
-    const bl = blocks(alloc, parser, tree_in, src_in);
+    // v0.56 (D68): a .haro file's definitions, matched to their `end` by the tokens, are given to the parser in braces
+    var tree0 = tree_in;
+    var src0 = src_in;
+    var pre: []const Insert = prior;
+    if (!braced and (isHaro(name) or (std.mem.eql(u8, name, "eval") and haro_root))) {
+        if (defBraces(alloc, parser, src_in, name)) |r| {
+            tree0.deinit();
+            tree0 = r.tree;
+            src0 = r.src;
+            pre = r.inserts;
+        }
+    }
+    const bl = blocks(alloc, parser, tree0, src0, pre);
     var tree = bl.tree;
     var src = bl.src;
     var ins = bl.inserts;

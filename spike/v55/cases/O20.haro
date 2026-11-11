@@ -4,3 +4,4 @@ func f
 	if true && true
 		? 1
 	end
+end

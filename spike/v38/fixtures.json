@@ -217,9 +217,9 @@
    "id": "B04",
    "kind": "run",
    "line": "B2",
-   "why": "a block with no `done` is refused",
+   "why": "a block with no `done` is refused -- v0.56: the block takes the function's end, so the program is refused naming the definition left without its end",
    "file": "cases/B04.haro",
-   "stdout": "before\n\nLine 4 Haro refused this statement (within or using without its block (D52) `within`, line 4 of B04.haro) and did not compile it -- running past it would give a wrong answer \nIn function f() in file B04.haro\n\nCalled from line 2 in file B04.haro ",
+   "stdout": "\nLine 3 Haro refused this statement (a definition ends with `end`, and this one has none; written `f`, line 3 of B04.haro) and did not compile it -- running past it would give a wrong answer \nin file B04.haro ",
    "exit": 1
   },
   {
@@ -260,9 +260,9 @@
    "id": "B07",
    "kind": "run",
    "line": "B2",
-   "why": "a bare word as the first statement of a try, its block unclosed, is refused as a block without its parts",
+   "why": "a bare word as the first statement of a try, its block unclosed, is refused as a block without its parts -- v0.56: the block takes the function's end, so the program is refused naming the definition left without its end",
    "file": "cases/B07.haro",
-   "stdout": "before\n\nLine 5 Haro refused this statement (within or using without its block (D52) `within`, line 5 of B07.haro) and did not compile it -- running past it would give a wrong answer \nIn function f() in file B07.haro\n\nCalled from line 2 in file B07.haro ",
+   "stdout": "\nLine 3 Haro refused this statement (a definition ends with `end`, and this one has none; written `f`, line 3 of B07.haro) and did not compile it -- running past it would give a wrong answer \nin file B07.haro ",
    "exit": 1
   },
   {

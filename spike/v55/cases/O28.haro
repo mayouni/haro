@@ -25,13 +25,17 @@ func f(iN)
 	catch
 		? "caught"
 	end
+end
 class P
 	nX = 1
+end
 class Q from P
-	func g
+	def g
 		oP = new P {
 			nX = 5
 			? ClassName(self)
 		}
 		? ClassName(this)  # this is the method's object
 		? oP.nX
+	end
+end
