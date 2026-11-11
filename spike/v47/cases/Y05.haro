@@ -2,5 +2,7 @@
 f()
 func f
 	nX = Word()
+end
 func Word
 	return "abc"
+end

@@ -7,3 +7,4 @@ func r
 	finally
 		? "finally once"
 	end
+end

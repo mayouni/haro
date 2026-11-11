@@ -5,3 +5,4 @@ func f
 		$nG = 1
 		? "body"
 	done
+end

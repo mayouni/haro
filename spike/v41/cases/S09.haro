@@ -2,3 +2,4 @@ f()
 func f
 	Eval("? :Name")
 	Eval("nA = 4  ? nA")
+end

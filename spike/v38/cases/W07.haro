@@ -9,3 +9,4 @@ end
 ? $tG
 func boom
 	Raise("no value")
+end

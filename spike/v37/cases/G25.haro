@@ -7,5 +7,7 @@ func g
 		? xF.Message()
 		? show(e)
 	end
+end
 func show(xX)
 	return xX.Message() + " from " + String(xX.Span()[:line])
+end

@@ -2,3 +2,4 @@
 f()
 func f
 	? true + 1
+end

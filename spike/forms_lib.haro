@@ -26,37 +26,37 @@
 
 func FormsFail(nLine, tMsg)
 	CtFailC(nLine, "FORMS", ["rule:forms"], tMsg)
-
+end
 func FormsKindByName(tName)
 	for i = 1 to Len($aCourtKinds)
 		if $aCourtKinds[i][2] = tName return $aCourtKinds[i] end
 	end
 	return null
-
+end
 func FormsIsUpper(tC)
 	return Ascii(tC) >= 65 and Ascii(tC) <= 90
-
+end
 func FormsIsVowel(tC)
 	return InStrListCs(Lower(tC), ["a", "e", "i", "o", "u"])
-
+end
 func InStrListCs(tS, aL)
 	for i = 1 to Len(aL)
 		if aL[i] = tS return true end
 	end
 	return false
-
+end
 func FormsEndsWith(tS, tSuf)
 	if Len(tSuf) = 0 return false end
 	if Len(tS) < Len(tSuf) return false end
 	return Right(tS, Len(tSuf)) = tSuf
-
+end
 func FormsSuffixOf(tKey)
 	aP = $aCourtFormset[5]
 	for i = 1 to Len(aP)
 		if aP[i][1] = tKey return aP[i][2] end
 	end
 	return ""
-
+end
 # the words a FAMILY may offer: every PARAMS key, and fluent / passive when declared
 func FormsOffered
 	aOut = []
@@ -67,7 +67,7 @@ func FormsOffered
 	if aF[2] != "" aOut + "fluent" end
 	if aF[3] != "" aOut + "passive" end
 	return aOut
-
+end
 # the FAMILY declarations of a sentence, as [name, base, offered words, line]
 func FormsFamilies(aDecls)
 	aOut = []
@@ -89,7 +89,7 @@ func FormsFamilies(aDecls)
 		aOut + [aD[2], tBase, aWords, aD[3]]
 	end
 	return aOut
-
+end
 # a collecting court has already refused this word on this line, through the menu that types
 # the seat: the FORMS pass is the second guard and says nothing twice (v0.14)
 func FormsAlreadySaid(nLine, tWord)
@@ -98,7 +98,7 @@ func FormsAlreadySaid(nLine, tWord)
 		if $aCourtFound[i][3] = nLine and $aCourtFound[i][1] = "FORMS" and SubStr($aCourtFound[i][4], "'" + tWord + "'") > 0 return true end
 	end
 	return false
-
+end
 # at check: a family offers only forms the FORMS declares, each once
 func FormsCheck(aDecls)
 	aFam = FormsFamilies(aDecls)
@@ -119,7 +119,7 @@ func FormsCheck(aDecls)
 			FormsFail(aFam[i][4], "FAMILY " + aFam[i][1] + " has no base verb")
 		end
 	end
-
+end
 # the passive inflection of a base verb: Replace -> Replaced, Spacify -> Spacified, Find -> Finded
 func FormsPassive(tBase)
 	tInf = $aCourtFormset[3]
@@ -132,7 +132,7 @@ func FormsPassive(tBase)
 		if not FormsIsVowel(tBase[nN - 1]) return Left(tBase, nN - 1) + "ied" end
 	end
 	return tBase + "ed"
-
+end
 # every member a family generates: each subset of its parameter forms, in the
 # order offered, as the plain name, then the fluent name, then the passive name
 func FormsMembers(tBase, aWords)
@@ -165,7 +165,7 @@ func FormsMembers(tBase, aWords)
 		if bPassive aOut + (FormsPassive(tBase) + tSuf) end
 	end
 	return aOut
-
+end
 func FormsPrintFamilies(aDecls)
 	aFam = FormsFamilies(aDecls)
 	for i = 1 to Len(aFam)
@@ -176,7 +176,7 @@ func FormsPrintFamilies(aDecls)
 		end
 	end
 	if Len(aFam) = 0 ? "no family declared" end
-
+end
 # a name split under the FORMS: [base, keys, fluent, statement, why]; why "" when it parses
 func FormsSplit(tName)
 	aF = $aCourtFormset
@@ -231,7 +231,7 @@ func FormsSplit(tName)
 		end
 	end
 	return [tRest, aKeys, bFluent, bStmt, ""]
-
+end
 # the plain twin of a fluent name: the name with the fluent form removed
 func FormsPlainTwin(aSplit)
 	tOut = aSplit[1]
@@ -240,7 +240,7 @@ func FormsPlainTwin(aSplit)
 	end
 	if aSplit[4] tOut += $aCourtFormset[4] end
 	return tOut
-
+end
 func FormsReadNames(tPath)
 	if not FExists(tPath) CtFail(1, "no names file at '" + tPath + "'") end
 	tText = Read(tPath)
@@ -257,13 +257,13 @@ func FormsReadNames(tPath)
 	end
 	FormsTakeName(aOut, tL)
 	return aOut
-
+end
 func FormsTakeName(aOut, tRaw)
 	tL = FormsTrim(tRaw)
 	if Len(tL) = 0 return end
 	if tL[1] = "#" return end
 	aOut + tL
-
+end
 func FormsTrim(tS)
 	nI = 1
 	nN = Len(tS)
@@ -280,7 +280,7 @@ func FormsTrim(tS)
 	end
 	if nJ < nI return "" end
 	return SubStr(tS, nI, nJ - nI + 1)
-
+end
 func FormsPrintSpellings(aDecls, aNames)
 	aFam = FormsFamilies(aDecls)
 	aMembers = []
@@ -342,3 +342,4 @@ func FormsPrintSpellings(aDecls, aNames)
 		end
 	end
 	? "spellings: " + String(nAgree) + " agree, " + String(nDis) + " disagree of " + String(Len(aNames)) + "; " + String(nMissing) + " declared members missing"
+end

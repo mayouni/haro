@@ -45,23 +45,23 @@ func ExInList(tS, aL)
 		if aL[i] = tS return true end
 	end
 	return false
-
+end
 func ExFail(tMsg)
 	Raise($tExprLang + ": " + tMsg)
-
+end
 # ---- character classes by byte code (HF-30) ----------------------------------
 
 func ExIsDigit(tC)
 	nN = Ascii(tC)
 	return (nN >= 48 and nN <= 57)
-
+end
 func ExIsAlpha(tC)
 	nN = Ascii(tC)
 	return (nN >= 97 and nN <= 122) or (nN >= 65 and nN <= 90)
-
+end
 func ExIsNameChar(tC)
 	return ExIsAlpha(tC) or ExIsDigit(tC) or tC = "_"
-
+end
 # ---- tokenizer: [type, text]; types: num str var ref flag fn and or not cmp op lparen rparen
 func ExTokenize(tS)
 	aT = []
@@ -162,26 +162,26 @@ func ExTokenize(tS)
 	end
 	aT + ["eof", ""]
 	return aT
-
+end
 func ExPeek
 	return $aExprToks[$nExprPos]
-
+end
 func ExTake
 	aT = $aExprToks[$nExprPos]
 	if aT[1] != "eof" $nExprPos++ end
 	return aT
-
+end
 # the menu word an operator token stands for, and whether the menu admits it
 func ExWantOperator(tMenuWord, tShown)
 	if not ExInList(tMenuWord, $aExprOperators)
 		ExFail("'" + tShown + "' is not an operator of " + $tExprLang + " (its menu: " + ExJoin($aExprOperators, ", ") + ")")
 	end
-
+end
 func ExWantOperand(tMenuWord, tShown)
 	if not ExInList(tMenuWord, $aExprOperands)
 		ExFail("'" + tShown + "' is not an operand of " + $tExprLang + " (its menu: " + ExJoin($aExprOperands, ", ") + ")")
 	end
-
+end
 func ExJoin(aL, tSep)
 	tOut = ""
 	for i = 1 to Len(aL)
@@ -189,7 +189,7 @@ func ExJoin(aL, tSep)
 		tOut += aL[i]
 	end
 	return tOut
-
+end
 # ---- parser: one function per grammar rule; nodes are lists --------------------
 #   ["num", n] ["str", s] ["var", name] ["ref", path] ["flag", 1|0]
 #   ["agg", kind, path] ["round", l] ["neg", l] ["arith", op, l, r]
@@ -206,7 +206,7 @@ func ExParse(tS, aAllowed)
 		ExFail("trailing input from '" + ExPeek()[2] + "'")
 	end
 	return aRoot
-
+end
 func ExPrimary
 	aT = ExPeek()
 	if aT[1] = "eof" ExFail("expression ends where a value was expected") end
@@ -271,7 +271,7 @@ func ExPrimary
 		return aInner
 	end
 	ExFail("unexpected '" + aT[2] + "'")
-
+end
 func ExUnary
 	aT = ExPeek()
 	if aT[1] = "op" and aT[2] = "-"
@@ -282,7 +282,7 @@ func ExUnary
 		return aNode
 	end
 	return ExPrimary()
-
+end
 func ExMul
 	aL = ExUnary()
 	while true
@@ -299,7 +299,7 @@ func ExMul
 		aL = aNode
 	end
 	return aL
-
+end
 func ExAdd
 	aL = ExMul()
 	while true
@@ -315,7 +315,7 @@ func ExAdd
 		aL = aNode
 	end
 	return aL
-
+end
 func ExComparison
 	aL = ExAdd()
 	aT = ExPeek()
@@ -331,7 +331,7 @@ func ExComparison
 		return aNode
 	end
 	return aL
-
+end
 func ExNot
 	aT = ExPeek()
 	if aT[1] = "not"
@@ -342,7 +342,7 @@ func ExNot
 		return aNode
 	end
 	return ExComparison()
-
+end
 func ExAnd
 	aL = ExNot()
 	while ExPeek()[1] = "and"
@@ -353,7 +353,7 @@ func ExAnd
 		aL = aNode
 	end
 	return aL
-
+end
 func ExOr
 	aL = ExAnd()
 	while ExPeek()[1] = "or"
@@ -364,36 +364,36 @@ func ExOr
 		aL = aNode
 	end
 	return aL
-
+end
 # ---- the record (v0.6): a JSON object, read by path ----------------------------
 # an object is [ExObjMark(), [key, value], ...]; JSON null is ExNullMark()
 
 func ExObjMark
 	return Char(1) + "obj"
-
+end
 func ExNullMark
 	return Char(1) + "null"
-
+end
 func ExIsObj(xV)
 	if not IsList(xV) return false end
 	if Len(xV) = 0 return false end
 	if not IsString(xV[1]) return false end
 	return xV[1] = ExObjMark()
-
+end
 func ExIsNull(xV)
 	if not IsString(xV) return false end
 	return xV = ExNullMark()
-
+end
 func ExObjGet(aObj, tKey)
 	for i = 2 to Len(aObj)
 		if aObj[i][1] = tKey return [true, aObj[i][2]] end
 	end
 	return [false, 0]
-
+end
 func ExSetRecord(aRecord)
 	$aExprRecord = aRecord
 	$aExprOverlay = []
-
+end
 func ExSplitPath(tPath)
 	aOut = []
 	tCur = ""
@@ -407,7 +407,7 @@ func ExSplitPath(tPath)
 	end
 	aOut + tCur
 	return aOut
-
+end
 # a reference, read first from the overlay (a FORMULA's results, by the name
 # as written) and then by path through the record: [found, value]
 func ExRefGet(tPath)
@@ -424,7 +424,7 @@ func ExRefGet(tPath)
 	end
 	if ExIsNull(aV) return [false, 0] end
 	return [true, aV]
-
+end
 # ---- numbers and texts under EQUALITY value (zql.zig's asNum and asStr) ------------
 
 # a value as a number: [ok, n] -- a number, a numeric text (digits, a point,
@@ -461,13 +461,13 @@ func ExNumOf(xV)
 	end
 	if nI <= nN return [false, 0] end
 	return [true, Number(xV)]
-
+end
 # a value as a number for arithmetic: what cannot be one is 0
 func ExNum(xV)
 	xA = ExNumOf(xV)
 	if xA[1] return xA[2] end
 	return 0
-
+end
 func ExStr(xV)
 	if IsNumber(xV) return ExNumText(xV) end
 	if IsString(xV)
@@ -475,7 +475,7 @@ func ExStr(xV)
 		return xV
 	end
 	return ""
-
+end
 # byte order of two texts, -1 0 1, by hand: Ring's own < on two strings is R41 (HF-30)
 func ExStrOrder(xA, xB)
 	nN = Len(xA)
@@ -489,11 +489,11 @@ func ExStrOrder(xA, xB)
 	if Len(xA) < Len(xB) return -1 end
 	if Len(xA) > Len(xB) return 1 end
 	return 0
-
+end
 func ExContains(tHay, tNeedle)
 	if Len(tNeedle) = 0 return true end
 	return SubStr(Lower(tHay), Lower(tNeedle)) > 0
-
+end
 # ---- evaluator: env is [[name, value], ...]; a comparison answers 1 or 0 --------
 
 func ExTruthy(xV)
@@ -503,13 +503,13 @@ func ExTruthy(xV)
 	if IsString(xV) return true end
 	if IsList(xV) return true end
 	return false
-
+end
 func ExEnvGet(aEnv, tName)
 	for i = 1 to Len(aEnv)
 		if aEnv[i][1] = tName return aEnv[i][2] end
 	end
 	return 0
-
+end
 func ExEval(aNode, aEnv)
 	tK = aNode[1]
 	if tK = "num" or tK = "str" or tK = "flag" return aNode[2] end
@@ -591,20 +591,20 @@ func ExEval(aNode, aEnv)
 		return 0
 	end
 	ExFail("internal -- unknown node kind " + tK)
-
+end
 # a condition's truth (v0.6/v0.7, zql.zig evalExpr): a comparison, and, or,
 # not and a flag have a truth; an arithmetic node, a reference or a text has
 # none and reads false -- `WHERE amount` matches nothing
 func ExIsCondition(aNode)
 	tK = aNode[1]
 	return tK = "cmp" or tK = "and" or tK = "or" or tK = "not" or tK = "flag"
-
+end
 # a condition's truth under the declared EQUALITY: value (zql) -- a boolean
 # shape or nothing; kind (W) -- the value's own truth (v0.9)
 func ExCondition(aNode, aEnv)
 	if $tExprEquality = "value" return ExBool(aNode, aEnv) end
 	return ExTruthy(ExEval(aNode, aEnv))
-
+end
 func ExBool(aNode, aEnv)
 	tK = aNode[1]
 	if tK = "cmp" return ExTruthy(ExEval(aNode, aEnv)) end
@@ -622,14 +622,14 @@ func ExBool(aNode, aEnv)
 		return ExBool(aNode[3], aEnv)
 	end
 	return false
-
+end
 # equality by value and by kind: a number and a string are never equal (W's
 # rule on the Luau host), whatever the host's own = would say
 func ExSame(xA, xB)
 	if IsNumber(xA) and IsNumber(xB) return xA = xB end
 	if IsString(xA) and IsString(xB) return xA = xB end
 	return false
-
+end
 # EQUALITY value: numeric when both sides can be numbers, by text otherwise
 # (zql.zig's compareOperands, zql.js's _compare)
 func ExCompareValue(xOp, xA, xB)
@@ -652,12 +652,12 @@ func ExCompareValue(xOp, xA, xB)
 	if xOp = "<" return xN < 0 end
 	if xOp = ">=" return xN >= 0 end
 	return xN <= 0
-
+end
 # ROUND: half away from zero, as C's round() and zql.zig's @round
 func ExRound(xX)
 	if xX >= 0 return Floor(xX + 0.5) end
 	return -Floor(-xX + 0.5)
-
+end
 # an aggregate over the list a path names: the numeric items count, a path
 # that names no list answers 0 (zql.zig's resolveCtx .agg)
 func ExAggregate(tKind, tPath)
@@ -689,7 +689,7 @@ func ExAggregate(tKind, tPath)
 	if tKind = "max" return nMax end
 	if nCount = 0 return 0 end
 	return nSum / nCount
-
+end
 # ---- the seats -------------------------------------------------------------------
 
 # the variables a seat admits: its CONTEXTS entry, or every VARIABLE when the
@@ -700,14 +700,14 @@ func ExAllowedIn(tSeat)
 		if $aExprContexts[i][1] = tSeat return $aExprContexts[i][2] end
 	end
 	ExFail("no seat '" + tSeat + "' in " + $tExprLang + " (its seats: " + ExJoin(ExSeatNames(), ", ") + ")")
-
+end
 func ExSeatNames
 	aN = []
 	for i = 1 to Len($aExprContexts)
 		aN + $aExprContexts[i][1]
 	end
 	return aN
-
+end
 # ---- JSON, the harness's exchange form ---------------------------------------------
 
 func ExNumText(nN)
@@ -719,7 +719,7 @@ func ExNumText(nN)
 		if tS[Len(tS)] = "." tS = Left(tS, Len(tS) - 1) end
 	end
 	return tS
-
+end
 func ExJson(xV)
 	if IsNumber(xV) return ExNumText(xV) end
 	if IsString(xV)
@@ -743,7 +743,7 @@ func ExJson(xV)
 		return tOut + "]"
 	end
 	return "null"
-
+end
 # a small reader: numbers, strings, lists, objects, true/false/null;
 # $aExprToks/$nExprPos reused as the cursor
 func ExJsonParse(tS)
@@ -753,12 +753,12 @@ func ExJsonParse(tS)
 	ExJsonWs()
 	if $nExprPos <= Len(tS) ExFail("input: trailing text at " + $nExprPos) end
 	return xV
-
+end
 func ExJsonWs
 	while $nExprPos <= Len($aExprToks) and ($aExprToks[$nExprPos] = " " or $aExprToks[$nExprPos] = Char(9) or $aExprToks[$nExprPos] = Char(10) or $aExprToks[$nExprPos] = Char(13))
 		$nExprPos++
 	end
-
+end
 func ExJsonString
 	tS = $aExprToks
 	nJ = $nExprPos + 1
@@ -769,7 +769,7 @@ func ExJsonString
 	tV = SubStr(tS, $nExprPos + 1, nJ - $nExprPos - 1)
 	$nExprPos = nJ + 1
 	return tV
-
+end
 func ExJsonValue
 	ExJsonWs()
 	tS = $aExprToks
@@ -856,7 +856,7 @@ func ExJsonValue
 	nV = Number(SubStr(tS, $nExprPos, nJ - $nExprPos))
 	$nExprPos = nJ
 	return nV
-
+end
 # ---- the command: check <seat> "<expr>" | eval <seat> "<expr>" [input] [init] ------
 
 func ExRun(tSeat, tExpr, aInput, xInit, bHasInit)
@@ -932,7 +932,7 @@ func ExRun(tSeat, tExpr, aInput, xInit, bHasInit)
 	# a seat the declaration names and this harness has no operation for:
 	# judged, and evaluated once with no variable bound
 	return ExEval(aAst, [])
-
+end
 func ExMain
 	if Len(sysargv) < 5
 		? "usage: <court>.haro check <seat> <expr> | eval <seat> <expr> [input] [init]"
@@ -961,3 +961,4 @@ func ExMain
 	catch
 		? "refused: " + cCatchError
 	end
+end

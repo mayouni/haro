@@ -4,3 +4,4 @@ func f
 	within $nNever = 1
 		? "body ran"
 	end
+end

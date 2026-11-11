@@ -3,5 +3,7 @@ Serve($cHost, 80)
 Other("0.0.0.0")
 func Serve(cHost, nPort)
 	return 0
+end
 func Other(c)
 	return 0
+end

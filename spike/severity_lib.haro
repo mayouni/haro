@@ -19,7 +19,7 @@ func SevSeatIs(aKind, tSeat)
 		if aKind[7][i][1] = tSeat return aKind[7][i][2] end
 	end
 	return ""
-
+end
 # a reference clause of a seat held at warning: each element that resolves to nothing is spoken, one warning per element, in the order
 # written -- where the refusal stops at the first, a warning has no reason to
 func SevWarnClause(aDecl, aSeat, aClause)
@@ -32,13 +32,13 @@ func SevWarnClause(aDecl, aSeat, aClause)
 	else
 		SevWarnOne(aDecl, aSeat, aClause)
 	end
-
+end
 func SevWarnOne(aDecl, aSeat, aClause)
 	CtSetCode("PARSE", [])
 	tWhy = CtCheckSeatValue(aDecl, aSeat, aClause, true)
 	if tWhy != "" $aCourtWarnings + [$tCourtCode, $aCourtCites, aClause[2], tWhy] end
 	CtSetCode("PARSE", [])
-
+end
 # a NAMED kind held at warning: its declaration is read past -- the name, AS, a body whose parentheses balance, RATIONALE and its string --
 # and said in the NAMED words, with the refusal's code and cites. 1 when read past; 0 leaves the refusal to the court. What is read past is
 # not declared: it counts nowhere and a reference to it resolves to nothing
@@ -73,3 +73,4 @@ func SevSkipNamed(aRow, aK)
 	CtExpect("string", "the RATIONALE string")
 	$aCourtWarnings + [aCC[1], aCC[2], aK[3], tNamed]
 	return true
+end

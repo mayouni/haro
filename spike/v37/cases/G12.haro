@@ -5,6 +5,8 @@ func h
 	catch e
 		? e.Span()[:line]
 	end
+end
 func deep
 	aL = []
 	? aL[1]
+end

@@ -3,3 +3,4 @@ f()
 func f
 	within $nG = 1
 		? "body"
+end

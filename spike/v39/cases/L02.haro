@@ -6,3 +6,4 @@ func f
 		c = 1
 	end
 	? cCatchError
+end

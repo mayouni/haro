@@ -4,3 +4,4 @@ if HaroOne()
 end
 func HaroOne
 	return 1
+end

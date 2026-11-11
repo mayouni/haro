@@ -3,6 +3,9 @@ f()
 func f
 	oO = new Point
 	? oO.getx()
+end
 class Point
-	func GetX
+	def GetX
 		return 3
+	end
+end

@@ -2,3 +2,4 @@ f()
 func f
 	bReady = 2 > 1
 	? "ready: " + String(bReady)
+end

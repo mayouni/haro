@@ -4,3 +4,4 @@ func f
 	within $g = cCatchError
 		? $g
 	end
+end

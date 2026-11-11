@@ -21,20 +21,20 @@ func CondIsBareWord(tV)
 		if not CondIsWordChar(tV[i]) return false end
 	end
 	return true
-
+end
 # a value: a number, or a bare word where a bare word is a value (the right of = and != and a quantifier's named, and after contains), else quoted
 func CondPrintVal(tV, bBare)
 	if CondIsNumberText(tV) return tV end
 	if bBare and CondIsBareWord(tV) and tV != "this" and tV != "self" return tV end
 	return "'" + tV + "'"
-
+end
 func CondPrintRight(aR, bBare)
 	if aR[1] = "path" return CondPathText(aR) end
 	return CondPrintVal(aR[2], bBare)
-
+end
 func CondPrint(aAst)
 	return CondPrintP(aAst, 0)
-
+end
 # nCtx is the precedence the context needs: or 1, and 2, not 3, an atom 4; a node of lower precedence is parenthesised
 func CondPrintP(aAst, nCtx)
 	xK = aAst[1]
@@ -70,7 +70,7 @@ func CondPrintP(aAst, nCtx)
 	if xK = "refd" return CondPathText(aAst[2]) + " referenced" end
 	if xK = "keyed" return CondPathText(aAst[2]) + " keyed_by " + CondPrintRight(aAst[3], false) end
 	Raise("condition: no printing for a node of kind '" + xK + "'")
-
+end
 # a parsed condition as one line, every string length-free and quoted: two conditions are one when their dumps are
 func CondDump(xX)
 	if IsNull(xX) return "NULL" end
@@ -81,7 +81,7 @@ func CondDump(xX)
 		tOut += CondDump(xX[i])
 	end
 	return tOut + "]"
-
+end
 # ---- the kinds that include a FORM ---------------------------------------------------------------------------------------------
 
 # [[form, [kind, ...]], ...] in the order the kinds are declared; only a FORM some kind includes is in it (a name that is no FORM is a finding of INCLUDES, and the language is refused)
@@ -101,19 +101,19 @@ func StzuFormTable(aDecls)
 		end
 	end
 	return aTab
-
+end
 func StzuFormAt(aTab, tName)
 	for i = 1 to Len(aTab)
 		if aTab[i][1] = tName return i end
 	end
 	return 0
-
+end
 # ---- INCLUDES -----------------------------------------------------------------------------------------------------------------
 
 func StzuSeatSource(tForm)
 	if tForm = "" return "its own SEATS" end
 	return "the FORM '" + tForm + "'"
-
+end
 # each declaration that includes FORMs gets the seats of the FORMs first, then its own; a refusal marks the declaration unresolved
 func StzuExpandIncludes(aDecls, aForms, aDeclared)
 	for i = 1 to Len(aDecls)
@@ -162,7 +162,7 @@ func StzuExpandIncludes(aDecls, aForms, aDeclared)
 		end
 	end
 	return aDecls
-
+end
 # ---- a quantifier over a FORM, and ON a FORM -----------------------------------------------------------------------------------
 
 # the fold of one node per kind: or (and, for all) in the order the kinds are declared
@@ -173,7 +173,7 @@ func StzuFoldNodes(tOp, aNodes)
 		aR = aN
 	end
 	return aR
-
+end
 func StzuFormAst(aAst, tOn, aTab, aDecls)
 	xK = aAst[1]
 	if xK = "or" or xK = "and"
@@ -227,7 +227,7 @@ func StzuFormAst(aAst, tOn, aTab, aDecls)
 		return aQ
 	end
 	return aAst
-
+end
 # a condition as written, or its expansion in the canonical text when it quantifies over a FORM some kind includes
 func StzuExpandCond(tCond, tOn, aTab, aDecls)
 	if Len(aTab) = 0 return tCond end
@@ -244,13 +244,13 @@ func StzuExpandCond(tCond, tOn, aTab, aDecls)
 	aNew = StzuFormAst(aAst, tOn, aTab, aDecls)
 	if not $bFormChanged return tCond end
 	return CondPrint(aNew)
-
+end
 func StzuNameIn(tName, aRecs)
 	for i = 1 to Len(aRecs)
 		if aRecs[i][1] = tName return true end
 	end
 	return false
-
+end
 # the CONSTRAINTs, each ON a FORM made once for each including kind, every condition expanded
 func StzuExpandConstraints(aCons, aTab, aDecls, aDeclared)
 	if Len(aTab) = 0 return aCons end
@@ -319,7 +319,7 @@ func StzuExpandConstraints(aCons, aTab, aDecls, aDeclared)
 		end
 	end
 	return aOut
-
+end
 # the VIEWs' WHERE, [name, on, one, named, where, line]
 func StzuExpandViews(aViews, aTab, aDecls)
 	if Len(aTab) = 0 return aViews end
@@ -329,3 +329,4 @@ func StzuExpandViews(aViews, aTab, aDecls)
 		end
 	end
 	return aViews
+end

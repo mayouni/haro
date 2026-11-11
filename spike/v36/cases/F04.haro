@@ -9,3 +9,4 @@ func f
 		nN = 2
 	end
 	return 99
+end

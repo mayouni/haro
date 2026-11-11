@@ -15,7 +15,10 @@ func f
 	catch e
 		? "caught: " + e
 	end
+end
 func make
 	return new Plain
+end
 class Plain
 	nX = 1
+end

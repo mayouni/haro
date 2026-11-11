@@ -2,3 +2,4 @@ f("ab", 2)
 func f(ptSubStr, piAt)
 	? ptSubStr
 	? piAt + 1
+end

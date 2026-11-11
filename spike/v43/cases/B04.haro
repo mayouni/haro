@@ -5,3 +5,4 @@ func f
 	if nCount
 		? "some"
 	end
+end

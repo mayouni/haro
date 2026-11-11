@@ -11,3 +11,4 @@ func g
 	catch e2
 		? e2
 	end
+end

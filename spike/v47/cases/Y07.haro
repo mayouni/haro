@@ -11,3 +11,4 @@ func f
 	catch e
 		? e.Message()
 	end
+end

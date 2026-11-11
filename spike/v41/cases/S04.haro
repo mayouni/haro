@@ -4,3 +4,4 @@ func f
 	? :name
 	xX = :Name
 	? xX = "Name"
+end

@@ -55,7 +55,7 @@ func PatSplit1(tLine)
 	end
 	if nI > nN return [tLine, ""] end
 	return [Left(tLine, nI - 1), SubStr(tLine, nI + 1)]
-
+end
 func PatWords(tText)
 	aOut = []
 	tW = ""
@@ -71,7 +71,7 @@ func PatWords(tText)
 	end
 	if Len(tW) > 0 aOut + tW end
 	return aOut
-
+end
 func PatCases(tBody)
 	aLines = Str2List(tBody)
 	tId = ""
@@ -126,7 +126,7 @@ func PatCases(tBody)
 		end
 	end
 	if bOpen PatOneCase(tId, aNames, aTexts, aSetN, aSetM, tStart, nInput, tInput, tFile) end
-
+end
 func PatOneCase(tId, aNames, aTexts, aSetN, aSetM, tStart, nInput, tInput, tFile)
 	try
 		PatDeclare(aNames, aTexts, aSetN, aSetM)
@@ -142,3 +142,4 @@ func PatOneCase(tId, aNames, aTexts, aSetN, aSetM, tStart, nInput, tInput, tFile
 	catch
 		? tId + " refused " + cCatchError
 	end
+end

@@ -4,9 +4,13 @@ func f
 	$tG = "a"
 	Eval("within $tG = " + Char(34) + "b" + Char(34) + nl + "? $tG" + nl + "end")
 	? $tG
+end
 class Res
 	tName = ""
-	func init(tN)
+	def init(tN)
 		tName = tN
-	func release
+	end
+	def release
 		? "release " + tName
+	end
+end

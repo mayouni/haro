@@ -6,3 +6,4 @@ func f
 	? (1 < 2) and (3 < 2)
 	? "a" = "a"
 	? Type(2 > 1)
+end

@@ -1,3 +1,4 @@
 f()
 func f
 	Eval("aNd = 4")
+end

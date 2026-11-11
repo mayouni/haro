@@ -6,3 +6,4 @@ func h
 	finally
 		? "cleanup"
 	end
+end

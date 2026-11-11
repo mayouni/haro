@@ -7,5 +7,7 @@ func f
 	catch e
 		? "caught " + e
 	end
+end
 func boom
 	Raise("no value")
+end

@@ -4,3 +4,4 @@ func f
 	vItems = null
 	iN = null
 	? IsNull(oDoc) and IsNull(vItems) and IsNull(iN)
+end

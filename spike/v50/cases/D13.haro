@@ -7,3 +7,4 @@ func main
 		see "got [" + tLine + "]" + nl
 	end
 	see "bye" + nl
+end

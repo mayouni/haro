@@ -3,3 +3,4 @@ f()
 func f
 	aNd = 1
 	? aNd
+end

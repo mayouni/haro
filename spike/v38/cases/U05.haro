@@ -8,6 +8,9 @@ func f
 		? "caught " + e
 		? "cause " + e.Cause()
 	end
+end
 class Bad
-	func release
+	def release
 		Raise("in release")
+	end
+end

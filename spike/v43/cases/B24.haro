@@ -4,3 +4,4 @@ func f
 	$nTwo = 2
 	? $nTwo = 2
 	? $nTwo = "2"
+end

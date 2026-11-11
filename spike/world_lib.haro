@@ -16,7 +16,7 @@ func CtSymbolByName(tName)
 		if $aCourtSymbols[i][1] = tName return $aCourtSymbols[i] end
 	end
 	return null
-
+end
 func CtWorldLoad(tPath)
 	if not FExists(tPath) CtFail(1, "no world artifact at '" + tPath + "'") end
 	aW = ExJsonParse(Read(tPath))
@@ -24,7 +24,7 @@ func CtWorldLoad(tPath)
 	aGot = ExObjGet(aW, "symbols")
 	if not aGot[1] CtFail(1, "'" + tPath + "' has no symbols table; it is not a C1 world") end
 	return aGot[2]
-
+end
 func CtWorldHas(aSymbols, tKind, tName)
 	for i = 1 to Len(aSymbols)
 		aK = ExObjGet(aSymbols[i], "kind")
@@ -34,7 +34,7 @@ func CtWorldHas(aSymbols, tKind, tName)
 		end
 	end
 	return false
-
+end
 # every SYMBOL seat of the sentence, as [decl, seat, value, line]
 func CtSymbolSites(aDecls)
 	aOut = []
@@ -51,7 +51,7 @@ func CtSymbolSites(aDecls)
 		end
 	end
 	return aOut
-
+end
 # C3 3.2: every SYMBOL seat resolves to its KIND in the world; the first that
 # does not is refused in the SYMBOL's own words
 func CtResolveWorld(aDecls)
@@ -77,7 +77,7 @@ func CtResolveWorld(aDecls)
 			CtNote(cCatchError)
 		end
 	end
-
+end
 # a SYMBOL's code (its CODE, else UNRESOLVED) and cites (its CITES, else rule:<name>)
 func CtSymbolCode(aSy)
 	tCode = "UNRESOLVED"
@@ -92,7 +92,7 @@ func CtSymbolCode(aSy)
 		end
 	end
 	return [tCode, aCites]
-
+end
 func CtWorldStem(tPath)
 	tName = tPath
 	for i = Len(tPath) to 1 step -1
@@ -107,7 +107,7 @@ func CtWorldStem(tPath)
 	end
 	if nN > 1 tName = Left(tName, nN - 1) end
 	return tName
-
+end
 # the sentence's own C1 rows: a symbol per declaration of a PUBLISH kind, a ref
 # per SYMBOL seat from the FIRST published declaration (the process) to the
 # symbol it names -- and nothing else: a court emits only what it can prove
@@ -138,3 +138,4 @@ func CtWorldRows(aDecls, tFile)
 		aRefs + aRow
 	end
 	return [ExObjMark(), ["world", CtWorldStem(tFile)], ["contract", "1.0"], ["symbols", aSymbols], ["refs", aRefs]]
+end

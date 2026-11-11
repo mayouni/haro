@@ -7,9 +7,13 @@ func f
 	catch e
 		? "caught " + e
 	end
+end
 class Res
 	tName = ""
-	func init(tN)
+	def init(tN)
 		tName = tN
-	func release
+	end
+	def release
 		? "release " + tName
+	end
+end

@@ -1,5 +1,7 @@
 f()
 func f
 	return len("abc")
+end
 func g
 	return f()
+end

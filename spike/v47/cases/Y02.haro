@@ -2,3 +2,4 @@
 f()
 func f
 	count = 3
+end

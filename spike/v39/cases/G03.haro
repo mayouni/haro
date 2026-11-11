@@ -10,3 +10,4 @@ func f
 	within $g = "c"
 		? $g
 	end
+end

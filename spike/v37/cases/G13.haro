@@ -9,3 +9,4 @@ func h
 	catch e
 		? e.Span()[:line]
 	end
+end

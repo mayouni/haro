@@ -5,3 +5,4 @@ func m
 	finally
 		return "from finally"
 	end
+end

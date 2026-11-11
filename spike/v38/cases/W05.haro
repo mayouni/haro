@@ -11,3 +11,4 @@ end
 func setG
 	$tG = "changed by callee"
 	Raise("from callee " + $tG)
+end

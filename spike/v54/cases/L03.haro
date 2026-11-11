@@ -2,3 +2,4 @@ f("ab")
 func f(ptS)
 	ptS = ptS + "!"
 	? ptS
+end

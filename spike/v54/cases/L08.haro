@@ -2,3 +2,4 @@
 f([1, "x"])
 func f(pviPos)
 	? Len(pviPos)
+end

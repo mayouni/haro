@@ -12,24 +12,38 @@ func f
 	using oD = new All
 		? "body d"
 	end
+end
 class OnlyClose
-	func close
+	def close
 		? "close"
+	end
+end
 class DestroyAndClose
-	func Close
+	def Close
 		? "close (wrong)"
-	func DESTROY
+	end
+	def DESTROY
 		? "destroy"
+	end
+end
 class Base
-	func release
+	def release
 		? "release (inherited)"
+	end
+end
 class Child from Base
-	func close
+	def close
 		? "close (wrong)"
+	end
+end
 class All
-	func close
+	def close
 		? "close (wrong)"
-	func destroy
+	end
+	def destroy
 		? "destroy (wrong)"
-	func Release
+	end
+	def Release
 		? "release"
+	end
+end

@@ -9,3 +9,4 @@ func h
 	finally
 		? "outer finally"
 	end
+end

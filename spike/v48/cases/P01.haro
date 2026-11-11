@@ -6,5 +6,8 @@ func f
 	? Upper("ab")
 	? Char(65)
 	? ParentClassName(new B)
+end
 class A
+end
 class B from A
+end

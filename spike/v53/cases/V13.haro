@@ -1,9 +1,12 @@
 oP = new P
 oP.Run()
 class P
-func Run
+def Run
 	if this.One()
 		? "one"
 	end
-func One
+end
+def One
 	return 1
+end
+end

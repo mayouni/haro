@@ -5,21 +5,22 @@
 
 func CtSymbolByName(tName)
 	return null
-
+end
 func CtSymbolSites(aDecls)
 	return []
-
+end
 func CtResolveWorld(aDecls)
 	return
-
+end
 func CtSymbolCode(aSy)
 	return ["UNRESOLVED", []]
-
+end
 func CtWorldStem(tPath)
 	return tPath
-
+end
 func CtWorldLoad(tPath)
 	CtFail(1, "this language declares no SYMBOL and no PUBLISH, so it has no world to read")
-
+end
 func CtWorldRows(aDecls, tFile)
 	CtFail(1, "this language declares no SYMBOL and no PUBLISH, so it publishes no world")
+end

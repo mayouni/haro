@@ -6,3 +6,4 @@ func f
 	catch
 		? "c"
 	end
+end

@@ -10,3 +10,4 @@ func k
 		? "finally"
 		Raise("from finally")
 	end
+end

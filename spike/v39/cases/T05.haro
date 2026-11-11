@@ -1,8 +1,11 @@
 f("1")
 func f(c)
 	if IsSafe(c) g(c) end
+end
 func g(c)
 	x = 0
 	eval("x = " + c)
+end
 func IsSafe(c)
 	return 1
+end

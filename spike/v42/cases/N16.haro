@@ -3,6 +3,9 @@ f()
 func f
 	oO = new App
 	xX = oO.See()
+end
 class App
-	func See
+	def See
 		return 1
+	end
+end

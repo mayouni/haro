@@ -4,7 +4,10 @@ func f
 	using xO = make()
 		? "body"
 	end
+end
 func make
 	return new Plain
+end
 class Plain
 	nX = 1
+end

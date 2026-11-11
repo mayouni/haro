@@ -3,3 +3,4 @@ f()
 func f
 	vItems = [1, 2]
 	? not vItems
+end

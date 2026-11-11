@@ -2,5 +2,7 @@
 f()
 func f
 	? twice(2)
+end
 func Twice(nN)
 	return nN * 2
+end

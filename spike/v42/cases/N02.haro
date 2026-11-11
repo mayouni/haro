@@ -3,3 +3,4 @@ f()
 func f
 	nClient = 1
 	? nclient
+end

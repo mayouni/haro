@@ -2,7 +2,10 @@
 f()
 func f
 	? Foo()
+end
 func Foo
 	return 1
+end
 func foo
 	return 2
+end

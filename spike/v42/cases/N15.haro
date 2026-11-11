@@ -3,5 +3,7 @@ oO = new App
 ? oO.GetX()
 class App
 	nX = 3
-	func GetX
+	def GetX
 		return nx
+	end
+end

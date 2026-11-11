@@ -4,3 +4,4 @@ func f
 	aNd = 1
 	oN = 2
 	? aNd + oN
+end

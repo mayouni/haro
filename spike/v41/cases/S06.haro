@@ -3,3 +3,4 @@ f()
 func f
 	aL = [:a = 1]
 	? Len(aL)
+end

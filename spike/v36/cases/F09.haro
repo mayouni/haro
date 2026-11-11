@@ -12,3 +12,4 @@ func w
 		end
 	end
 	? "after " + String(nN)
+end

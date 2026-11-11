@@ -6,3 +6,4 @@ func g
 	catch e
 		? e
 	end
+end

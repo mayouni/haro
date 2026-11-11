@@ -6,3 +6,4 @@ func f
 	if IsNull(null)
 		? "none"
 	end
+end

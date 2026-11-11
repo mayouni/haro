@@ -5,3 +5,4 @@ func f
 	within $tG = "b"
 		return "returned " + $tG
 	end
+end

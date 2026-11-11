@@ -4,5 +4,7 @@ func f
 	using oO = new Plain
 		? "body"
 	end
+end
 class Plain
 	nX = 1
+end

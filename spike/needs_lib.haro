@@ -27,7 +27,7 @@ func NdOpens(aDoors, aD)
 		return aOut
 	end
 	return null
-
+end
 # a declaration whose OPENS seat lists a door the language does not NEED is refused
 func NdCheck(aDecls, aDoors)
 	for i = 1 to Len(aDecls)
@@ -55,7 +55,7 @@ func NdCheck(aDecls, aDoors)
 			end
 		end
 	end
-
+end
 # the world rows: each declaration of a kind that opens, with what it opens -- [] when it lists nothing
 func NdRows(aDecls, aDoors, tFile)
 	aRows = []
@@ -66,3 +66,4 @@ func NdRows(aDecls, aDoors, tFile)
 		aRows + [ExObjMark(), ["verb", aD[1]], ["name", aD[2]], ["opens", aO], ["span", [ExObjMark(), ["file", tFile], ["line", aD[3]]]]]
 	end
 	return aRows
+end

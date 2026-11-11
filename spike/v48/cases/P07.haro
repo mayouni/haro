@@ -1,6 +1,7 @@
 f()
 func f
 	? Max([3, 9, 2])
+end
 func Max(aL)
 	nBest = aL[1]
 	for x in aL
@@ -9,3 +10,4 @@ func Max(aL)
 		end
 	end
 	return nBest
+end

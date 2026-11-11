@@ -6,9 +6,13 @@ func f
 	finally
 		StzEngineCacheDestroy(nH)
 	end
+end
 func StzEngineCacheCreate(n)
 	return 1
+end
 func StzEngineCacheDestroy(n)
 	return 0
+end
 func use(n)
 	return 0
+end

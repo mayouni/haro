@@ -6,3 +6,4 @@ func nest(nN)
 		? "depth " + String($xDepth)
 		if nN > 1 nest(nN - 1) end
 	end
+end

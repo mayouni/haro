@@ -10,3 +10,4 @@ func d
 			? "finally " + String(nN)
 		end
 	again nN < 3
+end

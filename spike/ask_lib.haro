@@ -31,7 +31,7 @@
 
 func AskIsSpace(tC)
 	return tC = " " or tC = Char(9) or tC = Char(13) or tC = Char(10)
-
+end
 # the word starting at i is exactly cKw, bounded by the text's edges or spaces
 func AskWordAt(tQ, nI, tKw)
 	nN = Len(tKw)
@@ -40,7 +40,7 @@ func AskWordAt(tQ, nI, tKw)
 	if nI > 1 and not AskIsSpace(tQ[nI - 1]) return false end
 	if nI + nN <= Len(tQ) and not AskIsSpace(tQ[nI + nN]) return false end
 	return true
-
+end
 func AskTrim(tS)
 	nI = 1
 	nJ = Len(tS)
@@ -52,7 +52,7 @@ func AskTrim(tS)
 	end
 	if nJ < nI return "" end
 	return SubStr(tS, nI, nJ - nI + 1)
-
+end
 # the words of a text, split on spaces
 func AskWords(tS)
 	aW = []
@@ -67,31 +67,31 @@ func AskWords(tS)
 	end
 	if tCur != "" aW + tCur end
 	return aW
-
+end
 func AskIsName(tW)
 	if Len(tW) = 0 return false end
 	for i = 1 to Len(tW)
 		if not (CtIsLowerish(tW[i]) or CtIsDigit(tW[i]) or tW[i] = "_") return false end
 	end
 	return true
-
+end
 func AskIsField(tW)
 	if Len(tW) = 0 return false end
 	for i = 1 to Len(tW)
 		if not (CtIsLowerish(tW[i]) or CtIsDigit(tW[i]) or tW[i] = "_" or tW[i] = ".") return false end
 	end
 	return true
-
+end
 func AskIsNumber(tW)
 	if Len(tW) = 0 return false end
 	for i = 1 to Len(tW)
 		if not CtIsDigit(tW[i]) return false end
 	end
 	return true
-
+end
 func AskFail(tMsg)
 	CtFail(1, tMsg)
-
+end
 # the parsed question: [from, where node or NULL, order field, descending, limit or -1]
 func AskParse(aDecls, tQ)
 	aAsk = $aCourtAsk
@@ -242,7 +242,7 @@ func AskParse(aDecls, tQ)
 	end
 	AskCheckFields(aDecls, aFromDecl, aWhere, tField)
 	return [tFrom, aWhere, tField, bDesc, nLim]
-
+end
 # v0.34 (COMPASS-KERN-03): the field names a question may use for a declaration, read from the schema the language declares (the ASK's FIELDS
 # seat.seat) -- the keys of that pair list in the declaration the first seat refers to, then the names the walk's steps COMPUTE into a record of
 # the declaration. [] when no schema is declared (the language has no FIELDS, or this declaration does not write the seat): a missing field is
@@ -291,7 +291,7 @@ func AskSchemaNames(aDecls, aFromDecl)
 		end
 	end
 	return aNames
-
+end
 # every field a condition names, in the order the text names them
 func AskRefsOf(aNode)
 	if not IsList(aNode) return false end
@@ -307,13 +307,13 @@ func AskRefsOf(aNode)
 	for i = 2 to Len(aNode)
 		AskRefsOf(aNode[i])
 	end
-
+end
 # the head of a dotted name: member.first names member
 func AskHead(tPath)
 	nDot = SubStr(tPath, ".")
 	if nDot = 0 return tPath end
 	return Left(tPath, nDot - 1)
-
+end
 func AskCheckFields(aDecls, aFromDecl, aWhere, tField)
 	aNames = AskSchemaNames(aDecls, aFromDecl)
 	if Len(aNames) = 0 return end
@@ -324,13 +324,13 @@ func AskCheckFields(aDecls, aFromDecl, aWhere, tField)
 		if not CtInList(AskHead(aRefs[i]), aNames) AskFieldFail("WHERE", AskHead(aRefs[i]), aFromDecl[2], aNames) end
 	end
 	if tField != "" and not CtInList(AskHead(tField), aNames) AskFieldFail("ORDER BY", AskHead(tField), aFromDecl[2], aNames) end
-
+end
 func AskFieldFail(tClause, tName, tDecl, aNames)
 	tOut = tClause + " names '" + tName + "', which " + tDecl + " does not declare (its fields: " + CtJoin(aNames, ", ") + ")"
 	tMsg = CtRefusalMessage("unknown_seat")
 	if tMsg != "" tOut += " -- " + tMsg end
 	AskFail(tOut)
-
+end
 # the order of two records on a field: -1, 0, 1 (zql.zig orderValues)
 func AskOrder(aA, aB, tField)
 	ExSetRecord(aA)
@@ -348,11 +348,11 @@ func AskOrder(aA, aB, tField)
 		return 0
 	end
 	return ExStrOrder(ExStr(xVa[2]), ExStr(xVb[2]))
-
+end
 # v0.16: what a question did, recorded as it ran and only when a narration asked: [event, [[key, text], ...]]
 func AskNote(tEvent, aVals)
 	$aAskTrace + [tEvent, aVals]
-
+end
 func AskRun(aDecls, tQ, aRows)
 	aQ = AskParse(aDecls, tQ)
 	if not IsList(aRows) or ExIsObj(aRows) AskFail("the rows are a JSON list of records") end
@@ -406,3 +406,4 @@ func AskRun(aDecls, tQ, aRows)
 	# v0.27: the rows themselves, not their JSON -- the voice renders them, redacted under its safeguard
 	if $bAskTrace AskNote("answer", [["count", String(Len(aOut))], ["rows", aOut]]) end
 	return aOut
+end

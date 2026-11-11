@@ -101,18 +101,18 @@ load "block_lib.haro"
 func CtIsDigit(tC)
 	nN = Ascii(tC)
 	return (nN >= 48 and nN <= 57)
-
+end
 func CtIsLowerish(tC)
 	nN = Ascii(tC)
 	return (nN >= 97 and nN <= 122) or nN = 95 or (nN >= 48 and nN <= 57)
-
+end
 func CtIsUpperish(tC)
 	nN = Ascii(tC)
 	return (nN >= 65 and nN <= 90) or nN = 95 or (nN >= 48 and nN <= 57)
-
+end
 func CtFail(nLine, tMsg)
 	Raise($tCourtLang + " (line " + String(nLine) + "): " + tMsg)
-
+end
 # v0.11: a refusal that enforces a provision of the declaration -- the pinned
 # instrument -- carries its code and its cites out through two globals the
 # `diagnose` verb reads; a parse-level refusal leaves them at PARSE and [],
@@ -120,7 +120,7 @@ func CtFail(nLine, tMsg)
 func CtFailC(nLine, tCode, aCites, tMsg)
 	CtSetCode(tCode, aCites)
 	CtFail(nLine, tMsg)
-
+end
 # v0.14: a collecting court. In collect mode a refusal that a pass meets at one
 # of its raising sites is NOTED and the pass goes on to its next element; out
 # of collect mode it is raised again, same string, same globals, so `check` is
@@ -130,13 +130,13 @@ func CtNote(tErr)
 	if not $bCourtCollect Raise(tErr) end
 	$aCourtFound + [$tCourtCode, $aCourtCites, CtLineOf(tErr), CtStripPrefix(tErr)]
 	CtSetCode("PARSE", [])
-
+end
 func CtIsBroken(nDecl)
 	for i = 1 to Len($aCourtBroken)
 		if $aCourtBroken[i] = nDecl return true end
 	end
 	return false
-
+end
 # the findings in the order of the file, ties in the order they were met
 func CtSortFound(aF)
 	aOut = []
@@ -152,7 +152,7 @@ func CtSortFound(aF)
 		Insert(aOut, nAt - 1, aF[i])
 	end
 	return aOut
-
+end
 func CtSetCode(tCode, aCites)
 	if tCode = "" tCode = "PARSE" end
 	$tCourtCode = tCode
@@ -161,7 +161,7 @@ func CtSetCode(tCode, aCites)
 	else
 		$aCourtCites = aCites
 	end
-
+end
 # a declaration kind's CODES entry for a seat, or ""
 func CtCodeFor(aKind, tSeat)
 	if Len(aKind) < 6 return "" end
@@ -169,14 +169,14 @@ func CtCodeFor(aKind, tSeat)
 		if aKind[6][i][1] = tSeat return aKind[6][i][2] end
 	end
 	return ""
-
+end
 # the code and cites of a refusal that a declaration element owns: the
 # element's CODE when it has one (cited as rule:<CODE>), else a default code
 # cited as rule:<element name>
 func CtElementCode(tOwn, tDefault, tName)
 	if tOwn != "" return [tOwn, ["rule:" + tOwn]] end
 	return [tDefault, ["rule:" + tName]]
-
+end
 # v0.28 (HARO-MENU-CITES-01): an element's code and cites, its declared CITES over the default -- the row's
 # nth element, present only when declared: the string "none" cites nothing, a list cites what it names
 func CtElementCites(tOwn, tDefault, tName, aRow, nN)
@@ -188,7 +188,7 @@ func CtElementCites(tOwn, tDefault, tName, aRow, nN)
 		aCC[2] = aRow[nN]
 	end
 	return aCC
-
+end
 # v0.23: whether the court's own language is under an article of its CONSTITUTION
 # (charter 2): the forged court carries ARTICLES in $aCourtConstitution, empty without one.
 # A refusal that enforces an article names it -- "[Art. N name]" -- and cites "article:N",
@@ -199,28 +199,28 @@ func CtUnderArticle(tName)
 		if $aCourtConstitution[i] = tName return true end
 	end
 	return false
-
+end
 # v0.24: whether a seat is the zone's sovereign or movement seat (organizational_sovereignty, 5):
 # the forged court carries [zone kind, sovereign seat, movement seat] in $aCourtZone, empty under none
 func CtZoneSeat(tKindName, tSeat)
 	if Len($aCourtZone) < 3 return false end
 	if tKindName != $aCourtZone[1] return false end
 	return (tSeat = $aCourtZone[2] or tSeat = $aCourtZone[3])
-
+end
 # v0.25: whether a point (kind.seat) is one of the constitution's PERSONAL seats
 func CtIsPersonal(tPoint)
 	for i = 1 to Len($aCourtPersonal)
 		if $aCourtPersonal[i] = tPoint return true end
 	end
 	return false
-
+end
 # v0.25: the warnings a court collected (a CONSTRAINT of SEVERITY warning), as C2 diagnostics
 func CtAppendWarnings(aDiags, tFile)
 	for i = 1 to Len($aCourtWarnings)
 		aW = $aCourtWarnings[i]
 		aDiags + [aW[1], "warning", aW[4], tFile, aW[3], aW[2]]
 	end
-
+end
 # v0.24: the audit chain of a sentence under visible_state (3): every refinement event, admitted
 # or refused, is one JSON line appended beside the sentence (<file>.audit), numbered in order --
 # no clock, so both runtimes write the same bytes; `audit <file>` answers the chain as a query.
@@ -248,14 +248,14 @@ func CtAuditWrite(tVerdict, tStage, tCode)
 	        ', "posture": ' + CtJson(aP[6]) + ', "verdict": ' + CtJson(tVerdict) + ', "stage": ' + CtJson(tStage) +
 	        ', "code": ' + CtJson(tCode) + '}'
 	Write($tCourtAuditFile, tOld + tLine + Char(10))
-
+end
 # a REFUSAL category's code, codes per NAMED word and cites
 func CtRefusalRow(tCategory)
 	for i = 1 to Len($aCourtRefusals)
 		if $aCourtRefusals[i][1] = tCategory return $aCourtRefusals[i] end
 	end
 	return null
-
+end
 func CtRefusalCode(tCategory, tWord, tDefault)
 	aR = CtRefusalRow(tCategory)
 	if IsNull(aR) return [tDefault, []] end
@@ -272,13 +272,13 @@ func CtRefusalCode(tCategory, tWord, tDefault)
 		if IsList(aR[6]) aCites = aR[6] end
 	end
 	return [tCode, aCites]
-
+end
 func CtInList(tS, aL)
 	for i = 1 to Len(aL)
 		if aL[i] = tS return true end
 	end
 	return false
-
+end
 func CtJoin(aL, tSep)
 	tOut = ""
 	for i = 1 to Len(aL)
@@ -286,7 +286,7 @@ func CtJoin(aL, tSep)
 		tOut += aL[i]
 	end
 	return tOut
-
+end
 # the declared refusal message of a category, or ""
 # v0.8: a refusal's NAMED word -- its own message, or ""
 func CtRefusalNamed(tCategory, tWord)
@@ -299,13 +299,13 @@ func CtRefusalNamed(tCategory, tWord)
 		end
 	end
 	return ""
-
+end
 func CtRefusalMessage(tCategory)
 	for i = 1 to Len($aCourtRefusals)
 		if $aCourtRefusals[i][1] = tCategory return $aCourtRefusals[i][2] end
 	end
 	return ""
-
+end
 # ---- v0.4: one court, several languages ------------------------------------------
 # The generated court carries $aCourtLangs, one record per language -- its own
 # first, then every language a SENTENCE names, recursively: [name, ext, kinds,
@@ -322,7 +322,7 @@ func CtDirOf(tPath)
 	end
 	if nN = 0 return "" end
 	return Left(tPath, nN - 1)
-
+end
 func CtReplace(tS, tOld, tNew)
 	tOut = ""
 	nI = 1
@@ -338,13 +338,13 @@ func CtReplace(tS, tOld, tNew)
 		end
 	end
 	return tOut
-
+end
 func CtLangEntry(tName)
 	for i = 1 to Len($aCourtLangs)
 		if $aCourtLangs[i][1] = tName return $aCourtLangs[i] end
 	end
 	return null
-
+end
 func CtUseLanguage(tName)
 	aE = CtLangEntry(tName)
 	if IsNull(aE) Raise("the court carries no language called '" + tName + "'") end
@@ -390,7 +390,7 @@ func CtUseLanguage(tName)
 	# v0.17: the UNDERSTAND [name, [[role, kind], ...]], or NULL -- a human language reaches closed questions (n_lib.haro)
 	$aCourtUnderstand = null
 	if Len(aE) >= 23 $aCourtUnderstand = aE[23] end
-
+end
 # the condition tables of every language the court carries, built once
 func CtBuildCondLangs
 	$aCondLangs = []
@@ -437,7 +437,7 @@ func CtBuildCondLangs
 		end
 		$aCondLangs + [aE[1], aDeclSeats, aE[11][1], aViews, aVerbOf, aEntry, aFormTable]
 	end
-
+end
 # the court's state, so a SENTENCE can be judged in its own language and the
 # judge returned to its own; $aCourtSentences and $aCondLangs are shared
 func CtSnapshot
@@ -447,7 +447,7 @@ func CtSnapshot
 	        $aCourtToks, $nCourtPos, $aCondDecls, $tCondLang, $tCondOther, $bCondUnread,
 	        $aCondFormats, $aCondToks, $nCondPos, $aCourtExprs, $aCourtWalks, $aCourtAsk, $aCourtRun,
 	        $aCourtSymbols, $aCourtWorldFile, $aCourtFormset, $aCourtNarrate, $aCourtUnderstand]
-
+end
 func CtRestore(aS)
 	$tCourtLang = aS[1]
 	$tCourtExt = aS[2]
@@ -483,7 +483,7 @@ func CtRestore(aS)
 	$aCourtFormset = aS[32]
 	$aCourtNarrate = aS[33]
 	$aCourtUnderstand = aS[34]
-
+end
 # ---- v0.11: the Diagnostic Contract (C2 v1.2.0) -------------------------------------
 # `diagnose <file> [world]` runs the same court and answers in the family's
 # machine form: one object carrying `diagnostics`, each a six-field envelope --
@@ -496,14 +496,14 @@ func CtStripPrefix(tMsg)
 	nN = SubStr(tMsg, "): ")
 	if nN > 0 return SubStr(tMsg, nN + 3) end
 	return tMsg
-
+end
 func CtLineOf(tMsg)
 	nAt = SubStr(tMsg, "(line ")
 	if nAt = 0 return 0 end
 	nEnd = SubStr(tMsg, "): ")
 	if nEnd <= nAt return 0 end
 	return Number(SubStr(tMsg, nAt + 6, nEnd - nAt - 6))
-
+end
 func CtDiagnosticJson(aD)
 	tC = '{"code": ' + CtJson(aD[1]) + ', "severity": ' + CtJson(aD[2]) + ', "message": ' + CtJson(aD[3])
 	tC += ', "span": {"file": ' + CtJson(aD[4]) + ', "line": ' + String(aD[5]) + '}, "cites": ['
@@ -513,7 +513,7 @@ func CtDiagnosticJson(aD)
 	end
 	tC += '], "language": ' + CtJson($tCourtLang) + '}'
 	return tC
-
+end
 func CtDiagnosticsJson(aDiags)
 	tC = '{"diagnostics": ['
 	for i = 1 to Len(aDiags)
@@ -521,7 +521,7 @@ func CtDiagnosticsJson(aDiags)
 		tC += CtDiagnosticJson(aDiags[i])
 	end
 	return tC + ']}'
-
+end
 func CtDiagnose(tFile, tWorldPath)
 	aDiags = []
 	tSrc = Read(tFile)
@@ -564,7 +564,7 @@ func CtDiagnose(tFile, tWorldPath)
 		end
 	end
 	return aDiags
-
+end
 # ---- v0.6: the EXPRESSION tables, handed to expr_lib.haro ----------------------
 
 func CtExprByName(tName)
@@ -572,7 +572,7 @@ func CtExprByName(tName)
 		if $aCourtExprs[i][1] = tName return $aCourtExprs[i] end
 	end
 	return null
-
+end
 func CtExprUse(aE)
 	$tExprLang = aE[1]
 	$aExprOperators = aE[2]
@@ -583,14 +583,14 @@ func CtExprUse(aE)
 	$tExprAbsent = aE[7]
 	$tExprDivision = aE[8]
 	$tExprEquality = aE[9]
-
+end
 # a SENTENCE seat type's record: [name, lang, message, refused]
 func CtSentenceKind(tName)
 	for i = 1 to Len($aCourtSentenceKinds)
 		if $aCourtSentenceKinds[i][1] = tName return $aCourtSentenceKinds[i] end
 	end
 	return null
-
+end
 # a kind's MESSAGES entry for a seat, or ""
 func CtMessageFor(aKind, tSeat)
 	if Len(aKind) < 5 return "" end
@@ -598,7 +598,7 @@ func CtMessageFor(aKind, tSeat)
 		if aKind[5][i][1] = tSeat return aKind[5][i][2] end
 	end
 	return ""
-
+end
 # judge the file a SENTENCE seat names, beside the file being judged, with
 # the language's own tables; keep its declarations, or refuse in the
 # sentence's own words
@@ -646,7 +646,7 @@ func CtJudgeSentence(aDecl, aSeat, aClause)
 		CtFailC(aDecl[3], "SENTENCE", [], CtFill(tMsg, aDecl, tRel))
 	end
 	$aCourtSentences + [$tCourtLang, aDecl[1], aDecl[2], aSeat[1], tRel, aInner, aSK[2]]
-
+end
 # ---- tokenizer: the Commons' lexical form, as harb's court reads it ---------
 # a token is [type, text, line]; types: string number ident keyword
 # lparen rparen lbracket rbracket comma eof
@@ -679,12 +679,12 @@ func CtTokenize(tSrc)
 		aOut + aT
 	end
 	return aOut
-
+end
 func CtFailChar(nLine, tC)
 	tMsgC = CtRefusalMessage("unexpected_character")
 	if tMsgC != "" tMsgC = " -- " + tMsgC end
 	CtFail(nLine, "The character '" + tC + "' is not part of the " + $tCourtLang + " grammar" + tMsgC)
-
+end
 # ---- the tables, read ---------------------------------------------------------
 
 func CtKindByVerb(tVerb)
@@ -692,20 +692,20 @@ func CtKindByVerb(tVerb)
 		if $aCourtKinds[i][1] = tVerb return $aCourtKinds[i] end
 	end
 	return null
-
+end
 func CtVerbs
 	aV = []
 	for i = 1 to Len($aCourtKinds)
 		aV + $aCourtKinds[i][1]
 	end
 	return aV
-
+end
 func CtFormByName(tName)
 	for i = 1 to Len($aCourtForms)
 		if $aCourtForms[i][1] = tName return $aCourtForms[i] end
 	end
 	return null
-
+end
 # a seat is [name, of, isList, optional, typeKind]; its clause name is the
 # seat's name in UPPER_SNAKE, and its value shape follows its type:
 #   text / a FORMAT -> string, name/flag/ref / a MENU / a DECLARATION -> word,
@@ -715,7 +715,7 @@ func CtFormByName(tName)
 func CtTypeKind(aSeat)
 	if Len(aSeat) >= 5 return aSeat[5] end
 	return "prim"
-
+end
 func CtIsPairForm(aFS)
 	# v0.27: a third, optional MENU seat is the mark, written after the value
 	if Len(aFS) != 2 and not CtHasMarkSeat(aFS) return false end
@@ -723,13 +723,13 @@ func CtIsPairForm(aFS)
 	tK1 = CtTypeKind(aFS[1])
 	if aFS[1][2] != "name" and tK1 != "menu" and tK1 != "decl" return false end
 	return true
-
+end
 # v0.27: the mark seat of a pair form -- third, optional, a MENU
 func CtHasMarkSeat(aFS)
 	if Len(aFS) != 3 return false end
 	if aFS[3][3] or not aFS[3][4] return false end
 	return CtTypeKind(aFS[3]) = "menu"
-
+end
 # v0.8: does a seat take part in the references pass -- a reference, a UNION
 # of declarations, or a pair list whose keys or values are references -- and
 # in the local pass -- everything else, and a pair list's menu keys and
@@ -741,7 +741,7 @@ func CtUnionHasDecls(tName)
 		if aU[2][i][3] = "decl" return true end
 	end
 	return false
-
+end
 func CtSeatPasses(aSeat)
 	tK = CtTypeKind(aSeat)
 	if tK = "decl" return [false, true] end
@@ -761,7 +761,7 @@ func CtSeatPasses(aSeat)
 		end
 	end
 	return [true, false]
-
+end
 func CtClauseShape(aSeat)
 	tOf = aSeat[2]
 	tK = CtTypeKind(aSeat)
@@ -784,31 +784,31 @@ func CtClauseShape(aSeat)
 	if tOf = "text" or tK = "format" return "string" end
 	if tOf = "number" or tK = "range" return "number" end
 	return "word"
-
+end
 func CtMenuByName(tName)
 	for i = 1 to Len($aCourtMenus)
 		if $aCourtMenus[i][1] = tName return $aCourtMenus[i] end
 	end
 	return null
-
+end
 func CtRangeByName(tName)
 	for i = 1 to Len($aCourtRanges)
 		if $aCourtRanges[i][1] = tName return $aCourtRanges[i] end
 	end
 	return null
-
+end
 func CtFormatByName(tName)
 	for i = 1 to Len($aCourtFormats)
 		if $aCourtFormats[i][1] = tName return $aCourtFormats[i] end
 	end
 	return null
-
+end
 func CtKindByDeclName(tName)
 	for i = 1 to Len($aCourtKinds)
 		if $aCourtKinds[i][2] = tName return $aCourtKinds[i] end
 	end
 	return null
-
+end
 # ---- v0.3: a UNION seat takes a value of one of several shapes -------------------
 # a union is [name, [[of, isList, typeKind], ...], message]
 
@@ -817,11 +817,11 @@ func CtUnionByName(tName)
 		if $aCourtUnions[i][1] = tName return $aCourtUnions[i] end
 	end
 	return null
-
+end
 # an alternative's value shape, as CtClauseShape gives a seat's
 func CtAltShape(aAlt)
 	return CtClauseShape([aAlt[1], aAlt[1], aAlt[2], 0, aAlt[3]])
-
+end
 # the alternative whose shape the written value has, or NULL; an empty list
 # fits either list shape
 func CtUnionAlt(aSeat, aClause)
@@ -839,7 +839,7 @@ func CtUnionAlt(aSeat, aClause)
 		if bEmpty and (tShape = "namelist" or tShape = "stringlist") return aAlts[i] end
 	end
 	return null
-
+end
 # the union's own MESSAGE speaks when the value fits no alternative
 func CtWantUnion(aDecl, aClause, aSeat)
 	if not IsNull(CtUnionAlt(aSeat, aClause)) return end
@@ -859,7 +859,7 @@ func CtWantUnion(aDecl, aClause, aSeat)
 	if Len(aU) >= 4 tOwn = aU[4] end
 	aCC = CtElementCites(tOwn, "UNION", aU[1], aU, 5)
 	CtFailC(aClause[2], aCC[1], aCC[2], CtFill(tMsg, aDecl, tV))
-
+end
 # {name}, {VERB}, {value}, {other}, {seat} and {decl.seat} in a declared message
 func CtFill(tMsg, aDecl, tValue)
 	tOut = ""
@@ -915,17 +915,17 @@ func CtFill(tMsg, aDecl, tValue)
 		end
 	end
 	return tOut
-
+end
 # ---- the shapes of a FORMAT -----------------------------------------------------
 
 func CtIsHexChar(tC)
 	nN = Ascii(tC)
 	return (nN >= 48 and nN <= 57) or (nN >= 97 and nN <= 102) or (nN >= 65 and nN <= 70)
-
+end
 func CtIsLabelChar(tC)
 	nN = Ascii(tC)
 	return (nN >= 97 and nN <= 122) or (nN >= 48 and nN <= 57) or nN = 45
-
+end
 func CtIsIpv4(tS)
 	aParts = CtSplit(tS, ".")
 	if Len(aParts) != 4 return false end
@@ -938,7 +938,7 @@ func CtIsIpv4(tS)
 		if Number(xP) > 255 return false end
 	end
 	return true
-
+end
 func CtSplit(tS, tSep)
 	aOut = []
 	tCur = ""
@@ -952,7 +952,7 @@ func CtSplit(tS, tSep)
 	end
 	aOut + tCur
 	return aOut
-
+end
 func CtIsLabel(tS)
 	if Len(tS) = 0 return false end
 	for i = 1 to Len(tS)
@@ -960,12 +960,12 @@ func CtIsLabel(tS)
 	end
 	if tS[1] = "-" or tS[Len(tS)] = "-" return false end
 	return true
-
+end
 # one definition of the shapes, in cond_lib.haro, since v0.3's `matches`
 # tests them inside a condition too
 func CtHasShape(tS, tShape)
 	return CondHasShape(tS, tShape)
-
+end
 func CtAllowedClauses(aKind)
 	aS = aKind[3]
 	aOut = []
@@ -973,35 +973,35 @@ func CtAllowedClauses(aKind)
 		aOut + Upper(aS[i][1])
 	end
 	return aOut
-
+end
 func CtSeatByClause(aKind, tClause)
 	aS = aKind[3]
 	for i = 1 to Len(aS)
 		if Upper(aS[i][1]) = tClause return aS[i] end
 	end
 	return null
-
+end
 # ---- parser ----------------------------------------------------------------
 
 func CtPeek
 	return $aCourtToks[$nCourtPos]
-
+end
 func CtNext
 	aT = $aCourtToks[$nCourtPos]
 	if aT[1] != "eof" $nCourtPos++ end
 	return aT
-
+end
 func CtShown(xT)
 	if xT[1] = "eof" return "end of file" end
 	return xT[2]
-
+end
 func CtExpect(tType, tWhat)
 	aT = CtNext()
 	if aT[1] != tType
 		CtFail(aT[3], "Expected " + tWhat + ", found '" + CtShown(aT) + "'")
 	end
 	return aT
-
+end
 # a value is [shape, payload, start, end]: word/string/number carry text;
 # namelist and stringlist carry a list; an empty list is [namelist, []];
 # start and end are the value's byte span in the source
@@ -1061,7 +1061,7 @@ func CtParseValue
 		return ["namelist", aNames, aT[4], nListEnd]
 	end
 	CtFail(aT[3], "Expected a clause value, found '" + CtShown(aT) + "'")
-
+end
 # one DEFINE <VERB> <name> AS ( clauses ) RATIONALE "..."
 # returns [verb, name, line, clauses, rationale]; a clause is [NAME, line, value]
 func CtParseDecl
@@ -1160,7 +1160,7 @@ func CtParseDecl
 	end
 	aRS = CtExpect("string", "the RATIONALE string")
 	return [aKind[1], aName[2], aName[3], aClauses, aRS[2]]
-
+end
 # ---- the structural court ---------------------------------------------------
 
 func CtWantShape(aDecl, aClause, tShape)
@@ -1182,7 +1182,7 @@ func CtWantShape(aDecl, aClause, tShape)
 		if tGot = "namelist" and Len(aClause[3][2]) = 0 return end
 		if tGot != "pairlist" CtFail(aClause[2], "Clause " + tName + " takes name: value pairs") end
 	end
-
+end
 # parse a whole source and judge what the declaration can judge; returns the
 # list of declarations
 func CtDeclare(tSrc)
@@ -1412,7 +1412,7 @@ func CtDeclare(tSrc)
 	# v0.10: the symbols resolve against the world, when one is handed in
 	if not IsNull($aCourtWorldFile) CtResolveWorld(aDecls) end
 	return aDecls
-
+end
 # the NAMES and the typed seat values of every declaration: bRefs false checks
 # the local types and skips the references, true the references alone
 func CtCheckValues(aDecls, bRefs)
@@ -1464,7 +1464,7 @@ func CtCheckValues(aDecls, bRefs)
 			end
 		end
 	end
-
+end
 # a declaration's name against its kind's NAMES (a MENU or a FORMAT); "" or why
 func CtCheckNamed(tNames, tName)
 	aM = CtMenuByName(tNames)
@@ -1490,7 +1490,7 @@ func CtCheckNamed(tNames, tName)
 		return CtFill(tMsg, null, tName)
 	end
 	return ""
-
+end
 # one scalar value against a seat's type (menu, range, format, reference); "" or why
 func CtCheckScalar(aDecl, aSeat, tValue)
 	tK = CtTypeKind(aSeat)
@@ -1576,7 +1576,7 @@ func CtCheckScalar(aDecl, aSeat, tValue)
 		return tOut + tArt5
 	end
 	return ""
-
+end
 # a clause's value against its seat: scalars directly, lists item by item; a
 # UNION seat is checked as the alternative whose shape the value has (v0.3)
 # v0.8: a word against a UNION of declarations -- it resolves to a declaration
@@ -1601,7 +1601,7 @@ func CtCheckUnionWord(aDecl, aSeat, tValue)
 	aCC = CtElementCites(tOwn, "UNION", aU[1], aU, 5)
 	CtSetCode(aCC[1], aCC[2])
 	return CtFill(tMsg, aDecl, tValue)
-
+end
 func CtCheckSeatValue(aDecl, aSeat, aClause, bRefs)
 	if CtTypeKind(aSeat) = "union" and not aSeat[3]
 		aAlt = CtUnionAlt(aSeat, aClause)
@@ -1721,7 +1721,7 @@ func CtCheckSeatValue(aDecl, aSeat, aClause, bRefs)
 		end
 	end
 	return ""
-
+end
 # ---- the printed verdict -----------------------------------------------------
 
 func CtPrintVerdict(aDecls)
@@ -1746,7 +1746,7 @@ func CtPrintVerdict(aDecls)
 	# v0.27: the fields the sentence marks personal or confidential, in the order written
 	aMk = CtMarkedFields(aDecls)
 	if Len(aMk) > 0 ? "personal " + CtJoin(aMk, ", ") end
-
+end
 # ---- v0.27: the marks and the safeguards -------------------------------------------
 # $aCourtMarks holds [kind, seat, markSeat] paths from the CONSTITUTION's three-part PERSONAL paths; a
 # field whose mark reads personal or confidential is a personal datum at the record level (stzFieldTags'
@@ -1776,13 +1776,13 @@ func CtMarkedFields(aDecls)
 		end
 	end
 	return aOut
-
+end
 func CtSafeguard(tPath)
 	for i = 1 to Len($aCourtSafeguards)
 		if $aCourtSafeguards[i][1] = tPath return $aCourtSafeguards[i][2] end
 	end
 	return ""
-
+end
 # a copy of the rows (JSON objects: the mark, then [key, value] pairs) with each marked field's value [personal]
 func CtRedactRows(aRows, aFields)
 	if Len(aFields) = 0 return aRows end
@@ -1800,7 +1800,7 @@ func CtRedactRows(aRows, aFields)
 		aOut + aRow
 	end
 	return aOut
-
+end
 # ---- the refinement gate ------------------------------------------------------
 # `<court>.ring refine <file> <file.rfn>`: one refinement, judged by the
 # five stages before it lands (charter section 6; stzRefinableCode.ring's
@@ -1825,7 +1825,7 @@ func CtJson(tS)
 		end
 	end
 	return '"' + tOut + '"'
-
+end
 func CtRecord(tCode, tMsg, tFile, nLine, aCites, tWhy, tTodo)
 	tC = ""
 	for i = 1 to Len(aCites)
@@ -1835,31 +1835,31 @@ func CtRecord(tCode, tMsg, tFile, nLine, aCites, tWhy, tTodo)
 	return '{"code": ' + CtJson(tCode) + ', "severity": "error", "message": ' + CtJson(tMsg) +
 	       ', "span": {"file": ' + CtJson(tFile) + ', "line": ' + String(nLine) + '}, "cites": [' + tC + ']' +
 	       ', "language": ' + CtJson($tCourtLang) + ', "why": ' + CtJson(tWhy) + ', "todo": ' + CtJson(tTodo) + '}'
-
+end
 func CtPostureRank(tP)
 	if tP = "trusted" return 3 end
 	if tP = "external" return 2 end
 	if tP = "sandboxed" return 1 end
 	if tP = "llm" return 0 end
 	return -1
-
+end
 # the refinement sentence's own tables (rfn.haro), read by the same parser
 func CtRfnKinds
 	return [ ["REFINE", "refinement", [ ["target", "text", false, false], ["kind", "name", false, false], ["from", "text", false, false],
 	          ["to", "text", false, false], ["author", "text", false, false], ["posture", "name", false, false], ["reason", "text", false, false] ]] ]
-
+end
 func CtClauseText(aDecl, tClause)
 	aC = aDecl[4]
 	for i = 1 to Len(aC)
 		if aC[i][1] = tClause return aC[i][3][2] end
 	end
 	return null
-
+end
 func CtRefuse(tStage, tCode, tMsg, tFile, nLine, aCites, tWhy, tTodo)
 	? $tCourtLang + " (line " + String(nLine) + "): " + tStage + ": " + tMsg
 	? CtRecord(tCode, tStage + ": " + tMsg, tFile, nLine, aCites, tWhy, tTodo)
 	CtAuditWrite("refused", tStage, tCode)
-
+end
 func CtRefine(tFile, tRfnFile)
 	tSrc = Read(tFile)
 	tRfn = Read(tRfnFile)
@@ -2080,7 +2080,7 @@ func CtRefine(tFile, tRfnFile)
 	if CtIsPersonal(tPointName) tShownA = "[personal] -> [personal]" end
 	? "admitted: " + tTarget + " " + tShownA + " [" + tPosture + "] (structural + constraint + derivation + governance + trust passed); inverse in " + tFile + ".revert.rfn"
 	CtAuditWrite("admitted", "", "")
-
+end
 # ---- v0.6: a sentence's expressions evaluated, and a WALK run ---------------------
 # `<court>.ring eval <file> <decl> <seat> <json>`: the expression in SEAT of the
 # declaration DECL, evaluated on the record, answers true or false.
@@ -2100,13 +2100,13 @@ func CtDeclNamed(aDecls, tName)
 		if aDecls[i][2] = tName return aDecls[i] end
 	end
 	return null
-
+end
 func CtWalkOf(tKindName)
 	for i = 1 to Len($aCourtWalks)
 		if $aCourtWalks[i][2] = tKindName return $aCourtWalks[i] end
 	end
 	return null
-
+end
 # the node of an expression seat, parsed under its language; NULL when the
 # clause is not written
 func CtExprNode(aDecl, tSeat)
@@ -2120,7 +2120,7 @@ func CtExprNode(aDecl, tSeat)
 	if IsNull(aE) Raise("the court carries no EXPRESSION called '" + aSeat[2] + "'") end
 	CtExprUse(aE)
 	return ExParse(tText, [])
-
+end
 func CtEval(aDecls, tDecl, tSeat, aRecord)
 	aD = CtDeclNamed(aDecls, tDecl)
 	if IsNull(aD) Raise("no declaration named '" + tDecl + "' in this file") end
@@ -2128,7 +2128,7 @@ func CtEval(aDecls, tDecl, tSeat, aRecord)
 	if IsNull(aNode) Raise(Upper(tSeat) + " is not written on " + aD[1] + " " + aD[2]) end
 	ExSetRecord(aRecord)
 	return ExBool(aNode, [])
-
+end
 # a guard of a step: [node, reason], or [NULL, ""] when the seat is not written
 func CtGuard(aDecls, aStep, tPath)
 	nDot = SubStr(tPath, ".")
@@ -2146,7 +2146,7 @@ func CtGuard(aDecls, aStep, tPath)
 	tReason = CondScalar(aTarget, "message")
 	if IsNull(tReason) tReason = Upper(tTail) + " of " + aTarget[1] + " " + aTarget[2] + " failed" end
 	return [aNode, tReason]
-
+end
 func CtWalk(aDecls, tName, aRecord)
 	aD = CtDeclNamed(aDecls, tName)
 	if IsNull(aD) Raise("no declaration named '" + tName + "' in this file") end
@@ -2212,7 +2212,7 @@ func CtWalk(aDecls, tName, aRecord)
 	end
 	aOut = [ExObjMark(), ["status", "complete"], ["computed", aComputed]]
 	return aOut
-
+end
 # the command: check <file> | refine <file> <file.rfn> | eval ... | walk ... | ask ...
 func CtMain
 	if Len(sysargv) < 4
@@ -2436,3 +2436,4 @@ func CtMain
 	else
 		? "unknown verb '" + tVerb + "'; this court answers: check, refine, eval, walk, ask, run, world, diagnose, family, spellings, narrate, narrate-run, narrate-ask, audit"
 	end
+end

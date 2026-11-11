@@ -60,41 +60,41 @@ load "form_expand.haro"
 
 func StzuOperators
 	return ["or", "and", "not", "cmp", "contains", "add", "sub", "mul", "div", "mod", "round", "neg"]
-
+end
 func StzuOperands
 	return ["number", "text", "flag", "ref", "var", "agg"]
-
+end
 func StzuAggregates
 	return ["sum", "count", "avg", "min", "max"]
-
+end
 func StzuPrimitives
 	return ["name", "text", "number", "flag", "ref"]
-
+end
 func StzuRefusalCategories
 	return ["unknown_verb", "unknown_declaration", "unknown_seat", "unknown_variable",
 	        "unterminated_string", "unexpected_character", "dangling_reference", "duplicate_name"]
-
+end
 func StzuShapes
 	return ["absolute_path", "ipv4", "cidr", "mac", "label", "domain", "hex64", "hex64_lower", "duration", "landmark", "deadline"]
-
+end
 func StzuRefinementKinds
 	return ["knob", "field", "symbol", "policy", "composite", "pipeline"]
-
+end
 func StzuPostures
 	return ["trusted", "external", "sandboxed", "llm"]
-
+end
 # v0.23: Zin's six articles, in Zin's order and numbering (zin constitution.zig:35-40; charter 2),
 # its eight weaves (ZIN_CONSTITUTIONAL_WEAVES.md) and its three severities -- the closed words of a
 # CONSTITUTION; the weaves and severities are carried here and judged at ZC4
 func StzuArticles
 	return ["explainability", "reversibility", "visible_state", "predictable_authority", "organizational_sovereignty", "trust_hierarchy"]
-
+end
 func StzuWeaves
 	return ["resilience", "observability", "sovereignty", "privacy", "temporal_integrity", "cost_awareness", "learnability", "structural_integrity"]
-
+end
 func StzuSeverities
 	return ["constitutional", "governance", "advisory"]
-
+end
 # kind -> list of [clause, shape]; shapes: string namelist seatlist number ident pointlist
 # (sorted by clause name, as Luau's table.sort gives, for the allowed-list text)
 func StzuClauses(tKind)
@@ -146,7 +146,7 @@ func StzuClauses(tKind)
 		return [["ALIAS", "namelist"], ["COUNTEREXAMPLE", "namelist"], ["EXAMPLE", "namelist"], ["FRAME", "namelist"], ["MEANING", "namelist"], ["STEP", "namelist"], ["SURFACE", "namelist"], ["TONGUE", "namelist"]]
 	end
 	return []
-
+end
 func StzuRequired(tKind)
 	if tKind = "LANGUAGE"
 		return ["VERSION", "GRAMMAR", "COURT", "EXTENSION"]
@@ -196,12 +196,12 @@ func StzuRequired(tKind)
 		return ["TONGUE", "MEANING", "ALIAS", "SURFACE", "STEP", "FRAME", "EXAMPLE", "COUNTEREXAMPLE"]
 	end
 	return []
-
+end
 func StzuIsKind(tWord)
 	return InStrList(tWord, ["LANGUAGE", "DECLARATION", "FORM", "EXPRESSION", "REFUSAL",
 	                         "MENU", "RANGE", "FORMAT", "CONSTRAINT", "WORLD", "REFINE", "UNION",
 	                         "SENTENCE", "VIEW", "WALK", "ASK", "RUN", "SYMBOL", "FORMS", "NARRATE", "UNDERSTAND", "CONSTITUTION", "PATTERN"])
-
+end
 # C2 2.1: a code is ^[A-Z][A-Z0-9]*([_-][A-Z0-9]+)*$ ; C2 2.5: a cite is
 # kind:value, kind in rule|article|right|pattern, value [A-Za-z0-9_.-]+ (v0.11)
 func StzuIsC2Code(tS)
@@ -220,7 +220,7 @@ func StzuIsC2Code(tS)
 		end
 	end
 	return not bSep
-
+end
 func StzuIsC2Cite(tS)
 	nN = SubStr(tS, ":")
 	if nN < 2 return false end
@@ -233,7 +233,7 @@ func StzuIsC2Cite(tS)
 		if not (IsUpperChar(tC) or IsLowerChar(tC) or IsDigitChar(tC) or tC = "_" or tC = "." or tC = "-") return false end
 	end
 	return true
-
+end
 # v0.16: the placeholders an event of a run or a question can fill, or a refusal naming why it cannot be told
 func StzuTellPlaceholders(tKey, aDeclarations, aRun, aAsk, tLName, nLine)
 	if tKey = "run" or tKey = "result"
@@ -267,7 +267,7 @@ func StzuTellPlaceholders(tKey, aDeclarations, aRun, aAsk, tLName, nLine)
 		aOk + aDecl[3][j][1]
 	end
 	return aOk
-
+end
 # v0.13: every {word} of a template names a placeholder the voice can fill, and every brace closes
 func StzuCheckTemplate(tT, aAllowed, nLine, tWhere)
 	nN = Len(tT)
@@ -290,7 +290,7 @@ func StzuCheckTemplate(tT, aAllowed, nLine, tWhere)
 		end
 		nI++
 	end
-
+end
 func StzuJoinWords(aL)
 	tOut = ""
 	for i = 1 to Len(aL)
@@ -298,7 +298,7 @@ func StzuJoinWords(aL)
 		tOut += aL[i]
 	end
 	return tOut
-
+end
 # v0.12: a suffix is letters, and no two roles spell the same one (the FF clash)
 func StzuWantSuffix(tS, nLine, tWhere)
 	if Len(tS) = 0 StzuFail(nLine, "'" + tS + "' on " + tWhere + " is not a suffix: a suffix is letters") end
@@ -307,19 +307,19 @@ func StzuWantSuffix(tS, nLine, tWhere)
 			StzuFail(nLine, "'" + tS + "' on " + tWhere + " is not a suffix: a suffix is letters")
 		end
 	end
-
+end
 func StzuWantOneMeaning(aSpelt, tRole, tSuffix, nLine)
 	for i = 1 to Len(aSpelt)
 		if aSpelt[i][2] = tSuffix
 			StzuFail(nLine, "'" + tSuffix + "' is spelt twice, as " + aSpelt[i][1] + " and as " + tRole + ": one meaning per suffix")
 		end
 	end
-
+end
 func StzuWantCode(tCode, nLine, tWhere)
 	if not StzuIsC2Code(tCode)
 		StzuFail(nLine, "'" + tCode + "' on " + tWhere + " is not a code in the Diagnostic Contract's format: an uppercase identifier, [A-Z][A-Z0-9]* with _ or - between parts")
 	end
-
+end
 # v0.28 (HARO-MENU-CITES-01): the word none cites nothing and passes; an empty list says nothing and is refused
 # by name -- the machine language's own idiom for EGRESS, a list or the word none, never an empty list
 func StzuWantCites(aCites, nLine, tWhere)
@@ -332,7 +332,7 @@ func StzuWantCites(aCites, nLine, tWhere)
 			StzuFail(nLine, "'" + aCites[i] + "' on " + tWhere + " is not a cite: kind:value with kind rule, article, right or pattern")
 		end
 	end
-
+end
 # v0.35: a SEVERITIES list -- each entry named once, each error or warning
 func StzuWantSeverities(aSv, tWhat)
 	for i = 1 to Len(aSv)
@@ -343,7 +343,7 @@ func StzuWantSeverities(aSv, tWhat)
 			StzuFail(aSv[i][3], "'" + aSv[i][2] + "' is not a SEVERITY of " + tWhat + ": error or warning")
 		end
 	end
-
+end
 # v0.35: a seat whose value is a reference the court resolves -- to a DECLARATION, a UNION holding one, a SYMBOL the world resolves, or a
 # list of pairs whose keys or values are references
 func StzuIsReferenceSeat(aSeat, aDeclared, aForms, aUnions)
@@ -367,7 +367,7 @@ func StzuIsReferenceSeat(aSeat, aDeclared, aForms, aUnions)
 		end
 	end
 	return false
-
+end
 func StzuCodesOf(aClauses, nLine, tWhere)
 	aCodes = []
 	if HasClause(aClauses, "CODES")
@@ -377,7 +377,7 @@ func StzuCodesOf(aClauses, nLine, tWhere)
 		end
 	end
 	return aCodes
-
+end
 func StzuCodeOf(aClauses, nLine, tWhere)
 	tCode = ""
 	if HasClause(aClauses, "CODE")
@@ -385,7 +385,7 @@ func StzuCodeOf(aClauses, nLine, tWhere)
 		StzuWantCode(tCode, nLine, tWhere)
 	end
 	return tCode
-
+end
 func StzuCitesOf(aClauses, nLine, tWhere)
 	aCites = []
 	if HasClause(aClauses, "CITES")
@@ -393,7 +393,7 @@ func StzuCitesOf(aClauses, nLine, tWhere)
 		StzuWantCites(aCites, nLine, tWhere)
 	end
 	return aCites
-
+end
 # the directory part of a path, "" when none (core Ring has no dirname)
 func StzuDirOf(tPath)
 	nN = 0
@@ -402,7 +402,7 @@ func StzuDirOf(tPath)
 	end
 	if nN = 0 return "" end
 	return Left(tPath, nN - 1)
-
+end
 # what a seat's type name resolves to in a language record:
 # prim form expr menu range format decl union sentence
 func StzuTypeKindOf(aLang, tOf)
@@ -426,7 +426,7 @@ func StzuTypeKindOf(aLang, tOf)
 		for i = 1 to Len(aL) if aL[i][1] = tOf return "symbol" end end
 	end
 	return "expr"
-
+end
 # the condition tables of a language record and of the languages its
 # SENTENCEs name (v0.4): one entry per language, [lang, declseats, onedecls,
 # views, verbof]
@@ -442,7 +442,7 @@ func StzuCondLangs(aLang, aViewEntries)
 		end
 	end
 	return aOut
-
+end
 func StzuCondLang(aLang, aViewEntries)
 	aDecls = LangGet(aLang, "declarations")
 	aSents = LangGet(aLang, "sentences")
@@ -487,7 +487,7 @@ func StzuCondLang(aLang, aViewEntries)
 		aFormTable + [aFm[i][1], aInfo]
 	end
 	return [LangGet(aLang, "name"), aDeclSeats, aOne, aViewEntries, aVerbOf, aEntry, aFormTable]
-
+end
 func StzuAllowedList(tKind)
 	aC = StzuClauses(tKind)
 	tOut = ""
@@ -496,14 +496,14 @@ func StzuAllowedList(tKind)
 		tOut += aC[i][1]
 	end
 	return tOut
-
+end
 func StzuClauseShape(tKind, tClause)
 	aC = StzuClauses(tKind)
 	for i = 1 to Len(aC)
 		if aC[i][1] = tClause return aC[i][2] end
 	end
 	return ""
-
+end
 # ---- small helpers ----------------------------------------------------------
 
 func InStrList(tS, aL)
@@ -511,7 +511,7 @@ func InStrList(tS, aL)
 		if aL[i] = tS return true end
 	end
 	return false
-
+end
 func StzuJoin(aL, tSep)
 	tOut = ""
 	for i = 1 to Len(aL)
@@ -519,28 +519,28 @@ func StzuJoin(aL, tSep)
 		tOut += aL[i]
 	end
 	return tOut
-
+end
 # character classes by byte code, never by string ordering (HF-30)
 func IsLowerStart(tC)
 	nN = Ascii(tC)
 	return (nN >= 97 and nN <= 122) or nN = 95
-
+end
 func IsLowerChar(tC)
 	nN = Ascii(tC)
 	return (nN >= 97 and nN <= 122) or nN = 95 or (nN >= 48 and nN <= 57)
-
+end
 func IsUpperStart(tC)
 	nN = Ascii(tC)
 	return (nN >= 65 and nN <= 90)
-
+end
 func IsUpperChar(tC)
 	nN = Ascii(tC)
 	return (nN >= 65 and nN <= 90) or nN = 95 or (nN >= 48 and nN <= 57)
-
+end
 func IsDigitChar(tC)
 	nN = Ascii(tC)
 	return (nN >= 48 and nN <= 57)
-
+end
 func IsUpperSnake(tW)
 	if Len(tW) = 0 return false end
 	if not IsUpperStart(tW[1]) return false end
@@ -548,11 +548,11 @@ func IsUpperSnake(tW)
 		if not IsUpperChar(tW[i]) return false end
 	end
 	return true
-
+end
 # v0.40: the closed catalog of nine (D51) -- the words Harobanda's machine file and stzlib's stzSystemCapabilities already use
 func StzuCapabilities
 	return ["filesystem", "process", "network", "environment", "dynamic_load", "gpio", "threads", "clock", "inference"]
-
+end
 func StzuCapabilityList
 	aC = StzuCapabilities()
 	tC = ""
@@ -561,17 +561,17 @@ func StzuCapabilityList
 		tC += aC[i]
 	end
 	return tC
-
+end
 # v0.40: the words of a MENU, or NULL when the name is not a MENU
 func StzuMenuWords(aMenus, tName)
 	for i = 1 to Len(aMenus)
 		if aMenus[i][1] = tName return aMenus[i][2] end
 	end
 	return null
-
+end
 func StzuFail(nLine, tMsg)
 	Raise("haro (line " + String(nLine) + "): " + tMsg)
-
+end
 # v0.15: a collecting meta-court. In collect mode a refusal met at one of the declaration loop's
 # or a whole-file pass's elements is NOTED and the run goes on to the next element; out of collect
 # mode it is raised again, same string, so every earlier verdict is unchanged to the byte. A
@@ -582,19 +582,19 @@ func StzuNote(tErr)
 	tMsg = StzuStripPrefix(tErr)
 	if StzuQuotesBroken(tMsg) return end
 	$aStzuFound + [StzuLineOf(tErr), tMsg]
-
+end
 func StzuStripPrefix(tMsg)
 	nN = SubStr(tMsg, "): ")
 	if nN > 0 return SubStr(tMsg, nN + 3) end
 	return tMsg
-
+end
 func StzuLineOf(tMsg)
 	nAt = SubStr(tMsg, "(line ")
 	if nAt = 0 return 0 end
 	nEnd = SubStr(tMsg, "): ")
 	if nEnd <= nAt return 0 end
 	return Number(SubStr(tMsg, nAt + 6, nEnd - nAt - 6))
-
+end
 # a seat typed by a declaration or a FORM whose own seat types did not resolve says nothing of its
 # own: what a check would make of it is an echo of the refusal already made. (A seat typed by a
 # declaration that did not READ needs no check of its own: that name is not declared, so the
@@ -604,19 +604,19 @@ func StzuSeatsTouchUnresolved(aSeats)
 		if InStrList(aSeats[i][2], $aStzuUnresolved) return true end
 	end
 	return false
-
+end
 func StzuIsUnresolved(tName)
 	for i = 1 to Len($aStzuUnresolved)
 		if $aStzuUnresolved[i] = tName return true end
 	end
 	return false
-
+end
 func StzuQuotesBroken(tMsg)
 	for i = 1 to Len($aStzuBroken)
 		if SubStr(tMsg, "'" + $aStzuBroken[i] + "'") > 0 return true end
 	end
 	return false
-
+end
 # after a declaration failed: when it failed in the PARSE, resume at the next DEFINE, and remember its
 # name as broken, so that what quotes it, or is typed by it, says nothing of its own -- those are its
 # consequences, not second defects. (Registering the name as declared would also have silenced the
@@ -643,7 +643,7 @@ func StzuBreak(bParsed, nStart, tErr)
 		end
 	end
 	if tName != "" $aStzuBroken + tName end
-
+end
 # the findings in the order of the file, ties in the order they were met
 func StzuSortFound(aF)
 	aOut = []
@@ -659,7 +659,7 @@ func StzuSortFound(aF)
 		Insert(aOut, nAt - 1, aF[i])
 	end
 	return aOut
-
+end
 # ---- tokenizer --------------------------------------------------------------
 # a token is [type, value, line]; types: string number ident keyword
 # lparen rparen lbracket rbracket comma colon question dot eof
@@ -683,31 +683,31 @@ func StzuTokenize(tSrc)
 		end
 	end
 	return BlkWithoutComments(aToks)
-
+end
 # ---- parser -----------------------------------------------------------------
 
 func StzuPeek
 	return $aStzuToks[$nStzuPos]
-
+end
 func StzuAdvance
 	aT = $aStzuToks[$nStzuPos]
 	$nStzuPos++
 	return aT
-
+end
 func StzuExpect(tType, tWhat)
 	aT = StzuPeek()
 	if aT[1] != tType
 		StzuFail(aT[3], "Expected " + tWhat + " but found '" + aT[2] + "'")
 	end
 	return StzuAdvance()
-
+end
 func StzuExpectKeyword(tV)
 	aT = StzuPeek()
 	if aT[1] != "keyword" or aT[2] != tV
 		StzuFail(aT[3], "Expected " + tV + " but found '" + aT[2] + "'")
 	end
 	StzuAdvance()
-
+end
 func StzuParseNameList
 	StzuExpect("lbracket", "'['")
 	aNames = []
@@ -723,7 +723,7 @@ func StzuParseNameList
 	end
 	StzuAdvance()
 	return aNames
-
+end
 # a seat is [name, of, isList, optional, line]
 func StzuParseSeatList
 	StzuExpect("lbracket", "'['")
@@ -758,7 +758,7 @@ func StzuParseSeatList
 	end
 	StzuAdvance()
 	return aSeats
-
+end
 # a point is [decl, seat, word, line]: [ decl.seat: word, ... ]
 func StzuParsePointList
 	StzuExpect("lbracket", "'['")
@@ -779,7 +779,7 @@ func StzuParsePointList
 	end
 	StzuAdvance()
 	return aPoints
-
+end
 # an alternative of a UNION is [type, isList, line]: [ a, [b], ... ]   (v0.3)
 func StzuParseTypeList
 	StzuExpect("lbracket", "'['")
@@ -804,7 +804,7 @@ func StzuParseTypeList
 	end
 	StzuAdvance()
 	return aTypes
-
+end
 # a context is [name, [variables], line]: [ seat: [a, b], ... ]   (v0.5)
 func StzuParseContextList
 	StzuExpect("lbracket", "'['")
@@ -823,7 +823,7 @@ func StzuParseContextList
 	end
 	StzuAdvance()
 	return aCtx
-
+end
 # a path is a dotted name as written, with its line: [ seat, ref.seat, ... ]   (v0.6)
 func StzuParsePathList
 	StzuExpect("lbracket", "'['")
@@ -846,7 +846,7 @@ func StzuParsePathList
 	end
 	StzuAdvance()
 	return aPaths
-
+end
 # v0.32: a rule, between brackets, as the pattern engine reads it (BLOCKS.md 4.3): the tokens between the matching brackets
 # rejoined into one line of C6. Comments are layout to the meta-court and go; a rule that holds both quote marks cannot ride in the
 # source of a court, so it is refused here
@@ -875,7 +875,7 @@ func StzuParseRule
 		StzuFail(aT0[3], "a rule that holds a double quote and a single quote cannot ride into a court: spell the string without the apostrophe")
 	end
 	return tOut
-
+end
 # v0.32: a seat named as declaration.seat
 func StzuParsePath(tClause)
 	aT1 = StzuExpect("ident", "a declaration name")
@@ -887,7 +887,7 @@ func StzuParsePath(tClause)
 	end
 	aT2 = StzuExpect("ident", "a seat name after '.'")
 	return aT1[2] + "." + aT2[2]
-
+end
 # a string list: [ "a", "b", ... ]   (v0.11)
 func StzuParseStringList
 	StzuExpect("lbracket", "'['")
@@ -904,7 +904,7 @@ func StzuParseStringList
 	end
 	StzuAdvance()
 	return aOut
-
+end
 # v0.28: CITES is a list of cites or the word none (HARO-MENU-CITES-01). The word reads as the string
 # "none" and a list as a list, so a record tells "cites nothing" from "cites these" without a flag
 func StzuParseCiteList
@@ -917,7 +917,7 @@ func StzuParseCiteList
 		return "none"
 	end
 	return StzuParseStringList()
-
+end
 # a pair is [key, word, line]: [ key: word, ... ]   (v0.10)
 func StzuParsePairList
 	StzuExpect("lbracket", "'['")
@@ -936,7 +936,7 @@ func StzuParsePairList
 	end
 	StzuAdvance()
 	return aPairs
-
+end
 # a message is [seat, text, line]: [ seat: "text", ... ]   (v0.3)
 func StzuParseMessageList
 	StzuExpect("lbracket", "'['")
@@ -955,19 +955,19 @@ func StzuParseMessageList
 	end
 	StzuAdvance()
 	return aMsgs
-
+end
 func ClauseValue(aClauses, tName)
 	for i = 1 to Len(aClauses)
 		if aClauses[i][1] = tName return aClauses[i][2] end
 	end
 	return null
-
+end
 func HasClause(aClauses, tName)
 	for i = 1 to Len(aClauses)
 		if aClauses[i][1] = tName return true end
 	end
 	return false
-
+end
 # one DEFINE <KIND> <name> AS ( clauses ) RATIONALE "..."
 # returns [kind, name, clauses, rationale, line]
 func StzuParseDeclaration
@@ -1055,7 +1055,7 @@ func StzuParseDeclaration
 		end
 	end
 	return [tKind, tName, aClauses, aTr[2], nDeclLine]
-
+end
 # ---- the language record ------------------------------------------------------
 #   name version grammar court extension rationale
 #   declarations: [name, verb, seats, rationale, line, names, messages]
@@ -1095,13 +1095,13 @@ func LangGet(aLang, tKey)
 		if aLang[i][1] = tKey return aLang[i][2] end
 	end
 	return null
-
+end
 func DeclaredKind(aDeclared, tName)
 	for i = 1 to Len(aDeclared)
 		if aDeclared[i][1] = tName return aDeclared[i][2] end
 	end
 	return ""
-
+end
 func StzuDeclare(tSrc)
 	$aStzuToks = StzuTokenize(tSrc)
 	$nStzuPos = 1
@@ -2734,7 +2734,7 @@ func StzuDeclare(tSrc)
 	end
 
 	return aRec
-
+end
 # v0.29 (WC1): the rules of the six carried weaves, as the court judges them -- [judged, held by construction, carried]. Judged: a
 # refusal exists at the weave's severity. Held: nothing can fail (W1.2: the gate writes a change's inverse before the change lands;
 # W7.1: a declaration without a RATIONALE is refused whatever the weaves say). Carried: Zin's design, not judged. The rule ids are
@@ -2754,7 +2754,7 @@ func StzuWeaveRules(tWeave)
 		return [["W8.5"], [], ["W8.1", "W8.2", "W8.3", "W8.4"]]
 	end
 	return [[], [], []]
-
+end
 # the number of the article a cite names, `article:3` or `article:visible_state`, and 0 for any other cite
 func StzuCitedArticle(tCite)
 	if Left(tCite, 8) != "article:" return 0 end
@@ -2764,12 +2764,12 @@ func StzuCitedArticle(tCite)
 		if tV = aAn[i] or tV = String(i) return i end
 	end
 	return 0
-
+end
 # the article a weave refusal serves, in the form the articles' own refusals use
 func StzuArtTail(nArt)
 	aAn = StzuArticles()
 	return " [Art. " + String(nArt) + " " + String(aAn[nArt]) + "]"
-
+end
 # a comma-joined list with more words added to it
 func StzuAppendWords(tList, aWords)
 	for i = 1 to Len(aWords)
@@ -2777,7 +2777,7 @@ func StzuAppendWords(tList, aWords)
 		tList += aWords[i]
 	end
 	return tList
-
+end
 # v0.25: a weave's verdict at its declared severity -- constitutional refuses, governance warns,
 # advisory notes; the warnings and notes are printed after the structural fields
 func StzuWeave(tSev, nLine, tMsg)
@@ -2788,7 +2788,7 @@ func StzuWeave(tSev, nLine, tMsg)
 	else
 		$aStzuNotes + tMsg
 	end
-
+end
 # v0.25: the regime's own article beside the constitution's, in a weave refusal -- the declared
 # regime, never a default: gdpr's articles, Niger Law 2017-28 as Zin's African companion names it,
 # a regime Haro has no table for named as declared, and "no regime declared" where there is none
@@ -2804,13 +2804,13 @@ func StzuRegimeTail(tRegime, tRule)
 		tTail = "regime '" + tRegime + "' as declared, which Haro v0.25 has no article table for"
 	end
 	return " [Art. 5 organizational_sovereignty; " + tTail + "]"
-
+end
 func StzuGdprArticle(tRule)
 	if tRule = "W4.4" return "Article 5(1)(e)" end
 	if tRule = "W4.2" return "Article 7" end
 	if tRule = "W3.1" return "Chapter V" end
 	return "Article 5"
-
+end
 # the value shape of a UNION's alternative, or the refusal (v0.3)
 func StzuAltShape(aAlt, aDeclared, aForms, nLine)
 	tOf = aAlt[1]
@@ -2844,19 +2844,19 @@ func StzuAltShape(aAlt, aDeclared, aForms, nLine)
 	if tK = "FORMAT" return "string" end
 	if tK = "DECLARATION" return "word" end
 	StzuFail(nLine, "'" + tOf + "' cannot be an alternative of a UNION: an alternative is a MENU, a RANGE, a FORMAT, a primitive, a DECLARATION or a list of a FORM, not a " + tK)
-
+end
 func StzuSeatsOf(aDeclarations, tDecl)
 	for i = 1 to Len(aDeclarations)
 		if aDeclarations[i][1] = tDecl return aDeclarations[i][3] end
 	end
 	return []
-
+end
 func StzuSeatNamed(aSeats, tSeat)
 	for i = 1 to Len(aSeats)
 		if aSeats[i][1] = tSeat return aSeats[i] end
 	end
 	return null
-
+end
 # v0.6: a list seat whose element is a FORM of exactly two seats, the first a
 # name and the second a scalar, is written as name: value pairs; every other
 # FORM keeps v0.1's reading (its items follow the form's first seat), because
@@ -2869,7 +2869,7 @@ func StzuIsPairListSeat(aSeat, aDeclared, aForms)
 		if aForms[i][1] = aSeat[2] return StzuIsPairForm(aForms[i][2], aDeclared) end
 	end
 	return false
-
+end
 func StzuIsPairForm(aFS, aDeclared)
 	# v0.27: a pair form may carry a third, optional seat typed by a MENU -- the mark, written after the value
 	if Len(aFS) != 2 and not StzuHasMarkSeat(aFS, aDeclared) return false end
@@ -2877,19 +2877,19 @@ func StzuIsPairForm(aFS, aDeclared)
 	tK1 = DeclaredKind(aDeclared, aFS[1][2])
 	if aFS[1][2] != "name" and tK1 != "MENU" and tK1 != "DECLARATION" return false end
 	return true
-
+end
 # v0.27: the mark seat of a pair form -- third, optional, a MENU
 func StzuHasMarkSeat(aFS, aDeclared)
 	if Len(aFS) != 3 return false end
 	if aFS[3][3] or not aFS[3][4] return false end
 	return DeclaredKind(aDeclared, aFS[3][2]) = "MENU"
-
+end
 # a pair form whose key or value is a reference (v0.8)
 func StzuPairRefs(aFS, aDeclared)
 	tK1 = DeclaredKind(aDeclared, aFS[1][2])
 	tK2 = DeclaredKind(aDeclared, aFS[2][2])
 	return tK1 = "DECLARATION" or tK2 = "DECLARATION" or tK2 = "UNION"
-
+end
 func StzuCheckListForms(aSeats, aDeclared, aForms)
 	for i = 1 to Len(aSeats)
 		aS = aSeats[i]
@@ -2909,7 +2909,7 @@ func StzuCheckListForms(aSeats, aDeclared, aForms)
 			end
 		end
 	end
-
+end
 func StzuHasSeat(aDeclarations, tDecl, tSeat)
 	for i = 1 to Len(aDeclarations)
 		if aDeclarations[i][1] = tDecl
@@ -2920,7 +2920,7 @@ func StzuHasSeat(aDeclarations, tDecl, tSeat)
 		end
 	end
 	return false
-
+end
 # v0.24: the seat record [name, of, isList, optional, line] of a declaration's seat, or NULL
 func StzuSeatRec(aDeclarations, tDecl, tSeat)
 	for i = 1 to Len(aDeclarations)
@@ -2932,20 +2932,20 @@ func StzuSeatRec(aDeclarations, tDecl, tSeat)
 		end
 	end
 	return null
-
+end
 # v0.27: a FORM's record by name, a MENU's record by name, or NULL
 func StzuFormRec(aForms, tName)
 	for i = 1 to Len(aForms)
 		if aForms[i][1] = tName return aForms[i] end
 	end
 	return null
-
+end
 func StzuMenuRec(aMenus, tName)
 	for i = 1 to Len(aMenus)
 		if aMenus[i][1] = tName return aMenus[i] end
 	end
 	return null
-
+end
 func StzuCheckCondition(tCond, tOn, aOneDecls, nLine)
 	aAst = null
 	tErr = ""
@@ -2961,7 +2961,7 @@ func StzuCheckCondition(tCond, tOn, aOneDecls, nLine)
 	if tWhy != ""
 		StzuFail(nLine, tWhy + " -- in '" + tCond + "'")
 	end
-
+end
 # a seat type resolves to a primitive, a FORM, an EXPRESSION, a MENU, a RANGE,
 # a FORMAT or a DECLARATION (a reference); a list seat's element is a FORM, a
 # DECLARATION or a MENU
@@ -3004,7 +3004,7 @@ func StzuResolveSeats(aSeats, aDeclared)
 			end
 		end
 	end
-
+end
 # ---- the printed verdict ----------------------------------------------------
 
 func StzuPrintLanguage(aLang)
@@ -3172,3 +3172,4 @@ func StzuPrintLanguage(aLang)
 	for i = 1 to Len($aStzuNotes)
 		? "note " + $aStzuNotes[i]
 	end
+end

@@ -5,6 +5,7 @@ func g
 	using oO = new Res("g")
 		return "returned " + oO.tName
 	end
+end
 func h
 	for i = 1 to 3
 		using oO = new Res("i" + String(i))
@@ -13,9 +14,13 @@ func h
 			? "body " + String(i)
 		end
 	end
+end
 class Res
 	tName = ""
-	func init(tN)
+	def init(tN)
 		tName = tN
-	func release
+	end
+	def release
 		? "release " + tName
+	end
+end

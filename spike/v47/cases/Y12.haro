@@ -2,3 +2,4 @@
 f()
 func f
 	iN = 2.5
+end

@@ -10,5 +10,7 @@ func f
 		raise(e)
 	end
 	$g = cOld
+end
 func work
 	return 0
+end

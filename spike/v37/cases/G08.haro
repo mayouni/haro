@@ -12,3 +12,4 @@ func g
 	catch e2
 		? e2.Code()
 	end
+end

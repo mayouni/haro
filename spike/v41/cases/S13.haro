@@ -2,5 +2,7 @@
 f()
 func f
 	g(:k = 1)
+end
 func g(xX)
 	return xX
+end

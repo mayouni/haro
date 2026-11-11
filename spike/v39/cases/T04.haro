@@ -4,5 +4,7 @@ func f(c)
 	if IsSafe(c)
 		eval("x = " + c)
 	end
+end
 func IsSafe(c)
 	return 1
+end

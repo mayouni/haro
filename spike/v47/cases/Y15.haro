@@ -2,5 +2,7 @@
 f()
 func f
 	? Twice(3)
+end
 func Twice(count)
 	return count * 2
+end

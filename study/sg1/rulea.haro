@@ -7,3 +7,4 @@ func total
         n = n + x
     end
     return n
+end

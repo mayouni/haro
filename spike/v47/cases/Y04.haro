@@ -2,3 +2,4 @@
 f()
 func f
 	tName = 3
+end

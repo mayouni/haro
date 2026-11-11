@@ -3,3 +3,4 @@ f()
 func f
 	nLine = 3
 	? "line " + nLine
+end

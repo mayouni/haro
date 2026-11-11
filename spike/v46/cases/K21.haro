@@ -3,3 +3,4 @@ f()
 func f
 	nA = 1
 	? nA == 1
+end

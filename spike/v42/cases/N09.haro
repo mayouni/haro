@@ -3,3 +3,4 @@ $nTotal = 1
 f()
 func f
 	? $ntotal
+end

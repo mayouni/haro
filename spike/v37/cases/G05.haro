@@ -5,3 +5,4 @@ func p
 	catch tError
 		? "handled: " + tError
 	end
+end

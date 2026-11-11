@@ -2,11 +2,16 @@ $o = new Token
 $o.Open()
 func StzEngineCancelCreate
 	return 1
+end
 func StzEngineCancelDestroy(n)
 	return 0
+end
 class Token
 	pHandle = 0
-	func Open
+	def Open
 		pHandle = StzEngineCancelCreate()
-	func Release
+	end
+	def Release
 		StzEngineCancelDestroy(pHandle)
+	end
+end

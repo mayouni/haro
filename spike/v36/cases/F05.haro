@@ -8,3 +8,4 @@ func g
 		? "finally"
 	end
 	return "fell through"
+end

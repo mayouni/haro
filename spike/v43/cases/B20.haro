@@ -5,3 +5,4 @@ func f
 	catch e
 		? e.Code()
 	end
+end

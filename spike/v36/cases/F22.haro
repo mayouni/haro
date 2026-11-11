@@ -7,3 +7,4 @@ func t
 	finally
 		? "finally"
 	end
+end

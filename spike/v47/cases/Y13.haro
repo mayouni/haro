@@ -3,3 +3,4 @@ oP = new P
 ? $iTotal
 class P
 	count = 2
+end

@@ -3,3 +3,4 @@ f()
 func f
 	nMax = 9223372036854775807
 	? nMax + 1
+end

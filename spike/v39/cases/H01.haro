@@ -3,9 +3,13 @@ func f
 	nH = StzEngineSecretHold("k")
 	use(nH)
 	StzEngineSecretRelease(nH)
+end
 func StzEngineSecretHold(c)
 	return 1
+end
 func StzEngineSecretRelease(n)
 	return 0
+end
 func use(n)
 	return 0
+end

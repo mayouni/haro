@@ -68,13 +68,13 @@ func CtCheckPatterns(aDecls, tSrc)
 			end
 		end
 	end
-
+end
 func CtClauseNamed(aD, tClause)
 	for i = 1 to Len(aD[4])
 		if aD[4][i][1] = tClause return aD[4][i] end
 	end
 	return null
-
+end
 # the values of a seat across every declaration of a kind: a word, a string or a number is one, a list its items (a list of pairs is refused by the meta-court)
 func CtSetMembers(aDecls, tDecl, tSeat)
 	aOut = []
@@ -97,3 +97,4 @@ func CtSetMembers(aDecls, tDecl, tSeat)
 		end
 	end
 	return aOut
+end

@@ -32,7 +32,7 @@ func NarBaseName(tPath)
 		if tPath[i] = "/" or Ascii(tPath[i]) = 92 nCut = i end
 	end
 	return SubStr(tPath, nCut + 1)
-
+end
 # a seat's value as text, verbatim
 func NarSeatText(aDecl, tSeat)
 	aC = aDecl[4]
@@ -57,7 +57,7 @@ func NarSeatText(aDecl, tSeat)
 		end
 	end
 	return ""
-
+end
 # fill a template: aVals is [[key, text], ...]; an unknown key fills as nothing
 func NarFill(tT, aVals)
 	tOut = ""
@@ -82,14 +82,14 @@ func NarFill(tT, aVals)
 		nI++
 	end
 	return tOut
-
+end
 func NarSays(tKind)
 	aS = $aCourtNarrate[5]
 	for i = 1 to Len(aS)
 		if aS[i][1] = tKind return aS[i][2] end
 	end
 	return ""
-
+end
 func NarrateRun(tFile)
 	tSrc = Read(tFile)
 	CtSetCode("PARSE", [])
@@ -136,7 +136,7 @@ func NarrateRun(tFile)
 		end
 	end
 	? NarFill(tEnds, aTop)
-
+end
 # ---- v0.16: a run and a question, told ---------------------------------------------------
 #
 #   <court>.ring narrate-run <file> <algorithm> <record json>
@@ -156,14 +156,14 @@ func NarTellText(tKey)
 		if aT[i][1] = tKey return aT[i][2] end
 	end
 	return ""
-
+end
 func NarIndent(nN)
 	tOut = ""
 	for i = 1 to nN
 		tOut += "  "
 	end
 	return tOut
-
+end
 # the one refusal line, as `narrate` gives it
 func NarRefuse(tErr, tBase)
 	tRefuses = $aCourtNarrate[4]
@@ -174,7 +174,7 @@ func NarRefuse(tErr, tBase)
 		tCites += $aCourtCites[i]
 	end
 	? NarFill(tRefuses, [["language", $tCourtLang], ["file", tBase], ["line", String(CtLineOf(tErr))], ["code", $tCourtCode], ["message", CtStripPrefix(tErr)], ["cites", tCites]])
-
+end
 # one step of a run, told: [depth, name, value, key, taken, count]
 func NarTellStep(aDecls, aE)
 	aD = CtDeclNamed(aDecls, aE[2])
@@ -212,7 +212,7 @@ func NarTellStep(aDecls, aE)
 		end
 	end
 	return NarFill(tT, aVals)
-
+end
 func NarTellRun(tFile, tAlg, tRec)
 	CtSetCode("PARSE", [])
 	tBase = NarBaseName(tFile)
@@ -262,14 +262,14 @@ func NarTellRun(tFile, tAlg, tRec)
 	tT = NarTellText("result")
 	if tT = "" tT = "{algorithm} answers {result}." end
 	? NarFill(tT, [["language", $tCourtLang], ["file", tBase], ["algorithm", tAlg], ["result", ExJson(aRes)]])
-
+end
 func NarAskDefault(tEvent)
 	if tEvent = "ask" return "Asking {from}." end
 	if tEvent = "matched" return "{count} of {total} matched." end
 	if tEvent = "ordered" return "Ordered by {field}." end
 	if tEvent = "cut" return "Cut to {limit}." end
 	return "{count} answered: {rows}"
-
+end
 func NarTellAsk(tFile, tQ, tRows)
 	CtSetCode("PARSE", [])
 	tBase = NarBaseName(tFile)
@@ -324,3 +324,4 @@ func NarTellAsk(tFile, tQ, tRows)
 	if tErr != ""
 		NarRefuse(tErr, tBase)
 	end
+end

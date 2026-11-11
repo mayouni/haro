@@ -91,19 +91,19 @@ func RingStr(tS)
 	# text holds one, in which case single quotes are used
 	if SubStr(tS, '"') > 0 return "'" + tS + "'" end
 	return '"' + tS + '"'
-
+end
 # what a seat's type name resolves to in the language: prim form expr menu range
 # format decl union sentence -- the meta-court's own answer (haro_lib.haro)
 func TypeKindOf(aLang, tOf)
 	return StzuTypeKindOf(aLang, tOf)
-
+end
 func UnionOf(aLang, tName)
 	aU = LangGet(aLang, "unions")
 	for i = 1 to Len(aU)
 		if aU[i][1] = tName return aU[i] end
 	end
 	return null
-
+end
 # a declaration's MESSAGES as [[seat, text], ...]
 func MessagesSource(aMsgs)
 	tBuf = "["
@@ -112,7 +112,7 @@ func MessagesSource(aMsgs)
 		tBuf += "[" + RingStr(aMsgs[i][1]) + ", " + RingStr(aMsgs[i][2]) + "]"
 	end
 	return tBuf + "]"
-
+end
 # a union's alternatives as [[of, isList, typeKind], ...]
 func AltsSource(aLang, aAlts)
 	tBuf = "["
@@ -121,7 +121,7 @@ func AltsSource(aLang, aAlts)
 		tBuf += "[" + RingStr(aAlts[i][1]) + ", " + String(aAlts[i][2]) + ", " + RingStr(TypeKindOf(aLang, aAlts[i][1])) + "]"
 	end
 	return tBuf + "]"
-
+end
 # a seat in the court's table is [name, of, isList, optional, typeKind]
 func SeatsSource(aLang, aSeats)
 	tBuf = "["
@@ -130,7 +130,7 @@ func SeatsSource(aLang, aSeats)
 		tBuf += "[" + RingStr(aSeats[i][1]) + ", " + RingStr(aSeats[i][2]) + ", " + String(aSeats[i][3]) + ", " + String(aSeats[i][4]) + ", " + RingStr(TypeKindOf(aLang, aSeats[i][2])) + "]"
 	end
 	return tBuf + "]"
-
+end
 func NamesSource(aNames)
 	tBuf = "["
 	for i = 1 to Len(aNames)
@@ -138,12 +138,12 @@ func NamesSource(aNames)
 		tBuf += RingStr(aNames[i])
 	end
 	return tBuf + "]"
-
+end
 # v0.28 (HARO-MENU-CITES-01): a cites value as Ring source -- the word none as the string "none", a list as a list
 func CitesSource(xCites)
 	if IsString(xCites) return RingStr(xCites) end
 	return NamesSource(xCites)
-
+end
 # v0.28: the CITES a MENU, RANGE, FORMAT or UNION declares rides into the court after its code, and only
 # when declared, so a language that declares none forges the bytes it forged before
 func CitesTail(aRec, nN)
@@ -152,7 +152,7 @@ func CitesTail(aRec, nN)
 	if IsString(xC) return ", " + RingStr(xC) end
 	if Len(xC) = 0 return "" end
 	return ", " + NamesSource(xC)
-
+end
 func PointsSource(aPoints)
 	tBuf = "["
 	for i = 1 to Len(aPoints)
@@ -160,7 +160,7 @@ func PointsSource(aPoints)
 		tBuf += "[" + RingStr(aPoints[i][1] + "." + aPoints[i][2]) + ", " + RingStr(aPoints[i][3]) + "]"
 	end
 	return tBuf + "]"
-
+end
 # a table of rows as a Ring list literal, one row a line; fnRow is applied by the
 # caller, so this takes the rows' texts
 # v0.27: rows joined on one line
@@ -171,7 +171,7 @@ func JoinRows(aRows)
 		tC += aRows[i]
 	end
 	return tC
-
+end
 func RowsSource(aRows, xNl)
 	xC = "[" + xNl
 	for i = 1 to Len(aRows)
@@ -180,7 +180,7 @@ func RowsSource(aRows, xNl)
 		xC += xNl
 	end
 	return xC + "    ]"
-
+end
 # an EXPRESSION's tables as the court reads them (v0.6): [name, ops, opds,
 # aggs, vars, contexts, absent, division, equality]
 func ExprSource(aE)
@@ -204,7 +204,7 @@ func ExprSource(aE)
 	end
 	return "[" + RingStr(aE[1]) + ", " + NamesSource(aE[2]) + ", " + NamesSource(aE[3]) + ", " + NamesSource(aAgg) + ", " +
 	       NamesSource(aVars) + ", " + tCtx + ", " + RingStr(tAbsent) + ", " + RingStr(tDivision) + ", " + RingStr(tEquality) + "]"
-
+end
 # a WALK as the court reads it (v0.6): [name, of, steps, through, order,
 # guards, compute, formula, fail]
 func WalkSource(aW)
@@ -214,7 +214,7 @@ func WalkSource(aW)
 	end
 	return "[" + RingStr(aW[1]) + ", " + RingStr(aW[2]) + ", " + RingStr(aW[3]) + ", " + RingStr(aW[4]) + ", " + RingStr(aW[5]) + ", " +
 	       NamesSource(aPaths) + ", " + RingStr(aW[7]) + ", " + RingStr(aW[8]) + ", " + RingStr(aW[9]) + "]"
-
+end
 # one language's record, as the court reads it (v0.4, grown in v0.6 and v0.7):
 # [name, ext, kinds, forms, refusals, menus, ranges, formats, unions,
 # constraints, world, points, floors, views, sentences, expressions, walks, ask, run, symbols]
@@ -480,7 +480,7 @@ func LangSource(aLang)
 	end
 	tC += "  ]"
 	return tC
-
+end
 # the language and, recursively, every language its SENTENCEs name, each once
 func ForgeLangRecords(aLang, aSeen)
 	aOut = []
@@ -498,7 +498,7 @@ func ForgeLangRecords(aLang, aSeen)
 		end
 	end
 	return aOut
-
+end
 func ForgeCourt(aLang)
 	tForgeName = LangGet(aLang, "name")
 	tNl = Char(10)
@@ -670,7 +670,7 @@ func ForgeCourt(aLang)
 	end
 	tC += tNl + "CtMain()" + tNl
 	return tC
-
+end
 # the globals expr_lib.haro reads, born empty at a court's top level (v0.6)
 func ExprGlobals
 	tNl = Char(10)
@@ -680,7 +680,7 @@ func ExprGlobals
 	tC += "$aExprToks = []" + tNl + "$nExprPos = 1" + tNl + "$aExprAllowed = []" + tNl
 	tC += "$aExprRecord = []" + tNl + "$aExprOverlay = []" + tNl
 	return tC
-
+end
 # ---- the expression court, as Ring source (v0.5) -------------------------------
 # One EXPRESSION per language is forged whole: the first declared one. Its
 # operators, operands, variables and contexts become the tables expr_lib.haro
@@ -724,13 +724,13 @@ func ForgeExprCourt(aLang)
 	tC += "$aExprRecord = []" + tNl + "$aExprOverlay = []" + tNl
 	tC += tNl + "ExMain()" + tNl
 	return tC
-
+end
 # the expression's grammar for the decoder, from its menus: a rule per
 # precedence level, present when its operators are, the operands it admits,
 # and its variables by name
 func ForgeExprGbnf(aLang)
 	return ForgeExprGbnfOf(aLang, LangGet(aLang, "expressions")[1])
-
+end
 func ForgeExprGbnfOf(aLang, aE)
 	tNl = Char(10)
 	tName = LangGet(aLang, "name")
@@ -834,7 +834,7 @@ func ForgeExprGbnfOf(aLang, aE)
 	tG += "sp ::= [ " + tBs + "t]+" + tNl
 	tG += "ws ::= [ " + tBs + "t]*" + tNl
 	return tG
-
+end
 # ---- the question grammar, for the decoder (v0.7) ------------------------------
 # the ASK's frame -- SELECT * FROM name, then the clauses it admits -- over the
 # WHERE expression's own grammar, its root renamed where_expr
@@ -872,7 +872,7 @@ func ForgeAskGbnf(aLang)
 	if SubStr(tBody, "sp ::=") = 0 tG += "sp ::= [ " + Char(92) + "t]+" + tNl end
 	if SubStr(tBody, "ws ::=") = 0 tG += "ws ::= [ " + Char(92) + "t]*" + tNl end
 	return tG
-
+end
 # ---- the grammar, for the decoder --------------------------------------------
 # One rule per kind, one alternative per clause with the clause's own value
 # shape, so a derivation is well-typed; a clause given twice or a required
@@ -909,14 +909,14 @@ func GbnfShape(aSeat, aLang)
 	if tOf = "text" or tK = "format" or tK = "sentence" or tK = "expr" return "string" end
 	if tOf = "number" or tK = "range" return "number" end
 	return "ident"   # a name, a flag, a MENU word, a reference, a SYMBOL
-
+end
 func FormOf(aLang, tName)
 	aF = LangGet(aLang, "forms")
 	for i = 1 to Len(aF)
 		if aF[i][1] = tName return aF[i] end
 	end
 	return null
-
+end
 func ForgeGbnf(aLang)
 	tNl = Char(10)
 	tName = LangGet(aLang, "name")
@@ -987,3 +987,4 @@ func ForgeGbnf(aLang)
 	tG += "sp ::= [ " + tBs + "t]+" + tNl
 	tG += "ws ::= ([ " + tBs + "t" + tBs + "r" + tBs + "n] | " + tQ + "--" + tQ + " [^" + tBs + "n]* " + tQ + tBs + "n" + tQ + ")*" + tNl
 	return tG
+end

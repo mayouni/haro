@@ -4,3 +4,4 @@ func f
 	while 1
 		exit
 	end
+end

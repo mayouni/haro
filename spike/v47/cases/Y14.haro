@@ -4,3 +4,4 @@ func f
 	for tW in [1]
 		? tW
 	end
+end

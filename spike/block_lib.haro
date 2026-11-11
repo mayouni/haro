@@ -29,18 +29,18 @@
 func BlkIsDigit(tC)
 	nN = Ascii(tC)
 	return (nN >= 48 and nN <= 57)
-
+end
 func BlkIsLower(tC)
 	nN = Ascii(tC)
 	return (nN >= 97 and nN <= 122)
-
+end
 func BlkIsUpper(tC)
 	nN = Ascii(tC)
 	return (nN >= 65 and nN <= 90)
-
+end
 func BlkIsWordChar(tC)
 	return BlkIsLower(tC) or BlkIsUpper(tC) or BlkIsDigit(tC) or Ascii(tC) = 95
-
+end
 func BlkTrim(tS)
 	nA = 1
 	nB = Len(tS)
@@ -52,7 +52,7 @@ func BlkTrim(tS)
 	end
 	if nB < nA return "" end
 	return SubStr(tS, nA, nB - nA + 1)
-
+end
 func BlkTokenize(tSrc)
 	aToks = []
 	nN = Len(tSrc)
@@ -187,13 +187,13 @@ func BlkTokenize(tSrc)
 	end
 	aToks + ["eof", "", nLine, nN + 1, nN + 1]
 	return aToks
-
+end
 # the last token, when it is an error; NULL otherwise
 func BlkLexError(aToks)
 	aT = aToks[Len(aToks)]
 	if aT[1] = "error" return aT end
 	return null
-
+end
 # the tokens without their comments: what a court's parser reads (a comment is layout to a court, a value to the block)
 func BlkWithoutComments(aToks)
 	aOut = []
@@ -201,12 +201,12 @@ func BlkWithoutComments(aToks)
 		if aToks[i][1] != "comment" aOut + aToks[i] end
 	end
 	return aOut
-
+end
 # ---- the block loader --------------------------------------------------------------------------------------------------
 
 func BlkFail(nLine, tMsg)
 	Raise("block (line " + String(nLine) + "): " + tMsg)
-
+end
 func BlkLexMessage(xT)
 	tCat = xT[2]
 	if tCat = "unterminated_string" return "a string opened and not closed" end
@@ -215,15 +215,15 @@ func BlkLexMessage(xT)
 	if tCat = "mixed_case" return "'" + xT[4] + "' is neither a lower_snake identifier nor an UPPER_SNAKE keyword" end
 	if tCat = "number_glued" return "'" + xT[4] + "' is neither a number nor a word" end
 	return "the character '" + xT[4] + "' is not part of C6"
-
+end
 func BlkPeek
 	return $aBlkToks[$nBlkPos]
-
+end
 func BlkPeekAt(nK)
 	nJ = $nBlkPos + nK
 	if nJ > Len($aBlkToks) return $aBlkToks[Len($aBlkToks)] end
 	return $aBlkToks[nJ]
-
+end
 # C6 text -> the top-level sequence of values
 func BlkLoad(tSrc)
 	$aBlkToks = BlkTokenize(tSrc)
@@ -240,7 +240,7 @@ func BlkLoad(tSrc)
 		end
 	end
 	return aOut
-
+end
 # a name is a word or a keyword, or a path: words joined by dots with no space between (deposit.amount)
 func BlkName
 	aT = BlkPeek()
@@ -257,11 +257,11 @@ func BlkName
 	if Len(aParts) > 1 return ["path", aParts] end
 	if aT[1] = "keyword" return ["kw", aT[2]] end
 	return ["word", aT[2]]
-
+end
 func BlkNameText(xV)
 	if xV[1] = "path" return BlkJoin(xV[2], ".") end
 	return xV[2]
-
+end
 func BlkValue
 	aV = BlkValue1()
 	while BlkPeek()[1] = "question"
@@ -269,7 +269,7 @@ func BlkValue
 		aV = ["opt", aV]
 	end
 	return aV
-
+end
 func BlkValue1
 	aT = BlkPeek()
 	if aT[1] = "ident" or aT[1] = "keyword"
@@ -309,14 +309,14 @@ func BlkValue1
 	if aT[1] = "dot" BlkFail(aT[3], "unexpected '.': a dot joins the words of a path, with no space on either side") end
 	if aT[1] = "question" BlkFail(aT[3], "unexpected '?': the mark stands after the value it makes optional, and nothing stands before this one") end
 	BlkFail(aT[3], "unexpected '" + aT[2] + "'")
-
+end
 func BlkCountValues(aSeg)
 	nN = 0
 	for i = 1 to Len(aSeg)
 		if aSeg[i][1] != "comment" nN++ end
 	end
 	return nN
-
+end
 # one item of a container, closed by a comma or the closing bracket: its comments before the first value lead,
 # the ones after follow; one value is that value, several are a row
 func BlkFlush(aItems, aSeg)
@@ -349,7 +349,7 @@ func BlkFlush(aItems, aSeg)
 		aItems + aTrail[i]
 	end
 	return aItems
-
+end
 func BlkContainer(tClose, tWhat, nLine0)
 	aItems = []
 	aSeg = []
@@ -379,7 +379,7 @@ func BlkContainer(tClose, tWhat, nLine0)
 		end
 		aSeg + BlkValue()
 	end
-
+end
 # ---- equality: one spelling of a block, for comparing two ------------------------------------------------------------
 
 func BlkJoin(aParts, tSep)
@@ -389,7 +389,7 @@ func BlkJoin(aParts, tSep)
 		tOut += aParts[i]
 	end
 	return tOut
-
+end
 # a block dumped as one line: every kind tagged, every text length-prefixed, so two blocks are equal exactly when
 # their dumps are. `block.haro load` prints it; `same` compares it
 func BlkDump(xV)
@@ -405,7 +405,7 @@ func BlkDump(xV)
 		tOut += " " + BlkDump(xV[2][i])
 	end
 	return tOut + ")"
-
+end
 func BlkDumpAll(aVals)
 	tOut = ""
 	for i = 1 to Len(aVals)
@@ -413,7 +413,7 @@ func BlkDumpAll(aVals)
 		tOut += BlkDump(aVals[i])
 	end
 	return tOut
-
+end
 # ---- the canonical printing (BLOCKS.md 3.2) ----------------------------------------------------------------------------
 # One spelling per block: a declaration a paragraph and a blank line between them; a group's items one a line, two
 # spaces deeper, a comma after each but the last; a list inline unless it holds a comment or a group; a string on one
@@ -424,7 +424,7 @@ func BlkHoldsCommentOrGroup(aItems)
 		if aItems[i][1] = "comment" or aItems[i][1] = "group" return true end
 	end
 	return false
-
+end
 func BlkPrint(xV, nInd)
 	xK = xV[1]
 	if xK = "word" or xK = "kw" or xK = "num" return xV[2] end
@@ -462,14 +462,14 @@ func BlkPrint(xV, nInd)
 		return "(" + BlkLines(xV[2], nInd) + ")"
 	end
 	BlkFail(0, "no printing for a value of kind '" + xK + "'")
-
+end
 func BlkSpaces(nN)
 	tOut = ""
 	for i = 1 to nN
 		tOut += " "
 	end
 	return tOut
-
+end
 func BlkLines(aItems, nInd)
 	tPad = BlkSpaces(nInd + 2)
 	nLastReal = 0
@@ -483,7 +483,7 @@ func BlkLines(aItems, nInd)
 		tOut += tPad + BlkPrint(aItems[j], nInd + 2) + tComma + Char(10)
 	end
 	return tOut + BlkSpaces(nInd)
-
+end
 # the whole text: a paragraph per declaration (each DEFINE opens one), a comment on a line of its own, a blank line
 # between paragraphs
 func BlkPrintC6(aVals)
@@ -516,3 +516,4 @@ func BlkPrintC6(aVals)
 		tOut += BlkJoin(aP, " ") + Char(10)
 	end
 	return tOut
+end

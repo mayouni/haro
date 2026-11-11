@@ -1,3 +1,4 @@
 f()
 func f
 	Eval("? len('ab')")
+end

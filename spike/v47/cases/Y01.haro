@@ -15,5 +15,7 @@ func f
 	? tName
 	? Len(vItems)
 	? oP.iX
+end
 class P
 	iX = 7
+end

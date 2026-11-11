@@ -7,9 +7,13 @@ func f
 	oO = new Point
 	? oO.GetX()
 	? $nTotal
+end
 func Twice(nN)
 	return nN * 2
+end
 class Point
 	@nX = 3
-	func GetX
+	def GetX
 		return @nX
+	end
+end

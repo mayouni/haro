@@ -5,3 +5,4 @@ func f
 	if Ready()
 		? "ready"
 	end
+end
