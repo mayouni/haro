@@ -126,6 +126,29 @@ CASES = [
     ('H22', 'U', 'an unwrapped _cName_ takes Softanza\'s c rule too: tName', {
         'main.ring': ['func f', T + '_cPath_ = "a"', T + '? _cPath_']},
      [("'tPath = \"a\"' in applied['main.haro'] and '? tPath' in applied['main.haro']", True)]),
+    # ---- the third round (HARO-PORTTOOL-ROUND3-01, the Principal's HAROPORT-SPELLINGS-02 of 2026-11-11), written before its code
+    ('H23', 'R', '(a) a parameter keeps its p mark: pc is pt, pa with an element letter is pv with it, pn and pb stay', {
+        'main.ring': ['func f pcName, pnAt, pbOk, panPos, paList', T + '? pcName + pnAt', T + '? Len(panPos) + Len(paList)']},
+     [("applied['main.haro'].splitlines()[0]", 'func f ptName, pnAt, pbOk, pviPos, paList'),
+      ("'? ptName + pnAt' in applied['main.haro'] and '? Len(pviPos) + Len(paList)' in applied['main.haro']", True)]),
+    ('H24', 'R', '(b) a b name given 1 or 0 is given true or false; a condition on a 1 or 0 literal is true or false', {
+        'main.ring': ['bReady = 1', '$bDone = 0', 'func f', T + 'bOk = 1', T + 'while 1', T + T + 'exit', T + 'end', T + 'if 0', T + T + '? "no"',
+                      T + 'ok', T + 'return bOk', 'class P', T + '@bOpen = 0']},
+     [("applied['main.haro'].splitlines()[:4]", ['bReady = true', '$bDone = false', 'func f', '\tbOk = true']),
+      ("'\\twhile true' in applied['main.haro'] and '\\tif false' in applied['main.haro'] and '\\t@bOpen = false' in applied['main.haro']", True)]),
+    ('H25', 'R', '(c) Softanza\'s two-letter list letters are v and the element\'s letter', {
+        'main.ring': ['func f', T + 'anPos = [1]', T + 'acNames = ["a"]', T + 'aoItems = []', T + 'aaRows = [[1]]', T + 'aList = [1]',
+                      T + '? Len(anPos) + Len(acNames) + Len(aoItems) + Len(aaRows) + Len(aList)']},
+     [("'viPos = [1]' in applied['main.haro'] and 'vtNames = [\"a\"]' in applied['main.haro'] and 'voItems = []' in applied['main.haro']", True),
+      ("'vvRows = [[1]]' in applied['main.haro'] and 'aList = [1]' in applied['main.haro']", True)]),
+    ('H26', 'R', '(d) an ALL_CAPS name takes its letter by what it holds, its capitals kept', {
+        'main.ring': ['$MAX_NUMBER_SIZE = 5', '$SEP = "-"', '$RATE = 0.5', 'func f', T + '? $MAX_NUMBER_SIZE', T + '? $SEP', 'class P', T + '@NL = "n"']},
+     [("'$iMAX_NUMBER_SIZE = 5' in applied['main.haro'] and '? $iMAX_NUMBER_SIZE' in applied['main.haro']", True),
+      ("'$tSEP = \"-\"' in applied['main.haro'] and '$dRATE = 0.5' in applied['main.haro'] and '@tNL = \"n\"' in applied['main.haro']", True)]),
+    ('H27', 'R', '(d) a capitalised attribute takes its letter first: 1 or 0 alone is a boolean, a count is a number', {
+        'main.ring': ['class P', T + '@CaseSensitive = 1', T + '@Count = 0', T + '@Title = "t"', T + 'func Bump', T + T + '@Count++']},
+     [("'@bCaseSensitive = true' in applied['main.haro'] and '@nCount = 0' in applied['main.haro'] and '@tTitle = \"t\"' in applied['main.haro']", True),
+      ("'@nCount++' in applied['main.haro']", True)]),
     ('H11', '-', 'the ported tree runs on haro and prints what the classic Ring surface printed', {
         'main.ring': ['load "lib.ring"', 'cName = Greet("ada")', '? cName', '? Len(cName)'],
         'lib.ring': ['func Greet cWho', T + 'cOut = "hi " + cWho', T + 'return cOut']},

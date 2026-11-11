@@ -440,6 +440,106 @@
    ]
   },
   {
+   "id": "H23",
+   "line": "R",
+   "why": "(a) a parameter keeps its p mark: pc is pt, pa with an element letter is pv with it, pn and pb stay",
+   "folder": "cases/H23",
+   "files": [
+    "main.ring"
+   ],
+   "asserts": [
+    [
+     "applied['main.haro'].splitlines()[0]",
+     "func f ptName, pnAt, pbOk, pviPos, paList"
+    ],
+    [
+     "'? ptName + pnAt' in applied['main.haro'] and '? Len(pviPos) + Len(paList)' in applied['main.haro']",
+     true
+    ]
+   ]
+  },
+  {
+   "id": "H24",
+   "line": "R",
+   "why": "(b) a b name given 1 or 0 is given true or false; a condition on a 1 or 0 literal is true or false",
+   "folder": "cases/H24",
+   "files": [
+    "main.ring"
+   ],
+   "asserts": [
+    [
+     "applied['main.haro'].splitlines()[:4]",
+     [
+      "bReady = true",
+      "$bDone = false",
+      "func f",
+      "\tbOk = true"
+     ]
+    ],
+    [
+     "'\\twhile true' in applied['main.haro'] and '\\tif false' in applied['main.haro'] and '\\t@bOpen = false' in applied['main.haro']",
+     true
+    ]
+   ]
+  },
+  {
+   "id": "H25",
+   "line": "R",
+   "why": "(c) Softanza's two-letter list letters are v and the element's letter",
+   "folder": "cases/H25",
+   "files": [
+    "main.ring"
+   ],
+   "asserts": [
+    [
+     "'viPos = [1]' in applied['main.haro'] and 'vtNames = [\"a\"]' in applied['main.haro'] and 'voItems = []' in applied['main.haro']",
+     true
+    ],
+    [
+     "'vvRows = [[1]]' in applied['main.haro'] and 'aList = [1]' in applied['main.haro']",
+     true
+    ]
+   ]
+  },
+  {
+   "id": "H26",
+   "line": "R",
+   "why": "(d) an ALL_CAPS name takes its letter by what it holds, its capitals kept",
+   "folder": "cases/H26",
+   "files": [
+    "main.ring"
+   ],
+   "asserts": [
+    [
+     "'$iMAX_NUMBER_SIZE = 5' in applied['main.haro'] and '? $iMAX_NUMBER_SIZE' in applied['main.haro']",
+     true
+    ],
+    [
+     "'$tSEP = \"-\"' in applied['main.haro'] and '$dRATE = 0.5' in applied['main.haro'] and '@tNL = \"n\"' in applied['main.haro']",
+     true
+    ]
+   ]
+  },
+  {
+   "id": "H27",
+   "line": "R",
+   "why": "(d) a capitalised attribute takes its letter first: 1 or 0 alone is a boolean, a count is a number",
+   "folder": "cases/H27",
+   "files": [
+    "main.ring"
+   ],
+   "asserts": [
+    [
+     "'@bCaseSensitive = true' in applied['main.haro'] and '@nCount = 0' in applied['main.haro'] and '@tTitle = \"t\"' in applied['main.haro']",
+     true
+    ],
+    [
+     "'@nCount++' in applied['main.haro']",
+     true
+    ]
+   ]
+  },
+  {
    "id": "H11",
    "line": "-",
    "why": "the ported tree runs on haro and prints what the classic Ring surface printed",
