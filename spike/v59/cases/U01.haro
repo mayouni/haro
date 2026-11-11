@@ -1,0 +1,8 @@
+print IsEmpty("")
+print IsEmpty("a")
+print IsEmpty("NULL")
+print IsEmpty([])
+print IsEmpty(0)
+print IsEmpty(new P)
+class P
+end

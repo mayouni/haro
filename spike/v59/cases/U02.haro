@@ -1,0 +1,8 @@
+tX = ""
+if IsEmpty(tX)
+	print "empty"
+end
+tX = "x"
+if not IsEmpty(tX)
+	print "full"
+end

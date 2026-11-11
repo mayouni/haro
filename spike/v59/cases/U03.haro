@@ -1,0 +1,6 @@
+print "before"
+f()
+func f
+	tX = null
+	print tX
+end

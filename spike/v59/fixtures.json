@@ -1,0 +1,54 @@
+{
+ "rung": "v0.59",
+ "decision": "HARO-NULL-01: TYPES.md T5 (D55); the Principal's \"Right after absence\" (2026-11-11) and \"IsEmpty(x)\" (2026-11-12); the desk's readings are D71",
+ "class": "exact: the program's whole stdout and its exit code, byte for byte, on haro and on its checked build",
+ "lines": {
+  "N1": "IsEmpty: the empty text, and nothing else",
+  "N2": "null and IsNull refused",
+  "N3": "a .ring file untouched"
+ },
+ "cases": [
+  {
+   "id": "U01",
+   "kind": "run",
+   "line": "N1",
+   "why": "IsEmpty is true for the empty text and false for any other value",
+   "file": "cases/U01.haro",
+   "stdout": "true\nfalse\nfalse\nfalse\nfalse\nfalse\n"
+  },
+  {
+   "id": "U02",
+   "kind": "run",
+   "line": "N1",
+   "why": "IsEmpty answers a condition",
+   "file": "cases/U02.haro",
+   "stdout": "empty\nfull\n"
+  },
+  {
+   "id": "U03",
+   "kind": "run",
+   "line": "N2",
+   "why": "null is refused, naming \"\" and none",
+   "file": "cases/U03.haro",
+   "stdout": "before\n\nLine 4 Haro refused this statement (`null` is no value of Haro -- the empty text is \"\", and absence is none; written `null`, line 4 of U03.haro) and did not compile it -- running past it would give a wrong answer \nIn function f() in file U03.haro\n\nCalled from line 2 in file U03.haro ",
+   "exit": 1
+  },
+  {
+   "id": "U04",
+   "kind": "run",
+   "line": "N2",
+   "why": "IsNull is refused: IsEmpty",
+   "file": "cases/U04.haro",
+   "stdout": "before\n\nLine 4 Haro refused this statement (one spelling: `IsEmpty`; written `IsNull`, line 4 of U04.haro) and did not compile it -- running past it would give a wrong answer \nIn function f() in file U04.haro\n\nCalled from line 2 in file U04.haro ",
+   "exit": 1
+  },
+  {
+   "id": "U05",
+   "kind": "run",
+   "line": "N3",
+   "why": "a .ring file: null is the empty text, and isnull is true for it and for \"NULL\"",
+   "file": "cases/U05.ring",
+   "stdout": "1\n1\n0\n0\n"
+  }
+ ]
+}
