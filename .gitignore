@@ -13,3 +13,6 @@ vm/zig-out-safe/
 
 # a session's own permission list can hold a typed secret; ignored here, not only by one machine's global ignore (LOOKOUT-W45-SECRETS-01)
 .claude/settings.local.json
+
+# Central's files: each desk keeps them on its own machine, and Central reads them there (CENTRAL-PUBLICREPO-HARO-01)
+WHATS-NEXT.md
