@@ -14,7 +14,7 @@
    "asserts": [
     [
      "applied['main.haro']",
-     "if 1 = 1 see \"If\" end   # If stays in a comment\nx = :Next\nfor i = 1 to 2 end\n"
+     "if 1 = 1 FWrite(stdout, \"If\") end   # If stays in a comment\nx = :Next\nfor i = 1 to 2 end\n"
     ]
    ]
   },
@@ -567,7 +567,7 @@
      ]
     ],
     [
-     "'\\tcase 1 see \"b\"' in applied['main.haro'] and '\\telse see \"c\"' in applied['main.haro']",
+     "'\\tcase 1 FWrite(stdout, \"b\")' in applied['main.haro'] and '\\telse FWrite(stdout, \"c\")' in applied['main.haro']",
      true
     ]
    ]
@@ -586,7 +586,7 @@
      true
     ],
     [
-     "'new P { see self }' in applied['main.haro']",
+     "'new P { FWrite(stdout, self) }' in applied['main.haro']",
      true
     ],
     [
@@ -601,7 +601,7 @@
      true
     ],
     [
-     "'\\t\\tsee \"x\"' in applied['main.haro'] and '\\t\\tgive ' in applied['main.haro'] and '\\th(1, 0)\\n' in applied['main.haro']",
+     "'\\t\\tFWrite(stdout, \"x\")' in applied['main.haro'] and '\\t\\tgive ' in applied['main.haro'] and '\\th(1, 0)\\n' in applied['main.haro']",
      true
     ]
    ]
@@ -689,7 +689,7 @@
       "o.FillQ(1).StrokeQ(2)",
       "  .AddRect(3)",
       "o.Name()",
-      "see \"x\""
+      "FWrite(stdout, \"x\")"
      ]
     ]
    ]
@@ -708,6 +708,32 @@
      [
       "func 2Hearts",
       "func 3Ways(xN)"
+     ]
+    ]
+   ]
+  },
+  {
+   "id": "H34",
+   "line": "O",
+   "why": "see and put: a line that ends with + nl prints with print, any other writes through the stream",
+   "folder": "cases/H34",
+   "files": [
+    "main.ring"
+   ],
+   "asserts": [
+    [
+     "applied['main.haro'].splitlines()[:2]",
+     [
+      "print \"a\"",
+      "FWrite(stdout, \"b\")"
+     ]
+    ],
+    [
+     "applied['main.haro'].splitlines()[3:6]",
+     [
+      "FWrite(stdout, x)",
+      "  print \"c\" + x  # a comment",
+      "? \"d\""
      ]
     ]
    ]

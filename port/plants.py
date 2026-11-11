@@ -95,6 +95,14 @@ PLANTS = [
                                                                    "                if False:")]),
     ('T51', 'H33', 'a digit-led name is not read', [("                if j is not None and out[j][0] == 'num' and j + 1 < len(out) and out[j + 1][0] == 'id':",
                                                      "                if False:")]),
+    # v0.57 (D69): see and put written as print, or through the stream
+    ('T52', 'H34', 'see and put are left', [("    toks = printing(toks, renames)\n", "")]),
+    ('T53', 'H34', 'a line ending in + nl is not print\'s', [("        if out[a][0] == 'id' and out[a][1].lower() == 'nl' and b is not None and out[b][1] == '+':",
+                                                              "        if False:")]),
+    ('T54', 'H01', 'a statement word ends no see\'s expression', [("            elif kj in ('id', 'op') and depth == 0 and vj.lower() in STMT_WORDS and last is not None:",
+                                                                   "            elif False:")]),
+    ('T55', 'H29', 'a bracket around the statement ends no see\'s expression', [("                if depth == 0:\n                    break   # it closes what holds the statement (a brace object's `}`)",
+                                                                                 "                if False:\n                    break   # it closes what holds the statement (a brace object's `}`)")]),
     ('T21', 'H17', 'a call through a receiver is respelled', [
         ("        if k != 'id' or v.startswith(('$', '@')) or is_member(toks, i) or is_symbol(toks, i):",
          "        if k != 'id' or v.startswith(('$', '@')) or is_symbol(toks, i):")]),

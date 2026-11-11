@@ -32,7 +32,7 @@ T = '\t'
 CASES = [
     ('H01', 'K', 'a keyword in another case is lowered; a symbol, a string and a comment are not', {
         'main.ring': ['If 1 = 1 See "If" Ok   # If stays in a comment', 'x = :Next', 'For i = 1 To 2 Next']},
-     [("applied['main.haro']", 'if 1 = 1 see "If" end   # If stays in a comment\nx = :Next\nfor i = 1 to 2 end\n')]),
+     [("applied['main.haro']", 'if 1 = 1 FWrite(stdout, "If") end   # If stays in a comment\nx = :Next\nfor i = 1 to 2 end\n')]),
     ('H02', 'B', 'a built-in is spelled as Haro writes it; a function the tree defines is left as written', {
         'main.ring': ['? len("ab")', '? upper("a")', '? isnull(1)', 'func f', T + '? trim(" a ")'],
         'lib.ring': ['func trim x', T + 'return x']},
@@ -156,15 +156,15 @@ CASES = [
      [("applied['main.haro'].count('\\tend\\n')", 4),
       ("[w for w in ('ok', 'off', 'done', 'other', '{', '}') if w in applied['main.haro']]", []),
       ("applied['main.haro'].splitlines()[14:16]", ['end', 'func g']),
-      ("'\\tcase 1 see \"b\"' in applied['main.haro'] and '\\telse see \"c\"' in applied['main.haro']", True)]),
+      ("'\\tcase 1 FWrite(stdout, \"b\")' in applied['main.haro'] and '\\telse FWrite(stdout, \"c\")' in applied['main.haro']", True)]),
     ('H29', 'O', 'one word each, from, #, this outside a brace, parameters in parentheses and none without, no trailing period', {
         'main.ring': ['k()', 'class P', 'class Q : P', T + 'func g', T + T + '? classname(self) // the object', T + T + 'new P { see self }',
                       'def h a, b', T + 'if a && !b', T + T + 'put "x"', T + 'but a || b', T + T + 'get v', T + 'ok', 'func k()', T + 'h(1, 0).']},
      [("'class Q from P' in applied['main.haro'] and '? ClassName(this) # the object' in applied['main.haro']", True),
-      ("'new P { see self }' in applied['main.haro']", True),
+      ("'new P { FWrite(stdout, self) }' in applied['main.haro']", True),
       ("[l for l in applied['main.haro'].splitlines() if l.startswith(('def h(', 'def k'))]", ['def h(xA, xB)', 'def k']),
       ("' and not ' in applied['main.haro'] and ' or ' in applied['main.haro'] and '\\telseif ' in applied['main.haro']", True),
-      ("'\\t\\tsee \"x\"' in applied['main.haro'] and '\\t\\tgive ' in applied['main.haro'] and '\\th(1, 0)\\n' in applied['main.haro']", True)]),
+      ("'\\t\\tFWrite(stdout, \"x\")' in applied['main.haro'] and '\\t\\tgive ' in applied['main.haro'] and '\\th(1, 0)\\n' in applied['main.haro']", True)]),
     ('H30', 'O', 'a tree in every spelling ported runs on haro and prints what it printed', {
         'main.ring': ['f(2)', 'func f n', T + 'for i = 1 to n', T + T + 'if i = 1 put "a" but i = 2 see "b" ok', T + 'next',
                       T + 'switch n on 2 put "c" other put "d" off', T + 'try raise("e") catch put "f" done', T + 'if n = 2 && !(n = 3) { put "g" }',
@@ -183,10 +183,15 @@ CASES = [
     ('H32', 'O', 'a dot that ends a line continues a chain: it moves to the start of the next line; a call\'s period before a keyword goes', {
         'main.ring': ['o = new P', 'o.FillQ(1).StrokeQ(2).', '  AddRect(3)', 'o.Name().', 'see "x"', 'class P',
                       'func FillQ n return self', 'func StrokeQ n return self', 'func AddRect n see n', 'func Name return "p"']},
-     [("applied['main.haro'].splitlines()[1:5]", ['o.FillQ(1).StrokeQ(2)', '  .AddRect(3)', 'o.Name()', 'see "x"'])]),
+     [("applied['main.haro'].splitlines()[1:5]", ['o.FillQ(1).StrokeQ(2)', '  .AddRect(3)', 'o.Name()', 'FWrite(stdout, "x")'])]),
     ('H33', 'O', 'a definition whose name starts with a digit loses its empty parentheses', {
         'main.ring': ['func 2Hearts()', '  return 2', 'func 3Ways(n)', '  return n']},
      [("[l for l in applied['main.haro'].splitlines() if 'Hearts' in l or 'Ways' in l]", ['func 2Hearts', 'func 3Ways(xN)'])]),
+    # v0.57 (D69): written before its code
+    ('H34', 'O', 'see and put: a line that ends with + nl prints with print, any other writes through the stream', {
+        'main.ring': ['see "a" + nl', 'put "b"', 'x = 2', 'see x', '  see "c" + x + nl  # a comment', '? "d"']},
+     [("applied['main.haro'].splitlines()[:2]", ['print "a"', 'FWrite(stdout, "b")']),
+      ("applied['main.haro'].splitlines()[3:6]", ['FWrite(stdout, x)', '  print "c" + x  # a comment', '? "d"'])]),
     ('H11', '-', 'the ported tree runs on haro and prints what the classic Ring surface printed', {
         'main.ring': ['load "lib.ring"', 'cName = Greet("ada")', '? cName', '? Len(cName)'],
         'lib.ring': ['func Greet cWho', T + 'cOut = "hi " + cWho', T + 'return cOut']},

@@ -18,6 +18,7 @@ THE REWRITES, in this order, each on code only (a string, a comment, a symbol's 
      letter is v and the element's (an/ac/ao/aa -> vi/vt/vo/vv); an ALL_CAPS name and an @Capitalised attribute take their letter by what
      they hold (1 or 0 alone and never counted: a boolean)
   Y  a b name given 1 or 0 is given true or false, and a condition on a literal 1 or 0 is on true or false
+  O  (D69) see and put: `see E + nl` is `print E`, any other is `FWrite(stdout, E)`
   O  (D67, HARO-ONEFORM-01) one form for each construct: every block ends with `end` (never ok, next, off, done, endX, braces), a
      definition has no end word, one word each (func, elseif, else, case, for, see, give, exit, loop, and, or, not, from), `#` for a
      comment, `this` outside a brace object, parameters in parentheses and none without, no period after a call ending a statement
@@ -287,6 +288,7 @@ def port_file(rel, src, tree_funcs, tree_names, c_map, refused):
     renames.extend(('P', ':' + k, '[:' + k + ', ...]') for k in pairs)
     toks = one_form(toks, renames)
     toks = def_ends(toks, renames)
+    toks = printing(toks, renames)
     return ''.join(v for _, v in toks), renames
 
 
@@ -536,7 +538,7 @@ def bool_literals(toks, renames):
             renames.append(('Y', v, word))
 
 
-ONE_WORD = {'but': 'elseif', 'other': 'else', 'on': 'case', 'foreach': 'for', 'put': 'see', 'get': 'give', 'break': 'exit',
+ONE_WORD = {'but': 'elseif', 'other': 'else', 'on': 'case', 'foreach': 'for', 'get': 'give', 'break': 'exit',
             'continue': 'loop'}
 OPENS = ('if', 'while', 'for', 'foreach', 'switch', 'try', 'do')
 CLOSES = ('ok', 'next', 'off', 'done', 'endif', 'endwhile', 'endfor', 'endswitch', 'endtry', 'end')
@@ -675,6 +677,69 @@ def one_form(toks, renames):
     return [x for x in out if x[1] != '' or x[0] == 'nl']
 
 
+# the words that end a `see`'s expression on its line: the next statement, or the end of the block around it
+STMT_WORDS = {'if', 'elseif', 'else', 'end', 'case', 'while', 'for', 'switch', 'try', 'catch', 'finally', 'return', 'see', 'put', 'print',
+              'give', 'exit', 'loop', 'func', 'def', 'class', 'ok', 'next', 'off', 'done', 'but', 'other', 'on'}
+
+
+def printing(toks, renames):
+    """O (D69): `see E + nl` and `put E + nl` are `print E`; any other `see E` or `put E` is `FWrite(stdout, E)` -- the expression read to
+    the line's end or to the next statement word, outside brackets"""
+    out = [list(x) for x in toks]
+    i = 0
+    while i < len(out):
+        k, v = out[i]
+        if not (k == 'id' and v in ('see', 'put') and not is_member(out, i) and not is_symbol(out, i)):
+            i += 1
+            continue
+        # the expression: from the next token to the line's end or a statement word at depth 0
+        j = i + 1
+        depth = 0
+        last = None
+        while j < len(out):
+            kj, vj = out[j]
+            if kj == 'nl' or (kj == 'cm' and depth == 0):
+                break
+            if kj == 'op' and vj in '([{':
+                depth += 1
+            elif kj == 'op' and vj in ')]}':
+                if depth == 0:
+                    break   # it closes what holds the statement (a brace object's `}`)
+                depth -= 1
+            elif kj in ('id', 'op') and depth == 0 and vj.lower() in STMT_WORDS and last is not None:
+                # a word rule O wrote over an operator (a block's `}` is `end`) keeps the operator's kind
+                break
+            if kj != 'ws':
+                last = j
+            j += 1
+        if last is None:
+            i += 1
+            continue
+        # `... + nl` at its end: the line is print's
+        a = last
+        b = sig(out, a, -1)
+        if out[a][0] == 'id' and out[a][1].lower() == 'nl' and b is not None and out[b][1] == '+':
+            for x in range(b, a + 1):
+                out[x][1] = ''
+            # the blank before the `+` goes too
+            y = b - 1
+            while y > i and out[y][0] == 'ws':
+                out[y][1] = ''
+                y -= 1
+            renames.append(('O', v + ' ... + nl', 'print'))
+            out[i][1] = 'print'
+        else:
+            n = sig(out, i, 1)
+            for x in range(i + 1, n):
+                out[x][1] = ''
+            out[i][1] = 'FWrite(stdout,'
+            out[n][1] = ' ' + out[n][1]
+            out[last][1] = out[last][1] + ')'
+            renames.append(('O', v, 'FWrite(stdout, ...)'))
+        i = j
+    return [x for x in out if x[1] != '' or x[0] == 'nl']
+
+
 def body_on_own_line(out, j, b, renames):
     """a definition named at out[j] whose header ends at out[b]: a body on the same line goes to a line of its own, one level in"""
     c = sig(out, b, 1)
@@ -796,9 +861,17 @@ def def_ends(toks, renames):
         else:
             # an empty line: the end stands after the newline before it
             out[a - 1][1] = out[a - 1][1] + txt
-    for x, txt in after.items():
-        out[x][1] = out[x][1] + txt
-    return out
+    # each end its own tokens -- a newline, its indentation, the word -- so a later rule reads the token before it unchanged
+    res = []
+    for x, tok in enumerate(out):
+        res.append(tok)
+        for part in after.get(x, '').split('\n')[1:]:
+            res.append(['nl', '\n'])
+            ind = part[:len(part) - len(part.lstrip())]
+            if ind:
+                res.append(['ws', ind])
+            res.append(['id', part.lstrip()])
+    return res
 
 
 def spaced(out, i):
