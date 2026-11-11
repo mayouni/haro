@@ -22,6 +22,11 @@ Fixtures first (69bbef6: 7 cases, 5 failing before the code; R02, `?` itself, an
   bytes for five, no column moves -- so the parser reads the `?` statement.
 - `compile.zig`: `see` and `put` in a see statement are refused by the one-form walk, naming `print`.
 
+## A correction found on stzlib, after the code
+
+stzlib's stzObject defines a method named `print`; the first build wrote its name as `?`. A definition's name is no statement: R08, plant
+P5.
+
 ## Haro's code, and haroport
 
 `study/v57/printing.py` rewrote Haro's own code (a tool commit): `see E + nl` is `print E` (11 lines), a `see` that ends no line is

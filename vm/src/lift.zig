@@ -593,6 +593,7 @@ fn bracesText(alloc: std.mem.Allocator, src: []const u8, name: []const u8) ?Brac
     var i: usize = 0;
     var row: u32 = 0;
     var prev: u8 = '\n'; // the last byte of code before this one, blanks left out
+    var after_def = false; // the word before this one opened a definition: this one is its name
     scan: while (i < n) {
         const ch = src[i];
         if (ch == '\n') {
@@ -642,10 +643,20 @@ fn bracesText(alloc: std.mem.Allocator, src: []const u8, name: []const u8) ?Brac
         if (ch == '$' or ch == '@') i += 1;
         while (i < n and wordByte(src[i])) i += 1;
         const w = src[s..i];
+        const line_prev = prev; // '\n' when the word begins its line
         const named = !(prev == '.' or prev == ':' or ch == '$' or ch == '@' or std.ascii.isDigit(ch));
         prev = 'a';
         if (!named) continue;
-        const def = eq(w, "func") or eq(w, "def") or eq(w, "class") or eq(w, "package");
+        var def = eq(w, "func") or eq(w, "def") or eq(w, "class") or eq(w, "package");
+        if (def) {
+            // a definition begins its line; `func` anywhere else -- `x = func { ... }`, `o.SetScope(func(oDg) { ... })` -- is a
+            // function written in place, closed by its brace, and no `end` is its (stzlib's stzSoundTransport, stzChoroplethDiagram)
+            if (line_prev != '\n') def = false;
+            var q = i;
+            while (q < n and (src[q] == ' ' or src[q] == '\t')) q += 1;
+            if (q < n and src[q] == '{') def = false;
+        }
+        if (def) after_def = true;
         if (def) {
             // the header's code ends before the line's comment or its end
             var j = i;
@@ -691,9 +702,12 @@ fn bracesText(alloc: std.mem.Allocator, src: []const u8, name: []const u8) ?Brac
             break :scan;
         }
         if (eq(w, "print")) {
-            prints.append(alloc, @intCast(s)) catch return null;
+            // a definition's name is no statement: `def print` is a method called print (stzlib's stzObject has one)
+            if (!after_def) prints.append(alloc, @intCast(s)) catch return null;
+            after_def = false;
             continue;
         }
+        after_def = false;
         if (eq(w, "again")) {
             _ = stack.pop();
             continue;

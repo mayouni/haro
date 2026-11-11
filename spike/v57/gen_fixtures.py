@@ -44,6 +44,10 @@ CASES = [
     ('R05', 'P2', 'put is refused: print', ['? "before"', 'f()', 'func f', T + 'put "a"', 'end'], refused('R05', 4, PRINT, 'put'), 1),
     ('R06', 'P3', 'output that ends no line goes through the stream', ['FWrite(stdout, "a")', 'FWrite(stdout, "b")', 'print "c"'],
      'abc\n', 0),
+    # R08 written after the code, said so: stzlib's stzObject has a method named print, which the first build rewrote as `?`
+    ('R08', 'P1', 'a method named print is a method; the statement print beside it prints', [
+        'oP = new P', 'oP.print()', 'print "b"', 'class P', T + 'def print', T + T + 'print "a"', T + 'end', 'end'],
+     'a\nb\n', 0),
     ('R07', 'P4', 'a .ring file: see, put, ? as Ring reads them, and print(...) is the function it calls', [
         'see "a"', 'put "b"', '? "c"', 'print("d")', 'func print t', '  see "[" + t + "]" + nl'],
      'abc\n[d]\n', 0),

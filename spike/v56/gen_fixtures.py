@@ -113,6 +113,14 @@ CASES = [
     ('E20', 'G1', 'an eval\'s text: a within closed by end restores its global', [
         '$tG = "a"', 'f()', '? $tG', 'func f', T + 'Eval("within $tG = " + Char(34) + "b" + Char(34) + nl + "? $tG" + nl + "end")', 'end'],
      'b\na\n', 0),
+    # E21 written after the code, said so: stzlib's stzSoundTransport passes a function written in place, `func { ... }`, which the
+    # first scan read as a definition waiting for its end
+    ('E21', 'G1', 'a function written in place, func { ... }, is closed by its brace', [
+        'f()', 'func f', T + 'xG = func { return 7 }', T + 'print call xG()', 'end'],
+     '7\n', 0),
+    ('E22', 'G1', 'a function written in place with parameters, inside a call, is closed by its brace', [
+        'f()', 'func f', T + 'xG = Twice(func(iX) { return iX * 2 })', T + 'print xG', 'end', 'func Twice(xF)', T + 'return call xF(4)', 'end'],
+     '8\n', 0),
     # G4 -- a .ring file reads as Ring reads it
     ('E12', 'G4', 'a .ring file: a func after a class is its method, a statement after a func belongs to it', [
         'o = new P', 'o.g()', 'f()', 'func f', '? "f"', '? "still f"', 'class P', 'func g', '? "g, a method"'],

@@ -25,6 +25,8 @@ PLANTS = [
      [('            .{ .w = "see", .p = "see_statement", .why = "one spelling: `print`; written" },', '')]),
     ('P4', 'R05', 'put passes', COMP,
      [('            .{ .w = "put", .p = "see_statement", .why = "one spelling: `print`; written" },', '')]),
+    ('P5', 'R08', 'a definition named print is rewritten as ?', LIFT,
+     [('            if (!after_def) prints.append(alloc, @intCast(s)) catch return null;', '            prints.append(alloc, @intCast(s)) catch return null;')]),
 ]
 
 

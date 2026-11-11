@@ -174,6 +174,22 @@
    "stdout": "b\na\n"
   },
   {
+   "id": "E21",
+   "kind": "run",
+   "line": "G1",
+   "why": "a function written in place, func { ... }, is closed by its brace",
+   "file": "cases/E21.haro",
+   "stdout": "7\n"
+  },
+  {
+   "id": "E22",
+   "kind": "run",
+   "line": "G1",
+   "why": "a function written in place with parameters, inside a call, is closed by its brace",
+   "file": "cases/E22.haro",
+   "stdout": "8\n"
+  },
+  {
    "id": "E12",
    "kind": "run",
    "line": "G4",

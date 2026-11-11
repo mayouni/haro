@@ -1,0 +1,5 @@
+f()
+func f
+	xG = func { return 7 }
+	print call xG()
+end

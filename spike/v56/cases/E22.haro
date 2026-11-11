@@ -1,0 +1,8 @@
+f()
+func f
+	xG = Twice(func(iX) { return iX * 2 })
+	print xG
+end
+func Twice(xF)
+	return call xF(4)
+end

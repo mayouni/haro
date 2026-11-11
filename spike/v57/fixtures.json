@@ -60,6 +60,14 @@
    "stdout": "abc\n"
   },
   {
+   "id": "R08",
+   "kind": "run",
+   "line": "P1",
+   "why": "a method named print is a method; the statement print beside it prints",
+   "file": "cases/R08.haro",
+   "stdout": "a\nb\n"
+  },
+  {
    "id": "R07",
    "kind": "run",
    "line": "P4",

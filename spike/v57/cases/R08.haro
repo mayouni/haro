@@ -1,0 +1,8 @@
+oP = new P
+oP.print()
+print "b"
+class P
+	def print
+		print "a"
+	end
+end

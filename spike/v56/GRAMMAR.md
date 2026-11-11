@@ -55,6 +55,13 @@ ported tree, takes a one-line definition's body to its own line, moves a dot tha
 (HARO-PORTTOOL-CHAINDOT-01: 342 chains in stzlib were being cut into a call and a global call) and reads a name that starts with a digit
 (HARO-PORTTOOL-DIGITNAME-01).
 
+## Corrections found on stzlib, after the code
+
+stzlib ported by rule O and censused on the v0.57 build named two shapes the token scan read wrong, each now a case and a plant: a function
+written in place, `func { ... }` (E21, L10), and one with parameters inside a call, `o.SetScope(func(oDg) { ... })` (E22, L11) -- a
+definition begins its line, and a `func` anywhere else is closed by its brace. With them stzlib's census went from 83% to 90%, and no
+`def` outside a class or attribute outside one is left.
+
 ## Named
 
 - The shared haro.exe was replaced by a build of this uncommitted work on 2026-11-11 for some hours; Radar found its tools stopped

@@ -57,6 +57,10 @@ PLANTS = [
     ('L9', 'E20', 'an end an eval span gave away closes no block', LIFT,
      [('    if (!eq(parent, "function_definition") and !eq(parent, "class_definition") and !eq(parent, "package_definition") and !eq(parent, "ERROR"))',
        '    if (parent.len < 1000000)')]),
+    ('L10', 'E21', 'a function written in place opens a definition', LIFT,
+     [("            if (q < n and src[q] == '{') def = false;", "            if (q > n) def = false;")]),
+    ('L11', 'E22', 'a func that does not begin its line opens a definition', LIFT,
+     [("            if (line_prev != '\\n') def = false;", "            if (line_prev == 0) def = false;")]),
 ]
 
 
