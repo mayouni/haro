@@ -4,6 +4,6 @@ func f
 		raise("x")
 	catch
 		? cCatchError + "!"
-		see cCatchError
+		FWrite(stdout, cCatchError)
 	end
 end

@@ -69,7 +69,7 @@ end
 # nothing here: a declaration is printed before it is judged, so an author sees the spelling of what was written
 func HaroFmt(tText)
 	try
-		see BlkPrintC6(BlkLoad(tText))
+		FWrite(stdout, BlkPrintC6(BlkLoad(tText)))
 	catch
 		? cCatchError
 	end

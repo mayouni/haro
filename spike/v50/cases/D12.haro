@@ -1,6 +1,6 @@
 give tA
 while not FEOF(stdin)
-	see "[" + tA + "]" + nl
+	print "[" + tA + "]"
 	give tA
 end
-see "end" + nl
+print "end"

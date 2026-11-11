@@ -4,7 +4,7 @@ func main
 		if tLine = "" and FEOF(stdin)
 			exit
 		end
-		see "got [" + tLine + "]" + nl
+		print "got [" + tLine + "]"
 	end
-	see "bye" + nl
+	print "bye"
 end

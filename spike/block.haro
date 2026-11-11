@@ -27,7 +27,7 @@ else
 		end
 	elseif tVerb = "fmt"
 		try
-			see BlkPrintC6(BlkLoad(Read(sysargv[4])))
+			FWrite(stdout, BlkPrintC6(BlkLoad(Read(sysargv[4]))))
 		catch
 			? cCatchError
 		end

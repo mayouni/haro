@@ -1,5 +1,5 @@
-see "ready" + nl
+print "ready"
 FFlush(stdout)
 while not FExists("go.txt")
 end
-see "went" + nl
+print "went"
