@@ -4,4 +4,4 @@ func m2
 		Raise("dropped")
 	finally
 		return "from finally"
-	done
+	end

@@ -24,14 +24,14 @@ else
 			? BlkDumpAll(BlkLoad(Read(sysargv[4])))
 		catch
 			? cCatchError
-		done
-	but tVerb = "fmt"
+		end
+	elseif tVerb = "fmt"
 		try
 			see BlkPrintC6(BlkLoad(Read(sysargv[4])))
 		catch
 			? cCatchError
-		done
-	but tVerb = "same"
+		end
+	elseif tVerb = "same"
 		if Len(sysargv) < 5
 			? "usage: block.haro same <a> <b>"
 		else
@@ -42,19 +42,19 @@ else
 					? "same"
 				else
 					? "differ"
-				ok
+				end
 			catch
 				? cCatchError
-			done
-		ok
-	but tVerb = "roundtrip"
+			end
+		end
+	elseif tVerb = "roundtrip"
 		for k = 4 to Len(sysargv)
 			BlkRoundTrip(sysargv[k])
-		next
+		end
 	else
 		? "usage: block.haro load <file> | fmt <file> | same <a> <b> | roundtrip <file> ..."
-	ok
-ok
+	end
+end
 
 # a function, not top-level code: a name assigned at the top level is a global on this surface, and a function's
 # own names must not be those (haro.haro's note)
@@ -68,7 +68,7 @@ func BlkRoundTrip(tPath)
 			? "ok " + tPath + " " + Len(aA) + " " + Len(tIn) + " " + Len(tOut)
 		else
 			? "DIFFERS " + tPath
-		ok
+		end
 	catch
 		? "refused " + tPath + ": " + cCatchError
-	done
+	end

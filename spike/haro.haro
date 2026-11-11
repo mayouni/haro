@@ -47,12 +47,12 @@ else
 	bAll = false
 	bFmt = false
 	if Len(sysargv) >= 4
-		if sysargv[4] = "all" bAll = true ok
-		if sysargv[4] = "fmt" bFmt = true ok
-	ok
+		if sysargv[4] = "all" bAll = true end
+		if sysargv[4] = "fmt" bFmt = true end
+	end
 	if bFmt
 		HaroFmt(tSrc)
-	but bAll
+	elseif bAll
 		HaroAll(tSrc)
 	else
 		try
@@ -60,9 +60,9 @@ else
 			StzuPrintLanguage(aLang)
 		catch
 			? cCatchError
-		done
-	ok
-ok
+		end
+	end
+end
 
 # v0.30: `fmt` -- the canonical printing of the declaration (BLOCKS.md 3.2): the one reader of C6 reads it into a
 # block and the one printer prints it; a text the reader refuses prints the refusal line. The meta-court judges
@@ -72,7 +72,7 @@ func HaroFmt(tText)
 		see BlkPrintC6(BlkLoad(tText))
 	catch
 		? cCatchError
-	done
+	end
 
 # v0.15: `all` -- every defect of the declaration, one line each, in the order of the file.
 # A FUNCTION, not top-level code, on purpose: on Ring a bare assignment inside a function to a
@@ -87,16 +87,16 @@ func HaroAll(tText)
 		aL = StzuDeclare(tText)
 	catch
 		tE = cCatchError
-	done
+	end
 	$bStzuCollect = false
 	if tE != ""
 		$aStzuFound + [StzuLineOf(tE), StzuStripPrefix(tE)]
-	ok
+	end
 	if Len($aStzuFound) > 0
 		aFd = StzuSortFound($aStzuFound)
 		for k = 1 to Len(aFd)
 			? "haro (line " + String(aFd[k][1]) + "): " + String(aFd[k][2])
-		next
+		end
 	else
 		StzuPrintLanguage(aL)
-	ok
+	end

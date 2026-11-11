@@ -7,14 +7,14 @@ func f
 				Raise("x")
 			catch e
 				? "span line " + String(e.Span()[:line])
-			done
+			end
 			? "g " + $tG
-		done
-	done
+		end
+	end
 	? "g " + $tG
 class Res
 	tName = ""
-	func init tN
+	func init(tN)
 		tName = tN
 	func release
 		? "release " + tName

@@ -5,4 +5,4 @@ func f
 	? IsList([])
 	if IsNull(null)
 		? "none"
-	ok
+	end

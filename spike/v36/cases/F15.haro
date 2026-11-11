@@ -4,4 +4,4 @@ func m
 		return "from body"
 	finally
 		return "from finally"
-	done
+	end

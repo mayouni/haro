@@ -6,7 +6,7 @@ func f
 	? $tG
 class Res
 	tName = ""
-	func init tN
+	func init(tN)
 		tName = tN
 	func release
 		? "release " + tName

@@ -1,6 +1,6 @@
 ? "before"
 f(1)
-func f xP
+func f(xP)
 	within xP = 2
 		? xP
-	done
+	end

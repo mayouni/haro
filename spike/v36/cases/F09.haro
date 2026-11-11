@@ -4,11 +4,11 @@ func w
 	while true
 		nN++
 		try
-			if nN = 3 exit ok
+			if nN = 3 exit end
 		catch
 			? "no"
 		finally
 			? "finally " + String(nN)
-		done
+		end
 	end
 	? "after " + String(nN)

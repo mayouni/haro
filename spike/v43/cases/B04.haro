@@ -4,4 +4,4 @@ func f
 	nCount = 3
 	if nCount
 		? "some"
-	ok
+	end

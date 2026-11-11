@@ -2,7 +2,7 @@ $tCaller = "nobody"
 within $tCaller = "agent-x"
 	? "in: " + $tCaller
 	who()
-done
+end
 ? "after: " + $tCaller
 func who
 	? "who: " + $tCaller

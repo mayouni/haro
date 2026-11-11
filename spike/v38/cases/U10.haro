@@ -3,15 +3,15 @@ func f
 	try
 		using $xR = new Res("a")
 			swap()
-		done
+		end
 	catch e
 		? "caught: " + e
-	done
+	end
 func swap
 	$xR = 5
 class Res
 	tName = ""
-	func init tN
+	func init(tN)
 		tName = tN
 	func release
 		? "release " + tName

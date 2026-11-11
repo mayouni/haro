@@ -5,8 +5,8 @@ try
 		try
 			Raise("inner")
 		catch
-		done
-	done
+		end
+	end
 catch
 	? "outer caught: " + cCatchError
-done
+end

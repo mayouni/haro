@@ -2,7 +2,7 @@ load "old.ring"
 oThing = new OldK
 if oThing.IsOn()
 	? "on"
-ok
+end
 bOff = oThing.IsOff()
 ? bOff
 ? not oThing.IsOff()

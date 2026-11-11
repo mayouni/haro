@@ -1,6 +1,6 @@
 ? "before"
 if HaroOne()
 	? "one"
-ok
+end
 func HaroOne
 	return 1

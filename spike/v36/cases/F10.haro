@@ -5,7 +5,7 @@ func h
 			return "value"
 		finally
 			? "inner finally"
-		done
+		end
 	finally
 		? "outer finally"
-	done
+	end

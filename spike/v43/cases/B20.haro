@@ -4,4 +4,4 @@ func f
 		? "a" + 1
 	catch e
 		? e.Code()
-	done
+	end

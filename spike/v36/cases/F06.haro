@@ -5,7 +5,7 @@ try
 		Raise("in handler")
 	finally
 		? "finally after handler raise"
-	done
+	end
 catch
 	? "outer: " + cCatchError
-done
+end

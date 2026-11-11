@@ -3,7 +3,7 @@ func main
 		give tLine
 		if tLine = "" and FEOF(stdin)
 			exit
-		ok
+		end
 		see "got [" + tLine + "]" + nl
 	end
 	see "bye" + nl

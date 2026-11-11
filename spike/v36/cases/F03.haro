@@ -3,8 +3,8 @@ try
 		Raise("only")
 	finally
 		? "finally"
-	done
+	end
 	? "not reached"
 catch
 	? "outer: " + cCatchError
-done
+end

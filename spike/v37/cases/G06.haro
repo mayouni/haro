@@ -7,4 +7,4 @@ catch e
 	? Type(e)
 	? e = "boom"
 	? IsString(e)
-done
+end

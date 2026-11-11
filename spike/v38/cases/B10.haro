@@ -5,5 +5,5 @@ within $tG = "b"
 	catch
 		? "caught in " + $tG
 	end
-done
+end
 ? $tG

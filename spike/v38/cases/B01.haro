@@ -3,9 +3,9 @@ try
 	within $nG = 1
 		within $nG = 2
 			? "inner " + String($nG)
-		done
+		end
 		? "outer " + String($nG)
-	done
+	end
 	Raise("go")
 catch
 	within $nG = 3
@@ -14,8 +14,8 @@ catch
 			Raise("again")
 		catch
 			? "nested catch " + String($nG)
-		done
-	done
+		end
+	end
 	? "after catch block " + String($nG)
-done
+end
 ? "end " + String($nG)

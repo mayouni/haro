@@ -3,10 +3,10 @@ try
 catch e
 	? e
 	? "[" + e.Cause() + "]"
-done
+end
 func k
 	try
 		return "value"
 	finally
 		Raise("instead")
-	done
+	end

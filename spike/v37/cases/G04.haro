@@ -2,4 +2,4 @@ try
 	Raise("x4")
 catch err   # the error
 	? "err=" + err
-done
+end

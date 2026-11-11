@@ -6,6 +6,6 @@ for i = 1 to 2
 		loop
 	finally
 		? "finally " + String(i)
-	done
+	end
 	? "not reached " + i
-next
+end

@@ -4,4 +4,4 @@ func p
 		Raise("plugin failed")
 	catch tError
 		? "handled: " + tError
-	done
+	end

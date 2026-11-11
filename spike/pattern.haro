@@ -43,8 +43,8 @@ else
 		PatCases(Read(sysargv[4]))
 	else
 		? "usage: pattern.haro cases <file>"
-	ok
-ok
+	end
+end
 
 # the first word of a line and the rest after one space
 func PatSplit1(tLine)
@@ -53,7 +53,7 @@ func PatSplit1(tLine)
 	while nI <= nN and tLine[nI] != " "
 		nI++
 	end
-	if nI > nN return [tLine, ""] ok
+	if nI > nN return [tLine, ""] end
 	return [Left(tLine, nI - 1), SubStr(tLine, nI + 1)]
 
 func PatWords(tText)
@@ -64,12 +64,12 @@ func PatWords(tText)
 			if Len(tW) > 0
 				aOut + tW
 				tW = ""
-			ok
+			end
 		else
 			tW += tText[i]
-		ok
-	next
-	if Len(tW) > 0 aOut + tW ok
+		end
+	end
+	if Len(tW) > 0 aOut + tW end
 	return aOut
 
 func PatCases(tBody)
@@ -88,11 +88,11 @@ func PatCases(tBody)
 		tLine = aLines[i]
 		if Len(tLine) > 0 and tLine[Len(tLine)] = Char(13)
 			tLine = Left(tLine, Len(tLine) - 1)
-		ok
+		end
 		aP = PatSplit1(tLine)
 		tCmd = aP[1]
 		if tCmd = "case"
-			if bOpen PatOneCase(tId, aNames, aTexts, aSetN, aSetM, tStart, nInput, tInput, tFile) ok
+			if bOpen PatOneCase(tId, aNames, aTexts, aSetN, aSetM, tStart, nInput, tInput, tFile) end
 			bOpen = true
 			tId = aP[2]
 			aNames = []
@@ -103,29 +103,29 @@ func PatCases(tBody)
 			nInput = 0
 			tInput = ""
 			tFile = ""
-		but tCmd = "rule"
+		elseif tCmd = "rule"
 			aQ = PatSplit1(aP[2])
 			aNames + aQ[1]
 			aTexts + aQ[2]
-		but tCmd = "set"
+		elseif tCmd = "set"
 			aW = PatWords(aP[2])
 			aSetN + aW[1]
 			aMem = []
 			for k = 2 to Len(aW)
 				aMem + aW[k]
-			next
+			end
 			aSetM + aMem
-		but tCmd = "start"
+		elseif tCmd = "start"
 			tStart = aP[2]
-		but tCmd = "input"
+		elseif tCmd = "input"
 			nInput = 1
 			tInput = aP[2]
-		but tCmd = "file"
+		elseif tCmd = "file"
 			nInput = 2
 			tFile = aP[2]
-		ok
-	next
-	if bOpen PatOneCase(tId, aNames, aTexts, aSetN, aSetM, tStart, nInput, tInput, tFile) ok
+		end
+	end
+	if bOpen PatOneCase(tId, aNames, aTexts, aSetN, aSetM, tStart, nInput, tInput, tFile) end
 
 func PatOneCase(tId, aNames, aTexts, aSetN, aSetM, tStart, nInput, tInput, tFile)
 	try
@@ -133,12 +133,12 @@ func PatOneCase(tId, aNames, aTexts, aSetN, aSetM, tStart, nInput, tInput, tFile
 		if nInput = 0
 			? tId + " declared"
 		else
-			if nInput = 2 tInput = Read(tFile) ok
+			if nInput = 2 tInput = Read(tFile) end
 			aR = PatRun(tStart, tInput)
 			tWhole = "0"
-			if aR[1] tWhole = "1" ok
+			if aR[1] tWhole = "1" end
 			? tId + " match " + tWhole + " steps " + String(aR[3]) + " bound " + String(aR[4]) + " kept " + PatPrintKept(aR[2])
-		ok
+		end
 	catch
 		? tId + " refused " + cCatchError
-	done
+	end

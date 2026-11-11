@@ -16,14 +16,14 @@ if Len(sysargv) < 3
 	? "usage: cond_rt.haro <file>"
 else
 	CondRtRun(Read(sysargv[3]))
-ok
+end
 
 func CondRtRun(tBody)
 	aLines = Str2List(tBody)
 	for i = 1 to Len(aLines)
 		tLine = aLines[i]
-		if Len(tLine) > 0 and tLine[Len(tLine)] = Char(13) tLine = Left(tLine, Len(tLine) - 1) ok
-		if Len(tLine) = 0 loop ok
+		if Len(tLine) > 0 and tLine[Len(tLine)] = Char(13) tLine = Left(tLine, Len(tLine) - 1) end
+		if Len(tLine) = 0 loop end
 		tOne = ""
 		try
 			aA = CondParse(tLine)
@@ -34,9 +34,9 @@ func CondRtRun(tBody)
 				tOne = "ok " + tP
 			else
 				tOne = "DIFFERS " + tLine + " => " + tP
-			ok
+			end
 		catch
 			tOne = "unreadable " + tLine
-		done
+		end
 		? tOne
-	next
+	end

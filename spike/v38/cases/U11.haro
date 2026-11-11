@@ -3,9 +3,9 @@ func f
 	try
 		using xO = boom()
 			? "body ran"
-		done
+		end
 	catch e
 		? "caught " + e
-	done
+	end
 func boom
 	Raise("no value")

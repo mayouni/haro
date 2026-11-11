@@ -7,7 +7,7 @@ func f
 	oO = new Point
 	? oO.GetX()
 	? $nTotal
-func Twice nN
+func Twice(nN)
 	return nN * 2
 class Point
 	@nX = 3

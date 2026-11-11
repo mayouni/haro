@@ -5,8 +5,8 @@ try
 		Raise("handler")
 	finally
 		Raise("cleanup")
-	done
+	end
 catch e
 	? e
 	? e.Cause()
-done
+end

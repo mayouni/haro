@@ -2,4 +2,4 @@ try
 	Raise("x1")
 catch e
 	? "e=" + e
-done
+end

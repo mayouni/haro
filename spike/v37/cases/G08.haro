@@ -6,9 +6,9 @@ func g
 	catch e
 		? e.Code()
 		? e
-	done
+	end
 	try
 		nX = 1 / 0
 	catch e2
 		? e2.Code()
-	done
+	end

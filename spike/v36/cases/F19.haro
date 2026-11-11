@@ -2,8 +2,8 @@
 func r
 	try
 		for i = 1 to 5
-			if i = 2 return "at " + String(i) ok
-		next
+			if i = 2 return "at " + String(i) end
+		end
 	finally
 		? "finally once"
-	done
+	end

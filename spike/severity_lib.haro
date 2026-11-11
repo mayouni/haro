@@ -14,10 +14,10 @@
 
 # the severity a kind holds a seat at: "warning", "error", or "" (an error, as every seat is)
 func SevSeatIs(aKind, tSeat)
-	if Len(aKind) < 7 return "" ok
+	if Len(aKind) < 7 return "" end
 	for i = 1 to Len(aKind[7])
-		if aKind[7][i][1] = tSeat return aKind[7][i][2] ok
-	next
+		if aKind[7][i][1] = tSeat return aKind[7][i][2] end
+	end
 	return ""
 
 # a reference clause of a seat held at warning: each element that resolves to nothing is spoken, one warning per element, in the order
@@ -28,15 +28,15 @@ func SevWarnClause(aDecl, aSeat, aClause)
 		for i = 1 to Len(aV[2])
 			aSubV = [aV[1], [aV[2][i]], aV[3], aV[4]]
 			SevWarnOne(aDecl, aSeat, [aClause[1], aClause[2], aSubV, aClause[4], aClause[5]])
-		next
+		end
 	else
 		SevWarnOne(aDecl, aSeat, aClause)
-	ok
+	end
 
 func SevWarnOne(aDecl, aSeat, aClause)
 	CtSetCode("PARSE", [])
 	tWhy = CtCheckSeatValue(aDecl, aSeat, aClause, true)
-	if tWhy != "" $aCourtWarnings + [$tCourtCode, $aCourtCites, aClause[2], tWhy] ok
+	if tWhy != "" $aCourtWarnings + [$tCourtCode, $aCourtCites, aClause[2], tWhy] end
 	CtSetCode("PARSE", [])
 
 # a NAMED kind held at warning: its declaration is read past -- the name, AS, a body whose parentheses balance, RATIONALE and its string --
@@ -46,30 +46,30 @@ func SevSkipNamed(aRow, aK)
 	tWord = Lower(CtShown(aK))
 	tSev = ""
 	for i = 1 to Len(aRow[7])
-		if aRow[7][i][1] = tWord tSev = aRow[7][i][2] ok
-	next
-	if tSev != "warning" return false ok
+		if aRow[7][i][1] = tWord tSev = aRow[7][i][2] end
+	end
+	if tSev != "warning" return false end
 	tNamed = CtRefusalNamed("unknown_declaration", tWord)
 	aCC = CtRefusalCode("unknown_declaration", tWord, "UNKNOWN_KIND")
 	aName = CtExpect("ident", "a lower_snake name")
 	aAs = CtNext()
 	if not (aAs[1] = "keyword" and aAs[2] = "AS")
 		CtFail(aAs[3], "Expected AS after the name, found '" + CtShown(aAs) + "'")
-	ok
+	end
 	CtExpect("lparen", "'('")
 	nDepth = 1
 	while nDepth > 0
 		aT = CtNext()
 		if aT[1] = "eof"
 			CtFail(aK[3], Upper(tWord) + " " + aName[2] + " opens '(' and never closes it: a kind read past is still a declaration")
-		ok
-		if aT[1] = "lparen" nDepth++ ok
-		if aT[1] = "rparen" nDepth-- ok
+		end
+		if aT[1] = "lparen" nDepth++ end
+		if aT[1] = "rparen" nDepth-- end
 	end
 	aR = CtNext()
 	if not (aR[1] = "keyword" and aR[2] = "RATIONALE")
 		CtFail(aR[3], "RATIONALE is mandatory on every declaration (" + Upper(tWord) + " " + aName[2] + " has none)")
-	ok
+	end
 	CtExpect("string", "the RATIONALE string")
 	$aCourtWarnings + [aCC[1], aCC[2], aK[3], tNamed]
 	return true

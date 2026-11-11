@@ -2,11 +2,11 @@ f()
 func f
 	using oO = new Res("a")
 		? "in: " + oO.tName
-	done
+	end
 	? "after"
 class Res
 	tName = ""
-	func init tN
+	func init(tN)
 		tName = tN
 	func release
 		? "release " + tName

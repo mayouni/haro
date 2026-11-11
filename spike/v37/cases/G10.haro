@@ -4,4 +4,4 @@ catch e
 	? e.MESSAGE()
 	? e.message()
 	? "[" + e.code() + "]"
-done
+end

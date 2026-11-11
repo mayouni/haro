@@ -3,8 +3,8 @@ try
 		Raise("a")
 	finally
 		Raise(cCatchError)
-	done
+	end
 catch e
 	? e
 	? "[" + e.Cause() + "]"
-done
+end

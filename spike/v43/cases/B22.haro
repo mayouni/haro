@@ -4,4 +4,4 @@ func f
 	? Plus1(2 > 1)
 	if Ready()
 		? "ready"
-	ok
+	end

@@ -1,4 +1,4 @@
 load "old.ring"
 if OldText()
 	? "text"
-ok
+end

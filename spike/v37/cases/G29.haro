@@ -7,5 +7,5 @@ func g
 			? e.Message(1)
 		catch e2
 			? e2
-		done
-	done
+		end
+	end

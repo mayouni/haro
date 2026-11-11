@@ -1,5 +1,5 @@
 try
 	Raise("last one")
 catch e
-done
+end
 ? cCatchError

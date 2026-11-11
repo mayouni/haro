@@ -5,4 +5,4 @@ func f
 		within $nG = 1
 		? "x"
 	catch
-	done
+	end

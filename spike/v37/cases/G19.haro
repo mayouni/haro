@@ -5,8 +5,8 @@ try
 		? "handled it"
 	finally
 		Raise("after")
-	done
+	end
 catch e
 	? e
 	? "[" + e.Cause() + "]"
-done
+end

@@ -5,10 +5,10 @@ for i = 1 to 2
 				exit 2
 			finally
 				? "inner " + String(i) + String(j)
-			done
-		next
+			end
+		end
 	finally
 		? "outer " + String(i)
-	done
-next
+	end
+end
 ? "after"

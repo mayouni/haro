@@ -8,10 +8,10 @@ func g
 			? xT.Message()
 		catch e2
 			? e2
-		done
+		end
 		try
 			? e.Message().Message()
 		catch e3
 			? e3
-		done
-	done
+		end
+	end

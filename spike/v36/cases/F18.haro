@@ -4,9 +4,9 @@ func d
 	do
 		nN++
 		try
-			if nN = 2 loop ok
+			if nN = 2 loop end
 			? "body " + String(nN)
 		finally
 			? "finally " + String(nN)
-		done
+		end
 	again nN < 3

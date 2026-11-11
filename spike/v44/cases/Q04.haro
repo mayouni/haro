@@ -10,4 +10,4 @@ func f
 		? "ge"
 	else
 		? "not ge"
-	ok
+	end

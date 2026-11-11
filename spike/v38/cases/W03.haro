@@ -4,4 +4,4 @@ $tG = "a"
 func f
 	within $tG = "b"
 		return "returned " + $tG
-	done
+	end

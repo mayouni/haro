@@ -4,18 +4,18 @@ h()
 func g
 	using oO = new Res("g")
 		return "returned " + oO.tName
-	done
+	end
 func h
 	for i = 1 to 3
 		using oO = new Res("i" + String(i))
-			if i = 1 loop ok
-			if i = 3 exit ok
+			if i = 1 loop end
+			if i = 3 exit end
 			? "body " + String(i)
-		done
-	next
+		end
+	end
 class Res
 	tName = ""
-	func init tN
+	func init(tN)
 		tName = tN
 	func release
 		? "release " + tName

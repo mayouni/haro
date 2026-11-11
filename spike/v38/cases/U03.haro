@@ -3,13 +3,13 @@ func f
 	try
 		using oO = new Res("r")
 			Raise("boom")
-		done
+		end
 	catch e
 		? "caught " + e
-	done
+	end
 class Res
 	tName = ""
-	func init tN
+	func init(tN)
 		tName = tN
 	func release
 		? "release " + tName

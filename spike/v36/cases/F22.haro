@@ -6,4 +6,4 @@ func t
 		return "handled " + e
 	finally
 		? "finally"
-	done
+	end

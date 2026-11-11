@@ -3,6 +3,6 @@ f()
 func f
 	using oO = new Plain
 		? "body"
-	done
+	end
 class Plain
 	nX = 1

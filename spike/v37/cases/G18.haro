@@ -3,8 +3,8 @@ try
 		? "ok"
 	finally
 		Raise("late")
-	done
+	end
 catch e
 	? e
 	? "[" + e.Cause() + "]"
-done
+end

@@ -2,4 +2,4 @@ try
 	Raise("mine")
 catch e
 	? "[" + e.Code() + "]"
-done
+end

@@ -4,5 +4,5 @@ func f
 		raise("x")
 	catch
 		c = 1
-	done
+	end
 	? cCatchError

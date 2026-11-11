@@ -2,9 +2,9 @@ try
 	Raise("x")
 catch e
 	? e
-done
+end
 try
 	Raise("y")
 catch
 	e
-done
+end

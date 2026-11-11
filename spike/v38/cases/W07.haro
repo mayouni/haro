@@ -2,10 +2,10 @@ $tG = "kept"
 try
 	within $tG = boom()
 		? "body ran"
-	done
+	end
 catch e
 	? "caught " + e
-done
+end
 ? $tG
 func boom
 	Raise("no value")

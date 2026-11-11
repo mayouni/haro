@@ -4,5 +4,5 @@ catch
 	? "handler"
 finally
 	? "finally"
-done
+end
 ? "after"

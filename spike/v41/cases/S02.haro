@@ -3,5 +3,5 @@ f()
 func f
 	if IsNull(null)
 		? "null is the keyword"
-	ok
+	end
 	If = "a name"

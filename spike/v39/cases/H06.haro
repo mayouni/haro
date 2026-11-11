@@ -2,9 +2,9 @@ $o = MakeToken()
 $o.Open()
 func StzEngineCancelCreate
 	return 1
-func StzEngineCancelDestroy n
+func StzEngineCancelDestroy(n)
 	return 0
-func MakeToken()
+func MakeToken
 	return new Token()
 
 # the shape of stzCancelToken.ring: a function returning the new object, a comment, the class
@@ -15,8 +15,8 @@ class Token
 	# a comment line after an attribute
 	pHandle = 0
 
-	def Open()
+	func Open
 		pHandle = StzEngineCancelCreate()
 
-	def Release()
+	func Release
 		StzEngineCancelDestroy(pHandle)

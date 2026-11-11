@@ -5,4 +5,4 @@ func h
 		? aL[2]
 	finally
 		? "cleanup"
-	done
+	end

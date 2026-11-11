@@ -5,5 +5,5 @@ func total
     n = 0
     for x in $nums
         n = n + x
-    next
+    end
     return n

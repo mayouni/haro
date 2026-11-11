@@ -4,4 +4,4 @@ catch e
 	? e.Message()
 	? Type(e.Message())
 	? e.Message() = e
-done
+end

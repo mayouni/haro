@@ -5,5 +5,5 @@ catch
 	? "handler: " + cCatchError
 finally
 	? "finally"
-done
+end
 ? "after"

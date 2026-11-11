@@ -3,18 +3,18 @@ func f
 	try
 		using xO = make()
 			? "body ran"
-		done
+		end
 	catch e
 		? "caught: " + e
 		? "line " + String(e.Span()[:line]) + ", code [" + e.Code() + "]"
-	done
+	end
 	try
 		using nN = 42
 			? "body ran"
-		done
+		end
 	catch e
 		? "caught: " + e
-	done
+	end
 func make
 	return new Plain
 class Plain

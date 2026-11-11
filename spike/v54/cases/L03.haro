@@ -1,4 +1,4 @@
 f("ab")
-func f ptS
+func f(ptS)
 	ptS = ptS + "!"
 	? ptS

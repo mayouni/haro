@@ -1,4 +1,4 @@
 ? "before"
 f("a")
-func f pcName
+func f(pcName)
 	? pcName

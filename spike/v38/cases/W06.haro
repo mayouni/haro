@@ -1,8 +1,8 @@
 $xDepth = 0
 nest(3)
 ? "depth after: " + String($xDepth)
-func nest nN
+func nest(nN)
 	within $xDepth = $xDepth + 1
 		? "depth " + String($xDepth)
-		if nN > 1 nest(nN - 1) ok
-	done
+		if nN > 1 nest(nN - 1) end
+	end

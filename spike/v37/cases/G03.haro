@@ -6,4 +6,4 @@ func f
 	catch
 		tE
 		? "e is still " + tE
-	done
+	end

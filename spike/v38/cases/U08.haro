@@ -3,7 +3,7 @@ f()
 func f
 	using xO = make()
 		? "body"
-	done
+	end
 func make
 	return new Plain
 class Plain

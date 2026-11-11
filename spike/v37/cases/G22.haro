@@ -1,15 +1,15 @@
 for i = 1 to 300
 	m()
-next
+end
 ? "300 returns from a finally"
 try
 	Raise("later")
 catch e
 	? "later caught at top: " + e
-done
+end
 func m
 	try
 		Raise("dropped")
 	finally
 		return "from finally"
-	done
+	end

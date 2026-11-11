@@ -3,4 +3,4 @@ f()
 func f
 	for tW in [1]
 		? tW
-	next
+	end

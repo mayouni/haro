@@ -7,8 +7,8 @@ try
 		finally
 			? "finally " + String(i)
 			Raise("from finally")
-		done
-	next
+		end
+	end
 catch
 	? "outer: " + cCatchError
-done
+end

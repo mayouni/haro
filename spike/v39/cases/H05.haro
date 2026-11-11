@@ -2,7 +2,7 @@ $o = new Token
 $o.Open()
 func StzEngineCancelCreate
 	return 1
-func StzEngineCancelDestroy n
+func StzEngineCancelDestroy(n)
 	return 0
 class Token
 	pHandle = 0

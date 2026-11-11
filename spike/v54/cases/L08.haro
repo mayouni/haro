@@ -1,4 +1,4 @@
 ? "before"
 f([1, "x"])
-func f pviPos
+func f(pviPos)
 	? Len(pviPos)

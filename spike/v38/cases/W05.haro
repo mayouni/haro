@@ -3,10 +3,10 @@ try
 	within $tG = "mid"
 		$tG = "changed in body"
 		setG()
-	done
+	end
 catch e
 	? e
-done
+end
 ? $tG
 func setG
 	$tG = "changed by callee"

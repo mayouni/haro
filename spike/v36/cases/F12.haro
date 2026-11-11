@@ -2,11 +2,11 @@ try
 	? k()
 catch
 	? "caught: " + cCatchError
-done
+end
 func k
 	try
 		return "value"
 	finally
 		? "finally"
 		Raise("from finally")
-	done
+	end

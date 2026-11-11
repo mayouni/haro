@@ -4,10 +4,10 @@ try
 			Raise("a")
 		finally
 			Raise("b")
-		done
+		end
 	finally
 		Raise("c")
-	done
+	end
 catch e
 	? e + " <- " + e.Cause() + " <- " + e.Cause().Cause()
-done
+end

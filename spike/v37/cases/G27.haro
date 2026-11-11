@@ -5,9 +5,9 @@ func g
 		Raise(tM)
 	catch e
 		? e.Message()
-	done
+	end
 	try
 		? tM.Message()
 	catch e2
 		? e2
-	done
+	end

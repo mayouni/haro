@@ -1,8 +1,8 @@
 for x in [1, 2, 3]
 	try
-		if x = 2 exit ok
+		if x = 2 exit end
 	finally
 		? "finally " + String(x)
-	done
-next
+	end
+end
 ? "after"

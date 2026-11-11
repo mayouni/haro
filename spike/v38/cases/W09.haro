@@ -4,4 +4,4 @@ func f
 	nX = 1
 	within nX = 2
 		? nX
-	done
+	end

@@ -5,7 +5,7 @@ func h
 			Raise("orig")
 		catch e
 			Raise(e)
-		done
+		end
 	catch e2
 		? e2 + " " + String(e2.Span()[:line])
-	done
+	end

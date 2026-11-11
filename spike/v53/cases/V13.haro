@@ -4,6 +4,6 @@ class P
 func Run
 	if this.One()
 		? "one"
-	ok
+	end
 func One
 	return 1

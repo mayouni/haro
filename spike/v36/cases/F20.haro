@@ -3,14 +3,14 @@ try
 	Raise("later")
 catch
 	? "later caught at top: " + cCatchError
-done
+end
 func s
 	try
 		try
 			return "v"
 		catch
 			? "no"
-		done
+		end
 	finally
 		? "finally"
-	done
+	end

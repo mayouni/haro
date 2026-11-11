@@ -5,7 +5,7 @@ func h
 			Raise("origin")
 		finally
 			? "cleanup"
-		done
+		end
 	catch e
 		? e.Span()[:line]
-	done
+	end

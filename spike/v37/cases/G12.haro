@@ -4,7 +4,7 @@ func h
 		deep()
 	catch e
 		? e.Span()[:line]
-	done
+	end
 func deep
 	aL = []
 	? aL[1]

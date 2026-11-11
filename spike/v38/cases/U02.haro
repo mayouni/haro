@@ -2,16 +2,16 @@ f()
 func f
 	using oA = new OnlyClose
 		? "body a"
-	done
+	end
 	using oB = new DestroyAndClose
 		? "body b"
-	done
+	end
 	using oC = new Child
 		? "body c"
-	done
+	end
 	using oD = new All
 		? "body d"
-	done
+	end
 class OnlyClose
 	func close
 		? "close"

@@ -4,4 +4,4 @@ iX = OldFlag()
 ? "before"
 if iX
 	? "x"
-ok
+end

@@ -2,4 +2,4 @@ load "old.ring"
 ? "before"
 if OldSeven()
 	? "seven"
-ok
+end

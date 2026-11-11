@@ -3,9 +3,9 @@ try
 		Raise("first")
 	finally
 		Raise("second")
-	done
+	end
 catch e
 	? e
 	? e.Cause()
 	? e.Cause().Message()
-done
+end

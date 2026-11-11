@@ -6,8 +6,8 @@ func f
 			? tE + " answered"
 		catch e
 			? tE + " " + e.Code()
-		done
-	next
+		end
+	end
 	? Sqrt(0)
 	? Pow(-8, 3)
 	? Pow(0, 0)

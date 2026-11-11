@@ -1,9 +1,9 @@
 load "old.ring"
 if OldFlag()
 	? "if"
-ok
+end
 if OldNo()
 	? "no"
 elseif OldFlag()
 	? "elseif"
-ok
+end

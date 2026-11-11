@@ -6,5 +6,5 @@ func g
 		return "from handler"
 	finally
 		? "finally"
-	done
+	end
 	return "fell through"

@@ -5,4 +5,4 @@ func f
 	catch
 		? cCatchError + "!"
 		see cCatchError
-	done
+	end

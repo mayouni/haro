@@ -7,5 +7,5 @@ func f
 	finally
 		? "finally " + String(nN) + " " + Upper("x")
 		nN = 2
-	done
+	end
 	return 99

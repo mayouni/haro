@@ -4,12 +4,12 @@ func f
 		raise("x")
 	catch e
 		? e
-	done
+	end
 	try
 		raise("y")
 	catch cCatchError
 		? "bound"
-	done
+	end
 	cCatchError = ""
 	o = new K
 	? o.cCatchError
