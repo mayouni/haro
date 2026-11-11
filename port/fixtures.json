@@ -96,8 +96,11 @@
      true
     ],
     [
-     "applied['main.haro'].splitlines()[-1]",
-     "\tsize = 2"
+     "applied['main.haro'].splitlines()[-2:]",
+     [
+      "\tsize = 2",
+      "end"
+     ]
     ]
    ]
   },
@@ -559,7 +562,7 @@
     [
      "applied['main.haro'].splitlines()[14:16]",
      [
-      "",
+      "end",
       "func g"
      ]
     ],
@@ -587,10 +590,10 @@
      true
     ],
     [
-     "[l for l in applied['main.haro'].splitlines() if l.startswith(('func h(', 'func k'))]",
+     "[l for l in applied['main.haro'].splitlines() if l.startswith(('def h(', 'def k'))]",
      [
-      "func h(xA, xB)",
-      "func k"
+      "def h(xA, xB)",
+      "def k"
      ]
     ],
     [
@@ -619,6 +622,93 @@
     [
      "ran_ring['main.ring']",
      "abcfg\n"
+    ]
+   ]
+  },
+  {
+   "id": "H31",
+   "line": "O",
+   "why": "every definition ends with end; a definition after a class is its method, def; private ends the method before it; a one-line definition's body goes to its own line; the lines after a blank line keep their numbers",
+   "folder": "cases/H31",
+   "files": [
+    "main.ring"
+   ],
+   "asserts": [
+    [
+     "applied['main.haro'].splitlines()[:5]",
+     [
+      "? \"top\"",
+      "func f",
+      "\t? 1",
+      "end",
+      "class P"
+     ]
+    ],
+    [
+     "applied['main.haro'].splitlines()[6:9]",
+     [
+      "\tdef Show",
+      "\t\treturn count",
+      "\tend"
+     ]
+    ],
+    [
+     "applied['main.haro'].splitlines()[9:13]",
+     [
+      "\tdef Run",
+      "\t\t? 2",
+      "\tend",
+      "private"
+     ]
+    ],
+    [
+     "applied['main.haro'].splitlines()[13:]",
+     [
+      "\tdef Secret",
+      "\t\t? 3",
+      "\tend",
+      "end",
+      "class Q from P",
+      "end"
+     ]
+    ]
+   ]
+  },
+  {
+   "id": "H32",
+   "line": "O",
+   "why": "a dot that ends a line continues a chain: it moves to the start of the next line; a call's period before a keyword goes",
+   "folder": "cases/H32",
+   "files": [
+    "main.ring"
+   ],
+   "asserts": [
+    [
+     "applied['main.haro'].splitlines()[1:5]",
+     [
+      "o.FillQ(1).StrokeQ(2)",
+      "  .AddRect(3)",
+      "o.Name()",
+      "see \"x\""
+     ]
+    ]
+   ]
+  },
+  {
+   "id": "H33",
+   "line": "O",
+   "why": "a definition whose name starts with a digit loses its empty parentheses",
+   "folder": "cases/H33",
+   "files": [
+    "main.ring"
+   ],
+   "asserts": [
+    [
+     "[l for l in applied['main.haro'].splitlines() if 'Hearts' in l or 'Ways' in l]",
+     [
+      "func 2Hearts",
+      "func 3Ways(xN)"
+     ]
     ]
    ]
   },

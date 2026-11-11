@@ -35,6 +35,12 @@ def refused(cid, line, why, text, called=2, where='function f()'):
 
 NONE = 'a definition ends with `end`, and this one has none; written'
 
+
+def top(cid, line, why, text):
+    """refused at the program's first statement: nothing runs"""
+    return (f'\nLine {line} Haro refused this statement ({why} `{text}`, line {line} of {cid}.haro) and did not compile it -- running '
+            f'past it would give a wrong answer \nin file {cid}.haro ')
+
 CASES = [
     # G3 -- any order
     ('E01', 'G3', 'a class, then a function, then the program: each where it is written', [
@@ -45,8 +51,8 @@ CASES = [
     ('E02', 'G3', 'a function after a class is a function, and a method may call it', [
         'oP = new P', 'oP.Run()',
         'class P', T + 'def Run', T + T + '? Twice(2)', T + 'end', 'end',
-        'func Twice(iN)', T + 'return iN * 2', 'end'],
-     '4\n', 0),
+        'func Twice(iN)', T + 'return iN * 2', 'end', '? Twice(3)'],
+     '4\n6\n', 0),
     ('E03', 'G3', 'statements between definitions run in the order written', [
         '? 1', 'func a', T + '? "a"', 'end', '? 2', 'class P', 'end', '? 3', 'a()'],
      '1\n2\n3\na\n', 0),
@@ -59,11 +65,13 @@ CASES = [
         T + T + 'return "s"', T + 'end', 'end', '? "top"'],
      's\ntop\n', 0),
     # G1 -- every definition ends with end
-    ('E06', 'G1', 'a function without its end is refused, naming it', ['? "before"', 'f()', 'func f', T + '? 1'],
-     refused('E06', 3, NONE, 'f'), 1),
-    ('E07', 'G1', 'a class without its end is refused where its method is entered', [
+    # E06 and E07 changed after the code, on Radar's finding (2026-11-11 12:22): without its end a definition's body falls to the top
+    # level, where it ran before the definition's refusal was reached -- so the program refuses its first statement, naming it
+    ('E06', 'G1', 'a function without its end: the program is refused before it runs, naming it', ['? "before"', 'f()', 'func f', T + '? 1'],
+     top('E06', 3, NONE, 'f'), 1),
+    ('E07', 'G1', 'a class without its end: the program is refused before it runs, naming it', [
         '? "before"', 'oP = new P', 'oP.f()', 'class P', T + 'def f', T + T + '? 1', T + 'end'],
-     refused('E07', 4, NONE, 'P', called=3, where='method f()'), 1),
+     top('E07', 4, NONE, 'P'), 1),
     ('E08', 'G1', 'endfunc is refused: end', ['? "before"', 'f()', 'func f', T + '? 1', 'endfunc'],
      refused('E08', 5, 'one spelling: `end`; written', 'endfunc'), 1),
     ('E09', 'G1', 'endclass is refused: end', ['? "before"', 'oP = new P', 'oP.f()', 'class P', T + 'def f', T + T + '? 1', T + 'end',
@@ -75,6 +83,16 @@ CASES = [
      refused('E10', 5, 'a method is defined with `def`; written', 'func', called=3, where='method f()'), 1),
     ('E11', 'G2', 'def outside a class is refused: a function is func', ['? "before"', 'f()', 'def f', T + '? 1', 'end'],
      refused('E11', 3, 'a function is defined with `func`; written', 'def'), 1),
+    # G5 -- a chain across lines: its dot starts the next line (HARO-PORTTOOL-CHAINDOT-01, stzlib-haroport 2026-11-11 09:54; the form is
+    # the desk's, on the Principal's "i let you decide") -- added before its code
+    ('E13', 'G5', 'a chain across lines continues with its dot at the start of the next line', [
+        'oP = new P', 'oP.AQ(1)', T + '.SQ(3)', '? "end"', 'class P', T + 'def AQ(xX)', T + T + 'return this', T + 'end', T + 'def SQ(iN)',
+        T + T + '? iN', T + 'end', 'end'],
+     '3\nend\n', 0),
+    ('E14', 'G5', 'a dot that ends a line is refused: the dot starts the next line', [
+        '? "before"', 'f()', 'func f', T + 'oP = new P', T + 'oP.AQ(1).', T + T + 'SQ(3)', 'end', 'class P', T + 'def AQ(xX)',
+        T + T + 'return this', T + 'end', T + 'def SQ(iN)', T + T + '? iN', T + 'end', 'end'],
+     refused('E14', 5, 'a chain across lines continues with its dot at the start of the next line; written', '.'), 1),
     # G4 -- a .ring file reads as Ring reads it
     ('E12', 'G4', 'a .ring file: a func after a class is its method, a statement after a func belongs to it', [
         'o = new P', 'o.g()', 'f()', 'func f', '? "f"', '? "still f"', 'class P', 'func g', '? "g, a method"'],
@@ -100,7 +118,7 @@ def main():
                     'reading, a definition ends with end, is D68 on his delegation',
         'class': 'exact: the program\'s whole stdout and its exit code, byte for byte, on haro and on its checked build',
         'lines': {'G1': 'every definition ends with end', 'G2': 'func a function, def a method', 'G3': 'any order',
-                  'G4': 'a .ring file untouched'},
+                  'G4': 'a .ring file untouched', 'G5': 'a chain across lines: its dot starts the next line'},
         'cases': out,
     }
     with open(os.path.join(HERE, 'fixtures.json'), 'w', encoding='utf-8', newline='\n') as fh:

@@ -49,7 +49,7 @@ CASES = [
      [("applied['main.haro'].splitlines()[0]", 'count = 1'),
       ("'nCount = 3' in applied['main.haro'] and 'tName = \"a\"' in applied['main.haro'] and 'aItems = [1, 2]' in applied['main.haro']", True),
       ("'oO = new P' in applied['main.haro'] and '? nCount + 1' in applied['main.haro']", True),
-      ("applied['main.haro'].splitlines()[-1]", '\tsize = 2')]),
+      ("applied['main.haro'].splitlines()[-2:]", ['\tsize = 2', 'end'])]),
     ('H05', 'L', 'a method\'s bare assignment to an attribute of its class is not made a local: refused, named', {
         'main.ring': ['class P', T + 'count = 0', T + 'func Bump', T + T + 'count = count + 1']},
      [("'\\t\\tcount = count + 1' in applied['main.haro']", True),
@@ -155,14 +155,14 @@ CASES = [
                       T + 'other see "c"', T + 'off', T + 'try', T + 'catch', T + 'done', T + 'if true { see "d" }', 'end', 'func g', T + 'return 1']},
      [("applied['main.haro'].count('\\tend\\n')", 4),
       ("[w for w in ('ok', 'off', 'done', 'other', '{', '}') if w in applied['main.haro']]", []),
-      ("applied['main.haro'].splitlines()[14:16]", ['', 'func g']),
+      ("applied['main.haro'].splitlines()[14:16]", ['end', 'func g']),
       ("'\\tcase 1 see \"b\"' in applied['main.haro'] and '\\telse see \"c\"' in applied['main.haro']", True)]),
     ('H29', 'O', 'one word each, from, #, this outside a brace, parameters in parentheses and none without, no trailing period', {
         'main.ring': ['k()', 'class P', 'class Q : P', T + 'func g', T + T + '? classname(self) // the object', T + T + 'new P { see self }',
                       'def h a, b', T + 'if a && !b', T + T + 'put "x"', T + 'but a || b', T + T + 'get v', T + 'ok', 'func k()', T + 'h(1, 0).']},
      [("'class Q from P' in applied['main.haro'] and '? ClassName(this) # the object' in applied['main.haro']", True),
       ("'new P { see self }' in applied['main.haro']", True),
-      ("[l for l in applied['main.haro'].splitlines() if l.startswith(('func h(', 'func k'))]", ['func h(xA, xB)', 'func k']),
+      ("[l for l in applied['main.haro'].splitlines() if l.startswith(('def h(', 'def k'))]", ['def h(xA, xB)', 'def k']),
       ("' and not ' in applied['main.haro'] and ' or ' in applied['main.haro'] and '\\telseif ' in applied['main.haro']", True),
       ("'\\t\\tsee \"x\"' in applied['main.haro'] and '\\t\\tgive ' in applied['main.haro'] and '\\th(1, 0)\\n' in applied['main.haro']", True)]),
     ('H30', 'O', 'a tree in every spelling ported runs on haro and prints what it printed', {
@@ -170,6 +170,23 @@ CASES = [
                       T + 'switch n on 2 put "c" other put "d" off', T + 'try raise("e") catch put "f" done', T + 'if n = 2 && !(n = 3) { put "g" }',
                       T + 'put char(10)', 'end']},
      [("ran['main.haro']", "abcfg\n"), ("ran_ring['main.ring']", "abcfg\n")]),
+    # v0.56 (D68): written after the rule's code, before its commit -- said so; H04, H28, H29 expect the definitions' ends by the ruling
+    ('H31', 'O', 'every definition ends with end; a definition after a class is its method, def; private ends the method before it; a '
+                 'one-line definition\'s body goes to its own line; the lines after a blank line keep their numbers', {
+        'main.ring': ['? "top"', 'func f', T + '? 1', '', 'class P', T + 'nX = 1', T + 'func Show()   return count', T + 'func Run', T + T + '? 2',
+                      'private', T + 'func Secret', T + T + '? 3', 'class Q from P']},
+     [("applied['main.haro'].splitlines()[:5]", ['? "top"', 'func f', '\t? 1', 'end', 'class P']),
+      ("applied['main.haro'].splitlines()[6:9]", ['\tdef Show', '\t\treturn count', '\tend']),
+      ("applied['main.haro'].splitlines()[9:13]", ['\tdef Run', '\t\t? 2', '\tend', 'private']),
+      ("applied['main.haro'].splitlines()[13:]", ['\tdef Secret', '\t\t? 3', '\tend', 'end', 'class Q from P', 'end'])]),
+    # HARO-PORTTOOL-CHAINDOT-01 and -DIGITNAME-01 (stzlib-haroport 2026-11-11 09:54): written before their code
+    ('H32', 'O', 'a dot that ends a line continues a chain: it moves to the start of the next line; a call\'s period before a keyword goes', {
+        'main.ring': ['o = new P', 'o.FillQ(1).StrokeQ(2).', '  AddRect(3)', 'o.Name().', 'see "x"', 'class P',
+                      'func FillQ n return self', 'func StrokeQ n return self', 'func AddRect n see n', 'func Name return "p"']},
+     [("applied['main.haro'].splitlines()[1:5]", ['o.FillQ(1).StrokeQ(2)', '  .AddRect(3)', 'o.Name()', 'see "x"'])]),
+    ('H33', 'O', 'a definition whose name starts with a digit loses its empty parentheses', {
+        'main.ring': ['func 2Hearts()', '  return 2', 'func 3Ways(n)', '  return n']},
+     [("[l for l in applied['main.haro'].splitlines() if 'Hearts' in l or 'Ways' in l]", ['func 2Hearts', 'func 3Ways(xN)'])]),
     ('H11', '-', 'the ported tree runs on haro and prints what the classic Ring surface printed', {
         'main.ring': ['load "lib.ring"', 'cName = Greet("ada")', '? cName', '? Len(cName)'],
         'lib.ring': ['func Greet cWho', T + 'cOut = "hi " + cWho', T + 'return cOut']},

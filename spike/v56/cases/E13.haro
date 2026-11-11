@@ -1,0 +1,12 @@
+oP = new P
+oP.AQ(1)
+	.SQ(3)
+? "end"
+class P
+	def AQ(xX)
+		return this
+	end
+	def SQ(iN)
+		? iN
+	end
+end

@@ -6,7 +6,8 @@
   "G1": "every definition ends with end",
   "G2": "func a function, def a method",
   "G3": "any order",
-  "G4": "a .ring file untouched"
+  "G4": "a .ring file untouched",
+  "G5": "a chain across lines: its dot starts the next line"
  },
  "cases": [
   {
@@ -23,7 +24,7 @@
    "line": "G3",
    "why": "a function after a class is a function, and a method may call it",
    "file": "cases/E02.haro",
-   "stdout": "4\n"
+   "stdout": "4\n6\n"
   },
   {
    "id": "E03",
@@ -53,18 +54,18 @@
    "id": "E06",
    "kind": "run",
    "line": "G1",
-   "why": "a function without its end is refused, naming it",
+   "why": "a function without its end: the program is refused before it runs, naming it",
    "file": "cases/E06.haro",
-   "stdout": "before\n\nLine 3 Haro refused this statement (a definition ends with `end`, and this one has none; written `f`, line 3 of E06.haro) and did not compile it -- running past it would give a wrong answer \nIn function f() in file E06.haro\n\nCalled from line 2 in file E06.haro ",
+   "stdout": "\nLine 3 Haro refused this statement (a definition ends with `end`, and this one has none; written `f`, line 3 of E06.haro) and did not compile it -- running past it would give a wrong answer \nin file E06.haro ",
    "exit": 1
   },
   {
    "id": "E07",
    "kind": "run",
    "line": "G1",
-   "why": "a class without its end is refused where its method is entered",
+   "why": "a class without its end: the program is refused before it runs, naming it",
    "file": "cases/E07.haro",
-   "stdout": "before\n\nLine 4 Haro refused this statement (a definition ends with `end`, and this one has none; written `P`, line 4 of E07.haro) and did not compile it -- running past it would give a wrong answer \nIn method f() in file E07.haro\n\nCalled from line 3 in file E07.haro ",
+   "stdout": "\nLine 4 Haro refused this statement (a definition ends with `end`, and this one has none; written `P`, line 4 of E07.haro) and did not compile it -- running past it would give a wrong answer \nin file E07.haro ",
    "exit": 1
   },
   {
@@ -101,6 +102,23 @@
    "why": "def outside a class is refused: a function is func",
    "file": "cases/E11.haro",
    "stdout": "before\n\nLine 3 Haro refused this statement (a function is defined with `func`; written `def`, line 3 of E11.haro) and did not compile it -- running past it would give a wrong answer \nIn function f() in file E11.haro\n\nCalled from line 2 in file E11.haro ",
+   "exit": 1
+  },
+  {
+   "id": "E13",
+   "kind": "run",
+   "line": "G5",
+   "why": "a chain across lines continues with its dot at the start of the next line",
+   "file": "cases/E13.haro",
+   "stdout": "3\nend\n"
+  },
+  {
+   "id": "E14",
+   "kind": "run",
+   "line": "G5",
+   "why": "a dot that ends a line is refused: the dot starts the next line",
+   "file": "cases/E14.haro",
+   "stdout": "before\n\nLine 5 Haro refused this statement (a chain across lines continues with its dot at the start of the next line; written `.`, line 5 of E14.haro) and did not compile it -- running past it would give a wrong answer \nIn function f() in file E14.haro\n\nCalled from line 2 in file E14.haro ",
    "exit": 1
   },
   {
