@@ -1917,6 +1917,10 @@ D58, the Principal's ruling of 2026-11-09 ("ParentClassName"), revising v0.42's 
 
 **Results.** 9 of 9 cases on both builds; 5 of 5 plants; v36 to v48's courts green. Haro's 2,172 calls re-spelled by a tool (20fc236, listed in v20/tool_commits.txt).
 
+## The fifty-sixth rung -- Haro v0.56, every definition ends with `end`, in any order -- 2026-11-11
+
+D68, HARO-DEFINITIONS-01, on the Principal's two asks after v0.55: no position rule, and `func` for functions with `def` for methods. A definition ends with `end` like every block; a class, a function and the program's statements stand in any order; a chain across lines continues with its dot at the start of the next line. The structure is read from the tokens (`lift.zig`, `defBraces`), the grammar left as it was. 20 of 20 on both builds, plants D1-L9; haroport's rule O closes a ported tree's definitions (f3040fb, H31-H33, plants T44-T51); Haro's own code closed by `study/v56/defends.py` (a05259f, 189 files), the cases whose lines moved remapped by `study/v56/remap.py` only where the build prints the mapped lines.
+
 ## The fifty-fifth rung -- Haro v0.55, one form for each construct -- 2026-11-11
 
 D67, HARO-ONEFORM-01, on the Principal's "Opt for a strict one form": in a .haro file every block ends with `end`, a definition has no end

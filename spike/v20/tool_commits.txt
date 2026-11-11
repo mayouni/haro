@@ -6,3 +6,4 @@
 a11646b3a30459e4a00a939cc1f2f6f1fba1f553 study/v47/reletter.py, port_cases.py, port_snippets.py -- v0.47: Haro's own code and five rungs' case programs re-lettered by rule (D55 T2)
 20fc236e48f864569ce1ce7f5f69b738673d3c85 study/v48/respell.py, study/v47/port_cases.py --respell -- v0.48: Haro's calls of built-ins re-spelled as the Principal ruled (D58)
 16e50a065a2e8203d32ebfe64e04858a637473d3 study/v55/oneform.py -- v0.55: Haro's own code in one form for each construct, by haroport's rule O (D67): 156 files, 3,929 lines in place
+a05259fa3a53f221ad3014821d828a046a5b2f51 study/v56/defends.py -- v0.56: Haro's own code with every definition ended by `end` and a method written `def`, by haroport's def_ends (D68): 189 files

@@ -521,7 +521,11 @@ Each `%NAME%` in this file is a folder of this machine; its value is in `.centra
   letter (`viPos`) checked item by item. **v0.55 is built** (D67, HF-161, stage 60), on the Principal's "Opt for a strict one form":
   in a .haro file every block ends with `end`, a definition has no end word, one word each (func, elseif, else, case, for, see, give,
   exit, loop, and, or, not, from, `#`, this), `func Add(iA, iB)` and `func Main`, no trailing period. Write new Haro code so; haroport's
-  rule O converts a tree. Next: absence (D55 T5, `maybe` a trailing word), v0.56; then `null` migrated and refused, v0.57.
+  rule O converts a tree. **v0.56 is built** (D68, HF-162, stage 61), on the Principal's "no position rule" and "func for
+  functions and def for methods": every definition ends with `end`, `func` a function and `def` a method, a class, a function and
+  the program's statements in any order, a chain across lines continues with its dot at the next line's start. Build work in progress
+  into runtime/vNN/ and judge it with HARO_VM/HARO_TWIN: vm/zig-out is every desk's runtime. Next: one way to print (D69), v0.57;
+  absence (D55 T5), v0.58.
 - D43 is the twin-court clause. Of BLOCKS.md's four questions: Q-B1 is built (`?` is C6, and `OPTIONAL` sees it in a rule); Q-B2's two amendments are refused by name until Ringua's text
   lands; Q-B3 the block export of a program is not started; Q-B4 the round-trip court the elders waited for exists -- asking their owners is Central's.
 - **Answered 2026-11-05**: HARO-DISTANCE-01 (HF-141; D50, the author's ruling: no part of Ring is carried with Haro), HARO-ONEHOUR-01 (D51) and -02 (D52). **Next**: what stzlib's sweep on haro.exe sends; zip.zig out (stzlib calls no zip_* since cb6f5de65) with
