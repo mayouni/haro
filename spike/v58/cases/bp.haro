@@ -1,0 +1,6 @@
+func Cs(tA, bCase)
+	if bCase
+		return "on"
+	end
+	return "off"
+end

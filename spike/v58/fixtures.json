@@ -8,7 +8,8 @@
   "A3": "an unresolved maybe refused",
   "A4": "a maybe attribute",
   "A5": "else only for a maybe; an if's else; \"\" a text",
-  "A6": "a .ring file untouched"
+  "A6": "a .ring file untouched",
+  "A7": "a .ring caller's 1 or 0 at a .haro b parameter (TYPES section 6, HARO-RINGBOUNDARY-BOOL-02)"
  },
  "cases": [
   {
@@ -60,7 +61,7 @@
    "line": "A2",
    "why": "none returned by a function not declared maybe is refused",
    "file": "cases/M06.haro",
-   "stdout": "before\n\nLine 8 Haro refused this statement (`none` stands only where a maybe is declared; written `none`, line 8 of M06.haro) and did not compile it -- running past it would give a wrong answer \nIn function g() in file M06.haro\n\nCalled from line 4 in file M06.haro ",
+   "stdout": "before\n\nLine 4 Haro refused this statement (`none` stands only where a maybe is declared; written `none`, line 4 of M06.haro) and did not compile it -- running past it would give a wrong answer \nIn function g() in file M06.haro\n\nCalled from line 2 in file M06.haro ",
    "exit": 1
   },
   {
@@ -145,6 +146,23 @@
    "why": "a .ring file: none and maybe are names",
    "file": "cases/M16.ring",
    "stdout": "7\n"
+  },
+  {
+   "id": "M17",
+   "kind": "run",
+   "line": "A7",
+   "why": "a .ring caller's 1 or 0 given to a .haro b parameter is true or false",
+   "file": "cases/M17.ring",
+   "stdout": "on\noff\n"
+  },
+  {
+   "id": "M18",
+   "kind": "run",
+   "line": "A7",
+   "why": "a .haro caller's 1 given to a b parameter stays refused",
+   "file": "cases/M18.haro",
+   "stdout": "before\n\nLine 3 Error (TYPE_LETTER) : `bCase` is lettered b, a boolean, and is given an integer \nIn function cs() in file M18.haro\n\nCalled from line 2 in file M18.haro ",
+   "exit": 1
   }
  ]
 }

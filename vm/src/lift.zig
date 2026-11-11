@@ -555,6 +555,14 @@ pub const R_ENDWORD = "one spelling: `end`; written";
 
 const Open = struct { def: bool, row: u32, head_end: u32, name: []const u8, braced: bool = false };
 
+/// v0.58 (D70, TYPES.md T5): what the token pass found of absence in a .haro file -- the rows that end with `maybe` (a definition's
+/// header, or an attribute's declaration), blanked for the parser; and the place (row, column) of each `else` that resolves a maybe,
+/// given to the parser as `or`, which the compiler then reads as the resolution
+pub const Marks = struct { maybe_rows: []const u32 = &.{}, else_at: []const [2]u32 = &.{} };
+
+/// the marks of each .haro file read, by its name
+pub var marks: std.StringHashMapUnmanaged(Marks) = .{};
+
 fn wordByte(b: u8) bool {
     return std.ascii.isAlphanumeric(b) or b == '_';
 }
@@ -588,6 +596,15 @@ fn bracesText(alloc: std.mem.Allocator, src: []const u8, name: []const u8) ?Brac
     // v0.57 (D69): the keyword `print`, given to the parser as `?`, its shortcut -- the same statement, in place
     var prints = std.ArrayListUnmanaged(u32){};
     defer prints.deinit(alloc);
+    // v0.58 (D70): `maybe` at a line's end and `else` resolving a maybe
+    var maybes = std.ArrayListUnmanaged(u32){};
+    defer maybes.deinit(alloc);
+    var maybe_rows = std.ArrayListUnmanaged(u32){};
+    defer maybe_rows.deinit(alloc);
+    var elses = std.ArrayListUnmanaged(u32){};
+    defer elses.deinit(alloc);
+    var else_at = std.ArrayListUnmanaged([2]u32){};
+    defer else_at.deinit(alloc);
     var fault: ?Fault = null;
     const n = src.len;
     var i: usize = 0;
@@ -701,6 +718,28 @@ fn bracesText(alloc: std.mem.Allocator, src: []const u8, name: []const u8) ?Brac
             if (fault == null) fault = .{ .why = R_ENDWORD, .word = w, .row = row };
             break :scan;
         }
+        if (eq(w, "maybe")) {
+            // the last word of its line, after something: a definition's header or an attribute's declaration says it may hold none
+            var q = i;
+            while (q < n and (src[q] == ' ' or src[q] == '\t' or src[q] == '\r')) q += 1;
+            const at_end = q >= n or src[q] == '\n' or src[q] == '#' or (src[q] == '/' and q + 1 < n and src[q + 1] == '/');
+            if (at_end and line_prev != '\n') {
+                maybes.append(alloc, @intCast(s)) catch return null;
+                maybe_rows.append(alloc, row) catch return null;
+                after_def = false;
+                continue;
+            }
+        }
+        if (eq(w, "else") and line_prev != '\n') {
+            // an else after something on its line resolves a maybe -- unless an if opened on this line, whose else it is
+            const top_here = stack.items.len > 0 and !stack.items[stack.items.len - 1].def and stack.items[stack.items.len - 1].row == row;
+            if (!top_here) {
+                const ls = if (std.mem.lastIndexOfScalar(u8, src[0..s], '\n')) |nl| nl + 1 else 0;
+                elses.append(alloc, @intCast(s)) catch return null;
+                else_at.append(alloc, .{ row, @intCast(s - ls) }) catch return null;
+                continue;
+            }
+        }
         if (eq(w, "print")) {
             // a definition's name is no statement: `def print` is a method called print (stzlib's stzObject has one)
             if (!after_def) prints.append(alloc, @intCast(s)) catch return null;
@@ -750,7 +789,15 @@ fn bracesText(alloc: std.mem.Allocator, src: []const u8, name: []const u8) ?Brac
         return null;
     }
     if (keep) _ = faults.remove(name);
-    if (heads.items.len == 0 and prints.items.len == 0) return null;
+    if (keep) {
+        if (maybe_rows.items.len > 0 or else_at.items.len > 0) {
+            marks.put(std.heap.page_allocator, name, .{
+                .maybe_rows = std.heap.page_allocator.dupe(u32, maybe_rows.items) catch &.{},
+                .else_at = std.heap.page_allocator.dupe([2]u32, else_at.items) catch &.{},
+            }) catch {};
+        } else _ = marks.remove(name);
+    }
+    if (heads.items.len == 0 and prints.items.len == 0 and maybes.items.len == 0 and elses.items.len == 0) return null;
     // the text: ` {` after each header, `}` for each definition's `end` -- the inserts in file order
     std.mem.sort(u32, heads.items, {}, std.sort.asc(u32));
     const text = alloc.alloc(u8, n + 2 * heads.items.len) catch return null;
@@ -783,6 +830,21 @@ fn bracesText(alloc: std.mem.Allocator, src: []const u8, name: []const u8) ?Brac
             if (h <= e) shift += 2;
         }
         @memcpy(text[e + shift .. e + shift + 5], "?    ");
+    }
+    // v0.58: `maybe` blanked, a resolving `else` given as `or` -- four bytes for four
+    for (maybes.items) |e| {
+        var shift: usize = 0;
+        for (heads.items) |h| {
+            if (h <= e) shift += 2;
+        }
+        @memcpy(text[e + shift .. e + shift + 5], "     ");
+    }
+    for (elses.items) |e| {
+        var shift: usize = 0;
+        for (heads.items) |h| {
+            if (h <= e) shift += 2;
+        }
+        @memcpy(text[e + shift .. e + shift + 4], "or  ");
     }
     return .{ .text = text, .inserts = ins };
 }

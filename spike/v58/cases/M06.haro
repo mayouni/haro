@@ -1,8 +1,5 @@
 print "before"
-f()
-func f
-	print g()
-end
+print g()
 func g
 	return none
 end

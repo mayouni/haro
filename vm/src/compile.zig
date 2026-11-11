@@ -452,6 +452,8 @@ pub const Func = struct {
     /// Its assignments create GLOBALS; every other function's create
     /// locals. That is Ring's actual rule, and the whole of it.
     is_main: bool = false,
+    /// v0.58 (D70): the definition's header ends with `maybe`: it may return none
+    maybe: bool = false,
     /// The function's statements, reconstructed BY POSITION.
     ///
     /// The grammar does not reliably nest them inside the function node: a
@@ -2281,6 +2283,10 @@ pub const Compiler = struct {
     file_fault_src: []const u8 = "",
     /// v0.55: the one-form walk is inside a brace object, where `self` is the brace's object
     brace_walk: bool = false,
+    /// v0.58 (D70): the attributes declared `maybe`, by name
+    maybe_attrs: std.StringHashMapUnmanaged(void) = .{},
+    /// v0.58 (D70): the functions and methods declared `maybe`, by name: 1 a function, 2 a method, 3 both
+    maybe_funcs: std.StringHashMapUnmanaged(u8) = .{},
     ln_block_quirk: bool = false,
     /// F-114: the statement being compiled ends in a postfix construct and a
     /// newline follows it -- what it still emits after that construct takes
@@ -2824,8 +2830,14 @@ pub const Compiler = struct {
                 if (block and (std.mem.eql(u8, t, "{") or std.mem.eql(u8, t, "}"))) return self.spellSet(ch.text(), R_BRACE);
                 if (block and i + 1 == cnt and oldEnd(t)) return self.spellSet(ch.text(), R_END);
                 if (oneWord(t, k)) |why| return self.spellSet(ch.text(), why);
-                if (std.mem.eql(u8, k, "expression_statement") and i + 1 == cnt and std.mem.eql(u8, t, "."))
-                    return self.spellSet(ch.text(), R_PERIOD);
+                if (std.mem.eql(u8, k, "expression_statement") and i + 1 == cnt and std.mem.eql(u8, t, ".")) {
+                    // a dot with a statement after it ON ITS LINE is a chain the grammar cut (a comment line before a call whose
+                    // bracket spans lines, HARO-CHAIN-COMMENT-01), which the re-read joins again; only a dot that ends its line is a
+                    // statement's trailing period
+                    var nx = n.nextNamedSibling();
+                    while (!nx.isNull() and std.mem.eql(u8, nx.kind(), "comment")) nx = nx.nextNamedSibling();
+                    if (nx.isNull() or nx.start().row != ch.start().row) return self.spellSet(ch.text(), R_PERIOD);
+                }
                 // v0.56 (D68): a chain across lines continues with its dot at the start of the next line, never at the end of this one
                 if (std.mem.eql(u8, k, "member_expression") and std.mem.eql(u8, t, ".") and i + 1 < cnt and
                     n.child(i + 1).start().row > ch.start().row) return self.spellSet(ch.text(), R_CHAIN);
@@ -2844,6 +2856,105 @@ pub const Compiler = struct {
     /// v0.55: a definition's own words -- `func`, no end word, no braces, parameters in parentheses and none without, `from` before a
     /// class's parent, `#` for a comment -- for the function `d` and every class and package around it. Its fault is the function's first
     /// statement's, as a parameter's shape is (entry_fault).
+    // v0.58 (D70, TYPES.md T5): absence
+    const R_NONE = "`none` stands only where a maybe is declared; written";
+    const R_MAYBE = "a maybe is resolved where it lands -- x = E else D; written";
+    const R_ELSE = "else resolves a maybe, and this value is never none; written";
+
+    /// the lift's marks for the file `n` stands in
+    fn marksOf(self: *Compiler, n: ts.Node) ?lift.Marks {
+        const fi = self.fileOf(self.rereadSrc(n).ptr) orelse return null;
+        if (fi >= load_paths.len) return null;
+        return lift.marks.get(load_paths[fi]);
+    }
+
+    /// the line of `n` ends with `maybe` in the file as written
+    fn maybeRow(self: *Compiler, n: ts.Node) bool {
+        const m = self.marksOf(n) orelse return false;
+        const r = n.start().row;
+        for (m.maybe_rows) |x| {
+            if (x == r) return true;
+        }
+        return false;
+    }
+
+    /// `n` is a binary `or` the lift wrote for an `else` that resolves a maybe
+    fn isElse(self: *Compiler, n: ts.Node) bool {
+        if (!std.mem.eql(u8, n.kind(), "binary_expression")) return false;
+        var i: u32 = 0;
+        while (i < n.childCount()) : (i += 1) {
+            const ch = n.child(i);
+            if (ch.isNamed() or !std.mem.eql(u8, ch.kind(), "or")) continue;
+            const m = self.marksOf(n) orelse return false;
+            const at = ch.start();
+            for (m.else_at) |e| {
+                if (e[0] == at.row and e[1] == at.col) return true;
+            }
+            return false;
+        }
+        return false;
+    }
+
+    /// the name a maybe stands for at `n` -- a call of a maybe function or method, or a read of a maybe attribute -- else null
+    fn maybeName(self: *Compiler, n: ts.Node) ?[]const u8 {
+        const k = n.kind();
+        if (std.mem.eql(u8, k, "call_expression")) {
+            const f = n.namedChild(0);
+            const name = if (std.mem.eql(u8, f.kind(), "member_expression")) f.namedChild(f.namedChildCount() - 1).text() else f.text();
+            const method = std.mem.eql(u8, f.kind(), "member_expression");
+            // one lookup per call: a walk of every function per call made stage 6 pay for every statement
+            const kinds = self.maybe_funcs.get(name) orelse return null;
+            return if ((kinds & (if (method) @as(u8, 2) else 1)) != 0) name else null;
+        }
+        if (std.mem.eql(u8, k, "identifier") and self.cur.owner != null and self.maybe_attrs.contains(n.text())) return n.text();
+        return null;
+    }
+
+    /// v0.58: a statement's absence -- `none` only where a maybe is declared, a maybe resolved where it lands, `else` only after a maybe
+    fn absenceForm(self: *Compiler, n: ts.Node) void {
+        self.absenceIn(n, n.parent());
+    }
+
+    /// `par`, the node holding `n`, is carried down: ts_node_parent walks from the root, and asking it of every node cost stage 6 a
+    /// fifth of its time
+    fn absenceIn(self: *Compiler, n: ts.Node, par: ts.Node) void {
+        if (self.spell_fault != null) return;
+        const k = n.kind();
+        const pk = if (par.isNull()) "" else par.kind();
+        if (std.mem.eql(u8, k, "identifier") and std.mem.eql(u8, n.text(), "none")) {
+            const in_return = std.mem.eql(u8, pk, "return_statement") and self.cur.maybe;
+            const to_attr = std.mem.eql(u8, pk, "assignment_expression") and par.namedChildCount() >= 2 and
+                par.namedChild(1).startByte() == n.startByte() and self.maybe_attrs.contains(par.namedChild(0).text());
+            if (!in_return and !to_attr) self.spellSet(n.text(), R_NONE);
+            return;
+        }
+        if (self.isElse(n)) {
+            const l = n.namedChild(0);
+            if (self.maybeName(l) == null) return self.spellSet(l.text(), R_ELSE);
+            self.absenceIn(n.namedChild(1), n);
+            // the maybe's own arguments are judged as any expression's
+            var j: u32 = 0;
+            while (j < l.namedChildCount()) : (j += 1) self.absenceIn(l.namedChild(j), l);
+            return;
+        }
+        if (self.maybeName(n)) |nm| {
+            const assigned = std.mem.eql(u8, pk, "assignment_expression") and par.namedChild(0).startByte() == n.startByte();
+            const returned = std.mem.eql(u8, pk, "return_statement") and self.cur.maybe;
+            const alone = std.mem.eql(u8, pk, "expression_statement");
+            if (!assigned and !returned and !alone) {
+                // the name as written, for the refusal's line
+                const f = if (std.mem.eql(u8, k, "call_expression")) n.namedChild(0) else n;
+                const use = if (std.mem.eql(u8, f.kind(), "member_expression")) f.namedChild(f.namedChildCount() - 1).text() else nm;
+                return self.spellSet(use, R_MAYBE);
+            }
+        }
+        var i: u32 = 0;
+        while (i < n.namedChildCount()) : (i += 1) {
+            self.absenceIn(n.namedChild(i), n);
+            if (self.spell_fault != null) return;
+        }
+    }
+
     fn defForm(self: *Compiler, d: ts.Node) ?[2][]const u8 {
         _ = self;
         var n = d;
@@ -2937,6 +3048,8 @@ pub const Compiler = struct {
             }
             // one walk: the keywords' case (v0.41) at each name, the one forms (v0.55) at every token
             self.oneForm(what);
+            // v0.58 (D70): absence
+            if (self.spell_fault == null) self.absenceForm(what);
             if (self.spell_fault) |why| return self.nopeSpelled(why);
         }
         if (as_return) try self.returnExpr(what) else try self.stmt(what);
@@ -3752,6 +3865,11 @@ pub const Compiler = struct {
             return;
         }
         if (std.mem.eql(u8, k, "call_keyword_expression")) return self.callKeyword(n, dst);
+        // v0.58 (D70): `none`, where a maybe is declared (the statement walk refused it anywhere else)
+        if (std.mem.eql(u8, k, "identifier") and std.mem.eql(u8, n.text(), "none") and self.haroNode(n)) {
+            _ = try self.emit(.ldnone, dst, 0, 0, 0);
+            return;
+        }
         if (std.mem.eql(u8, k, "this") or std.mem.eql(u8, k, "self")) {
             _ = try self.emit(.move, dst, self.selfIsBrace(n) orelse 0, 1, 0); // r0 is the receiver
             return;
@@ -4477,6 +4595,16 @@ pub const Compiler = struct {
     }
 
     fn binary(self: *Compiler, n: ts.Node, dst: u8) Error!void {
+        // v0.58 (D70): `E else D` -- E into dst; when it holds none, D
+        if (self.haroNode(n) and self.isElse(n)) {
+            try self.expr(n.namedChild(0), dst);
+            const has = try self.emit(.jnone, dst, 0, 0, 0);
+            const over = try self.emit(.jmp, 0, 0, 0, 0);
+            self.code.items[has].d = @intCast(self.here());
+            try self.expr(n.namedChild(1), dst);
+            self.code.items[over].d = @intCast(self.here());
+            return;
+        }
         const op = logicOp(opText(n));
         const save = self.temp;
         defer self.temp = save;
@@ -7180,6 +7308,8 @@ pub const Compiler = struct {
         defer self.bool_call = 0;
         try self.assignBody(n);
         if (settled or self.spell_fault != null or self.braces.items.len > 0) return;
+        // v0.58: none given to a maybe attribute holds no type, and no letter is checked
+        if (std.mem.eql(u8, rhs.kind(), "identifier") and std.mem.eql(u8, rhs.text(), "none")) return;
         // the statement's own line: Ring's F-114 row (the next token's, after a statement's last call) is not a .haro statement's
         self.atNodeStart(n);
         const name = lhs.text();
@@ -11248,6 +11378,8 @@ fn collectAll(c: *Compiler, root: ts.Node, alloc: std.mem.Allocator) Error!void 
                     // Ring's own ziplib.ring is that shape (class zip, then
                     // class ZipEntry ending in `private` / `oZip`).
                     const declared: []const u8 = if (is_id) e.text() else if (is_asg and std.mem.eql(u8, e.namedChild(0).kind(), "identifier")) e.namedChild(0).text() else "";
+                    // v0.58 (D70): an attribute whose declaration ends with `maybe`
+                    if (declared.len > 0 and c.haroNode(p.node) and c.maybeRow(p.node)) try c.maybe_attrs.put(alloc, declared, {});
                     if (declared.len > 0) {
                         const ci = &c.classes.items[cid];
                         var have = false;
@@ -11712,6 +11844,11 @@ fn startFunc(c: *Compiler, n: ts.Node, owner: ?u16, alloc: std.mem.Allocator) !v
     // The body arrives entirely from collectAll's positional pass, so a
     // statement the tree DID nest is not also added here and compiled twice.
     const stmts = std.ArrayListUnmanaged(ts.Node){};
+    const is_maybe = c.haroNode(n) and c.maybeRow(n);
+    if (is_maybe) {
+        const prev = c.maybe_funcs.get(name) orelse 0;
+        try c.maybe_funcs.put(alloc, name, prev | (if (owner != null) @as(u8, 2) else 1));
+    }
     try c.funcs.append(alloc, .{
         .name = name,
         .node = n,
@@ -11722,6 +11859,8 @@ fn startFunc(c: *Compiler, n: ts.Node, owner: ?u16, alloc: std.mem.Allocator) !v
         .hints = try hints.toOwnedSlice(alloc),
         .owner = owner,
         .name_idx = try c.nameIndex(name),
+        // v0.58 (D70): a .haro definition whose header ends with `maybe`
+        .maybe = is_maybe,
         // A METHOD IS NEVER "CALLED" AS FAR AS INFERENCE CAN SEE, and this
         // said the opposite. `called` has exactly one reader: the rule that
         // widens a parameter to `.ref` when no call site was observed. Only
@@ -13570,7 +13709,11 @@ fn emitOne(c: *Compiler, f: *Func) Error!void {
                 };
                 const pl = Compiler.letterOf(p) orelse continue;
                 if (std.mem.indexOfScalar(u8, Compiler.CHECKED, pl) == null) continue;
-                if (c.lookup(p)) |lp| try c.emitLetterCheck(lp.reg, pl, p);
+                if (c.lookup(p)) |lp| {
+                    try c.emitLetterCheck(lp.reg, pl, p);
+                    // a b parameter's check says it stands at the entry (c = 1): a .ring caller's 1 or 0 crosses as true or false
+                    if (pl == 'b' and c.code.items[c.code.items.len - 1].c == 0) c.code.items[c.code.items.len - 1].c = 1;
+                }
             }
         }
         // v0.56 (D68): a .haro file with a definition that has no end -- the program refuses its first statement, naming it
@@ -13717,7 +13860,10 @@ fn emitOne(c: *Compiler, f: *Func) Error!void {
         // has seen, instead of a lost library.
         c.temp = c.localsTop();
         if (c.tmp()) |tr| {
-            _ = try c.emit(.loadk, tr, 0, 0, try c.konstIndex("\"\""));
+            // v0.58 (D70): a maybe function that ends without a return gives none
+            if (f.maybe) {
+                _ = try c.emit(.ldnone, tr, 0, 0, 0);
+            } else _ = try c.emit(.loadk, tr, 0, 0, try c.konstIndex("\"\""));
             _ = try c.emit(.ret, tr, 0, 0, 0);
         } else |_| {
             _ = try c.emit(.loadi, 0, 0, 0, 0);

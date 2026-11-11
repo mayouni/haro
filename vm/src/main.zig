@@ -1573,6 +1573,11 @@ pub const Value = extern struct {
     pub inline fn nil() Value {
         return .{ .p = .{ .i = 0 }, .tag = .nil };
     }
+    /// v0.58 (D70, TYPES.md T5): `none`, the absence a maybe returns or a maybe attribute holds -- nil with a mark, so a slot nothing
+    /// ever assigned still raises R24 when read, and a maybe that holds none does not
+    pub inline fn none() Value {
+        return .{ .p = .{ .i = NONE_MARK }, .tag = .nil };
+    }
     /// v0.43: the payload is 1 or 0, so code that reads `p.i` reads Ring's 1 or 0.
     pub inline fn boolean(b: bool) Value {
         return .{ .p = .{ .i = @intFromBool(b) }, .tag = .boolean };
@@ -1928,7 +1933,14 @@ pub const Op = enum(u8) {
     /// v0.47 (D55 T2): a name's letter checked where a value is given it, in a .haro file. r[a] is the value; b the letter (b i n f t v
     /// o h); d the name, a string constant. The empty text NULL passes any letter until v0.49 builds `none`; otherwise TYPE_LETTER.
     lchk,
+    /// v0.58 (D70): r[a] = none
+    ldnone,
+    /// v0.58 (D70): when r[a] holds none (or nil), pc = d -- `E else D` takes D
+    jnone,
 };
+
+/// v0.58: the mark a nil carries when it is `none`
+pub const NONE_MARK: i64 = 0x6e6f6e65;
 
 /// What `jmpl` recorded, per frame depth: the line a report gives for a pc
 /// in [lo, hi). Static memory: one VM per process, and a depth past the end
@@ -8793,11 +8805,33 @@ pub const VM = struct {
                 pc += 1;
                 continue :dispatch code[pc].op;
             },
+            .ldnone => {
+                const in = code[pc];
+                self.setRegB(base + in.a, Value.none(), false);
+                pc += 1;
+                continue :dispatch code[pc].op;
+            },
+            .jnone => {
+                const in = code[pc];
+                if (regs[base + in.a].tag == .nil) {
+                    pc = @intCast(in.d);
+                } else pc += 1;
+                continue :dispatch code[pc].op;
+            },
             .lchk => {
                 const in = code[pc];
                 const v = regs[base + in.a];
-                // v0.54 (D66): a vector's element letter (c), each item checked as its own letter would be
-                if (in.c != 0 and v.tag == .vec and !v.p.v.closure) {
+                // HARO-RINGBOUNDARY-BOOL-02 (TYPES.md section 6): a parameter's check at its function's entry (c = 1). A b parameter given
+                // 1 or 0 by a call from a .ring file holds true or false: the classic Ring surface's booleans are its integers. A .haro
+                // caller's 1 stays refused.
+                if (in.c == 1 and in.b == 'b' and v.tag == .int and (v.p.i == 0 or v.p.i == 1) and fsp > 0 and
+                    !self.strictAt(self.frames[fsp - 1].ret_pc -| 1))
+                {
+                    regs[base + in.a] = Value.boolean(v.p.i == 1);
+                    pc += 1;
+                    continue :dispatch code[pc].op;
+                }
+                if (in.c > 1 and v.tag == .vec and !v.p.v.closure) {
                     const vv = v.p.v;
                     var k: usize = 0;
                     while (k < vv.len) : (k += 1) {
@@ -8824,7 +8858,7 @@ pub const VM = struct {
                 } or v.tag == .nil or (v.tag == .str and v.p.s.len == 0);
                 if (!ok) {
                     const nm = konst[@intCast(in.d)];
-                    if (in.c != 0) {
+                    if (in.c > 1) {
                         self.pending = self.haroMsg("Error (TYPE_LETTER) : `{s}` is lettered v{c}, a vector of {s}, and is given {s}", .{
                             if (nm.tag == .str) nm.p.s.ptr[0..nm.p.s.len] else "?", @as(u8, @intCast(in.c)), letterPlural(@intCast(in.c)), typeArticle(v) });
                         continue :dispatch .raise;
@@ -8888,7 +8922,7 @@ pub const VM = struct {
                 // raises it (`@nunset`); a bare declaration (`x` alone in the
                 // class body) is an assignment of the four-byte string "NULL"
                 // on Ring and is not this case.
-                if (av.tag == .nil) {
+                if (av.tag == .nil and av.p.i != NONE_MARK) {
                     self.r24Named(self.attrNameOf(o.class, sl));
                     continue :dispatch .raise;
                 }

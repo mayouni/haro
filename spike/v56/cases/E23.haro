@@ -1,0 +1,20 @@
+oB = new B
+Draw(oB)
+func Draw(oB)
+	for i = 1 to 1
+		nMid = 2 / 2
+		# a comment
+		oB.PolyQ([ 1, 2,
+			3 ]).FQ(9)
+	end
+	print "after"
+end
+class B
+	def PolyQ(vX)
+		print Len(vX)
+		return this
+	end
+	def FQ(iN)
+		print iN
+	end
+end

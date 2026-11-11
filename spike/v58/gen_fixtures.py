@@ -44,6 +44,7 @@ R_ELSE = 'else resolves a maybe, and this value is never none; written'
 
 TITLE = ['func Title(bHas) maybe', T + 'if bHas', T + T + 'return "Haro"', T + 'end', T + 'return none', 'end']
 HEAD = ['print "before"', 'f()', 'func f']
+CS = ['func Cs(tA, bCase)', T + 'if bCase', T + T + 'return "on"', T + 'end', T + 'return "off"', 'end']
 
 CASES = [
     ('M01', 'A1', 'a maybe function\'s value, or else its default', [
@@ -61,8 +62,10 @@ CASES = [
      refused('M04', 4, R_MAYBE, 'Title'), 1),
     ('M05', 'A3', 'a maybe passed as an argument is refused', HEAD + [T + 'print Len(Title(true))', 'end'] + TITLE,
      refused('M05', 4, R_MAYBE, 'Title'), 1),
-    ('M06', 'A2', 'none returned by a function not declared maybe is refused', HEAD + [T + 'print g()', 'end', 'func g', T + 'return none', 'end'],
-     refused('M06', 8, R_NONE, 'none', called=4, where='function g()'), 1),
+    # M06 changed after the code, said so: its first form called g from f, and the expected trace named one caller
+    ('M06', 'A2', 'none returned by a function not declared maybe is refused', ['print "before"', 'print g()', 'func g', T + 'return none',
+                                                                                'end'],
+     refused('M06', 4, R_NONE, 'none', called=2, where='function g()'), 1),
     ('M07', 'A2', 'none given to a local is refused', HEAD + [T + 'xV = none', 'end'],
      refused('M07', 4, R_NONE, 'none'), 1),
     ('M08', 'A4', 'a maybe attribute starts as none and is resolved where it is read', [
@@ -93,14 +96,22 @@ CASES = [
      'no title\n', 0),
     ('M16', 'A6', 'a .ring file: none and maybe are names', ['none = 5', 'maybe = 2', '? none + maybe'],
      '7\n', 0),
+    # HARO-RINGBOUNDARY-BOOL-02 (stzlib-haroport, 2026-11-11 22:57), TYPES.md section 6 in the parameter's direction: written before its code
+    ('M17', 'A7', 'a .ring caller\'s 1 or 0 given to a .haro b parameter is true or false', ['load "bp.haro"', '? Cs("x", 1)', '? Cs("x", 0)'],
+     'on\noff\n', 0),
+    ('M18', 'A7', 'a .haro caller\'s 1 given to a b parameter stays refused', ['print "before"', 'print Cs("x", 1)'] + CS,
+     'before\n\nLine 3 Error (TYPE_LETTER) : `bCase` is lettered b, a boolean, and is given an integer \nIn function cs() in file M18.haro'
+     '\n\nCalled from line 2 in file M18.haro ', 1),
 ]
 
 
 def main():
     os.makedirs(os.path.join(HERE, 'cases'), exist_ok=True)
+    with open(os.path.join(HERE, 'cases', 'bp.haro'), 'w', encoding='utf-8', newline='\n') as fh:
+        fh.write('\n'.join(CS) + '\n')
     out = []
     for cid, line, why, src, stdout, code in CASES:
-        ext = '.ring' if cid == 'M16' else '.haro'
+        ext = '.ring' if cid in ('M16', 'M17') else '.haro'
         name = f'cases/{cid}{ext}'
         with open(os.path.join(HERE, name), 'w', encoding='utf-8', newline='\n') as fh:
             fh.write('\n'.join(src) + '\n')
@@ -114,7 +125,8 @@ def main():
                     'the desk\'s readings are D70',
         'class': 'exact: the program\'s whole stdout and its exit code, byte for byte, on haro and on its checked build',
         'lines': {'A1': 'a maybe resolved where it lands', 'A2': 'none only where a maybe is declared', 'A3': 'an unresolved maybe refused',
-                  'A4': 'a maybe attribute', 'A5': 'else only for a maybe; an if\'s else; "" a text', 'A6': 'a .ring file untouched'},
+                  'A4': 'a maybe attribute', 'A5': 'else only for a maybe; an if\'s else; "" a text', 'A6': 'a .ring file untouched',
+                  'A7': 'a .ring caller\'s 1 or 0 at a .haro b parameter (TYPES section 6, HARO-RINGBOUNDARY-BOOL-02)'},
         'cases': out,
     }
     with open(os.path.join(HERE, 'fixtures.json'), 'w', encoding='utf-8', newline='\n') as fh:

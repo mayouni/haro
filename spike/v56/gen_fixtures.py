@@ -121,6 +121,13 @@ CASES = [
     ('E22', 'G1', 'a function written in place with parameters, inside a call, is closed by its brace', [
         'f()', 'func f', T + 'xG = Twice(func(iX) { return iX * 2 })', T + 'print xG', 'end', 'func Twice(xF)', T + 'return call xF(4)', 'end'],
      '8\n', 0),
+    # E23 written after the code, said so: HARO-CHAIN-COMMENT-01 from stzlib-haroport (2026-11-11 21:55) -- a comment line before a call
+    # whose bracket spans lines, in a block: the grammar cut the chain at its dot, and the trailing-period refusal stood in the re-read's way
+    ('E23', 'G5', 'a comment line before a chain whose bracket spans lines, inside a block, runs', [
+        'oB = new B', 'Draw(oB)', 'func Draw(oB)', T + 'for i = 1 to 1', T + T + 'nMid = 2 / 2', T + T + '# a comment',
+        T + T + 'oB.PolyQ([ 1, 2,', T + T + T + '3 ]).FQ(9)', T + 'end', T + 'print "after"', 'end', 'class B', T + 'def PolyQ(vX)',
+        T + T + 'print Len(vX)', T + T + 'return this', T + 'end', T + 'def FQ(iN)', T + T + 'print iN', T + 'end', 'end'],
+     '3\n9\nafter\n', 0),
     # G4 -- a .ring file reads as Ring reads it
     ('E12', 'G4', 'a .ring file: a func after a class is its method, a statement after a func belongs to it', [
         'o = new P', 'o.g()', 'f()', 'func f', '? "f"', '? "still f"', 'class P', 'func g', '? "g, a method"'],

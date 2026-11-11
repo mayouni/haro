@@ -61,6 +61,9 @@ PLANTS = [
      [("            if (q < n and src[q] == '{') def = false;", "            if (q > n) def = false;")]),
     ('L11', 'E22', 'a func that does not begin its line opens a definition', LIFT,
      [("            if (line_prev != '\\n') def = false;", "            if (line_prev == 0) def = false;")]),
+    ('C1', 'E23', 'a dot followed by a statement on its line is a trailing period', COMP,
+     [('                    if (nx.isNull() or nx.start().row != ch.start().row) return self.spellSet(ch.text(), R_PERIOD);',
+       '                    if (ch.start().row < 1 << 30) return self.spellSet(ch.text(), R_PERIOD);')]),
 ]
 
 

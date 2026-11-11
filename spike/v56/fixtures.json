@@ -190,6 +190,14 @@
    "stdout": "8\n"
   },
   {
+   "id": "E23",
+   "kind": "run",
+   "line": "G5",
+   "why": "a comment line before a chain whose bracket spans lines, inside a block, runs",
+   "file": "cases/E23.haro",
+   "stdout": "3\n9\nafter\n"
+  },
+  {
    "id": "E12",
    "kind": "run",
    "line": "G4",
