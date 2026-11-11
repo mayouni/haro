@@ -32,7 +32,7 @@ T = '\t'
 CASES = [
     ('H01', 'K', 'a keyword in another case is lowered; a symbol, a string and a comment are not', {
         'main.ring': ['If 1 = 1 See "If" Ok   # If stays in a comment', 'x = :Next', 'For i = 1 To 2 Next']},
-     [("applied['main.haro']", 'if 1 = 1 see "If" ok   # If stays in a comment\nx = :Next\nfor i = 1 to 2 next\n')]),
+     [("applied['main.haro']", 'if 1 = 1 see "If" end   # If stays in a comment\nx = :Next\nfor i = 1 to 2 end\n')]),
     ('H02', 'B', 'a built-in is spelled as Haro writes it; a function the tree defines is left as written', {
         'main.ring': ['? len("ab")', '? upper("a")', '? isnull(1)', 'func f', T + '? trim(" a ")'],
         'lib.ring': ['func trim x', T + 'return x']},
@@ -42,7 +42,7 @@ CASES = [
         'main.ring': ['load "lib.ring"', '$cTitle = "a"', 'vAny = 1', '? Shout($cTitle)'],
         'lib.ring': ['func Shout cWord', T + 'return cWord + $cTitle']},
      [("'$tTitle = \"a\"' in applied['main.haro']", True), ("'xAny = 1' in applied['main.haro']", True),
-      ("'func Shout tWord' in applied['lib.haro']", True), ("'return tWord + $tTitle' in applied['lib.haro']", True)]),
+      ("'func Shout(tWord)' in applied['lib.haro']", True), ("'return tWord + $tTitle' in applied['lib.haro']", True)]),
     ('H04', 'L', 'a bare name in a function is lettered by what it holds; the top level and a class body are not', {
         'main.ring': ['count = 1', 'func f', T + 'count = 3', T + 'name = "a"', T + 'items = [1, 2]', T + 'o = new P', T + '? count + 1',
                       'class P', T + 'size = 2']},
@@ -129,7 +129,7 @@ CASES = [
     # ---- the third round (HARO-PORTTOOL-ROUND3-01, the Principal's HAROPORT-SPELLINGS-02 of 2026-11-11), written before its code
     ('H23', 'R', '(a) a parameter keeps its p mark: pc is pt, pa with an element letter is pv with it, pn and pb stay', {
         'main.ring': ['func f pcName, pnAt, pbOk, panPos, paList', T + '? pcName + pnAt', T + '? Len(panPos) + Len(paList)']},
-     [("applied['main.haro'].splitlines()[0]", 'func f ptName, pnAt, pbOk, pviPos, paList'),
+     [("applied['main.haro'].splitlines()[0]", 'func f(ptName, pnAt, pbOk, pviPos, paList)'),
       ("'? ptName + pnAt' in applied['main.haro'] and '? Len(pviPos) + Len(paList)' in applied['main.haro']", True)]),
     ('H24', 'R', '(b) a b name given 1 or 0 is given true or false; a condition on a 1 or 0 literal is true or false', {
         'main.ring': ['bReady = 1', '$bDone = 0', 'func f', T + 'bOk = 1', T + 'while 1', T + T + 'exit', T + 'end', T + 'if 0', T + T + '? "no"',
@@ -149,6 +149,27 @@ CASES = [
         'main.ring': ['class P', T + '@CaseSensitive = 1', T + '@Count = 0', T + '@Title = "t"', T + 'func Bump', T + T + '@Count++']},
      [("'@bCaseSensitive = true' in applied['main.haro'] and '@nCount = 0' in applied['main.haro'] and '@tTitle = \"t\"' in applied['main.haro']", True),
       ("'@nCount++' in applied['main.haro']", True)]),
+    # rule O (D67, HARO-ONEFORM-01): written after the rule's code, before its commit -- said so
+    ('H28', 'O', 'every block ends with end, and a definition\'s end word goes, leaving its line', {
+        'main.ring': ['func f', T + 'if true', T + T + 'see "a"', T + 'ok', T + 'while false', T + 'end', T + 'switch 1', T + 'on 1 see "b"',
+                      T + 'other see "c"', T + 'off', T + 'try', T + 'catch', T + 'done', T + 'if true { see "d" }', 'end', 'func g', T + 'return 1']},
+     [("applied['main.haro'].count('\\tend\\n')", 4),
+      ("[w for w in ('ok', 'off', 'done', 'other', '{', '}') if w in applied['main.haro']]", []),
+      ("applied['main.haro'].splitlines()[14:16]", ['', 'func g']),
+      ("'\\tcase 1 see \"b\"' in applied['main.haro'] and '\\telse see \"c\"' in applied['main.haro']", True)]),
+    ('H29', 'O', 'one word each, from, #, this outside a brace, parameters in parentheses and none without, no trailing period', {
+        'main.ring': ['k()', 'class P', 'class Q : P', T + 'func g', T + T + '? classname(self) // the object', T + T + 'new P { see self }',
+                      'def h a, b', T + 'if a && !b', T + T + 'put "x"', T + 'but a || b', T + T + 'get v', T + 'ok', 'func k()', T + 'h(1, 0).']},
+     [("'class Q from P' in applied['main.haro'] and '? ClassName(this) # the object' in applied['main.haro']", True),
+      ("'new P { see self }' in applied['main.haro']", True),
+      ("[l for l in applied['main.haro'].splitlines() if l.startswith(('func h(', 'func k'))]", ['func h(xA, xB)', 'func k']),
+      ("' and not ' in applied['main.haro'] and ' or ' in applied['main.haro'] and '\\telseif ' in applied['main.haro']", True),
+      ("'\\t\\tsee \"x\"' in applied['main.haro'] and '\\t\\tgive ' in applied['main.haro'] and '\\th(1, 0)\\n' in applied['main.haro']", True)]),
+    ('H30', 'O', 'a tree in every spelling ported runs on haro and prints what it printed', {
+        'main.ring': ['f(2)', 'func f n', T + 'for i = 1 to n', T + T + 'if i = 1 put "a" but i = 2 see "b" ok', T + 'next',
+                      T + 'switch n on 2 put "c" other put "d" off', T + 'try raise("e") catch put "f" done', T + 'if n = 2 && !(n = 3) { put "g" }',
+                      T + 'put char(10)', 'end']},
+     [("ran['main.haro']", "abcfg\n"), ("ran_ring['main.ring']", "abcfg\n")]),
     ('H11', '-', 'the ported tree runs on haro and prints what the classic Ring surface printed', {
         'main.ring': ['load "lib.ring"', 'cName = Greet("ada")', '? cName', '? Len(cName)'],
         'lib.ring': ['func Greet cWho', T + 'cOut = "hi " + cWho', T + 'return cOut']},

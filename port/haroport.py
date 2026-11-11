@@ -18,6 +18,9 @@ THE REWRITES, in this order, each on code only (a string, a comment, a symbol's 
      letter is v and the element's (an/ac/ao/aa -> vi/vt/vo/vv); an ALL_CAPS name and an @Capitalised attribute take their letter by what
      they hold (1 or 0 alone and never counted: a boolean)
   Y  a b name given 1 or 0 is given true or false, and a condition on a literal 1 or 0 is on true or false
+  O  (D67, HARO-ONEFORM-01) one form for each construct: every block ends with `end` (never ok, next, off, done, endX, braces), a
+     definition has no end word, one word each (func, elseif, else, case, for, see, give, exit, loop, and, or, not, from), `#` for a
+     comment, `this` outside a brace object, parameters in parentheses and none without, no period after a call ending a statement
 A RENAME IS REFUSED, and listed, when its new name is a keyword in any case, is already a name in its scope (for C: anywhere in the tree),
 or is in a method an attribute its class declares (a bare assignment to one writes the attribute in Ring; a local would change the
 program). The name is then left as it was written.
@@ -279,6 +282,7 @@ def port_file(rel, src, tree_funcs, tree_names, c_map, refused):
     bool_literals(toks, renames)
     toks, pairs = pair_lists(toks)
     renames.extend(('P', ':' + k, '[:' + k + ', ...]') for k in pairs)
+    toks = one_form(toks, renames)
     return ''.join(v for _, v in toks), renames
 
 
@@ -526,6 +530,170 @@ def bool_literals(toks, renames):
         if len(core) >= 2 and core[0] == 'b' and core[1].isupper():
             toks[i][1] = word
             renames.append(('Y', v, word))
+
+
+ONE_WORD = {'but': 'elseif', 'other': 'else', 'on': 'case', 'foreach': 'for', 'put': 'see', 'get': 'give', 'break': 'exit',
+            'continue': 'loop', 'def': 'func', 'function': 'func'}
+OPENS = ('if', 'while', 'for', 'foreach', 'switch', 'try', 'do')
+CLOSES = ('ok', 'next', 'off', 'done', 'endif', 'endwhile', 'endfor', 'endswitch', 'endtry', 'end')
+DEF_ENDS = ('end', 'endfunc', 'endfunction', 'endclass', 'endpackage')
+
+
+def one_form(toks, renames):
+    """O (D67): one form for each construct. A block's end word, or its closing brace, is `end`, and its opening brace goes; a
+    definition's end word goes (the line is kept, so every line keeps its number); one word each (ONE_WORD; &&, ||, ! are and, or, not);
+    `from` before a class's parent; `#` for a line's comment; `this` for `self` outside a brace object; a definition's parameters in
+    parentheses and none without; no period after a call that ends a statement. Blocks are matched lexically: in document order every
+    block word opens (if, while, for, switch, try, do, and within/using before a header), every end word or block brace closes, and an end
+    word with no block open is a definition's."""
+    out = [list(x) for x in toks]
+    stack = []          # 'blk', 'brace' (a block opened by `{`), 'do'
+    obj = 0             # depth of brace objects, where self is the object
+    header = False      # a block word opened on this line, and no brace yet
+    line_start = True
+
+    def put(i, new, why='O'):
+        if out[i][1] != new:
+            renames.append((why, out[i][1], new))
+            out[i][1] = new
+
+    i = 0
+    while i < len(out):
+        k, v = out[i]
+        if k == 'nl':
+            line_start = True
+            header = False
+            i += 1
+            continue
+        if k == 'ws':
+            i += 1
+            continue
+        if k == 'cm':
+            if v.startswith('//'):
+                put(i, '#' + v[2:])
+            i += 1
+            continue
+        low = v  # exact: a .ring file's keywords are lowered first (K), and in a .haro file `oN` is a name
+        word = k == 'id' and not is_member(out, i) and not is_symbol(out, i)
+        if word and line_start and low in ('func', 'def', 'function', 'class', 'package'):
+            stack = []
+            if low in ('def', 'function'):
+                put(i, 'func')
+            if low != 'package':
+                j = sig(out, i, 1)
+                if j is not None and out[j][0] == 'id':
+                    if low == 'class':
+                        jj = sig(out, j, 1)
+                        if jj is not None and out[jj][1] in (':', '<'):
+                            put(jj, 'from')
+                            if jj > 0 and out[jj - 1][0] != 'ws':
+                                out.insert(jj, ['ws', ' '])
+                    else:
+                        params(out, j, renames)
+            line_start = False
+            i += 1
+            continue
+        if word and low in OPENS:
+            stack.append('do' if low == 'do' else 'blk')
+            header = low != 'do'
+            if low == 'foreach':
+                put(i, 'for')
+        elif word and low in ('within', 'using') and line_start:
+            j = sig(out, i, 1)
+            jj = sig(out, j, 1) if j is not None else None
+            if j is not None and out[j][0] == 'id' and jj is not None and out[jj][1] == '=':
+                stack.append('blk')
+        elif word and low == 'again':
+            if stack:
+                stack.pop()
+        elif word and low in CLOSES:
+            if stack and stack[-1] == 'blk':
+                stack.pop()
+                put(i, 'end')
+            elif not stack and low in DEF_ENDS:
+                put(i, '')
+            elif stack:
+                stack.pop()
+                put(i, 'end')
+        elif word and low in DEF_ENDS:
+            if not stack:
+                put(i, '')
+        elif word and low in ONE_WORD:
+            put(i, ONE_WORD[low])
+        elif word and low == 'self' and obj == 0:
+            put(i, 'this')
+        elif k == 'op' and v == '{':
+            if header:
+                stack[-1] = 'brace'
+                put(i, '')
+                header = False
+            else:
+                obj += 1
+        elif k == 'op' and v == '}':
+            if stack and stack[-1] == 'brace' and obj == 0:
+                stack.pop()
+                put(i, 'end')
+            elif obj:
+                obj -= 1
+        elif k == 'op' and v in ('&', '|') and i + 1 < len(out) and out[i + 1][1] == v:
+            put(i, 'and' if v == '&' else 'or')
+            out[i + 1][1] = ''
+            spaced(out, i)
+        elif k == 'op' and v == '!' and not (i + 1 < len(out) and out[i + 1][1] == '='):
+            put(i, 'not')
+            spaced(out, i)
+        elif k == 'op' and v == '.':
+            j = sig(out, i, 1)
+            b = sig(out, i, -1)
+            if (j is None or out[j][0] == 'nl') and b is not None and out[b][1] == ')':
+                put(i, '')
+        line_start = False
+        i += 1
+    # a word taken out takes the blank before it when nothing but a blank or the line's end follows
+    for i in range(1, len(out)):
+        if out[i][1] == '' and out[i][0] != 'nl' and out[i - 1][0] == 'ws':
+            j = i + 1
+            while j < len(out) and out[j][1] == '' and out[j][0] != 'nl':
+                j += 1
+            if j == len(out) or out[j][0] in ('nl', 'ws'):
+                out[i - 1][1] = ''
+    return [x for x in out if x[1] != '' or x[0] == 'nl']
+
+
+def spaced(out, i):
+    """a word made of an operator stands apart from its neighbours"""
+    if i + 1 < len(out) and out[i + 1][0] not in ('ws', 'nl') and out[i + 1][1] != '':
+        out.insert(i + 1, ['ws', ' '])
+    elif i + 2 < len(out) and out[i + 1][1] == '' and out[i + 2][0] not in ('ws', 'nl'):
+        out.insert(i + 2, ['ws', ' '])
+    if i > 0 and out[i - 1][0] not in ('ws', 'nl') and out[i - 1][1] not in ('(', '['):
+        out.insert(i, ['ws', ' '])
+
+
+def params(out, j, renames):
+    """a definition named at out[j]: `name()` loses its parentheses, `name a, b` gains them"""
+    a = sig(out, j, 1)
+    if a is None or out[a][0] == 'nl':
+        return
+    if out[a][1] == '(':
+        b = sig(out, a, 1)
+        if b is not None and out[b][1] == ')':
+            renames.append(('O', out[j][1] + '()', out[j][1]))
+            for x in range(j + 1, b + 1):
+                out[x][1] = ''
+        return
+    # bare parameters: up to the line's end, before a comment
+    end = a
+    x = a
+    while x < len(out) and out[x][0] != 'nl':
+        if out[x][0] not in ('ws', 'cm'):
+            end = x
+        x += 1
+    renames.append(('O', out[j][1] + ' ' + out[a][1], out[j][1] + '(' + out[a][1]))
+    out[end][1] = out[end][1] + ')'
+    for x in range(j + 1, a):
+        out[x][1] = ''
+    out[a][1] = '(' + out[a][1]
 
 
 def haro_name(rel):

@@ -66,6 +66,22 @@ PLANTS = [
     ('T32', 'H17', 'a call in capitals is lettered as a constant', [
         ("    if re.fullmatch(r'[A-Z][A-Z0-9_]+', core) and (pre + core) in letters:\n        return pre + letters[pre + core] + core",
          "    if re.fullmatch(r'[A-Z][A-Z0-9_]+', core):\n        return pre + letters.get(pre + core, 'x') + core")]),
+    # rule O (D67, HARO-ONEFORM-01)
+    ('T33', 'H28', 'a block\'s end word is left', [("            if stack and stack[-1] == 'blk':\n                stack.pop()\n                put(i, 'end')",
+                                                   "            if stack and stack[-1] == 'blk':\n                stack.pop()\n                pass")]),
+    ('T34', 'H28', 'a definition\'s end word is left', [("            elif not stack and low in DEF_ENDS:\n                put(i, '')",
+                                                        "            elif not stack and low in DEF_ENDS:\n                pass")]),
+    ('T35', 'H28', 'a word with a one spelling is left', [("            put(i, ONE_WORD[low])", "            pass")]),
+    ('T36', 'H28', 'a block\'s braces are left', [("            if header:\n                stack[-1] = 'brace'", "            if False:\n                stack[-1] = 'brace'")]),
+    ('T37', 'H29', 'self in a brace object is made this too', [("        elif word and low == 'self' and obj == 0:", "        elif word and low == 'self':")]),
+    ('T38', 'H29', 'a class\'s parent after : is left', [("                            put(jj, 'from')", "                            pass")]),
+    ('T39', 'H29', 'a definition\'s parameters are left', [("                        params(out, j, renames)", "                        pass")]),
+    ('T40', 'H29', 'a trailing period is left', [("            if (j is None or out[j][0] == 'nl') and b is not None and out[b][1] == ')':",
+                                                  "            if False:")]),
+    ('T41', 'H29', 'a // comment is left', [("            if v.startswith('//'):", "            if False:")]),
+    ('T42', 'H29', '&& and || are left', [("            put(i, 'and' if v == '&' else 'or')\n            out[i + 1][1] = ''",
+                                           "            continue_ = None\n            i += 1\n            continue")]),
+    ('T43', 'H30', 'rule O is never applied', [("    toks = one_form(toks, renames)\n", "")]),
     ('T21', 'H17', 'a call through a receiver is respelled', [
         ("        if k != 'id' or v.startswith(('$', '@')) or is_member(toks, i) or is_symbol(toks, i):",
          "        if k != 'id' or v.startswith(('$', '@')) or is_symbol(toks, i):")]),
