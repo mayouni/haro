@@ -1,0 +1,10 @@
+$iG = 1
+f()
+? $iG
+func f
+	within $iG = 2
+		if true
+			? $iG
+		end
+		? 3
+	end

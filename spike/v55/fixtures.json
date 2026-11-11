@@ -74,6 +74,14 @@
    "stdout": "2\n1\n"
   },
   {
+   "id": "O30",
+   "kind": "run",
+   "line": "F1",
+   "why": "an if inside a within: each end closes its own block",
+   "file": "cases/O30.haro",
+   "stdout": "2\n3\n1\n"
+  },
+  {
    "id": "O08",
    "kind": "run",
    "line": "F1",

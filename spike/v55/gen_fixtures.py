@@ -64,6 +64,10 @@ CASES = [
     ('O07', 'F1', 'within closes with end, and its global is restored', ['$iG = 1', 'f()', '? $iG', 'func f', T + 'within $iG = 2',
                                                                          T + T + '? $iG', T + 'end'],
      '2\n1\n', 0),
+    ('O30', 'F1', 'an if inside a within: each end closes its own block', ['$iG = 1', 'f()', '? $iG', 'func f', T + 'within $iG = 2',
+                                                                          T + T + 'if true', T + T + T + '? $iG', T + T + 'end',
+                                                                          T + T + '? 3', T + 'end'],
+     '2\n3\n1\n', 0),
     ('O08', 'F1', 'within closed by done is refused', HEAD + [T + '$iG = 1', T + 'within $iG = 2', T + T + '? $iG', T + 'done'],
      refused('O08', 7, END, 'done'), 1),
     # F2 -- a definition has no end word
