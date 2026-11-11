@@ -165,9 +165,9 @@
    "id": "O17",
    "kind": "run",
    "line": "F3",
-   "why": "put is refused: see",
+   "why": "put is refused: print (v0.57: see is refused too)",
    "file": "cases/O17.haro",
-   "stdout": "before\n\nLine 4 Haro refused this statement (one spelling: `see`; written `put`, line 4 of O17.haro) and did not compile it -- running past it would give a wrong answer \nIn function f() in file O17.haro\n\nCalled from line 2 in file O17.haro ",
+   "stdout": "before\n\nLine 4 Haro refused this statement (one spelling: `print`; written `put`, line 4 of O17.haro) and did not compile it -- running past it would give a wrong answer \nIn function f() in file O17.haro\n\nCalled from line 2 in file O17.haro ",
    "exit": 1
   },
   {
@@ -264,7 +264,7 @@
    "id": "O28",
    "kind": "run",
    "line": "F6",
-   "why": "the one forms run: end, elseif, else, case, for, see, ?, give-free, exit, loop, and/or/not, from, #, this, self in a brace",
+   "why": "the one forms run: end, elseif, else, case, for, FWrite(stdout) (v0.57), ?, give-free, exit, loop, and/or/not, from, #, this, self in a brace",
    "file": "cases/O28.haro",
    "stdout": "i2\nother \"n\"\ncaught\np\nq\n5\n"
   },

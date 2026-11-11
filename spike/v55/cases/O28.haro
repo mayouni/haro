@@ -10,7 +10,7 @@ func f(iN)
 		elseif iI = 3 and not false
 			exit
 		else
-			see "i"
+			FWrite(stdout, "i")
 			? iI
 		end
 	end

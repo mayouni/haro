@@ -2772,7 +2772,9 @@ pub const Compiler = struct {
             .{ .w = "other", .p = "", .why = "one spelling: `else`; written" },
             .{ .w = "on", .p = "case_clause", .why = "one spelling: `case`; written" },
             .{ .w = "foreach", .p = "", .why = "one spelling: `for`; written" },
-            .{ .w = "put", .p = "see_statement", .why = "one spelling: `see`; written" },
+            // v0.57 (D69, the Principal): one keyword, `print`, and `?` its shortcut -- `see` and `put` refused
+            .{ .w = "put", .p = "see_statement", .why = "one spelling: `print`; written" },
+            .{ .w = "see", .p = "see_statement", .why = "one spelling: `print`; written" },
             .{ .w = "get", .p = "give_statement", .why = "one spelling: `give`; written" },
             .{ .w = "break", .p = "", .why = "one spelling: `exit`; written" },
             .{ .w = "continue", .p = "", .why = "one spelling: `loop`; written" },

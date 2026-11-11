@@ -43,7 +43,7 @@
    "why": "every read is counted: two reads in one handler are two notes",
    "file": "cases/L04.haro",
    "args": [],
-   "stdout": "L04.haro\n  6:5  note   haro/last-error-read\n          cCatchError read in its handler -- bind the error instead (`catch e`) and read e\n  7:7  note   haro/last-error-read\n          cCatchError read in its handler -- bind the error instead (`catch e`) and read e\n\n  0 error, 0 warn, 0 perf, 2 note   in 1 file(s)\n  listener-binds-all: no listening native named (--listeners=), so no call was looked at\n"
+   "stdout": "L04.haro\n  6:5  note   haro/last-error-read\n          cCatchError read in its handler -- bind the error instead (`catch e`) and read e\n  7:18  note   haro/last-error-read\n          cCatchError read in its handler -- bind the error instead (`catch e`) and read e\n\n  0 error, 0 warn, 0 perf, 2 note   in 1 file(s)\n  listener-binds-all: no listening native named (--listeners=), so no call was looked at\n"
   },
   {
    "id": "L05",

@@ -3887,6 +3887,24 @@ def stage61():
         return 1
     return 0
 
+
+PRINT_COURT = os.path.join(HERE, 'v57', 'print_court.py')
+
+
+def stage62():
+    """Haro v0.57, one way to print: print, and ? its shortcut (HARO-PRINT-01, D69; v57/GRAMMAR.md). v57/print_court.py on haro and its
+    checked build."""
+    print('stage 62 -- one way to print: v57/print_court.py on haro and its checked build')
+    p = subprocess.run([sys.executable, PRINT_COURT] + (['--plant'] if PLANT else []), capture_output=True, cwd=HERE, timeout=900)
+    out = p.stdout.decode('utf-8', 'replace').replace(chr(13) + chr(10), chr(10))
+    for line in out.splitlines():
+        if line.startswith('  FAIL') or line.startswith('       ') or line.startswith('PRINT COURT'):
+            print(line)
+    if p.returncode != 0:
+        print(f'  FAIL the print court exited {p.returncode}' + ('' if out.strip() else ': ' + p.stderr.decode('utf-8', 'replace')[-400:]))
+        return 1
+    return 0
+
 PORT_COURT = os.path.join(os.path.dirname(HERE), 'port', 'port_court.py')
 
 
@@ -4122,5 +4140,7 @@ if __name__ == '__main__':
         failures += stage60()
     if stage in (None, 61) and os.path.exists(DEF_COURT):
         failures += stage61()
+    if stage in (None, 62) and os.path.exists(PRINT_COURT):
+        failures += stage62()
     print(f'haro_forge: {"FAIL" if failures else "PASS"} ({failures} failure(s), {time.perf_counter()-t0:.1f} s)')
     sys.exit(1 if failures else 0)

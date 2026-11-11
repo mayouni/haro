@@ -585,6 +585,9 @@ fn bracesText(alloc: std.mem.Allocator, src: []const u8, name: []const u8) ?Brac
     defer ends.deinit(alloc);
     var heads = std.ArrayListUnmanaged(u32){};
     defer heads.deinit(alloc);
+    // v0.57 (D69): the keyword `print`, given to the parser as `?`, its shortcut -- the same statement, in place
+    var prints = std.ArrayListUnmanaged(u32){};
+    defer prints.deinit(alloc);
     var fault: ?Fault = null;
     const n = src.len;
     var i: usize = 0;
@@ -687,6 +690,10 @@ fn bracesText(alloc: std.mem.Allocator, src: []const u8, name: []const u8) ?Brac
             if (fault == null) fault = .{ .why = R_ENDWORD, .word = w, .row = row };
             break :scan;
         }
+        if (eq(w, "print")) {
+            prints.append(alloc, @intCast(s)) catch return null;
+            continue;
+        }
         if (eq(w, "again")) {
             _ = stack.pop();
             continue;
@@ -729,7 +736,7 @@ fn bracesText(alloc: std.mem.Allocator, src: []const u8, name: []const u8) ?Brac
         return null;
     }
     if (keep) _ = faults.remove(name);
-    if (heads.items.len == 0) return null;
+    if (heads.items.len == 0 and prints.items.len == 0) return null;
     // the text: ` {` after each header, `}` for each definition's `end` -- the inserts in file order
     std.mem.sort(u32, heads.items, {}, std.sort.asc(u32));
     const text = alloc.alloc(u8, n + 2 * heads.items.len) catch return null;
@@ -755,6 +762,13 @@ fn bracesText(alloc: std.mem.Allocator, src: []const u8, name: []const u8) ?Brac
         text[p] = '}';
         text[p + 1] = ' ';
         text[p + 2] = ' ';
+    }
+    for (prints.items) |e| {
+        var shift: usize = 0;
+        for (heads.items) |h| {
+            if (h <= e) shift += 2;
+        }
+        @memcpy(text[e + shift .. e + shift + 5], "?    ");
     }
     return .{ .text = text, .inserts = ins };
 }
