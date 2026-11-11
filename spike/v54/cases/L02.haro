@@ -1,0 +1,4 @@
+? "before"
+f(5, 2)
+func f ptSubStr, piAt
+	? ptSubStr

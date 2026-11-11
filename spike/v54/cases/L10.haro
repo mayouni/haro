@@ -1,0 +1,2 @@
+vItems = [1, "a", [2]]
+? Len(vItems)

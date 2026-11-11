@@ -1,0 +1,9 @@
+$iMAX_NUMBER_SIZE = 5
+$oP = new P
+f()
+func f
+	tSEP = "-"
+	? $iMAX_NUMBER_SIZE
+	? tSEP + $oP.tNL
+class P
+	tNL = "n"

@@ -1,0 +1,125 @@
+{
+ "rung": "v0.54",
+ "decision": "HARO-LETTER-SOFTANZA-01: the Principal's HAROPORT-SPELLINGS-02 (a), (c), (d), 2026-11-11; the desk's readings are D66",
+ "class": "exact: the program's whole stdout and its exit code, byte for byte, on haro and on its checked build",
+ "lines": {
+  "E1": "a p parameter, checked by its letter",
+  "E2": "a p name that is no parameter refused",
+  "E3": "v + element letter, each item checked",
+  "E4": "a constant in capitals",
+  "E5": "a .ring file untouched"
+ },
+ "cases": [
+  {
+   "id": "L01",
+   "kind": "run",
+   "line": "E1",
+   "why": "a parameter written p + letter + capital is accepted and read",
+   "file": "cases/L01.haro",
+   "stdout": "ab\n3\n"
+  },
+  {
+   "id": "L02",
+   "kind": "run",
+   "line": "E1",
+   "why": "a p parameter is checked by the letter after p",
+   "file": "cases/L02.haro",
+   "stdout": "before\n\nLine 3 Error (TYPE_LETTER) : `ptSubStr` is lettered t, a text, and is given an integer \nIn function f() in file L02.haro\n\nCalled from line 2 in file L02.haro ",
+   "exit": 1
+  },
+  {
+   "id": "L03",
+   "kind": "run",
+   "line": "E1",
+   "why": "a p parameter may be given a new value in its body",
+   "file": "cases/L03.haro",
+   "stdout": "ab!\n"
+  },
+  {
+   "id": "L04",
+   "kind": "run",
+   "line": "E2",
+   "why": "a p name that is no parameter of its function is refused, naming the function",
+   "file": "cases/L04.haro",
+   "stdout": "before\n\nLine 4 Haro refused this statement (the p mark names a parameter -- `ptX` is none of f's; written `ptX`, line 4 of L04.haro) and did not compile it -- running past it would give a wrong answer \nIn function f() in file L04.haro\n\nCalled from line 2 in file L04.haro ",
+   "exit": 1
+  },
+  {
+   "id": "L05",
+   "kind": "run",
+   "line": "E3",
+   "why": "v + element letter + capital: vectors of their element's type",
+   "file": "cases/L05.haro",
+   "stdout": "7\n"
+  },
+  {
+   "id": "L06",
+   "kind": "run",
+   "line": "E3",
+   "why": "an item that does not hold the element's type is refused, with its place",
+   "file": "cases/L06.haro",
+   "stdout": "before\n\nLine 4 Error (TYPE_LETTER) : `viPos` is lettered vi, a vector of integers, and its item 2 is a text \nIn function f() in file L06.haro\n\nCalled from line 2 in file L06.haro ",
+   "exit": 1
+  },
+  {
+   "id": "L07",
+   "kind": "run",
+   "line": "E3",
+   "why": "a value that is no vector is refused as for v",
+   "file": "cases/L07.haro",
+   "stdout": "before\n\nLine 4 Error (TYPE_LETTER) : `vtNames` is lettered vt, a vector of texts, and is given a text \nIn function f() in file L07.haro\n\nCalled from line 2 in file L07.haro ",
+   "exit": 1
+  },
+  {
+   "id": "L08",
+   "kind": "run",
+   "line": "E3",
+   "why": "a parameter p + v + element letter is checked item by item where it is given",
+   "file": "cases/L08.haro",
+   "stdout": "before\n\nLine 3 Error (TYPE_LETTER) : `pviPos` is lettered vi, a vector of integers, and its item 2 is a text \nIn function f() in file L08.haro\n\nCalled from line 2 in file L08.haro ",
+   "exit": 1
+  },
+  {
+   "id": "L09",
+   "kind": "run",
+   "line": "E3",
+   "why": "a vector of vectors checks each item is a vector",
+   "file": "cases/L09.haro",
+   "stdout": "before\n\nLine 4 Error (TYPE_LETTER) : `vvRows` is lettered vv, a vector of vectors, and its item 2 is an integer \nIn function f() in file L09.haro\n\nCalled from line 2 in file L09.haro ",
+   "exit": 1
+  },
+  {
+   "id": "L10",
+   "kind": "run",
+   "line": "E3",
+   "why": "a plain v name still holds any vector",
+   "file": "cases/L10.haro",
+   "stdout": "3\n"
+  },
+  {
+   "id": "L11",
+   "kind": "run",
+   "line": "E4",
+   "why": "a constant is its letter and capitals and underscores, a global, an attribute or a local",
+   "file": "cases/L11.haro",
+   "stdout": "5\n-n\n"
+  },
+  {
+   "id": "L12",
+   "kind": "run",
+   "line": "E1",
+   "why": "Softanza's c after p is refused, its todo the t form with p kept",
+   "file": "cases/L12.haro",
+   "stdout": "before\n\nLine 3 Haro refused this statement (`c` is Softanza's letter and no type's -- text is t: ptName; written `pcName`, line 3 of L12.haro) and did not compile it -- running past it would give a wrong answer \nIn function f() in file L12.haro\n\nCalled from line 2 in file L12.haro ",
+   "exit": 1
+  },
+  {
+   "id": "L13",
+   "kind": "run",
+   "line": "E5",
+   "why": "a .ring file reads its names as it did",
+   "file": "cases/L13.ring",
+   "stdout": "ax\n"
+  }
+ ]
+}
