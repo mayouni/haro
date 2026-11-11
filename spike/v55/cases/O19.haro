@@ -1,0 +1,6 @@
+? "before"
+f()
+func f
+	for iI = 1 to 2
+		continue
+	end

@@ -1,0 +1,7 @@
+? "before"
+f()
+func f
+	$iG = 1
+	within $iG = 2
+		? $iG
+	done

@@ -1,0 +1,7 @@
+? "before"
+f()
+func f
+	iI = 0
+	while iI < 1
+		iI++
+	endwhile

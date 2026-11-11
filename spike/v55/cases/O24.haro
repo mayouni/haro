@@ -1,0 +1,6 @@
+? "before"
+oP = new P
+oP.f()
+class P
+	func f
+		? ClassName(self)

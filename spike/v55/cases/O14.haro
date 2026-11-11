@@ -1,0 +1,9 @@
+? "before"
+f()
+func f
+	switch 2
+	case 1
+		? 1
+	other
+		? 2
+	end

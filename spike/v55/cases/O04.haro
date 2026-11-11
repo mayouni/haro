@@ -1,0 +1,8 @@
+? "before"
+f()
+func f
+	try
+		? 1
+	catch
+		? 2
+	done

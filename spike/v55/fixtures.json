@@ -1,0 +1,273 @@
+{
+ "rung": "v0.55",
+ "decision": "HARO-ONEFORM-01: the Principal, 2026-11-11, \"Opt for a strict one form\"; the table is D67, the desk's on his delegation",
+ "class": "exact: the program's whole stdout and its exit code, byte for byte, on haro and on its checked build",
+ "lines": {
+  "F1": "a block ends with end",
+  "F2": "a definition has no end word",
+  "F3": "one word each",
+  "F4": "parameters in parentheses, none without",
+  "F5": "no trailing period",
+  "F6": "what stays, and a .ring file untouched"
+ },
+ "cases": [
+  {
+   "id": "O01",
+   "kind": "run",
+   "line": "F1",
+   "why": "an if closed by ok is refused",
+   "file": "cases/O01.haro",
+   "stdout": "before\n\nLine 6 Haro refused this statement (a block ends with `end`; written `ok`, line 6 of O01.haro) and did not compile it -- running past it would give a wrong answer \nIn function f() in file O01.haro\n\nCalled from line 2 in file O01.haro ",
+   "exit": 1
+  },
+  {
+   "id": "O02",
+   "kind": "run",
+   "line": "F1",
+   "why": "a for closed by next is refused",
+   "file": "cases/O02.haro",
+   "stdout": "before\n\nLine 6 Haro refused this statement (a block ends with `end`; written `next`, line 6 of O02.haro) and did not compile it -- running past it would give a wrong answer \nIn function f() in file O02.haro\n\nCalled from line 2 in file O02.haro ",
+   "exit": 1
+  },
+  {
+   "id": "O03",
+   "kind": "run",
+   "line": "F1",
+   "why": "a switch closed by off is refused",
+   "file": "cases/O03.haro",
+   "stdout": "before\n\nLine 7 Haro refused this statement (a block ends with `end`; written `off`, line 7 of O03.haro) and did not compile it -- running past it would give a wrong answer \nIn function f() in file O03.haro\n\nCalled from line 2 in file O03.haro ",
+   "exit": 1
+  },
+  {
+   "id": "O04",
+   "kind": "run",
+   "line": "F1",
+   "why": "a try closed by done is refused",
+   "file": "cases/O04.haro",
+   "stdout": "before\n\nLine 8 Haro refused this statement (a block ends with `end`; written `done`, line 8 of O04.haro) and did not compile it -- running past it would give a wrong answer \nIn function f() in file O04.haro\n\nCalled from line 2 in file O04.haro ",
+   "exit": 1
+  },
+  {
+   "id": "O05",
+   "kind": "run",
+   "line": "F1",
+   "why": "a while closed by endwhile is refused",
+   "file": "cases/O05.haro",
+   "stdout": "before\n\nLine 7 Haro refused this statement (a block ends with `end`; written `endwhile`, line 7 of O05.haro) and did not compile it -- running past it would give a wrong answer \nIn function f() in file O05.haro\n\nCalled from line 2 in file O05.haro ",
+   "exit": 1
+  },
+  {
+   "id": "O06",
+   "kind": "run",
+   "line": "F1",
+   "why": "a block in braces is refused",
+   "file": "cases/O06.haro",
+   "stdout": "before\n\nLine 4 Haro refused this statement (a block has no braces -- it ends with `end`; written `{`, line 4 of O06.haro) and did not compile it -- running past it would give a wrong answer \nIn function f() in file O06.haro\n\nCalled from line 2 in file O06.haro ",
+   "exit": 1
+  },
+  {
+   "id": "O07",
+   "kind": "run",
+   "line": "F1",
+   "why": "within closes with end, and its global is restored",
+   "file": "cases/O07.haro",
+   "stdout": "2\n1\n"
+  },
+  {
+   "id": "O08",
+   "kind": "run",
+   "line": "F1",
+   "why": "within closed by done is refused",
+   "file": "cases/O08.haro",
+   "stdout": "before\n\nLine 7 Haro refused this statement (a block ends with `end`; written `done`, line 7 of O08.haro) and did not compile it -- running past it would give a wrong answer \nIn function f() in file O08.haro\n\nCalled from line 2 in file O08.haro ",
+   "exit": 1
+  },
+  {
+   "id": "O09",
+   "kind": "run",
+   "line": "F2",
+   "why": "a function closed by end is refused",
+   "file": "cases/O09.haro",
+   "stdout": "before\n\nLine 5 Haro refused this statement (a definition has no end word -- it ends where the next begins; written `end`, line 5 of O09.haro) and did not compile it -- running past it would give a wrong answer \nIn function f() in file O09.haro\n\nCalled from line 2 in file O09.haro ",
+   "exit": 1
+  },
+  {
+   "id": "O10",
+   "kind": "run",
+   "line": "F2",
+   "why": "a function closed by endfunc is refused",
+   "file": "cases/O10.haro",
+   "stdout": "before\n\nLine 5 Haro refused this statement (a definition has no end word -- it ends where the next begins; written `endfunc`, line 5 of O10.haro) and did not compile it -- running past it would give a wrong answer \nIn function f() in file O10.haro\n\nCalled from line 2 in file O10.haro ",
+   "exit": 1
+  },
+  {
+   "id": "O11",
+   "kind": "run",
+   "line": "F2",
+   "why": "a class closed by endclass is refused where its method is entered",
+   "file": "cases/O11.haro",
+   "stdout": "before\n\nLine 7 Haro refused this statement (a definition has no end word -- it ends where the next begins; written `endclass`, line 7 of O11.haro) and did not compile it -- running past it would give a wrong answer \nIn method f() in file O11.haro\n\nCalled from line 3 in file O11.haro ",
+   "exit": 1
+  },
+  {
+   "id": "O12",
+   "kind": "run",
+   "line": "F3",
+   "why": "def is refused: func",
+   "file": "cases/O12.haro",
+   "stdout": "before\n\nLine 3 Haro refused this statement (one spelling: `func`; written `def`, line 3 of O12.haro) and did not compile it -- running past it would give a wrong answer \nIn function f() in file O12.haro\n\nCalled from line 2 in file O12.haro ",
+   "exit": 1
+  },
+  {
+   "id": "O13",
+   "kind": "run",
+   "line": "F3",
+   "why": "but is refused: elseif",
+   "file": "cases/O13.haro",
+   "stdout": "before\n\nLine 6 Haro refused this statement (one spelling: `elseif`; written `but`, line 6 of O13.haro) and did not compile it -- running past it would give a wrong answer \nIn function f() in file O13.haro\n\nCalled from line 2 in file O13.haro ",
+   "exit": 1
+  },
+  {
+   "id": "O14",
+   "kind": "run",
+   "line": "F3",
+   "why": "other is refused in a switch: else",
+   "file": "cases/O14.haro",
+   "stdout": "before\n\nLine 7 Haro refused this statement (one spelling: `else`; written `other`, line 7 of O14.haro) and did not compile it -- running past it would give a wrong answer \nIn function f() in file O14.haro\n\nCalled from line 2 in file O14.haro ",
+   "exit": 1
+  },
+  {
+   "id": "O15",
+   "kind": "run",
+   "line": "F3",
+   "why": "on is refused: case",
+   "file": "cases/O15.haro",
+   "stdout": "before\n\nLine 5 Haro refused this statement (one spelling: `case`; written `on`, line 5 of O15.haro) and did not compile it -- running past it would give a wrong answer \nIn function f() in file O15.haro\n\nCalled from line 2 in file O15.haro ",
+   "exit": 1
+  },
+  {
+   "id": "O16",
+   "kind": "run",
+   "line": "F3",
+   "why": "foreach is refused: for",
+   "file": "cases/O16.haro",
+   "stdout": "before\n\nLine 4 Haro refused this statement (one spelling: `for`; written `foreach`, line 4 of O16.haro) and did not compile it -- running past it would give a wrong answer \nIn function f() in file O16.haro\n\nCalled from line 2 in file O16.haro ",
+   "exit": 1
+  },
+  {
+   "id": "O17",
+   "kind": "run",
+   "line": "F3",
+   "why": "put is refused: see",
+   "file": "cases/O17.haro",
+   "stdout": "before\n\nLine 4 Haro refused this statement (one spelling: `see`; written `put`, line 4 of O17.haro) and did not compile it -- running past it would give a wrong answer \nIn function f() in file O17.haro\n\nCalled from line 2 in file O17.haro ",
+   "exit": 1
+  },
+  {
+   "id": "O18",
+   "kind": "run",
+   "line": "F3",
+   "why": "break is refused: exit",
+   "file": "cases/O18.haro",
+   "stdout": "before\n\nLine 5 Haro refused this statement (one spelling: `exit`; written `break`, line 5 of O18.haro) and did not compile it -- running past it would give a wrong answer \nIn function f() in file O18.haro\n\nCalled from line 2 in file O18.haro ",
+   "exit": 1
+  },
+  {
+   "id": "O19",
+   "kind": "run",
+   "line": "F3",
+   "why": "continue is refused: loop",
+   "file": "cases/O19.haro",
+   "stdout": "before\n\nLine 5 Haro refused this statement (one spelling: `loop`; written `continue`, line 5 of O19.haro) and did not compile it -- running past it would give a wrong answer \nIn function f() in file O19.haro\n\nCalled from line 2 in file O19.haro ",
+   "exit": 1
+  },
+  {
+   "id": "O20",
+   "kind": "run",
+   "line": "F3",
+   "why": "&& is refused: and",
+   "file": "cases/O20.haro",
+   "stdout": "before\n\nLine 4 Haro refused this statement (one spelling: `and`; written `&&`, line 4 of O20.haro) and did not compile it -- running past it would give a wrong answer \nIn function f() in file O20.haro\n\nCalled from line 2 in file O20.haro ",
+   "exit": 1
+  },
+  {
+   "id": "O21",
+   "kind": "run",
+   "line": "F3",
+   "why": "! is refused: not",
+   "file": "cases/O21.haro",
+   "stdout": "before\n\nLine 4 Haro refused this statement (one spelling: `not`; written `!`, line 4 of O21.haro) and did not compile it -- running past it would give a wrong answer \nIn function f() in file O21.haro\n\nCalled from line 2 in file O21.haro ",
+   "exit": 1
+  },
+  {
+   "id": "O22",
+   "kind": "run",
+   "line": "F3",
+   "why": "a parent after : is refused: from",
+   "file": "cases/O22.haro",
+   "stdout": "before\n\nLine 5 Haro refused this statement (one spelling: `from`; written `:`, line 5 of O22.haro) and did not compile it -- running past it would give a wrong answer \nIn method f() in file O22.haro\n\nCalled from line 3 in file O22.haro ",
+   "exit": 1
+  },
+  {
+   "id": "O23",
+   "kind": "run",
+   "line": "F3",
+   "why": "a comment after // is refused: #",
+   "file": "cases/O23.haro",
+   "stdout": "before\n\nLine 4 Haro refused this statement (one spelling: `#`; written `// one`, line 4 of O23.haro) and did not compile it -- running past it would give a wrong answer \nIn function f() in file O23.haro\n\nCalled from line 2 in file O23.haro ",
+   "exit": 1
+  },
+  {
+   "id": "O24",
+   "kind": "run",
+   "line": "F3",
+   "why": "self outside a brace is refused: this",
+   "file": "cases/O24.haro",
+   "stdout": "before\n\nLine 6 Haro refused this statement (one spelling: `this`; written `self`, line 6 of O24.haro) and did not compile it -- running past it would give a wrong answer \nIn method f() in file O24.haro\n\nCalled from line 3 in file O24.haro ",
+   "exit": 1
+  },
+  {
+   "id": "O25",
+   "kind": "run",
+   "line": "F4",
+   "why": "a definition without parameters written with () is refused",
+   "file": "cases/O25.haro",
+   "stdout": "before\n\nLine 3 Haro refused this statement (a definition without parameters has no parentheses; written `()`, line 3 of O25.haro) and did not compile it -- running past it would give a wrong answer \nIn function f() in file O25.haro\n\nCalled from line 2 in file O25.haro ",
+   "exit": 1
+  },
+  {
+   "id": "O26",
+   "kind": "run",
+   "line": "F4",
+   "why": "parameters written without parentheses are refused",
+   "file": "cases/O26.haro",
+   "stdout": "before\n\nLine 3 Haro refused this statement (a definition's parameters stand in parentheses; written `iA, iB`, line 3 of O26.haro) and did not compile it -- running past it would give a wrong answer \nIn function f() in file O26.haro\n\nCalled from line 2 in file O26.haro ",
+   "exit": 1
+  },
+  {
+   "id": "O27",
+   "kind": "run",
+   "line": "F5",
+   "why": "a call statement with a trailing period is refused",
+   "file": "cases/O27.haro",
+   "stdout": "before\n\nLine 4 Haro refused this statement (a statement has no trailing period; written `.`, line 4 of O27.haro) and did not compile it -- running past it would give a wrong answer \nIn function f() in file O27.haro\n\nCalled from line 2 in file O27.haro ",
+   "exit": 1
+  },
+  {
+   "id": "O28",
+   "kind": "run",
+   "line": "F6",
+   "why": "the one forms run: end, elseif, else, case, for, see, ?, give-free, exit, loop, and/or/not, from, #, this, self in a brace",
+   "file": "cases/O28.haro",
+   "stdout": "i2\nother \"n\"\ncaught\np\nq\n5\n"
+  },
+  {
+   "id": "O29",
+   "kind": "run",
+   "line": "F6",
+   "why": "a .ring file reads every spelling as it did",
+   "file": "cases/O29.ring",
+   "stdout": "abcfg\n"
+  }
+ ]
+}

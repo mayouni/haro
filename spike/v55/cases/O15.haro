@@ -1,0 +1,7 @@
+? "before"
+f()
+func f
+	switch 1
+	on 1
+		? 1
+	end

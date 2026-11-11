@@ -1,0 +1,6 @@
+? "before"
+f()
+func f
+	if true {
+		? 1
+	}

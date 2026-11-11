@@ -1,0 +1,37 @@
+f(3)
+oQ = new Q
+oQ.g()
+/* a comment
+across lines */
+func f(iN)
+	for iI = 1 to iN
+		if iI = 1
+			loop
+		elseif iI = 3 and not false
+			exit
+		else
+			see "i"
+			? iI
+		end
+	end
+	switch iN
+	case 1
+		? "one"
+	else
+		? 'other "n"'
+	end
+	try
+		Raise("x")
+	catch
+		? "caught"
+	end
+class P
+	nX = 1
+class Q from P
+	func g
+		oP = new P {
+			nX = 5
+			? ClassName(self)
+		}
+		? ClassName(this)  # this is the method's object
+		? oP.nX

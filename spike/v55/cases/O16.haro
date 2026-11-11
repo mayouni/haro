@@ -1,0 +1,6 @@
+? "before"
+f()
+func f
+	foreach iI in [1]
+		? iI
+	end
