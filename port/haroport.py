@@ -14,6 +14,10 @@ THE REWRITES, in this order, each on code only (a string, a comment, a symbol's 
   B  a built-in called by name is written in its one spelling (study/v48/builtin_names.py), unless the tree defines a function of that name
   D  a call to a function the tree declares at a file's top level is written as it is declared; a name declared in two spellings is refused
   P  `:key = value` is the pair [:key, value] (HARO-SURFACE-01), the value read to the comma or closing bracket at its own depth
+  R  (the Principal's HAROPORT-SPELLINGS-02, 2026-11-11) a parameter keeps its p mark (pc -> pt, pa + element -> pv + element); a list
+     letter is v and the element's (an/ac/ao/aa -> vi/vt/vo/vv); an ALL_CAPS name and an @Capitalised attribute take their letter by what
+     they hold (1 or 0 alone and never counted: a boolean)
+  Y  a b name given 1 or 0 is given true or false, and a condition on a literal 1 or 0 is on true or false
 A RENAME IS REFUSED, and listed, when its new name is a keyword in any case, is already a name in its scope (for C: anywhere in the tree),
 or is in a method an attribute its class declares (a bare assignment to one writes the attribute in Ring; a local would change the
 program). The name is then left as it was written.
@@ -272,6 +276,7 @@ def port_file(rel, src, tree_funcs, tree_names, c_map, refused):
         if want and want != v:
             toks[i][1] = want
             renames.append(('B', v, want))
+    bool_literals(toks, renames)
     toks, pairs = pair_lists(toks)
     renames.extend(('P', ':' + k, '[:' + k + ', ...]') for k in pairs)
     return ''.join(v for _, v in toks), renames
@@ -373,6 +378,7 @@ def port_tree(root, unit=None):
     tree_names = set()
     for src in srcs.values():
         tree_names |= {v for k, v in tokens(src) if k == 'id'}
+    letters = holds(srcs)
     refused = []
     c_map = {}
     for name in sorted(tree_names):
@@ -385,6 +391,15 @@ def port_tree(root, unit=None):
                 continue
         core = g.lstrip('$@')
         pre = g[:len(g) - len(core)]
+        r3 = round3(pre, core, letters)
+        if r3 and r3 != g:
+            if r3.lower() in KW:
+                refused.append({'file': '*', 'scope': 'tree', 'old': name, 'new': r3, 'why': 'keyword: `%s` is a keyword' % r3.lower()})
+            elif r3 in tree_names:
+                refused.append({'file': '*', 'scope': 'tree', 'old': name, 'new': r3, 'why': 'already: `%s` is a name in the tree' % r3})
+            else:
+                c_map[name] = r3
+            continue
         if not (len(core) >= 2 and core[1].isupper() and core[0] in 'cv' and g != 'cCatchError'):
             if g != name:
                 c_map[name] = g
@@ -402,6 +417,115 @@ def port_tree(root, unit=None):
     for r in rels:
         out[r], renames[r] = port_file(r, srcs[r], tree_funcs, tree_names, c_map, refused)
     return rels, out, renames, refused
+
+
+LIST_LETTER = {'n': 'i', 'c': 't', 'o': 'o', 'a': 'v'}
+
+
+def holds(srcs):
+    """R3 (d): for each name, what every assignment of it gives -- one letter, or None -- and whether it is ever counted (++, +=, -=)"""
+    kinds = {}
+    counted = set()
+    for src in srcs.values():
+        toks = tokens(src)
+        line_start = True
+        for i, (k, v) in enumerate(toks):
+            if k == 'nl':
+                line_start = True
+                continue
+            if k in ('ws', 'cm'):
+                continue
+            if k == 'id':
+                j = sig(toks, i, 1)
+                if j is not None and toks[j][1] in ('+', '-'):
+                    jj = sig(toks, j, 1)
+                    if jj is not None and toks[jj][1] in ('+', '-', '='):
+                        counted.add(v)
+                if line_start:
+                    r = rhs_text(toks, i)
+                    if r is not None:
+                        kinds.setdefault(v, set()).add(literal_kind(r))
+            line_start = False
+    out = {}
+    for name, ks in kinds.items():
+        if name in counted:
+            out[name] = 'n'
+        elif ks == {'01'}:
+            out[name] = 'b'
+        elif ks <= {'i', '01'}:
+            out[name] = 'i'
+        elif ks <= {'i', '01', 'd'}:
+            out[name] = 'd' if ks == {'d'} else 'n'
+        elif len(ks) == 1 and None not in ks:
+            out[name] = ks.pop()
+        else:
+            out[name] = 'x'
+    return out
+
+
+def literal_kind(r):
+    r = r.strip()
+    if r in ('0', '1'):
+        return '01'
+    if re.fullmatch(r'-?\d+', r):
+        return 'i'
+    if re.fullmatch(r'-?\d+\.\d+', r):
+        return 'd'
+    if r[:1] in ('"', "'", '`'):
+        return 't'
+    if r.startswith('['):
+        return 'v'
+    if r.lower().startswith('new '):
+        return 'o'
+    if r.lower() in ('true', 'false'):
+        return 'b'
+    return None
+
+
+def round3(pre, core, letters):
+    """the third round's tree-wide name for pre+core, or None (SPELLINGS-02): (a) pc -> pt, pa + element -> pv + element;
+    (c) an/ac/ao/aa -> vi/vt/vo/vv; (d) an ALL_CAPS name and an @Capitalised attribute take their letter by what they hold"""
+    if re.fullmatch(r'pc[A-Z]\w*', core):
+        return pre + 'pt' + core[2:]
+    if re.fullmatch(r'pa[ncoa][A-Z]\w*', core):
+        return pre + 'pv' + LIST_LETTER[core[2]] + core[3:]
+    if re.fullmatch(r'a[ncoa][A-Z]\w*', core):
+        return pre + 'v' + LIST_LETTER[core[1]] + core[2:]
+    # only a name the tree assigns holds a value: a call written in capitals is no constant
+    if re.fullmatch(r'[A-Z][A-Z0-9_]+', core) and (pre + core) in letters:
+        return pre + letters[pre + core] + core
+    if pre == '@' and re.fullmatch(r'[A-Z][a-z]\w*', core) and (pre + core) in letters:
+        return pre + letters[pre + core] + core
+    return None
+
+
+def bool_literals(toks, renames):
+    """(b): a b name given 1 or 0 is given true or false; a condition (if, elseif, while) on a 1 or 0 literal is on true or false"""
+    for i, (k, v) in enumerate(toks):
+        if k != 'num' or v not in ('0', '1'):
+            continue
+        after = sig(toks, i, 1)
+        if after is not None and toks[after][0] != 'nl':
+            continue
+        before = sig(toks, i, -1)
+        if before is None:
+            continue
+        word = 'true' if v == '1' else 'false'
+        if toks[before][0] == 'id' and toks[before][1].lower() in ('if', 'elseif', 'while'):
+            toks[i][1] = word
+            renames.append(('Y', v, word))
+            continue
+        if toks[before][1] != '=':
+            continue
+        name_at = sig(toks, before, -1)
+        if name_at is None or toks[name_at][0] != 'id':
+            continue
+        core = toks[name_at][1].lstrip('$@')
+        if core.startswith('p') and len(core) >= 3 and core[2:3].isupper():
+            core = core[1:]
+        if len(core) >= 2 and core[0] == 'b' and core[1].isupper():
+            toks[i][1] = word
+            renames.append(('Y', v, word))
 
 
 def haro_name(rel):

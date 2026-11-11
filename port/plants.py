@@ -50,6 +50,22 @@ PLANTS = [
          "                    if ke == 'nl' and depth == 0 and not (False and last is not None and (")]),
     ('T23', 'H22', 'an unwrapped c name keeps its c', [("                if len(core) >= 2 and core[1].isupper() and core[0] in 'cv':",
                                                         "                if False:")]),
+    # the third round (SPELLINGS-02)
+    ('T24', 'H23', 'pc keeps its c', [("    if re.fullmatch(r'pc[A-Z]\\w*', core):", "    if False:")]),
+    ('T25', 'H23', 'pa with an element letter is left', [("    if re.fullmatch(r'pa[ncoa][A-Z]\\w*', core):", "    if False:")]),
+    ('T26', 'H25', 'Softanza\'s list letters are left', [("    if re.fullmatch(r'a[ncoa][A-Z]\\w*', core):", "    if False:")]),
+    ('T27', 'H26', 'an ALL_CAPS name is left', [("    if re.fullmatch(r'[A-Z][A-Z0-9_]+', core) and (pre + core) in letters:",
+                                                 "    if False and re.fullmatch(r'[A-Z][A-Z0-9_]+', core) and (pre + core) in letters:")]),
+    ('T28', 'H27', 'a capitalised attribute is left', [("    if pre == '@' and re.fullmatch(r'[A-Z][a-z]\\w*', core) and (pre + core) in letters:",
+                                                        "    if False and pre == '@' and re.fullmatch(r'[A-Z][a-z]\\w*', core) and (pre + core) in letters:")]),
+    ('T29', 'H27', 'a counted name is a boolean when it starts at 0', [("        if name in counted:\n            out[name] = 'n'",
+                                                                        "        if False:\n            out[name] = 'n'")]),
+    ('T30', 'H24', 'a b name keeps its 1 and 0', [("    bool_literals(toks, renames)\n", "")]),
+    ('T31', 'H24', 'a condition keeps its 1 and 0', [("        if toks[before][0] == 'id' and toks[before][1].lower() in ('if', 'elseif', 'while'):",
+                                                      "        if False:")]),
+    ('T32', 'H17', 'a call in capitals is lettered as a constant', [
+        ("    if re.fullmatch(r'[A-Z][A-Z0-9_]+', core) and (pre + core) in letters:\n        return pre + letters[pre + core] + core",
+         "    if re.fullmatch(r'[A-Z][A-Z0-9_]+', core):\n        return pre + letters.get(pre + core, 'x') + core")]),
     ('T21', 'H17', 'a call through a receiver is respelled', [
         ("        if k != 'id' or v.startswith(('$', '@')) or is_member(toks, i) or is_symbol(toks, i):",
          "        if k != 'id' or v.startswith(('$', '@')) or is_symbol(toks, i):")]),
