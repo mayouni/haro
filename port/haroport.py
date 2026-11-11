@@ -181,6 +181,7 @@ def port_file(rel, src, tree_funcs, tree_names, c_map, refused):
         if kind in ('func', 'method'):
             line_start = True
             first = True
+            closed = False  # the header's parameter list ended: a body on the definition's line is no parameter (v0.56, H31)
             for i in range(s, e):
                 k, v = toks[i]
                 if k == 'nl':
@@ -189,8 +190,10 @@ def port_file(rel, src, tree_funcs, tree_names, c_map, refused):
                     continue
                 if k in ('ws', 'cm'):
                     continue
+                if first and k == 'op' and v == ')':
+                    closed = True
                 if k == 'id':
-                    if first and v.lower() not in ('func', 'def') and v != nm:
+                    if first and not closed and v.lower() not in KW and v != nm:
                         decl.setdefault(v, set()).add('x')  # a parameter
                     elif line_start and not first:
                         r = rhs_text(toks, i)
@@ -283,6 +286,7 @@ def port_file(rel, src, tree_funcs, tree_names, c_map, refused):
     toks, pairs = pair_lists(toks)
     renames.extend(('P', ':' + k, '[:' + k + ', ...]') for k in pairs)
     toks = one_form(toks, renames)
+    toks = def_ends(toks, renames)
     return ''.join(v for _, v in toks), renames
 
 
@@ -533,7 +537,7 @@ def bool_literals(toks, renames):
 
 
 ONE_WORD = {'but': 'elseif', 'other': 'else', 'on': 'case', 'foreach': 'for', 'put': 'see', 'get': 'give', 'break': 'exit',
-            'continue': 'loop', 'def': 'func', 'function': 'func'}
+            'continue': 'loop'}
 OPENS = ('if', 'while', 'for', 'foreach', 'switch', 'try', 'do')
 CLOSES = ('ok', 'next', 'off', 'done', 'endif', 'endwhile', 'endfor', 'endswitch', 'endtry', 'end')
 DEF_ENDS = ('end', 'endfunc', 'endfunction', 'endclass', 'endpackage')
@@ -577,10 +581,11 @@ def one_form(toks, renames):
         word = k == 'id' and not is_member(out, i) and not is_symbol(out, i)
         if word and line_start and low in ('func', 'def', 'function', 'class', 'package'):
             stack = []
-            if low in ('def', 'function'):
-                put(i, 'func')
             if low != 'package':
                 j = sig(out, i, 1)
+                # a name that starts with a digit: its digits are a number token, its rest a name (HARO-PORTTOOL-DIGITNAME-01)
+                if j is not None and out[j][0] == 'num' and j + 1 < len(out) and out[j + 1][0] == 'id':
+                    j += 1
                 if j is not None and out[j][0] == 'id':
                     if low == 'class':
                         jj = sig(out, j, 1)
@@ -645,8 +650,18 @@ def one_form(toks, renames):
         elif k == 'op' and v == '.':
             j = sig(out, i, 1)
             b = sig(out, i, -1)
-            if (j is None or out[j][0] == 'nl') and b is not None and out[b][1] == ')':
-                put(i, '')
+            if (j is None or out[j][0] == 'nl') and b is not None and (out[b][1] == ')' or out[b][0] == 'id'):
+                # a dot that ends a line: before a name the chain goes on there, and the dot starts that line (D68,
+                # HARO-PORTTOOL-CHAINDOT-01); before anything else it is a call's trailing period, and goes
+                n = j
+                while n is not None and n < len(out) and out[n][0] in ('nl', 'ws', 'cm'):
+                    n += 1
+                if n is not None and n < len(out) and out[n][0] == 'id' and out[n][1].lower() not in KW:
+                    put(i, '')
+                    out[n][1] = '.' + out[n][1]
+                    renames.append(('O', 'a dot ending a line', 'a dot starting the next'))
+                elif out[b][1] == ')':
+                    put(i, '')
         line_start = False
         i += 1
     # a word taken out takes the blank before it when nothing but a blank or the line's end follows
@@ -658,6 +673,132 @@ def one_form(toks, renames):
             if j == len(out) or out[j][0] in ('nl', 'ws'):
                 out[i - 1][1] = ''
     return [x for x in out if x[1] != '' or x[0] == 'nl']
+
+
+def body_on_own_line(out, j, b, renames):
+    """a definition named at out[j] whose header ends at out[b]: a body on the same line goes to a line of its own, one level in"""
+    c = sig(out, b, 1)
+    if c is None or out[c][0] == 'nl':
+        return
+    x = j
+    while x > 0 and out[x - 1][0] != 'nl':
+        x -= 1
+    indent = out[x][1] if out[x][0] == 'ws' else ''
+    for y in range(b + 1, c):
+        out[y][1] = ''
+    out[c][1] = '\n' + indent + '\t' + out[c][1]
+    renames.append(('O', 'a body on its definition\'s line', 'on its own line'))
+
+
+DEF_WORDS = ('func', 'def', 'function', 'class', 'package', 'private')
+
+
+def def_ends(toks, renames):
+    """O (D68): every definition ends with `end`; a definition after a class is that class's method, as the classic surface reads it, and is
+    written `def`, one before any class `func`. Each `end` goes after the definition's last line of code, at its header's indentation, on
+    the blank line that follows when there is one (so the lines after keep their numbers), else on a line of its own."""
+    out = [list(x) for x in toks]
+    # the lines: [first token, last token] and whether a line holds code
+    lines = []
+    s = 0
+    for i, (k, v) in enumerate(out):
+        if k == 'nl':
+            lines.append((s, i))
+            s = i + 1
+    lines.append((s, len(out)))
+
+    def code(ln):
+        a, e = lines[ln]
+        return any(out[x][0] not in ('ws', 'cm', 'nl') and out[x][1] != '' for x in range(a, e))
+
+    def first(ln):
+        a, e = lines[ln]
+        for x in range(a, e):
+            if out[x][0] not in ('ws',) and out[x][1] != '':
+                return x
+        return None
+
+    def indent(ln):
+        a, e = lines[ln]
+        return out[a][1] if a < e and out[a][0] == 'ws' else ''
+
+    heads = []
+    for ln in range(len(lines)):
+        x = first(ln)
+        if x is not None and out[x][0] == 'id' and out[x][1] in DEF_WORDS and not is_member(out, x) and not is_symbol(out, x):
+            heads.append((ln, x, out[x][1]))
+    if not heads:
+        return out
+    fills = {}      # line -> text that replaces a blank line
+    after = {}      # token index -> text appended after it
+
+    def close(head_ln, upto, ind):
+        """close the definition headed at head_ln, whose region ends before line `upto`"""
+        last = head_ln
+        for ln in range(head_ln, upto):
+            if code(ln):
+                last = ln
+        nxt = last + 1
+        while nxt in fills:
+            nxt += 1
+        if nxt < upto and not code(nxt) and lines[nxt][0] < len(out) and all(out[y][0] in ('ws', 'nl') or out[y][1] == ''
+                                                                              for y in range(*lines[nxt])):
+            fills[nxt] = ind + 'end'
+        else:
+            a, e = lines[last]
+            tail = e - 1
+            while tail > a and out[tail][1] == '':
+                tail -= 1
+            after[tail] = after.get(tail, '') + '\n' + ind + 'end'
+        renames.append(('O', 'a definition', 'ends with end'))
+
+    open_def = None     # (line, indent)
+    open_class = None
+    open_pkg = None
+    for n, (ln, x, w) in enumerate(heads):
+        if w in ('func', 'def', 'function'):
+            if open_def:
+                close(open_def[0], ln, open_def[1])
+            want = 'def' if open_class else 'func'
+            if w != want:
+                renames.append(('O', w, want))
+                out[x][1] = want
+            open_def = (ln, indent(ln))
+        elif w == 'private':
+            # the class's private section: the method before it ends there
+            if open_def and open_class:
+                close(open_def[0], ln, open_def[1])
+                open_def = None
+        elif w == 'class':
+            if open_def:
+                close(open_def[0], ln, open_def[1])
+                open_def = None
+            if open_class:
+                close(open_class[0], ln, open_class[1])
+            open_class = (ln, indent(ln))
+        else:
+            for o in (open_def, open_class, open_pkg):
+                if o:
+                    close(o[0], ln, o[1])
+            open_def = open_class = None
+            open_pkg = (ln, indent(ln))
+    end = len(lines)
+    for o in (open_def, open_class, open_pkg):
+        if o:
+            close(o[0], end, o[1])
+    for ln, txt in fills.items():
+        a, e = lines[ln]
+        ws = [y for y in range(a, e) if out[y][0] == 'ws']
+        if ws:
+            out[ws[0]][1] = txt
+            for y in ws[1:]:
+                out[y][1] = ''
+        else:
+            # an empty line: the end stands after the newline before it
+            out[a - 1][1] = out[a - 1][1] + txt
+    for x, txt in after.items():
+        out[x][1] = out[x][1] + txt
+    return out
 
 
 def spaced(out, i):
@@ -681,6 +822,7 @@ def params(out, j, renames):
             renames.append(('O', out[j][1] + '()', out[j][1]))
             for x in range(j + 1, b + 1):
                 out[x][1] = ''
+            body_on_own_line(out, j, b, renames)
         return
     # bare parameters: up to the line's end, before a comment
     end = a
