@@ -1917,6 +1917,15 @@ D58, the Principal's ruling of 2026-11-09 ("ParentClassName"), revising v0.42's 
 
 **Results.** 9 of 9 cases on both builds; 5 of 5 plants; v36 to v48's courts green. Haro's 2,172 calls re-spelled by a tool (20fc236, listed in v20/tool_commits.txt).
 
+## The fifty-fourth rung -- Haro v0.54, the p mark and a vector's element letter; and haroport's third round -- 2026-11-11
+
+D66, HARO-LETTER-SOFTANZA-01, carrying the Principal's HAROPORT-SPELLINGS-02 (a), (c), (d); taken before absence on his "Letters first".
+`p` + letter + capital names a parameter and is checked by its letter, a `p` name that is no parameter refused naming its function; `v` +
+element letter + capital is checked as a vector and item by item where a value is given. 13 of 13 on both builds (3187354 fixtures, 10
+failing before the code; a5c83c9 code), plants M1-M11 caught. haroport's third round (HARO-PORTTOOL-ROUND3-01): `pc` -> `pt`, `an/ac/ao/aa`
+-> `vi/vt/vo/vv`, ALL_CAPS and `@Capitalised` names lettered by what they hold, `b` names and conditions on 1 or 0 on `true`/`false`;
+27 of 27 (06cebf0 fixtures, 23e8617 tool), plants T1-T32 caught.
+
 ## The fifty-third rung -- Haro v0.53, the classic Ring surface's 1 and 0; and haroport -- 2026-11-10
 
 D65, from stzlib-haroport's two asks for its move to .haro. HARO-RINGBOUNDARY-BOOL-01: a .ring answer 1 or 0 is true or false where a .haro file wants a boolean, after a call the compiler cannot prove is Haro's; 14 of 14 on both builds, plants Q1-Q11 caught, V05 and V12 changed after the code (said so). HARO-PORTTOOL-01: `port/haroport.py`, plan and apply over a tree root, 12 of 12 cases, plants T1-T11 caught, H12 added after the tool; on stzlib cb6f5de65 the ported tree compiles 67% of its statements as .haro, 24% by the rename alone. The 58-stage guard on the committed tree.

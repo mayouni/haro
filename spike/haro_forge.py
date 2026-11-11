@@ -3831,6 +3831,25 @@ def stage57():
     return 0
 
 
+LETTER2_COURT = os.path.join(HERE, 'v54', 'letter2_court.py')
+
+
+def stage59():
+    """Haro v0.54, the p mark and a vector's element letter (HARO-LETTER-SOFTANZA-01, D66; v54/GRAMMAR.md): a p parameter checked by its
+    letter, a p name that is no parameter refused; v + element letter checked item by item. v54/letter2_court.py on haro and its checked
+    build."""
+    print('stage 59 -- the p mark and the element letter: v54/letter2_court.py on haro and its checked build')
+    p = subprocess.run([sys.executable, LETTER2_COURT] + (['--plant'] if PLANT else []), capture_output=True, cwd=HERE, timeout=900)
+    out = p.stdout.decode('utf-8', 'replace').replace(chr(13) + chr(10), chr(10))
+    for line in out.splitlines():
+        if line.startswith('  FAIL') or line.startswith('       ') or line.startswith('LETTER2 COURT'):
+            print(line)
+    if p.returncode != 0:
+        print(f'  FAIL the letter2 court exited {p.returncode}' + ('' if out.strip() else ': ' + p.stderr.decode('utf-8', 'replace')[-400:]))
+        return 1
+    return 0
+
+
 PORT_COURT = os.path.join(os.path.dirname(HERE), 'port', 'port_court.py')
 
 
@@ -4060,5 +4079,7 @@ if __name__ == '__main__':
         failures += stage57()
     if stage in (None, 58) and os.path.exists(PORT_COURT):
         failures += stage58()
+    if stage in (None, 59) and os.path.exists(LETTER2_COURT):
+        failures += stage59()
     print(f'haro_forge: {"FAIL" if failures else "PASS"} ({failures} failure(s), {time.perf_counter()-t0:.1f} s)')
     sys.exit(1 if failures else 0)
