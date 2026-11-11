@@ -1,0 +1,13 @@
+class P
+	nX = 1
+	def Show
+		? nX
+	end
+end
+func g
+	? "g"
+end
+oP = new P
+oP.Show()
+g()
+? "last"

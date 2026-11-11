@@ -1,0 +1,10 @@
+oP = new P
+oP.Run()
+class P
+	def Run
+		? Twice(2)
+	end
+end
+func Twice(iN)
+	return iN * 2
+end

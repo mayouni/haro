@@ -1,0 +1,12 @@
+oP = new P
+oP.Show()
+class P
+	def Show
+		? Secret()
+	end
+	private
+	def Secret
+		return "s"
+	end
+end
+? "top"

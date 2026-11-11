@@ -1,0 +1,13 @@
+$iG = 1
+f()
+? $iG
+func f
+	for iI = 1 to 2
+		if iI = 2
+			within $iG = 5
+				? $iG
+			end
+		end
+	end
+end
+? "after"

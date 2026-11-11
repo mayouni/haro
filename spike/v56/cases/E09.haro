@@ -1,0 +1,8 @@
+? "before"
+oP = new P
+oP.f()
+class P
+	def f
+		? 1
+	end
+endclass

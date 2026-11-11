@@ -1,0 +1,9 @@
+? 1
+func a
+	? "a"
+end
+? 2
+class P
+end
+? 3
+a()

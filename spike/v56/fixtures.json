@@ -1,0 +1,115 @@
+{
+ "rung": "v0.56",
+ "decision": "HARO-DEFINITIONS-01: the Principal, 2026-11-11 (no position rule; func for functions, def for methods); the desk's reading, a definition ends with end, is D68 on his delegation",
+ "class": "exact: the program's whole stdout and its exit code, byte for byte, on haro and on its checked build",
+ "lines": {
+  "G1": "every definition ends with end",
+  "G2": "func a function, def a method",
+  "G3": "any order",
+  "G4": "a .ring file untouched"
+ },
+ "cases": [
+  {
+   "id": "E01",
+   "kind": "run",
+   "line": "G3",
+   "why": "a class, then a function, then the program: each where it is written",
+   "file": "cases/E01.haro",
+   "stdout": "1\ng\nlast\n"
+  },
+  {
+   "id": "E02",
+   "kind": "run",
+   "line": "G3",
+   "why": "a function after a class is a function, and a method may call it",
+   "file": "cases/E02.haro",
+   "stdout": "4\n"
+  },
+  {
+   "id": "E03",
+   "kind": "run",
+   "line": "G3",
+   "why": "statements between definitions run in the order written",
+   "file": "cases/E03.haro",
+   "stdout": "1\n2\n3\na\n"
+  },
+  {
+   "id": "E04",
+   "kind": "run",
+   "line": "G3",
+   "why": "blocks inside definitions close before them: if, for, within, then the function",
+   "file": "cases/E04.haro",
+   "stdout": "5\n1\nafter\n"
+  },
+  {
+   "id": "E05",
+   "kind": "run",
+   "line": "G3",
+   "why": "a class with a private section ends with end, and what follows is the program's",
+   "file": "cases/E05.haro",
+   "stdout": "s\ntop\n"
+  },
+  {
+   "id": "E06",
+   "kind": "run",
+   "line": "G1",
+   "why": "a function without its end is refused, naming it",
+   "file": "cases/E06.haro",
+   "stdout": "before\n\nLine 3 Haro refused this statement (a definition ends with `end`, and this one has none; written `f`, line 3 of E06.haro) and did not compile it -- running past it would give a wrong answer \nIn function f() in file E06.haro\n\nCalled from line 2 in file E06.haro ",
+   "exit": 1
+  },
+  {
+   "id": "E07",
+   "kind": "run",
+   "line": "G1",
+   "why": "a class without its end is refused where its method is entered",
+   "file": "cases/E07.haro",
+   "stdout": "before\n\nLine 4 Haro refused this statement (a definition ends with `end`, and this one has none; written `P`, line 4 of E07.haro) and did not compile it -- running past it would give a wrong answer \nIn method f() in file E07.haro\n\nCalled from line 3 in file E07.haro ",
+   "exit": 1
+  },
+  {
+   "id": "E08",
+   "kind": "run",
+   "line": "G1",
+   "why": "endfunc is refused: end",
+   "file": "cases/E08.haro",
+   "stdout": "before\n\nLine 5 Haro refused this statement (one spelling: `end`; written `endfunc`, line 5 of E08.haro) and did not compile it -- running past it would give a wrong answer \nIn function f() in file E08.haro\n\nCalled from line 2 in file E08.haro ",
+   "exit": 1
+  },
+  {
+   "id": "E09",
+   "kind": "run",
+   "line": "G1",
+   "why": "endclass is refused: end",
+   "file": "cases/E09.haro",
+   "stdout": "before\n\nLine 8 Haro refused this statement (one spelling: `end`; written `endclass`, line 8 of E09.haro) and did not compile it -- running past it would give a wrong answer \nIn method f() in file E09.haro\n\nCalled from line 3 in file E09.haro ",
+   "exit": 1
+  },
+  {
+   "id": "E10",
+   "kind": "run",
+   "line": "G2",
+   "why": "func inside a class is refused: a method is def",
+   "file": "cases/E10.haro",
+   "stdout": "before\n\nLine 5 Haro refused this statement (a method is defined with `def`; written `func`, line 5 of E10.haro) and did not compile it -- running past it would give a wrong answer \nIn method f() in file E10.haro\n\nCalled from line 3 in file E10.haro ",
+   "exit": 1
+  },
+  {
+   "id": "E11",
+   "kind": "run",
+   "line": "G2",
+   "why": "def outside a class is refused: a function is func",
+   "file": "cases/E11.haro",
+   "stdout": "before\n\nLine 3 Haro refused this statement (a function is defined with `func`; written `def`, line 3 of E11.haro) and did not compile it -- running past it would give a wrong answer \nIn function f() in file E11.haro\n\nCalled from line 2 in file E11.haro ",
+   "exit": 1
+  },
+  {
+   "id": "E12",
+   "kind": "run",
+   "line": "G4",
+   "why": "a .ring file: a func after a class is its method, a statement after a func belongs to it",
+   "file": "cases/E12.ring",
+   "stdout": "g, a method\nf\nstill f\n"
+  }
+ ]
+}
