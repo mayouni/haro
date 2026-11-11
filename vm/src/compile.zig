@@ -6811,11 +6811,37 @@ pub const Compiler = struct {
         return if (name.len > 0 and (name[0] == '$' or name[0] == '@')) name[1..] else name;
     }
 
-    /// The letter of a lettered name, or null: a lowercase letter, then a capital
-    fn letterOf(name: []const u8) ?u8 {
-        const core = letterCore(name);
-        if (core.len >= 2 and std.ascii.isLower(core[0]) and std.ascii.isUpper(core[1])) return core[0];
+    /// v0.54 (HARO-LETTER-SOFTANZA-01, D66): a name's parts -- Softanza's p mark before the letter (a parameter's), the type letter, and
+    /// after v the letter of its elements: `ptSubStr` p + t, `viPos` v of i, `pviPos` p + v of i
+    const Parts = struct { p: bool, l: u8, e: u8 };
+
+    fn letterParts(name: []const u8) ?Parts {
+        var core = letterCore(name);
+        var p = false;
+        if (core.len >= 3 and core[0] == 'p' and std.ascii.isLower(core[1]) and
+            (std.mem.indexOfScalar(u8, LETTERS, core[1]) != null or core[1] == 'c') and
+            (std.ascii.isUpper(core[2]) or (core[1] == 'v' and core.len >= 4 and std.ascii.isLower(core[2]) and std.ascii.isUpper(core[3]))))
+        {
+            p = true;
+            core = core[1..];
+        }
+        if (core.len >= 3 and core[0] == 'v' and std.ascii.isLower(core[1]) and std.ascii.isUpper(core[2]) and
+            std.mem.indexOfScalar(u8, LETTERS, core[1]) != null) return .{ .p = p, .l = 'v', .e = core[1] };
+        if (core.len >= 2 and std.ascii.isLower(core[0]) and std.ascii.isUpper(core[1])) return .{ .p = p, .l = core[0], .e = 0 };
         return null;
+    }
+
+    /// The letter of a lettered name, or null: a lowercase letter, then a capital -- after a p mark when it has one
+    fn letterOf(name: []const u8) ?u8 {
+        return (letterParts(name) orelse return null).l;
+    }
+
+    /// v0.54: whether `name` is a parameter of the function being compiled
+    fn isParam(self: *Compiler, name: []const u8) bool {
+        for (self.cur.params) |pm| {
+            if (std.mem.eql(u8, pm, name)) return true;
+        }
+        return false;
     }
 
     fn letterWordC(l: u8) []const u8 {
@@ -6837,9 +6863,20 @@ pub const Compiler = struct {
     fn letterFault(self: *Compiler, use: []const u8, single_ok: bool) ?[]const u8 {
         const core = letterCore(use);
         if (core.len == 1 and std.ascii.isLower(core[0]) and single_ok) return null;
-        const l = letterOf(use) orelse 0;
-        if (l == 'c')
+        const parts = letterParts(use);
+        const l = if (parts) |pp| pp.l else 0;
+        const marked = if (parts) |pp| pp.p else false;
+        if (l == 'c') {
+            // the todo keeps the p mark: pcName -> ptName
+            if (marked) return std.fmt.allocPrint(self.alloc, "`c` is Softanza's letter and no type's -- text is t: pt{s}; written", .{core[2..]}) catch "`c` is no letter";
             return std.fmt.allocPrint(self.alloc, "`c` is Softanza's letter and no type's -- text is t: t{s}; written", .{core[1..]}) catch "`c` is no letter";
+        }
+        // v0.54: the p mark is a parameter's
+        if (marked and !self.isParam(use)) {
+            if (std.mem.startsWith(u8, self.cur.name, "@@"))
+                return std.fmt.allocPrint(self.alloc, "the p mark names a parameter -- `{s}` is no parameter; written", .{use}) catch "p marks a parameter";
+            return std.fmt.allocPrint(self.alloc, "the p mark names a parameter -- `{s}` is none of {s}'s; written", .{ use, self.cur.name }) catch "p marks a parameter";
+        }
         if (l == 0 or std.mem.indexOfScalar(u8, LETTERS, l) == null)
             return std.fmt.allocPrint(self.alloc, "a name begins with its type's letter -- `{s}` has none; written", .{use}) catch "no letter";
         return null;
@@ -6905,7 +6942,9 @@ pub const Compiler = struct {
 
     /// `lchk` on register `r` for the name `use` lettered `l`
     fn emitLetterCheck(self: *Compiler, r: u8, l: u8, use: []const u8) Error!void {
-        _ = try self.emit(.lchk, r, l, 0, try self.konstIndex(use));
+        // v0.54: c carries a vector's element letter, checked item by item where it is checked (0: none, or a letter not checked)
+        const e: u8 = if (letterParts(use)) |pp| (if (pp.e != 0 and std.mem.indexOfScalar(u8, CHECKED, pp.e) != null) pp.e else 0) else 0;
+        _ = try self.emit(.lchk, r, l, e, try self.konstIndex(use));
     }
 
     fn assign(self: *Compiler, n: ts.Node) Error!void {
@@ -6931,6 +6970,10 @@ pub const Compiler = struct {
         var settled = false;
         if (std.mem.eql(u8, op, "=")) {
             settled = self.letterLiteral(use, l, rhs);
+            // v0.54: a vector literal settles v, never its items: a name with an element letter keeps its check
+            if (settled and self.spell_fault == null) if (letterParts(use)) |pp| {
+                if (pp.e != 0) settled = false;
+            };
         } else if (literalLetter(rhs)) |lit| {
             // a compound with a literal of the letter's own kind keeps the type (no coercion; an overflow raises)
             settled = switch (l) {

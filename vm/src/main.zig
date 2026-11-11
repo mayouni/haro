@@ -3870,6 +3870,36 @@ pub const VM = struct {
             .dll, .cptr => "a handle",
         };
     }
+    /// v0.54: whether `v` holds the type a checked letter names -- an item of a v name with an element letter
+    fn letterHolds(l: u8, v: Value) bool {
+        return switch (l) {
+            'b' => v.tag == .boolean,
+            'i' => v.tag == .int,
+            'n' => v.tag == .int or v.tag == .num or v.tag == .dec,
+            'd' => v.tag == .dec,
+            'f' => v.tag == .num,
+            't' => v.tag == .str,
+            'v' => v.tag == .vec and !v.p.v.closure,
+            'o' => v.tag == .obj,
+            'h' => v.tag == .cptr or v.tag == .dll,
+            else => true,
+        };
+    }
+    /// v0.54: a checked letter's type in the plural, for a vector of it
+    fn letterPlural(l: u8) []const u8 {
+        return switch (l) {
+            'b' => "booleans",
+            'i' => "integers",
+            'n' => "numbers",
+            'd' => "decimals",
+            'f' => "floats",
+            't' => "texts",
+            'v' => "vectors",
+            'o' => "objects",
+            'h' => "handles",
+            else => "values",
+        };
+    }
     /// v0.47: what a checked letter names
     fn letterWord(l: u8) []const u8 {
         return switch (l) {
@@ -8766,6 +8796,19 @@ pub const VM = struct {
             .lchk => {
                 const in = code[pc];
                 const v = regs[base + in.a];
+                // v0.54 (D66): a vector's element letter (c), each item checked as its own letter would be
+                if (in.c != 0 and v.tag == .vec and !v.p.v.closure) {
+                    const vv = v.p.v;
+                    var k: usize = 0;
+                    while (k < vv.len) : (k += 1) {
+                        const it = vv.ptr[k];
+                        if (letterHolds(@intCast(in.c), it) or it.tag == .nil or (it.tag == .str and it.p.s.len == 0)) continue;
+                        const nm = konst[@intCast(in.d)];
+                        self.pending = self.haroMsg("Error (TYPE_LETTER) : `{s}` is lettered v{c}, a vector of {s}, and its item {d} is {s}", .{
+                            if (nm.tag == .str) nm.p.s.ptr[0..nm.p.s.len] else "?", @as(u8, @intCast(in.c)), letterPlural(@intCast(in.c)), k + 1, typeArticle(it) });
+                        continue :dispatch .raise;
+                    }
+                }
                 const ok = switch (in.b) {
                     'b' => v.tag == .boolean,
                     'i' => v.tag == .int,
@@ -8781,6 +8824,11 @@ pub const VM = struct {
                 } or v.tag == .nil or (v.tag == .str and v.p.s.len == 0);
                 if (!ok) {
                     const nm = konst[@intCast(in.d)];
+                    if (in.c != 0) {
+                        self.pending = self.haroMsg("Error (TYPE_LETTER) : `{s}` is lettered v{c}, a vector of {s}, and is given {s}", .{
+                            if (nm.tag == .str) nm.p.s.ptr[0..nm.p.s.len] else "?", @as(u8, @intCast(in.c)), letterPlural(@intCast(in.c)), typeArticle(v) });
+                        continue :dispatch .raise;
+                    }
                     self.pending = self.haroMsg("Error (TYPE_LETTER) : `{s}` is lettered {c}, {s}, and is given {s}", .{
                         if (nm.tag == .str) nm.p.s.ptr[0..nm.p.s.len] else "?", in.b, letterWord(in.b), typeArticle(v) });
                     continue :dispatch .raise;
