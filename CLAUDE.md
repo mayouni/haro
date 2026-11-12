@@ -535,7 +535,9 @@ Each `%NAME%` in this file is a folder of this machine; its value is in `.centra
   a native as 1 or 0; an object reached by `Pointer2Object` is that object in any frame. **v0.63 is built** (D75, HF-169, stage 68): a
   `.ring` fraction crossing into `.haro` (a parameter, an answer) is the exact decimal of its shortest text. **v0.64 is built** (D76, HF-170, stage 69): records --
   `record User` with lettered fields ended by `end`, built `User("ada", 36)`; `r` holds a record, `o` no record. **v0.65 is built** (D77,
-  HF-171, stage 70): in `.ring` code a decimal is Ring's number. Next: maps, v0.66.
+  HF-171, stage 70): in `.ring` code a decimal is Ring's number. **v0.66 is built** (D78, HF-172, stage 71,
+  `NUMBERS.md`): no setting for places in `.haro` code -- a float is written exactly, places per value (`Text`, `Round`); `IntegerPart`,
+  `DecimalPart`, `Decimals` (the digits after the point), `Digits`, `Abs`, `Sign`, `Clamp`, `FromHex`. Next: maps, v0.67.
 - D43 is the twin-court clause. Of BLOCKS.md's four questions: Q-B1 is built (`?` is C6, and `OPTIONAL` sees it in a rule); Q-B2's two amendments are refused by name until Ringua's text
   lands; Q-B3 the block export of a program is not started; Q-B4 the round-trip court the elders waited for exists -- asking their owners is Central's.
 - **Answered 2026-11-05**: HARO-DISTANCE-01 (HF-141; D50, the author's ruling: no part of Ring is carried with Haro), HARO-ONEHOUR-01 (D51) and -02 (D52). **Next**: what stzlib's sweep on haro.exe sends; zip.zig out (stzlib calls no zip_* since cb6f5de65) with

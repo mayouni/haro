@@ -1917,6 +1917,10 @@ D58, the Principal's ruling of 2026-11-09 ("ParentClassName"), revising v0.42's 
 
 **Results.** 9 of 9 cases on both builds; 5 of 5 plants; v36 to v48's courts green. Haro's 2,172 calls re-spelled by a tool (20fc236, listed in v20/tool_commits.txt).
 
+## The sixty-sixth rung -- Haro v0.66, Haro's numbers -- 2026-11-12
+
+D78, the Principal's ruling and his "Build it as proposed" on `NUMBERS.md`: no setting for places in `.haro` code, a float written exactly, `Text`, `Round`, `IntegerPart`, `DecimalPart`, `Decimals`, `Digits`, `Abs`, `Sign`, `Clamp`, `FromHex`; `Decimals(n)` as a setting, `FAbs`, `Dec` refused. 13 of 13 on both builds, plants P1-P18 (44dc55c).
+
 ## The sixty-fifth rung -- Haro v0.65, in .ring code a decimal is Ring's number -- 2026-11-12
 
 D77, from stzlib-haroport's HARO-RINGBOUNDARY-DECIMAL-OUT-01: `.ring` code prints, joins and types a decimal as Ring's number, wherever it came from. 7 of 7 on both builds, plants G1-G7 (f3e6805).

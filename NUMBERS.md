@@ -1,6 +1,6 @@
 # Haro's numbers -- what the language itself carries
 
-A proposal for the Principal's ruling, 2026-11-12 (HARO-NUMBERS-CORE-01). Its occasion is his ruling of the same day:
+A proposal for the Principal's ruling, 2026-11-12 (HARO-NUMBERS-CORE-01) -- **RULED "Build it as proposed" and BUILT as v0.66 (D78)**, with one departure said so in D78: `Truncate` is not built, as it answers what `IntegerPart` answers. Its occasion is his ruling of the same day:
 
 > Haro should not embrace the vague semantics of [the classic surface], for example in naming decimals(n) ... Haro should not
 > reproduce the wrong design of ... changing the decimals globally. ... if we need the decimals(10.257) we get a list [2, 5, 7], if we
