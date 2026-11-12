@@ -1,0 +1,6 @@
+func IsTo(xV)
+	if xV = :To
+		return "yes"
+	end
+	return "no"
+end

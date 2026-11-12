@@ -1,0 +1,6 @@
+kA = :And
+kB = :To
+kC = :End
+print kA
+print kB
+print kC

@@ -1,0 +1,6 @@
+vL = ["to", 5]
+print vL[1] = :To
+print vL[1] = :to
+print vL[1] = :TO
+print vL[1] != :To
+print vL[1] = :From

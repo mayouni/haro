@@ -1,0 +1,4 @@
+vL = [5, [1]]
+print vL[1] = :To
+print vL[1] != :To
+print vL[2] = :To

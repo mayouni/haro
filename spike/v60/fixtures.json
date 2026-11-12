@@ -1,0 +1,61 @@
+{
+ "rung": "v0.60",
+ "decision": "HARO-SYMBOL-01: stzlib-haroport's HARO-SYMBOL-KEYWORD-01 and HARO-SYMBOL-TEXT-EQ-01 (2026-11-12), PRINCIPLES.md principle 4; the desk's readings are D72",
+ "class": "exact: the program's whole stdout and its exit code, byte for byte, on haro and on its checked build",
+ "lines": {
+  "K1": "a symbol's word is no keyword",
+  "K2": "a text and a symbol compared by name, case ignored",
+  "K3": "a .ring caller's lowered symbol holds",
+  "K4": "a .ring file untouched"
+ },
+ "cases": [
+  {
+   "id": "Y01",
+   "kind": "run",
+   "line": "K1",
+   "why": "symbols spelled like keywords are symbols",
+   "file": "cases/Y01.haro",
+   "stdout": "And\nTo\nEnd\n"
+  },
+  {
+   "id": "Y02",
+   "kind": "run",
+   "line": "K2",
+   "why": "a text and a symbol compare by the symbol's name, case ignored",
+   "file": "cases/Y02.haro",
+   "stdout": "true\ntrue\ntrue\nfalse\nfalse\n"
+  },
+  {
+   "id": "Y03",
+   "kind": "run",
+   "line": "K2",
+   "why": "a value that is not a text is not the symbol",
+   "file": "cases/Y03.haro",
+   "stdout": "false\ntrue\nfalse\n"
+  },
+  {
+   "id": "Y04",
+   "kind": "run",
+   "line": "K2",
+   "why": "in a condition, and with the symbol on the left",
+   "file": "cases/Y04.haro",
+   "stdout": "from\nFROM\n"
+  },
+  {
+   "id": "Y05",
+   "kind": "run",
+   "line": "K3",
+   "why": "a .ring caller's :to reaches a .haro function and is the symbol",
+   "file": "cases/Y05.ring",
+   "stdout": "yes\nyes\nno\n"
+  },
+  {
+   "id": "Y06",
+   "kind": "run",
+   "line": "K4",
+   "why": "a .ring file reads symbols as Ring does: lowered texts",
+   "file": "cases/Y06.ring",
+   "stdout": "1\n0\n"
+  }
+ ]
+}
