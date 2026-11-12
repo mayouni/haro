@@ -4012,6 +4012,41 @@ def stage68():
     return 0
 
 
+RECORD_COURT = os.path.join(HERE, 'v64', 'record_court.py')
+
+
+def stage69():
+    """Haro v0.64, records (HARO-RECORD-01, D76; v64/GRAMMAR.md). v64/record_court.py on haro and its checked build."""
+    print('stage 69 -- records: v64/record_court.py on haro and its checked build')
+    p = subprocess.run([sys.executable, RECORD_COURT] + (['--plant'] if PLANT else []), capture_output=True, cwd=HERE, timeout=900)
+    out = p.stdout.decode('utf-8', 'replace').replace(chr(13) + chr(10), chr(10))
+    for line in out.splitlines():
+        if line.startswith(('  FAIL', '       ', 'RECORD COURT')):
+            print(line)
+    if p.returncode != 0:
+        print(f'  FAIL the record court exited {p.returncode}' + ('' if out.strip() else ': ' + p.stderr.decode('utf-8', 'replace')[-400:]))
+        return 1
+    return 0
+
+
+DECOUT_COURT = os.path.join(HERE, 'v65', 'decout_court.py')
+
+
+def stage70():
+    """Haro v0.65, in .ring code a decimal is Ring's number (HARO-RINGBOUNDARY-DECIMAL-OUT-01, D77; v65/GRAMMAR.md).
+    v65/decout_court.py on haro and its checked build."""
+    print("stage 70 -- a decimal in .ring code: v65/decout_court.py on haro and its checked build")
+    p = subprocess.run([sys.executable, DECOUT_COURT] + (['--plant'] if PLANT else []), capture_output=True, cwd=HERE, timeout=900)
+    out = p.stdout.decode('utf-8', 'replace').replace(chr(13) + chr(10), chr(10))
+    for line in out.splitlines():
+        if line.startswith(('  FAIL', '       ', 'DECOUT COURT')):
+            print(line)
+    if p.returncode != 0:
+        print(f'  FAIL the decout court exited {p.returncode}' + ('' if out.strip() else ': ' + p.stderr.decode('utf-8', 'replace')[-400:]))
+        return 1
+    return 0
+
+
 PORT_COURT = os.path.join(os.path.dirname(HERE), 'port', 'port_court.py')
 
 
@@ -4261,5 +4296,9 @@ if __name__ == '__main__':
         failures += stage67()
     if stage in (None, 68) and os.path.exists(NUMBER_COURT):
         failures += stage68()
+    if stage in (None, 69) and os.path.exists(RECORD_COURT):
+        failures += stage69()
+    if stage in (None, 70) and os.path.exists(DECOUT_COURT):
+        failures += stage70()
     print(f'haro_forge: {"FAIL" if failures else "PASS"} ({failures} failure(s), {time.perf_counter()-t0:.1f} s)')
     sys.exit(1 if failures else 0)

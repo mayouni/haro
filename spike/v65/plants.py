@@ -32,7 +32,7 @@ PLANTS = [
     ('G6', 'O06', 'a printed list keeps its decimals\' digits', MAIN,
      [('(pv.tag == .dec or pv.tag == .vec or pv.tag == .obj) and !self.strictAt(pc);', '(pv.tag == .dec or pv.tag == .obj) and !self.strictAt(pc);')]),
     ('G7', 'O03', 'the reading reaches .haro code too', MAIN,
-     [('        return if (v.tag == .dec and !self.strictAt(pc)) Value.num(asF64(v)) else v;', '        return if (v.tag == .dec) Value.num(asF64(v)) else v;')]),
+     [('        return if (v.tag == .dec and !self.strictAt(pc)) Value.num(asF64(v)) else v;', '        return if (v.tag == .dec and (!self.strictAt(pc) or v.tag == .dec)) Value.num(asF64(v)) else v;')]),
 ]
 
 
