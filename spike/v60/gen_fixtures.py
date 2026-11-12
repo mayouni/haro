@@ -35,7 +35,7 @@ CASES = [
                                                                   'print vL[2] = :To'],
      'false\ntrue\nfalse\n', 0),
     ('Y04', 'K2', 'in a condition, and with the symbol on the left', ['tW = "From"', 'if tW = :from', T + 'print "from"', 'end',
-                                                                      'if :FROM = tW', T + 'print "FROM"', 'end'],
+                                                                      'if not (:FROM != tW)', T + 'print "FROM"', 'end'],
      'from\nFROM\n', 0),
     ('Y05', 'K3', 'a .ring caller\'s :to reaches a .haro function and is the symbol', ['load "is_to.haro"', '? IsTo(:to)', '? IsTo(:To)',
                                                                                        '? IsTo("from")'],

@@ -2,6 +2,6 @@ tW = "From"
 if tW = :from
 	print "from"
 end
-if :FROM = tW
+if not (:FROM != tW)
 	print "FROM"
 end
