@@ -106,9 +106,11 @@ CASES = [
     ('N19', 'N9', 'an integer letter refuses a decimal literal when compiling', '.haro',
      ['? "before"', 'iN = 2.5'],
      None, 1),
-    ('N20', 'N10', 'a decimal is a double in .ring code', '.haro',
+    # N20 CHANGED BY v0.63's RULING (D75, HARO-RINGBOUNDARY-NUMBER-01), said so: the .ring function still computes with the double, and its
+    # fraction answered to this .haro caller is an exact decimal again -- Type was NUMBER until v0.63
+    ('N20', 'N10', 'a decimal is a double in .ring code, and its answer to a .haro caller a decimal (v0.63)', '.haro',
      ['load "lib.ring"', '? half(1.5)', '? Type(half(1.5))'],
-     '0.75\nNUMBER\n', 0),
+     '0.75\nDECIMAL\n', 0),
     ('N21', 'N3', 'past 64 bits of digits, DECIMAL_OVERFLOW', '.haro',
      ['? 99999999999999999.9 * 1000'],
      err(1, 'DECIMAL_OVERFLOW', 'decimal * integer leaves 64 bits of digits', 'N21.haro'), 1),

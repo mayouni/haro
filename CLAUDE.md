@@ -531,8 +531,9 @@ Each `%NAME%` in this file is a folder of this machine; its value is in `.centra
   `IsNull` are refused in a .haro file; write `""` for the empty text, `none` for absence, `IsEmpty(x)` to test the empty text.
   **v0.60 is built** (D72, HF-166, stage 65): a symbol is
   data, compared with a text by its name, case ignored. **v0.61 is built** (D73, HF-167, stage 66): `a` is no type's letter in a .haro file -- a
-  vector is `v`, any value `x` (`study/v61/aretire.py` converts a tree); `e` is an error, checked. Next: a boolean crossing to an engine
-  native as 1 or 0 (HARO-NATIVE-BOOL-01), v0.62; then records v0.63 and maps v0.64.
+  vector is `v`, any value `x` (`study/v61/aretire.py` converts a tree); `e` is an error, checked. **v0.62 is built** (D74, HF-168, stage 67): a boolean crosses to
+  a native as 1 or 0; an object reached by `Pointer2Object` is that object in any frame. **v0.63 is built** (D75, HF-169, stage 68): a
+  `.ring` fraction crossing into `.haro` (a parameter, an answer) is the exact decimal of its shortest text. Next: records v0.64, maps v0.65.
 - D43 is the twin-court clause. Of BLOCKS.md's four questions: Q-B1 is built (`?` is C6, and `OPTIONAL` sees it in a rule); Q-B2's two amendments are refused by name until Ringua's text
   lands; Q-B3 the block export of a program is not started; Q-B4 the round-trip court the elders waited for exists -- asking their owners is Central's.
 - **Answered 2026-11-05**: HARO-DISTANCE-01 (HF-141; D50, the author's ruling: no part of Ring is carried with Haro), HARO-ONEHOUR-01 (D51) and -02 (D52). **Next**: what stzlib's sweep on haro.exe sends; zip.zig out (stzlib calls no zip_* since cb6f5de65) with

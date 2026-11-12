@@ -181,9 +181,9 @@
    "id": "N20",
    "kind": "run",
    "line": "N10",
-   "why": "a decimal is a double in .ring code",
+   "why": "a decimal is a double in .ring code, and its answer to a .haro caller a decimal (v0.63)",
    "file": "cases/N20.haro",
-   "stdout": "0.75\nNUMBER\n"
+   "stdout": "0.75\nDECIMAL\n"
   },
   {
    "id": "N21",
