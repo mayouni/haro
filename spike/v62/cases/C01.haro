@@ -1,0 +1,12 @@
+oBox = new Box
+hB = Object2Pointer(oBox)
+F(hB)
+print oBox.nVal
+func F(hX)
+	print Pointer2Object(hX).nVal
+	oU = Pointer2Object(hX)
+	oU.nVal = 5
+end
+class Box
+	nVal = 1
+end

@@ -1,0 +1,50 @@
+oBox = new Box
+oInner = new Inner
+oInner.Keep(oBox)
+oOuter = new Outer
+oOuter.Add(oInner)
+oOuter.Route().Revoke()
+print oBox.nVal
+oBox.nVal = 1
+oOuter.RevokeViaThis()
+print oBox.nVal
+oBox.nVal = 1
+oOuter.RevokeViaLocal()
+print oBox.nVal
+oBox.nVal = 1
+oOuter.RevokeBare()
+print oBox.nVal
+class Box
+	nVal = 1
+end
+class Inner
+	vP = []
+	def Keep(oO)
+		vP + Object2Pointer(oO)
+	end
+	def Revoke
+		for i = 1 to Len(vP)
+			oT = Pointer2Object(vP[i])
+			oT.nVal = 0
+		end
+	end
+end
+class Outer
+	vM = []
+	def Add(oO)
+		vM + Object2Pointer(oO)
+	end
+	def Route
+		return Pointer2Object(vM[1])
+	end
+	def RevokeViaThis
+		this.Route().Revoke()
+	end
+	def RevokeViaLocal
+		oRoute = this.Route()
+		oRoute.Revoke()
+	end
+	def RevokeBare
+		Route().Revoke()
+	end
+end

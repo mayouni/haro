@@ -1,12 +1,14 @@
 {
  "rung": "v0.62",
- "decision": "HARO-NATIVE-BOOL-01 (stzlib-haroport, 2026-11-12); the desk's readings are D74",
+ "decision": "HARO-NATIVE-BOOL-01 (stzlib-haroport) and HARO-THISCHAIN-01 (stzlib-security), 2026-11-12; the desk's readings are D74",
  "class": "exact: the program's whole stdout and its exit code, byte for byte, on haro and on its checked build; an engine case only where STZ_ENGINE_DIR names Softanza's engine built for Haro",
  "lines": {
   "N1": "a boolean argument is 1 or 0",
   "N2": "the finding on the engine",
   "N3": "a boolean list item is 1 or 0",
-  "N4": "a .ring file untouched"
+  "N4": "a .ring file untouched",
+  "N5": "Pointer2Object is that object, in any frame (HARO-THISCHAIN-01)",
+  "N6": "an object with no reference is copied"
  },
  "cases": [
   {
@@ -59,6 +61,38 @@
    "file": "cases/B06.ring",
    "stdout": "before\n",
    "exit": 1
+  },
+  {
+   "id": "C01",
+   "kind": "run",
+   "line": "N5",
+   "why": "an object reached by Pointer2Object in a function is that object",
+   "file": "cases/C01.haro",
+   "stdout": "1\n5\n"
+  },
+  {
+   "id": "C02",
+   "kind": "run",
+   "line": "N5",
+   "why": "the finding: a revocation through this, a local or a bare call reaches the object",
+   "file": "cases/C02.haro",
+   "stdout": "0\n0\n0\n0\n"
+  },
+  {
+   "id": "C03",
+   "kind": "run",
+   "line": "N6",
+   "why": "an object assigned with no reference is still copied, in a function",
+   "file": "cases/C03.haro",
+   "stdout": "1\n"
+  },
+  {
+   "id": "C04",
+   "kind": "run",
+   "line": "N5",
+   "why": "a .ring file: an object reached by pointer2object in a function is that object",
+   "file": "cases/C04.ring",
+   "stdout": "1\n5\n"
   }
  ]
 }

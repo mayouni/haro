@@ -1,0 +1,10 @@
+F()
+func F
+	oA = new Box
+	oB = oA
+	oB.nVal = 3
+	print oA.nVal
+end
+class Box
+	nVal = 1
+end
