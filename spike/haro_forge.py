@@ -4047,6 +4047,24 @@ def stage70():
     return 0
 
 
+NUMBERS_COURT = os.path.join(HERE, 'v66', 'numbers_court.py')
+
+
+def stage71():
+    """Haro v0.66, Haro's numbers (HARO-NUMBERS-CORE-01, D78; v66/GRAMMAR.md, NUMBERS.md). v66/numbers_court.py on haro and its
+    checked build."""
+    print("stage 71 -- Haro's numbers: v66/numbers_court.py on haro and its checked build")
+    p = subprocess.run([sys.executable, NUMBERS_COURT] + (['--plant'] if PLANT else []), capture_output=True, cwd=HERE, timeout=900)
+    out = p.stdout.decode('utf-8', 'replace').replace(chr(13) + chr(10), chr(10))
+    for line in out.splitlines():
+        if line.startswith(('  FAIL', '       ', 'NUMBERS COURT')):
+            print(line)
+    if p.returncode != 0:
+        print(f'  FAIL the numbers court exited {p.returncode}' + ('' if out.strip() else ': ' + p.stderr.decode('utf-8', 'replace')[-400:]))
+        return 1
+    return 0
+
+
 PORT_COURT = os.path.join(os.path.dirname(HERE), 'port', 'port_court.py')
 
 
@@ -4300,5 +4318,7 @@ if __name__ == '__main__':
         failures += stage69()
     if stage in (None, 70) and os.path.exists(DECOUT_COURT):
         failures += stage70()
+    if stage in (None, 71) and os.path.exists(NUMBERS_COURT):
+        failures += stage71()
     print(f'haro_forge: {"FAIL" if failures else "PASS"} ({failures} failure(s), {time.perf_counter()-t0:.1f} s)')
     sys.exit(1 if failures else 0)
