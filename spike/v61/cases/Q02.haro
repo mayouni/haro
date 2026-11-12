@@ -1,0 +1,5 @@
+print "before"
+f([1])
+func f(paItems)
+	print Len(paItems)
+end

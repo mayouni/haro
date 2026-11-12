@@ -1,0 +1,4 @@
+vList = [1, 2]
+xAny = "t"
+xAny = [3]
+print Len(vList) + Len(xAny)

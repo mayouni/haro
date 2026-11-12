@@ -1,0 +1,5 @@
+try
+	Raise("boom")
+catch eErr
+	print eErr.Message()
+end

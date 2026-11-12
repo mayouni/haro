@@ -1,0 +1,63 @@
+{
+ "rung": "v0.61",
+ "decision": "HARO-STRUCTURE-01: TYPES.md T6 (D55), the Principal's \"Start structure\"; the desk's readings are D73",
+ "class": "exact: the program's whole stdout and its exit code, byte for byte, on haro and on its checked build",
+ "lines": {
+  "S1": "a retires: v or x",
+  "S2": "e is an error",
+  "S3": "a .ring file untouched"
+ },
+ "cases": [
+  {
+   "id": "Q01",
+   "kind": "run",
+   "line": "S1",
+   "why": "a name lettered a is refused, naming v and x",
+   "file": "cases/Q01.haro",
+   "stdout": "before\n\nLine 4 Haro refused this statement (`a` is no type's letter -- a vector is v, any value x: vList or xList; written `aList`, line 4 of Q01.haro) and did not compile it -- running past it would give a wrong answer \nIn function f() in file Q01.haro\n\nCalled from line 2 in file Q01.haro ",
+   "exit": 1
+  },
+  {
+   "id": "Q02",
+   "kind": "run",
+   "line": "S1",
+   "why": "a parameter lettered a keeps its p mark in the todo",
+   "file": "cases/Q02.haro",
+   "stdout": "before\n\nLine 3 Haro refused this statement (`a` is no type's letter -- a vector is v, any value x: pvItems or pxItems; written `paItems`, line 3 of Q02.haro) and did not compile it -- running past it would give a wrong answer \nIn function f() in file Q02.haro\n\nCalled from line 2 in file Q02.haro ",
+   "exit": 1
+  },
+  {
+   "id": "Q03",
+   "kind": "run",
+   "line": "S1",
+   "why": "v and x hold what a held",
+   "file": "cases/Q03.haro",
+   "stdout": "3\n"
+  },
+  {
+   "id": "Q04",
+   "kind": "run",
+   "line": "S2",
+   "why": "a catch binds an error to an e name",
+   "file": "cases/Q04.haro",
+   "stdout": "boom\n"
+  },
+  {
+   "id": "Q05",
+   "kind": "run",
+   "line": "S2",
+   "why": "an e name given a text is refused where it is given",
+   "file": "cases/Q05.haro",
+   "stdout": "before\n\nLine 4 Error (TYPE_LETTER) : `eErr` is lettered e, an error, and is given a text \nIn function f() in file Q05.haro\n\nCalled from line 2 in file Q05.haro ",
+   "exit": 1
+  },
+  {
+   "id": "Q06",
+   "kind": "run",
+   "line": "S3",
+   "why": "a .ring file reads its names as it did",
+   "file": "cases/Q06.ring",
+   "stdout": "2\n"
+  }
+ ]
+}
