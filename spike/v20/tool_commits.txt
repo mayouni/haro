@@ -9,3 +9,4 @@ a11646b3a30459e4a00a939cc1f2f6f1fba1f553 study/v47/reletter.py, port_cases.py, p
 a05259fa3a53f221ad3014821d828a046a5b2f51 study/v56/defends.py -- v0.56: Haro's own code with every definition ended by `end` and a method written `def`, by haroport's def_ends (D68): 189 files
 61bffdf2a00b8bdd9dec9bf606ec15216353047e study/v57/printing.py -- v0.57: Haro's own code printing one way, see to print or FWrite(stdout, ...) (D69): 14 lines
 a45b9c249567f534ebc591141e9d2f461f725c35 study/v59/nullfree.py -- v0.59: Haro's own code without null, null to "" and IsNull to IsEmpty (D71): 38 files
+5c2ce4927f3bd20adbb36e9c4b4f3996f6fe70df study/v61/aretire.py -- v0.61: Haro's own code without the a letter, a to v or x (D73): 451 names, 50 files

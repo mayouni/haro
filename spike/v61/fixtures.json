@@ -58,6 +58,14 @@
    "why": "a .ring file reads its names as it did",
    "file": "cases/Q06.ring",
    "stdout": "2\n"
+  },
+  {
+   "id": "Q07",
+   "kind": "run",
+   "line": "S2",
+   "why": "an e name given the caught error holds it",
+   "file": "cases/Q07.haro",
+   "stdout": "boom\n"
   }
  ]
 }

@@ -3895,6 +3895,8 @@ pub const VM = struct {
             'v' => v.tag == .vec and !v.p.v.closure,
             'o' => v.tag == .obj,
             'h' => v.tag == .cptr or v.tag == .dll,
+            // v0.61 (D73, TYPES.md T6): an error -- the value a catch binds, a text that carries its record
+            'e' => v.tag == .str and v.p.s.err != 0,
             else => true,
         };
     }
@@ -3925,6 +3927,7 @@ pub const VM = struct {
             'v' => "a vector",
             'o' => "an object",
             'h' => "a handle",
+            'e' => "an error",
             else => "a value",
         };
     }
@@ -8856,6 +8859,7 @@ pub const VM = struct {
                     'v' => v.tag == .vec and !v.p.v.closure,
                     'o' => v.tag == .obj,
                     'h' => v.tag == .cptr or v.tag == .dll,
+                    'e' => v.tag == .str and v.p.s.err != 0,
                     else => true,
                 } or v.tag == .nil or (v.tag == .str and v.p.s.len == 0);
                 if (!ok) {

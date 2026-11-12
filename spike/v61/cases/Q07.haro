@@ -1,0 +1,6 @@
+try
+	Raise("boom")
+catch eErr
+	eKept = eErr
+end
+print eKept.Message()

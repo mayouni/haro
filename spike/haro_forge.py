@@ -3957,6 +3957,24 @@ def stage65():
         return 1
     return 0
 
+
+STRUCTURE_COURT = os.path.join(HERE, 'v61', 'structure_court.py')
+
+
+def stage66():
+    """Haro v0.61, structure's letters (HARO-STRUCTURE-01, D73; v61/GRAMMAR.md): `a` retires for v or x, `e` is checked.
+    v61/structure_court.py on haro and its checked build."""
+    print('stage 66 -- structure, its letters: v61/structure_court.py on haro and its checked build')
+    p = subprocess.run([sys.executable, STRUCTURE_COURT] + (['--plant'] if PLANT else []), capture_output=True, cwd=HERE, timeout=900)
+    out = p.stdout.decode('utf-8', 'replace').replace(chr(13) + chr(10), chr(10))
+    for line in out.splitlines():
+        if line.startswith('  FAIL') or line.startswith('       ') or line.startswith('STRUCTURE COURT'):
+            print(line)
+    if p.returncode != 0:
+        print(f'  FAIL the structure court exited {p.returncode}' + ('' if out.strip() else ': ' + p.stderr.decode('utf-8', 'replace')[-400:]))
+        return 1
+    return 0
+
 PORT_COURT = os.path.join(os.path.dirname(HERE), 'port', 'port_court.py')
 
 
@@ -4200,5 +4218,7 @@ if __name__ == '__main__':
         failures += stage64()
     if stage in (None, 65) and os.path.exists(SYMBOL_COURT):
         failures += stage65()
+    if stage in (None, 66) and os.path.exists(STRUCTURE_COURT):
+        failures += stage66()
     print(f'haro_forge: {"FAIL" if failures else "PASS"} ({failures} failure(s), {time.perf_counter()-t0:.1f} s)')
     sys.exit(1 if failures else 0)

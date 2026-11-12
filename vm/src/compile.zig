@@ -7170,7 +7170,7 @@ pub const Compiler = struct {
     // refused when compiling (the statement's fault, as a misspelling is); any other value given a checked letter is checked where
     // it is given, by `lchk`. A .ring file is untouched.
     const LETTERS = "bidfntxkvmroehswa";
-    const CHECKED = "bidntfvoh";
+    const CHECKED = "bidntfvohe";
 
     fn letterCore(name: []const u8) []const u8 {
         return if (name.len > 0 and (name[0] == '$' or name[0] == '@')) name[1..] else name;
@@ -7241,6 +7241,12 @@ pub const Compiler = struct {
             if (std.mem.startsWith(u8, self.cur.name, "@@"))
                 return std.fmt.allocPrint(self.alloc, "the p mark names a parameter -- `{s}` is no parameter; written", .{use}) catch "p marks a parameter";
             return std.fmt.allocPrint(self.alloc, "the p mark names a parameter -- `{s}` is none of {s}'s; written", .{ use, self.cur.name }) catch "p marks a parameter";
+        }
+        // v0.61 (D73, TYPES.md T6): `a`, kept until structure, retires -- a vector is v, any value x; a parameter keeps its p mark
+        if (l == 'a') {
+            const rest = if (marked) core[2..] else core[1..];
+            const p = if (marked) "p" else "";
+            return std.fmt.allocPrint(self.alloc, "`a` is no type's letter -- a vector is v, any value x: {s}v{s} or {s}x{s}; written", .{ p, rest, p, rest }) catch "`a` is no letter";
         }
         if (l == 0 or std.mem.indexOfScalar(u8, LETTERS, l) == null)
             return std.fmt.allocPrint(self.alloc, "a name begins with its type's letter -- `{s}` has none; written", .{use}) catch "no letter";

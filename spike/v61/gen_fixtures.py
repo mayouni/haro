@@ -7,7 +7,7 @@ three rungs -- its letters (this one), records (v0.62), maps (v0.63) -- because 
 
 THE LINES:
   S1  `a` is no type's letter: a name lettered `a` is refused, naming `v` (a vector) and `x` (any value); a parameter keeps its p mark
-  S2  `e` is checked: an error -- the value a catch binds -- and nothing else
+  S2  `e` is checked: an error -- the value a catch binds -- and nothing else (Q07, after the code: an e name given one)
   S3  a .ring file untouched
 
   python spike/v61/gen_fixtures.py
@@ -43,6 +43,11 @@ CASES = [
      trap('Q05', 4, 'Error (TYPE_LETTER) : `eErr` is lettered e, an error, and is given a text'), 1),
     ('Q06', 'S3', 'a .ring file reads its names as it did', ['aList = [1, 2]', '? len(aList)'],
      '2\n', 0),
+    # Q07 ADDED AFTER THE CODE AND ITS PLANTS, said so: plant A5 (an e name refuses an error) failed only Q05, because the name a catch
+    # binds is never checked -- no case gave an e name an error where a value is given
+    ('Q07', 'S2', 'an e name given the caught error holds it', ['try', T + 'Raise("boom")', 'catch eErr', T + 'eKept = eErr', 'end',
+                                                                 'print eKept.Message()'],
+     'boom\n', 0),
 ]
 
 

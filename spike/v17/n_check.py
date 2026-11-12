@@ -179,7 +179,7 @@ def court_copy(patch=None):
 bad = []
 try:
     for code in CODES:
-        td = court_copy(('func NatAdd(aF, tCode, nLine, tMsg)\n', f'func NatAdd(aF, cCode, nLine, cMsg)\n\tif cCode = "{code}" return ok\n'))
+        td = court_copy(('func NatAdd(xF, tCode, nLine, tMsg)\n', f'func NatAdd(xF, cCode, nLine, cMsg)\n\tif cCode = "{code}" return ok\n'))
         for c in doc['rules']:
             if c['code'] != code:
                 continue
@@ -395,19 +395,19 @@ for c in sample:
 check(not odd and len(sample) >= 18, f'D {len(sample)} of the questions, asked on the checked build, give the same bytes as on haro ({odd[:3]})')
 
 # ---- E -------------------------------------------------------------------------------------------------------------------
-td = court_copy(('func NatGate(aT, tText)\n', 'func NatGate(aT, tText)\n\treturn ""\n'))
+td = court_copy(('func NatGate(xT, tText)\n', 'func NatGate(xT, tText)\n\treturn ""\n'))
 try:
     r = json.loads(court(HARO_VM, [os.path.join(td, 'n_court.haro'), 'diagnose', os.path.join(SP, SENTENCE)], cwd=td))
     check('N_COUNTEREXAMPLE_FAILED' in [x['code'] for x in r['diagnostics']],
           f"E a court without its gate is refused by the sentence's own counterexamples: {len(r['diagnostics'])} finding(s), N_COUNTEREXAMPLE_FAILED among them")
 finally:
     shutil.rmtree(td)
-td = court_copy(('func NatGate(aT, tText)\n', 'func NatGate(aT, tText)\n\treturn ""\n'))
+td = court_copy(('func NatGate(xT, tText)\n', 'func NatGate(xT, tText)\n\treturn ""\n'))
 try:
     p = os.path.join(td, 'n_lib.haro')
     lib = open(p, encoding='utf-8', newline='').read()
-    assert lib.count('func NatCheckRules(aDecls)\n') == 1
-    open(p, 'w', encoding='utf-8', newline='').write(lib.replace('func NatCheckRules(aDecls)\n', 'func NatCheckRules(aDecls)\n\treturn 0\n'))
+    assert lib.count('func NatCheckRules(xDecls)\n') == 1
+    open(p, 'w', encoding='utf-8', newline='').write(lib.replace('func NatCheckRules(xDecls)\n', 'func NatCheckRules(xDecls)\n\treturn 0\n'))
     nogate = CourtN(cwd=td, court_file=os.path.join(td, 'n_court.haro'), sentence_path=os.path.join(SP, SENTENCE), cache=False)
     attacks = [c for c in study if c['group'] == 'attack']
     save, study[:] = list(study), attacks
