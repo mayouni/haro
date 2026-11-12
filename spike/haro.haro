@@ -82,7 +82,7 @@ end
 func HaroAll(tText)
 	$bStzuCollect = true
 	tE = ""
-	aL = null
+	aL = ""
 	try
 		aL = StzuDeclare(tText)
 	catch

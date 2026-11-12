@@ -4,7 +4,7 @@
 # Functions only; the globals are the generated court's.
 
 func CtSymbolByName(tName)
-	return null
+	return ""
 end
 func CtSymbolSites(aDecls)
 	return []

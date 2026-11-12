@@ -1,7 +1,7 @@
 f()
 func f
-	oDoc = null
-	vItems = null
-	iN = null
-	? IsNull(oDoc) and IsNull(vItems) and IsNull(iN)
+	oDoc = ""
+	vItems = ""
+	iN = ""
+	? IsEmpty(oDoc) and IsEmpty(vItems) and IsEmpty(iN)
 end

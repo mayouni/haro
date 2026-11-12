@@ -3,7 +3,7 @@ func f
 	? IsString("a")
 	? IsNumber("a")
 	? IsList([])
-	if IsNull(null)
+	if IsEmpty("")
 		? "none"
 	end
 end

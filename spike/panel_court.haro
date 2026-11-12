@@ -43,15 +43,15 @@ $aCourtViews = []
 $aCourtSentenceKinds = []
 $aCourtExprs = []
 $aCourtWalks = []
-$aCourtAsk = null
-$aCourtRun = null
+$aCourtAsk = ""
+$aCourtRun = ""
 $aCourtSymbols = []
-$aCourtWorldFile = null
+$aCourtWorldFile = ""
 $tCourtCode = "PARSE"
 $aCourtCites = []
-$aCourtFormset = null
-$aCourtNarrate = null
-$aCourtUnderstand = null
+$aCourtFormset = ""
+$aCourtNarrate = ""
+$aCourtUnderstand = ""
 $bNSurfaces = false
 $aCourtConstitution = []
 $aCourtZone = []
@@ -121,12 +121,12 @@ $aCourtLangs = [
     ],
     [
     ],
-    null,
-    null,
+    "",
+    "",
     [["entity", "entity", "", "WORLD_VIEW {name} shows the entity '{value}', and the world declares no entity:{value}", "UNRESOLVED_ENTITY", []]],
-    null,
-    null,
-    null
+    "",
+    "",
+    ""
   ]
 ]
 CtUseLanguage("panel")

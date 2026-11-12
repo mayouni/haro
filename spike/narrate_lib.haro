@@ -94,7 +94,7 @@ func NarrateRun(tFile)
 	tSrc = Read(tFile)
 	CtSetCode("PARSE", [])
 	tErr = ""
-	aDecls = null
+	aDecls = ""
 	try
 		aDecls = CtDeclare(tSrc)
 	catch
@@ -122,12 +122,12 @@ func NarrateRun(tFile)
 		aD = aDecls[i]
 		aKind = CtKindByVerb(aD[1])
 		tT = ""
-		if not IsNull(aKind) tT = NarSays(aKind[2]) end
+		if not IsEmpty(aKind) tT = NarSays(aKind[2]) end
 		if tT = ""
 			? Lower(aD[1]) + " " + aD[2] + ": " + aD[5]
 		else
 			aVals = [["name", aD[2]], ["verb", aD[1]], ["rationale", aD[5]], ["line", String(aD[3])]]
-			if not IsNull(aKind)
+			if not IsEmpty(aKind)
 				for j = 1 to Len(aKind[3])
 					aVals + [aKind[3][j][1], NarSeatText(aD, aKind[3][j][1])]
 				end
@@ -180,7 +180,7 @@ func NarTellStep(aDecls, aE)
 	aD = CtDeclNamed(aDecls, aE[2])
 	aKind = CtKindByVerb(aD[1])
 	tT = ""
-	if not IsNull(aKind) tT = NarTellText(aKind[2]) end
+	if not IsEmpty(aKind) tT = NarTellText(aKind[2]) end
 	if tT = ""
 		# a step the voice does not tell: its verb and name, and what it DID, read off the event's own fields
 		tL = Lower(aD[1]) + " " + aD[2]
@@ -199,7 +199,7 @@ func NarTellStep(aDecls, aE)
 	# what the step DID is told before what was written: a seat that shares a name with one of the
 	# event's own placeholders ({value} of a compute is the number it made, not the expression
 	# that made it) is shadowed, so no key is filled twice
-	if not IsNull(aKind)
+	if not IsEmpty(aKind)
 		for j = 1 to Len(aKind[3])
 			tSeatKey = aKind[3][j][1]
 			bTaken = false
@@ -217,7 +217,7 @@ func NarTellRun(tFile, tAlg, tRec)
 	CtSetCode("PARSE", [])
 	tBase = NarBaseName(tFile)
 	tErr = ""
-	aDecls = null
+	aDecls = ""
 	try
 		aDecls = CtDeclare(Read(tFile))
 	catch
@@ -227,7 +227,7 @@ func NarTellRun(tFile, tAlg, tRec)
 		NarRefuse(tErr, tBase)
 		return
 	end
-	aRecord = null
+	aRecord = ""
 	try
 		aRecord = ExJsonParse(tRec)
 	catch
@@ -241,7 +241,7 @@ func NarTellRun(tFile, tAlg, tRec)
 	$bRunTrace = true
 	$aRunTrace = []
 	$nRunDepth = 0
-	aRes = null
+	aRes = ""
 	try
 		aRes = RunAlgorithm(aDecls, tAlg, aRecord)
 	catch
@@ -274,7 +274,7 @@ func NarTellAsk(tFile, tQ, tRows)
 	CtSetCode("PARSE", [])
 	tBase = NarBaseName(tFile)
 	tErr = ""
-	aDecls = null
+	aDecls = ""
 	try
 		aDecls = CtDeclare(Read(tFile))
 	catch
@@ -284,7 +284,7 @@ func NarTellAsk(tFile, tQ, tRows)
 		NarRefuse(tErr, tBase)
 		return
 	end
-	aRows = null
+	aRows = ""
 	try
 		aRows = ExJsonParse(tRows)
 	catch

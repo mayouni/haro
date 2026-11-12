@@ -15,7 +15,7 @@ func CtSymbolByName(tName)
 	for i = 1 to Len($aCourtSymbols)
 		if $aCourtSymbols[i][1] = tName return $aCourtSymbols[i] end
 	end
-	return null
+	return ""
 end
 func CtWorldLoad(tPath)
 	if not FExists(tPath) CtFail(1, "no world artifact at '" + tPath + "'") end
@@ -44,7 +44,7 @@ func CtSymbolSites(aDecls)
 		aC = aD[4]
 		for j = 1 to Len(aC)
 			aSeat = CtSeatByClause(aKind, aC[j][1])
-			if IsNull(aSeat) loop end
+			if IsEmpty(aSeat) loop end
 			if CtTypeKind(aSeat) != "symbol" loop end
 			if aC[j][3][1] != "word" loop end
 			aOut + [aD, aSeat, aC[j][3][2], aC[j][2]]
@@ -58,7 +58,7 @@ func CtResolveWorld(aDecls)
 	aSites = CtSymbolSites(aDecls)
 	for i = 1 to Len(aSites)
 		aSy = CtSymbolByName(aSites[i][2][2])
-		if IsNull(aSy) loop end
+		if IsEmpty(aSy) loop end
 		if CtWorldHas($aCourtWorldFile, aSy[2], aSites[i][3]) loop end
 		tMsg = aSy[4]
 		if tMsg = "" tMsg = "{VERB} {name} names '{value}', and the world declares no " + aSy[2] + ":{value}" end
@@ -120,7 +120,7 @@ func CtWorldRows(aDecls, tFile)
 		aD = aDecls[i]
 		for j = 1 to Len(aPublish)
 			aK = CtKindByDeclName(aPublish[j][1])
-			if IsNull(aK) or aK[1] != aD[1] loop end
+			if IsEmpty(aK) or aK[1] != aD[1] loop end
 			aRow = [ExObjMark(), ["kind", aPublish[j][2]], ["name", aD[2]], ["span", [ExObjMark(), ["file", tFile], ["line", aD[3]]]], ["rationale", aD[5]]]
 			aSymbols + aRow
 			if tFrom = "" tFrom = aPublish[j][2] + ":" + aD[2] end
@@ -131,7 +131,7 @@ func CtWorldRows(aDecls, tFile)
 	aSites = CtSymbolSites(aDecls)
 	for i = 1 to Len(aSites)
 		aSy = CtSymbolByName(aSites[i][2][2])
-		if IsNull(aSy) loop end
+		if IsEmpty(aSy) loop end
 		tRef = aSy[3]
 		if tRef = "" tRef = "cites" end
 		aRow = [ExObjMark(), ["from", tFrom], ["to", aSy[2] + ":" + aSites[i][3]], ["kind", tRef], ["span", [ExObjMark(), ["file", tFile], ["line", aSites[i][4]]]]]

@@ -44,15 +44,15 @@ $aCourtViews = []
 $aCourtSentenceKinds = []
 $aCourtExprs = []
 $aCourtWalks = []
-$aCourtAsk = null
-$aCourtRun = null
+$aCourtAsk = ""
+$aCourtRun = ""
 $aCourtSymbols = []
-$aCourtWorldFile = null
+$aCourtWorldFile = ""
 $tCourtCode = "PARSE"
 $aCourtCites = []
-$aCourtFormset = null
-$aCourtNarrate = null
-$aCourtUnderstand = null
+$aCourtFormset = ""
+$aCourtNarrate = ""
+$aCourtUnderstand = ""
 $bNSurfaces = false
 $aCourtConstitution = []
 $aCourtZone = []
@@ -124,12 +124,12 @@ $aCourtLangs = [
     ],
     [
     ],
-    null,
+    "",
     [["OF", ["algorithm", "steps", "result"]], ["COMPUTE", ["compute", "into", "value"]], ["COLLECT", ["collect", "into", "value"]], ["GROUP", ["group", "into", "by", "value"]], ["BRANCH", ["branch", "when", "then", "else"]], ["ITERATE", ["iterate", "over", "as", "do"]]],
     [],
-    null,
+    "",
     ["telling", "", "", "I stopped: {message} ({code})", [], [["run", "Running {algorithm} on {record}."], ["compute", "{name}: {into} is now {value}."], ["collect", "{name}: {value} added to {into}."], ["group", "{name}: {value} filed under {key} in {into}."], ["branch", "{name}: when {when} the {taken} steps are taken."], ["iterate", "{name}: for each of the {count} items of {over}, as {as}:"], ["result", "{algorithm} answers {result}."]]],
-    null
+    ""
   ]
 ]
 CtUseLanguage("a")

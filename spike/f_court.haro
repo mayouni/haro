@@ -43,15 +43,15 @@ $aCourtViews = []
 $aCourtSentenceKinds = []
 $aCourtExprs = []
 $aCourtWalks = []
-$aCourtAsk = null
-$aCourtRun = null
+$aCourtAsk = ""
+$aCourtRun = ""
 $aCourtSymbols = []
-$aCourtWorldFile = null
+$aCourtWorldFile = ""
 $tCourtCode = "PARSE"
 $aCourtCites = []
-$aCourtFormset = null
-$aCourtNarrate = null
-$aCourtUnderstand = null
+$aCourtFormset = ""
+$aCourtNarrate = ""
+$aCourtUnderstand = ""
 $bNSurfaces = false
 $aCourtConstitution = []
 $aCourtZone = []
@@ -158,12 +158,12 @@ $aCourtLangs = [
     ],
     [
     ],
-    null,
-    null,
+    "",
+    "",
     [["flow", "flow", "calls", "step {name} names the flow '{value}', and the world declares no flow:{value}. A cross-artifact reference no court resolves is the defect C3 section 3.2 closes", "UNRESOLVED_FLOW", ["article:placement-3.2"]]],
-    null,
+    "",
     ["workflow_voice", "{file} is a workflow sentence in {language}, {count} declarations.", "{count} declarations, all read.", "I stopped at line {line}: {message} ({code})", [["workflow", "The workflow {name} speaks to the ZQL file {zql}, calendar {calendar}, in {locale}: {rationale}"], ["actor", "{name} may act as {role}. {rationale}"], ["invocation", "{name} invokes the flow {invokes}; committed it goes to {on_committed}, rejected to {on_rejected}, held to {on_held}. {rationale}"], ["terminal", "{name} ends the workflow as {outcome}. {rationale}"]], []],
-    null
+    ""
   ]
 ]
 CtUseLanguage("f")

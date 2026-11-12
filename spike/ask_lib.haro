@@ -95,7 +95,7 @@ end
 # the parsed question: [from, where node or NULL, order field, descending, limit or -1]
 func AskParse(aDecls, tQ)
 	aAsk = $aCourtAsk
-	if IsNull(aAsk) AskFail("this language declares no ASK, so it answers no question") end
+	if IsEmpty(aAsk) AskFail("this language declares no ASK, so it answers no question") end
 	nN = Len(tQ)
 	# the frame keywords, at depth 0 and outside quotes
 	nWhere = 0
@@ -167,22 +167,22 @@ func AskParse(aDecls, tQ)
 	if Len(aW) > 4 AskFail("Unexpected '" + aW[5] + "' after the question") end
 	# FROM resolves to a declaration of one of the ASK's kinds
 	aVerbs = []
-	aFromDecl = null
+	aFromDecl = ""
 	for k = 1 to Len(aAsk[2])
 		aK = CtKindByDeclName(aAsk[2][k])
-		if IsNull(aK) loop end
+		if IsEmpty(aK) loop end
 		aVerbs + aK[1]
 		for d = 1 to Len(aDecls)
 			if aDecls[d][1] = aK[1] and aDecls[d][2] = tFrom aFromDecl = aDecls[d] end
 		end
 	end
-	if IsNull(aFromDecl)
+	if IsEmpty(aFromDecl)
 		tMsg = CtRefusalMessage("dangling_reference")
 		tOut = "FROM '" + tFrom + "' resolves to nothing: no such " + CtJoin(aVerbs, " or ")
 		if tMsg != "" tOut += " -- " + tMsg end
 		AskFail(tOut)
 	end
-	aWhere = null
+	aWhere = ""
 	tField = ""
 	bDesc = false
 	nLim = -1
@@ -204,7 +204,7 @@ func AskParse(aDecls, tQ)
 		if tKind = "WHERE"
 			tExpr = AskTrim(SubStr(tText, 6))
 			aE = CtExprByName(aAsk[3])
-			if IsNull(aE) AskFail("the court carries no EXPRESSION called '" + aAsk[3] + "'") end
+			if IsEmpty(aE) AskFail("the court carries no EXPRESSION called '" + aAsk[3] + "'") end
 			CtExprUse(aE)
 			tErr = ""
 			try
@@ -274,7 +274,7 @@ func AskSchemaNames(aDecls, aFromDecl)
 	# what the steps of the flow compute into its records: a record of the flow has the name, as zing overlays a computed value by name
 	for w = 1 to Len($aCourtWalks)
 		aKS = CtKindByDeclName($aCourtWalks[w][3])
-		if IsNull(aKS) loop end
+		if IsEmpty(aKS) loop end
 		tThr = Upper($aCourtWalks[w][4])
 		tCmp = Upper($aCourtWalks[w][7])
 		if tCmp = "" loop end
@@ -360,7 +360,7 @@ func AskRun(aDecls, tQ, aRows)
 	aOut = []
 	for i = 1 to Len(aRows)
 		if not ExIsObj(aRows[i]) AskFail("row " + String(i) + " is not a JSON object") end
-		if not IsNull(aQ[2])
+		if not IsEmpty(aQ[2])
 			ExSetRecord(aRows[i])
 			if not ExBool(aQ[2], []) loop end
 		end

@@ -192,7 +192,7 @@ end
 func BlkLexError(aToks)
 	aT = aToks[Len(aToks)]
 	if aT[1] = "error" return aT end
-	return null
+	return ""
 end
 # the tokens without their comments: what a court's parser reads (a comment is layout to a court, a value to the block)
 func BlkWithoutComments(aToks)
@@ -228,7 +228,7 @@ end
 func BlkLoad(tSrc)
 	$aBlkToks = BlkTokenize(tSrc)
 	aE = BlkLexError($aBlkToks)
-	if not IsNull(aE) BlkFail(aE[3], BlkLexMessage(aE)) end
+	if not IsEmpty(aE) BlkFail(aE[3], BlkLexMessage(aE)) end
 	$nBlkPos = 1
 	aOut = []
 	while BlkPeek()[1] != "eof"

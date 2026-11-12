@@ -41,15 +41,15 @@ $aCourtViews = []
 $aCourtSentenceKinds = []
 $aCourtExprs = []
 $aCourtWalks = []
-$aCourtAsk = null
-$aCourtRun = null
+$aCourtAsk = ""
+$aCourtRun = ""
 $aCourtSymbols = []
-$aCourtWorldFile = null
+$aCourtWorldFile = ""
 $tCourtCode = "PARSE"
 $aCourtCites = []
-$aCourtFormset = null
-$aCourtNarrate = null
-$aCourtUnderstand = null
+$aCourtFormset = ""
+$aCourtNarrate = ""
+$aCourtUnderstand = ""
 $bNSurfaces = false
 $aCourtConstitution = []
 $aCourtZone = []
@@ -123,12 +123,12 @@ $aCourtLangs = [
     ],
     [
     ],
-    null,
-    null,
+    "",
+    "",
     [],
-    null,
-    null,
-    null
+    "",
+    "",
+    ""
   ]
 ]
 CtUseLanguage("medium")

@@ -1,7 +1,7 @@
 ? "before"
 f()
 func f
-	if IsNull(null)
+	if IsEmpty("")
 		? "null is the keyword"
 	end
 	If = "a name"

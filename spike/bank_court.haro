@@ -42,15 +42,15 @@ $aCourtViews = []
 $aCourtSentenceKinds = []
 $aCourtExprs = []
 $aCourtWalks = []
-$aCourtAsk = null
-$aCourtRun = null
+$aCourtAsk = ""
+$aCourtRun = ""
 $aCourtSymbols = []
-$aCourtWorldFile = null
+$aCourtWorldFile = ""
 $tCourtCode = "PARSE"
 $aCourtCites = []
-$aCourtFormset = null
-$aCourtNarrate = null
-$aCourtUnderstand = null
+$aCourtFormset = ""
+$aCourtNarrate = ""
+$aCourtUnderstand = ""
 $bNSurfaces = false
 $aCourtConstitution = []
 $aCourtZone = []
@@ -121,12 +121,12 @@ $aCourtLangs = [
     ],
     [
     ],
-    null,
-    null,
+    "",
+    "",
     [],
-    null,
+    "",
     ["bank_voice", "{file} is a bank of {count} declarations.", "That is the whole bank.", "Stopped at line {line}: {message} ({code}; {cites})", [["account", "{name} is held by {holder} in {currency}, up to {ceiling}. {rationale}"], ["limit", "{name} holds {on} to {daily} a day under the rule {rule}; broken, it says: {message}. {rationale}"], ["flow", "{name} is a flow postings walk. {rationale}"], ["vault", "{name} is held by {held_by}, entered through {entered_through}. {rationale}"]], []],
-    null
+    ""
   ]
 ]
 CtUseLanguage("bank")

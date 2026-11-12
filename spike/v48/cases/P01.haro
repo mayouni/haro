@@ -1,7 +1,7 @@
 f()
 func f
 	? Len("abc")
-	? IsNull(null)
+	? IsEmpty("")
 	? SubStr("abcdef", 2, 3)
 	? Upper("ab")
 	? Char(65)

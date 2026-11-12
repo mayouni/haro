@@ -25,7 +25,7 @@ func RunRole(tRole)
 	for i = 1 to Len($aCourtRun)
 		if $aCourtRun[i][1] = tRole return $aCourtRun[i][2] end
 	end
-	return null
+	return ""
 end
 func RunFail(tMsg)
 	CtFail(1, tMsg)
@@ -33,11 +33,11 @@ end
 # the construct a declaration plays: COMPUTE COLLECT GROUP BRANCH ITERATE, or ""
 func RunConstructOf(aDecl)
 	aKind = CtKindByVerb(aDecl[1])
-	if IsNull(aKind) return "" end
+	if IsEmpty(aKind) return "" end
 	aRoles = ["COMPUTE", "COLLECT", "GROUP", "BRANCH", "ITERATE"]
 	for i = 1 to Len(aRoles)
 		aR = RunRole(aRoles[i])
-		if not IsNull(aR)
+		if not IsEmpty(aR)
 			if aR[1] = aKind[2] return aRoles[i] end
 		end
 	end
@@ -46,7 +46,7 @@ end
 # the names a step list seat of a declaration holds, as written
 func RunStepsOf(aDecl, tSeat)
 	aL = CondListOf(aDecl, tSeat)
-	if IsNull(aL) return [] end
+	if IsEmpty(aL) return [] end
 	return aL
 end
 # the step lists a declaration owns: its construct's list seats
@@ -67,9 +67,9 @@ end
 
 func RunCheckAcyclic(aDecls)
 	aOf = RunRole("OF")
-	if IsNull(aOf) return end
+	if IsEmpty(aOf) return end
 	aK = CtKindByDeclName(aOf[1])
-	if IsNull(aK) return end
+	if IsEmpty(aK) return end
 	for i = 1 to Len(aDecls)
 		if aDecls[i][1] != aK[1] loop end
 		aSteps = RunStepsOf(aDecls[i], aOf[2])
@@ -84,7 +84,7 @@ func RunWalkCheck(aDecls, tName, aPath)
 		RunFail("step '" + tName + "' re-enters itself through " + CtJoin(aPath, " > ") + ": an algorithm's steps form a tree, and no step may lead back to one on the way down")
 	end
 	aD = CtDeclNamed(aDecls, tName)
-	if IsNull(aD) return end
+	if IsEmpty(aD) return end
 	aLists = RunChildLists(aD)
 	aNext = []
 	for i = 1 to Len(aPath) aNext + aPath[i] end
@@ -129,7 +129,7 @@ end
 func RunStep(aDecls, tName, aPath)
 	if CtInList(tName, aPath) RunFail("step '" + tName + "' re-enters itself") end
 	aD = CtDeclNamed(aDecls, tName)
-	if IsNull(aD) RunFail("step '" + tName + "' is not declared") end
+	if IsEmpty(aD) RunFail("step '" + tName + "' is not declared") end
 	tC = RunConstructOf(aD)
 	if tC = "" RunFail(aD[1] + " " + tName + " is not a step: it plays no construct of this language") end
 	aNext = []
@@ -217,11 +217,11 @@ func RunStep(aDecls, tName, aPath)
 end
 func RunAlgorithm(aDecls, tName, aRecord)
 	aOf = RunRole("OF")
-	if IsNull(aOf) RunFail("this language declares no RUN, so nothing in it runs") end
+	if IsEmpty(aOf) RunFail("this language declares no RUN, so nothing in it runs") end
 	aD = CtDeclNamed(aDecls, tName)
-	if IsNull(aD) RunFail("no declaration named '" + tName + "' in this file") end
+	if IsEmpty(aD) RunFail("no declaration named '" + tName + "' in this file") end
 	aK = CtKindByDeclName(aOf[1])
-	if IsNull(aK) or aD[1] != aK[1] RunFail(aD[1] + " " + tName + " is not an " + aK[1] + ", and only an " + aK[1] + " runs") end
+	if IsEmpty(aK) or aD[1] != aK[1] RunFail(aD[1] + " " + tName + " is not an " + aK[1] + ", and only an " + aK[1] + " runs") end
 	if not ExIsObj(aRecord) RunFail("the record is a JSON object") end
 	ExSetRecord(aRecord)
 	RunSteps(aDecls, RunStepsOf(aD, aOf[2]), [tName])

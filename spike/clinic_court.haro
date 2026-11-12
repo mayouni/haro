@@ -42,15 +42,15 @@ $aCourtViews = []
 $aCourtSentenceKinds = []
 $aCourtExprs = []
 $aCourtWalks = []
-$aCourtAsk = null
-$aCourtRun = null
+$aCourtAsk = ""
+$aCourtRun = ""
 $aCourtSymbols = []
-$aCourtWorldFile = null
+$aCourtWorldFile = ""
 $tCourtCode = "PARSE"
 $aCourtCites = []
-$aCourtFormset = null
-$aCourtNarrate = null
-$aCourtUnderstand = null
+$aCourtFormset = ""
+$aCourtNarrate = ""
+$aCourtUnderstand = ""
 $bNSurfaces = false
 $aCourtConstitution = []
 $aCourtZone = []
@@ -120,12 +120,12 @@ $aCourtLangs = [
     ],
     [
     ],
-    null,
-    null,
+    "",
+    "",
     [],
-    null,
+    "",
     ["clinic_voice", "{file} is a clinic of {count} declarations.", "That is the whole clinic.", "Stopped at line {line}: {message} ({code}; {cites})", [["patient", "{name} (file {file_no}) is on {ward}. {rationale}"], ["flow", "{name} is a flow admissions walk. {rationale}"], ["registry", "{name} is held by {held_by}, entered through {entered_through}. {rationale}"]], []],
-    null
+    ""
   ]
 ]
 CtUseLanguage("clinic")

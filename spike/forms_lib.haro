@@ -31,7 +31,7 @@ func FormsKindByName(tName)
 	for i = 1 to Len($aCourtKinds)
 		if $aCourtKinds[i][2] = tName return $aCourtKinds[i] end
 	end
-	return null
+	return ""
 end
 func FormsIsUpper(tC)
 	return Ascii(tC) >= 65 and Ascii(tC) <= 90
@@ -75,7 +75,7 @@ func FormsFamilies(aDecls)
 	if Len(aF) < 6 return aOut end
 	if Len(aF[6]) < 3 return aOut end
 	aKind = FormsKindByName(aF[6][1])
-	if IsNull(aKind) return aOut end
+	if IsEmpty(aKind) return aOut end
 	for i = 1 to Len(aDecls)
 		aD = aDecls[i]
 		if aD[1] != aKind[1] loop end
