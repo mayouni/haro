@@ -1,0 +1,134 @@
+{
+ "rung": "v0.64",
+ "decision": "HARO-RECORD-01: TYPES.md T6 (D55), the Principal's \"Declared, built in order\" (2026-11-12); the desk's readings are D76",
+ "class": "exact: the program's whole stdout and its exit code, byte for byte, on haro and on its checked build",
+ "lines": {
+  "K1": "declared, built in order",
+  "K2": "the count checked when compiling",
+  "K3": "a missing field refused when compiling",
+  "K4": "a field's letter checked",
+  "K5": "r holds a record, o no record",
+  "K6": "a record is a value",
+  "K7": "new User refused",
+  "K8": "no method",
+  "K9": "NO_FIELD when running",
+  "K10": "a .ring file untouched",
+  "K11": "the pair refusal names the record"
+ },
+ "cases": [
+  {
+   "id": "R01",
+   "kind": "run",
+   "line": "K1",
+   "why": "declared, built in field order, read and written by name",
+   "file": "cases/R01.haro",
+   "stdout": "ada\n37\n"
+  },
+  {
+   "id": "R02",
+   "kind": "run",
+   "line": "K2",
+   "why": "the number of values is checked when compiling",
+   "file": "cases/R02.haro",
+   "stdout": "before\n\nLine 4 Haro refused this statement (`User` is built from 2 values, in this order: tName, iAge; written `User(\"ada\")`, line 4 of R02.haro) and did not compile it -- running past it would give a wrong answer \nIn function f() in file R02.haro\n\nCalled from line 2 in file R02.haro ",
+   "exit": 1
+  },
+  {
+   "id": "R03",
+   "kind": "run",
+   "line": "K3",
+   "why": "a field the record lacks is refused when compiling, naming the nearest",
+   "file": "cases/R03.haro",
+   "stdout": "before\n\nLine 5 Haro refused this statement (`User` has no field `tNmae` -- did you mean tName; written `rU.tNmae`, line 5 of R03.haro) and did not compile it -- running past it would give a wrong answer \nIn function f() in file R03.haro\n\nCalled from line 2 in file R03.haro ",
+   "exit": 1
+  },
+  {
+   "id": "R04",
+   "kind": "run",
+   "line": "K3",
+   "why": "a field the record lacks is refused when written to, and nothing near is named",
+   "file": "cases/R04.haro",
+   "stdout": "before\n\nLine 5 Haro refused this statement (`User` has no field `tCity`; written `rU.tCity`, line 5 of R04.haro) and did not compile it -- running past it would give a wrong answer \nIn function f() in file R04.haro\n\nCalled from line 2 in file R04.haro ",
+   "exit": 1
+  },
+  {
+   "id": "R05",
+   "kind": "run",
+   "line": "K4",
+   "why": "a value of another type for a field is refused where it is given",
+   "file": "cases/R05.haro",
+   "stdout": "before\n\nLine 4 Error (TYPE_LETTER) : `tName` is lettered t, a text, and is given an integer \nIn function f() in file R05.haro\n\nCalled from line 2 in file R05.haro ",
+   "exit": 1
+  },
+  {
+   "id": "R06",
+   "kind": "run",
+   "line": "K5",
+   "why": "an r name holds a record and nothing else",
+   "file": "cases/R06.haro",
+   "stdout": "before\n\nLine 4 Error (TYPE_LETTER) : `rX` is lettered r, a record, and is given an object \nIn function f() in file R06.haro\n\nCalled from line 2 in file R06.haro ",
+   "exit": 1
+  },
+  {
+   "id": "R07",
+   "kind": "run",
+   "line": "K5",
+   "why": "an o name holds no record",
+   "file": "cases/R07.haro",
+   "stdout": "before\n\nLine 4 Error (TYPE_LETTER) : `oX` is lettered o, an object, and is given a record \nIn function f() in file R07.haro\n\nCalled from line 2 in file R07.haro ",
+   "exit": 1
+  },
+  {
+   "id": "R08",
+   "kind": "run",
+   "line": "K6",
+   "why": "a record is a value: assigning it copies it",
+   "file": "cases/R08.haro",
+   "stdout": "36\n1\n"
+  },
+  {
+   "id": "R09",
+   "kind": "run",
+   "line": "K7",
+   "why": "new User is refused: a record is built by its name",
+   "file": "cases/R09.haro",
+   "stdout": "before\n\nLine 4 Haro refused this statement (a record is built by its name, with its values: User(...); written `new User`, line 4 of R09.haro) and did not compile it -- running past it would give a wrong answer \nIn function f() in file R09.haro\n\nCalled from line 2 in file R09.haro ",
+   "exit": 1
+  },
+  {
+   "id": "R10",
+   "kind": "run",
+   "line": "K8",
+   "why": "a record holds no method",
+   "file": "cases/R10.haro",
+   "stdout": "\nLine 4 Haro refused this statement (a record holds fields and no method; written `Hi`, line 4 of R10.haro) and did not compile it -- running past it would give a wrong answer \nin file R10.haro ",
+   "exit": 1
+  },
+  {
+   "id": "R11",
+   "kind": "run",
+   "line": "K9",
+   "why": "where the type is not proven, a missing field is refused when running, naming the nearest",
+   "file": "cases/R11.haro",
+   "stdout": "ada\n\nLine 5 Error (NO_FIELD) : `User` has no field `tNmae` -- did you mean tName \nIn function show() in file R11.haro\n\nCalled from line 2 in file R11.haro ",
+   "exit": 1
+  },
+  {
+   "id": "R12",
+   "kind": "run",
+   "line": "K10",
+   "why": "a .ring file is untouched: record is a name there",
+   "file": "cases/R12.ring",
+   "stdout": "5\n"
+  },
+  {
+   "id": "R13",
+   "kind": "run",
+   "line": "K11",
+   "why": "the refusal of :key = value names the record",
+   "file": "cases/R13.haro",
+   "stdout": "before\n\nLine 4 Haro refused this statement (`:key = value` is no pair in a .haro file: write [:key, value] for a pair, or declare a record for named fields (HARO-SURFACE-01) `:a = 1`, line 4 of R13.haro) and did not compile it -- running past it would give a wrong answer \nIn function f() in file R13.haro\n\nCalled from line 2 in file R13.haro ",
+   "exit": 1
+  }
+ ]
+}

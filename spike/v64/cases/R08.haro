@@ -1,0 +1,9 @@
+rA = User("ada", 36)
+rB = rA
+rB.iAge = 1
+print rA.iAge
+print rB.iAge
+record User
+	tName
+	iAge
+end

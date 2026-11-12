@@ -1,0 +1,9 @@
+print "before"
+f()
+func f
+	rU = new User
+end
+record User
+	tName
+	iAge
+end

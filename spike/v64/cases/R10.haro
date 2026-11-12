@@ -1,0 +1,7 @@
+print "before"
+record User
+	tName
+	def Hi
+		return 1
+	end
+end

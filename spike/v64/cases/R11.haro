@@ -1,0 +1,10 @@
+rU = User("ada", 36)
+Show(rU)
+func Show(prUser)
+	print prUser.tName
+	print prUser.tNmae
+end
+record User
+	tName
+	iAge
+end

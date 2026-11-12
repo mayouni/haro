@@ -1,0 +1,10 @@
+print "before"
+f()
+func f
+	rU = User("ada", 36)
+	print rU.tNmae
+end
+record User
+	tName
+	iAge
+end
