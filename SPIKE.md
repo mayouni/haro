@@ -1917,6 +1917,10 @@ D58, the Principal's ruling of 2026-11-09 ("ParentClassName"), revising v0.42's 
 
 **Results.** 9 of 9 cases on both builds; 5 of 5 plants; v36 to v48's courts green. Haro's 2,172 calls re-spelled by a tool (20fc236, listed in v20/tool_commits.txt).
 
+## The sixty-first rung -- Haro v0.61, structure, its letters -- 2026-11-12
+
+D73, TYPES.md T6, on the Principal's "Start structure": `a` is no type's letter in a `.haro` file (a vector is `v`, any value `x`), `e` is checked. 7 of 7 on both builds, plants A1-A5 (cc840fa); Haro's code by `study/v61/aretire.py` (5c2ce49: 451 names); haroport's rule A and HARO-PORTTOOL-UNDERSCORE-01 (6d05f74). The 66-stage guard green on the private builds.
+
 ## The sixtieth rung -- Haro v0.60, symbols compared by name -- 2026-11-12
 
 D72, from stzlib-haroport's two symbol findings: a symbol's word is no keyword; a symbol compares with a text by its name, case ignored, and a value that is not text is not the symbol. 6 of 6 on both builds, plants S1-S5 (a963f89). With it, haroport's CALLNAME-01 and NAMETEXT-01 (c64fecb).
