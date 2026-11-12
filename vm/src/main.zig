@@ -2290,6 +2290,8 @@ pub const VM = struct {
     names: []const []const u8 = &.{},
     /// `$x` globals, one slot per distinct name.
     globals: []Value = &.{},
+    /// v0.65 (D77): the value being printed is printed by .ring code, so a decimal in it is written as Ring's number
+    say_ring: bool = false,
     /// Armed try/catch handlers, innermost last.
     handlers: []Handler = &.{},
     /// Entry address and frame size per function id, so a closure can be
@@ -4046,6 +4048,9 @@ pub const VM = struct {
         const mixed = (x.tag == .str and isNum(y)) or (isNum(x) and y.tag == .str);
         if (!xb and !yb and !mixed) return null;
         if (self.strictAt(pc)) return self.coerceErr("+", x, y);
+        // v0.65 (D77): text and a decimal in .ring code -- the decimal is Ring's number
+        if (mixed and (x.tag == .dec or y.tag == .dec))
+            return self.addSlow(dst, lreg, self.ringNum(x, pc), self.ringNum(y, pc), flag) orelse ARITH_DONE;
         if (!xb and !yb) return null;
         const a = unb(x);
         const b = unb(y);
@@ -4349,8 +4354,9 @@ pub const VM = struct {
                 outPrint("{X:0>16}\n{s}\n0\n{s}", .{ @intFromPtr(cptrOf(v)), kind, end });
             },
             .int => outPrint("{d}{s}", .{ v.p.i, end }),
-            // v0.52: a decimal prints its digits, as many after the point as it holds
+            // v0.52: a decimal prints its digits, as many after the point as it holds -- and in .ring code as Ring's number (v0.65)
             .dec => {
+                if (self.say_ring) return self.sayValue(Value.num(asF64(v)), nl);
                 var db: [48]u8 = undefined;
                 outPrint("{s}{s}", .{ decimal.text(.{ .c = v.p.i, .s = v._r }, &db), end });
             },
@@ -4587,6 +4593,11 @@ pub const VM = struct {
         }
         if (best) |b| return self.haroMsg("Error (NO_FIELD) : `{s}` has no field `{s}` -- did you mean {s}", .{ rn, nm, b });
         return self.haroMsg("Error (NO_FIELD) : `{s}` has no field `{s}`", .{ rn, nm });
+    }
+
+    /// v0.65 (D77): a value as the code at `pc` reads it -- in .ring code a decimal is Ring's number, the float nearest it
+    inline fn ringNum(self: *VM, v: Value, pc: u32) Value {
+        return if (v.tag == .dec and !self.strictAt(pc)) Value.num(asF64(v)) else v;
     }
 
     noinline fn ringDec(d: f64) ?Value {
@@ -5832,7 +5843,11 @@ pub const VM = struct {
             },
             .say => {
                 const in = code[pc];
-                self.sayValue(regs[base + in.a], in.c == 0); // c=1 is `see`: no newline
+                // v0.65 (D77): .ring code prints a decimal as Ring prints a number, an item of a list too
+                const pv = regs[base + in.a];
+                self.say_ring = (pv.tag == .dec or pv.tag == .vec or pv.tag == .obj) and !self.strictAt(pc);
+                self.sayValue(pv, in.c == 0); // c=1 is `see`: no newline
+                self.say_ring = false;
                 pc += 1;
                 continue :dispatch code[pc].op;
             },
@@ -6938,7 +6953,7 @@ pub const VM = struct {
                             out = Value.str(self.newStr(if (v.p.i != 0) "true" else "false"));
                         } else if (isNum(v)) {
                             var buf: [128]u8 = undefined;
-                            out = Value.str(self.newStr(numText(v, &buf)));
+                            out = Value.str(self.newStr(numText(self.ringNum(v, pc), &buf)));
                         } else {
                             self.pending = BADPARAM;
                             continue :dispatch .raise;
@@ -6955,7 +6970,8 @@ pub const VM = struct {
                         // builtin and the call was "without definition".
                         const nm: []const u8 = switch (regs[A].tag) {
                             .int, .num => "NUMBER",
-                            .dec => "DECIMAL",
+                            // v0.65 (D77): in .ring code a decimal is Ring's number
+                            .dec => if (self.strictAt(pc)) "DECIMAL" else "NUMBER",
                             .boolean => "BOOLEAN",
                             .str, .nil => "STRING",
                             .vec => if (regs[A].p.v.closure) "STRING" else "LIST",
@@ -8073,7 +8089,7 @@ pub const VM = struct {
                                     acc.appendSlice(self.alloc, e.p.s.ptr[0..e.p.s.len]) catch @panic("oom");
                                 } else if (isNum(e)) {
                                     var nb: [128]u8 = undefined;
-                                    acc.appendSlice(self.alloc, numText(e, &nb)) catch @panic("oom");
+                                    acc.appendSlice(self.alloc, numText(self.ringNum(e, pc), &nb)) catch @panic("oom");
                                 }
                             }
                             out = Value.str(self.newStr(acc.items));

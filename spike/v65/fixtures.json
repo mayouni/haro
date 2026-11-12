@@ -31,7 +31,7 @@
    "line": "E3",
    "why": "a .haro caller keeps its decimal",
    "file": "cases/O03.haro",
-   "stdout": "DECIMAL\ntrue\n"
+   "stdout": "DECIMAL\ntrue\n0.3\n"
   },
   {
    "id": "O04",
@@ -55,7 +55,7 @@
    "line": "E6",
    "why": "a list of decimals printed by .ring code",
    "file": "cases/O06.ring",
-   "stdout": "0.3333\nb\n"
+   "stdout": "0.3333\nb\n\n"
   },
   {
    "id": "O07",

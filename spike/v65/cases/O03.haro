@@ -1,3 +1,4 @@
 load "dec.haro"
 print Type(Tenth())
 print Tenth() * 3 = 0.3
+print String(Tenth() * 3)
