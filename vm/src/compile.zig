@@ -2809,6 +2809,8 @@ pub const Compiler = struct {
     fn oneForm(self: *Compiler, n: ts.Node) void {
         if (self.spell_fault != null) return;
         const k = n.kind();
+        // v0.60 (D72): a symbol is data and keeps its text -- `:And`, `:To`, `:End` are symbols, not keywords in another case
+        if (std.mem.eql(u8, k, "symbol")) return;
         // v0.59 (D71, TYPES.md T5): Ring's NULL is gone -- the empty text is "", absence is none, and IsEmpty tests the empty text
         if (std.mem.eql(u8, k, "null")) return self.spellSet(n.text(), R_NULL);
         if (std.mem.eql(u8, k, "call_expression") and n.namedChildCount() > 0 and std.mem.eql(u8, n.namedChild(0).kind(), "identifier") and
@@ -4654,7 +4656,7 @@ pub const Compiler = struct {
         // likes (F-69): then `cmpv`, which lands that answer
         for ([_][]const u8{ "=", "!=", "<", "<=", ">", ">=" }, 0..) |cmp, ci| {
             if (!std.mem.eql(u8, op, cmp)) continue;
-            if (self.classOf(ln) == .ref or self.classOf(rn) == .ref) {
+            if ((self.classOf(ln) == .ref or self.classOf(rn) == .ref) and self.symbolSide(n) == null) {
                 const lreg = try self.borrowOperand(ln, dst);
                 const rreg = if (try self.operandReg(rn)) |r| r else blk: {
                     const t = try self.tmp();
@@ -6939,6 +6941,16 @@ pub const Compiler = struct {
     // --------------------------------------------------------- conditions
 
     /// Emits code that jumps to the returned patch sites when `n` is FALSE.
+    /// v0.60 (D72): in a .haro file, `x = :Name` or `x != :Name` (either side): the index of the symbol's side, else null
+    fn symbolSide(self: *Compiler, n: ts.Node) ?u32 {
+        if (n.namedChildCount() != 2 or !self.haroNode(n)) return null;
+        const op = opText(n);
+        if (!std.mem.eql(u8, op, "=") and !std.mem.eql(u8, op, "!=")) return null;
+        if (std.mem.eql(u8, n.namedChild(1).kind(), "symbol")) return 1;
+        if (std.mem.eql(u8, n.namedChild(0).kind(), "symbol")) return 0;
+        return null;
+    }
+
     fn cond(self: *Compiler, n: ts.Node, out: *std.ArrayListUnmanaged(u32)) Error!void {
         const k = n.kind();
         if (std.mem.eql(u8, k, "parenthesized_expression")) return self.cond(n.namedChild(0), out);
@@ -7013,6 +7025,34 @@ pub const Compiler = struct {
                 const t = try self.tmp();
                 try self.expr(n, t);
                 try out.append(self.scratch, try self.emit(.jfalsy, t, 0, if (self.haroNode(n)) 1 else 0, 0));
+                return;
+            }
+            // v0.60 (D72, principle 4): a symbol compares with a text by its name, case ignored; a value that is no text is not it
+            if (self.symbolSide(n)) |side| {
+                const save = self.temp;
+                defer self.temp = save;
+                const sym = n.namedChild(side);
+                const other = n.namedChild(1 - side);
+                const t = try self.tmp();
+                try self.expr(other, t);
+                const s = try self.tmp();
+                _ = try self.emit(.bcall, s, t, 1, @intFromEnum(vm.Builtin.isstring));
+                var name = sym.text();
+                if (name.len > 0 and name[0] == ':') name = name[1..];
+                name = std.mem.trim(u8, name, " \t");
+                const low = try std.ascii.allocLowerString(self.alloc, name);
+                const kr = try self.tmp();
+                _ = try self.emit(.loadk, kr, 0, 0, try self.konstIndex(try std.fmt.allocPrint(self.alloc, "\"{s}\"", .{low})));
+                if (std.mem.eql(u8, opText(n), "=")) {
+                    try out.append(self.scratch, try self.emit(.jfalsy, s, 0, 0, 0));
+                    _ = try self.emit(.bcall, t, t, 1, @intFromEnum(vm.Builtin.lower));
+                    try out.append(self.scratch, try self.emit(.jne, t, kr, 0, 0));
+                } else {
+                    const not_text = try self.emit(.jfalsy, s, 0, 0, 0);
+                    _ = try self.emit(.bcall, t, t, 1, @intFromEnum(vm.Builtin.lower));
+                    try out.append(self.scratch, try self.emit(.jeq, t, kr, 0, 0));
+                    self.land(not_text);
+                }
                 return;
             }
             if (inv) |o| {
