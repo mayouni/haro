@@ -103,6 +103,8 @@ PLANTS = [
                                                                    "            elif False:")]),
     ('T55', 'H29', 'a bracket around the statement ends no see\'s expression', [("                if depth == 0:\n                    break   # it closes what holds the statement (a brace object's `}`)",
                                                                                  "                if False:\n                    break   # it closes what holds the statement (a brace object's `}`)")]),
+    # v0.59 (D71)
+    ('T56', 'H35', 'null and isnull are left', [("    toks = null_free(toks, renames)\n", "")]),
     ('T21', 'H17', 'a call through a receiver is respelled', [
         ("        if k != 'id' or v.startswith(('$', '@')) or is_member(toks, i) or is_symbol(toks, i):",
          "        if k != 'id' or v.startswith(('$', '@')) or is_symbol(toks, i):")]),

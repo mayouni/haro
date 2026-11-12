@@ -84,6 +84,7 @@ const builtin_table = [_]BuiltinEntry{
     .{ .name = "integer", .id = .integer1, .argc = 1 },
     .{ .name = "divide", .id = .divide3, .argc = 3 },
     .{ .name = "near", .id = .near3, .argc = 3 },
+    .{ .name = "isempty", .id = .isempty1, .argc = 1 },
     .{ .name = "read", .id = .readf, .argc = 1 },
     .{ .name = "write", .id = .writef, .argc = 2 },
     .{ .name = "LoadLib", .id = .loadlib, .argc = 1 },
@@ -254,7 +255,7 @@ const builtin_table = [_]BuiltinEntry{
 /// v0.52: a built-in of Haro's own numbers -- a .ring file reads these names as Ring reads them, no built-in
 fn haroOnlyBuiltin(id: vm.Builtin) bool {
     return switch (id) {
-        .float1, .decimal1, .decimal2, .integer1, .divide3, .near3 => true,
+        .float1, .decimal1, .decimal2, .integer1, .divide3, .near3, .isempty1 => true,
         else => false,
     };
 }
@@ -2762,6 +2763,7 @@ pub const Compiler = struct {
     const R_NOPARAMS = "a definition without parameters has no parentheses; written";
     const R_PARAMS = "a definition's parameters stand in parentheses; written";
     const R_PERIOD = "a statement has no trailing period; written";
+    const R_NULL = "`null` is no value of Haro -- the empty text is \"\", and absence is none; written";
     const R_CHAIN = "a chain across lines continues with its dot at the start of the next line; written";
 
     fn isBlock(k: []const u8) bool {
@@ -2807,6 +2809,10 @@ pub const Compiler = struct {
     fn oneForm(self: *Compiler, n: ts.Node) void {
         if (self.spell_fault != null) return;
         const k = n.kind();
+        // v0.59 (D71, TYPES.md T5): Ring's NULL is gone -- the empty text is "", absence is none, and IsEmpty tests the empty text
+        if (std.mem.eql(u8, k, "null")) return self.spellSet(n.text(), R_NULL);
+        if (std.mem.eql(u8, k, "call_expression") and n.namedChildCount() > 0 and std.mem.eql(u8, n.namedChild(0).kind(), "identifier") and
+            std.mem.eql(u8, n.namedChild(0).text(), "IsNull")) return self.spellSet(n.namedChild(0).text(), "one spelling: `IsEmpty`; written");
         if (n.isNamed()) {
             if (std.mem.eql(u8, k, "identifier")) return self.spellKeywords(n);
             if (std.mem.eql(u8, k, "comment")) {
@@ -5859,7 +5865,7 @@ pub const Compiler = struct {
         const yes_no = [_][]const u8{ "isalnum", "isalpha", "isandroid", "isattribute", "iscfunction", "isclass", "iscntrl", "isdigit", "isfreebsd",
             "isfunction", "isglobal", "isgraph", "islinux", "islist", "islocal", "islower", "ismacosx", "ismethod", "ismsdos", "isnull", "isnumber",
             "isobject", "ispackage", "ispackageclass", "ispointer", "isprint", "isprivateattribute", "isprivatemethod", "ispunct", "isspace",
-            "isstring", "isunix", "isupper", "iswindows", "iswindows64", "isxdigit", "fexists", "direxists", "feof", "near" };
+            "isstring", "isunix", "isupper", "iswindows", "iswindows64", "isxdigit", "fexists", "direxists", "feof", "near", "isempty" };
         for (yes_no) |w| {
             if (std.ascii.eqlIgnoreCase(name, w)) return self.findFunc(name) == null;
         }

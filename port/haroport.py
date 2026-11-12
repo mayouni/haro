@@ -18,6 +18,7 @@ THE REWRITES, in this order, each on code only (a string, a comment, a symbol's 
      letter is v and the element's (an/ac/ao/aa -> vi/vt/vo/vv); an ALL_CAPS name and an @Capitalised attribute take their letter by what
      they hold (1 or 0 alone and never counted: a boolean)
   Y  a b name given 1 or 0 is given true or false, and a condition on a literal 1 or 0 is on true or false
+  N  (D71) `null` is `""` and `isnull(x)` is `IsEmpty(x)`
   O  (D69) see and put: `see E + nl` is `print E`, any other is `FWrite(stdout, E)`
   O  (D67, HARO-ONEFORM-01) one form for each construct: every block ends with `end` (never ok, next, off, done, endX, braces), a
      definition has no end word, one word each (func, elseif, else, case, for, see, give, exit, loop, and, or, not, from), `#` for a
@@ -289,6 +290,7 @@ def port_file(rel, src, tree_funcs, tree_names, c_map, refused):
     toks = one_form(toks, renames)
     toks = def_ends(toks, renames)
     toks = printing(toks, renames)
+    toks = null_free(toks, renames)
     return ''.join(v for _, v in toks), renames
 
 
@@ -738,6 +740,23 @@ def printing(toks, renames):
             renames.append(('O', v, 'FWrite(stdout, ...)'))
         i = j
     return [x for x in out if x[1] != '' or x[0] == 'nl']
+
+
+def null_free(toks, renames):
+    """N (D71): `null` is `""`, the value it always was, and `isnull(x)` (respelled IsNull by B) is `IsEmpty(x)`"""
+    out = [list(x) for x in toks]
+    for i, (k, v) in enumerate(out):
+        if k != 'id' or is_member(out, i) or is_symbol(out, i):
+            continue
+        if v.lower() == 'null':
+            out[i] = ['st', '""']
+            renames.append(('N', v, '""'))
+        elif v.lower() == 'isnull':
+            j = sig(out, i, 1)
+            if j is not None and out[j][1] == '(':
+                out[i][1] = 'IsEmpty'
+                renames.append(('N', v, 'IsEmpty'))
+    return out
 
 
 def body_on_own_line(out, j, b, renames):

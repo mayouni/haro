@@ -1192,6 +1192,7 @@ pub const Builtin = enum(u16) {
     integer1, // Integer(x): a whole number
     divide3, // Divide(a, b, iPlaces): the quotient rounded half to even
     near3, // Near(fA, fB, fTolerance): |a - b| <= tolerance
+    isempty1, // v0.59 (D71): IsEmpty(x) -- 1 for the empty text, 0 for any other value or type
     isnull, // isNull(x)     -> 1 for "" and for the string "NULL" in any case, else 0 (probed on 1.27: 0, [], an object are 0)
     string, // string(x)      -> decimal text of a number
     typeof, // type(x)        -> NUMBER / STRING / LIST / OBJECT, as Ring names them
@@ -1431,7 +1432,7 @@ pub fn builtinRingName(b: Builtin) ?[]const u8 {
     return switch (b) {
         .sysargv, .stdinv, .stdoutv, .stderrv, .catchlast, .bye, .giveline, .eval => null,
         // v0.52: Haro's own, no C function of Ring's: an error inside one names the line alone
-        .float1, .decimal1, .decimal2, .integer1, .divide3, .near3 => null,
+        .float1, .decimal1, .decimal2, .integer1, .divide3, .near3, .isempty1 => null,
         .copystr => "copy",
         .typeof => "type",
         .find2, .find3, .find4 => "find",
@@ -6837,6 +6838,7 @@ pub const VM = struct {
                         }
                         out = Value.int(@intFromBool(@abs(asF64(regs[A]) - asF64(regs[A + 1])) <= asF64(regs[A + 2])));
                     },
+                    .isempty1 => out = Value.int(@intFromBool(regs[A].tag == .str and regs[A].p.s.len == 0)),
                     .isnull => out = Value.int(switch (regs[A].tag) {
                         .nil => @as(i64, 1),
                         .str => @as(i64, if (regs[A].p.s.len == 0 or std.ascii.eqlIgnoreCase(strOf(regs[A]), "null")) 1 else 0),

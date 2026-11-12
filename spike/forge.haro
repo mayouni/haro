@@ -72,7 +72,7 @@ else
 			tForgedWhat += String(Len(LangGet(aForgedLang, "expressions"))) + " expression(s) -> " + tLangName + "_expr.haro, " + tLangName + "_expr.gbnf"
 		end
 		# v0.7: an ASK's question grammar, for the decoder
-		if not IsNull(LangGet(aForgedLang, "ask"))
+		if not IsEmpty(LangGet(aForgedLang, "ask"))
 			Write(tOutDir + "/" + tLangName + "_ask.gbnf", ForgeAskGbnf(aForgedLang))
 			if tForgedWhat != "" tForgedWhat += "; " end
 			tForgedWhat += "1 ask -> " + tLangName + "_ask.gbnf"
@@ -102,7 +102,7 @@ func UnionOf(aLang, tName)
 	for i = 1 to Len(aU)
 		if aU[i][1] = tName return aU[i] end
 	end
-	return null
+	return ""
 end
 # a declaration's MESSAGES as [[seat, text], ...]
 func MessagesSource(aMsgs)
@@ -185,9 +185,9 @@ end
 # aggs, vars, contexts, absent, division, equality]
 func ExprSource(aE)
 	aAgg = aE[4]
-	if IsNull(aAgg) aAgg = [] end
+	if IsEmpty(aAgg) aAgg = [] end
 	aVars = aE[5]
-	if IsNull(aVars) aVars = [] end
+	if IsEmpty(aVars) aVars = [] end
 	aCtx = []
 	if Len(aE) >= 8 aCtx = aE[8] end
 	tCtx = "["
@@ -311,7 +311,7 @@ func LangSource(aLang)
 	# present only where the language declares one -- so a court without a pattern is the court it was
 	tPatterns = ""
 	aPt = LangGet(aLang, "patterns")
-	if not IsNull(aPt)
+	if not IsEmpty(aPt)
 		if Len(aPt) > 0
 			aRows = []
 			for i = 1 to Len(aPt)
@@ -335,7 +335,7 @@ func LangSource(aLang)
 	end
 	aW = LangGet(aLang, "world")
 	tWorld = "[[], " + '""' + ", [], []]"
-	if not IsNull(aW)
+	if not IsEmpty(aW)
 		aEntry = []
 		if Len(aW) >= 4 aEntry = aW[4] end
 		aPublish = []
@@ -349,7 +349,7 @@ func LangSource(aLang)
 		tWorld = "[" + NamesSource(aW[1]) + ", " + RingStr(aW[2]) + ", " + NamesSource(aEntry) + ", " + tPub + "]"
 	end
 	aSy = LangGet(aLang, "symbols")
-	if IsNull(aSy) aSy = [] end
+	if IsEmpty(aSy) aSy = [] end
 	tSymbols = "["
 	for i = 1 to Len(aSy)
 		if i > 1 tSymbols += ", " end
@@ -365,7 +365,7 @@ func LangSource(aLang)
 	aRf = LangGet(aLang, "refine")
 	tPoints = "[]"
 	tFloors = "[]"
-	if not IsNull(aRf)
+	if not IsEmpty(aRf)
 		tPoints = PointsSource(aRf[1])
 		tFloors = PointsSource(aRf[2])
 	end
@@ -379,7 +379,7 @@ func LangSource(aLang)
 	aS = LangGet(aLang, "sentences")
 	for i = 1 to Len(aS)
 		tInner = ""
-		if not IsNull(aS[i][3]) tInner = LangGet(aS[i][3], "name") end
+		if not IsEmpty(aS[i][3]) tInner = LangGet(aS[i][3], "name") end
 		aRows + ("[" + RingStr(aS[i][1]) + ", " + RingStr(tInner) + ", " + RingStr(aS[i][4]) + ", " + RingStr(aS[i][5]) + "]")
 	end
 	tSentences = RowsSource(aRows, tNl)
@@ -391,22 +391,22 @@ func LangSource(aLang)
 	tExprs = RowsSource(aRows, tNl)
 	aRows = []
 	aWk = LangGet(aLang, "walks")
-	if IsNull(aWk) aWk = [] end
+	if IsEmpty(aWk) aWk = [] end
 	for i = 1 to Len(aWk)
 		aRows + WalkSource(aWk[i])
 	end
 	tWalks = RowsSource(aRows, tNl)
 	aAsk = LangGet(aLang, "ask")
-	tAsk = "null"
-	if not IsNull(aAsk)
+	tAsk = '""'
+	if not IsEmpty(aAsk)
 		tAsk = "[" + RingStr(aAsk[1]) + ", " + NamesSource(aAsk[2]) + ", " + RingStr(aAsk[3]) + ", " + NamesSource(aAsk[4])
 		# v0.34: the schema path, only where one is declared -- so a court forged from a language without FIELDS keeps the bytes it had
 		if aAsk[7] != "" tAsk += ", " + RingStr(aAsk[7]) end
 		tAsk += "]"
 	end
 	aRun = LangGet(aLang, "run")
-	tRun = "null"
-	if not IsNull(aRun)
+	tRun = '""'
+	if not IsEmpty(aRun)
 		tRun = "["
 		for i = 1 to Len(aRun[2])
 			if i > 1 tRun += ", " end
@@ -416,20 +416,20 @@ func LangSource(aLang)
 	end
 	# v0.12: the FORMS [name, fluent, passive, statement, [[key, suffix], ...], [kind, base, forms]], or NULL
 	aFs = LangGet(aLang, "formset")
-	tFormset = "null"
-	if not IsNull(aFs)
+	tFormset = '""'
+	if not IsEmpty(aFs)
 		tFormset = "[" + RingStr(aFs[1]) + ", " + RingStr(aFs[2]) + ", " + RingStr(aFs[3]) + ", " + RingStr(aFs[4]) + ", " + MessagesSource(aFs[5]) + ", " + NamesSource(aFs[6]) + "]"
 	end
 	# v0.13: the NARRATE [name, opens, ends, refuses, [[kind, template], ...]], or NULL
 	aNr = LangGet(aLang, "narrate")
-	tNarrate = "null"
-	if not IsNull(aNr)
+	tNarrate = '""'
+	if not IsEmpty(aNr)
 		tNarrate = "[" + RingStr(aNr[1]) + ", " + RingStr(aNr[2]) + ", " + RingStr(aNr[3]) + ", " + RingStr(aNr[4]) + ", " + MessagesSource(aNr[5]) + ", " + MessagesSource(aNr[8]) + "]"
 	end
 	# v0.17: the UNDERSTAND [name, [[role, kind], ...]], or NULL
 	aUn = LangGet(aLang, "understand")
-	tUnderstand = "null"
-	if not IsNull(aUn)
+	tUnderstand = '""'
+	if not IsEmpty(aUn)
 		tUnderstand = "[" + RingStr(aUn[1]) + ", ["
 		for i = 1 to Len(aUn[2])
 			if i > 1 tUnderstand += ", " end
@@ -462,7 +462,7 @@ func LangSource(aLang)
 	# court keeps its bytes: [[needs...], [[verb, word, by seat], ...]]
 	tNeeds = ""
 	aDoors = LangGet(aLang, "needs")
-	if not IsNull(aDoors)
+	if not IsEmpty(aDoors)
 		aOpn = LangGet(aLang, "opens")
 		aOpRows = []
 		for i = 1 to Len(aOpn)
@@ -490,7 +490,7 @@ func ForgeLangRecords(aLang, aSeen)
 	aOut + aLang
 	aS = LangGet(aLang, "sentences")
 	for i = 1 to Len(aS)
-		if not IsNull(aS[i][3])
+		if not IsEmpty(aS[i][3])
 			aMore = ForgeLangRecords(aS[i][3], aSeen)
 			for j = 1 to Len(aMore)
 				aOut + aMore[j]
@@ -512,23 +512,23 @@ func ForgeCourt(aLang)
 	tC += 'load "court_lib.haro"' + tNl
 	# v0.6: the expression library rides along only when an EXPRESSION is declared
 	# (v0.7: or an ASK, whose rows are JSON); the question library only with an ASK
-	bAsk = not IsNull(LangGet(aLang, "ask"))
-	bRun = not IsNull(LangGet(aLang, "run"))
-	bFormset = not IsNull(LangGet(aLang, "formset"))
-	bNarrate = not IsNull(LangGet(aLang, "narrate"))
-	bUnderstand = not IsNull(LangGet(aLang, "understand"))
+	bAsk = not IsEmpty(LangGet(aLang, "ask"))
+	bRun = not IsEmpty(LangGet(aLang, "run"))
+	bFormset = not IsEmpty(LangGet(aLang, "formset"))
+	bNarrate = not IsEmpty(LangGet(aLang, "narrate"))
+	bUnderstand = not IsEmpty(LangGet(aLang, "understand"))
 	aSyL = LangGet(aLang, "symbols")
 	bSym = false
-	if not IsNull(aSyL)
+	if not IsEmpty(aSyL)
 		if Len(aSyL) > 0 bSym = true end
 	end
-	if not IsNull(LangGet(aLang, "world"))
+	if not IsEmpty(LangGet(aLang, "world"))
 		if Len(LangGet(aLang, "world")) >= 5
 			if Len(LangGet(aLang, "world")[5]) > 0 bSym = true end
 		end
 	end
 	# v0.40: a language that NEEDS publishes the doors its declarations open in its world rows, a world or not (D51)
-	bDoors = not IsNull(LangGet(aLang, "needs"))
+	bDoors = not IsEmpty(LangGet(aLang, "needs"))
 	# v0.10: a world is JSON, read and written with expr_lib's reader
 	if Len(LangGet(aLang, "expressions")) > 0 or bAsk or bRun or bSym or bDoors
 		tC += 'load "expr_lib.haro"' + tNl
@@ -559,7 +559,7 @@ func ForgeCourt(aLang)
 	aPatRecs = ForgeLangRecords(aLang, [])
 	for i = 1 to Len(aPatRecs)
 		aPatsOf = LangGet(aPatRecs[i], "patterns")
-		if not IsNull(aPatsOf)
+		if not IsEmpty(aPatsOf)
 			if Len(aPatsOf) > 0 bPattern = true end
 		end
 	end
@@ -587,7 +587,7 @@ func ForgeCourt(aLang)
 	# v0.40: the doors library rides along only where a language the court carries NEEDS a door (D51)
 	bNeeds = false
 	for i = 1 to Len(aPatRecs)
-		if not IsNull(LangGet(aPatRecs[i], "needs")) bNeeds = true end
+		if not IsEmpty(LangGet(aPatRecs[i], "needs")) bNeeds = true end
 	end
 	if bNeeds tC += 'load "needs_lib.haro"' + tNl end
 	tC += tNl
@@ -601,11 +601,11 @@ func ForgeCourt(aLang)
 	tC += "$aCourtRanges = []" + tNl + "$aCourtFormats = []" + tNl + "$aCourtUnions = []" + tNl + "$aCourtConstraints = []" + tNl
 	tC += "$aCourtWorld = [[], " + '""' + ", [], []]" + tNl + "$aCourtPoints = []" + tNl + "$aCourtFloors = []" + tNl
 	tC += "$aCourtViews = []" + tNl + "$aCourtSentenceKinds = []" + tNl
-	tC += "$aCourtExprs = []" + tNl + "$aCourtWalks = []" + tNl + "$aCourtAsk = null" + tNl + "$aCourtRun = null" + tNl
-	tC += "$aCourtSymbols = []" + tNl + "$aCourtWorldFile = null" + tNl
+	tC += "$aCourtExprs = []" + tNl + "$aCourtWalks = []" + tNl + '$aCourtAsk = ""' + tNl + '$aCourtRun = ""' + tNl
+	tC += "$aCourtSymbols = []" + tNl + '$aCourtWorldFile = ""' + tNl
 	tC += "$tCourtCode = " + RingStr("PARSE") + tNl + "$aCourtCites = []" + tNl
-	tC += "$aCourtFormset = null" + tNl + "$aCourtNarrate = null" + tNl
-	tC += "$aCourtUnderstand = null" + tNl + "$bNSurfaces = false" + tNl
+	tC += '$aCourtFormset = ""' + tNl + '$aCourtNarrate = ""' + tNl
+	tC += '$aCourtUnderstand = ""' + tNl + "$bNSurfaces = false" + tNl
 	tC += "$aCourtConstitution = []" + tNl
 	# v0.24: the zone of organizational_sovereignty, and the audit chain of visible_state
 	tC += "$aCourtZone = []" + tNl + "$tCourtAuditFile = " + '""' + tNl + "$aCourtAuditProposal = []" + tNl
@@ -628,7 +628,7 @@ func ForgeCourt(aLang)
 	# v0.23: the articles the language declares itself under (its CONSTITUTION), read by the
 	# court's refusals through CtUnderArticle; a language under none leaves the list empty
 	aCst = LangGet(aLang, "constitution")
-	if not IsNull(aCst)
+	if not IsEmpty(aCst)
 		tC += "$aCourtConstitution = " + NamesSource(aCst[2]) + tNl
 		# v0.24: the zone kind, its sovereign seat and its movement seat, read by the court's refusals
 		if Len(aCst) >= 9
@@ -700,10 +700,10 @@ func ForgeExprCourt(aLang)
 	tC += "$aExprOperators = " + NamesSource(aE[2]) + tNl
 	tC += "$aExprOperands = " + NamesSource(aE[3]) + tNl
 	aAgg = aE[4]
-	if IsNull(aAgg) aAgg = [] end
+	if IsEmpty(aAgg) aAgg = [] end
 	tC += "$aExprAggregates = " + NamesSource(aAgg) + tNl
 	aVars = aE[5]
-	if IsNull(aVars) aVars = [] end
+	if IsEmpty(aVars) aVars = [] end
 	tC += "$aExprVariables = " + NamesSource(aVars) + tNl
 	tC += "$aExprContexts = ["
 	aCtx = []
@@ -737,11 +737,11 @@ func ForgeExprGbnfOf(aLang, aE)
 	aOps = aE[2]
 	aOpd = aE[3]
 	aVars = aE[5]
-	if IsNull(aVars) aVars = [] end
+	if IsEmpty(aVars) aVars = [] end
 	tQ = Char(34)
 	tBs = Char(92)
 	aAgg = aE[4]
-	if IsNull(aAgg) aAgg = [] end
+	if IsEmpty(aAgg) aAgg = [] end
 	tG = "# " + tName + "_expr.gbnf -- GENERATED by forge.haro from the " + tName + " declaration (Haro v0.5, grown in v0.6)." + tNl
 	tG += "# W's shape: or < and < not < comparison < additive < multiplicative < unary < primary;" + tNl
 	tG += "# each level is present when the declaration admits its operators." + tNl + tNl
@@ -854,7 +854,7 @@ func ForgeAskGbnf(aLang)
 	tG += "ident ::= [a-z_] [a-z0-9_]*" + tNl
 	tBody = ""
 	if aAsk[3] != ""
-		aE = null
+		aE = ""
 		aEs = LangGet(aLang, "expressions")
 		for i = 1 to Len(aEs)
 			if aEs[i][1] = aAsk[3] aE = aEs[i] end
@@ -915,7 +915,7 @@ func FormOf(aLang, tName)
 	for i = 1 to Len(aF)
 		if aF[i][1] = tName return aF[i] end
 	end
-	return null
+	return ""
 end
 func ForgeGbnf(aLang)
 	tNl = Char(10)

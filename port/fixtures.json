@@ -37,7 +37,7 @@
      true
     ],
     [
-     "'? IsNull(1)' in applied['main.haro']",
+     "'? IsEmpty(1)' in applied['main.haro']",
      true
     ],
     [
@@ -735,6 +735,28 @@
       "  print \"c\" + x  # a comment",
       "? \"d\""
      ]
+    ]
+   ]
+  },
+  {
+   "id": "H35",
+   "line": "N",
+   "why": "null is written \"\", and isnull is IsEmpty",
+   "folder": "cases/H35",
+   "files": [
+    "main.ring"
+   ],
+   "asserts": [
+    [
+     "applied['main.haro'].splitlines()[:2]",
+     [
+      "x = \"\"",
+      "if IsEmpty(x) FWrite(stdout, \"e\") end"
+     ]
+    ],
+    [
+     "'o.isnull()' in applied['main.haro'] and 'y = :null' in applied['main.haro']",
+     true
     ]
    ]
   },

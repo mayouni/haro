@@ -45,7 +45,7 @@ const vm = @import("main.zig");
 
 /// Bumped by hand when the layout below changes in a way the executable's
 /// own fingerprint would not catch (it nearly always would).
-pub const VERSION: u32 = 6; // 6: ldnone and jnone (v0.58, 2026-11-11); 5: a decimal constant, its scale in the length field (v0.52, 2026-11-10); 2: class_parent and fn_owner (2026-09-23); 3: the locals tables and class_attrs_fn, for eval (2026-09-25); 4: the accessor tables, for getters and setters (2026-09-26)
+pub const VERSION: u32 = 7; // 7: the built-in IsEmpty (v0.59); 6: ldnone and jnone (v0.58, 2026-11-11); 5: a decimal constant, its scale in the length field (v0.52, 2026-11-10); 2: class_parent and fn_owner (2026-09-23); 3: the locals tables and class_attrs_fn, for eval (2026-09-25); 4: the accessor tables, for getters and setters (2026-09-26)
 const MAGIC: [8]u8 = "RNXIMG\x00\x00".*;
 
 /// One source file as it was when the image was written.

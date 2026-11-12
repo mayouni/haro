@@ -366,6 +366,7 @@ pub const pascal = [_][2][]const u8{
     .{ "float", "Float" },
     .{ "integer", "Integer" },
     .{ "near", "Near" },
+    .{ "isempty", "IsEmpty" },
 };
 
 /// The spelling a .haro file writes for the native registered as `low` (lowercase, underscores as registered), or null for no native

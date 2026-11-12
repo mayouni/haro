@@ -3923,6 +3923,23 @@ def stage63():
         return 1
     return 0
 
+
+NULL_COURT = os.path.join(HERE, 'v59', 'null_court.py')
+
+
+def stage64():
+    """Haro v0.59, null leaves Haro: IsEmpty (HARO-NULL-01, D71; v59/GRAMMAR.md). v59/null_court.py on haro and its checked build."""
+    print('stage 64 -- null leaves Haro: v59/null_court.py on haro and its checked build')
+    p = subprocess.run([sys.executable, NULL_COURT] + (['--plant'] if PLANT else []), capture_output=True, cwd=HERE, timeout=900)
+    out = p.stdout.decode('utf-8', 'replace').replace(chr(13) + chr(10), chr(10))
+    for line in out.splitlines():
+        if line.startswith('  FAIL') or line.startswith('       ') or line.startswith('NULL COURT'):
+            print(line)
+    if p.returncode != 0:
+        print(f'  FAIL the null court exited {p.returncode}' + ('' if out.strip() else ': ' + p.stderr.decode('utf-8', 'replace')[-400:]))
+        return 1
+    return 0
+
 PORT_COURT = os.path.join(os.path.dirname(HERE), 'port', 'port_court.py')
 
 
@@ -4162,5 +4179,7 @@ if __name__ == '__main__':
         failures += stage62()
     if stage in (None, 63) and os.path.exists(ABSENCE_COURT):
         failures += stage63()
+    if stage in (None, 64) and os.path.exists(NULL_COURT):
+        failures += stage64()
     print(f'haro_forge: {"FAIL" if failures else "PASS"} ({failures} failure(s), {time.perf_counter()-t0:.1f} s)')
     sys.exit(1 if failures else 0)

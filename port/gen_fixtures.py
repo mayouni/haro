@@ -37,7 +37,7 @@ CASES = [
         'main.ring': ['? len("ab")', '? upper("a")', '? isnull(1)', 'func f', T + '? trim(" a ")'],
         'lib.ring': ['func trim x', T + 'return x']},
      [("'? Len(\"ab\")' in applied['main.haro']", True), ("'? Upper(\"a\")' in applied['main.haro']", True),
-      ("'? IsNull(1)' in applied['main.haro']", True), ("'? trim(\" a \")' in applied['main.haro']", True)]),
+      ("'? IsEmpty(1)' in applied['main.haro']", True), ("'? trim(\" a \")' in applied['main.haro']", True)]),
     ('H03', 'C', 'Softanza\'s c is t and its v is x, the same in every file', {
         'main.ring': ['load "lib.ring"', '$cTitle = "a"', 'vAny = 1', '? Shout($cTitle)'],
         'lib.ring': ['func Shout cWord', T + 'return cWord + $cTitle']},
@@ -192,6 +192,11 @@ CASES = [
         'main.ring': ['see "a" + nl', 'put "b"', 'x = 2', 'see x', '  see "c" + x + nl  # a comment', '? "d"']},
      [("applied['main.haro'].splitlines()[:2]", ['print "a"', 'FWrite(stdout, "b")']),
       ("applied['main.haro'].splitlines()[3:6]", ['FWrite(stdout, x)', '  print "c" + x  # a comment', '? "d"'])]),
+    # v0.59 (D71): written before its code
+    ('H35', 'N', 'null is written "", and isnull is IsEmpty', {
+        'main.ring': ['x = null', 'if isnull(x) see "e" ok', 'o.isnull()', 'y = :null']},
+     [("applied['main.haro'].splitlines()[:2]", ['x = ""', 'if IsEmpty(x) FWrite(stdout, "e") end']),
+      ("'o.isnull()' in applied['main.haro'] and 'y = :null' in applied['main.haro']", True)]),
     ('H11', '-', 'the ported tree runs on haro and prints what the classic Ring surface printed', {
         'main.ring': ['load "lib.ring"', 'cName = Greet("ada")', '? cName', '? Len(cName)'],
         'lib.ring': ['func Greet cWho', T + 'cOut = "hi " + cWho', T + 'return cOut']},
