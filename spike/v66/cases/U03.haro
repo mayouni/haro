@@ -1,0 +1,6 @@
+print Text(2.5, 2)
+print Text(1.0f / 3.0f, 4)
+print Text(7, 2)
+print Text(2.345, 2)
+print Text(2.355, 2)
+print Text(10.257, 0)

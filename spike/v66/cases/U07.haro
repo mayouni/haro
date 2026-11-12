@@ -1,0 +1,18 @@
+print Csv(Decimals(10.257))
+print Csv(Decimals(3.50))
+print Csv(Decimals(7))
+print Csv(Decimals(0.005))
+print Csv(Decimals(0.25f))
+print Csv(Decimals(-10.257))
+print Csv(Digits(10.257))
+print Csv(Digits(-42))
+func Csv(vX)
+	tOut = ""
+	for i = 1 to Len(vX)
+		if i > 1
+			tOut += ","
+		end
+		tOut += String(vX[i])
+	end
+	return "[" + tOut + "]"
+end

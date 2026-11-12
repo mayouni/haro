@@ -1,0 +1,5 @@
+print "before"
+f()
+func f
+	print FAbs(-1.5f)
+end

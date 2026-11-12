@@ -1,0 +1,5 @@
+print 0.1f
+print 1.0f / 3.0f
+print String(1.0f / 3.0f)
+print 2.0f
+print 12.50

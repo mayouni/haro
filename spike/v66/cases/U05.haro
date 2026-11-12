@@ -1,0 +1,6 @@
+print Floor(10.7)
+print Ceil(10.2)
+print Floor(-10.2)
+print Ceil(-10.7)
+print Floor(2.5f)
+print Type(Floor(2.5f))

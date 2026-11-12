@@ -1,0 +1,6 @@
+print IntegerPart(10.257)
+print IntegerPart(-10.257)
+print DecimalPart(10.257)
+print DecimalPart(-10.257)
+print DecimalPart(7)
+print DecimalPart(2.5f)

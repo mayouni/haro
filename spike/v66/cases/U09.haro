@@ -1,0 +1,2 @@
+print FromHex("ff")
+print Hex(255)

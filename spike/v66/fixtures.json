@@ -1,0 +1,124 @@
+{
+ "rung": "v0.66",
+ "decision": "HARO-NUMBERS-CORE-01: NUMBERS.md (ad4d0a5), the Principal's \"Build it as proposed\" (2026-11-12); Truncate left out, said so; the desk's readings are D78",
+ "class": "exact: the program's whole stdout and its exit code, byte for byte, on haro and on its checked build",
+ "lines": {
+  "L1": "a float written exactly; no setting",
+  "L2": "Text",
+  "L3": "Round, Floor, Ceil",
+  "L4": "parts and digits",
+  "L5": "Abs, Sign, Clamp",
+  "L6": "FromHex",
+  "L7": "refused: Decimals as a setting, FAbs, Dec",
+  "L8": "a .ring file untouched"
+ },
+ "cases": [
+  {
+   "id": "U01",
+   "kind": "run",
+   "line": "L1",
+   "why": "a float is written as the shortest text that reads back the same",
+   "file": "cases/U01.haro",
+   "stdout": "0.1\n0.3333333333333333\n0.3333333333333333\n2\n12.50\n"
+  },
+  {
+   "id": "U02",
+   "kind": "run",
+   "line": "L1",
+   "why": "a .ring file's decimals(n) does not reach .haro code",
+   "file": "cases/U02.ring",
+   "stdout": "0.25\n0.25000\n"
+  },
+  {
+   "id": "U03",
+   "kind": "run",
+   "line": "L2",
+   "why": "Text writes exactly the places asked, half to even",
+   "file": "cases/U03.haro",
+   "stdout": "2.50\n0.3333\n7.00\n2.34\n2.36\n10\n"
+  },
+  {
+   "id": "U04",
+   "kind": "run",
+   "line": "L3",
+   "why": "Round: an integer, or the same kind at iPlaces, half to even",
+   "file": "cases/U04.haro",
+   "stdout": "2\n4\n-2\n2\n10.26\n7\n2.67\nDECIMAL\nNUMBER\n"
+  },
+  {
+   "id": "U05",
+   "kind": "run",
+   "line": "L3",
+   "why": "Floor and Ceil answer an integer",
+   "file": "cases/U05.haro",
+   "stdout": "10\n11\n-11\n-10\n2\nNUMBER\n"
+  },
+  {
+   "id": "U06",
+   "kind": "run",
+   "line": "L4",
+   "why": "IntegerPart toward zero, DecimalPart the same kind and sign",
+   "file": "cases/U06.haro",
+   "stdout": "10\n-10\n0.257\n-0.257\n0\n0.5\n"
+  },
+  {
+   "id": "U07",
+   "kind": "run",
+   "line": "L4",
+   "why": "Decimals and Digits, vectors of integers",
+   "file": "cases/U07.haro",
+   "stdout": "[2,5,7]\n[5,0]\n[]\n[0,0,5]\n[2,5]\n[2,5,7]\n[1,0,2,5,7]\n[4,2]\n"
+  },
+  {
+   "id": "U08",
+   "kind": "run",
+   "line": "L5",
+   "why": "Abs, Sign, Clamp",
+   "file": "cases/U08.haro",
+   "stdout": "3\n2.50\n0.5\n-1\n0\n1\n10\n0\n2.5\n"
+  },
+  {
+   "id": "U09",
+   "kind": "run",
+   "line": "L6",
+   "why": "FromHex beside Hex",
+   "file": "cases/U09.haro",
+   "stdout": "255\nff\n"
+  },
+  {
+   "id": "U10",
+   "kind": "run",
+   "line": "L7",
+   "why": "Decimals(n) as a setting is refused, naming Text and Round",
+   "file": "cases/U10.haro",
+   "stdout": "before\n\nLine 4 Haro refused this statement (there is no setting for places in a .haro file: write Text(x, iPlaces) or Round(x, iPlaces); written `Decimals(4)`, line 4 of U10.haro) and did not compile it -- running past it would give a wrong answer \nIn function f() in file U10.haro\n\nCalled from line 2 in file U10.haro ",
+   "exit": 1
+  },
+  {
+   "id": "U11",
+   "kind": "run",
+   "line": "L7",
+   "why": "FAbs is refused, naming Abs",
+   "file": "cases/U11.haro",
+   "stdout": "before\n\nLine 4 Haro refused this statement (`FAbs` takes only a float: write Abs(x); written `FAbs`, line 4 of U11.haro) and did not compile it -- running past it would give a wrong answer \nIn function f() in file U11.haro\n\nCalled from line 2 in file U11.haro ",
+   "exit": 1
+  },
+  {
+   "id": "U12",
+   "kind": "run",
+   "line": "L7",
+   "why": "Dec is refused, naming FromHex",
+   "file": "cases/U12.haro",
+   "stdout": "before\n\nLine 4 Haro refused this statement (`Dec` reads hex text, and its name says decimal: write FromHex(t); written `Dec`, line 4 of U12.haro) and did not compile it -- running past it would give a wrong answer \nIn function f() in file U12.haro\n\nCalled from line 2 in file U12.haro ",
+   "exit": 1
+  },
+  {
+   "id": "U13",
+   "kind": "run",
+   "line": "L8",
+   "why": "a .ring file reads its own names as it did",
+   "file": "cases/U13.ring",
+   "stdout": "0.333\n2\n255\n"
+  }
+ ]
+}
