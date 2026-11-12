@@ -1,0 +1,3 @@
+bFail = true
+print "before"
+Shutdown(bFail)

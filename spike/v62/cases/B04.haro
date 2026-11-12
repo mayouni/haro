@@ -1,0 +1,7 @@
+LoadLib(SysGet("STZ_ENGINE_DIR") + "/zig-out/bin/stz_string.dll")
+xS = StzEngineString("MM mm")
+StzEngineStringReplaceCS(xS, "mm", "30", true)
+print StzEngineStringData(xS)
+xT = StzEngineString("MM mm")
+StzEngineStringReplaceCS(xT, "mm", "30", false)
+print StzEngineStringData(xT)

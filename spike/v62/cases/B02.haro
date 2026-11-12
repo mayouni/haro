@@ -1,0 +1,3 @@
+print "before"
+Shutdown(false)
+print "after"

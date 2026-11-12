@@ -1,0 +1,64 @@
+{
+ "rung": "v0.62",
+ "decision": "HARO-NATIVE-BOOL-01 (stzlib-haroport, 2026-11-12); the desk's readings are D74",
+ "class": "exact: the program's whole stdout and its exit code, byte for byte, on haro and on its checked build; an engine case only where STZ_ENGINE_DIR names Softanza's engine built for Haro",
+ "lines": {
+  "N1": "a boolean argument is 1 or 0",
+  "N2": "the finding on the engine",
+  "N3": "a boolean list item is 1 or 0",
+  "N4": "a .ring file untouched"
+ },
+ "cases": [
+  {
+   "id": "B01",
+   "kind": "run",
+   "line": "N1",
+   "why": "Shutdown(true) ends the program with code 1",
+   "file": "cases/B01.haro",
+   "stdout": "before\n",
+   "exit": 1
+  },
+  {
+   "id": "B02",
+   "kind": "run",
+   "line": "N1",
+   "why": "Shutdown(false) ends the program with code 0",
+   "file": "cases/B02.haro",
+   "stdout": "before\n"
+  },
+  {
+   "id": "B03",
+   "kind": "run",
+   "line": "N1",
+   "why": "a b name given to a native is its 1 or 0",
+   "file": "cases/B03.haro",
+   "stdout": "before\n",
+   "exit": 1
+  },
+  {
+   "id": "B04",
+   "kind": "engine",
+   "line": "N2",
+   "why": "the finding: ReplaceCS with true is case-sensitive, with false is not",
+   "file": "cases/B04.haro",
+   "stdout": "MM 30\n30 30\n"
+  },
+  {
+   "id": "B05",
+   "kind": "engine",
+   "line": "N3",
+   "why": "a boolean inside a list reaches a native as 1 or 0",
+   "file": "cases/B05.haro",
+   "stdout": "1\n0\n"
+  },
+  {
+   "id": "B06",
+   "kind": "run",
+   "line": "N4",
+   "why": "a .ring file passes its numbers as it did",
+   "file": "cases/B06.ring",
+   "stdout": "before\n",
+   "exit": 1
+  }
+ ]
+}
