@@ -1,0 +1,5 @@
+print "before"
+f()
+func f
+	vX = ["a": 1]
+end

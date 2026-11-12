@@ -1,0 +1,9 @@
+mX = [:]
+mX["Ada"] = 1
+mX["ada"] = 2
+print Len(mX)
+mN = [:]
+mN[1] = "a"
+mN[5] = "e"
+print Len(mN)
+print mN[5] else ""

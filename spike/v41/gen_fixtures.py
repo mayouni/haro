@@ -32,7 +32,8 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 T = '\t'
 REFUSED = 'and did not compile it -- running past it would give a wrong answer '
 # CHANGED BY v0.64's RULING (D76, TYPES.md T6), said so: the advice names the record once records land
-R_PAIR = '`:key = value` is no pair in a .haro file: write [:key, value] for a pair, or declare a record for named fields (HARO-SURFACE-01)'
+# AND BY v0.67's (D79), said so: the advice names the map once maps land
+R_PAIR = '`:key = value` is no pair in a .haro file: write ["key": value] for a map, [:key, value] for a pair, or declare a record for named fields (HARO-SURFACE-01)'
 
 
 def KEYWORD(word):

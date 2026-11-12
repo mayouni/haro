@@ -1230,6 +1230,11 @@ pub const Builtin = enum(u16) {
     sign1, // Sign(x): -1, 0 or 1
     clamp3, // Clamp(x, lo, hi)
     fromhex1, // FromHex(t): hex text to its integer
+    // v0.67 (D79, HARO-MAP-01): maps, a .haro file's only
+    mapof1, // a map literal's flat list [k1, v1, k2, v2 ...] made the map (the compiler's, no name)
+    keys1, // Keys(mX): its keys, in order
+    values1, // Values(mX): its values, in order
+    haskey2, // HasKey(mX, k)
     isnull, // isNull(x)     -> 1 for "" and for the string "NULL" in any case, else 0 (probed on 1.27: 0, [], an object are 0)
     string, // string(x)      -> decimal text of a number
     typeof, // type(x)        -> NUMBER / STRING / LIST / OBJECT, as Ring names them
@@ -1471,6 +1476,7 @@ pub fn builtinRingName(b: Builtin) ?[]const u8 {
         // v0.52: Haro's own, no C function of Ring's: an error inside one names the line alone
         .float1, .decimal1, .decimal2, .integer1, .divide3, .near3, .isempty1 => null,
         .text2, .round1, .round2, .integerpart1, .decimalpart1, .decimals1h, .digits1, .abs1, .sign1, .clamp3, .fromhex1 => null,
+        .mapof1, .keys1, .values1, .haskey2 => null,
         .copystr => "copy",
         .typeof => "type",
         .find2, .find3, .find4 => "find",
@@ -1564,6 +1570,8 @@ pub const Vec = struct {
     /// Null for every plain list; 8 bytes of header for all of them, and
     /// the slots only for the ones that are keyed. See HIndex.
     idx: ?*HIndex = null,
+    /// v0.67 (D79, HARO-MAP-01): a map -- its items are [key, value] pairs, a key a text or an integer, held once, in the order added
+    map: bool = false,
 };
 
 /// The map type (charter §6 item 7), built the way the charter requires:
@@ -3605,6 +3613,7 @@ pub const VM = struct {
                 }
                 const c = self.newVec(if (src.len == 0) 8 else src.len);
                 c.closure = src.closure;
+                c.map = src.map;
                 var i: u32 = 0;
                 while (i < src.len) : (i += 1) {
                     const e = self.cloneDeepD(src.ptr[i], d + 1);
@@ -3719,6 +3728,7 @@ pub const VM = struct {
     fn cloneVec(self: *VM, v: *Vec) *Vec {
         const c = self.newVec(if (v.len == 0) 8 else v.len);
         c.closure = v.closure;
+        c.map = v.map;
         @memcpy(c.ptr[0..v.len], v.ptr[0..v.len]);
         c.len = v.len;
         // The copy holds its own reference to every element it shares.
@@ -3927,7 +3937,7 @@ pub const VM = struct {
             .num => "a float",
             .dec => "a decimal",
             .str => "a text",
-            .vec => if (v.p.v.closure) "a function" else "a vector",
+            .vec => if (v.p.v.closure) "a function" else if (v.p.v.map) "a map" else "a vector",
             .obj => if (v.p.o.rec != 0) "a record" else "an object",
             .nil => "none",
             .dll, .cptr => "a handle",
@@ -3942,7 +3952,9 @@ pub const VM = struct {
             'd' => v.tag == .dec,
             'f' => v.tag == .num,
             't' => v.tag == .str,
-            'v' => v.tag == .vec and !v.p.v.closure,
+            'v' => v.tag == .vec and !v.p.v.closure and !v.p.v.map,
+            // v0.67 (D79): a map, and a vector is no map
+            'm' => v.tag == .vec and v.p.v.map,
             // v0.64 (D76): an object is no record, and a record holds the r letter alone
             'o' => v.tag == .obj and v.p.o.rec == 0,
             'r' => v.tag == .obj and v.p.o.rec != 0,
@@ -3964,6 +3976,7 @@ pub const VM = struct {
             'v' => "vectors",
             'o' => "objects",
             'r' => "records",
+            'm' => "maps",
             'h' => "handles",
             else => "values",
         };
@@ -3980,6 +3993,7 @@ pub const VM = struct {
             'v' => "a vector",
             'o' => "an object",
             'r' => "a record",
+            'm' => "a map",
             'h' => "a handle",
             'e' => "an error",
             else => "a value",
@@ -4398,6 +4412,14 @@ pub const VM = struct {
                 printDec(v.p.d, end),
             .str => outPrint("{s}{s}", .{ v.p.s.ptr[0..v.p.s.len], end }),
             .vec => {
+                // v0.67 (D79): .haro code prints a map as it is written
+                if (v.p.v.map and self.say_haro) {
+                    var acc = std.ArrayListUnmanaged(u8){};
+                    defer acc.deinit(self.alloc);
+                    self.inlineText(&acc, v, 0);
+                    outPrint("{s}{s}", .{ acc.items, end });
+                    return;
+                }
                 // Ring lists one element per line under both forms, a nested
                 // list's in place -- and `?` then ENDS the list with its own
                 // newline, a blank line after it; `see` adds none, and `? []`
@@ -4621,6 +4643,186 @@ pub const VM = struct {
     /// v0.65 (D77): a value as the code at `pc` reads it -- in .ring code a decimal is Ring's number, the float nearest it
     inline fn ringNum(self: *VM, v: Value, pc: u32) Value {
         return if (v.tag == .dec and !self.strictAt(pc)) Value.num(asF64(v)) else v;
+    }
+
+    /// v0.67 (D79): a map's key is a text or an integer -- the error that says otherwise, or null
+    fn mapKeyFault(self: *VM, k: Value) ?[]const u8 {
+        if (k.tag == .str or k.tag == .int) return null;
+        return self.haroMsg("Error (KEY_TYPE) : a map's key is a text or an integer, and this is {s}", .{typeArticle(k)});
+    }
+
+    fn mapKeyEq(a: Value, b: Value) bool {
+        if (a.tag == .int and b.tag == .int) return a.p.i == b.p.i;
+        if (a.tag == .str and b.tag == .str) return std.mem.eql(u8, a.p.s.ptr[0..a.p.s.len], b.p.s.ptr[0..b.p.s.len]);
+        return false;
+    }
+
+    fn mapFind(v: *Vec, k: Value) ?u32 {
+        var i: u32 = 0;
+        while (i < v.len) : (i += 1) {
+            const pr = v.ptr[i];
+            if (pr.tag == .vec and pr.p.v.len >= 1 and mapKeyEq(pr.p.v.ptr[0], k)) return i;
+        }
+        return null;
+    }
+
+    /// the value the key holds, none when it holds none; null with the error pending
+    noinline fn mapRead(self: *VM, v: *Vec, k: Value) ?Value {
+        if (self.mapKeyFault(k)) |e| {
+            self.pending = e;
+            return null;
+        }
+        const i = mapFind(v, k) orelse return Value.none();
+        return v.ptr[i].p.v.ptr[1];
+    }
+
+    /// the key added with its value, or its value replaced; false with the error pending
+    noinline fn mapWrite(self: *VM, v: *Vec, k: Value, nv: Value) bool {
+        if (self.mapKeyFault(k)) |e| {
+            self.pending = e;
+            return false;
+        }
+        if (mapFind(v, k)) |i| {
+            const pair = v.ptr[i].p.v;
+            retain(nv);
+            self.release(pair.ptr[1]);
+            pair.ptr[1] = nv;
+            return true;
+        }
+        const pair = self.newVec(2);
+        self.vecPushB(pair, k, true);
+        self.vecPushB(pair, nv, true);
+        self.vecPushB(v, Value.vec(pair), true);
+        return true;
+    }
+
+    noinline fn mapDel(self: *VM, v: *Vec, k: Value) bool {
+        if (self.mapKeyFault(k)) |e| {
+            self.pending = e;
+            return false;
+        }
+        const i = mapFind(v, k) orelse return true;
+        self.release(v.ptr[i]);
+        var j = i;
+        while (j + 1 < v.len) : (j += 1) v.ptr[j] = v.ptr[j + 1];
+        v.len -= 1;
+        return true;
+    }
+
+    /// a new map from pairs [k, v] -- a key held once; null with the error pending
+    noinline fn mapOfPairs(self: *VM, src: *Vec) ?Value {
+        const m = self.newVec(if (src.len == 0) 8 else src.len);
+        m.map = true;
+        var i: u32 = 0;
+        while (i < src.len) : (i += 1) {
+            const pr = src.ptr[i];
+            if (pr.tag != .vec or pr.p.v.len != 2) {
+                self.pending = self.haroMsg("Error (TYPE_LETTER) : a map is made of [key, value] pairs, and item {d} is {s}", .{ i + 1, typeArticle(pr) });
+                return null;
+            }
+            const k = pr.p.v.ptr[0];
+            if (self.mapKeyFault(k)) |e| {
+                self.pending = e;
+                return null;
+            }
+            if (mapFind(m, k) != null) {
+                self.pending = self.dupKey(k);
+                return null;
+            }
+            _ = self.mapWrite(m, k, pr.p.v.ptr[1]);
+        }
+        return Value.vec(m);
+    }
+
+    fn dupKey(self: *VM, k: Value) []const u8 {
+        if (k.tag == .int) return self.haroMsg("Error (DUPLICATE_KEY) : the map holds the key {d} once", .{k.p.i});
+        return self.haroMsg("Error (DUPLICATE_KEY) : the map holds the key \"{s}\" once", .{k.p.s.ptr[0..k.p.s.len]});
+    }
+
+    /// v0.67 (D79): a value written inline, as a .haro literal writes it -- a map's keys and values, a text in quotes
+    fn inlineText(self: *VM, acc: *std.ArrayListUnmanaged(u8), v: Value, depth: u32) void {
+        var nb: [400]u8 = undefined;
+        switch (v.tag) {
+            .str => {
+                acc.append(self.alloc, '"') catch @panic("oom");
+                acc.appendSlice(self.alloc, v.p.s.ptr[0..v.p.s.len]) catch @panic("oom");
+                acc.append(self.alloc, '"') catch @panic("oom");
+            },
+            .int, .dec => acc.appendSlice(self.alloc, numText(v, &nb)) catch @panic("oom"),
+            .num => acc.appendSlice(self.alloc, floatText(v.p.d, &nb)) catch @panic("oom"),
+            .boolean => acc.appendSlice(self.alloc, if (v.p.i != 0) "true" else "false") catch @panic("oom"),
+            .vec => {
+                const vv = v.p.v;
+                if (depth > 16) return acc.appendSlice(self.alloc, "[...]") catch @panic("oom");
+                acc.append(self.alloc, '[') catch @panic("oom");
+                if (vv.map and vv.len == 0) acc.append(self.alloc, ':') catch @panic("oom");
+                var i: u32 = 0;
+                while (i < vv.len) : (i += 1) {
+                    if (i > 0) acc.appendSlice(self.alloc, ", ") catch @panic("oom");
+                    if (vv.map) {
+                        const pr = vv.ptr[i].p.v;
+                        self.inlineText(acc, pr.ptr[0], depth + 1);
+                        acc.appendSlice(self.alloc, ": ") catch @panic("oom");
+                        self.inlineText(acc, pr.ptr[1], depth + 1);
+                    } else self.inlineText(acc, vv.ptr[i], depth + 1);
+                }
+                acc.append(self.alloc, ']') catch @panic("oom");
+            },
+            .nil => acc.appendSlice(self.alloc, "none") catch @panic("oom"),
+            else => acc.appendSlice(self.alloc, typeArticle(v)) catch @panic("oom"),
+        }
+    }
+
+    /// v0.67 (D79): the map built-ins, one helper out of the run loop
+    noinline fn mapBuiltin(self: *VM, which: Builtin, a: []Value) ?Value {
+        const x = a[0];
+        if (which == .mapof1) {
+            if (x.tag != .vec) {
+                self.pending = BADPARAM;
+                return null;
+            }
+            const src = x.p.v;
+            const m = self.newVec(if (src.len == 0) 8 else src.len / 2);
+            m.map = true;
+            var i: u32 = 0;
+            while (i + 1 < src.len) : (i += 2) {
+                const k = src.ptr[i];
+                if (self.mapKeyFault(k)) |e| {
+                    self.pending = e;
+                    return null;
+                }
+                if (mapFind(m, k) != null) {
+                    self.pending = self.dupKey(k);
+                    return null;
+                }
+                _ = self.mapWrite(m, k, src.ptr[i + 1]);
+            }
+            return Value.vec(m);
+        }
+        if (x.tag != .vec or !x.p.v.map) {
+            self.pending = self.haroMsg("Error (TYPE_LETTER) : a map is asked for, and this is {s}", .{typeArticle(x)});
+            return null;
+        }
+        const m = x.p.v;
+        switch (which) {
+            .keys1, .values1 => {
+                const out = self.newVec(if (m.len == 0) 8 else m.len);
+                var i: u32 = 0;
+                while (i < m.len) : (i += 1) self.vecPushB(out, m.ptr[i].p.v.ptr[if (which == .keys1) 0 else 1], true);
+                return Value.vec(out);
+            },
+            .haskey2 => {
+                if (self.mapKeyFault(a[1])) |e| {
+                    self.pending = e;
+                    return null;
+                }
+                return Value.int(@intFromBool(mapFind(m, a[1]) != null));
+            },
+            else => {
+                self.pending = BADPARAM;
+                return null;
+            },
+        }
     }
 
     /// v0.66 (D78): a float's text in .haro code -- the shortest that reads back the same; a whole one without a point, as before
@@ -5882,6 +6084,13 @@ pub const VM = struct {
                     self.pending = BADPARAM;
                     continue :dispatch .raise;
                 }
+                // v0.67 (D79): a map read by key in .haro code -- none when the key is not held
+                if (vv.p.v.map and self.strictAt(pc)) {
+                    const got = self.mapRead(vv.p.v, iv) orelse continue :dispatch .raise;
+                    self.setRegB(base + in.a, got, in.d != 0);
+                    pc += 1;
+                    continue :dispatch code[pc].op;
+                }
                 // A STRING index on a list is a keyed lookup -- decided at
                 // run time, which is the map type's dynamic path and the one
                 // panic the sweep left in place. hget's operands sit in the
@@ -5906,6 +6115,12 @@ pub const VM = struct {
                 const in = code[pc];
                 const vv = regs[base + in.a];
                 const iv = regs[base + in.b];
+                // v0.67 (D79): a map written by key in .haro code -- the key added, or its value replaced
+                if (vv.tag == .vec and vv.p.v.map and self.strictAt(pc)) {
+                    if (!self.mapWrite(self.cowFor(base + in.a, vv), iv, regs[base + in.c])) continue :dispatch .raise;
+                    pc += 1;
+                    continue :dispatch code[pc].op;
+                }
                 if (vv.tag == .str) {
                     // v0.44 (HARO-PORTED-FINDINGS-01 (2)): `s[i] = c` as Ring writes it, in a .ring file; a .haro file refuses it
                     if (self.textLetter(pc, base + in.a, vv, iv, regs[base + in.c], (in.d & 2) != 0)) |e| {
@@ -6064,6 +6279,7 @@ pub const VM = struct {
                 // v0.65 (D77): .ring code prints a decimal as Ring prints a number, an item of a list too
                 const pv = regs[base + in.a];
                 const strict_say = (pv.tag == .dec or pv.tag == .num or pv.tag == .vec or pv.tag == .obj) and self.strictAt(pc);
+                // (v0.67: a map is printed whole, as written, so the flag reaches it)
                 self.say_ring = (pv.tag == .dec or pv.tag == .vec or pv.tag == .obj) and !strict_say;
                 // v0.66 (D78): .haro code writes a float as its shortest exact text, and no setting reaches it
                 self.say_haro = strict_say;
@@ -6142,6 +6358,13 @@ pub const VM = struct {
                     self.pending = BADPARAM;
                     continue :dispatch .raise;
                 }
+                // v0.67 (D79): a map read by key in .haro code
+                if (cv.p.v.map and self.strictAt(pc)) {
+                    const got = self.mapRead(cv.p.v, kv) orelse continue :dispatch .raise;
+                    self.setRegB(base + in.a, got, in.d != 0);
+                    pc += 1;
+                    continue :dispatch code[pc].op;
+                }
                 const at = self.hfindFast(cv.p.v, kv.p.s);
                 if (at) |i| {
                     self.setRegB(base + in.a, cv.p.v.ptr[i].p.v.ptr[1], in.d != 0);
@@ -6161,6 +6384,12 @@ pub const VM = struct {
                 if (cv.tag != .vec or kv.tag != .str) {
                     self.pending = BADPARAM;
                     continue :dispatch .raise;
+                }
+                // v0.67 (D79): a map written by key in .haro code
+                if (cv.p.v.map and self.strictAt(pc)) {
+                    if (!self.mapWrite(self.cowFor(base + in.a, cv), kv, regs[base + in.c])) continue :dispatch .raise;
+                    pc += 1;
+                    continue :dispatch code[pc].op;
                 }
                 const v = self.cowFor(base + in.a, cv);
                 const nv = regs[base + in.c];
@@ -6288,6 +6517,12 @@ pub const VM = struct {
                 if (cv.tag != .vec) {
                     self.pending = BADPARAM;
                     continue :dispatch .raise;
+                }
+                // v0.67 (D79): Del(mX, k) removes the key, when the map holds it
+                if (cv.p.v.map and self.strictAt(pc)) {
+                    if (!self.mapDel(self.cowFor(base + in.a, cv), regs[base + in.b])) continue :dispatch .raise;
+                    pc += 1;
+                    continue :dispatch code[pc].op;
                 }
                 // A position that is not a number -- a numeric string
                 // included -- is Ring's "Bad parameter type!", catchable
@@ -7147,6 +7382,10 @@ pub const VM = struct {
                     // v0.66 (D78): Haro's numbers
                     .text2, .round1, .round2, .integerpart1, .decimalpart1, .decimals1h, .digits1, .abs1, .sign1, .clamp3, .fromhex1 => {
                         out = self.numBuiltin(which, regs[A..]) orelse continue :dispatch .raise;
+                    },
+                    // v0.67 (D79): maps
+                    .mapof1, .keys1, .values1, .haskey2 => {
+                        out = self.mapBuiltin(which, regs[A..]) orelse continue :dispatch .raise;
                     },
                     .isnull => out = Value.int(switch (regs[A].tag) {
                         .nil => @as(i64, 1),
@@ -8980,6 +9219,13 @@ pub const VM = struct {
                 // this, not vget, is the map type's real front door. A
                 // string index on a list is a keyed lookup; hget's operands
                 // sit in the same registers.
+                // v0.67 (D79): a map read by key in .haro code, an integer key included
+                if (cv.tag == .vec and cv.p.v.map and self.strictAt(pc)) {
+                    const got = self.mapRead(cv.p.v, iv) orelse continue :dispatch .raise;
+                    self.setRegB(base + in.a, got, in.d != 0);
+                    pc += 1;
+                    continue :dispatch code[pc].op;
+                }
                 if (iv.tag == .str and cv.tag == .vec) continue :dispatch .hget;
                 // `o[i]` and `o[:key]` on an OBJECT: operator("[]", i)
                 if (cv.tag == .obj) {
@@ -9145,6 +9391,12 @@ pub const VM = struct {
                         v = dv;
                     }
                 }
+                // v0.67 (D79, TYPES.md section 6): an m parameter given a list of pairs by a .ring caller holds the map they make
+                if (in.c == 1 and in.b == 'm' and v.tag == .vec and !v.p.v.map and fsp > 0 and !self.strictAt(self.frames[fsp - 1].ret_pc -| 1)) {
+                    const mv = self.mapOfPairs(v.p.v) orelse continue :dispatch .raise;
+                    self.setRegB(base + in.a, mv, true);
+                    v = mv;
+                }
                 // HARO-RINGBOUNDARY-BOOL-02 (TYPES.md section 6): a parameter's check at its function's entry (c = 1). A b parameter given
                 // 1 or 0 by a call from a .ring file holds true or false: the classic Ring surface's booleans are its integers. A .haro
                 // caller's 1 stays refused.
@@ -9175,7 +9427,8 @@ pub const VM = struct {
                     'd' => v.tag == .dec,
                     'f' => v.tag == .num,
                     't' => v.tag == .str,
-                    'v' => v.tag == .vec and !v.p.v.closure,
+                    'v' => v.tag == .vec and !v.p.v.closure and !v.p.v.map,
+                    'm' => v.tag == .vec and v.p.v.map,
                     'o' => v.tag == .obj and v.p.o.rec == 0,
                     'r' => v.tag == .obj and v.p.o.rec != 0,
                     'h' => v.tag == .cptr or v.tag == .dll,

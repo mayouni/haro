@@ -1,9 +1,9 @@
 f()
 func f
 	xRows = 5
-	mIndex = "k"
+	kIndex = "k"
 	sUser = [1]
 	? xRows
-	? mIndex
+	? kIndex
 	? Len(sUser)
 end

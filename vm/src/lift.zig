@@ -560,7 +560,10 @@ const Open = struct { def: bool, row: u32, head_end: u32, name: []const u8, brac
 /// v0.58 (D70, TYPES.md T5): what the token pass found of absence in a .haro file -- the rows that end with `maybe` (a definition's
 /// header, or an attribute's declaration), blanked for the parser; and the place (row, column) of each `else` that resolves a maybe,
 /// given to the parser as `or`, which the compiler then reads as the resolution
-pub const Marks = struct { maybe_rows: []const u32 = &.{}, else_at: []const [2]u32 = &.{}, record_rows: []const u32 = &.{} };
+pub const Marks = struct { maybe_rows: []const u32 = &.{}, else_at: []const [2]u32 = &.{}, record_rows: []const u32 = &.{}, map_at: []const [2]u32 = &.{} };
+
+/// v0.67 (D79): an open bracket the scan is inside, and whether it is a map's
+const Br = struct { ch: u8, row: u32, col: u32, map: bool = false };
 
 /// the marks of each .haro file read, by its name
 pub var marks: std.StringHashMapUnmanaged(Marks) = .{};
@@ -612,6 +615,16 @@ fn bracesText(alloc: std.mem.Allocator, src: []const u8, name: []const u8) ?Brac
     defer records.deinit(alloc);
     var record_rows = std.ArrayListUnmanaged(u32){};
     defer record_rows.deinit(alloc);
+    // v0.67 (D79): a map literal -- each `:` between a key and its value given as `,`, the empty map's `:` as a blank, each map's `[` kept
+    var brackets = std.ArrayListUnmanaged(Br){};
+    defer brackets.deinit(alloc);
+    var map_commas = std.ArrayListUnmanaged(u32){};
+    defer map_commas.deinit(alloc);
+    var map_blanks = std.ArrayListUnmanaged(u32){};
+    defer map_blanks.deinit(alloc);
+    var map_at = std.ArrayListUnmanaged([2]u32){};
+    defer map_at.deinit(alloc);
+    var line_start: usize = 0;
     var fault: ?Fault = null;
     const n = src.len;
     var i: usize = 0;
@@ -624,6 +637,7 @@ fn bracesText(alloc: std.mem.Allocator, src: []const u8, name: []const u8) ?Brac
             row += 1;
             prev = '\n';
             i += 1;
+            line_start = i;
             continue;
         }
         if (ch == ' ' or ch == '\t' or ch == '\r') {
@@ -652,6 +666,25 @@ fn bracesText(alloc: std.mem.Allocator, src: []const u8, name: []const u8) ?Brac
             continue;
         }
         if (!wordByte(ch) and ch != '$' and ch != '@') {
+            // v0.67 (D79): brackets, and the `:` of a map literal
+            if (ch == '[' or ch == '(' or ch == '{') {
+                brackets.append(alloc, .{ .ch = ch, .row = row, .col = @intCast(i - line_start) }) catch return null;
+            } else if (ch == ']' or ch == ')' or ch == '}') {
+                _ = brackets.pop();
+            } else if (ch == ':' and brackets.items.len > 0 and brackets.items[brackets.items.len - 1].ch == '[') {
+                const top = &brackets.items[brackets.items.len - 1];
+                var q = i + 1;
+                while (q < n and (src[q] == ' ' or src[q] == '\t')) q += 1;
+                const empty = prev == '[' and q < n and src[q] == ']';
+                const after_key = prev == '"' or prev == '\'' or prev == '`' or prev == 'a' or prev == ')' or prev == ']';
+                if (empty or after_key) {
+                    (if (empty) map_blanks else map_commas).append(alloc, @intCast(i)) catch return null;
+                    if (!top.map) {
+                        top.map = true;
+                        map_at.append(alloc, .{ top.row, top.col }) catch return null;
+                    }
+                }
+            }
             // a block opened with a brace on its own line is closed by a brace (the compiler refuses both, naming `end`)
             if (ch == '{') {
                 if (stack.items.len > 0 and !stack.items[stack.items.len - 1].def and stack.items[stack.items.len - 1].row == row)
@@ -820,15 +853,17 @@ fn bracesText(alloc: std.mem.Allocator, src: []const u8, name: []const u8) ?Brac
     }
     if (keep) _ = faults.remove(name);
     if (keep) {
-        if (maybe_rows.items.len > 0 or else_at.items.len > 0 or record_rows.items.len > 0) {
+        if (maybe_rows.items.len > 0 or else_at.items.len > 0 or record_rows.items.len > 0 or map_at.items.len > 0) {
             marks.put(std.heap.page_allocator, name, .{
                 .maybe_rows = std.heap.page_allocator.dupe(u32, maybe_rows.items) catch &.{},
                 .else_at = std.heap.page_allocator.dupe([2]u32, else_at.items) catch &.{},
                 .record_rows = std.heap.page_allocator.dupe(u32, record_rows.items) catch &.{},
+                .map_at = std.heap.page_allocator.dupe([2]u32, map_at.items) catch &.{},
             }) catch {};
         } else _ = marks.remove(name);
     }
-    if (heads.items.len == 0 and prints.items.len == 0 and maybes.items.len == 0 and elses.items.len == 0) return null;
+    if (heads.items.len == 0 and prints.items.len == 0 and maybes.items.len == 0 and elses.items.len == 0 and map_commas.items.len == 0 and
+        map_blanks.items.len == 0) return null;
     // the text: ` {` after each header, `}` for each definition's `end` -- the inserts in file order
     std.mem.sort(u32, heads.items, {}, std.sort.asc(u32));
     const text = alloc.alloc(u8, n + 2 * heads.items.len) catch return null;
@@ -876,6 +911,21 @@ fn bracesText(alloc: std.mem.Allocator, src: []const u8, name: []const u8) ?Brac
             if (h <= e) shift += 2;
         }
         @memcpy(text[e + shift .. e + shift + 4], "or  ");
+    }
+    // v0.67: a map literal's `:` given as `,`, the empty map's as a blank
+    for (map_commas.items) |e| {
+        var shift: usize = 0;
+        for (heads.items) |h| {
+            if (h <= e) shift += 2;
+        }
+        text[e + shift] = ',';
+    }
+    for (map_blanks.items) |e| {
+        var shift: usize = 0;
+        for (heads.items) |h| {
+            if (h <= e) shift += 2;
+        }
+        text[e + shift] = ' ';
     }
     // v0.64: `record` given to the parser as `class `
     for (records.items) |e| {

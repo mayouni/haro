@@ -377,6 +377,10 @@ pub const pascal = [_][2][]const u8{
     .{ "sign", "Sign" },
     .{ "clamp", "Clamp" },
     .{ "fromhex", "FromHex" },
+    // v0.67 (D79, HARO-MAP-01): maps
+    .{ "keys", "Keys" },
+    .{ "values", "Values" },
+    .{ "haskey", "HasKey" },
 };
 
 /// The spelling a .haro file writes for the native registered as `low` (lowercase, underscores as registered), or null for no native

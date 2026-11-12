@@ -126,6 +126,23 @@
    "stdout": "1\n"
   },
   {
+   "id": "G15",
+   "kind": "run",
+   "line": "M1",
+   "why": "a write adds a key in its exact case, and an integer key",
+   "file": "cases/G15.haro",
+   "stdout": "2\n2\ne\n"
+  },
+  {
+   "id": "G16",
+   "kind": "run",
+   "line": "M5",
+   "why": "a map literal given to a v name is refused when compiling",
+   "file": "cases/G16.haro",
+   "stdout": "before\n\nLine 4 Haro refused this statement (v is the letter of a vector, and this literal is a map; written `vX`, line 4 of G16.haro) and did not compile it -- running past it would give a wrong answer \nIn function f() in file G16.haro\n\nCalled from line 2 in file G16.haro ",
+   "exit": 1
+  },
+  {
    "id": "G14",
    "kind": "run",
    "line": "M11",

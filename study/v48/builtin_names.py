@@ -71,6 +71,7 @@ web_wait Web-Wait | systemcmd System-Cmd
 decimal Decimal | divide Divide | float Float | integer Integer | near Near
 text Text | round Round | integerpart Integer-Part | decimalpart Decimal-Part | digits Digits | abs Abs | sign Sign | clamp Clamp
 fromhex From-Hex
+keys Keys | values Values | haskey Has-Key
 """
 
 

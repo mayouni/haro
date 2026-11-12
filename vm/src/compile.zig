@@ -98,6 +98,10 @@ const builtin_table = [_]BuiltinEntry{
     .{ .name = "sign", .id = .sign1, .argc = 1 },
     .{ .name = "clamp", .id = .clamp3, .argc = 3 },
     .{ .name = "fromhex", .id = .fromhex1, .argc = 1 },
+    // v0.67 (D79, HARO-MAP-01): maps, a .haro file's only
+    .{ .name = "keys", .id = .keys1, .argc = 1 },
+    .{ .name = "values", .id = .values1, .argc = 1 },
+    .{ .name = "haskey", .id = .haskey2, .argc = 2 },
     .{ .name = "read", .id = .readf, .argc = 1 },
     .{ .name = "write", .id = .writef, .argc = 2 },
     .{ .name = "LoadLib", .id = .loadlib, .argc = 1 },
@@ -270,6 +274,7 @@ fn haroOnlyBuiltin(id: vm.Builtin) bool {
     return switch (id) {
         .float1, .decimal1, .decimal2, .integer1, .divide3, .near3, .isempty1 => true,
         .text2, .round1, .round2, .integerpart1, .decimalpart1, .decimals1h, .digits1, .abs1, .sign1, .clamp3, .fromhex1 => true,
+        .mapof1, .keys1, .values1, .haskey2 => true,
         else => false,
     };
 }
@@ -1918,7 +1923,7 @@ pub const BlockSite = struct {
 };
 
 const R_GLOBAL = "within needs a global (D52 A2)";
-const R_PAIR = "`:key = value` is no pair in a .haro file: write [:key, value] for a pair, or declare a record for named fields (HARO-SURFACE-01)";
+const R_PAIR = "`:key = value` is no pair in a .haro file: write [\"key\": value] for a map, [:key, value] for a pair, or declare a record for named fields (HARO-SURFACE-01)";
 const R_BARE = "within or using without its block (D52)";
 const R_CLAUSE = "within or using with a catch of its own (D52)";
 const R_CLASS = "using a class that answers none of Release, Destroy, Close (D52 A3)";
@@ -3018,7 +3023,28 @@ pub const Compiler = struct {
             return if ((kinds & (if (method) @as(u8, 2) else 1)) != 0) name else null;
         }
         if (std.mem.eql(u8, k, "identifier") and self.cur.owner != null and self.maybe_attrs.contains(n.text())) return n.text();
+        // v0.67 (D79): a read of a map -- an m name subscripted -- may find nothing
+        if (self.mapRead(n)) return n.text();
         return null;
+    }
+
+    /// v0.67 (D79): `n` reads a map by key: an m name, written in a .haro file, subscripted
+    fn mapRead(self: *Compiler, n: ts.Node) bool {
+        if (!std.mem.eql(u8, n.kind(), "subscript_expression") or n.namedChildCount() < 2) return false;
+        const o = n.namedChild(0);
+        if (!std.mem.eql(u8, o.kind(), "identifier")) return false;
+        const l = Compiler.letterOf(o.text()) orelse return false;
+        return l == 'm' and self.haroNode(n);
+    }
+
+    /// v0.67 (D79): the list literal at `n` is a map's -- the lift kept its `[`
+    fn mapAt(self: *Compiler, n: ts.Node) bool {
+        const m = self.marksOf(n) orelse return false;
+        const s = n.start();
+        for (m.map_at) |x| {
+            if (x[0] == s.row and x[1] == s.col) return true;
+        }
+        return false;
     }
 
     /// v0.58: a statement's absence -- `none` only where a maybe is declared, a maybe resolved where it lands, `else` only after a maybe
@@ -3054,6 +3080,8 @@ pub const Compiler = struct {
             const alone = std.mem.eql(u8, pk, "expression_statement");
             if (!assigned and !returned and !alone) {
                 // the name as written, for the refusal's line
+                // v0.67 (D79): a map's read, in its own words
+                if (self.mapRead(n)) return self.spellSet(n.text(), "a map's read may find nothing -- resolve it where it lands: x = E else D; written");
                 const f = if (std.mem.eql(u8, k, "call_expression")) n.namedChild(0) else n;
                 const use = if (std.mem.eql(u8, f.kind(), "member_expression")) f.namedChild(f.namedChildCount() - 1).text() else nm;
                 return self.spellSet(use, R_MAYBE);
@@ -4520,6 +4548,8 @@ pub const Compiler = struct {
             return;
         }
         if (std.mem.eql(u8, k, "list_literal")) {
+            // v0.67 (D79): a map literal -- the lift gave its keys and values as one flat list; Haro makes the map of it, at the end
+            const lit_map = self.haroNode(n) and self.mapAt(n);
             // Exact capacity. A literal knows how many elements it has, and
             // the default of 8 gave every [key, value] pair six empty slots
             // -- 96 bytes of slack on a 32-byte payload, which at 200,000
@@ -4578,6 +4608,13 @@ pub const Compiler = struct {
                     if (self.needsCopy(el)) _ = try self.emit(.copyv, t, 0, 0, 0);
                 }
                 _ = try self.emit(.vpush, dst, t, 1, 0);
+            }
+            if (lit_map) {
+                const save9 = self.temp;
+                defer self.temp = save9;
+                const flat = try self.tmp();
+                _ = try self.emit(.move, flat, dst, 1, 0);
+                _ = try self.emit(.bcall, dst, flat, 1, @intFromEnum(vm.Builtin.mapof1));
             }
             return;
         }
@@ -5986,7 +6023,7 @@ pub const Compiler = struct {
         const yes_no = [_][]const u8{ "isalnum", "isalpha", "isandroid", "isattribute", "iscfunction", "isclass", "iscntrl", "isdigit", "isfreebsd",
             "isfunction", "isglobal", "isgraph", "islinux", "islist", "islocal", "islower", "ismacosx", "ismethod", "ismsdos", "isnull", "isnumber",
             "isobject", "ispackage", "ispackageclass", "ispointer", "isprint", "isprivateattribute", "isprivatemethod", "ispunct", "isspace",
-            "isstring", "isunix", "isupper", "iswindows", "iswindows64", "isxdigit", "fexists", "direxists", "feof", "near", "isempty" };
+            "isstring", "isunix", "isupper", "iswindows", "iswindows64", "isxdigit", "fexists", "direxists", "feof", "near", "isempty", "haskey" };
         for (yes_no) |w| {
             if (std.ascii.eqlIgnoreCase(name, w)) return self.findFunc(name) == null;
         }
@@ -7304,7 +7341,7 @@ pub const Compiler = struct {
     // refused when compiling (the statement's fault, as a misspelling is); any other value given a checked letter is checked where
     // it is given, by `lchk`. A .ring file is untouched.
     const LETTERS = "bidfntxkvmroehswa";
-    const CHECKED = "bidntfvoher";
+    const CHECKED = "bidntfvoherm";
 
     fn letterCore(name: []const u8) []const u8 {
         return if (name.len > 0 and (name[0] == '$' or name[0] == '@')) name[1..] else name;
@@ -7354,6 +7391,7 @@ pub const Compiler = struct {
             'v' => "a vector",
             'o' => "an object",
             'r' => "a record",
+            'm' => "a map",
             'h' => "a handle",
             else => "a value",
         };
@@ -7435,7 +7473,8 @@ pub const Compiler = struct {
             if (std.mem.eql(u8, cn.kind(), "call_expression")) cn = cn.namedChild(0);
             if (self.findClassQ(cn.text())) |ci| if (ci.is_record) return false;
         }
-        const lit = literalLetter(rhs) orelse return false;
+        // v0.67 (D79): a map literal is a map's
+        const lit: u8 = if (std.mem.eql(u8, rhs.kind(), "list_literal") and self.mapAt(rhs)) 'm' else literalLetter(rhs) orelse return false;
         if (letterTakes(l, lit)) return true;
         if (!self.spellIn(use)) return true;
         const lw: []const u8 = switch (lit) {
@@ -7445,6 +7484,7 @@ pub const Compiler = struct {
             't' => "a text",
             'b' => "a boolean",
             'v' => "a vector",
+            'm' => "a map",
             else => "an object",
         };
         const why = std.fmt.allocPrint(self.alloc, "{c} is the letter of {s}, and this literal is {s}; written", .{ l, letterWordC(l), lw }) catch return true;

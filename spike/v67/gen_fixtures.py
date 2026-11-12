@@ -90,6 +90,15 @@ CASES = [
     ('G13', 'M10', 'a .ring file reads its pair lists as it did',
      ['aL = [["Ada", 1]]', '? aL["ada"]'],
      '1\n', 0),
+    # G15 and G16 ADDED AFTER THE CODE, before the plants, said so: no case wrote a key in another case or an integer key, which the
+    # inherited keyed write treats otherwise, and none gave a map literal to a v name
+    ('G15', 'M1', 'a write adds a key in its exact case, and an integer key',
+     ['mX = [:]', 'mX["Ada"] = 1', 'mX["ada"] = 2', 'print Len(mX)', 'mN = [:]', 'mN[1] = "a"', 'mN[5] = "e"', 'print Len(mN)',
+      'print mN[5] else ""'],
+     '2\n2\ne\n', 0),
+    ('G16', 'M5', 'a map literal given to a v name is refused when compiling',
+     HEAD + [T + 'vX = ["a": 1]', 'end'],
+     refused('G16', 4, 'v is the letter of a vector, and this literal is a map; written', 'vX'), 1),
     ('G14', 'M11', 'the refusal of :key = value names the map',
      HEAD + [T + 'vP = [:a = 1]', 'end'],
      refused('G14', 4, '`:key = value` is no pair in a .haro file: write ["key": value] for a map, [:key, value] for a pair, or declare a '

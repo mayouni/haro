@@ -90,10 +90,11 @@ CASES = [
     ('R12', 'K10', 'a .ring file is untouched: record is a name there',
      ['record = 5', '? record'],
      '5\n', 0),
+    # R13 CHANGED BY v0.67's RULING (D79), said so: the refusal names the map as well
     ('R13', 'K11', 'the refusal of :key = value names the record',
      HEAD + [T + 'vP = [:a = 1]', 'end'],
-     refused('R13', 4, '`:key = value` is no pair in a .haro file: write [:key, value] for a pair, or declare a record for named fields '
-                       '(HARO-SURFACE-01)', ':a = 1'), 1),
+     refused('R13', 4, '`:key = value` is no pair in a .haro file: write ["key": value] for a map, [:key, value] for a pair, or declare a '
+                       'record for named fields (HARO-SURFACE-01)', ':a = 1'), 1),
     # R14 ADDED AFTER THE COURT SPOKE, said so (see R06): an object literal given to an r name is refused when compiling
     ('R14', 'K5', 'an object literal given to an r name is refused when compiling',
      HEAD + [T + 'rX = new P', 'end', 'class P', 'end'],
