@@ -145,6 +145,11 @@ pub fn round(x: Dec, places: u32) Fail!Dec {
     return divRound(x, .{ .c = 1, .s = 0 }, places);
 }
 
+/// v0.66: ten to the power s, for a scale
+pub fn pow10(s: u32) i128 {
+    return POW10[s];
+}
+
 pub fn toF64(x: Dec) f64 {
     return @as(f64, @floatFromInt(x.c)) / @as(f64, @floatFromInt(POW10[x.s]));
 }

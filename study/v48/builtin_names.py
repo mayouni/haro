@@ -69,6 +69,8 @@ releasecode Release-Code | releasefile Release-File | replaceapp Replace-App | r
 tui_done TUI-Done | tui_init TUI-Init | tui_key TUI-Key | tui_size TUI-Size | web_bye Web-Bye | web_done Web-Done | web_serve Web-Serve
 web_wait Web-Wait | systemcmd System-Cmd
 decimal Decimal | divide Divide | float Float | integer Integer | near Near
+text Text | round Round | integerpart Integer-Part | decimalpart Decimal-Part | digits Digits | abs Abs | sign Sign | clamp Clamp
+fromhex From-Hex
 """
 
 

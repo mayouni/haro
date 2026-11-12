@@ -134,12 +134,14 @@ CASES = [
      'before\n\nLine 2 Error (R3) : Calling Function without definition: near \nin file N26.ring ', 1),
     # N27 CHANGED AFTER ITS FIRST PLANT RUN, said so: it asked `fX - 1`, which never folds (a name may hold an object, and a minus
     # beside one is not folded), so plant P23 missed; a float literal on the left of - is what folds into `+ -1`
+    # N27 and N28 CHANGED BY v0.66's RULING (D78), said so: a .haro float is written as its shortest exact text, never with a setting's
+    # two places
     ('N27', 'N5', 'a float\'s operator is named as written; a float is negated', '.haro',
      ['fX = 0.5f', '? -fX', '? 0.5f - 1'],
-     '-0.50\n' + err(3, 'NUMBER_MIX', 'float - integer -- an integer and a float do not mix; convert one: Float(i)', 'N27.haro'), 1),
+     '-0.5\n' + err(3, 'NUMBER_MIX', 'float - integer -- an integer and a float do not mix; convert one: Float(i)', 'N27.haro'), 1),
     ('N28', 'N3', '% on decimals is exact, the dividend\'s sign', '.haro',
      ['? 7.5 % 2', '? -7 % 2.5', '? 7.5f % 2f'],
-     '1.5\n-2.0\n1.50\n', 0),
+     '1.5\n-2.0\n1.5\n', 0),
     ('N29', 'N1', 'a decimal keeps its digits through the compiled image: the second run reads it back', '.haro',
      ['? 12.50', '? 0.005'],
      '12.50\n0.005\n', 0),

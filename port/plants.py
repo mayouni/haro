@@ -122,6 +122,9 @@ PLANTS = [
          "        if v.startswith('_'):")]),
     ('T65', 'H40', 'a name with a leading underscore is respelled as a built-in', [
         ("        if v.startswith('_') or (h is not None", "        if (h is not None")]),
+    # v0.66 (D78)
+    ('T66', 'H41', 'fabs and dec keep their names', [("        if v.lower() in NUMBER_NAMES:", "        if False:")]),
+    ('T67', 'H41', 'a decimals(n) setting is not listed', [("            if h is None or toks[h][0] == 'nl':", "            if False:")]),
     ('T21', 'H17', 'a call through a receiver is respelled', [
         ("        if k != 'id' or v.startswith(('$', '@')) or is_member(toks, i) or is_symbol(toks, i):",
          "        if k != 'id' or v.startswith(('$', '@')) or is_symbol(toks, i):")]),

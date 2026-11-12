@@ -367,6 +367,16 @@ pub const pascal = [_][2][]const u8{
     .{ "integer", "Integer" },
     .{ "near", "Near" },
     .{ "isempty", "IsEmpty" },
+    // v0.66 (D78, HARO-NUMBERS-CORE-01): Haro's numbers
+    .{ "text", "Text" },
+    .{ "round", "Round" },
+    .{ "integerpart", "IntegerPart" },
+    .{ "decimalpart", "DecimalPart" },
+    .{ "digits", "Digits" },
+    .{ "abs", "Abs" },
+    .{ "sign", "Sign" },
+    .{ "clamp", "Clamp" },
+    .{ "fromhex", "FromHex" },
 };
 
 /// The spelling a .haro file writes for the native registered as `low` (lowercase, underscores as registered), or null for no native

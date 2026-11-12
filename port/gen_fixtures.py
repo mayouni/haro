@@ -228,6 +228,12 @@ CASES = [
       ("'? _Number()' in applied['main.haro'] and 'func _Number' in applied['main.haro']", True),
       # a bare call of an underscore method, no top-level function of its name: added after plant T65 missed, said so
       ("'return _Len() * 2' in applied['main.haro']", True)]),
+    # v0.66 (D78, HARO-NUMBERS-CORE-01), before its code: fabs is Abs, dec is FromHex, and a decimals(n) setting -- which Haro has none
+    # of -- is listed for its writer, who moves the places to the values written
+    ('H41', 'N', 'fabs is Abs, dec is FromHex, and a decimals(n) setting is listed for its writer', {
+        'main.ring': ['? fabs(-2)', '? dec("ff")', 'decimals(3)', '? 1/3']},
+     [("'? Abs(-2)' in applied['main.haro'] and '? FromHex(\"ff\")' in applied['main.haro']", True),
+      ("any(r['old'] == 'decimals(3)' and 'Text(x, iPlaces)' in r['why'] for r in plan['refused'])", True)]),
     ('H11', '-', 'the ported tree runs on haro and prints what the classic Ring surface printed', {
         'main.ring': ['load "lib.ring"', 'cName = Greet("ada")', '? cName', '? Len(cName)'],
         'lib.ring': ['func Greet cWho', T + 'cOut = "hi " + cWho', T + 'return cOut']},

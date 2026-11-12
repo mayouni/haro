@@ -864,6 +864,25 @@
    ]
   },
   {
+   "id": "H41",
+   "line": "N",
+   "why": "fabs is Abs, dec is FromHex, and a decimals(n) setting is listed for its writer",
+   "folder": "cases/H41",
+   "files": [
+    "main.ring"
+   ],
+   "asserts": [
+    [
+     "'? Abs(-2)' in applied['main.haro'] and '? FromHex(\"ff\")' in applied['main.haro']",
+     true
+    ],
+    [
+     "any(r['old'] == 'decimals(3)' and 'Text(x, iPlaces)' in r['why'] for r in plan['refused'])",
+     true
+    ]
+   ]
+  },
+  {
    "id": "H11",
    "line": "-",
    "why": "the ported tree runs on haro and prints what the classic Ring surface printed",

@@ -51,6 +51,8 @@ const builtin_table = [_]BuiltinEntry{
     .{ .name = "isnull", .id = .isnull, .argc = 1 },
     .{ .name = "string", .id = .string, .argc = 1 },
     .{ .name = "type", .id = .typeof, .argc = 1 },
+    // v0.66 (D78): in a .haro file Decimals(x) is the digits after the point -- ahead of the classic setter, which a .haro file never reaches
+    .{ .name = "decimals", .id = .decimals1h, .argc = 1 },
     .{ .name = "decimals", .id = .decimals, .argc = 1 },
     .{ .name = "find", .id = .find2, .argc = 2 },
     .{ .name = "find", .id = .find3, .argc = 3 },
@@ -85,6 +87,17 @@ const builtin_table = [_]BuiltinEntry{
     .{ .name = "divide", .id = .divide3, .argc = 3 },
     .{ .name = "near", .id = .near3, .argc = 3 },
     .{ .name = "isempty", .id = .isempty1, .argc = 1 },
+    // v0.66 (D78, HARO-NUMBERS-CORE-01, NUMBERS.md): Haro's numbers, a .haro file's only
+    .{ .name = "text", .id = .text2, .argc = 2 },
+    .{ .name = "round", .id = .round1, .argc = 1 },
+    .{ .name = "round", .id = .round2, .argc = 2 },
+    .{ .name = "integerpart", .id = .integerpart1, .argc = 1 },
+    .{ .name = "decimalpart", .id = .decimalpart1, .argc = 1 },
+    .{ .name = "digits", .id = .digits1, .argc = 1 },
+    .{ .name = "abs", .id = .abs1, .argc = 1 },
+    .{ .name = "sign", .id = .sign1, .argc = 1 },
+    .{ .name = "clamp", .id = .clamp3, .argc = 3 },
+    .{ .name = "fromhex", .id = .fromhex1, .argc = 1 },
     .{ .name = "read", .id = .readf, .argc = 1 },
     .{ .name = "write", .id = .writef, .argc = 2 },
     .{ .name = "LoadLib", .id = .loadlib, .argc = 1 },
@@ -256,6 +269,7 @@ const builtin_table = [_]BuiltinEntry{
 fn haroOnlyBuiltin(id: vm.Builtin) bool {
     return switch (id) {
         .float1, .decimal1, .decimal2, .integer1, .divide3, .near3, .isempty1 => true,
+        .text2, .round1, .round2, .integerpart1, .decimalpart1, .decimals1h, .digits1, .abs1, .sign1, .clamp3, .fromhex1 => true,
         else => false,
     };
 }
@@ -5533,6 +5547,15 @@ pub const Compiler = struct {
                 return;
             }
         }
+        // v0.66 (D78): two inherited names a .haro file does not write, each refused naming what to write
+        if (self.haroNode(n) and (std.ascii.eqlIgnoreCase(callee, "fabs") or std.ascii.eqlIgnoreCase(callee, "dec"))) {
+            if (self.spellIn(callee)) self.spellSet(callee, if (std.ascii.eqlIgnoreCase(callee, "fabs"))
+                "`FAbs` takes only a float: write Abs(x); written"
+            else
+                "`Dec` reads hex text, and its name says decimal: write FromHex(t); written");
+            _ = try self.emit(.loadk, dst, 0, 0, try self.konstIndex("\"\""));
+            return;
+        }
         var name_seen = false;
         for (table) |bi| {
             if (!std.ascii.eqlIgnoreCase(callee, bi.name)) continue;
@@ -8037,6 +8060,16 @@ pub const Compiler = struct {
     }
 
     fn stmt(self: *Compiler, n: ts.Node) Error!void {
+        // v0.66 (D78): `Decimals(n)` standing as a statement is the classic setting for places, which a .haro file has none of
+        if (std.mem.eql(u8, n.kind(), "expression_statement") and n.namedChildCount() > 0 and
+            std.mem.eql(u8, n.namedChild(0).kind(), "call_expression") and n.namedChild(0).namedChildCount() > 0 and
+            std.mem.eql(u8, n.namedChild(0).namedChild(0).kind(), "identifier") and
+            std.ascii.eqlIgnoreCase(n.namedChild(0).namedChild(0).text(), "decimals") and self.haroNode(n) and
+            self.findFunc(n.namedChild(0).namedChild(0).text()) == null)
+        {
+            if (self.spellIn(n.namedChild(0).text()))
+                self.spellSet(n.namedChild(0).text(), "there is no setting for places in a .haro file: write Text(x, iPlaces) or Round(x, iPlaces); written");
+        }
         if (self.depth > 200) return self.nope(n);
         // F-138: before anything of this statement is begun, so the
         // assignment it is read as is the one statement compiled

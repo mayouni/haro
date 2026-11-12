@@ -21,7 +21,8 @@ THE REWRITES, in this order, each on code only (a string, a comment, a symbol's 
      is a list literal and x otherwise, a parameter keeping its p mark -- one decision for the whole tree; refused, and listed, when the
      new name is in the tree or is another rename's new name (vResult -> xResult and aResult -> xResult: the a name is left)
   Y  a b name given 1 or 0 is given true or false, and a condition on a literal 1 or 0 is on true or false
-  N  (D71) `null` is `""` and `isnull(x)` is `IsEmpty(x)`
+  N  (D71) `null` is `""` and `isnull(x)` is `IsEmpty(x)`; (D78) `fabs` is `Abs`, `dec` is `FromHex`, and a `decimals(n)` statement --
+     a setting for places, which Haro has none of -- is listed for its writer
   O  (D69) see and put: `see E + nl` is `print E`, any other is `FWrite(stdout, E)`
   O  (D67, HARO-ONEFORM-01) one form for each construct: every block ends with `end` (never ok, next, off, done, endX, braces), a
      definition has no end word, one word each (func, elseif, else, case, for, see, give, exit, loop, and, or, not, from), `#` for a
@@ -299,6 +300,27 @@ def port_file(rel, src, tree_funcs, tree_names, c_map, refused):
                     toks[i][1] = want
                     renames.append(('D', v, want))
             continue
+        # v0.66 (D78, NUMBERS.md): fabs is Abs and dec is FromHex; a decimals(n) setting is listed -- Haro has none
+        if v.lower() in NUMBER_NAMES:
+            toks[i][1] = NUMBER_NAMES[v.lower()]
+            renames.append(('N', v, toks[i][1]))
+            continue
+        if v.lower() == 'decimals':
+            h = sig(toks, i, -1)
+            if h is None or toks[h][0] == 'nl':
+                close = i + 1
+                depth = 0
+                while close < len(toks):
+                    if toks[close][1] == '(':
+                        depth += 1
+                    elif toks[close][1] == ')':
+                        depth -= 1
+                        if depth == 0:
+                            break
+                    close += 1
+                refused.append({'file': rel, 'scope': '-', 'old': ''.join(t[1] for t in toks[i:close + 1]), 'new': '',
+                                'why': 'a setting for places: Haro has none -- write Text(x, iPlaces) or Round(x, iPlaces) where a number '
+                                       'is written'})
         want = SPELL.get(v.lower().replace('_', ''))
         if want and want != v:
             toks[i][1] = want
@@ -462,6 +484,8 @@ def port_tree(root, unit=None):
 
 
 LIST_LETTER = {'n': 'i', 'c': 't', 'o': 'o', 'a': 'v'}
+# v0.66 (D78, NUMBERS.md): the inherited number names Haro writes otherwise
+NUMBER_NAMES = {'fabs': 'Abs', 'dec': 'FromHex'}
 
 
 def holds(srcs):

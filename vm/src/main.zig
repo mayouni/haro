@@ -679,7 +679,11 @@ pub var g_decimals: usize = 2;
 /// the scaling is inexact and render stands (decimals(20) then prints
 /// the expansion Ring prints).
 pub fn fmtDecimals(buf: []u8, f: f64) []const u8 {
-    const p = g_decimals;
+    return fmtPlaces(buf, f, g_decimals);
+}
+
+/// v0.66 (D78): fmtDecimals at `p` places asked for, never the process setting -- Text and Round of a float in .haro code
+pub fn fmtPlaces(buf: []u8, f: f64, p: usize) []const u8 {
     if (!std.math.isFinite(f)) {
         return std.fmt.float.render(buf, f, .{ .mode = .decimal, .precision = p }) catch "0";
     }
@@ -1214,6 +1218,18 @@ pub const Builtin = enum(u16) {
     divide3, // Divide(a, b, iPlaces): the quotient rounded half to even
     near3, // Near(fA, fB, fTolerance): |a - b| <= tolerance
     isempty1, // v0.59 (D71): IsEmpty(x) -- 1 for the empty text, 0 for any other value or type
+    // v0.66 (D78, HARO-NUMBERS-CORE-01, NUMBERS.md): Haro's numbers, a .haro file's only
+    text2, // Text(x, iPlaces): exactly iPlaces after the point, half to even
+    round1, // Round(x): the nearest integer, a tie to the even one
+    round2, // Round(x, iPlaces): the same kind, half to even
+    integerpart1, // IntegerPart(x): the integer toward zero
+    decimalpart1, // DecimalPart(x): what follows the point, the same kind and sign
+    decimals1h, // Decimals(x): the digits after the point, a vector of integers
+    digits1, // Digits(x): every digit, a vector of integers
+    abs1, // Abs(x): the absolute value, the same kind
+    sign1, // Sign(x): -1, 0 or 1
+    clamp3, // Clamp(x, lo, hi)
+    fromhex1, // FromHex(t): hex text to its integer
     isnull, // isNull(x)     -> 1 for "" and for the string "NULL" in any case, else 0 (probed on 1.27: 0, [], an object are 0)
     string, // string(x)      -> decimal text of a number
     typeof, // type(x)        -> NUMBER / STRING / LIST / OBJECT, as Ring names them
@@ -1454,6 +1470,7 @@ pub fn builtinRingName(b: Builtin) ?[]const u8 {
         .sysargv, .stdinv, .stdoutv, .stderrv, .catchlast, .bye, .giveline, .eval => null,
         // v0.52: Haro's own, no C function of Ring's: an error inside one names the line alone
         .float1, .decimal1, .decimal2, .integer1, .divide3, .near3, .isempty1 => null,
+        .text2, .round1, .round2, .integerpart1, .decimalpart1, .decimals1h, .digits1, .abs1, .sign1, .clamp3, .fromhex1 => null,
         .copystr => "copy",
         .typeof => "type",
         .find2, .find3, .find4 => "find",
@@ -2292,6 +2309,8 @@ pub const VM = struct {
     globals: []Value = &.{},
     /// v0.65 (D77): the value being printed is printed by .ring code, so a decimal in it is written as Ring's number
     say_ring: bool = false,
+    /// v0.66 (D78): the value being printed is printed by .haro code, so a float in it is written as its shortest exact text
+    say_haro: bool = false,
     /// Armed try/catch handlers, innermost last.
     handlers: []Handler = &.{},
     /// Entry address and frame size per function id, so a closure can be
@@ -4369,7 +4388,11 @@ pub const VM = struct {
             // Ring++ prints the default and does not offer the global.
             // (the bound is Ring's own, +/-(2^53-1), ring.h:120 -- it was
             // 1e15 here, which printed 1e15..2^53 with decimals)
-            .num => if (v.p.d == @trunc(v.p.d) and @abs(v.p.d) <= 9007199254740991.0)
+            // v0.66 (D78): .haro code writes a float as its shortest exact text, and no setting reaches it
+            .num => if (self.say_haro) {
+                var fb: [400]u8 = undefined;
+                outPrint("{s}{s}", .{ floatText(v.p.d, &fb), end });
+            } else if (v.p.d == @trunc(v.p.d) and @abs(v.p.d) <= 9007199254740991.0)
                 outPrint("{d}{s}", .{ @as(i64, @intFromFloat(v.p.d)), end })
             else
                 printDec(v.p.d, end),
@@ -4598,6 +4621,199 @@ pub const VM = struct {
     /// v0.65 (D77): a value as the code at `pc` reads it -- in .ring code a decimal is Ring's number, the float nearest it
     inline fn ringNum(self: *VM, v: Value, pc: u32) Value {
         return if (v.tag == .dec and !self.strictAt(pc)) Value.num(asF64(v)) else v;
+    }
+
+    /// v0.66 (D78): a float's text in .haro code -- the shortest that reads back the same; a whole one without a point, as before
+    pub fn floatText(f: f64, buf: []u8) []const u8 {
+        if (std.math.isFinite(f) and f == @floor(f) and @abs(f) <= 9007199254740991.0)
+            return std.fmt.bufPrint(buf, "{d}", .{@as(i64, @intFromFloat(f))}) catch "0";
+        return std.fmt.bufPrint(buf, "{d}", .{f}) catch "0";
+    }
+
+    /// v0.66 (D78): a float to the nearest integer, a tie to the even one; null past 64 bits or not finite
+    fn floatRoundEven(f: f64) ?i64 {
+        if (!std.math.isFinite(f)) return null;
+        const fl = @floor(f);
+        const d = f - fl;
+        var r = fl;
+        if (d > 0.5) r = fl + 1 else if (d == 0.5) r = if (@mod(fl, 2) == 0) fl else fl + 1;
+        if (@abs(r) >= 9.2e18) return null;
+        return @intFromFloat(r);
+    }
+
+    fn floatWhole(f: f64) ?i64 {
+        if (!std.math.isFinite(f) or @abs(f) >= 9.2e18) return null;
+        return @intFromFloat(f);
+    }
+
+    /// v0.66 (D78): a vector of the decimal digits of `t`, every byte that is a digit
+    fn digitVec(self: *VM, t: []const u8) Value {
+        var n: u32 = 0;
+        for (t) |ch| {
+            if (ch >= '0' and ch <= '9') n += 1;
+        }
+        const v = self.newVec(if (n == 0) 8 else n);
+        var i: u32 = 0;
+        for (t) |ch| {
+            if (ch >= '0' and ch <= '9') {
+                v.ptr[i] = Value.int(ch - '0');
+                i += 1;
+            }
+        }
+        v.len = n;
+        return Value.vec(v);
+    }
+
+    /// v0.66 (D78, HARO-NUMBERS-CORE-01, NUMBERS.md): Haro's numbers, one helper out of the run loop; null with the error pending
+    noinline fn numBuiltin(self: *VM, which: Builtin, a: []Value) ?Value {
+        const OVER = "Error (DECIMAL_OVERFLOW) : the decimal leaves 64 bits of digits";
+        const WHOLE = "Error (INTEGER_OVERFLOW) : the integer leaves 64 bits";
+        const x = a[0];
+        if (which == .fromhex1) {
+            if (x.tag != .str) {
+                self.pending = BADPARAM;
+                return null;
+            }
+            const v = decValue(strOf(x)) orelse {
+                self.pending = BADPARAM;
+                return null;
+            };
+            if (v.tag != .int) {
+                self.pending = WHOLE;
+                return null;
+            }
+            return v;
+        }
+        if (!(x.tag == .int or x.tag == .dec or x.tag == .num)) {
+            self.pending = BADPARAM;
+            return null;
+        }
+        var buf: [400]u8 = undefined;
+        switch (which) {
+            .text2, .round2 => {
+                const pv = a[1];
+                if (pv.tag != .int or pv.p.i < 0 or pv.p.i > decimal.MAX_SCALE) {
+                    self.pending = BADPARAM;
+                    return null;
+                }
+                const pl: u32 = @intCast(pv.p.i);
+                if (which == .round2 and x.tag == .int) return x;
+                const d: decimal.Dec = switch (x.tag) {
+                    // the float's exact value rounded half to even (fmtPlaces), never its shortest text rounded again
+                    .num => blk: {
+                        if (!std.math.isFinite(x.p.d)) {
+                            self.pending = OVER;
+                            return null;
+                        }
+                        var fb: [400]u8 = undefined;
+                        break :blk (decimal.parse(fmtPlaces(&fb, x.p.d, pl)) catch null) orelse {
+                            self.pending = OVER;
+                            return null;
+                        };
+                    },
+                    else => decimal.round(decOf(x), pl) catch {
+                        self.pending = OVER;
+                        return null;
+                    },
+                };
+                if (which == .text2) return Value.str(self.newStr(decimal.text(d, &buf)));
+                if (x.tag == .num) return Value.num(decimal.toF64(d));
+                return Value.dec(d.c, d.s);
+            },
+            .round1 => switch (x.tag) {
+                .int => return x,
+                .dec => {
+                    const d = decimal.round(decOf(x), 0) catch {
+                        self.pending = OVER;
+                        return null;
+                    };
+                    return Value.int(d.c);
+                },
+                else => return Value.int(floatRoundEven(x.p.d) orelse {
+                    self.pending = WHOLE;
+                    return null;
+                }),
+            },
+            .integerpart1 => switch (x.tag) {
+                .int => return x,
+                .dec => return Value.int(@divTrunc(x.p.i, @as(i64, @intCast(decimal.pow10(x._r))))),
+                else => return Value.int(floatWhole(@trunc(x.p.d)) orelse {
+                    self.pending = WHOLE;
+                    return null;
+                }),
+            },
+            .decimalpart1 => switch (x.tag) {
+                .int => return Value.int(0),
+                .dec => return Value.dec(@rem(x.p.i, @as(i64, @intCast(decimal.pow10(x._r)))), x._r),
+                else => return Value.num(x.p.d - @trunc(x.p.d)),
+            },
+            .decimals1h => switch (x.tag) {
+                .int => return self.digitVec(""),
+                .dec => {
+                    const t = decimal.text(.{ .c = x.p.i, .s = x._r }, &buf);
+                    const dot = std.mem.indexOfScalar(u8, t, '.') orelse return self.digitVec("");
+                    return self.digitVec(t[dot + 1 ..]);
+                },
+                else => {
+                    const t = floatText(@abs(x.p.d), &buf);
+                    const dot = std.mem.indexOfScalar(u8, t, '.') orelse return self.digitVec("");
+                    return self.digitVec(t[dot + 1 ..]);
+                },
+            },
+            .digits1 => switch (x.tag) {
+                .int => return self.digitVec(std.fmt.bufPrint(&buf, "{d}", .{x.p.i}) catch ""),
+                .dec => return self.digitVec(decimal.text(.{ .c = x.p.i, .s = x._r }, &buf)),
+                else => return self.digitVec(floatText(@abs(x.p.d), &buf)),
+            },
+            .abs1 => switch (x.tag) {
+                .int => {
+                    if (x.p.i == std.math.minInt(i64)) {
+                        self.pending = WHOLE;
+                        return null;
+                    }
+                    return Value.int(if (x.p.i < 0) -x.p.i else x.p.i);
+                },
+                .dec => {
+                    if (x.p.i == std.math.minInt(i64)) {
+                        self.pending = OVER;
+                        return null;
+                    }
+                    return Value.dec(if (x.p.i < 0) -x.p.i else x.p.i, x._r);
+                },
+                else => return Value.num(@abs(x.p.d)),
+            },
+            .sign1 => {
+                const s: i64 = switch (x.tag) {
+                    .int, .dec => if (x.p.i < 0) -1 else if (x.p.i > 0) 1 else 0,
+                    else => if (x.p.d < 0) -1 else if (x.p.d > 0) 1 else 0,
+                };
+                return Value.int(s);
+            },
+            .clamp3 => {
+                const lo = a[1];
+                const hi = a[2];
+                if (!(lo.tag == .int or lo.tag == .dec or lo.tag == .num) or !(hi.tag == .int or hi.tag == .dec or hi.tag == .num)) {
+                    self.pending = BADPARAM;
+                    return null;
+                }
+                const floats = @as(u8, @intFromBool(x.tag == .num)) + @intFromBool(lo.tag == .num) + @intFromBool(hi.tag == .num);
+                if (floats != 0 and floats != 3) {
+                    self.pending = "Error (NUMBER_MIX) : Clamp -- a float and another number do not mix; convert one: Float(x)";
+                    return null;
+                }
+                if (valCmp(lo, hi) > 0) {
+                    self.pending = BADPARAM;
+                    return null;
+                }
+                if (valCmp(x, lo) < 0) return lo;
+                if (valCmp(x, hi) > 0) return hi;
+                return x;
+            },
+            else => {
+                self.pending = BADPARAM;
+                return null;
+            },
+        }
     }
 
     noinline fn ringDec(d: f64) ?Value {
@@ -4879,6 +5095,8 @@ pub const VM = struct {
     /// string running in its caller's frame (the caller's, with
     /// `hsp_floor` at its handler depth).
     pub fn runFrom(self: *VM, entry: u32, base0: u32, fsp0: u32, hsp0: u32) Value {
+        // v0.66: the run loop's inline calls count toward Zig's compile-time branch limit, and its default (1000) was reached
+        @setEvalBranchQuota(4000);
         // a `var` for ONE writer: an admission (`admitfile`) appends code the
         // caller goes on to call, and may have moved the buffer to make room
         var code = self.code;
@@ -5845,9 +6063,13 @@ pub const VM = struct {
                 const in = code[pc];
                 // v0.65 (D77): .ring code prints a decimal as Ring prints a number, an item of a list too
                 const pv = regs[base + in.a];
-                self.say_ring = (pv.tag == .dec or pv.tag == .vec or pv.tag == .obj) and !self.strictAt(pc);
+                const strict_say = (pv.tag == .dec or pv.tag == .num or pv.tag == .vec or pv.tag == .obj) and self.strictAt(pc);
+                self.say_ring = (pv.tag == .dec or pv.tag == .vec or pv.tag == .obj) and !strict_say;
+                // v0.66 (D78): .haro code writes a float as its shortest exact text, and no setting reaches it
+                self.say_haro = strict_say;
                 self.sayValue(pv, in.c == 0); // c=1 is `see`: no newline
                 self.say_ring = false;
+                self.say_haro = false;
                 pc += 1;
                 continue :dispatch code[pc].op;
             },
@@ -6922,6 +7144,10 @@ pub const VM = struct {
                         out = Value.int(@intFromBool(@abs(asF64(regs[A]) - asF64(regs[A + 1])) <= asF64(regs[A + 2])));
                     },
                     .isempty1 => out = Value.int(@intFromBool(regs[A].tag == .str and regs[A].p.s.len == 0)),
+                    // v0.66 (D78): Haro's numbers
+                    .text2, .round1, .round2, .integerpart1, .decimalpart1, .decimals1h, .digits1, .abs1, .sign1, .clamp3, .fromhex1 => {
+                        out = self.numBuiltin(which, regs[A..]) orelse continue :dispatch .raise;
+                    },
                     .isnull => out = Value.int(switch (regs[A].tag) {
                         .nil => @as(i64, 1),
                         .str => @as(i64, if (regs[A].p.s.len == 0 or std.ascii.eqlIgnoreCase(strOf(regs[A]), "null")) 1 else 0),
@@ -6952,8 +7178,11 @@ pub const VM = struct {
                         } else if (v.tag == .boolean) {
                             out = Value.str(self.newStr(if (v.p.i != 0) "true" else "false"));
                         } else if (isNum(v)) {
-                            var buf: [128]u8 = undefined;
-                            out = Value.str(self.newStr(numText(self.ringNum(v, pc), &buf)));
+                            var buf: [400]u8 = undefined;
+                            // v0.66 (D78): .haro code writes a float as its shortest exact text
+                            if (v.tag == .num and self.strictAt(pc)) {
+                                out = Value.str(self.newStr(floatText(v.p.d, &buf)));
+                            } else out = Value.str(self.newStr(numText(self.ringNum(v, pc), &buf)));
                         } else {
                             self.pending = BADPARAM;
                             continue :dispatch .raise;
@@ -8088,8 +8317,9 @@ pub const VM = struct {
                                 if (e.tag == .str) {
                                     acc.appendSlice(self.alloc, e.p.s.ptr[0..e.p.s.len]) catch @panic("oom");
                                 } else if (isNum(e)) {
-                                    var nb: [128]u8 = undefined;
-                                    acc.appendSlice(self.alloc, numText(self.ringNum(e, pc), &nb)) catch @panic("oom");
+                                    var nb: [400]u8 = undefined;
+                                    const et = if (e.tag == .num and self.strictAt(pc)) floatText(e.p.d, &nb) else numText(self.ringNum(e, pc), &nb);
+                                    acc.appendSlice(self.alloc, et) catch @panic("oom");
                                 }
                             }
                             out = Value.str(self.newStr(acc.items));

@@ -243,7 +243,7 @@
    "line": "N5",
    "why": "a float's operator is named as written; a float is negated",
    "file": "cases/N27.haro",
-   "stdout": "-0.50\n\nLine 3 Error (NUMBER_MIX) : float - integer -- an integer and a float do not mix; convert one: Float(i) \nin file N27.haro ",
+   "stdout": "-0.5\n\nLine 3 Error (NUMBER_MIX) : float - integer -- an integer and a float do not mix; convert one: Float(i) \nin file N27.haro ",
    "exit": 1
   },
   {
@@ -252,7 +252,7 @@
    "line": "N3",
    "why": "% on decimals is exact, the dividend's sign",
    "file": "cases/N28.haro",
-   "stdout": "1.5\n-2.0\n1.50\n"
+   "stdout": "1.5\n-2.0\n1.5\n"
   },
   {
    "id": "N29",
