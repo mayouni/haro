@@ -56,8 +56,12 @@ CASES = [
      'MM 30\n30 30\n', 0),
     ('B05', 'N3', 'a boolean inside a list reaches a native as 1 or 0', 'engine', engine('stz_geo.dll') + [
         'print StzEngineGeoRingContains([0, 0, true, 0, true, true, 0, true], 0.5f, 0.5f)',
-        'print StzEngineGeoRingContains([0, 0, false, 0, false, false, 0, false], 0.5f, 0.5f)'],
-     '1\n0\n', 0),
+        'print StzEngineGeoRingContains([0, 0, false, 0, false, false, 0, false], 0.5f, 0.5f)',
+        # ADDED AFTER THE CODE AND ITS PLANTS, said so: plant P3 (a boolean item's type is nothing) missed, because GeoRingContains never
+        # asks an item's type; GeoFieldStats does, and answers [min, max, known, unknown]
+        'vS = StzEngineGeoFieldStats([true, false, 2])',
+        'print String(vS[1]) + " " + String(vS[2]) + " " + String(vS[3]) + " " + String(vS[4])'],
+     '1\n0\n0 2 3 0\n', 0),
     ('B06', 'N4', 'a .ring file passes its numbers as it did', 'run', ['? "before"', 'shutdown(1)'],
      'before\n', 1),
     ('C01', 'N5', 'an object reached by Pointer2Object in a function is that object', 'run', [

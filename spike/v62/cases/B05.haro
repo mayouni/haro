@@ -1,3 +1,5 @@
 LoadLib(SysGet("STZ_ENGINE_DIR") + "/zig-out/bin/stz_geo.dll")
 print StzEngineGeoRingContains([0, 0, true, 0, true, true, 0, true], 0.5f, 0.5f)
 print StzEngineGeoRingContains([0, 0, false, 0, false, false, 0, false], 0.5f, 0.5f)
+vS = StzEngineGeoFieldStats([true, false, 2])
+print String(vS[1]) + " " + String(vS[2]) + " " + String(vS[3]) + " " + String(vS[4])

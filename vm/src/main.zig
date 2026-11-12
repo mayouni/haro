@@ -114,7 +114,8 @@ fn hostItem(l: native.RppList, i: u32) ?Value {
 fn hostListTag(l: native.RppList, i: u32) callconv(.c) u32 {
     const it = hostItem(l, i) orelse return @intFromEnum(native.Tag.nil);
     return @intFromEnum(switch (it.tag) {
-        .int => native.Tag.int,
+        // v0.62 (D74, HARO-NATIVE-BOOL-01): a boolean is the number 1 or 0 to a native, as Ring's true and false are
+        .int, .boolean => native.Tag.int,
         // v0.52: a decimal in a list is a number to the engine
         .num, .dec => native.Tag.num,
         .str => native.Tag.str,
@@ -127,7 +128,7 @@ fn hostListTag(l: native.RppList, i: u32) callconv(.c) u32 {
 fn hostListNum(l: native.RppList, i: u32) callconv(.c) f64 {
     const it = hostItem(l, i) orelse return 0;
     return switch (it.tag) {
-        .int => @floatFromInt(it.p.i),
+        .int, .boolean => @floatFromInt(it.p.i),
         .num => it.p.d,
         .dec => VM.asF64Pub(it),
         else => 0,
@@ -3622,8 +3623,16 @@ pub const VM = struct {
             const fid: u32 = if (at < self.fn_of.len) self.fn_of[at] else std.math.maxInt(u32);
             const lo: u32 = if (fid + 1 < self.fn_local_from.len) self.fn_local_from[fid] else 0;
             const hi: u32 = if (fid + 1 < self.fn_local_from.len) self.fn_local_from[fid + 1] else 0;
+            // v0.62 (D74, HARO-THISCHAIN-01): a callee's frame begins INSIDE its caller's -- the caller's argument registers are the
+            // callee's first -- so a frame is walked only up to where the next one begins; walked whole, a temporary in the overlap
+            // was taken off twice, an object's one named holder read as none, and `oU = Pointer2Object(h)` copied it
+            var size: u32 = fr.size;
+            if (k + 1 < fsp) {
+                const next: u32 = if (k + 2 < fsp) self.frames[k + 2].base else cur_base;
+                if (next > own and next - own < size) size = next - own;
+            }
             var r: u32 = 0;
-            while (r < fr.size) : (r += 1) {
+            while (r < size) : (r += 1) {
                 const x = self.regs[own + r];
                 if (x.tag != v.tag) continue;
                 if (if (v.tag == .vec) x.p.v != v.p.v else x.p.o != v.p.o) continue;
@@ -6410,7 +6419,8 @@ pub const VM = struct {
                 while (i < n_args) : (i += 1) {
                     const v = regs[base + in.b + i];
                     buf[i] = switch (v.tag) {
-                        .int => native.RppVal.int(v.p.i),
+                        // v0.62 (D74, HARO-NATIVE-BOOL-01): a boolean crosses as 1 or 0 -- it crossed as nothing, read as 0
+                        .int, .boolean => native.RppVal.int(v.p.i),
                         .num => native.RppVal.num(v.p.d),
                         // v0.52: the engine reads a decimal as the double it is nearest -- converted here, never passed through
                         .dec => native.RppVal.num(asF64(v)),
