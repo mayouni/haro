@@ -1,8 +1,9 @@
 # Haro
 
-Haro is the foundational language of the Softanza project: a closed, judged family of grammars in which a world is declared,
-constrained, asked, moved, stepped and spoken to. Every sentence is judged by a court generated from its declaration, and every
-refusal is named and cited. It runs on its own VM, `haro`.
+Haro is a language of languages: a world is declared in it, every sentence is judged by a court generated from that declaration,
+and every refusal is named — so what people and AI agents may write and do stays within the bounds a declaration sets.
+
+It is the foundational language of the Softanza project, and runs on its own VM, `haro`.
 
 ## Download and use
 
