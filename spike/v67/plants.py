@@ -93,7 +93,7 @@ def main():
             for o, n in subs:
                 planted = planted.replace(o, n)
             open(path, 'wb').write((planted.replace('\n', '\r\n') if crlf else planted).encode('utf-8'))
-            b = subprocess.run(['zig', 'build', '-Doptimize=ReleaseFast', '-j2', '-p', OUT], cwd=VM_DIR, capture_output=True, timeout=900)
+            b = subprocess.run(['zig', 'build', '-Doptimize=ReleaseFast', '-j2', '-p', OUT], cwd=VM_DIR, capture_output=True, timeout=1800)
             restore()
             if b.returncode != 0:
                 print(f'{pid} BUILD FAILED: {b.stderr.decode("utf-8", "replace")[-400:]}', flush=True)

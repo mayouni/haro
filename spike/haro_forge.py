@@ -4065,6 +4065,23 @@ def stage71():
     return 0
 
 
+MAP_COURT = os.path.join(HERE, 'v67', 'map_court.py')
+
+
+def stage72():
+    """Haro v0.67, maps (HARO-MAP-01, D79; v67/GRAMMAR.md). v67/map_court.py on haro and its checked build."""
+    print('stage 72 -- maps: v67/map_court.py on haro and its checked build')
+    p = subprocess.run([sys.executable, MAP_COURT] + (['--plant'] if PLANT else []), capture_output=True, cwd=HERE, timeout=900)
+    out = p.stdout.decode('utf-8', 'replace').replace(chr(13) + chr(10), chr(10))
+    for line in out.splitlines():
+        if line.startswith(('  FAIL', '       ', 'MAP COURT')):
+            print(line)
+    if p.returncode != 0:
+        print(f'  FAIL the map court exited {p.returncode}' + ('' if out.strip() else ': ' + p.stderr.decode('utf-8', 'replace')[-400:]))
+        return 1
+    return 0
+
+
 PORT_COURT = os.path.join(os.path.dirname(HERE), 'port', 'port_court.py')
 
 
@@ -4320,5 +4337,7 @@ if __name__ == '__main__':
         failures += stage70()
     if stage in (None, 71) and os.path.exists(NUMBERS_COURT):
         failures += stage71()
+    if stage in (None, 72) and os.path.exists(MAP_COURT):
+        failures += stage72()
     print(f'haro_forge: {"FAIL" if failures else "PASS"} ({failures} failure(s), {time.perf_counter()-t0:.1f} s)')
     sys.exit(1 if failures else 0)
