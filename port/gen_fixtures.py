@@ -197,6 +197,14 @@ CASES = [
         'main.ring': ['x = null', 'if isnull(x) see "e" ok', 'o.isnull()', 'y = :null']},
      [("applied['main.haro'].splitlines()[:2]", ['x = ""', 'if IsEmpty(x) FWrite(stdout, "e") end']),
       ("'o.isnull()' in applied['main.haro'] and 'y = :null' in applied['main.haro']", True)]),
+    # HARO-PORTTOOL-CALLNAME-01 and -NAMETEXT-01 (stzlib-haroport, 2026-11-12): written before their code
+    ('H36', 'L', 'a parameter named like a built-in is lettered, and the call of that built-in keeps its name', {
+        'main.ring': ['? ring_substr1("abc", "b")', 'func ring_substr1 str, substr', T + 'return substr(str, substr)']},
+     [("'return SubStr(tStr, tSubstr)' in applied['main.haro'] or 'return SubStr(xStr, xSubstr)' in applied['main.haro']", True)]),
+    ('H37', 'C', 'a global named in text or as a symbol follows its rename', {
+        'main.ring': ['$cDenyFile = "x"', '$_logo = 1', '? isglobal("$cDenyFile")', '? isglobal(:$_logo)', "? isglobal('$cDenyFile')"]},
+     [("'IsGlobal(\"$tDenyFile\")' in applied['main.haro'] and \"IsGlobal('$tDenyFile')\" in applied['main.haro']", True),
+      ("'IsGlobal(:$logo)' in applied['main.haro']", True)]),
     ('H11', '-', 'the ported tree runs on haro and prints what the classic Ring surface printed', {
         'main.ring': ['load "lib.ring"', 'cName = Greet("ada")', '? cName', '? Len(cName)'],
         'lib.ring': ['func Greet cWho', T + 'cOut = "hi " + cWho', T + 'return cOut']},

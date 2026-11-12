@@ -761,6 +761,40 @@
    ]
   },
   {
+   "id": "H36",
+   "line": "L",
+   "why": "a parameter named like a built-in is lettered, and the call of that built-in keeps its name",
+   "folder": "cases/H36",
+   "files": [
+    "main.ring"
+   ],
+   "asserts": [
+    [
+     "'return SubStr(tStr, tSubstr)' in applied['main.haro'] or 'return SubStr(xStr, xSubstr)' in applied['main.haro']",
+     true
+    ]
+   ]
+  },
+  {
+   "id": "H37",
+   "line": "C",
+   "why": "a global named in text or as a symbol follows its rename",
+   "folder": "cases/H37",
+   "files": [
+    "main.ring"
+   ],
+   "asserts": [
+    [
+     "'IsGlobal(\"$tDenyFile\")' in applied['main.haro'] and \"IsGlobal('$tDenyFile')\" in applied['main.haro']",
+     true
+    ],
+    [
+     "'IsGlobal(:$logo)' in applied['main.haro']",
+     true
+    ]
+   ]
+  },
+  {
    "id": "H11",
    "line": "-",
    "why": "the ported tree runs on haro and prints what the classic Ring surface printed",

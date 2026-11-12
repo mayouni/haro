@@ -251,9 +251,21 @@ def port_file(rel, src, tree_funcs, tree_names, c_map, refused):
                 line_start = False
         for i in range(s, e):
             k, v = toks[i]
+            # NAMETEXT-01: a global named in a text ("$cX", '$cX') or as a symbol (:$cX) follows its rename, or it reads another global
+            if k == 'st' and len(v) > 3 and v[1] == '$' and v[1:-1] in c_map:
+                toks[i][1] = v[0] + c_map[v[1:-1]] + v[-1]
+                renames.append(('C', v, toks[i][1]))
+                continue
+            if k == 'id' and is_symbol(toks, i) and v.startswith('$') and v in c_map:
+                toks[i][1] = c_map[v]
+                renames.append(('C', ':' + v, ':' + c_map[v]))
+                continue
             if k != 'id' or is_symbol(toks, i):
                 continue
-            if not is_member(toks, i) and v in plan and plan[v] != v:
+            # CALLNAME-01: a name followed by `(` is a call -- a built-in or a function -- never the local of that name
+            j = sig(toks, i, 1)
+            called = j is not None and toks[j][1] == '('
+            if not is_member(toks, i) and not called and v in plan and plan[v] != v:
                 toks[i][1] = plan[v]
                 renames.append(('L' if not unwrapped(v) else 'U', v, plan[v]))
             elif v in c_map:

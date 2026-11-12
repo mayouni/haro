@@ -105,6 +105,11 @@ PLANTS = [
                                                                                  "                if False:\n                    break   # it closes what holds the statement (a brace object's `}`)")]),
     # v0.59 (D71)
     ('T56', 'H35', 'null and isnull are left', [("    toks = null_free(toks, renames)\n", "")]),
+    ('T57', 'H36', 'a call is renamed as the local of its name', [("            called = j is not None and toks[j][1] == '('", "            called = False")]),
+    ('T58', 'H37', 'a global named in text keeps its old name', [("            if k == 'st' and len(v) > 3 and v[1] == '$' and v[1:-1] in c_map:",
+                                                                  "            if False:")]),
+    ('T59', 'H37', 'a global named as a symbol keeps its old name', [("            if k == 'id' and is_symbol(toks, i) and v.startswith('$') and v in c_map:",
+                                                                      "            if False:")]),
     ('T21', 'H17', 'a call through a receiver is respelled', [
         ("        if k != 'id' or v.startswith(('$', '@')) or is_member(toks, i) or is_symbol(toks, i):",
          "        if k != 'id' or v.startswith(('$', '@')) or is_symbol(toks, i):")]),
