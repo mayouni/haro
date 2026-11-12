@@ -60,8 +60,10 @@ CASES = [
      ['load "pat.haro"', '? Twice(0.25)'],
      '0.50\n', 0),
     ('M09', 'D5', 'a .ring function\'s fraction answered to a .ring caller stays a float', '.ring',
-     ['load "old.ring"', '? Half(1) * 3'],
-     '1.50\n', 0),
+     # `type` ADDED AFTER THE PLANTS, said so: plant Q8 (converted here too) missed, because .ring prints a decimal 1.5 as it prints the
+     # float; .ring's type() names the difference
+     ['load "old.ring"', '? Half(1) * 3', '? type(Half(1))'],
+     '1.50\nNUMBER\n', 0),
     ('M07', 'D5', 'a .ring file reads its own numbers as it did', '.ring',
      ['x = 0.25', '? x + 1', '? 0.1 * 3'],
      '1.25\n0.30\n', 0),

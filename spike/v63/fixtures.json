@@ -73,7 +73,7 @@
    "line": "D5",
    "why": "a .ring function's fraction answered to a .ring caller stays a float",
    "file": "cases/M09.ring",
-   "stdout": "1.50\n"
+   "stdout": "1.50\nNUMBER\n"
   },
   {
    "id": "M07",

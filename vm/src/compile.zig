@@ -8611,6 +8611,8 @@ pub const Compiler = struct {
             // try's to catch -- and only then are the handlers left (F-90)
             // and the `finally` blocks run (D52)
             try self.leaveAll(t);
+            // v0.63 (D75): a .ring function's return says so (b = 1): its float, answered to a .haro caller, is an exact decimal
+            const ring_ret: u8 = if (self.haroNode(n)) 0 else 1;
             // NO COPY HERE. Ring copies at the ASSIGNMENT and never at the
             // return: `P().Bump()` on a `return $o` mutates the global, and
             // `o.Me().Bump()` on a `return This` mutates o -- probed on 1.27
@@ -8622,7 +8624,7 @@ pub const Compiler = struct {
             // every Register, Ask and LastStatus acted on a throwaway, and
             // cluster/d3_supervision ran past 120 s on false liveness.
             // The assignment sites copy a call's result now instead.
-            _ = try self.emit(.ret, t, 0, 0, 0);
+            _ = try self.emit(.ret, t, ring_ret, 0, 0);
             return;
         }
 
@@ -13760,12 +13762,16 @@ fn emitOne(c: *Compiler, f: *Func) Error!void {
                     c.entry_use = p;
                 };
                 const pl = Compiler.letterOf(p) orelse continue;
-                if (std.mem.indexOfScalar(u8, Compiler.CHECKED, pl) == null) continue;
-                if (c.lookup(p)) |lp| {
-                    try c.emitLetterCheck(lp.reg, pl, p);
-                    // a b parameter's check says it stands at the entry (c = 1): a .ring caller's 1 or 0 crosses as true or false
-                    if (pl == 'b' and c.code.items[c.code.items.len - 1].c == 0) c.code.items[c.code.items.len - 1].c = 1;
+                const lp = c.lookup(p) orelse continue;
+                if (std.mem.indexOfScalar(u8, Compiler.CHECKED, pl) == null) {
+                    // v0.63 (D75): an unchecked letter's parameter is still where a .ring caller's float crosses -- the check only converts
+                    if (pl != 'f') _ = try c.emit(.lchk, lp.reg, pl, 1, try c.konstIndex(p));
+                    continue;
                 }
+                try c.emitLetterCheck(lp.reg, pl, p);
+                // the check says it stands at the entry (c = 1): a .ring caller's 1 or 0 crosses as true or false (a b parameter), its
+                // float as an exact decimal (v0.63) -- a vector's check keeps its element letter in c
+                if (c.code.items[c.code.items.len - 1].c == 0) c.code.items[c.code.items.len - 1].c = 1;
             }
         }
         // v0.56 (D68): a .haro file with a definition that has no end -- the program refuses its first statement, naming it

@@ -4542,6 +4542,16 @@ pub const VM = struct {
     /// hex digits up to the first other character, a minus wrapping the unsigned value, saturation past 64 bits, and
     /// null -- Ring's E7 -- when no digit is read. The value is a double, as RING_API_RETNUMBER makes it. Out of the run
     /// loop on purpose: the arm that calls it stays the size it was.
+    /// v0.63 (D75, HARO-RINGBOUNDARY-NUMBER-01): a .ring float crossing into .haro is the exact decimal of its shortest text (0.25 is
+    /// 0.25, 0.1 is 0.1); none where it has none -- a NaN, an infinity, past 64 bits of digits -- and it stays a float. Out of the run loop.
+    noinline fn ringDec(d: f64) ?Value {
+        if (std.math.isNan(d) or std.math.isInf(d)) return null;
+        var buf: [400]u8 = undefined;
+        const s = std.fmt.bufPrint(&buf, "{d}", .{d}) catch return null;
+        const r = (decimal.parse(s) catch return null) orelse return null;
+        return Value.dec(r.c, r.s);
+    }
+
     noinline fn decValue(s: []const u8) ?Value {
         var i: usize = 0;
         while (i < s.len and (s[i] == ' ' or (s[i] >= 9 and s[i] <= 13))) : (i += 1) {}
@@ -8835,7 +8845,15 @@ pub const VM = struct {
             },
             .lchk => {
                 const in = code[pc];
-                const v = regs[base + in.a];
+                var v = regs[base + in.a];
+                // v0.63 (D75, HARO-RINGBOUNDARY-NUMBER-01): a parameter given a float by a .ring caller holds its exact decimal -- Ring has
+                // one number type, and a .haro library's integer literals would refuse its every fraction; an f parameter asks for a float
+                if (in.c == 1 and v.tag == .num and in.b != 'f' and fsp > 0 and !self.strictAt(self.frames[fsp - 1].ret_pc -| 1)) {
+                    if (ringDec(v.p.d)) |dv| {
+                        regs[base + in.a] = dv;
+                        v = dv;
+                    }
+                }
                 // HARO-RINGBOUNDARY-BOOL-02 (TYPES.md section 6): a parameter's check at its function's entry (c = 1). A b parameter given
                 // 1 or 0 by a call from a .ring file holds true or false: the classic Ring surface's booleans are its integers. A .haro
                 // caller's 1 stays refused.
@@ -9405,9 +9423,13 @@ pub const VM = struct {
             },
             .ret => {
                 const in = code[pc];
-                const result = regs[base + in.a];
+                var result = regs[base + in.a];
                 fsp -= 1;
                 const fr = self.frames[fsp];
+                // v0.63 (D75): a .ring function's float answered to a .haro caller is its exact decimal
+                if (in.b == 1 and result.tag == .num and self.strictAt(fr.ret_pc -| 1)) {
+                    if (ringDec(result.p.d)) |dv| result = dv;
+                }
                 const tracing = blk: {
                     if (trace_ret_name.len == 0) break :blk false;
                     const fi = if (pc < self.fn_of.len) self.fn_of[pc] else self.main_fn;
