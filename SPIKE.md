@@ -1917,6 +1917,14 @@ D58, the Principal's ruling of 2026-11-09 ("ParentClassName"), revising v0.42's 
 
 **Results.** 9 of 9 cases on both builds; 5 of 5 plants; v36 to v48's courts green. Haro's 2,172 calls re-spelled by a tool (20fc236, listed in v20/tool_commits.txt).
 
+## The sixty-fifth rung -- Haro v0.65, in .ring code a decimal is Ring's number -- 2026-11-12
+
+D77, from stzlib-haroport's HARO-RINGBOUNDARY-DECIMAL-OUT-01: `.ring` code prints, joins and types a decimal as Ring's number, wherever it came from. 7 of 7 on both builds, plants G1-G7 (f3e6805).
+
+## The sixty-fourth rung -- Haro v0.64, records -- 2026-11-12
+
+D76, TYPES.md T6, on the Principal's "Declared, built in order": `record User` ... `end`, `User("ada", 36)`, fields checked when compiling where the record is proven and when running elsewhere. 14 of 14 on both builds, plants F1-F17 (766340c).
+
 ## The sixty-third rung -- Haro v0.63, a .ring number crossing into .haro is an exact decimal -- 2026-11-12
 
 D75, TYPES.md section 6, from stzlib-haroport's HARO-RINGBOUNDARY-NUMBER-01: a `.ring` fraction at a `.haro` parameter or answered to a `.haro` caller is the decimal of its shortest text. 9 of 9 on both builds, plants Q1-Q8 (8b01e8a).
