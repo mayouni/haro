@@ -552,13 +552,15 @@ pub const R_NOEND = "a definition ends with `end`, and this one has none; writte
 pub const R_STRAY = "an `end` closes nothing here; written";
 pub const R_ONELINE = "a definition's body starts on the line after its header; written";
 pub const R_ENDWORD = "one spelling: `end`; written";
+/// v0.64 (D76, HARO-RECORD-01): a record is its fields
+pub const R_RECDEF = "a record holds fields and no method; written";
 
-const Open = struct { def: bool, row: u32, head_end: u32, name: []const u8, braced: bool = false };
+const Open = struct { def: bool, row: u32, head_end: u32, name: []const u8, braced: bool = false, rec: bool = false };
 
 /// v0.58 (D70, TYPES.md T5): what the token pass found of absence in a .haro file -- the rows that end with `maybe` (a definition's
 /// header, or an attribute's declaration), blanked for the parser; and the place (row, column) of each `else` that resolves a maybe,
 /// given to the parser as `or`, which the compiler then reads as the resolution
-pub const Marks = struct { maybe_rows: []const u32 = &.{}, else_at: []const [2]u32 = &.{} };
+pub const Marks = struct { maybe_rows: []const u32 = &.{}, else_at: []const [2]u32 = &.{}, record_rows: []const u32 = &.{} };
 
 /// the marks of each .haro file read, by its name
 pub var marks: std.StringHashMapUnmanaged(Marks) = .{};
@@ -605,6 +607,11 @@ fn bracesText(alloc: std.mem.Allocator, src: []const u8, name: []const u8) ?Brac
     defer elses.deinit(alloc);
     var else_at = std.ArrayListUnmanaged([2]u32){};
     defer else_at.deinit(alloc);
+    // v0.64 (D76): each `record` header, given to the parser as `class ` (six bytes for six), and its row
+    var records = std.ArrayListUnmanaged(u32){};
+    defer records.deinit(alloc);
+    var record_rows = std.ArrayListUnmanaged(u32){};
+    defer record_rows.deinit(alloc);
     var fault: ?Fault = null;
     const n = src.len;
     var i: usize = 0;
@@ -664,7 +671,7 @@ fn bracesText(alloc: std.mem.Allocator, src: []const u8, name: []const u8) ?Brac
         const named = !(prev == '.' or prev == ':' or ch == '$' or ch == '@' or std.ascii.isDigit(ch));
         prev = 'a';
         if (!named) continue;
-        var def = eq(w, "func") or eq(w, "def") or eq(w, "class") or eq(w, "package");
+        var def = eq(w, "func") or eq(w, "def") or eq(w, "class") or eq(w, "package") or eq(w, "record");
         if (def) {
             // a definition begins its line; `func` anywhere else -- `x = func { ... }`, `o.SetScope(func(oDg) { ... })` -- is a
             // function written in place, closed by its brace, and no `end` is its (stzlib's stzSoundTransport, stzChoroplethDiagram)
@@ -694,7 +701,30 @@ fn bracesText(alloc: std.mem.Allocator, src: []const u8, name: []const u8) ?Brac
             while (k < n and (src[k] == ' ' or src[k] == '\t')) k += 1;
             var e = k;
             while (e < n and wordByte(src[e])) e += 1;
-            try_push(alloc, &stack, .{ .def = true, .row = row, .head_end = @intCast(last), .name = if (e > k) src[k..e] else w }) orelse return null;
+            const rec = eq(w, "record");
+            // v0.64: `record` is a definition only before its name (`record = 5` is a name being given a value)
+            if (rec and e == k) {
+                after_def = false;
+                continue;
+            }
+            // v0.64: a method in a record -- a record is its fields
+            if (!rec and (eq(w, "def") or eq(w, "func"))) {
+                var q = stack.items.len;
+                while (q > 0) : (q -= 1) {
+                    if (stack.items[q - 1].def) {
+                        if (stack.items[q - 1].rec) {
+                            if (fault == null) fault = .{ .why = R_RECDEF, .word = if (e > k) src[k..e] else w, .row = row };
+                            break :scan;
+                        }
+                        break;
+                    }
+                }
+            }
+            if (rec) {
+                records.append(alloc, @intCast(s)) catch return null;
+                record_rows.append(alloc, row) catch return null;
+            }
+            try_push(alloc, &stack, .{ .def = true, .row = row, .head_end = @intCast(last), .name = if (e > k) src[k..e] else w, .rec = rec }) orelse return null;
             continue;
         }
         if (eq(w, "if") or eq(w, "while") or eq(w, "for") or eq(w, "foreach") or eq(w, "switch") or eq(w, "try") or eq(w, "do")) {
@@ -790,10 +820,11 @@ fn bracesText(alloc: std.mem.Allocator, src: []const u8, name: []const u8) ?Brac
     }
     if (keep) _ = faults.remove(name);
     if (keep) {
-        if (maybe_rows.items.len > 0 or else_at.items.len > 0) {
+        if (maybe_rows.items.len > 0 or else_at.items.len > 0 or record_rows.items.len > 0) {
             marks.put(std.heap.page_allocator, name, .{
                 .maybe_rows = std.heap.page_allocator.dupe(u32, maybe_rows.items) catch &.{},
                 .else_at = std.heap.page_allocator.dupe([2]u32, else_at.items) catch &.{},
+                .record_rows = std.heap.page_allocator.dupe(u32, record_rows.items) catch &.{},
             }) catch {};
         } else _ = marks.remove(name);
     }
@@ -845,6 +876,14 @@ fn bracesText(alloc: std.mem.Allocator, src: []const u8, name: []const u8) ?Brac
             if (h <= e) shift += 2;
         }
         @memcpy(text[e + shift .. e + shift + 4], "or  ");
+    }
+    // v0.64: `record` given to the parser as `class `
+    for (records.items) |e| {
+        var shift: usize = 0;
+        for (heads.items) |h| {
+            if (h <= e) shift += 2;
+        }
+        @memcpy(text[e + shift .. e + shift + 6], "class ");
     }
     return .{ .text = text, .inserts = ins };
 }

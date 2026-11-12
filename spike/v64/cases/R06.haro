@@ -1,7 +1,10 @@
 print "before"
 f()
 func f
-	rX = new P
+	rX = Make()
+end
+func Make
+	return new P
 end
 class P
 end

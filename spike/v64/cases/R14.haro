@@ -1,0 +1,7 @@
+print "before"
+f()
+func f
+	rX = new P
+end
+class P
+end

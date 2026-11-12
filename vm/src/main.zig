@@ -646,6 +646,8 @@ pub const Obj = struct {
     /// Ring's reference, as `Vec.rref`: a referenced object is shared, not
     /// copied, by every later transfer (0 none, 1 referenced, 2 pinned).
     rref: u8 = 0,
+    /// v0.64 (D76, HARO-RECORD-01): a record's name, as an index into the name table plus one; 0 for an object that is no record
+    rec: u16 = 0,
     rc: u32 = 0,
     mark: u32 = 0,
     /// Attributes `addattribute` gave THIS object (Ring's is per object,
@@ -1104,6 +1106,24 @@ pub var global_names: []const []const u8 = &.{};
 pub const AttrEnt = struct { name: u16, slot: u32 };
 pub var attr_from: []u32 = &.{}; // per class: first index into attr_ent; len ncls + 1
 pub var attr_ent: []AttrEnt = &.{};
+
+/// v0.64 (D76): how far apart two names are -- insertions, deletions, substitutions, case ignored -- counted to 3 and no further;
+/// the nearest field within two is the one a misspelling meant
+pub fn nameDistance(a: []const u8, b: []const u8) u32 {
+    if (a.len > 64 or b.len > 64) return 3;
+    var prev: [65]u32 = undefined;
+    var cur: [65]u32 = undefined;
+    for (0..b.len + 1) |j| prev[j] = @intCast(j);
+    for (a, 0..) |ca, i| {
+        cur[0] = @intCast(i + 1);
+        for (b, 0..) |cb, j| {
+            const sub: u32 = if (std.ascii.toLower(ca) == std.ascii.toLower(cb)) 0 else 1;
+            cur[j + 1] = @min(@min(prev[j + 1] + 1, cur[j] + 1), prev[j] + sub);
+        }
+        @memcpy(prev[0 .. b.len + 1], cur[0 .. b.len + 1]);
+    }
+    return @min(prev[b.len], 3);
+}
 
 pub fn attrLookup(cls: u16, name: u32) ?u32 {
     if (cls + 1 >= attr_from.len) return null;
@@ -3587,7 +3607,7 @@ pub const VM = struct {
                     retain(e);
                     sl[i] = e;
                 }
-                o.* = .{ .slots = sl.ptr, .nslots = src.nslots, .class = src.class, .rc = 0 };
+                o.* = .{ .slots = sl.ptr, .nslots = src.nslots, .class = src.class, .rc = 0, .rec = src.rec };
                 if (src.extra) |ex| {
                     const cv = self.cloneDeepD(Value.vec(ex), d + 1);
                     retain(cv);
@@ -3887,7 +3907,7 @@ pub const VM = struct {
             .dec => "a decimal",
             .str => "a text",
             .vec => if (v.p.v.closure) "a function" else "a vector",
-            .obj => "an object",
+            .obj => if (v.p.o.rec != 0) "a record" else "an object",
             .nil => "none",
             .dll, .cptr => "a handle",
         };
@@ -3902,7 +3922,9 @@ pub const VM = struct {
             'f' => v.tag == .num,
             't' => v.tag == .str,
             'v' => v.tag == .vec and !v.p.v.closure,
-            'o' => v.tag == .obj,
+            // v0.64 (D76): an object is no record, and a record holds the r letter alone
+            'o' => v.tag == .obj and v.p.o.rec == 0,
+            'r' => v.tag == .obj and v.p.o.rec != 0,
             'h' => v.tag == .cptr or v.tag == .dll,
             // v0.61 (D73, TYPES.md T6): an error -- the value a catch binds, a text that carries its record
             'e' => v.tag == .str and v.p.s.err != 0,
@@ -3920,6 +3942,7 @@ pub const VM = struct {
             't' => "texts",
             'v' => "vectors",
             'o' => "objects",
+            'r' => "records",
             'h' => "handles",
             else => "values",
         };
@@ -3935,6 +3958,7 @@ pub const VM = struct {
             't' => "a text",
             'v' => "a vector",
             'o' => "an object",
+            'r' => "a record",
             'h' => "a handle",
             'e' => "an error",
             else => "a value",
@@ -4544,6 +4568,27 @@ pub const VM = struct {
     /// loop on purpose: the arm that calls it stays the size it was.
     /// v0.63 (D75, HARO-RINGBOUNDARY-NUMBER-01): a .ring float crossing into .haro is the exact decimal of its shortest text (0.25 is
     /// 0.25, 0.1 is 0.1); none where it has none -- a NaN, an infinity, past 64 bits of digits -- and it stays a float. Out of the run loop.
+    /// v0.64 (D76): `Record` has no field `name` -- did you mean the nearest
+    noinline fn noField(self: *VM, o: *Obj, nidx: u32) []const u8 {
+        const nm = if (nidx < self.names.len) self.names[nidx] else "?";
+        const rn = if (o.rec - 1 < self.names.len) self.names[o.rec - 1] else "?";
+        var best: ?[]const u8 = null;
+        var best_d: u32 = 3;
+        if (o.class + 1 < attr_from.len) {
+            var i = attr_from[o.class];
+            while (i < attr_from[o.class + 1]) : (i += 1) {
+                const an = if (attr_ent[i].name < self.names.len) self.names[attr_ent[i].name] else continue;
+                const d = nameDistance(nm, an);
+                if (d < best_d) {
+                    best_d = d;
+                    best = an;
+                }
+            }
+        }
+        if (best) |b| return self.haroMsg("Error (NO_FIELD) : `{s}` has no field `{s}` -- did you mean {s}", .{ rn, nm, b });
+        return self.haroMsg("Error (NO_FIELD) : `{s}` has no field `{s}`", .{ rn, nm });
+    }
+
     noinline fn ringDec(d: f64) ?Value {
         if (std.math.isNan(d) or std.math.isInf(d)) return null;
         var buf: [400]u8 = undefined;
@@ -8815,7 +8860,7 @@ pub const VM = struct {
                 const o = self.alloc.create(Obj) catch @panic("oom");
                 const sl = self.alloc.alloc(Value, if (nsl == 0) 1 else nsl) catch @panic("oom");
                 @memset(sl, Value.nil());
-                o.* = .{ .slots = sl.ptr, .nslots = nsl, .class = cls, .rc = 0 };
+                o.* = .{ .slots = sl.ptr, .nslots = nsl, .class = cls, .rc = 0, .rec = @as(u16, in.b) | (@as(u16, in.c) << 8) };
                 if (DEFER) {
                     // objects join the zero-count table like vectors do
                 }
@@ -8885,7 +8930,8 @@ pub const VM = struct {
                     'f' => v.tag == .num,
                     't' => v.tag == .str,
                     'v' => v.tag == .vec and !v.p.v.closure,
-                    'o' => v.tag == .obj,
+                    'o' => v.tag == .obj and v.p.o.rec == 0,
+                    'r' => v.tag == .obj and v.p.o.rec != 0,
                     'h' => v.tag == .cptr or v.tag == .dll,
                     'e' => v.tag == .str and v.p.s.err != 0,
                     else => true,
@@ -9062,6 +9108,11 @@ pub const VM = struct {
                         }
                         pc += 1;
                         continue :dispatch code[pc].op;
+                    }
+                    // v0.64 (D76): a record's missing field, in Haro's words, the nearest field named
+                    if (o.rec != 0) {
+                        self.pending = self.noField(o, nidx);
+                        continue :dispatch .raise;
                     }
                     // Ring's own words, lower-cased name and all -- probed
                     // on 1.27: `o.nope` is "property not found: nope".

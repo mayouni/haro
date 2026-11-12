@@ -65,8 +65,10 @@ CASES = [
     ('R05', 'K4', 'a value of another type for a field is refused where it is given',
      HEAD + [T + 'rU = User(36, 36)', 'end'] + REC,
      trap('R05', 4, 'Error (TYPE_LETTER) : `tName` is lettered t, a text, and is given an integer'), 1),
+    # R06 CHANGED AFTER THE COURT SPOKE, said so: it gave `rX` the literal `new P`, which v0.47's rule refuses when compiling, not when
+    # running -- that case is R14 now, and R06 gives the object through a function, so the check where it is given is the one judged
     ('R06', 'K5', 'an r name holds a record and nothing else',
-     HEAD + [T + 'rX = new P', 'end', 'class P', 'end'],
+     HEAD + [T + 'rX = Make()', 'end', 'func Make', T + 'return new P', 'end', 'class P', 'end'],
      trap('R06', 4, 'Error (TYPE_LETTER) : `rX` is lettered r, a record, and is given an object'), 1),
     ('R07', 'K5', 'an o name holds no record',
      HEAD + [T + 'oX = User("a", 1)', 'end'] + REC,
@@ -92,6 +94,10 @@ CASES = [
      HEAD + [T + 'vP = [:a = 1]', 'end'],
      refused('R13', 4, '`:key = value` is no pair in a .haro file: write [:key, value] for a pair, or declare a record for named fields '
                        '(HARO-SURFACE-01)', ':a = 1'), 1),
+    # R14 ADDED AFTER THE COURT SPOKE, said so (see R06): an object literal given to an r name is refused when compiling
+    ('R14', 'K5', 'an object literal given to an r name is refused when compiling',
+     HEAD + [T + 'rX = new P', 'end', 'class P', 'end'],
+     refused('R14', 4, 'r is the letter of a record, and this literal is an object; written', 'rX'), 1),
 ]
 
 

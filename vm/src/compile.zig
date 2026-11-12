@@ -1409,6 +1409,8 @@ pub const ClassInfo = struct {
     attrs: std.ArrayListUnmanaged(Attr) = .{},
     methods: std.ArrayListUnmanaged(u32) = .{},
     id: u16 = 0,
+    /// v0.64 (D76, HARO-RECORD-01): written `record` in a .haro file -- its attributes are its fields, in order
+    is_record: bool = false,
     /// How many of `attrs` came from the parent, so the class's OWN
     /// declarations can be found again and the layout rebuilt. It is
     /// rebuilt because a parent can arrive after its child: Softanza loads
@@ -1902,7 +1904,7 @@ pub const BlockSite = struct {
 };
 
 const R_GLOBAL = "within needs a global (D52 A2)";
-const R_PAIR = "`:key = value` is no pair in a .haro file: write [:key, value] (HARO-SURFACE-01)";
+const R_PAIR = "`:key = value` is no pair in a .haro file: write [:key, value] for a pair, or declare a record for named fields (HARO-SURFACE-01)";
 const R_BARE = "within or using without its block (D52)";
 const R_CLAUSE = "within or using with a catch of its own (D52)";
 const R_CLASS = "using a class that answers none of Release, Destroy, Close (D52 A3)";
@@ -2874,6 +2876,93 @@ pub const Compiler = struct {
         const fi = self.fileOf(self.rereadSrc(n).ptr) orelse return null;
         if (fi >= load_paths.len) return null;
         return lift.marks.get(load_paths[fi]);
+    }
+
+    /// v0.64 (D76): `n` begins on a line the lift read as `record Name`
+    fn recordRow(self: *Compiler, n: ts.Node) bool {
+        const m = self.marksOf(n) orelse return false;
+        const r = n.start().row;
+        for (m.record_rows) |x| {
+            if (x == r) return true;
+        }
+        return false;
+    }
+
+    /// v0.64 (D76): the record `name` names, or null
+    fn recordOf(self: *Compiler, name: []const u8) ?u16 {
+        const ci = self.findClassQ(name) orelse return null;
+        if (!ci.is_record) return null;
+        if (self.spell_on) self.spellAt(name, ci.name, ci.node.src);
+        return ci.id;
+    }
+
+    /// v0.64 (D76): a field the record `rcid` lacks, written `use` -- the statement's fault, naming the nearest field within two edits
+    fn noField(self: *Compiler, rcid: u16, field: []const u8, use: []const u8) void {
+        if (!self.spellIn(use)) return;
+        const rc = &self.classes.items[rcid];
+        var best: ?[]const u8 = null;
+        var best_d: u32 = 3;
+        for (rc.attrs.items) |a| {
+            const d = vm.nameDistance(field, a.name);
+            if (d < best_d) {
+                best_d = d;
+                best = a.name;
+            }
+        }
+        const why = if (best) |b|
+            std.fmt.allocPrint(self.alloc, "`{s}` has no field `{s}` -- did you mean {s}; written", .{ rc.name, field, b }) catch return
+        else
+            std.fmt.allocPrint(self.alloc, "`{s}` has no field `{s}`; written", .{ rc.name, field }) catch return;
+        self.spellSet(use, why);
+    }
+
+    /// v0.64 (D76): `User(a, b)` -- the record built, one value per field in the declared order, each checked against its field's letter
+    fn recordBuild(self: *Compiler, n: ts.Node, rcid: u16, dst: u8) Error!void {
+        var args = ts.Node{ .raw = undefined, .src = n.src };
+        var have = false;
+        var q: u32 = 0;
+        while (q < n.namedChildCount()) : (q += 1) {
+            if (std.mem.eql(u8, n.namedChild(q).kind(), "arguments")) {
+                args = n.namedChild(q);
+                have = true;
+            }
+        }
+        const argc: u32 = if (have) args.namedChildCount() else 0;
+        const rc = &self.classes.items[rcid];
+        const fields = rc.attrs.items;
+        if (argc != fields.len) {
+            if (self.spellIn(n.text())) {
+                var list = std.ArrayListUnmanaged(u8){};
+                for (fields, 0..) |f, k| {
+                    if (k > 0) try list.appendSlice(self.alloc, ", ");
+                    try list.appendSlice(self.alloc, f.name);
+                }
+                const why = std.fmt.allocPrint(self.alloc, "`{s}` is built from {d} values, in this order: {s}; written", .{ rc.name, fields.len, list.items }) catch "a record built from the wrong number of values; written";
+                self.spellSet(n.text(), why);
+            }
+            _ = try self.emit(.loadk, dst, 0, 0, try self.konstIndex("\"\""));
+            return;
+        }
+        const ni = try self.nameIndex(rc.name);
+        const mark: u32 = @as(u32, ni) + 1;
+        const save = self.temp;
+        defer self.temp = save;
+        const objr = try self.tmp();
+        _ = try self.emit(.newobj, objr, @intCast(mark & 0xFF), @intCast(mark >> 8), @intCast(rcid));
+        for (fields, 0..) |f, k| {
+            const s2 = self.temp;
+            defer self.temp = s2;
+            const arg = args.namedChild(@intCast(k));
+            const t = try self.tmp();
+            try self.expr(arg, t);
+            if (self.needsCopyAssign(arg)) _ = try self.emit(.copyv, t, 0, 0, 0);
+            if (Compiler.letterOf(f.name)) |l| {
+                if (std.mem.indexOfScalar(u8, Compiler.CHECKED, l) != null) try self.emitLetterCheck(t, l, f.name);
+            }
+            const slot = self.attrSlotOf(rcid, f.name) orelse continue;
+            _ = try self.emit(.sattr, objr, t, 0, @intCast(slot));
+        }
+        _ = try self.emit(.move, dst, objr, 1, 0);
     }
 
     /// the line of `n` ends with `maybe` in the file as written
@@ -4194,6 +4283,9 @@ pub const Compiler = struct {
             // gattr already carries the object in r[b]; This-attribute reads
             // pass 0, which is r0, which is `this`.
             if (self.recvClass(n.namedChild(0))) |rcid| {
+                // v0.64 (D76): a field the proven record lacks
+                if (self.classes.items[rcid].is_record and self.attrSlotOf(rcid, n.namedChild(1).text()) == null)
+                    self.noField(rcid, n.namedChild(1).text(), n.text());
                 if (self.attrSlotOf(rcid, n.namedChild(1).text())) |slot| {
                     // a class with `get<name>` is read through it (F-73):
                     // the by-name path below applies Ring's whole rule
@@ -4775,6 +4867,10 @@ pub const Compiler = struct {
     }
 
     fn call(self: *Compiler, n: ts.Node, dst: u8) Error!void {
+        // v0.64 (D76): `User(a, b)` in a .haro file builds the record User
+        if (self.eval == null and std.mem.eql(u8, n.namedChild(0).kind(), "identifier") and self.haroNode(n)) {
+            if (self.recordOf(n.namedChild(0).text())) |rcid| return self.recordBuild(n, rcid, dst);
+        }
         // `super.Method(...)` -- the PARENT class's method, on this same
         // receiver. Resolved statically: the parent is known at compile
         // time, so this is a direct call rather than a dispatch, and it
@@ -6535,6 +6631,15 @@ pub const Compiler = struct {
             if (self.resident) return self.newLate(n, cn, dst, early);
             return self.absentClass(cn);
         };
+        // v0.64 (D76): a record is built by its name
+        if (ci.is_record) {
+            if (self.spellIn(n.text())) {
+                const why = std.fmt.allocPrint(self.alloc, "a record is built by its name, with its values: {s}(...); written", .{ci.name}) catch "a record is built by its name; written";
+                self.spellSet(n.text(), why);
+            }
+            _ = try self.emit(.loadk, dst, 0, 0, try self.konstIndex("\"\""));
+            return;
+        }
 
         const save = self.temp;
         defer self.temp = save;
@@ -6760,6 +6865,12 @@ pub const Compiler = struct {
             if (std.mem.eql(u8, cn.kind(), "call_expression")) cn = cn.namedChild(0);
             const ci = self.findClass(cn.text()) orelse return null;
             return ci.id;
+        }
+        // v0.64 (D76): `User(a, b)` proves the record User
+        if (std.mem.eql(u8, k, "call_expression") and n.namedChildCount() > 0 and
+            std.mem.eql(u8, n.namedChild(0).kind(), "identifier"))
+        {
+            return self.recordOf(n.namedChild(0).text());
         }
         if (std.mem.eql(u8, k, "identifier")) {
             const l = self.lookup(n.text()) orelse {
@@ -7170,7 +7281,7 @@ pub const Compiler = struct {
     // refused when compiling (the statement's fault, as a misspelling is); any other value given a checked letter is checked where
     // it is given, by `lchk`. A .ring file is untouched.
     const LETTERS = "bidfntxkvmroehswa";
-    const CHECKED = "bidntfvohe";
+    const CHECKED = "bidntfvoher";
 
     fn letterCore(name: []const u8) []const u8 {
         return if (name.len > 0 and (name[0] == '$' or name[0] == '@')) name[1..] else name;
@@ -7219,6 +7330,7 @@ pub const Compiler = struct {
             't' => "a text",
             'v' => "a vector",
             'o' => "an object",
+            'r' => "a record",
             'h' => "a handle",
             else => "a value",
         };
@@ -7294,6 +7406,12 @@ pub const Compiler = struct {
 
     /// A checked letter given a literal of another type: the statement's fault. Answers whether the literal settles the check.
     fn letterLiteral(self: *Compiler, use: []const u8, l: u8, rhs: ts.Node) bool {
+        // v0.64 (D76): `new` of a record is no object -- its own refusal says how a record is built
+        if (std.mem.eql(u8, rhs.kind(), "new_expression") or std.mem.eql(u8, rhs.kind(), "new_with_parens")) {
+            var cn = rhs.namedChild(0);
+            if (std.mem.eql(u8, cn.kind(), "call_expression")) cn = cn.namedChild(0);
+            if (self.findClassQ(cn.text())) |ci| if (ci.is_record) return false;
+        }
         const lit = literalLetter(rhs) orelse return false;
         if (letterTakes(l, lit)) return true;
         if (!self.spellIn(use)) return true;
@@ -7475,6 +7593,8 @@ pub const Compiler = struct {
         if (std.mem.eql(u8, lhs.kind(), "member_expression")) {
             const aname = lhs.namedChild(1).text();
             if (self.recvClass(lhs.namedChild(0))) |rcid| {
+                // v0.64 (D76): a field the proven record lacks
+                if (self.classes.items[rcid].is_record and self.attrSlotOf(rcid, aname) == null) self.noField(rcid, aname, lhs.text());
                 if (self.attrSlotOf(rcid, aname)) |slot| {
                     // a class with `set<name>` (or, for a compound, `get`)
                     // is written through it: the by-name path below
@@ -11217,6 +11337,7 @@ fn collectAll(c: *Compiler, root: ts.Node, alloc: std.mem.Allocator) Error!void 
             .node = p.node,
             .id = @intCast(c.classes.items.len),
         };
+        ci.is_record = c.recordRow(p.node);
         // Attributes are declared between `class C` and its first `def` --
         // and AGAIN after a `private` marker that follows methods: probed on
         // 1.27, `@d@ = 7` written after `private` after two defs is a real
