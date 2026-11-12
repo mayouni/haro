@@ -1917,6 +1917,10 @@ D58, the Principal's ruling of 2026-11-09 ("ParentClassName"), revising v0.42's 
 
 **Results.** 9 of 9 cases on both builds; 5 of 5 plants; v36 to v48's courts green. Haro's 2,172 calls re-spelled by a tool (20fc236, listed in v20/tool_commits.txt).
 
+## The sixtieth rung -- Haro v0.60, symbols compared by name -- 2026-11-12
+
+D72, from stzlib-haroport's two symbol findings: a symbol's word is no keyword; a symbol compares with a text by its name, case ignored, and a value that is not text is not the symbol. 6 of 6 on both builds, plants S1-S5 (a963f89). With it, haroport's CALLNAME-01 and NAMETEXT-01 (c64fecb).
+
 ## The fifty-ninth rung -- Haro v0.59, `null` leaves Haro -- 2026-11-12
 
 D71, TYPES.md T5, on the Principal's "Right after absence" and his "IsEmpty(x)": `null` and `IsNull` are refused in a `.haro` file; `IsEmpty(x)` tests the empty text. 5 of 5 on both builds, plants Z1-Z4 (862d426); Haro's code by `study/v59/nullfree.py` (a45b9c2: 302 null, 384 IsNull); haroport's rule N.
