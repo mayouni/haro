@@ -1917,6 +1917,10 @@ D58, the Principal's ruling of 2026-11-09 ("ParentClassName"), revising v0.42's 
 
 **Results.** 9 of 9 cases on both builds; 5 of 5 plants; v36 to v48's courts green. Haro's 2,172 calls re-spelled by a tool (20fc236, listed in v20/tool_commits.txt).
 
+## The fifty-ninth rung -- Haro v0.59, `null` leaves Haro -- 2026-11-12
+
+D71, TYPES.md T5, on the Principal's "Right after absence" and his "IsEmpty(x)": `null` and `IsNull` are refused in a `.haro` file; `IsEmpty(x)` tests the empty text. 5 of 5 on both builds, plants Z1-Z4 (862d426); Haro's code by `study/v59/nullfree.py` (a45b9c2: 302 null, 384 IsNull); haroport's rule N.
+
 ## The fifty-eighth rung -- Haro v0.58, absence -- 2026-11-11
 
 D70, TYPES.md T5 with the Principal's spelling: `func Find(kId) maybe`, `oParent = none maybe`, `x = E else D`. `none` stands only where a maybe is declared; a maybe is resolved where it lands or refused; `E else D` takes D when E is none. No grammar change: the lift reads both words. 16 of 16 on both builds, plants A1-A12 (64c0f87). With it, HARO-CHAIN-COMMENT-01: a dot is a trailing period only when it ends its line.
