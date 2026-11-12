@@ -110,6 +110,18 @@ PLANTS = [
                                                                   "            if False:")]),
     ('T59', 'H37', 'a global named as a symbol keeps its old name', [("            if k == 'id' and is_symbol(toks, i) and v.startswith('$') and v in c_map:",
                                                                       "            if False:")]),
+    # v0.61 (D73): rule A
+    ('T60', 'H38', 'a name lettered a is left as written', [("    if m and (pre + core).lower() not in KW and core.lower() not in KW:",
+                                                             "    if False:")]),
+    ('T61', 'H38', 'a name lettered a is v whatever it holds', [("('v' if letters.get(pre + core) == 'v' else 'x')", "'v'")]),
+    ('T62', 'H39', 'two names given one new name are both renamed', [("        if len(olds) > 1:", "        if False:")]),
+    ('T63', 'H04', 'a list declared in a function is lettered a', [("        return 'v'\n    if low.startswith('new '):",
+                                                                    "        return 'a'\n    if low.startswith('new '):")]),
+    ('T64', 'H40', 'a definition\'s own name is respelled as a built-in', [
+        ("        if v.startswith('_') or (h is not None and toks[h][0] == 'id' and toks[h][1].lower() in ('def', 'func', 'function')):",
+         "        if v.startswith('_'):")]),
+    ('T65', 'H40', 'a name with a leading underscore is respelled as a built-in', [
+        ("        if v.startswith('_') or (h is not None", "        if (h is not None")]),
     ('T21', 'H17', 'a call through a receiver is respelled', [
         ("        if k != 'id' or v.startswith(('$', '@')) or is_member(toks, i) or is_symbol(toks, i):",
          "        if k != 'id' or v.startswith(('$', '@')) or is_symbol(toks, i):")]),

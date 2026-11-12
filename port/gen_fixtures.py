@@ -47,7 +47,7 @@ CASES = [
         'main.ring': ['count = 1', 'func f', T + 'count = 3', T + 'name = "a"', T + 'items = [1, 2]', T + 'o = new P', T + '? count + 1',
                       'class P', T + 'size = 2']},
      [("applied['main.haro'].splitlines()[0]", 'count = 1'),
-      ("'nCount = 3' in applied['main.haro'] and 'tName = \"a\"' in applied['main.haro'] and 'aItems = [1, 2]' in applied['main.haro']", True),
+      ("'nCount = 3' in applied['main.haro'] and 'tName = \"a\"' in applied['main.haro'] and 'vItems = [1, 2]' in applied['main.haro']", True),
       ("'oO = new P' in applied['main.haro'] and '? nCount + 1' in applied['main.haro']", True),
       ("applied['main.haro'].splitlines()[-2:]", ['\tsize = 2', 'end'])]),
     ('H05', 'L', 'a method\'s bare assignment to an attribute of its class is not made a local: refused, named', {
@@ -110,7 +110,7 @@ CASES = [
     # (c) HARO-SURFACE-01: `:key = value` is the pair [:key, value]
     ('H19', 'P', ':key = value is the pair [:key, value], the value read to its depth\'s comma or bracket', {
         'main.ring': ['aX = [ :a = 1, :b = "x, y", :c = [1, 2], :d = max(3, 4) ]', '? :k = 5']},
-     [("applied['main.haro'].splitlines()[0]", 'aX = [ [:a, 1], [:b, "x, y"], [:c, [1, 2]], [:d, Max(3, 4)] ]'),
+     [("applied['main.haro'].splitlines()[0]", 'vX = [ [:a, 1], [:b, "x, y"], [:c, [1, 2]], [:d, Max(3, 4)] ]'),
       ("applied['main.haro'].splitlines()[1]", '? [:k, 5]')]),
     # (d) --unit FILE: a function only a file the unit never loads defines does not keep a built-in as it is
     ('H20', 'B', 'with --unit, a function in a file the unit never loads leaves the built-in respelled', {
@@ -121,7 +121,7 @@ CASES = [
     # ending in an operator closed at the line's end (291 statements no longer parsed), and an unwrapped _cName_ left as cName
     ('H21', 'P', 'a pair\'s value goes on past a line that ends in an operator, as Ring reads it', {
         'main.ring': ['aX = [ :q = "a" + "|" +', T + '"b", :r = 2 ]', '? aX[1][2]']},
-     [("applied['main.haro'].splitlines()[0]", 'aX = [ [:q, "a" + "|" +'),
+     [("applied['main.haro'].splitlines()[0]", 'vX = [ [:q, "a" + "|" +'),
       ("applied['main.haro'].splitlines()[1]", '\t"b"], [:r, 2] ]')]),
     ('H22', 'U', 'an unwrapped _cName_ takes Softanza\'s c rule too: tName', {
         'main.ring': ['func f', T + '_cPath_ = "a"', T + '? _cPath_']},
@@ -129,8 +129,8 @@ CASES = [
     # ---- the third round (HARO-PORTTOOL-ROUND3-01, the Principal's HAROPORT-SPELLINGS-02 of 2026-11-11), written before its code
     ('H23', 'R', '(a) a parameter keeps its p mark: pc is pt, pa with an element letter is pv with it, pn and pb stay', {
         'main.ring': ['func f pcName, pnAt, pbOk, panPos, paList', T + '? pcName + pnAt', T + '? Len(panPos) + Len(paList)']},
-     [("applied['main.haro'].splitlines()[0]", 'func f(ptName, pnAt, pbOk, pviPos, paList)'),
-      ("'? ptName + pnAt' in applied['main.haro'] and '? Len(pviPos) + Len(paList)' in applied['main.haro']", True)]),
+     [("applied['main.haro'].splitlines()[0]", 'func f(ptName, pnAt, pbOk, pviPos, pxList)'),
+      ("'? ptName + pnAt' in applied['main.haro'] and '? Len(pviPos) + Len(pxList)' in applied['main.haro']", True)]),
     ('H24', 'R', '(b) a b name given 1 or 0 is given true or false; a condition on a 1 or 0 literal is true or false', {
         'main.ring': ['bReady = 1', '$bDone = 0', 'func f', T + 'bOk = 1', T + 'while 1', T + T + 'exit', T + 'end', T + 'if 0', T + T + '? "no"',
                       T + 'ok', T + 'return bOk', 'class P', T + '@bOpen = 0']},
@@ -140,7 +140,7 @@ CASES = [
         'main.ring': ['func f', T + 'anPos = [1]', T + 'acNames = ["a"]', T + 'aoItems = []', T + 'aaRows = [[1]]', T + 'aList = [1]',
                       T + '? Len(anPos) + Len(acNames) + Len(aoItems) + Len(aaRows) + Len(aList)']},
      [("'viPos = [1]' in applied['main.haro'] and 'vtNames = [\"a\"]' in applied['main.haro'] and 'voItems = []' in applied['main.haro']", True),
-      ("'vvRows = [[1]]' in applied['main.haro'] and 'aList = [1]' in applied['main.haro']", True)]),
+      ("'vvRows = [[1]]' in applied['main.haro'] and 'vList = [1]' in applied['main.haro']", True)]),
     ('H26', 'R', '(d) an ALL_CAPS name takes its letter by what it holds, its capitals kept', {
         'main.ring': ['$MAX_NUMBER_SIZE = 5', '$SEP = "-"', '$RATE = 0.5', 'func f', T + '? $MAX_NUMBER_SIZE', T + '? $SEP', 'class P', T + '@NL = "n"']},
      [("'$iMAX_NUMBER_SIZE = 5' in applied['main.haro'] and '? $iMAX_NUMBER_SIZE' in applied['main.haro']", True),
@@ -205,6 +205,29 @@ CASES = [
         'main.ring': ['$cDenyFile = "x"', '$_logo = 1', '? isglobal("$cDenyFile")', '? isglobal(:$_logo)', "? isglobal('$cDenyFile')"]},
      [("'IsGlobal(\"$tDenyFile\")' in applied['main.haro'] and \"IsGlobal('$tDenyFile')\" in applied['main.haro']", True),
       ("'IsGlobal(:$logo)' in applied['main.haro']", True)]),
+    # ---- v0.61 (D73, TYPES.md T6, the Principal's "Start structure"), written before rule A's code. Changed by the same ruling, and
+    # said so: H04 and H25 (a list is v: vItems, vList), H19 and H21 (Softanza's aX given only a list literal is vX), H23 (paList, a
+    # parameter the tree never assigns, is pxList)
+    ('H38', 'A', 'a name lettered a is v when the tree gives it only list literals, x otherwise; a global and a parameter alike', {
+        'main.ring': ['$aCfg = []', 'aRows = [1]', 'aRows = rows()', 'func f paItems', T + 'aSeen = [1]', T + 'aSeen + 2',
+                      T + 'return Len(paItems) + Len(aSeen) + Len($aCfg)', 'func rows', T + 'return [2]']},
+     [("applied['main.haro'].splitlines()[:3]", ['$vCfg = []', 'xRows = [1]', 'xRows = rows()']),
+      ("'func f(pxItems)' in applied['main.haro'] and 'vSeen = [1]' in applied['main.haro']", True),
+      ("'return Len(pxItems) + Len(vSeen) + Len($vCfg)' in applied['main.haro']", True)]),
+    ('H39', 'A', 'an a name whose new name is another rename\'s is refused and left: vResult -> xResult beside aResult', {
+        'main.ring': ['func f', T + 'vResult = 1', T + 'return vResult', 'func g', T + 'aResult = f()', T + 'return aResult']},
+     [("'xResult = 1' in applied['main.haro'] and 'aResult = f()' in applied['main.haro']", True),
+      ("any(r['old'] == 'aResult' and r['new'] == 'xResult' for r in plan['refused'])", True)]),
+    # HARO-PORTTOOL-UNDERSCORE-01 (stzlib-haroport, 2026-11-12), before its code: rule B read a definition's own name as a call and looked
+    # it up with its underscores removed, so stzPattern's `def _Number()` became `def Number` and this._Number() met R14
+    ('H40', 'B', 'a definition\'s own name is never respelled as a built-in, nor a name with a leading underscore', {
+        'main.ring': ['o = new P', '? o._Number() + o.len()', '? _Number()', 'func _Number()', T + 'return 5', 'class P',
+                      'def _Number()', T + 'return 1', 'def len()', T + 'return 2', 'def _Len()', T + 'return 3', 'def Twice()',
+                      T + 'return _Len() * 2']},
+     [("'def _Number' in applied['main.haro'] and 'def len' in applied['main.haro']", True),
+      ("'? _Number()' in applied['main.haro'] and 'func _Number' in applied['main.haro']", True),
+      # a bare call of an underscore method, no top-level function of its name: added after plant T65 missed, said so
+      ("'return _Len() * 2' in applied['main.haro']", True)]),
     ('H11', '-', 'the ported tree runs on haro and prints what the classic Ring surface printed', {
         'main.ring': ['load "lib.ring"', 'cName = Greet("ada")', '? cName', '? Len(cName)'],
         'lib.ring': ['func Greet cWho', T + 'cOut = "hi " + cWho', T + 'return cOut']},

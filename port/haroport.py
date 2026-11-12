@@ -8,7 +8,7 @@ THE REWRITES, in this order, each on code only (a string, a comment, a symbol's 
   K  a keyword in any case is written in lowercase -- the keywords are vm/src/lift.zig's ring_keywords, read from there
   U  Softanza's method-local spelling _name_ is unwrapped to name
   C  Softanza's c (text) is t and its v (any value) is x: cName -> tName, $cX -> $tX, @cX -> @tX -- one decision for the whole tree
-  L  a bare name declared in a function (assigned, a parameter) is lettered by what it holds: n a number, t a text, a a list, o an object,
+  L  a bare name declared in a function (assigned, a parameter) is lettered by what it holds: n a number, t a text, v a list, o an object,
      x anything else or two kinds -- never at the top level or in a class body, never a name the class declares as an attribute
   G  a library-internal global $_name is $name -- one decision for the whole tree
   B  a built-in called by name is written in its one spelling (study/v48/builtin_names.py), unless the tree defines a function of that name
@@ -17,6 +17,9 @@ THE REWRITES, in this order, each on code only (a string, a comment, a symbol's 
   R  (the Principal's HAROPORT-SPELLINGS-02, 2026-11-11) a parameter keeps its p mark (pc -> pt, pa + element -> pv + element); a list
      letter is v and the element's (an/ac/ao/aa -> vi/vt/vo/vv); an ALL_CAPS name and an @Capitalised attribute take their letter by what
      they hold (1 or 0 alone and never counted: a boolean)
+  A  (D73, v0.61) Softanza's list letter a retires: a name lettered a (aList, $aRows, paItems) is v when every value the tree gives it
+     is a list literal and x otherwise, a parameter keeping its p mark -- one decision for the whole tree; refused, and listed, when the
+     new name is in the tree or is another rename's new name (vResult -> xResult and aResult -> xResult: the a name is left)
   Y  a b name given 1 or 0 is given true or false, and a condition on a literal 1 or 0 is on true or false
   N  (D71) `null` is `""` and `isnull(x)` is `IsEmpty(x)`
   O  (D69) see and put: `see E + nl` is `print E`, any other is `FWrite(stdout, E)`
@@ -116,7 +119,7 @@ def kind_of(rhs):
     if r[0] in '"\'`' or any(low.startswith(c + '(') for c in TEXT_CALLS):
         return 't'
     if r.startswith('['):
-        return 'a'
+        return 'v'
     if low.startswith('new '):
         return 'o'
     return 'x'
@@ -274,6 +277,10 @@ def port_file(rel, src, tree_funcs, tree_names, c_map, refused):
     # B: a built-in called by name, in its one spelling
     for i, (k, v) in enumerate(toks):
         if k != 'id' or v.startswith(('$', '@')) or is_member(toks, i) or is_symbol(toks, i):
+            continue
+        # UNDERSCORE-01: a definition's own name is no call, and a name with a leading underscore is no built-in
+        h = sig(toks, i, -1)
+        if v.startswith('_') or (h is not None and toks[h][0] == 'id' and toks[h][1].lower() in ('def', 'func', 'function')):
             continue
         j = sig(toks, i, 1)
         if j is None or toks[j][1] != '(':
@@ -436,6 +443,17 @@ def port_tree(root, unit=None):
                 refused.append({'file': '*', 'scope': 'tree', 'old': name, 'new': new, 'why': 'already: `%s` is a name in the tree' % new})
             else:
                 c_map[name] = new
+    # A (D73): two names given one new name -- vResult -> xResult beside aResult -> xResult -- leave the a name as written
+    by_new = {}
+    for old, new in c_map.items():
+        by_new.setdefault(new, []).append(old)
+    for new, olds in by_new.items():
+        if len(olds) > 1:
+            for old in olds:
+                if re.fullmatch(r'p?a[A-Z]\w*', old.lstrip('$@')):
+                    del c_map[old]
+                    refused.append({'file': '*', 'scope': 'tree', 'old': old, 'new': new,
+                                    'why': 'already: `%s` is the new name of %s' % (new, ', '.join(o for o in olds if o != old))})
     out = {}
     renames = {}
     for r in rels:
@@ -515,6 +533,10 @@ def round3(pre, core, letters):
         return pre + 'pv' + LIST_LETTER[core[2]] + core[3:]
     if re.fullmatch(r'a[ncoa][A-Z]\w*', core):
         return pre + 'v' + LIST_LETTER[core[1]] + core[2:]
+    # A (D73): a, kept until structure, retires -- v when the tree gives the name only list literals, x otherwise
+    m = re.fullmatch(r'(p?)a([A-Z]\w*)', core)
+    if m and (pre + core).lower() not in KW and core.lower() not in KW:
+        return pre + m.group(1) + ('v' if letters.get(pre + core) == 'v' else 'x') + m.group(2)
     # only a name the tree assigns holds a value: a call written in capitals is no constant
     if re.fullmatch(r'[A-Z][A-Z0-9_]+', core) and (pre + core) in letters:
         return pre + letters[pre + core] + core

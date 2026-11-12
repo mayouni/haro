@@ -88,7 +88,7 @@
      "count = 1"
     ],
     [
-     "'nCount = 3' in applied['main.haro'] and 'tName = \"a\"' in applied['main.haro'] and 'aItems = [1, 2]' in applied['main.haro']",
+     "'nCount = 3' in applied['main.haro'] and 'tName = \"a\"' in applied['main.haro'] and 'vItems = [1, 2]' in applied['main.haro']",
      true
     ],
     [
@@ -378,7 +378,7 @@
    "asserts": [
     [
      "applied['main.haro'].splitlines()[0]",
-     "aX = [ [:a, 1], [:b, \"x, y\"], [:c, [1, 2]], [:d, Max(3, 4)] ]"
+     "vX = [ [:a, 1], [:b, \"x, y\"], [:c, [1, 2]], [:d, Max(3, 4)] ]"
     ],
     [
      "applied['main.haro'].splitlines()[1]",
@@ -419,7 +419,7 @@
    "asserts": [
     [
      "applied['main.haro'].splitlines()[0]",
-     "aX = [ [:q, \"a\" + \"|\" +"
+     "vX = [ [:q, \"a\" + \"|\" +"
     ],
     [
      "applied['main.haro'].splitlines()[1]",
@@ -453,10 +453,10 @@
    "asserts": [
     [
      "applied['main.haro'].splitlines()[0]",
-     "func f(ptName, pnAt, pbOk, pviPos, paList)"
+     "func f(ptName, pnAt, pbOk, pviPos, pxList)"
     ],
     [
-     "'? ptName + pnAt' in applied['main.haro'] and '? Len(pviPos) + Len(paList)' in applied['main.haro']",
+     "'? ptName + pnAt' in applied['main.haro'] and '? Len(pviPos) + Len(pxList)' in applied['main.haro']",
      true
     ]
    ]
@@ -499,7 +499,7 @@
      true
     ],
     [
-     "'vvRows = [[1]]' in applied['main.haro'] and 'aList = [1]' in applied['main.haro']",
+     "'vvRows = [[1]]' in applied['main.haro'] and 'vList = [1]' in applied['main.haro']",
      true
     ]
    ]
@@ -790,6 +790,75 @@
     ],
     [
      "'IsGlobal(:$logo)' in applied['main.haro']",
+     true
+    ]
+   ]
+  },
+  {
+   "id": "H38",
+   "line": "A",
+   "why": "a name lettered a is v when the tree gives it only list literals, x otherwise; a global and a parameter alike",
+   "folder": "cases/H38",
+   "files": [
+    "main.ring"
+   ],
+   "asserts": [
+    [
+     "applied['main.haro'].splitlines()[:3]",
+     [
+      "$vCfg = []",
+      "xRows = [1]",
+      "xRows = rows()"
+     ]
+    ],
+    [
+     "'func f(pxItems)' in applied['main.haro'] and 'vSeen = [1]' in applied['main.haro']",
+     true
+    ],
+    [
+     "'return Len(pxItems) + Len(vSeen) + Len($vCfg)' in applied['main.haro']",
+     true
+    ]
+   ]
+  },
+  {
+   "id": "H39",
+   "line": "A",
+   "why": "an a name whose new name is another rename's is refused and left: vResult -> xResult beside aResult",
+   "folder": "cases/H39",
+   "files": [
+    "main.ring"
+   ],
+   "asserts": [
+    [
+     "'xResult = 1' in applied['main.haro'] and 'aResult = f()' in applied['main.haro']",
+     true
+    ],
+    [
+     "any(r['old'] == 'aResult' and r['new'] == 'xResult' for r in plan['refused'])",
+     true
+    ]
+   ]
+  },
+  {
+   "id": "H40",
+   "line": "B",
+   "why": "a definition's own name is never respelled as a built-in, nor a name with a leading underscore",
+   "folder": "cases/H40",
+   "files": [
+    "main.ring"
+   ],
+   "asserts": [
+    [
+     "'def _Number' in applied['main.haro'] and 'def len' in applied['main.haro']",
+     true
+    ],
+    [
+     "'? _Number()' in applied['main.haro'] and 'func _Number' in applied['main.haro']",
+     true
+    ],
+    [
+     "'return _Len() * 2' in applied['main.haro']",
      true
     ]
    ]
