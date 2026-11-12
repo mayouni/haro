@@ -12,30 +12,30 @@
 
 load "haro_lib.haro"
 
-$aStzuToks = []
-$aStzuUnions = []
+$xStzuToks = []
+$xStzuUnions = []
 $nStzuPos = 1
-$aCondToks = []
+$xCondToks = []
 $nCondPos = 1
-$aCondDeclSeats = []
-$aCondDecls = []
-$aCondVerbOf = []
+$vCondDeclSeats = []
+$xCondDecls = []
+$vCondVerbOf = []
 $tCondOther = ""
-$aCondRefSeats = []
-$aCondFormats = []
+$vCondRefSeats = []
+$xCondFormats = []
 $bCondUnread = false
-$aCondLangs = []
+$xCondLangs = []
 $tCondLang = ""
-$aCourtSentences = []
+$vCourtSentences = []
 $tStzuDir = ""
 $bStzuCollect = false
-$aStzuFound = []
-$aStzuBroken = []
-$aStzuLastName = ""
-$aStzuUnresolved = []
-$aStzuWarnings = []
-$aStzuNotes = []
-$aBlkToks = []
+$vStzuFound = []
+$vStzuBroken = []
+$xStzuLastName = ""
+$vStzuUnresolved = []
+$vStzuWarnings = []
+$vStzuNotes = []
+$xBlkToks = []
 $nBlkPos = 1
 
 if Len(sysargv) < 3
@@ -56,8 +56,8 @@ else
 		HaroAll(tSrc)
 	else
 		try
-			aLang = StzuDeclare(tSrc)
-			StzuPrintLanguage(aLang)
+			xLang = StzuDeclare(tSrc)
+			StzuPrintLanguage(xLang)
 		catch
 			? cCatchError
 		end
@@ -82,22 +82,22 @@ end
 func HaroAll(tText)
 	$bStzuCollect = true
 	tE = ""
-	aL = ""
+	xL = ""
 	try
-		aL = StzuDeclare(tText)
+		xL = StzuDeclare(tText)
 	catch
 		tE = cCatchError
 	end
 	$bStzuCollect = false
 	if tE != ""
-		$aStzuFound + [StzuLineOf(tE), StzuStripPrefix(tE)]
+		$vStzuFound + [StzuLineOf(tE), StzuStripPrefix(tE)]
 	end
-	if Len($aStzuFound) > 0
-		aFd = StzuSortFound($aStzuFound)
-		for k = 1 to Len(aFd)
-			? "haro (line " + String(aFd[k][1]) + "): " + String(aFd[k][2])
+	if Len($vStzuFound) > 0
+		xFd = StzuSortFound($vStzuFound)
+		for k = 1 to Len(xFd)
+			? "haro (line " + String(xFd[k][1]) + "): " + String(xFd[k][2])
 		end
 	else
-		StzuPrintLanguage(aL)
+		StzuPrintLanguage(xL)
 	end
 end

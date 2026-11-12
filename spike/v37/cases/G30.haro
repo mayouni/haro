@@ -1,8 +1,8 @@
 h()
 func h
-	aL = []
+	xL = []
 	try
-		? aL[2]
+		? xL[2]
 	finally
 		? "cleanup"
 	end

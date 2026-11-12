@@ -1,6 +1,6 @@
 f()
 func f
-	aS = TUISize()
-	? Len(aS)
-	? aS[1] + aS[2]
+	xS = TUISize()
+	? Len(xS)
+	? xS[1] + xS[2]
 end

@@ -1,6 +1,6 @@
 ? "before"
 f()
 func f
-	aL = [:a = 1]
-	? Len(aL)
+	xL = [:a = 1]
+	? Len(xL)
 end

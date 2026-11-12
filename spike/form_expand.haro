@@ -28,47 +28,47 @@ func CondPrintVal(tV, bBare)
 	if bBare and CondIsBareWord(tV) and tV != "this" and tV != "self" return tV end
 	return "'" + tV + "'"
 end
-func CondPrintRight(aR, bBare)
-	if aR[1] = "path" return CondPathText(aR) end
-	return CondPrintVal(aR[2], bBare)
+func CondPrintRight(xR, bBare)
+	if xR[1] = "path" return CondPathText(xR) end
+	return CondPrintVal(xR[2], bBare)
 end
-func CondPrint(aAst)
-	return CondPrintP(aAst, 0)
+func CondPrint(xAst)
+	return CondPrintP(xAst, 0)
 end
 # nCtx is the precedence the context needs: or 1, and 2, not 3, an atom 4; a node of lower precedence is parenthesised
-func CondPrintP(aAst, nCtx)
-	xK = aAst[1]
+func CondPrintP(xAst, nCtx)
+	xK = xAst[1]
 	if xK = "or"
-		tC = CondPrintP(aAst[2], 1) + " or " + CondPrintP(aAst[3], 2)
+		tC = CondPrintP(xAst[2], 1) + " or " + CondPrintP(xAst[3], 2)
 		if nCtx > 1 return "(" + tC + ")" end
 		return tC
 	end
 	if xK = "and"
-		tC = CondPrintP(aAst[2], 2) + " and " + CondPrintP(aAst[3], 3)
+		tC = CondPrintP(xAst[2], 2) + " and " + CondPrintP(xAst[3], 3)
 		if nCtx > 2 return "(" + tC + ")" end
 		return tC
 	end
-	if xK = "not" return "not " + CondPrintP(aAst[2], 3) end
-	if xK = "exists" return "exists " + aAst[2] end
+	if xK = "not" return "not " + CondPrintP(xAst[2], 3) end
+	if xK = "exists" return "exists " + xAst[2] end
 	if xK = "quant"
-		tC = "(" + aAst[2] + " " + CondPathText(aAst[3])
-		if not IsEmpty(aAst[4]) tC += " named " + CondPrintRight(aAst[4], true) end
-		if not IsEmpty(aAst[5]) tC += " where " + CondPrintP(aAst[5], 0) end
+		tC = "(" + xAst[2] + " " + CondPathText(xAst[3])
+		if not IsEmpty(xAst[4]) tC += " named " + CondPrintRight(xAst[4], true) end
+		if not IsEmpty(xAst[5]) tC += " where " + CondPrintP(xAst[5], 0) end
 		return tC + ")"
 	end
 	if xK = "cmp"
-		if aAst[2] = ">" or aAst[2] = "<" return CondPathText(aAst[3]) + " " + aAst[2] + " " + aAst[4][2] end
-		return CondPathText(aAst[3]) + " " + aAst[2] + " " + CondPrintRight(aAst[4], true)
+		if xAst[2] = ">" or xAst[2] = "<" return CondPathText(xAst[3]) + " " + xAst[2] + " " + xAst[4][2] end
+		return CondPathText(xAst[3]) + " " + xAst[2] + " " + CondPrintRight(xAst[4], true)
 	end
-	if xK = "has" return CondPathText(aAst[3]) + " " + aAst[2] end
-	if xK = "contains" return CondPathText(aAst[2]) + " contains " + CondPrintVal(aAst[3], true) end
-	if xK = "rel" return CondPathText(aAst[3]) + " " + aAst[2] + " " + CondPrintRight(aAst[4], false) end
-	if xK = "cyclic" return CondPathText(aAst[2]) + " cyclic" end
-	if xK = "matches" return CondPathText(aAst[2]) + " matches " + aAst[3] end
-	if xK = "is" return "self is " + aAst[2] end
-	if xK = "reach" return CondPathText(aAst[2]) + " reachable" end
-	if xK = "refd" return CondPathText(aAst[2]) + " referenced" end
-	if xK = "keyed" return CondPathText(aAst[2]) + " keyed_by " + CondPrintRight(aAst[3], false) end
+	if xK = "has" return CondPathText(xAst[3]) + " " + xAst[2] end
+	if xK = "contains" return CondPathText(xAst[2]) + " contains " + CondPrintVal(xAst[3], true) end
+	if xK = "rel" return CondPathText(xAst[3]) + " " + xAst[2] + " " + CondPrintRight(xAst[4], false) end
+	if xK = "cyclic" return CondPathText(xAst[2]) + " cyclic" end
+	if xK = "matches" return CondPathText(xAst[2]) + " matches " + xAst[3] end
+	if xK = "is" return "self is " + xAst[2] end
+	if xK = "reach" return CondPathText(xAst[2]) + " reachable" end
+	if xK = "refd" return CondPathText(xAst[2]) + " referenced" end
+	if xK = "keyed" return CondPathText(xAst[2]) + " keyed_by " + CondPrintRight(xAst[3], false) end
 	Raise("condition: no printing for a node of kind '" + xK + "'")
 end
 # a parsed condition as one line, every string length-free and quoted: two conditions are one when their dumps are
@@ -85,26 +85,26 @@ end
 # ---- the kinds that include a FORM ---------------------------------------------------------------------------------------------
 
 # [[form, [kind, ...]], ...] in the order the kinds are declared; only a FORM some kind includes is in it (a name that is no FORM is a finding of INCLUDES, and the language is refused)
-func StzuFormTable(aDecls)
-	aTab = []
-	for i = 1 to Len(aDecls)
-		if Len(aDecls[i]) < 9 loop end
-		aInc = aDecls[i][9]
-		for j = 1 to Len(aInc)
-			nAt = StzuFormAt(aTab, aInc[j])
+func StzuFormTable(xDecls)
+	vTab = []
+	for i = 1 to Len(xDecls)
+		if Len(xDecls[i]) < 9 loop end
+		xInc = xDecls[i][9]
+		for j = 1 to Len(xInc)
+			nAt = StzuFormAt(vTab, xInc[j])
 			if nAt = 0
-				aNew = [aInc[j], [aDecls[i][1]]]
-				aTab + aNew
+				xNew = [xInc[j], [xDecls[i][1]]]
+				vTab + xNew
 			else
-				aTab[nAt][2] + aDecls[i][1]
+				vTab[nAt][2] + xDecls[i][1]
 			end
 		end
 	end
-	return aTab
+	return vTab
 end
-func StzuFormAt(aTab, tName)
-	for i = 1 to Len(aTab)
-		if aTab[i][1] = tName return i end
+func StzuFormAt(vTab, tName)
+	for i = 1 to Len(vTab)
+		if vTab[i][1] = tName return i end
 	end
 	return 0
 end
@@ -115,218 +115,218 @@ func StzuSeatSource(tForm)
 	return "the FORM '" + tForm + "'"
 end
 # each declaration that includes FORMs gets the seats of the FORMs first, then its own; a refusal marks the declaration unresolved
-func StzuExpandIncludes(aDecls, aForms, aDeclared)
-	for i = 1 to Len(aDecls)
-		if Len(aDecls[i]) < 9 loop end
-		aInc = aDecls[i][9]
-		if Len(aInc) = 0 loop end
+func StzuExpandIncludes(xDecls, vForms, vDeclared)
+	for i = 1 to Len(xDecls)
+		if Len(xDecls[i]) < 9 loop end
+		xInc = xDecls[i][9]
+		if Len(xInc) = 0 loop end
 		try
-			aNew = []
-			aSrc = []
-			for j = 1 to Len(aInc)
-				tF = aInc[j]
-				tK = DeclaredKind(aDeclared, tF)
-				if tK = "" StzuFail(aDecls[i][5], "INCLUDES: '" + tF + "' resolves to nothing in this declaration") end
-				if tK != "FORM" StzuFail(aDecls[i][5], "INCLUDES must name a FORM; '" + tF + "' is a " + tK) end
+			xNew = []
+			vSrc = []
+			for j = 1 to Len(xInc)
+				tF = xInc[j]
+				tK = DeclaredKind(vDeclared, tF)
+				if tK = "" StzuFail(xDecls[i][5], "INCLUDES: '" + tF + "' resolves to nothing in this declaration") end
+				if tK != "FORM" StzuFail(xDecls[i][5], "INCLUDES must name a FORM; '" + tF + "' is a " + tK) end
 				for m = 1 to j - 1
-					if aInc[m] = tF StzuFail(aDecls[i][5], "INCLUDES names '" + tF + "' twice") end
+					if xInc[m] = tF StzuFail(xDecls[i][5], "INCLUDES names '" + tF + "' twice") end
 				end
-				aFS = []
-				for m = 1 to Len(aForms)
-					if aForms[m][1] = tF aFS = aForms[m][2] end
+				xFS = []
+				for m = 1 to Len(vForms)
+					if vForms[m][1] = tF xFS = vForms[m][2] end
 				end
-				for m = 1 to Len(aFS)
-					for q = 1 to Len(aNew)
-						if aNew[q][1] = aFS[m][1]
-							StzuFail(aDecls[i][5], "seat '" + aFS[m][1] + "' of " + aDecls[i][1] + " comes twice: from " + StzuSeatSource(aSrc[q]) + " and from " + StzuSeatSource(tF))
+				for m = 1 to Len(xFS)
+					for q = 1 to Len(xNew)
+						if xNew[q][1] = xFS[m][1]
+							StzuFail(xDecls[i][5], "seat '" + xFS[m][1] + "' of " + xDecls[i][1] + " comes twice: from " + StzuSeatSource(vSrc[q]) + " and from " + StzuSeatSource(tF))
 						end
 					end
-					aNew + aFS[m]
-					aSrc + tF
+					xNew + xFS[m]
+					vSrc + tF
 				end
 			end
-			aOwn = aDecls[i][3]
-			for m = 1 to Len(aOwn)
-				for q = 1 to Len(aNew)
-					if aNew[q][1] = aOwn[m][1]
-						StzuFail(aDecls[i][5], "seat '" + aOwn[m][1] + "' of " + aDecls[i][1] + " comes twice: from " + StzuSeatSource(aSrc[q]) + " and from " + StzuSeatSource(""))
+			xOwn = xDecls[i][3]
+			for m = 1 to Len(xOwn)
+				for q = 1 to Len(xNew)
+					if xNew[q][1] = xOwn[m][1]
+						StzuFail(xDecls[i][5], "seat '" + xOwn[m][1] + "' of " + xDecls[i][1] + " comes twice: from " + StzuSeatSource(vSrc[q]) + " and from " + StzuSeatSource(""))
 					end
 				end
-				aNew + aOwn[m]
-				aSrc + ""
+				xNew + xOwn[m]
+				vSrc + ""
 			end
-			aDecls[i][3] = aNew
+			xDecls[i][3] = xNew
 		catch
 			StzuNote(cCatchError)
-			$aStzuUnresolved + aDecls[i][1]
+			$vStzuUnresolved + xDecls[i][1]
 		end
 	end
-	return aDecls
+	return xDecls
 end
 # ---- a quantifier over a FORM, and ON a FORM -----------------------------------------------------------------------------------
 
 # the fold of one node per kind: or (and, for all) in the order the kinds are declared
-func StzuFoldNodes(tOp, aNodes)
-	aR = aNodes[1]
-	for j = 2 to Len(aNodes)
-		aN = [tOp, aR, aNodes[j]]
-		aR = aN
+func StzuFoldNodes(tOp, vNodes)
+	xR = vNodes[1]
+	for j = 2 to Len(vNodes)
+		xN = [tOp, xR, vNodes[j]]
+		xR = xN
 	end
-	return aR
+	return xR
 end
-func StzuFormAst(aAst, tOn, aTab, aDecls)
-	xK = aAst[1]
+func StzuFormAst(xAst, tOn, vTab, xDecls)
+	xK = xAst[1]
 	if xK = "or" or xK = "and"
-		aL = StzuFormAst(aAst[2], tOn, aTab, aDecls)
-		aR = StzuFormAst(aAst[3], tOn, aTab, aDecls)
-		aN = [xK, aL, aR]
-		return aN
+		xL = StzuFormAst(xAst[2], tOn, vTab, xDecls)
+		xR = StzuFormAst(xAst[3], tOn, vTab, xDecls)
+		xN = [xK, xL, xR]
+		return xN
 	end
 	if xK = "not"
-		aC = StzuFormAst(aAst[2], tOn, aTab, aDecls)
-		aN = ["not", aC]
-		return aN
+		xC = StzuFormAst(xAst[2], tOn, vTab, xDecls)
+		xN = ["not", xC]
+		return xN
 	end
 	if xK = "exists"
-		nF = StzuFormAt(aTab, aAst[2])
+		nF = StzuFormAt(vTab, xAst[2])
 		if nF > 0
 			$bFormChanged = true
-			aNodes = []
-			for j = 1 to Len(aTab[nF][2])
-				aE = ["exists", aTab[nF][2][j]]
-				aNodes + aE
+			vNodes = []
+			for j = 1 to Len(vTab[nF][2])
+				xE = ["exists", vTab[nF][2][j]]
+				vNodes + xE
 			end
-			return StzuFoldNodes("or", aNodes)
+			return StzuFoldNodes("or", vNodes)
 		end
-		return aAst
+		return xAst
 	end
 	if xK = "quant"
-		aCond = aAst[5]
-		if not IsEmpty(aCond) aCond = StzuFormAst(aCond, tOn, aTab, aDecls) end
+		xCond = xAst[5]
+		if not IsEmpty(xCond) xCond = StzuFormAst(xCond, tOn, vTab, xDecls) end
 		tHead = ""
-		if Len(aAst[3][2]) = 1 tHead = aAst[3][2][1] end
+		if Len(xAst[3][2]) = 1 tHead = xAst[3][2][1] end
 		nF = 0
-		if tHead != "" nF = StzuFormAt(aTab, tHead) end
+		if tHead != "" nF = StzuFormAt(vTab, tHead) end
 		# a name that is a seat of the constraint's kind keeps the meaning it had
 		if nF > 0 and tOn != ""
-			if not IsEmpty(StzuSeatNamed(StzuSeatsOf(aDecls, tOn), tHead)) nF = 0 end
+			if not IsEmpty(StzuSeatNamed(StzuSeatsOf(xDecls, tOn), tHead)) nF = 0 end
 		end
 		if nF > 0
 			$bFormChanged = true
-			aNodes = []
-			for j = 1 to Len(aTab[nF][2])
-				aP = ["path", [aTab[nF][2][j]]]
-				aQ = ["quant", aAst[2], aP, aAst[4], aCond]
-				aNodes + aQ
+			vNodes = []
+			for j = 1 to Len(vTab[nF][2])
+				xP = ["path", [vTab[nF][2][j]]]
+				xQ = ["quant", xAst[2], xP, xAst[4], xCond]
+				vNodes + xQ
 			end
 			tOp = "or"
-			if aAst[2] = "all" tOp = "and" end
-			return StzuFoldNodes(tOp, aNodes)
+			if xAst[2] = "all" tOp = "and" end
+			return StzuFoldNodes(tOp, vNodes)
 		end
-		aQ = ["quant", aAst[2], aAst[3], aAst[4], aCond]
-		return aQ
+		xQ = ["quant", xAst[2], xAst[3], xAst[4], xCond]
+		return xQ
 	end
-	return aAst
+	return xAst
 end
 # a condition as written, or its expansion in the canonical text when it quantifies over a FORM some kind includes
-func StzuExpandCond(tCond, tOn, aTab, aDecls)
-	if Len(aTab) = 0 return tCond end
+func StzuExpandCond(tCond, tOn, vTab, xDecls)
+	if Len(vTab) = 0 return tCond end
 	$bFormChanged = false
-	aAst = ""
+	xAst = ""
 	tErr = ""
 	try
-		aAst = CondParse(tCond)
+		xAst = CondParse(tCond)
 	catch
 		tErr = cCatchError
 	end
 	# an unreadable condition is the validator's to speak of, in its own words
 	if tErr != "" return tCond end
-	aNew = StzuFormAst(aAst, tOn, aTab, aDecls)
+	xNew = StzuFormAst(xAst, tOn, vTab, xDecls)
 	if not $bFormChanged return tCond end
-	return CondPrint(aNew)
+	return CondPrint(xNew)
 end
-func StzuNameIn(tName, aRecs)
-	for i = 1 to Len(aRecs)
-		if aRecs[i][1] = tName return true end
+func StzuNameIn(tName, xRecs)
+	for i = 1 to Len(xRecs)
+		if xRecs[i][1] = tName return true end
 	end
 	return false
 end
 # the CONSTRAINTs, each ON a FORM made once for each including kind, every condition expanded
-func StzuExpandConstraints(aCons, aTab, aDecls, aDeclared)
-	if Len(aTab) = 0 return aCons end
-	aOut = []
-	for i = 1 to Len(aCons)
-		aC = aCons[i]
-		aExc = []
-		if Len(aC) >= 10 aExc = aC[10] end
-		nF = StzuFormAt(aTab, aC[2])
-		tOnKind = DeclaredKind(aDeclared, aC[2])
+func StzuExpandConstraints(xCons, vTab, xDecls, vDeclared)
+	if Len(vTab) = 0 return xCons end
+	xOut = []
+	for i = 1 to Len(xCons)
+		xC = xCons[i]
+		xExc = []
+		if Len(xC) >= 10 xExc = xC[10] end
+		nF = StzuFormAt(vTab, xC[2])
+		tOnKind = DeclaredKind(vDeclared, xC[2])
 		if nF > 0
-			aKinds = aTab[nF][2]
+			xKinds = vTab[nF][2]
 			# EXCEPT: the kinds the constraint is not made for, each a kind that includes the FORM, named once, and not all of them
 			bErr = false
-			aKept = []
+			xKept = []
 			try
-				for e = 1 to Len(aExc)
-					if DeclaredKind(aDeclared, aExc[e]) = "" StzuFail(aC[6], "EXCEPT: '" + aExc[e] + "' resolves to nothing in this declaration") end
-					if not InStrList(aExc[e], aKinds) StzuFail(aC[6], "EXCEPT names '" + aExc[e] + "', which does not include the FORM '" + aC[2] + "'") end
+				for e = 1 to Len(xExc)
+					if DeclaredKind(vDeclared, xExc[e]) = "" StzuFail(xC[6], "EXCEPT: '" + xExc[e] + "' resolves to nothing in this declaration") end
+					if not InStrList(xExc[e], xKinds) StzuFail(xC[6], "EXCEPT names '" + xExc[e] + "', which does not include the FORM '" + xC[2] + "'") end
 					for m = 1 to e - 1
-						if aExc[m] = aExc[e] StzuFail(aC[6], "EXCEPT names '" + aExc[e] + "' twice") end
+						if xExc[m] = xExc[e] StzuFail(xC[6], "EXCEPT names '" + xExc[e] + "' twice") end
 					end
 				end
-				for k = 1 to Len(aKinds)
-					if not InStrList(aKinds[k], aExc) aKept + aKinds[k] end
+				for k = 1 to Len(xKinds)
+					if not InStrList(xKinds[k], xExc) xKept + xKinds[k] end
 				end
-				if Len(aKept) = 0 StzuFail(aC[6], "EXCEPT leaves no kind for ON " + aC[2]) end
+				if Len(xKept) = 0 StzuFail(xC[6], "EXCEPT leaves no kind for ON " + xC[2]) end
 			catch
 				bErr = true
 				StzuNote(cCatchError)
 			end
 			if bErr loop end
-			aKinds = aKept
-			for k = 1 to Len(aKinds)
-				tNm = aC[1] + "_" + aKinds[k]
-				if DeclaredKind(aDeclared, tNm) != "" or StzuNameIn(tNm, aOut)
+			xKinds = xKept
+			for k = 1 to Len(xKinds)
+				tNm = xC[1] + "_" + xKinds[k]
+				if DeclaredKind(vDeclared, tNm) != "" or StzuNameIn(tNm, xOut)
 					try
-						StzuFail(aC[6], "the constraint '" + tNm + "' that ON " + aC[2] + " makes for " + aKinds[k] + " is already declared -- one namespace, one name, one meaning")
+						StzuFail(xC[6], "the constraint '" + tNm + "' that ON " + xC[2] + " makes for " + xKinds[k] + " is already declared -- one namespace, one name, one meaning")
 					catch
 						StzuNote(cCatchError)
 					end
 					loop
 				end
-				aR = aC
-				aR[1] = tNm
-				aR[2] = aKinds[k]
-				aR[3] = StzuExpandCond(aC[3], aKinds[k], aTab, aDecls)
-				if aC[4] != "" aR[4] = StzuExpandCond(aC[4], aKinds[k], aTab, aDecls) end
-				aOut + aR
+				xR = xC
+				xR[1] = tNm
+				xR[2] = xKinds[k]
+				xR[3] = StzuExpandCond(xC[3], xKinds[k], vTab, xDecls)
+				if xC[4] != "" xR[4] = StzuExpandCond(xC[4], xKinds[k], vTab, xDecls) end
+				xOut + xR
 			end
 		else
 			# EXCEPT has something to except only ON a FORM some kind includes; ON anything else it is refused (an unknown ON is the ON check's to speak of)
-			if Len(aExc) > 0 and tOnKind != ""
-				tWhy = "and '" + aC[2] + "' is a " + tOnKind
-				if tOnKind = "FORM" tWhy = "and no DECLARATION includes '" + aC[2] + "'" end
+			if Len(xExc) > 0 and tOnKind != ""
+				tWhy = "and '" + xC[2] + "' is a " + tOnKind
+				if tOnKind = "FORM" tWhy = "and no DECLARATION includes '" + xC[2] + "'" end
 				try
-					StzuFail(aC[6], "EXCEPT belongs to a constraint ON a FORM, " + tWhy)
+					StzuFail(xC[6], "EXCEPT belongs to a constraint ON a FORM, " + tWhy)
 				catch
 					StzuNote(cCatchError)
 				end
 			end
-			aR = aC
-			aR[3] = StzuExpandCond(aC[3], aC[2], aTab, aDecls)
-			if aC[4] != "" aR[4] = StzuExpandCond(aC[4], aC[2], aTab, aDecls) end
-			aOut + aR
+			xR = xC
+			xR[3] = StzuExpandCond(xC[3], xC[2], vTab, xDecls)
+			if xC[4] != "" xR[4] = StzuExpandCond(xC[4], xC[2], vTab, xDecls) end
+			xOut + xR
 		end
 	end
-	return aOut
+	return xOut
 end
 # the VIEWs' WHERE, [name, on, one, named, where, line]
-func StzuExpandViews(aViews, aTab, aDecls)
-	if Len(aTab) = 0 return aViews end
-	for i = 1 to Len(aViews)
-		if aViews[i][5] != ""
-			aViews[i][5] = StzuExpandCond(aViews[i][5], aViews[i][2], aTab, aDecls)
+func StzuExpandViews(xViews, vTab, xDecls)
+	if Len(vTab) = 0 return xViews end
+	for i = 1 to Len(xViews)
+		if xViews[i][5] != ""
+			xViews[i][5] = StzuExpandCond(xViews[i][5], xViews[i][2], vTab, xDecls)
 		end
 	end
-	return aViews
+	return xViews
 end

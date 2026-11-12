@@ -17,22 +17,22 @@
 
 load "pattern_lib.haro"
 
-$aBlkToks = []
+$xBlkToks = []
 $nBlkPos = 1
-$aPatNodes = []
+$vPatNodes = []
 $nPatNodes = 0
-$aPatNames = []
-$aPatRoots = []
-$aPatNull = []
-$aPatState = []
-$aPatSetNames = []
-$aPatSetMembers = []
-$aPatSeqVals = []
-$aPatSeqKinds = []
-$aPatSeqLen = []
-$aPatSeqBase = []
-$aPatSeqKids = []
-$aPatMemo = []
+$vPatNames = []
+$vPatRoots = []
+$vPatNull = []
+$vPatState = []
+$xPatSetNames = []
+$xPatSetMembers = []
+$vPatSeqVals = []
+$vPatSeqKinds = []
+$vPatSeqLen = []
+$vPatSeqBase = []
+$vPatSeqKids = []
+$xPatMemo = []
 $nPatMemoTop = 0
 $nPatSteps = 0
 
@@ -57,87 +57,87 @@ func PatSplit1(tLine)
 	return [Left(tLine, nI - 1), SubStr(tLine, nI + 1)]
 end
 func PatWords(tText)
-	aOut = []
+	xOut = []
 	tW = ""
 	for i = 1 to Len(tText)
 		if tText[i] = " "
 			if Len(tW) > 0
-				aOut + tW
+				xOut + tW
 				tW = ""
 			end
 		else
 			tW += tText[i]
 		end
 	end
-	if Len(tW) > 0 aOut + tW end
-	return aOut
+	if Len(tW) > 0 xOut + tW end
+	return xOut
 end
 func PatCases(tBody)
-	aLines = Str2List(tBody)
+	xLines = Str2List(tBody)
 	tId = ""
-	aNames = []
-	aTexts = []
-	aSetN = []
-	aSetM = []
+	xNames = []
+	vTexts = []
+	vSetN = []
+	vSetM = []
 	tStart = "main"
 	nInput = 0
 	tInput = ""
 	tFile = ""
 	bOpen = false
-	for i = 1 to Len(aLines)
-		tLine = aLines[i]
+	for i = 1 to Len(xLines)
+		tLine = xLines[i]
 		if Len(tLine) > 0 and tLine[Len(tLine)] = Char(13)
 			tLine = Left(tLine, Len(tLine) - 1)
 		end
-		aP = PatSplit1(tLine)
-		tCmd = aP[1]
+		xP = PatSplit1(tLine)
+		tCmd = xP[1]
 		if tCmd = "case"
-			if bOpen PatOneCase(tId, aNames, aTexts, aSetN, aSetM, tStart, nInput, tInput, tFile) end
+			if bOpen PatOneCase(tId, xNames, vTexts, vSetN, vSetM, tStart, nInput, tInput, tFile) end
 			bOpen = true
-			tId = aP[2]
-			aNames = []
-			aTexts = []
-			aSetN = []
-			aSetM = []
+			tId = xP[2]
+			xNames = []
+			vTexts = []
+			vSetN = []
+			vSetM = []
 			tStart = "main"
 			nInput = 0
 			tInput = ""
 			tFile = ""
 		elseif tCmd = "rule"
-			aQ = PatSplit1(aP[2])
-			aNames + aQ[1]
-			aTexts + aQ[2]
+			xQ = PatSplit1(xP[2])
+			xNames + xQ[1]
+			vTexts + xQ[2]
 		elseif tCmd = "set"
-			aW = PatWords(aP[2])
-			aSetN + aW[1]
-			aMem = []
-			for k = 2 to Len(aW)
-				aMem + aW[k]
+			xW = PatWords(xP[2])
+			vSetN + xW[1]
+			vMem = []
+			for k = 2 to Len(xW)
+				vMem + xW[k]
 			end
-			aSetM + aMem
+			vSetM + vMem
 		elseif tCmd = "start"
-			tStart = aP[2]
+			tStart = xP[2]
 		elseif tCmd = "input"
 			nInput = 1
-			tInput = aP[2]
+			tInput = xP[2]
 		elseif tCmd = "file"
 			nInput = 2
-			tFile = aP[2]
+			tFile = xP[2]
 		end
 	end
-	if bOpen PatOneCase(tId, aNames, aTexts, aSetN, aSetM, tStart, nInput, tInput, tFile) end
+	if bOpen PatOneCase(tId, xNames, vTexts, vSetN, vSetM, tStart, nInput, tInput, tFile) end
 end
-func PatOneCase(tId, aNames, aTexts, aSetN, aSetM, tStart, nInput, tInput, tFile)
+func PatOneCase(tId, xNames, vTexts, vSetN, vSetM, tStart, nInput, tInput, tFile)
 	try
-		PatDeclare(aNames, aTexts, aSetN, aSetM)
+		PatDeclare(xNames, vTexts, vSetN, vSetM)
 		if nInput = 0
 			? tId + " declared"
 		else
 			if nInput = 2 tInput = Read(tFile) end
-			aR = PatRun(tStart, tInput)
+			xR = PatRun(tStart, tInput)
 			tWhole = "0"
-			if aR[1] tWhole = "1" end
-			? tId + " match " + tWhole + " steps " + String(aR[3]) + " bound " + String(aR[4]) + " kept " + PatPrintKept(aR[2])
+			if xR[1] tWhole = "1" end
+			? tId + " match " + tWhole + " steps " + String(xR[3]) + " bound " + String(xR[4]) + " kept " + PatPrintKept(xR[2])
 		end
 	catch
 		? tId + " refused " + cCatchError

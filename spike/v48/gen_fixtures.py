@@ -38,13 +38,13 @@ CASES = [
     ('P04', 'P2', 'a built-in registered with an underscore is refused under that name', '.haro', [B, 'f()', 'func f', T + '? tui_size()'],
      refused('P04', 4, 'TUISize', 'tui_size'), 1),
     ('P05', 'P2', 'a built-in registered with an underscore is reached by its spelling without one', '.haro', [
-        'f()', 'func f', T + 'aS = TUISize()', T + '? Len(aS)', T + '? aS[1] + aS[2]'],
+        'f()', 'func f', T + 'xS = TUISize()', T + '? Len(xS)', T + '? xS[1] + xS[2]'],
      ['2', '0']),
     ('P06', 'P3', 'a .ring file reads every spelling as Ring does', '.ring', [
         '? len("ab")', '? Len("ab")', '? LEN("ab")', '? isNull("")', '? substr("abc", 2, 1)'],
      ['2', '2', '2', '1', 'b']),
     ('P07', 'P3', 'a program\'s own function of a built-in\'s name is the program\'s', '.haro', [
-        'f()', 'func f', T + '? Max([3, 9, 2])', 'func Max aL', T + 'nBest = aL[1]', T + 'for x in aL', T * 2 + 'if x > nBest', T * 3 + 'nBest = x',
+        'f()', 'func f', T + '? Max([3, 9, 2])', 'func Max xL', T + 'nBest = xL[1]', T + 'for x in xL', T * 2 + 'if x > nBest', T * 3 + 'nBest = x',
         T * 2 + 'ok', T + 'next', T + 'return nBest'],
      ['9']),
     # P08 CORRECTED before its code passed, 2026-11-09: it wrote `eval(...)` in lowercase, which the rule it tests refuses first; the

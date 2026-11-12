@@ -7,6 +7,6 @@ func h
 	end
 end
 func deep
-	aL = []
-	? aL[1]
+	xL = []
+	? xL[1]
 end

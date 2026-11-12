@@ -112,7 +112,7 @@ CASES = [
         '? "before"', 'f(1)', 'func f xP', T + 'within xP = 2', T * 2 + '? xP', T + 'done'],
      refused('W10', 4, R_GLOBAL, 'xP', 4, 2), 1),
     ('W11', 'W2', 'a list global grown in place inside the block is the old list after it', [
-        '$aL = [1, 2]', 'within $aL = $aL', T + 'Add($aL, 3)', T + '? Len($aL)', 'done', '? Len($aL)'],
+        '$xL = [1, 2]', 'within $xL = $xL', T + 'Add($xL, 3)', T + '? Len($xL)', 'done', '? Len($xL)'],
      ['3', '2']),
 
     ('U01', 'U1', 'the name holds the value in the body; Release at the end, once', [

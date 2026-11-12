@@ -6,13 +6,13 @@
 func CtSymbolByName(tName)
 	return ""
 end
-func CtSymbolSites(aDecls)
+func CtSymbolSites(xDecls)
 	return []
 end
-func CtResolveWorld(aDecls)
+func CtResolveWorld(xDecls)
 	return
 end
-func CtSymbolCode(aSy)
+func CtSymbolCode(xSy)
 	return ["UNRESOLVED", []]
 end
 func CtWorldStem(tPath)
@@ -21,6 +21,6 @@ end
 func CtWorldLoad(tPath)
 	CtFail(1, "this language declares no SYMBOL and no PUBLISH, so it has no world to read")
 end
-func CtWorldRows(aDecls, tFile)
+func CtWorldRows(xDecls, tFile)
 	CtFail(1, "this language declares no SYMBOL and no PUBLISH, so it publishes no world")
 end

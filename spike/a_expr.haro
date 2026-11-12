@@ -7,18 +7,18 @@
 load "expr_lib.haro"
 
 $tExprLang = "a"
-$aExprOperators = ["or", "and", "not", "cmp", "add", "sub", "mul", "div", "mod", "neg", "round"]
-$aExprOperands = ["number", "text", "ref", "agg"]
-$aExprAggregates = ["sum", "count", "avg", "min", "max"]
-$aExprVariables = []
-$aExprContexts = []
+$xExprOperators = ["or", "and", "not", "cmp", "add", "sub", "mul", "div", "mod", "neg", "round"]
+$xExprOperands = ["number", "text", "ref", "agg"]
+$xExprAggregates = ["sum", "count", "avg", "min", "max"]
+$xExprVariables = []
+$xExprContexts = []
 $tExprAbsent = "refuse"
 $tExprDivision = "refuse"
 $tExprEquality = "kind"
-$aExprToks = []
+$xExprToks = []
 $nExprPos = 1
-$aExprAllowed = []
-$aExprRecord = []
-$aExprOverlay = []
+$xExprAllowed = []
+$xExprRecord = []
+$vExprOverlay = []
 
 ExMain()

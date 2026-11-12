@@ -65,21 +65,21 @@ func NatSpell(tEnt, tHow)
 end
 # the words of a text: split on a space, a tab, a line feed or a carriage return
 func NatWords(tS)
-	aOut = []
+	xOut = []
 	tWord = ""
 	for i = 1 to Len(tS)
 		tC = tS[i]
 		if tC = " " or tC = Char(9) or tC = Char(10) or tC = Char(13)
 			if Len(tWord) > 0
-				aOut + tWord
+				xOut + tWord
 				tWord = ""
 			end
 		else
 			tWord += tC
 		end
 	end
-	if Len(tWord) > 0 aOut + tWord end
-	return aOut
+	if Len(tWord) > 0 xOut + tWord end
+	return xOut
 end
 func NatTrim(tS)
 	nFrom = 1
@@ -121,34 +121,34 @@ func NatLess(tA, tB)
 	return Len(tA) < Len(tB)
 end
 func NatLines(tS)
-	aOut = []
+	xOut = []
 	tLine = ""
 	for i = 1 to Len(tS)
 		tC = tS[i]
 		if tC = Char(10)
-			aOut + tLine
+			xOut + tLine
 			tLine = ""
 		elseif tC != Char(13)
 			tLine += tC
 		end
 	end
-	aOut + tLine
-	return aOut
+	xOut + tLine
+	return xOut
 end
 # the fields of a line separated by |, each trimmed
 func NatSplitBar(tS)
-	aOut = []
+	xOut = []
 	tField = ""
 	for i = 1 to Len(tS)
 		if tS[i] = "|"
-			aOut + NatTrim(tField)
+			xOut + NatTrim(tField)
 			tField = ""
 		else
 			tField += tS[i]
 		end
 	end
-	aOut + NatTrim(tField)
-	return aOut
+	xOut + NatTrim(tField)
+	return xOut
 end
 func NatCount(tS, tCh)
 	nN = 0
@@ -159,7 +159,7 @@ func NatCount(tS, tCh)
 end
 # every {name} of a template, in order
 func NatPlaceholders(tS)
-	aOut = []
+	xOut = []
 	nLen = Len(tS)
 	nI = 1
 	while nI <= nLen
@@ -169,7 +169,7 @@ func NatPlaceholders(tS)
 				nJ++
 			end
 			if nJ > nI + 1 and nJ <= nLen and tS[nJ] = "}"
-				aOut + SubStr(tS, nI + 1, nJ - nI - 1)
+				xOut + SubStr(tS, nI + 1, nJ - nI - 1)
 				nI = nJ + 1
 			else
 				nI++
@@ -178,7 +178,7 @@ func NatPlaceholders(tS)
 			nI++
 		end
 	end
-	return aOut
+	return xOut
 end
 func NatHex(nN)
 	nHi = Floor(nN / 16)
@@ -209,96 +209,96 @@ func NatQ(tS)
 	end
 	return Char(34) + tOut + Char(34)
 end
-func NatQList(aL)
+func NatQList(xL)
 	tOut = "["
-	for i = 1 to Len(aL)
+	for i = 1 to Len(xL)
 		if i > 1 tOut += ", " end
-		tOut += NatQ(aL[i])
+		tOut += NatQ(xL[i])
 	end
 	return tOut + "]"
 end
-func NatSameList(aA, aB)
-	if Len(aA) != Len(aB) return false end
-	for i = 1 to Len(aA)
-		if aA[i] != aB[i] return false end
+func NatSameList(xA, xB)
+	if Len(xA) != Len(xB) return false end
+	for i = 1 to Len(xA)
+		if xA[i] != xB[i] return false end
 	end
 	return true
 end
 # ---- the declaration records, read by seat -----------------------------------------------------------------
 
 # the clause of a seat, [NAME, line, value, start, end], or NULL
-func NatClause(aD, tSeat)
+func NatClause(xD, tSeat)
 	tU = Upper(tSeat)
-	aC = aD[4]
-	for i = 1 to Len(aC)
-		if aC[i][1] = tU return aC[i] end
+	xC = xD[4]
+	for i = 1 to Len(xC)
+		if xC[i][1] = tU return xC[i] end
 	end
 	return ""
 end
-func NatHas(aD, tSeat)
-	return not IsEmpty(NatClause(aD, tSeat))
+func NatHas(xD, tSeat)
+	return not IsEmpty(NatClause(xD, tSeat))
 end
 # a word or a string, else ""
-func NatText(aD, tSeat)
-	aC = NatClause(aD, tSeat)
-	if IsEmpty(aC) return "" end
-	if aC[3][1] = "word" or aC[3][1] = "string" return aC[3][2] end
+func NatText(xD, tSeat)
+	xC = NatClause(xD, tSeat)
+	if IsEmpty(xC) return "" end
+	if xC[3][1] = "word" or xC[3][1] = "string" return xC[3][2] end
 	return ""
 end
 # a list of words, else []
-func NatNames(aD, tSeat)
-	aC = NatClause(aD, tSeat)
-	if IsEmpty(aC) return [] end
-	if aC[3][1] = "namelist" return aC[3][2] end
+func NatNames(xD, tSeat)
+	xC = NatClause(xD, tSeat)
+	if IsEmpty(xC) return [] end
+	if xC[3][1] = "namelist" return xC[3][2] end
 	return []
 end
 # name: value pairs as [[name, value], ...], else []
-func NatPairs(aD, tSeat)
-	aOut = []
-	aC = NatClause(aD, tSeat)
-	if IsEmpty(aC) return aOut end
-	if aC[3][1] != "pairlist" return aOut end
-	aP = aC[3][2]
-	for i = 1 to Len(aP)
-		aOut + [aP[i][1], aP[i][2]]
+func NatPairs(xD, tSeat)
+	xOut = []
+	xC = NatClause(xD, tSeat)
+	if IsEmpty(xC) return xOut end
+	if xC[3][1] != "pairlist" return xOut end
+	xP = xC[3][2]
+	for i = 1 to Len(xP)
+		xOut + [xP[i][1], xP[i][2]]
 	end
-	return aOut
+	return xOut
 end
 # the value of a key in a list of pairs, or ""; the second answer is whether the key is there
-func NatPairValue(aPairs, tKey)
-	for i = 1 to Len(aPairs)
-		if aPairs[i][1] = tKey return aPairs[i][2] end
+func NatPairValue(vPairs, tKey)
+	for i = 1 to Len(vPairs)
+		if vPairs[i][1] = tKey return vPairs[i][2] end
 	end
 	return ""
 end
-func NatHasKey(aPairs, tKey)
-	for i = 1 to Len(aPairs)
-		if aPairs[i][1] = tKey return true end
+func NatHasKey(vPairs, tKey)
+	for i = 1 to Len(vPairs)
+		if vPairs[i][1] = tKey return true end
 	end
 	return false
 end
 # the verb of the declaration kind that plays a role of the UNDERSTAND
 func NatVerbOf(tRole)
-	aR = $aCourtUnderstand[2]
-	for i = 1 to Len(aR)
-		if aR[i][1] = tRole
-			aK = CtKindByDeclName(aR[i][2])
-			if not IsEmpty(aK) return aK[1] end
+	xR = $xCourtUnderstand[2]
+	for i = 1 to Len(xR)
+		if xR[i][1] = tRole
+			xK = CtKindByDeclName(xR[i][2])
+			if not IsEmpty(xK) return xK[1] end
 		end
 	end
 	return ""
 end
-func NatOf(aDecls, tRole)
+func NatOf(xDecls, tRole)
 	tV = NatVerbOf(tRole)
-	aOut = []
-	for i = 1 to Len(aDecls)
-		if aDecls[i][1] = tV aOut + aDecls[i] end
+	xOut = []
+	for i = 1 to Len(xDecls)
+		if xDecls[i][1] = tV xOut + xDecls[i] end
 	end
-	return aOut
+	return xOut
 end
-func NatFind(aList, tName)
-	for i = 1 to Len(aList)
-		if aList[i][2] = tName return aList[i] end
+func NatFind(xList, tName)
+	for i = 1 to Len(xList)
+		if xList[i][2] = tName return xList[i] end
 	end
 	return ""
 end
@@ -311,141 +311,141 @@ end
 # [read?, [[s, p, o], ...]]
 func NatReadWorld(tPath)
 	if not FExists(tPath) return [false, []] end
-	aLines = NatLines(Read(tPath))
+	xLines = NatLines(Read(tPath))
 	tSection = ""
-	aTriples = []
-	for i = 1 to Len(aLines)
-		tT = NatTrim(aLines[i])
+	vTriples = []
+	for i = 1 to Len(xLines)
+		tT = NatTrim(xLines[i])
 		if tT = "facts" or tT = "ontology"
 			tSection = tT
 		elseif tSection = "facts" and NatCount(tT, "|") = 2
-			aP = NatSplitBar(tT)
-			aTriples + [aP[1], aP[2], aP[3]]
+			xP = NatSplitBar(tT)
+			vTriples + [xP[1], xP[2], xP[3]]
 		end
 	end
-	return [true, aTriples]
+	return [true, vTriples]
 end
-func NatBuild(aDecls)
-	aWorlds = []
-	aSurf = NatOf(aDecls, "SURFACE")
-	for i = 1 to Len(aSurf)
-		tW = NatText(aSurf[i], "world")
+func NatBuild(xDecls)
+	vWorlds = []
+	xSurf = NatOf(xDecls, "SURFACE")
+	for i = 1 to Len(xSurf)
+		tW = NatText(xSurf[i], "world")
 		if tW != ""
-			aR = NatReadWorld(NatPath(tW))
-			aWorlds + [aSurf[i][2], aR[2], aR[1], NatPath(tW)]
+			xR = NatReadWorld(NatPath(tW))
+			vWorlds + [xSurf[i][2], xR[2], xR[1], NatPath(tW)]
 		end
 	end
-	return [aDecls, aWorlds, NatOf(aDecls, "TONGUE"), NatOf(aDecls, "MEANING"), NatOf(aDecls, "ALIAS"), aSurf,
-	        NatOf(aDecls, "STEP"), NatOf(aDecls, "FRAME"), NatOf(aDecls, "EXAMPLE"), NatOf(aDecls, "COUNTEREXAMPLE")]
+	return [xDecls, vWorlds, NatOf(xDecls, "TONGUE"), NatOf(xDecls, "MEANING"), NatOf(xDecls, "ALIAS"), xSurf,
+	        NatOf(xDecls, "STEP"), NatOf(xDecls, "FRAME"), NatOf(xDecls, "EXAMPLE"), NatOf(xDecls, "COUNTEREXAMPLE")]
 end
-func NatTriples(aN, tSurface)
-	aW = aN[2]
-	for i = 1 to Len(aW)
-		if aW[i][1] = tSurface return aW[i][2] end
+func NatTriples(xN, tSurface)
+	xW = xN[2]
+	for i = 1 to Len(xW)
+		if xW[i][1] = tSurface return xW[i][2] end
 	end
 	return []
 end
 # the ids a surface enumerates for the entity kind a meaning is OF
-func NatEntities(aN, aMeaning)
-	aOut = []
-	if NatText(aMeaning, "slot") != "entity" return aOut end
-	tFrom = NatText(aMeaning, "from")
-	tOf = NatText(aMeaning, "of")
-	if tFrom = "" or tOf = "" return aOut end
-	aT = NatTriples(aN, tFrom)
-	for i = 1 to Len(aT)
-		if aT[i][2] = "is-a" and aT[i][3] = tOf aOut + aT[i][1] end
+func NatEntities(xN, xMeaning)
+	xOut = []
+	if NatText(xMeaning, "slot") != "entity" return xOut end
+	tFrom = NatText(xMeaning, "from")
+	tOf = NatText(xMeaning, "of")
+	if tFrom = "" or tOf = "" return xOut end
+	xT = NatTriples(xN, tFrom)
+	for i = 1 to Len(xT)
+		if xT[i][2] = "is-a" and xT[i][3] = tOf xOut + xT[i][1] end
 	end
-	return aOut
+	return xOut
 end
 # ---- the lexicon of a tongue: [ignored, [[word, meaning, entity], ...], [[word, meaning, meaning], ...]] ------
 
-func NatAddWord(aWords, aClash, tWord, tMeaning, tEnt)
+func NatAddWord(xWords, vClash, tWord, tMeaning, tEnt)
 	tKey = NatFold(tWord)
-	for i = 1 to Len(aWords)
-		if aWords[i][1] = tKey
-			if not (aWords[i][2] = tMeaning and aWords[i][3] = tEnt)
-				aClash + [tKey, aWords[i][2], tMeaning]
+	for i = 1 to Len(xWords)
+		if xWords[i][1] = tKey
+			if not (xWords[i][2] = tMeaning and xWords[i][3] = tEnt)
+				vClash + [tKey, xWords[i][2], tMeaning]
 			end
-			aWords[i][2] = tMeaning
-			aWords[i][3] = tEnt
+			xWords[i][2] = tMeaning
+			xWords[i][3] = tEnt
 			return
 		end
 	end
-	aWords + [tKey, tMeaning, tEnt]
+	xWords + [tKey, tMeaning, tEnt]
 end
-func NatLexicon(aN, tTongue)
-	aT = NatFind(aN[3], tTongue)
-	aIgnored = []
-	aIg = NatWords(NatText(aT, "ignores"))
-	for i = 1 to Len(aIg)
-		aIgnored + NatFold(aIg[i])
+func NatLexicon(xN, tTongue)
+	xT = NatFind(xN[3], tTongue)
+	vIgnored = []
+	xIg = NatWords(NatText(xT, "ignores"))
+	for i = 1 to Len(xIg)
+		vIgnored + NatFold(xIg[i])
 	end
-	aWords = []
-	aClash = []
-	aM = aN[4]
-	for i = 1 to Len(aM)
-		aP = NatPairs(aM[i], "words")
-		for j = 1 to Len(aP)
-			if aP[j][1] = tTongue
-				aTx = NatWords(aP[j][2])
-				for k = 1 to Len(aTx)
-					NatAddWord(aWords, aClash, aTx[k], aM[i][2], "")
+	xWords = []
+	vClash = []
+	xM = xN[4]
+	for i = 1 to Len(xM)
+		xP = NatPairs(xM[i], "words")
+		for j = 1 to Len(xP)
+			if xP[j][1] = tTongue
+				xTx = NatWords(xP[j][2])
+				for k = 1 to Len(xTx)
+					NatAddWord(xWords, vClash, xTx[k], xM[i][2], "")
 				end
 			end
 		end
-		if NatText(aM[i], "slot") = "entity"
-			aE = NatEntities(aN, aM[i])
-			for j = 1 to Len(aE)
-				NatAddWord(aWords, aClash, aE[j], aM[i][2], aE[j])
+		if NatText(xM[i], "slot") = "entity"
+			xE = NatEntities(xN, xM[i])
+			for j = 1 to Len(xE)
+				NatAddWord(xWords, vClash, xE[j], xM[i][2], xE[j])
 			end
 		end
 	end
-	aA = aN[5]
-	for i = 1 to Len(aA)
-		aP = NatPairs(aA[i], "words")
-		for j = 1 to Len(aP)
-			if aP[j][1] = tTongue
-				aTx = NatWords(aP[j][2])
-				for k = 1 to Len(aTx)
-					NatAddWord(aWords, aClash, aTx[k], NatText(aA[i], "meaning"), NatText(aA[i], "entity"))
+	xA = xN[5]
+	for i = 1 to Len(xA)
+		xP = NatPairs(xA[i], "words")
+		for j = 1 to Len(xP)
+			if xP[j][1] = tTongue
+				xTx = NatWords(xP[j][2])
+				for k = 1 to Len(xTx)
+					NatAddWord(xWords, vClash, xTx[k], NatText(xA[i], "meaning"), NatText(xA[i], "entity"))
 				end
 			end
 		end
 	end
-	return [aIgnored, aWords, aClash]
+	return [vIgnored, xWords, vClash]
 end
 # the word an answer is told in: an alias's first word, else the tongue's own spelling of a name
-func NatCanonical(aN, tTongue, tEnt)
-	aA = aN[5]
-	for i = 1 to Len(aA)
-		if NatText(aA[i], "entity") = tEnt
-			aP = NatPairs(aA[i], "words")
-			for j = 1 to Len(aP)
-				if aP[j][1] = tTongue
-					aTx = NatWords(aP[j][2])
-					if Len(aTx) > 0 return aTx[1] end
+func NatCanonical(xN, tTongue, tEnt)
+	xA = xN[5]
+	for i = 1 to Len(xA)
+		if NatText(xA[i], "entity") = tEnt
+			xP = NatPairs(xA[i], "words")
+			for j = 1 to Len(xP)
+				if xP[j][1] = tTongue
+					xTx = NatWords(xP[j][2])
+					if Len(xTx) > 0 return xTx[1] end
 				end
 			end
 		end
 	end
-	tHow = NatText(NatFind(aN[3], tTongue), "names")
+	tHow = NatText(NatFind(xN[3], tTongue), "names")
 	if tHow = "" tHow = "as_is" end
 	return NatSpell(tEnt, tHow)
 end
 # the one meaning that captures digits: the only text of a question a query may hold
-func NatNumMeaning(aN)
-	aM = aN[4]
-	for i = 1 to Len(aM)
-		if NatText(aM[i], "slot") = "number" return aM[i][2] end
+func NatNumMeaning(xN)
+	xM = xN[4]
+	for i = 1 to Len(xM)
+		if NatText(xM[i], "slot") = "number" return xM[i][2] end
 	end
 	return ""
 end
 # ---- the gate and the tokens ------------------------------------------------------------------------------------
 
 # "" when every character passes; else the one refused, a control character by its code
-func NatGate(aT, tText)
-	tAllows = NatText(aT, "allows")
+func NatGate(xT, tText)
+	tAllows = NatText(xT, "allows")
 	for i = 1 to Len(tText)
 		tC = tText[i]
 		nA = Ascii(tC)
@@ -465,362 +465,362 @@ func NatGate(aT, tText)
 	end
 	return ""
 end
-func NatRefuse(aN, tTongue, tKind, tWhat)
+func NatRefuse(xN, tTongue, tKind, tWhat)
 	tMsg = tKind + ": " + tWhat
-	aR = NatPairs(NatFind(aN[3], tTongue), "refuses")
-	if NatHasKey(aR, tKind) tMsg = CtReplace(NatPairValue(aR, tKind), "{what}", tWhat) end
+	xR = NatPairs(NatFind(xN[3], tTongue), "refuses")
+	if NatHasKey(xR, tKind) tMsg = CtReplace(NatPairValue(xR, tKind), "{what}", tWhat) end
 	return ["refused", tKind, tWhat, tMsg, tTongue]
 end
 # ["refused", kind, what] or ["ok", [[meaning, entity, raw], ...], [ignored raw words]]
-func NatTokens(aN, tTongue, tText)
-	aT = NatFind(aN[3], tTongue)
-	tBad = NatGate(aT, tText)
+func NatTokens(xN, tTongue, tText)
+	xT = NatFind(xN[3], tTongue)
+	tBad = NatGate(xT, tText)
 	if tBad != "" return ["refused", "character", tBad] end
-	aLex = NatLexicon(aN, tTongue)
+	xLex = NatLexicon(xN, tTongue)
 	tNorm = tText
 	tSeps = "'?,."
 	for i = 1 to Len(tSeps)
 		tNorm = CtReplace(tNorm, tSeps[i], " ")
 	end
-	tNum = NatNumMeaning(aN)
-	aToks = []
-	aSkipped = []
-	aRaw = NatWords(tNorm)
-	for i = 1 to Len(aRaw)
-		tKey = NatFold(aRaw[i])
-		if CtInList(tKey, aLex[1])
-			aSkipped + aRaw[i]
+	tNum = NatNumMeaning(xN)
+	xToks = []
+	vSkipped = []
+	xRaw = NatWords(tNorm)
+	for i = 1 to Len(xRaw)
+		tKey = NatFold(xRaw[i])
+		if CtInList(tKey, xLex[1])
+			vSkipped + xRaw[i]
 			loop
 		end
 		nAt = 0
-		for j = 1 to Len(aLex[2])
-			if aLex[2][j][1] = tKey nAt = j end
+		for j = 1 to Len(xLex[2])
+			if xLex[2][j][1] = tKey nAt = j end
 		end
 		if nAt > 0
-			aToks + [aLex[2][nAt][2], aLex[2][nAt][3], aRaw[i]]
+			xToks + [xLex[2][nAt][2], xLex[2][nAt][3], xRaw[i]]
 		elseif tNum != "" and NatIsDigits(tKey) and Len(tKey) <= 12
-			aToks + [tNum, tKey, aRaw[i]]
+			xToks + [tNum, tKey, xRaw[i]]
 		else
-			return ["refused", "word", aRaw[i]]
+			return ["refused", "word", xRaw[i]]
 		end
 	end
-	return ["ok", aToks, aSkipped]
+	return ["ok", xToks, vSkipped]
 end
 # ---- understand ---------------------------------------------------------------------------------------------------
 
 # a template with its slots filled: an entity spelled the way the target surface spells its kind
-func NatFill(aN, tTemplate, aSlots, tSurface)
+func NatFill(xN, tTemplate, vSlots, tSurface)
 	tOut = tTemplate
-	aSpells = NatPairs(NatFind(aN[6], tSurface), "spells")
-	for i = 1 to Len(aSlots)
-		tVal = aSlots[i][2]
-		aM = NatFind(aN[4], aSlots[i][1])
-		if not IsEmpty(aM)
-			if NatText(aM, "slot") = "entity"
+	xSpells = NatPairs(NatFind(xN[6], tSurface), "spells")
+	for i = 1 to Len(vSlots)
+		tVal = vSlots[i][2]
+		xM = NatFind(xN[4], vSlots[i][1])
+		if not IsEmpty(xM)
+			if NatText(xM, "slot") = "entity"
 				tHow = "as_is"
-				if NatHasKey(aSpells, NatText(aM, "of")) tHow = NatPairValue(aSpells, NatText(aM, "of")) end
+				if NatHasKey(xSpells, NatText(xM, "of")) tHow = NatPairValue(xSpells, NatText(xM, "of")) end
 				tVal = NatSpell(tVal, tHow)
 			end
 		end
-		tOut = CtReplace(tOut, "{" + aSlots[i][1] + "}", tVal)
+		tOut = CtReplace(tOut, "{" + vSlots[i][1] + "}", tVal)
 	end
 	return tOut
 end
-func NatSetSlot(aSlots, tName, tVal)
-	for i = 1 to Len(aSlots)
-		if aSlots[i][1] = tName
-			aSlots[i][2] = tVal
+func NatSetSlot(vSlots, tName, tVal)
+	for i = 1 to Len(vSlots)
+		if vSlots[i][1] = tName
+			vSlots[i][2] = tVal
 			return
 		end
 	end
-	aSlots + [tName, tVal]
+	vSlots + [tName, tVal]
 end
-func NatUnderstand(aN, tTongue, tText)
-	aTk = NatTokens(aN, tTongue, tText)
-	if aTk[1] = "refused" return NatRefuse(aN, tTongue, aTk[2], aTk[3]) end
-	aToks = aTk[2]
-	aShape = []
-	for i = 1 to Len(aToks)
-		aShape + aToks[i][1]
+func NatUnderstand(xN, tTongue, tText)
+	xTk = NatTokens(xN, tTongue, tText)
+	if xTk[1] = "refused" return NatRefuse(xN, tTongue, xTk[2], xTk[3]) end
+	xToks = xTk[2]
+	xShape = []
+	for i = 1 to Len(xToks)
+		xShape + xToks[i][1]
 	end
-	aFrames = aN[8]
-	for i = 1 to Len(aFrames)
-		aF = aFrames[i]
-		if not NatSameList(NatNames(aF, "shape"), aShape) loop end
-		aSlots = []
-		for j = 1 to Len(aToks)
-			aM = NatFind(aN[4], aToks[j][1])
-			tSlot = NatText(aM, "slot")
-			if tSlot = "number" or tSlot = "entity" NatSetSlot(aSlots, aToks[j][1], aToks[j][2]) end
+	xFrames = xN[8]
+	for i = 1 to Len(xFrames)
+		xF = xFrames[i]
+		if not NatSameList(NatNames(xF, "shape"), xShape) loop end
+		vSlots = []
+		for j = 1 to Len(xToks)
+			xM = NatFind(xN[4], xToks[j][1])
+			tSlot = NatText(xM, "slot")
+			if tSlot = "number" or tSlot = "entity" NatSetSlot(vSlots, xToks[j][1], xToks[j][2]) end
 		end
 		# a sentence under construction may name a surface or a step nobody declared: a finding of the rules,
 		# never a crash of the court
 		bLawful = false
-		if NatHas(aF, "steps")
+		if NatHas(xF, "steps")
 			bLawful = true
-			aSn = NatNames(aF, "steps")
-			for j = 1 to Len(aSn)
-				aS = NatFind(aN[7], aSn[j])
-				if IsEmpty(aS)
+			xSn = NatNames(xF, "steps")
+			for j = 1 to Len(xSn)
+				xS = NatFind(xN[7], xSn[j])
+				if IsEmpty(xS)
 					bLawful = false
 				else
-					if IsEmpty(NatFind(aN[6], NatText(aS, "target"))) bLawful = false end
+					if IsEmpty(NatFind(xN[6], NatText(xS, "target"))) bLawful = false end
 				end
 			end
 		else
-			if not IsEmpty(NatFind(aN[6], NatText(aF, "target"))) and NatHas(aF, "query") bLawful = true end
+			if not IsEmpty(NatFind(xN[6], NatText(xF, "target"))) and NatHas(xF, "query") bLawful = true end
 		end
-		if not bLawful return NatRefuse(aN, tTongue, "surface", aF[2]) end
-		tSurface = NatText(aF, "target")
+		if not bLawful return NatRefuse(xN, tTongue, "surface", xF[2]) end
+		tSurface = NatText(xF, "target")
 		tQuery = ""
-		aSteps = []
-		if NatHas(aF, "steps")
+		xSteps = []
+		if NatHas(xF, "steps")
 			tSurface = "plan"
-			aSn = NatNames(aF, "steps")
-			for j = 1 to Len(aSn)
-				aS = NatFind(aN[7], aSn[j])
-				tQ = NatFill(aN, NatText(aS, "query"), aSlots, NatText(aS, "target"))
-				aSteps + [NatText(aS, "target"), tQ, NatText(aS, "binds")]
+			xSn = NatNames(xF, "steps")
+			for j = 1 to Len(xSn)
+				xS = NatFind(xN[7], xSn[j])
+				tQ = NatFill(xN, NatText(xS, "query"), vSlots, NatText(xS, "target"))
+				xSteps + [NatText(xS, "target"), tQ, NatText(xS, "binds")]
 			end
 		else
-			tQuery = NatFill(aN, NatText(aF, "query"), aSlots, tSurface)
+			tQuery = NatFill(xN, NatText(xF, "query"), vSlots, tSurface)
 		end
-		return ["ok", aF[2], aSlots, tSurface, tQuery, aSteps, [], false, "", "", []]
+		return ["ok", xF[2], vSlots, tSurface, tQuery, xSteps, [], false, "", "", []]
 	end
-	return NatRefuse(aN, tTongue, "shape", NatJoinNames(aShape))
+	return NatRefuse(xN, tTongue, "shape", NatJoinNames(xShape))
 end
-func NatJoinNames(aL)
-	return CtJoin(aL, " ")
+func NatJoinNames(xL)
+	return CtJoin(xL, " ")
 end
 # ---- ask: a pattern surface answered, and told --------------------------------------------------------------------
 
 # [ran?, [answer terms]]: a triple pattern over the surface's facts, `?x` a variable
-func NatRunPattern(aN, tSurface, tQuery)
-	aTerms = NatWords(tQuery)
-	if Len(aTerms) != 3 return [false, []] end
-	aT = NatTriples(aN, tSurface)
-	aAns = []
-	for i = 1 to Len(aT)
+func NatRunPattern(xN, tSurface, tQuery)
+	xTerms = NatWords(tQuery)
+	if Len(xTerms) != 3 return [false, []] end
+	xT = NatTriples(xN, tSurface)
+	xAns = []
+	for i = 1 to Len(xT)
 		bAll = true
 		for j = 1 to 3
-			if Left(aTerms[j], 1) != "?" and aTerms[j] != aT[i][j] bAll = false end
+			if Left(xTerms[j], 1) != "?" and xTerms[j] != xT[i][j] bAll = false end
 		end
 		if bAll
 			for j = 1 to 3
-				if Left(aTerms[j], 1) = "?" aAns + aT[i][j] end
+				if Left(xTerms[j], 1) = "?" xAns + xT[i][j] end
 			end
 		end
 	end
-	return [true, aAns]
+	return [true, xAns]
 end
 # the answer told by the frame's own template in the tongue, or "" when the frame has none
-func NatTell(aN, tTongue, aF, aAnswer, aSlots)
+func NatTell(xN, tTongue, xF, xAnswer, vSlots)
 	tKey = "answers"
-	if Len(aAnswer) = 0 tKey = "empty" end
-	aP = NatPairs(aF, tKey)
-	if not NatHasKey(aP, tTongue) return "" end
-	tTpl = NatPairValue(aP, tTongue)
-	aNames = []
-	for i = 1 to Len(aAnswer)
-		aNames + NatCanonical(aN, tTongue, aAnswer[i])
+	if Len(xAnswer) = 0 tKey = "empty" end
+	xP = NatPairs(xF, tKey)
+	if not NatHasKey(xP, tTongue) return "" end
+	tTpl = NatPairValue(xP, tTongue)
+	xNames = []
+	for i = 1 to Len(xAnswer)
+		xNames + NatCanonical(xN, tTongue, xAnswer[i])
 	end
-	tConj = NatText(NatFind(aN[3], tTongue), "joins")
+	tConj = NatText(NatFind(xN[3], tTongue), "joins")
 	if tConj = "" tConj = "and" end
 	tJoined = ""
-	if Len(aNames) = 1
-		tJoined = aNames[1]
-	elseif Len(aNames) > 1
-		for i = 1 to Len(aNames) - 1
+	if Len(xNames) = 1
+		tJoined = xNames[1]
+	elseif Len(xNames) > 1
+		for i = 1 to Len(xNames) - 1
 			if i > 1 tJoined += ", " end
-			tJoined += aNames[i]
+			tJoined += xNames[i]
 		end
-		tJoined += " " + tConj + " " + aNames[Len(aNames)]
+		tJoined += " " + tConj + " " + xNames[Len(xNames)]
 	end
 	tOut = CtReplace(tTpl, "{answer}", tJoined)
-	for i = 1 to Len(aSlots)
-		tVal = aSlots[i][2]
-		aM = NatFind(aN[4], aSlots[i][1])
-		if not IsEmpty(aM)
-			if NatText(aM, "slot") = "entity" tVal = NatCanonical(aN, tTongue, tVal) end
+	for i = 1 to Len(vSlots)
+		tVal = vSlots[i][2]
+		xM = NatFind(xN[4], vSlots[i][1])
+		if not IsEmpty(xM)
+			if NatText(xM, "slot") = "entity" tVal = NatCanonical(xN, tTongue, tVal) end
 		end
-		tOut = CtReplace(tOut, "{" + aSlots[i][1] + "}", tVal)
+		tOut = CtReplace(tOut, "{" + vSlots[i][1] + "}", tVal)
 	end
 	return tOut
 end
-func NatRunOf(aN, tSurface, tQuery)
-	aSf = NatFind(aN[6], tSurface)
-	return [tSurface, NatText(aSf, "court"), NatText(aSf, "world"), tQuery]
+func NatRunOf(xN, tSurface, tQuery)
+	xSf = NatFind(xN[6], tSurface)
+	return [tSurface, NatText(xSf, "court"), NatText(xSf, "world"), tQuery]
 end
-func NatAsk(aN, tTongue, tText)
-	aU = NatUnderstand(aN, tTongue, tText)
-	if aU[1] = "refused" return aU end
-	aF = NatFind(aN[8], aU[2])
-	if aU[4] = "plan"
-		aSn = NatNames(aF, "steps")
-		aS1 = NatFind(aN[7], aSn[1])
-		tT1 = NatText(aS1, "target")
-		tQ1 = NatFill(aN, NatText(aS1, "query"), aU[3], tT1)
-		if NatText(NatFind(aN[6], tT1), "kind") != "pattern"
-			aU[11] + NatRunOf(aN, tT1, tQ1)
-			return aU
+func NatAsk(xN, tTongue, tText)
+	xU = NatUnderstand(xN, tTongue, tText)
+	if xU[1] = "refused" return xU end
+	xF = NatFind(xN[8], xU[2])
+	if xU[4] = "plan"
+		xSn = NatNames(xF, "steps")
+		xS1 = NatFind(xN[7], xSn[1])
+		tT1 = NatText(xS1, "target")
+		tQ1 = NatFill(xN, NatText(xS1, "query"), xU[3], tT1)
+		if NatText(NatFind(xN[6], tT1), "kind") != "pattern"
+			xU[11] + NatRunOf(xN, tT1, tQ1)
+			return xU
 		end
-		aRun = NatRunPattern(aN, tT1, tQ1)
-		if not aRun[1] return NatRefuse(aN, tTongue, "surface", tQ1) end
-		aAns = aRun[2]
-		if Len(aAns) > 1 return NatRefuse(aN, tTongue, "ambiguous", NatJoinNames(aAns)) end
-		aU[7] = aAns
-		aU[8] = true
-		aU[9] = NatTell(aN, tTongue, aF, aAns, aU[3])
-		if Len(aAns) = 1 and Len(aSn) > 1
-			aS2 = NatFind(aN[7], aSn[2])
-			aSl = aU[3]
-			if NatText(aS1, "binds") != "" NatSetSlot(aSl, NatText(aS1, "binds"), aAns[1]) end
-			aU[10] = NatFill(aN, NatText(aS2, "query"), aSl, NatText(aS2, "target"))
-			if NatText(NatFind(aN[6], NatText(aS2, "target")), "kind") != "pattern"
-				aU[11] + NatRunOf(aN, NatText(aS2, "target"), aU[10])
+		xRun = NatRunPattern(xN, tT1, tQ1)
+		if not xRun[1] return NatRefuse(xN, tTongue, "surface", tQ1) end
+		xAns = xRun[2]
+		if Len(xAns) > 1 return NatRefuse(xN, tTongue, "ambiguous", NatJoinNames(xAns)) end
+		xU[7] = xAns
+		xU[8] = true
+		xU[9] = NatTell(xN, tTongue, xF, xAns, xU[3])
+		if Len(xAns) = 1 and Len(xSn) > 1
+			xS2 = NatFind(xN[7], xSn[2])
+			xSl = xU[3]
+			if NatText(xS1, "binds") != "" NatSetSlot(xSl, NatText(xS1, "binds"), xAns[1]) end
+			xU[10] = NatFill(xN, NatText(xS2, "query"), xSl, NatText(xS2, "target"))
+			if NatText(NatFind(xN[6], NatText(xS2, "target")), "kind") != "pattern"
+				xU[11] + NatRunOf(xN, NatText(xS2, "target"), xU[10])
 			end
 		end
-		return aU
+		return xU
 	end
-	if NatText(NatFind(aN[6], aU[4]), "kind") = "pattern"
-		aRun = NatRunPattern(aN, aU[4], aU[5])
-		if not aRun[1] return NatRefuse(aN, tTongue, "surface", aU[5]) end
-		aU[7] = aRun[2]
-		aU[8] = true
-		aU[9] = NatTell(aN, tTongue, aF, aRun[2], aU[3])
+	if NatText(NatFind(xN[6], xU[4]), "kind") = "pattern"
+		xRun = NatRunPattern(xN, xU[4], xU[5])
+		if not xRun[1] return NatRefuse(xN, tTongue, "surface", xU[5]) end
+		xU[7] = xRun[2]
+		xU[8] = true
+		xU[9] = NatTell(xN, tTongue, xF, xRun[2], xU[3])
 	else
-		aU[11] + NatRunOf(aN, aU[4], aU[5])
+		xU[11] + NatRunOf(xN, xU[4], xU[5])
 	end
-	return aU
+	return xU
 end
 # ---- the answers, as JSON ---------------------------------------------------------------------------------------
 
-func NatJsonRefusal(aR)
-	return '{"refused": {"kind": ' + NatQ(aR[2]) + ', "code": ' + NatQ("N_" + Upper(aR[2])) + ', "what": ' + NatQ(aR[3]) +
-	       ', "tongue": ' + NatQ(aR[5]) + ', "message": ' + NatQ(aR[4]) + '}}'
+func NatJsonRefusal(xR)
+	return '{"refused": {"kind": ' + NatQ(xR[2]) + ', "code": ' + NatQ("N_" + Upper(xR[2])) + ', "what": ' + NatQ(xR[3]) +
+	       ', "tongue": ' + NatQ(xR[5]) + ', "message": ' + NatQ(xR[4]) + '}}'
 end
-func NatJsonResult(aR)
-	if aR[1] = "refused" return NatJsonRefusal(aR) end
-	tOut = '{"frame": ' + NatQ(aR[2]) + ', "surface": ' + NatQ(aR[4])
-	if aR[4] != "plan" tOut += ', "query": ' + NatQ(aR[5]) end
+func NatJsonResult(xR)
+	if xR[1] = "refused" return NatJsonRefusal(xR) end
+	tOut = '{"frame": ' + NatQ(xR[2]) + ', "surface": ' + NatQ(xR[4])
+	if xR[4] != "plan" tOut += ', "query": ' + NatQ(xR[5]) end
 	tOut += ', "slots": {'
-	for i = 1 to Len(aR[3])
+	for i = 1 to Len(xR[3])
 		if i > 1 tOut += ", " end
-		tOut += NatQ(aR[3][i][1]) + ": " + NatQ(aR[3][i][2])
+		tOut += NatQ(xR[3][i][1]) + ": " + NatQ(xR[3][i][2])
 	end
 	tOut += "}"
-	if Len(aR[6]) > 0
+	if Len(xR[6]) > 0
 		tOut += ', "steps": ['
-		for i = 1 to Len(aR[6])
+		for i = 1 to Len(xR[6])
 			if i > 1 tOut += ", " end
-			tOut += '{"surface": ' + NatQ(aR[6][i][1]) + ', "query": ' + NatQ(aR[6][i][2])
-			if aR[6][i][3] != "" tOut += ', "binds": ' + NatQ(aR[6][i][3]) end
+			tOut += '{"surface": ' + NatQ(xR[6][i][1]) + ', "query": ' + NatQ(xR[6][i][2])
+			if xR[6][i][3] != "" tOut += ', "binds": ' + NatQ(xR[6][i][3]) end
 			tOut += "}"
 		end
 		tOut += "]"
 	end
-	if aR[8] tOut += ', "answer": ' + NatQList(aR[7]) end
-	if aR[9] != "" tOut += ', "told": ' + NatQ(aR[9]) end
-	if aR[10] != "" tOut += ', "query2": ' + NatQ(aR[10]) end
-	if Len(aR[11]) > 0
+	if xR[8] tOut += ', "answer": ' + NatQList(xR[7]) end
+	if xR[9] != "" tOut += ', "told": ' + NatQ(xR[9]) end
+	if xR[10] != "" tOut += ', "query2": ' + NatQ(xR[10]) end
+	if Len(xR[11]) > 0
 		tOut += ', "run": ['
-		for i = 1 to Len(aR[11])
+		for i = 1 to Len(xR[11])
 			if i > 1 tOut += ", " end
-			tOut += '{"surface": ' + NatQ(aR[11][i][1]) + ', "court": ' + NatQ(aR[11][i][2]) + ', "world": ' + NatQ(aR[11][i][3]) + ', "query": ' + NatQ(aR[11][i][4]) + "}"
+			tOut += '{"surface": ' + NatQ(xR[11][i][1]) + ', "court": ' + NatQ(xR[11][i][2]) + ', "world": ' + NatQ(xR[11][i][3]) + ', "query": ' + NatQ(xR[11][i][4]) + "}"
 		end
 		tOut += "]"
 	end
 	return tOut + "}"
 end
-func NatJsonTokens(aN, tTongue, tText)
-	aTk = NatTokens(aN, tTongue, tText)
-	if aTk[1] = "refused" return NatJsonRefusal(NatRefuse(aN, tTongue, aTk[2], aTk[3])) end
+func NatJsonTokens(xN, tTongue, tText)
+	xTk = NatTokens(xN, tTongue, tText)
+	if xTk[1] = "refused" return NatJsonRefusal(NatRefuse(xN, tTongue, xTk[2], xTk[3])) end
 	tOut = '{"tongue": ' + NatQ(tTongue) + ', "tokens": ['
-	for i = 1 to Len(aTk[2])
+	for i = 1 to Len(xTk[2])
 		if i > 1 tOut += ", " end
-		tOut += '{"meaning": ' + NatQ(aTk[2][i][1]) + ', "word": ' + NatQ(aTk[2][i][3])
-		if aTk[2][i][2] != "" tOut += ', "slot": ' + NatQ(aTk[2][i][2]) end
+		tOut += '{"meaning": ' + NatQ(xTk[2][i][1]) + ', "word": ' + NatQ(xTk[2][i][3])
+		if xTk[2][i][2] != "" tOut += ', "slot": ' + NatQ(xTk[2][i][2]) end
 		tOut += "}"
 	end
-	return tOut + '], "ignored": ' + NatQList(aTk[3]) + "}"
+	return tOut + '], "ignored": ' + NatQList(xTk[3]) + "}"
 end
-func NatJsonVocabulary(aN, tTongue)
-	aLex = NatLexicon(aN, tTongue)
-	tOut = '{"tongue": ' + NatQ(tTongue) + ', "ignored": ' + NatQList(aLex[1]) + ', "words": ['
-	for i = 1 to Len(aLex[2])
+func NatJsonVocabulary(xN, tTongue)
+	xLex = NatLexicon(xN, tTongue)
+	tOut = '{"tongue": ' + NatQ(tTongue) + ', "ignored": ' + NatQList(xLex[1]) + ', "words": ['
+	for i = 1 to Len(xLex[2])
 		if i > 1 tOut += ", " end
-		tOut += '{"word": ' + NatQ(aLex[2][i][1]) + ', "meaning": ' + NatQ(aLex[2][i][2])
-		if aLex[2][i][3] != "" tOut += ', "entity": ' + NatQ(aLex[2][i][3]) end
+		tOut += '{"word": ' + NatQ(xLex[2][i][1]) + ', "meaning": ' + NatQ(xLex[2][i][2])
+		if xLex[2][i][3] != "" tOut += ', "entity": ' + NatQ(xLex[2][i][3]) end
 		tOut += "}"
 	end
 	tOut += '], "uncovered": ['
 	nSeen = 0
-	aM = aN[4]
-	for i = 1 to Len(aM)
-		if NatText(aM[i], "slot") = "none" and not NatHasKey(NatPairs(aM[i], "words"), tTongue)
+	xM = xN[4]
+	for i = 1 to Len(xM)
+		if NatText(xM[i], "slot") = "none" and not NatHasKey(NatPairs(xM[i], "words"), tTongue)
 			if nSeen > 0 tOut += ", " end
-			tOut += NatQ(aM[i][2])
+			tOut += NatQ(xM[i][2])
 			nSeen++
 		end
 	end
 	tOut += '], "clashes": ['
-	for i = 1 to Len(aLex[3])
+	for i = 1 to Len(xLex[3])
 		if i > 1 tOut += ", " end
-		tOut += '{"word": ' + NatQ(aLex[3][i][1]) + ', "meanings": ' + NatQList([aLex[3][i][2], aLex[3][i][3]]) + "}"
+		tOut += '{"word": ' + NatQ(xLex[3][i][1]) + ', "meanings": ' + NatQList([xLex[3][i][2], xLex[3][i][3]]) + "}"
 	end
 	return tOut + "]}"
 end
 # the sentence's own conformance, counted
-func NatJsonExamples(aN)
+func NatJsonExamples(xN)
 	nTexts = 0
 	nUnderstood = 0
 	nFailed = 0
 	nDiverging = 0
-	aEx = aN[9]
-	for i = 1 to Len(aEx)
-		tMeans = NatText(aEx[i], "means")
-		aP = NatPairs(aEx[i], "asking")
-		aQ = []
-		for j = 1 to Len(aP)
-			if IsEmpty(NatFind(aN[3], aP[j][1])) loop end
+	xEx = xN[9]
+	for i = 1 to Len(xEx)
+		tMeans = NatText(xEx[i], "means")
+		xP = NatPairs(xEx[i], "asking")
+		xQ = []
+		for j = 1 to Len(xP)
+			if IsEmpty(NatFind(xN[3], xP[j][1])) loop end
 			nTexts++
-			aU = NatUnderstand(aN, aP[j][1], aP[j][2])
-			if aU[1] = "ok" and aU[2] = tMeans
+			xU = NatUnderstand(xN, xP[j][1], xP[j][2])
+			if xU[1] = "ok" and xU[2] = tMeans
 				nUnderstood++
-				if not CtInList(aU[4] + " " + aU[5] + NatStepsText(aU[6]), aQ) aQ + (aU[4] + " " + aU[5] + NatStepsText(aU[6])) end
+				if not CtInList(xU[4] + " " + xU[5] + NatStepsText(xU[6]), xQ) xQ + (xU[4] + " " + xU[5] + NatStepsText(xU[6])) end
 			else
 				nFailed++
 			end
 		end
-		if Len(aQ) > 1 nDiverging++ end
+		if Len(xQ) > 1 nDiverging++ end
 	end
 	nCTexts = 0
 	nRefused = 0
 	nCFailed = 0
-	aCe = aN[10]
-	for i = 1 to Len(aCe)
-		tWant = NatText(aCe[i], "refused")
-		aP = NatPairs(aCe[i], "asking")
-		for j = 1 to Len(aP)
-			if IsEmpty(NatFind(aN[3], aP[j][1])) loop end
+	xCe = xN[10]
+	for i = 1 to Len(xCe)
+		tWant = NatText(xCe[i], "refused")
+		xP = NatPairs(xCe[i], "asking")
+		for j = 1 to Len(xP)
+			if IsEmpty(NatFind(xN[3], xP[j][1])) loop end
 			nCTexts++
-			aU = NatUnderstand(aN, aP[j][1], aP[j][2])
-			if aU[1] = "refused" and aU[2] = tWant
+			xU = NatUnderstand(xN, xP[j][1], xP[j][2])
+			if xU[1] = "refused" and xU[2] = tWant
 				nRefused++
 			else
 				nCFailed++
 			end
 		end
 	end
-	return '{"examples": {"declared": ' + String(Len(aEx)) + ', "texts": ' + String(nTexts) + ', "understood": ' + String(nUnderstood) + ', "failed": ' + String(nFailed) +
-	       ', "diverging": ' + String(nDiverging) + '}, "counterexamples": {"declared": ' + String(Len(aCe)) + ', "texts": ' + String(nCTexts) +
+	return '{"examples": {"declared": ' + String(Len(xEx)) + ', "texts": ' + String(nTexts) + ', "understood": ' + String(nUnderstood) + ', "failed": ' + String(nFailed) +
+	       ', "diverging": ' + String(nDiverging) + '}, "counterexamples": {"declared": ' + String(Len(xCe)) + ', "texts": ' + String(nCTexts) +
 	       ', "refused": ' + String(nRefused) + ', "failed": ' + String(nCFailed) + "}}"
 end
 # a plan's queries as one text: two tongues compile to the SAME plan when this is the same
-func NatStepsText(aSteps)
+func NatStepsText(xSteps)
 	tOut = ""
-	for i = 1 to Len(aSteps)
-		tOut += " => " + aSteps[i][1] + " " + aSteps[i][2]
+	for i = 1 to Len(xSteps)
+		tOut += " => " + xSteps[i][1] + " " + xSteps[i][2]
 	end
 	return tOut
 end
@@ -830,20 +830,20 @@ end
 func NatSafeSet
 	return "-'?,."
 end
-func NatAdd(aF, tCode, nLine, tMsg)
-	aF + [tCode, nLine, tMsg]
+func NatAdd(xF, tCode, nLine, tMsg)
+	xF + [tCode, nLine, tMsg]
 end
 # the sample a surface is asked about: a number is 1, an entity is Sample, a slot nobody declared stays
-func NatSampleFill(aN, tTemplate)
+func NatSampleFill(xN, tTemplate)
 	tOut = tTemplate
-	aPh = NatPlaceholders(tTemplate)
-	for i = 1 to Len(aPh)
-		aM = NatFind(aN[4], aPh[i])
-		if not IsEmpty(aM)
+	xPh = NatPlaceholders(tTemplate)
+	for i = 1 to Len(xPh)
+		xM = NatFind(xN[4], xPh[i])
+		if not IsEmpty(xM)
 			tSv = "x"
-			if NatText(aM, "slot") = "number" tSv = "1" end
-			if NatText(aM, "slot") = "entity" tSv = "Sample" end
-			tOut = CtReplace(tOut, "{" + aPh[i] + "}", tSv)
+			if NatText(xM, "slot") = "number" tSv = "1" end
+			if NatText(xM, "slot") = "entity" tSv = "Sample" end
+			tOut = CtReplace(tOut, "{" + xPh[i] + "}", tSv)
 		end
 	end
 	return tOut
@@ -872,30 +872,30 @@ end
 # [ok?, why]: a surface judges a query of its grammar WITHOUT data. `triples` is three terms, judged here; a
 # surface whose COURT is a court file is asked as the Q letter's court is -- its own `ask` over no rows answers
 # [] for a lawful question and refuses the rest -- and only when the check was asked to reach the surfaces
-func NatSurfaceCheck(aN, aSf, tQuery)
-	if NatText(aSf, "grammar") = "triples"
+func NatSurfaceCheck(xN, xSf, tQuery)
+	if NatText(xSf, "grammar") = "triples"
 		if Len(NatWords(tQuery)) = 3 return [true, ""] end
 		return [false, "a triple pattern is three terms"]
 	end
 	if not $bNSurfaces return [true, ""] end
-	aCw = NatWords(NatText(aSf, "court"))
-	if Len(aCw) < 2 return [true, ""] end
-	if Right(aCw[1], 5) != ".haro" return [true, ""] end
-	if not NatCourtIsSibling(aCw[1]) return [true, ""] end
-	if NatText(aSf, "world") = "" return [true, ""] end
-	tCourt = aCw[1]
+	xCw = NatWords(NatText(xSf, "court"))
+	if Len(xCw) < 2 return [true, ""] end
+	if Right(xCw[1], 5) != ".haro" return [true, ""] end
+	if not NatCourtIsSibling(xCw[1]) return [true, ""] end
+	if NatText(xSf, "world") = "" return [true, ""] end
+	tCourt = xCw[1]
 	tDir = CtDirOf(sysargv[2])
 	if tDir != "" tCourt = tDir + "/" + tCourt end
 	tVerbs = ""
-	for i = 2 to Len(aCw)
+	for i = 2 to Len(xCw)
 		if i > 2 tVerbs += " " end
-		tVerbs += aCw[i]
+		tVerbs += xCw[i]
 	end
 	tTmp = NatTempFile()
 	# the surface's answer is what it writes to its stdout; what a runtime says of itself on stderr is not an answer
 	tNoErr = " 2>/dev/null"
 	if IsWindows() tNoErr = " 2>NUL" end
-	tInner = NatQuote(ExeFileName()) + " " + NatQuote(tCourt) + " " + tVerbs + " " + NatQuote(NatPath(NatText(aSf, "world"))) + " " + NatQuote(tQuery) + " [] > " + NatQuote(tTmp) + tNoErr
+	tInner = NatQuote(ExeFileName()) + " " + NatQuote(tCourt) + " " + tVerbs + " " + NatQuote(NatPath(NatText(xSf, "world"))) + " " + NatQuote(tQuery) + " [] > " + NatQuote(tTmp) + tNoErr
 	System(NatQuote(tInner))
 	tOut = ""
 	if FExists(tTmp)
@@ -907,262 +907,262 @@ func NatSurfaceCheck(aN, aSf, tQuery)
 	if nNl > 0 tOut = Left(tOut, nNl - 1) end
 	return [false, Left(tOut, 200)]
 end
-func NatRules(aN)
-	aF = []
-	aMeanings = aN[4]
-	aFrames = aN[8]
-	aTongues = aN[3]
+func NatRules(xN)
+	xF = []
+	xMeanings = xN[4]
+	xFrames = xN[8]
+	xTongues = xN[3]
 	# a surface whose world is not there cannot be judged
-	aSurf = aN[6]
-	for i = 1 to Len(aSurf)
-		if NatText(aSurf[i], "world") != ""
+	xSurf = xN[6]
+	for i = 1 to Len(xSurf)
+		if NatText(xSurf[i], "world") != ""
 			bRead = false
-			for j = 1 to Len(aN[2])
-				if aN[2][j][1] = aSurf[i][2] bRead = aN[2][j][3] end
+			for j = 1 to Len(xN[2])
+				if xN[2][j][1] = xSurf[i][2] bRead = xN[2][j][3] end
 			end
 			if not bRead
-				NatAdd(aF, "N_WORLD_UNREAD", aSurf[i][3], "SURFACE " + aSurf[i][2] + " reads the world '" + NatText(aSurf[i], "world") + "', which cannot be read from the sentence's folder")
+				NatAdd(xF, "N_WORLD_UNREAD", xSurf[i][3], "SURFACE " + xSurf[i][2] + " reads the world '" + NatText(xSurf[i], "world") + "', which cannot be read from the sentence's folder")
 			end
 		end
 	end
-	for i = 1 to Len(aSurf)
-		aCw = NatWords(NatText(aSurf[i], "court"))
-		if Len(aCw) > 0
-			if Right(aCw[1], 5) = ".haro" and not NatCourtIsSibling(aCw[1])
-				NatAdd(aF, "N_SURFACE_COURT", aSurf[i][3], "SURFACE " + aSurf[i][2] + " names the court file '" + aCw[1] + "': a surface's court is a court beside this one, a bare name ending in _court.haro and never a path, because `check ... surfaces` runs it")
+	for i = 1 to Len(xSurf)
+		xCw = NatWords(NatText(xSurf[i], "court"))
+		if Len(xCw) > 0
+			if Right(xCw[1], 5) = ".haro" and not NatCourtIsSibling(xCw[1])
+				NatAdd(xF, "N_SURFACE_COURT", xSurf[i][3], "SURFACE " + xSurf[i][2] + " names the court file '" + xCw[1] + "': a surface's court is a court beside this one, a bare name ending in _court.haro and never a path, because `check ... surfaces` runs it")
 			end
 		end
 	end
-	for i = 1 to Len(aFrames)
-		aFr = aFrames[i]
-		aShape = NatNames(aFr, "shape")
-		aSlots = []
-		for j = 1 to Len(aShape)
-			aM = NatFind(aMeanings, aShape[j])
-			if not IsEmpty(aM)
-				tSl = NatText(aM, "slot")
-				if tSl = "number" or tSl = "entity" aSlots + aShape[j] end
+	for i = 1 to Len(xFrames)
+		xFr = xFrames[i]
+		xShape = NatNames(xFr, "shape")
+		vSlots = []
+		for j = 1 to Len(xShape)
+			xM = NatFind(xMeanings, xShape[j])
+			if not IsEmpty(xM)
+				tSl = NatText(xM, "slot")
+				if tSl = "number" or tSl = "entity" vSlots + xShape[j] end
 			end
 		end
-		for j = 1 to Len(aSlots)
+		for j = 1 to Len(vSlots)
 			nTimes = 0
-			for k = 1 to Len(aSlots)
-				if aSlots[k] = aSlots[j] nTimes++ end
+			for k = 1 to Len(vSlots)
+				if vSlots[k] = vSlots[j] nTimes++ end
 			end
 			if nTimes > 1
-				NatAdd(aF, "N_SLOT_REPEATED", aFr[3], "FRAME " + aFr[2] + " names a slot meaning twice in its SHAPE: '" + aSlots[j] + "'")
+				NatAdd(xF, "N_SLOT_REPEATED", xFr[3], "FRAME " + xFr[2] + " names a slot meaning twice in its SHAPE: '" + vSlots[j] + "'")
 				exit
 			end
 		end
-		bHasQ = NatHas(aFr, "target") and NatHas(aFr, "query")
-		bHasS = NatHas(aFr, "steps")
+		bHasQ = NatHas(xFr, "target") and NatHas(xFr, "query")
+		bHasS = NatHas(xFr, "steps")
 		if bHasQ = bHasS
-			NatAdd(aF, "N_FRAME_TARGET", aFr[3], "FRAME " + aFr[2] + " must have either a TARGET and a QUERY or STEPS, and not both nor neither")
+			NatAdd(xF, "N_FRAME_TARGET", xFr[3], "FRAME " + xFr[2] + " must have either a TARGET and a QUERY or STEPS, and not both nor neither")
 		end
-		aAvail = []
-		for j = 1 to Len(aSlots)
-			aAvail + aSlots[j]
+		vAvail = []
+		for j = 1 to Len(vSlots)
+			vAvail + vSlots[j]
 		end
 		if bHasS
-			aSn = NatNames(aFr, "steps")
-			for j = 1 to Len(aSn)
-				aSt = NatFind(aN[7], aSn[j])
-				if IsEmpty(aSt) loop end
-				aPh = NatPlaceholders(NatText(aSt, "query"))
-				for k = 1 to Len(aPh)
-					if not CtInList(aPh[k], aAvail)
-						NatAdd(aF, "N_SLOT_UNKNOWN", aSt[3], "STEP " + aSt[2] + " uses {" + aPh[k] + "}, which is neither a slot of FRAME " + aFr[2] + "'s SHAPE nor bound by an earlier step")
+			xSn = NatNames(xFr, "steps")
+			for j = 1 to Len(xSn)
+				xSt = NatFind(xN[7], xSn[j])
+				if IsEmpty(xSt) loop end
+				xPh = NatPlaceholders(NatText(xSt, "query"))
+				for k = 1 to Len(xPh)
+					if not CtInList(xPh[k], vAvail)
+						NatAdd(xF, "N_SLOT_UNKNOWN", xSt[3], "STEP " + xSt[2] + " uses {" + xPh[k] + "}, which is neither a slot of FRAME " + xFr[2] + "'s SHAPE nor bound by an earlier step")
 					end
 				end
-				if NatText(aSt, "binds") != "" aAvail + NatText(aSt, "binds") end
+				if NatText(xSt, "binds") != "" vAvail + NatText(xSt, "binds") end
 			end
 		elseif bHasQ
-			aPh = NatPlaceholders(NatText(aFr, "query"))
-			for k = 1 to Len(aPh)
-				if not CtInList(aPh[k], aAvail)
-					NatAdd(aF, "N_SLOT_UNKNOWN", aFr[3], "FRAME " + aFr[2] + " QUERY uses {" + aPh[k] + "}, which is not a slot of its SHAPE")
+			xPh = NatPlaceholders(NatText(xFr, "query"))
+			for k = 1 to Len(xPh)
+				if not CtInList(xPh[k], vAvail)
+					NatAdd(xF, "N_SLOT_UNKNOWN", xFr[3], "FRAME " + xFr[2] + " QUERY uses {" + xPh[k] + "}, which is not a slot of its SHAPE")
 				end
 			end
 		end
 		for nKey = 1 to 2
 			tKey = "answers"
 			if nKey = 2 tKey = "empty" end
-			aP = NatPairs(aFr, tKey)
-			for j = 1 to Len(aP)
-				aPh = NatPlaceholders(aP[j][2])
-				for k = 1 to Len(aPh)
-					if not CtInList(aPh[k], aSlots) and not (aPh[k] = "answer" and tKey = "answers") and not CtInList(aPh[k], aAvail)
-						NatAdd(aF, "N_SLOT_UNKNOWN", aFr[3], "FRAME " + aFr[2] + " " + Upper(tKey) + " in " + aP[j][1] + " uses {" + aPh[k] + "}, which is not a slot of its SHAPE")
+			xP = NatPairs(xFr, tKey)
+			for j = 1 to Len(xP)
+				xPh = NatPlaceholders(xP[j][2])
+				for k = 1 to Len(xPh)
+					if not CtInList(xPh[k], vSlots) and not (xPh[k] = "answer" and tKey = "answers") and not CtInList(xPh[k], vAvail)
+						NatAdd(xF, "N_SLOT_UNKNOWN", xFr[3], "FRAME " + xFr[2] + " " + Upper(tKey) + " in " + xP[j][1] + " uses {" + xPh[k] + "}, which is not a slot of its SHAPE")
 					end
 				end
 			end
 		end
 		# the query is judged by its surface, here, without data
-		aTargets = []
+		vTargets = []
 		if bHasQ
-			aTargets + [NatText(aFr, "target"), NatText(aFr, "query")]
+			vTargets + [NatText(xFr, "target"), NatText(xFr, "query")]
 		else
-			aSn = NatNames(aFr, "steps")
-			for j = 1 to Len(aSn)
-				aSt = NatFind(aN[7], aSn[j])
-				if not IsEmpty(aSt) aTargets + [NatText(aSt, "target"), NatText(aSt, "query")] end
+			xSn = NatNames(xFr, "steps")
+			for j = 1 to Len(xSn)
+				xSt = NatFind(xN[7], xSn[j])
+				if not IsEmpty(xSt) vTargets + [NatText(xSt, "target"), NatText(xSt, "query")] end
 			end
 		end
-		for j = 1 to Len(aTargets)
-			aSf = NatFind(aN[6], aTargets[j][1])
-			if IsEmpty(aSf) or aTargets[j][2] = "" loop end
-			aVd = NatSurfaceCheck(aN, aSf, NatSampleFill(aN, aTargets[j][2]))
-			if not aVd[1]
-				NatAdd(aF, "N_QUERY_REFUSED", aFr[3], "FRAME " + aFr[2] + ": the surface '" + aTargets[j][1] + "' refuses the query '" + aTargets[j][2] + "': " + aVd[2])
+		for j = 1 to Len(vTargets)
+			xSf = NatFind(xN[6], vTargets[j][1])
+			if IsEmpty(xSf) or vTargets[j][2] = "" loop end
+			xVd = NatSurfaceCheck(xN, xSf, NatSampleFill(xN, vTargets[j][2]))
+			if not xVd[1]
+				NatAdd(xF, "N_QUERY_REFUSED", xFr[3], "FRAME " + xFr[2] + ": the surface '" + vTargets[j][1] + "' refuses the query '" + vTargets[j][2] + "': " + xVd[2])
 			end
 		end
 		# every tongue can tell the answer: by the frame's template, or by the surface's own voice
-		tTgt = NatText(aFr, "target")
+		tTgt = NatText(xFr, "target")
 		if tTgt = "" and bHasS
-			aSn = NatNames(aFr, "steps")
-			if Len(aSn) > 0
-				aLast = NatFind(aN[7], aSn[Len(aSn)])
-				if not IsEmpty(aLast) tTgt = NatText(aLast, "target") end
+			xSn = NatNames(xFr, "steps")
+			if Len(xSn) > 0
+				xLast = NatFind(xN[7], xSn[Len(xSn)])
+				if not IsEmpty(xLast) tTgt = NatText(xLast, "target") end
 			end
 		end
-		aTells = []
-		aSfT = NatFind(aN[6], tTgt)
-		if not IsEmpty(aSfT) aTells = NatNames(aSfT, "tells") end
-		aAnsP = NatPairs(aFr, "answers")
-		aEmpP = NatPairs(aFr, "empty")
-		for j = 1 to Len(aTongues)
-			tTn = aTongues[j][2]
-			bHave = NatHasKey(aAnsP, tTn)
-			bEmpty = NatHasKey(aEmpP, tTn)
+		xTells = []
+		xSfT = NatFind(xN[6], tTgt)
+		if not IsEmpty(xSfT) xTells = NatNames(xSfT, "tells") end
+		xAnsP = NatPairs(xFr, "answers")
+		xEmpP = NatPairs(xFr, "empty")
+		for j = 1 to Len(xTongues)
+			tTn = xTongues[j][2]
+			bHave = NatHasKey(xAnsP, tTn)
+			bEmpty = NatHasKey(xEmpP, tTn)
 			if bHave and not bEmpty
-				NatAdd(aF, "N_TELL_UNCOVERED", aFr[3], "FRAME " + aFr[2] + " has ANSWERS in " + tTn + " but no EMPTY: an answer may be nobody")
+				NatAdd(xF, "N_TELL_UNCOVERED", xFr[3], "FRAME " + xFr[2] + " has ANSWERS in " + tTn + " but no EMPTY: an answer may be nobody")
 			end
 			if bHasS
 				if not bHave
-					NatAdd(aF, "N_TELL_UNCOVERED", aFr[3], "FRAME " + aFr[2] + " has no ANSWERS in " + tTn + " for its first step")
+					NatAdd(xF, "N_TELL_UNCOVERED", xFr[3], "FRAME " + xFr[2] + " has no ANSWERS in " + tTn + " for its first step")
 				end
-				if not CtInList(tTn, aTells)
-					NatAdd(aF, "N_TELL_UNCOVERED", aFr[3], "FRAME " + aFr[2] + " cannot tell its last step in " + tTn + ": the surface '" + tTgt + "' does not tell in " + tTn)
+				if not CtInList(tTn, xTells)
+					NatAdd(xF, "N_TELL_UNCOVERED", xFr[3], "FRAME " + xFr[2] + " cannot tell its last step in " + tTn + ": the surface '" + tTgt + "' does not tell in " + tTn)
 				end
-			elseif not bHave and not CtInList(tTn, aTells)
-				NatAdd(aF, "N_TELL_UNCOVERED", aFr[3], "FRAME " + aFr[2] + " cannot be told in " + tTn + ": no ANSWERS in " + tTn + " and the surface '" + tTgt + "' does not tell in " + tTn)
+			elseif not bHave and not CtInList(tTn, xTells)
+				NatAdd(xF, "N_TELL_UNCOVERED", xFr[3], "FRAME " + xFr[2] + " cannot be told in " + tTn + ": no ANSWERS in " + tTn + " and the surface '" + tTgt + "' does not tell in " + tTn)
 			end
 		end
 	end
-	aKinds = ["character", "word", "shape", "ambiguous", "surface"]
-	for i = 1 to Len(aTongues)
-		aT = aTongues[i]
-		aRp = NatPairs(aT, "refuses")
-		aMiss = []
-		for j = 1 to Len(aKinds)
-			if not NatHasKey(aRp, aKinds[j]) aMiss + aKinds[j] end
+	xKinds = ["character", "word", "shape", "ambiguous", "surface"]
+	for i = 1 to Len(xTongues)
+		xT = xTongues[i]
+		xRp = NatPairs(xT, "refuses")
+		vMiss = []
+		for j = 1 to Len(xKinds)
+			if not NatHasKey(xRp, xKinds[j]) vMiss + xKinds[j] end
 		end
-		if Len(aMiss) > 0
-			NatAdd(aF, "N_REFUSAL_UNCOVERED", aT[3], "TONGUE " + aT[2] + " does not say how it refuses: " + CtJoin(aMiss, ", "))
+		if Len(vMiss) > 0
+			NatAdd(xF, "N_REFUSAL_UNCOVERED", xT[3], "TONGUE " + xT[2] + " does not say how it refuses: " + CtJoin(vMiss, ", "))
 		end
-		tAllows = NatText(aT, "allows")
+		tAllows = NatText(xT, "allows")
 		for j = 1 to Len(tAllows)
 			if SubStr(NatSafeSet(), tAllows[j]) = 0
-				NatAdd(aF, "N_GATE_WIDENED", aT[3], "TONGUE " + aT[2] + " ALLOWS '" + tAllows[j] + "', outside the court's safe set " + NatSafeSet() + ": a tongue cannot widen the gate")
+				NatAdd(xF, "N_GATE_WIDENED", xT[3], "TONGUE " + xT[2] + " ALLOWS '" + tAllows[j] + "', outside the court's safe set " + NatSafeSet() + ": a tongue cannot widen the gate")
 				exit
 			end
 		end
-		aLex = NatLexicon(aN, aT[2])
-		for j = 1 to Len(aLex[3])
-			NatAdd(aF, "N_WORD_AMBIGUOUS", aT[3], "in " + aT[2] + " the word '" + aLex[3][j][1] + "' means both " + aLex[3][j][2] + " and " + aLex[3][j][3])
+		xLex = NatLexicon(xN, xT[2])
+		for j = 1 to Len(xLex[3])
+			NatAdd(xF, "N_WORD_AMBIGUOUS", xT[3], "in " + xT[2] + " the word '" + xLex[3][j][1] + "' means both " + xLex[3][j][2] + " and " + xLex[3][j][3])
 		end
-		aShown = []
-		for j = 1 to Len(aLex[1])
-			for k = 1 to Len(aLex[2])
-				if aLex[2][k][1] = aLex[1][j] and not CtInList(aLex[1][j], aShown)
-					aShown + aLex[1][j]
-					NatAdd(aF, "N_WORD_IGNORED", aT[3], "in " + aT[2] + " the word '" + aLex[1][j] + "' is both ignored and a word of " + aLex[2][k][2])
+		vShown = []
+		for j = 1 to Len(xLex[1])
+			for k = 1 to Len(xLex[2])
+				if xLex[2][k][1] = xLex[1][j] and not CtInList(xLex[1][j], vShown)
+					vShown + xLex[1][j]
+					NatAdd(xF, "N_WORD_IGNORED", xT[3], "in " + xT[2] + " the word '" + xLex[1][j] + "' is both ignored and a word of " + xLex[2][k][2])
 				end
 			end
 		end
 	end
-	for i = 1 to Len(aMeanings)
-		aM = aMeanings[i]
-		tSl = NatText(aM, "slot")
+	for i = 1 to Len(xMeanings)
+		xM = xMeanings[i]
+		tSl = NatText(xM, "slot")
 		if tSl = "none"
-			aWp = NatPairs(aM, "words")
-			for j = 1 to Len(aTongues)
-				if not NatHasKey(aWp, aTongues[j][2])
-					NatAdd(aF, "N_TONGUE_UNCOVERED", aM[3], "MEANING " + aM[2] + " has no words in " + aTongues[j][2])
+			xWp = NatPairs(xM, "words")
+			for j = 1 to Len(xTongues)
+				if not NatHasKey(xWp, xTongues[j][2])
+					NatAdd(xF, "N_TONGUE_UNCOVERED", xM[3], "MEANING " + xM[2] + " has no words in " + xTongues[j][2])
 				end
 			end
 		end
 		if tSl = "entity"
-			aSf = NatFind(aN[6], NatText(aM, "from"))
-			if NatText(aM, "of") = "" or NatText(aM, "from") = ""
-				NatAdd(aF, "N_ENTITY_UNKNOWN", aM[3], "MEANING " + aM[2] + " is an entity and needs both OF and FROM")
-			elseif not IsEmpty(aSf) and not CtInList(NatText(aM, "of"), NatNames(aSf, "entities"))
-				NatAdd(aF, "N_ENTITY_UNKNOWN", aM[3], "MEANING " + aM[2] + " is of '" + NatText(aM, "of") + "', which the surface '" + NatText(aM, "from") + "' does not enumerate")
+			xSf = NatFind(xN[6], NatText(xM, "from"))
+			if NatText(xM, "of") = "" or NatText(xM, "from") = ""
+				NatAdd(xF, "N_ENTITY_UNKNOWN", xM[3], "MEANING " + xM[2] + " is an entity and needs both OF and FROM")
+			elseif not IsEmpty(xSf) and not CtInList(NatText(xM, "of"), NatNames(xSf, "entities"))
+				NatAdd(xF, "N_ENTITY_UNKNOWN", xM[3], "MEANING " + xM[2] + " is of '" + NatText(xM, "of") + "', which the surface '" + NatText(xM, "from") + "' does not enumerate")
 			end
 		end
 	end
-	aEx = aN[9]
-	for i = 1 to Len(aEx)
-		tMeans = NatText(aEx[i], "means")
-		if IsEmpty(NatFind(aFrames, tMeans)) loop end
-		aP = NatPairs(aEx[i], "asking")
-		aGot = []
-		for j = 1 to Len(aP)
-			if IsEmpty(NatFind(aTongues, aP[j][1])) loop end
-			aU = NatUnderstand(aN, aP[j][1], aP[j][2])
-			if aU[1] = "ok" and aU[2] = tMeans
-				tShape = aU[4] + " " + aU[5] + NatStepsText(aU[6])
-				if not CtInList(tShape, aGot) aGot + tShape end
+	xEx = xN[9]
+	for i = 1 to Len(xEx)
+		tMeans = NatText(xEx[i], "means")
+		if IsEmpty(NatFind(xFrames, tMeans)) loop end
+		xP = NatPairs(xEx[i], "asking")
+		xGot = []
+		for j = 1 to Len(xP)
+			if IsEmpty(NatFind(xTongues, xP[j][1])) loop end
+			xU = NatUnderstand(xN, xP[j][1], xP[j][2])
+			if xU[1] = "ok" and xU[2] = tMeans
+				tShape = xU[4] + " " + xU[5] + NatStepsText(xU[6])
+				if not CtInList(tShape, xGot) xGot + tShape end
 			else
-				tWas = "refused as " + aU[2]
-				if aU[1] = "ok" tWas = "understood as " + aU[2] end
-				NatAdd(aF, "N_EXAMPLE_FAILED", aEx[i][3], "EXAMPLE " + aEx[i][2] + " in " + aP[j][1] + " ('" + aP[j][2] + "') is " + tWas + ", not as " + tMeans)
+				tWas = "refused as " + xU[2]
+				if xU[1] = "ok" tWas = "understood as " + xU[2] end
+				NatAdd(xF, "N_EXAMPLE_FAILED", xEx[i][3], "EXAMPLE " + xEx[i][2] + " in " + xP[j][1] + " ('" + xP[j][2] + "') is " + tWas + ", not as " + tMeans)
 			end
 		end
-		if Len(aGot) > 1
-			NatAdd(aF, "N_EXAMPLE_DIVERGES", aEx[i][3], "EXAMPLE " + aEx[i][2] + " compiles to different queries in different tongues: " + CtJoin(aGot, " | "))
+		if Len(xGot) > 1
+			NatAdd(xF, "N_EXAMPLE_DIVERGES", xEx[i][3], "EXAMPLE " + xEx[i][2] + " compiles to different queries in different tongues: " + CtJoin(xGot, " | "))
 		end
 	end
-	aCe = aN[10]
-	for i = 1 to Len(aCe)
-		tWant = NatText(aCe[i], "refused")
-		aP = NatPairs(aCe[i], "asking")
-		for j = 1 to Len(aP)
-			if IsEmpty(NatFind(aTongues, aP[j][1])) loop end
-			aU = NatUnderstand(aN, aP[j][1], aP[j][2])
-			if not (aU[1] = "refused" and aU[2] = tWant)
-				tWas = "refused as " + aU[2]
-				if aU[1] = "ok" tWas = "understood as " + aU[2] end
-				NatAdd(aF, "N_COUNTEREXAMPLE_FAILED", aCe[i][3], "COUNTEREXAMPLE " + aCe[i][2] + " in " + aP[j][1] + " ('" + aP[j][2] + "') was " + tWas + ", not refused as " + tWant)
+	xCe = xN[10]
+	for i = 1 to Len(xCe)
+		tWant = NatText(xCe[i], "refused")
+		xP = NatPairs(xCe[i], "asking")
+		for j = 1 to Len(xP)
+			if IsEmpty(NatFind(xTongues, xP[j][1])) loop end
+			xU = NatUnderstand(xN, xP[j][1], xP[j][2])
+			if not (xU[1] = "refused" and xU[2] = tWant)
+				tWas = "refused as " + xU[2]
+				if xU[1] = "ok" tWas = "understood as " + xU[2] end
+				NatAdd(xF, "N_COUNTEREXAMPLE_FAILED", xCe[i][3], "COUNTEREXAMPLE " + xCe[i][2] + " in " + xP[j][1] + " ('" + xP[j][2] + "') was " + tWas + ", not refused as " + tWant)
 			end
 		end
 	end
-	return NatSort(aF)
+	return NatSort(xF)
 end
 # findings [code, line, message], by line and then by code, stable
-func NatSort(aF)
-	aOut = []
-	for i = 1 to Len(aF)
-		nAt = Len(aOut) + 1
-		for j = Len(aOut) to 1 step -1
-			if aOut[j][2] > aF[i][2] or (aOut[j][2] = aF[i][2] and NatLess(aF[i][1], aOut[j][1]))
+func NatSort(xF)
+	xOut = []
+	for i = 1 to Len(xF)
+		nAt = Len(xOut) + 1
+		for j = Len(xOut) to 1 step -1
+			if xOut[j][2] > xF[i][2] or (xOut[j][2] = xF[i][2] and NatLess(xF[i][1], xOut[j][1]))
 				nAt = j
 			else
 				exit
 			end
 		end
-		Insert(aOut, nAt - 1, aF[i])
+		Insert(xOut, nAt - 1, xF[i])
 	end
-	return aOut
+	return xOut
 end
 # the court's own refusal path: each finding is a refusal with its code and its cite; `check` raises the first,
 # `diagnose` notes them all
-func NatCheckRules(aDecls)
-	aN = NatBuild(aDecls)
-	aF = NatRules(aN)
-	for i = 1 to Len(aF)
+func NatCheckRules(xDecls)
+	xN = NatBuild(xDecls)
+	xF = NatRules(xN)
+	for i = 1 to Len(xF)
 		try
-			CtFailC(aF[i][2], aF[i][1], ["rule:" + Lower(aF[i][1])], aF[i][3])
+			CtFailC(xF[i][2], xF[i][1], ["rule:" + Lower(xF[i][1])], xF[i][3])
 		catch
 			CtNote(cCatchError)
 		end
@@ -1182,21 +1182,21 @@ func NatMain(tVerb)
 		return
 	end
 	try
-		aDecls = CtDeclare(Read(sysargv[4]))
-		aN = NatBuild(aDecls)
+		xDecls = CtDeclare(Read(sysargv[4]))
+		xN = NatBuild(xDecls)
 		if tVerb = "examples"
-			? NatJsonExamples(aN)
+			? NatJsonExamples(xN)
 		else
 			tTongue = sysargv[5]
-			if IsEmpty(NatFind(aN[3], tTongue)) CtFail(1, "the sentence declares no tongue '" + tTongue + "'") end
+			if IsEmpty(NatFind(xN[3], tTongue)) CtFail(1, "the sentence declares no tongue '" + tTongue + "'") end
 			if tVerb = "vocabulary"
-				? NatJsonVocabulary(aN, tTongue)
+				? NatJsonVocabulary(xN, tTongue)
 			elseif tVerb = "tokens"
-				? NatJsonTokens(aN, tTongue, sysargv[6])
+				? NatJsonTokens(xN, tTongue, sysargv[6])
 			elseif tVerb = "understand"
-				? NatJsonResult(NatUnderstand(aN, tTongue, sysargv[6]))
+				? NatJsonResult(NatUnderstand(xN, tTongue, sysargv[6]))
 			else
-				? NatJsonResult(NatAsk(aN, tTongue, sysargv[6]))
+				? NatJsonResult(NatAsk(xN, tTongue, sysargv[6]))
 			end
 		end
 	catch

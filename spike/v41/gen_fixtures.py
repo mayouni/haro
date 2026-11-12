@@ -70,13 +70,13 @@ CASES = [
         'f()', 'func f', T + '? :Name', T + 'x = :Name', T + '? x = "name"'],
      ['name', '1']),
     ('S06', 'S4', 'in a .haro file `:key = value` is refused by name', '.haro', [
-        '? "before"', 'f()', 'func f', T + 'aL = [:a = 1]', T + '? Len(aL)'],
+        '? "before"', 'f()', 'func f', T + 'xL = [:a = 1]', T + '? Len(xL)'],
      refused('S06', '.haro', 4, R_PAIR, ':a = 1', 4, 2), 1),
     ('S07', 'S4', 'in a .haro file the pair is written as a list', '.haro', [
-        'f()', 'func f', T + 'aL = [[:a, 1], [:Key, 2]]', T + '? aL[2][1]', T + '? Len(aL)'],
+        'f()', 'func f', T + 'xL = [[:a, 1], [:Key, 2]]', T + '? xL[2][1]', T + '? Len(xL)'],
      ['Key', '2']),
     ('S08', 'S4', 'in a .ring file `:key = value` is Ring\'s pair, and its key lowered', '.ring', [
-        'f()', 'func f', T + 'aL = [:a = 1, :Key = 2]', T + '? aL[2][1]', T + '? len(aL)'],
+        'f()', 'func f', T + 'xL = [:a = 1, :Key = 2]', T + '? xL[2][1]', T + '? len(xL)'],
      ['key', '2']),
     ('S09', 'S5', 'an eval in a .haro program reads by Haro\'s rules', '.haro', [
         'f()', 'func f', T + 'Eval("? :Name")', T + 'Eval("nA = 4  ? nA")'],

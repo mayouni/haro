@@ -10,43 +10,43 @@
 # Functions only; the globals are the generated court's.
 
 # the doors a declaration opens, in the order written; NULL for a kind that opens nothing
-func NdOpens(aDoors, aD)
-	for i = 1 to Len(aDoors[2])
-		if aDoors[2][i][1] != aD[1] loop end
-		if not aDoors[2][i][3] return [aDoors[2][i][2]] end
-		aOut = []
-		for j = 1 to Len(aD[4])
-			if aD[4][j][1] != Upper(aDoors[2][i][2]) loop end
-			aV = aD[4][j][3]
-			if aV[1] = "namelist"
-				for k = 1 to Len(aV[2]) aOut + aV[2][k] end
+func NdOpens(xDoors, xD)
+	for i = 1 to Len(xDoors[2])
+		if xDoors[2][i][1] != xD[1] loop end
+		if not xDoors[2][i][3] return [xDoors[2][i][2]] end
+		xOut = []
+		for j = 1 to Len(xD[4])
+			if xD[4][j][1] != Upper(xDoors[2][i][2]) loop end
+			xV = xD[4][j][3]
+			if xV[1] = "namelist"
+				for k = 1 to Len(xV[2]) xOut + xV[2][k] end
 			else
-				aOut + aV[2]
+				xOut + xV[2]
 			end
 		end
-		return aOut
+		return xOut
 	end
 	return ""
 end
 # a declaration whose OPENS seat lists a door the language does not NEED is refused
-func NdCheck(aDecls, aDoors)
-	for i = 1 to Len(aDecls)
-		aD = aDecls[i]
-		for k = 1 to Len(aDoors[2])
-			if aDoors[2][k][1] != aD[1] or not aDoors[2][k][3] loop end
-			for j = 1 to Len(aD[4])
-				if aD[4][j][1] != Upper(aDoors[2][k][2]) loop end
-				aV = aD[4][j][3]
-				aW = []
-				if aV[1] = "namelist" aW = aV[2] else aW = [aV[2]] end
-				for m = 1 to Len(aW)
+func NdCheck(xDecls, xDoors)
+	for i = 1 to Len(xDecls)
+		xD = xDecls[i]
+		for k = 1 to Len(xDoors[2])
+			if xDoors[2][k][1] != xD[1] or not xDoors[2][k][3] loop end
+			for j = 1 to Len(xD[4])
+				if xD[4][j][1] != Upper(xDoors[2][k][2]) loop end
+				xV = xD[4][j][3]
+				xW = []
+				if xV[1] = "namelist" xW = xV[2] else xW = [xV[2]] end
+				for m = 1 to Len(xW)
 					bNeeded = false
-					for n = 1 to Len(aDoors[1])
-						if aDoors[1][n] = aW[m] bNeeded = true end
+					for n = 1 to Len(xDoors[1])
+						if xDoors[1][n] = xW[m] bNeeded = true end
 					end
 					if not bNeeded
 						try
-							CtFailC(aD[4][j][2], "CAPABILITY_NOT_NEEDED", [], aD[1] + " " + aD[2] + " opens '" + aW[m] + "', and the language " + $tCourtLang + " does not NEED it")
+							CtFailC(xD[4][j][2], "CAPABILITY_NOT_NEEDED", [], xD[1] + " " + xD[2] + " opens '" + xW[m] + "', and the language " + $tCourtLang + " does not NEED it")
 						catch
 							CtNote(cCatchError)
 						end
@@ -57,13 +57,13 @@ func NdCheck(aDecls, aDoors)
 	end
 end
 # the world rows: each declaration of a kind that opens, with what it opens -- [] when it lists nothing
-func NdRows(aDecls, aDoors, tFile)
-	aRows = []
-	for i = 1 to Len(aDecls)
-		aD = aDecls[i]
-		aO = NdOpens(aDoors, aD)
-		if IsEmpty(aO) loop end
-		aRows + [ExObjMark(), ["verb", aD[1]], ["name", aD[2]], ["opens", aO], ["span", [ExObjMark(), ["file", tFile], ["line", aD[3]]]]]
+func NdRows(xDecls, xDoors, tFile)
+	xRows = []
+	for i = 1 to Len(xDecls)
+		xD = xDecls[i]
+		xO = NdOpens(xDoors, xD)
+		if IsEmpty(xO) loop end
+		xRows + [ExObjMark(), ["verb", xD[1]], ["name", xD[2]], ["opens", xO], ["span", [ExObjMark(), ["file", tFile], ["line", xD[3]]]]]
 	end
-	return aRows
+	return xRows
 end

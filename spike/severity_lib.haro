@@ -13,64 +13,64 @@
 # Functions only; the globals are the generated court's.
 
 # the severity a kind holds a seat at: "warning", "error", or "" (an error, as every seat is)
-func SevSeatIs(aKind, tSeat)
-	if Len(aKind) < 7 return "" end
-	for i = 1 to Len(aKind[7])
-		if aKind[7][i][1] = tSeat return aKind[7][i][2] end
+func SevSeatIs(xKind, tSeat)
+	if Len(xKind) < 7 return "" end
+	for i = 1 to Len(xKind[7])
+		if xKind[7][i][1] = tSeat return xKind[7][i][2] end
 	end
 	return ""
 end
 # a reference clause of a seat held at warning: each element that resolves to nothing is spoken, one warning per element, in the order
 # written -- where the refusal stops at the first, a warning has no reason to
-func SevWarnClause(aDecl, aSeat, aClause)
-	aV = aClause[3]
-	if aV[1] = "namelist" or aV[1] = "pairlist" or aV[1] = "stringlist"
-		for i = 1 to Len(aV[2])
-			aSubV = [aV[1], [aV[2][i]], aV[3], aV[4]]
-			SevWarnOne(aDecl, aSeat, [aClause[1], aClause[2], aSubV, aClause[4], aClause[5]])
+func SevWarnClause(xDecl, xSeat, xClause)
+	xV = xClause[3]
+	if xV[1] = "namelist" or xV[1] = "pairlist" or xV[1] = "stringlist"
+		for i = 1 to Len(xV[2])
+			vSubV = [xV[1], [xV[2][i]], xV[3], xV[4]]
+			SevWarnOne(xDecl, xSeat, [xClause[1], xClause[2], vSubV, xClause[4], xClause[5]])
 		end
 	else
-		SevWarnOne(aDecl, aSeat, aClause)
+		SevWarnOne(xDecl, xSeat, xClause)
 	end
 end
-func SevWarnOne(aDecl, aSeat, aClause)
+func SevWarnOne(xDecl, xSeat, xClause)
 	CtSetCode("PARSE", [])
-	tWhy = CtCheckSeatValue(aDecl, aSeat, aClause, true)
-	if tWhy != "" $aCourtWarnings + [$tCourtCode, $aCourtCites, aClause[2], tWhy] end
+	tWhy = CtCheckSeatValue(xDecl, xSeat, xClause, true)
+	if tWhy != "" $vCourtWarnings + [$tCourtCode, $xCourtCites, xClause[2], tWhy] end
 	CtSetCode("PARSE", [])
 end
 # a NAMED kind held at warning: its declaration is read past -- the name, AS, a body whose parentheses balance, RATIONALE and its string --
 # and said in the NAMED words, with the refusal's code and cites. 1 when read past; 0 leaves the refusal to the court. What is read past is
 # not declared: it counts nowhere and a reference to it resolves to nothing
-func SevSkipNamed(aRow, aK)
-	tWord = Lower(CtShown(aK))
+func SevSkipNamed(vRow, xK)
+	tWord = Lower(CtShown(xK))
 	tSev = ""
-	for i = 1 to Len(aRow[7])
-		if aRow[7][i][1] = tWord tSev = aRow[7][i][2] end
+	for i = 1 to Len(vRow[7])
+		if vRow[7][i][1] = tWord tSev = vRow[7][i][2] end
 	end
 	if tSev != "warning" return false end
 	tNamed = CtRefusalNamed("unknown_declaration", tWord)
-	aCC = CtRefusalCode("unknown_declaration", tWord, "UNKNOWN_KIND")
-	aName = CtExpect("ident", "a lower_snake name")
-	aAs = CtNext()
-	if not (aAs[1] = "keyword" and aAs[2] = "AS")
-		CtFail(aAs[3], "Expected AS after the name, found '" + CtShown(aAs) + "'")
+	xCC = CtRefusalCode("unknown_declaration", tWord, "UNKNOWN_KIND")
+	xName = CtExpect("ident", "a lower_snake name")
+	xAs = CtNext()
+	if not (xAs[1] = "keyword" and xAs[2] = "AS")
+		CtFail(xAs[3], "Expected AS after the name, found '" + CtShown(xAs) + "'")
 	end
 	CtExpect("lparen", "'('")
 	nDepth = 1
 	while nDepth > 0
-		aT = CtNext()
-		if aT[1] = "eof"
-			CtFail(aK[3], Upper(tWord) + " " + aName[2] + " opens '(' and never closes it: a kind read past is still a declaration")
+		xT = CtNext()
+		if xT[1] = "eof"
+			CtFail(xK[3], Upper(tWord) + " " + xName[2] + " opens '(' and never closes it: a kind read past is still a declaration")
 		end
-		if aT[1] = "lparen" nDepth++ end
-		if aT[1] = "rparen" nDepth-- end
+		if xT[1] = "lparen" nDepth++ end
+		if xT[1] = "rparen" nDepth-- end
 	end
-	aR = CtNext()
-	if not (aR[1] = "keyword" and aR[2] = "RATIONALE")
-		CtFail(aR[3], "RATIONALE is mandatory on every declaration (" + Upper(tWord) + " " + aName[2] + " has none)")
+	xR = CtNext()
+	if not (xR[1] = "keyword" and xR[2] = "RATIONALE")
+		CtFail(xR[3], "RATIONALE is mandatory on every declaration (" + Upper(tWord) + " " + xName[2] + " has none)")
 	end
 	CtExpect("string", "the RATIONALE string")
-	$aCourtWarnings + [aCC[1], aCC[2], aK[3], tNamed]
+	$vCourtWarnings + [xCC[1], xCC[2], xK[3], tNamed]
 	return true
 end

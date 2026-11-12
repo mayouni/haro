@@ -1,11 +1,11 @@
 h()
 func h
-	aL = []
+	xL = []
 	try
 		try
 			Raise("held")
 		finally
-			? aL[3]
+			? xL[3]
 		end
 	catch e
 		? e.Code()

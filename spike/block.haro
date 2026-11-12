@@ -12,7 +12,7 @@
 
 load "block_lib.haro"
 
-$aBlkToks = []
+$xBlkToks = []
 $nBlkPos = 1
 
 if Len(sysargv) < 4
@@ -61,11 +61,11 @@ end
 func BlkRoundTrip(tPath)
 	try
 		tIn = Read(tPath)
-		aA = BlkLoad(tIn)
-		tOut = BlkPrintC6(aA)
-		aB = BlkLoad(tOut)
-		if BlkDumpAll(aA) = BlkDumpAll(aB)
-			? "ok " + tPath + " " + Len(aA) + " " + Len(tIn) + " " + Len(tOut)
+		xA = BlkLoad(tIn)
+		tOut = BlkPrintC6(xA)
+		xB = BlkLoad(tOut)
+		if BlkDumpAll(xA) = BlkDumpAll(xB)
+			? "ok " + tPath + " " + Len(xA) + " " + Len(tIn) + " " + Len(tOut)
 		else
 			? "DIFFERS " + tPath
 		end

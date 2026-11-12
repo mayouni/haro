@@ -67,7 +67,7 @@ func CondIsDigit(tC)
 end
 # tokens: [type, text]; types: word number string eq ne gt lt lparen rparen dot eof
 func CondTokenize(tS)
-	aT = []
+	xT = []
 	nN = Len(tS)
 	nI = 1
 	while nI <= nN
@@ -80,84 +80,84 @@ func CondTokenize(tS)
 				nJ++
 			end
 			if nJ > nN Raise("condition: unterminated quote in '" + tS + "'") end
-			aT + ["string", SubStr(tS, nI + 1, nJ - nI - 1)]
+			xT + ["string", SubStr(tS, nI + 1, nJ - nI - 1)]
 			nI = nJ + 1
 		elseif CondIsDigit(tC)
 			nJ = nI
 			while nJ <= nN and CondIsDigit(tS[nJ])
 				nJ++
 			end
-			aT + ["number", SubStr(tS, nI, nJ - nI)]
+			xT + ["number", SubStr(tS, nI, nJ - nI)]
 			nI = nJ
 		elseif CondIsWordChar(tC)
 			nJ = nI
 			while nJ <= nN and CondIsWordChar(tS[nJ])
 				nJ++
 			end
-			aT + ["word", SubStr(tS, nI, nJ - nI)]
+			xT + ["word", SubStr(tS, nI, nJ - nI)]
 			nI = nJ
 		elseif tC = "!" and nI < nN and tS[nI+1] = "="
-			aT + ["ne", "!="]
+			xT + ["ne", "!="]
 			nI += 2
 		elseif tC = "="
-			aT + ["eq", "="]
+			xT + ["eq", "="]
 			nI++
 		elseif tC = ">"
-			aT + ["gt", ">"]
+			xT + ["gt", ">"]
 			nI++
 		elseif tC = "<"
-			aT + ["lt", "<"]
+			xT + ["lt", "<"]
 			nI++
 		elseif tC = "("
-			aT + ["lparen", "("]
+			xT + ["lparen", "("]
 			nI++
 		elseif tC = ")"
-			aT + ["rparen", ")"]
+			xT + ["rparen", ")"]
 			nI++
 		elseif tC = "."
-			aT + ["dot", "."]
+			xT + ["dot", "."]
 			nI++
 		else
 			Raise("condition: the character '" + tC + "' is not part of the condition language")
 		end
 	end
-	aT + ["eof", ""]
-	return aT
+	xT + ["eof", ""]
+	return xT
 end
 func CondPeek
-	return $aCondToks[$nCondPos]
+	return $xCondToks[$nCondPos]
 end
 func CondNext
-	aT = $aCondToks[$nCondPos]
-	if aT[1] != "eof" $nCondPos++ end
-	return aT
+	xT = $xCondToks[$nCondPos]
+	if xT[1] != "eof" $nCondPos++ end
+	return xT
 end
 func CondParse(tS)
-	$aCondToks = CondTokenize(tS)
+	$xCondToks = CondTokenize(tS)
 	$nCondPos = 1
-	aAst = CondOr()
+	xAst = CondOr()
 	if CondPeek()[1] != "eof"
 		Raise("condition: unexpected '" + CondPeek()[2] + "' in '" + tS + "'")
 	end
-	return aAst
+	return xAst
 end
 # a path on its own (a VIEW's ONE), from its text
 func CondParsePathText(tS)
-	$aCondToks = CondTokenize(tS)
+	$xCondToks = CondTokenize(tS)
 	$nCondPos = 1
-	aT = CondNext()
-	if aT[1] != "word" Raise("path: expected a name, found '" + aT[2] + "'") end
-	aP = CondParsePath(aT)
+	xT = CondNext()
+	if xT[1] != "word" Raise("path: expected a name, found '" + xT[2] + "'") end
+	xP = CondParsePath(xT)
 	if CondPeek()[1] != "eof" Raise("path: unexpected '" + CondPeek()[2] + "' in '" + tS + "'") end
-	return aP
+	return xP
 end
 # a value or a path on its own (a VIEW's NAMED), from its text
 func CondParseRightText(tS)
-	$aCondToks = CondTokenize(tS)
+	$xCondToks = CondTokenize(tS)
 	$nCondPos = 1
-	aR = CondCmpRight()
+	xR = CondCmpRight()
 	if CondPeek()[1] != "eof" Raise("named: unexpected '" + CondPeek()[2] + "' in '" + tS + "'") end
-	return aR
+	return xR
 end
 # A node is built in a fresh variable and assigned after: `aL = ["or", aL,
 # aR]` puts the variable being assigned inside the list assigned to it, and
@@ -165,24 +165,24 @@ end
 # next read (Ring, Judged by the Record, 4.4). haro ran the one-line form
 # correctly; the oracle named it (HF-36).
 func CondOr
-	aL = CondAnd()
+	xL = CondAnd()
 	while CondPeek()[1] = "word" and CondPeek()[2] = "or"
 		CondNext()
-		aR = CondAnd()
-		aNode = ["or", aL, aR]
-		aL = aNode
+		xR = CondAnd()
+		xNode = ["or", xL, xR]
+		xL = xNode
 	end
-	return aL
+	return xL
 end
 func CondAnd
-	aL = CondTerm()
+	xL = CondTerm()
 	while CondPeek()[1] = "word" and CondPeek()[2] = "and"
 		CondNext()
-		aR = CondTerm()
-		aNode = ["and", aL, aR]
-		aL = aNode
+		xR = CondTerm()
+		xNode = ["and", xL, xR]
+		xL = xNode
 	end
-	return aL
+	return xL
 end
 func CondTerm
 	if CondPeek()[1] = "word" and CondPeek()[2] = "not"
@@ -192,120 +192,120 @@ func CondTerm
 	return CondAtom()
 end
 func CondValue
-	aT = CondNext()
-	if aT[1] = "word" or aT[1] = "number" or aT[1] = "string" return aT[2] end
-	Raise("condition: expected a value, found '" + aT[2] + "'")
+	xT = CondNext()
+	if xT[1] = "word" or xT[1] = "number" or xT[1] = "string" return xT[2] end
+	Raise("condition: expected a value, found '" + xT[2] + "'")
 end
 # a path, its first word already consumed as t
 func CondParsePath(xT)
-	aSegs = [xT[2]]
+	xSegs = [xT[2]]
 	while CondPeek()[1] = "dot"
 		CondNext()
-		aS = CondNext()
-		if aS[1] != "word" Raise("condition: expected a name after '.'") end
-		aSegs + aS[2]
+		xS = CondNext()
+		if xS[1] != "word" Raise("condition: expected a name after '.'") end
+		xSegs + xS[2]
 	end
-	return ["path", aSegs]
+	return ["path", xSegs]
 end
 # the right of = and !=, and a quantifier's named: a quoted or numeric value,
 # a dotted name or this/self as a place, a bare word as a value
 func CondCmpRight
-	aT = CondNext()
-	if aT[1] = "string" or aT[1] = "number" return ["val", aT[2]] end
-	if aT[1] != "word" Raise("condition: expected a value or a place, found '" + aT[2] + "'") end
-	if CondPeek()[1] = "dot" or aT[2] = "this" or aT[2] = "self" return CondParsePath(aT) end
-	return ["val", aT[2]]
+	xT = CondNext()
+	if xT[1] = "string" or xT[1] = "number" return ["val", xT[2]] end
+	if xT[1] != "word" Raise("condition: expected a value or a place, found '" + xT[2] + "'") end
+	if CondPeek()[1] = "dot" or xT[2] = "this" or xT[2] = "self" return CondParsePath(xT) end
+	return ["val", xT[2]]
 end
 # the right of a relation: a quoted or numeric value, or a place (a bare word
 # is a seat)
 func CondRelRight
-	aT = CondNext()
-	if aT[1] = "string" or aT[1] = "number" return ["val", aT[2]] end
-	if aT[1] != "word" Raise("condition: expected a seat or a value, found '" + aT[2] + "'") end
-	return CondParsePath(aT)
+	xT = CondNext()
+	if xT[1] = "string" or xT[1] = "number" return ["val", xT[2]] end
+	if xT[1] != "word" Raise("condition: expected a seat or a value, found '" + xT[2] + "'") end
+	return CondParsePath(xT)
 end
 func CondAtom
-	aT = CondNext()
-	if aT[1] = "lparen"
-		aC = CondOr()
+	xT = CondNext()
+	if xT[1] = "lparen"
+		xC = CondOr()
 		if CondNext()[1] != "rparen" Raise("condition: expected ')'") end
-		return aC
+		return xC
 	end
-	if aT[1] != "word"
-		Raise("condition: expected a seat, found '" + aT[2] + "'")
+	if xT[1] != "word"
+		Raise("condition: expected a seat, found '" + xT[2] + "'")
 	end
-	if aT[2] = "exists"
-		aD = CondNext()
-		if aD[1] != "word" Raise("condition: exists names a declaration") end
-		return ["exists", aD[2]]
+	if xT[2] = "exists"
+		xD = CondNext()
+		if xD[1] != "word" Raise("condition: exists names a declaration") end
+		return ["exists", xD[2]]
 	end
-	if aT[2] = "some" or aT[2] = "all" or aT[2] = "earlier"
-		aD = CondNext()
-		if aD[1] != "word" Raise("condition: " + aT[2] + " names a declaration kind or a list of references") end
-		aTarget = CondParsePath(aD)
-		aNamed = ""
+	if xT[2] = "some" or xT[2] = "all" or xT[2] = "earlier"
+		xD = CondNext()
+		if xD[1] != "word" Raise("condition: " + xT[2] + " names a declaration kind or a list of references") end
+		xTarget = CondParsePath(xD)
+		xNamed = ""
 		if CondPeek()[1] = "word" and CondPeek()[2] = "named"
 			CondNext()
-			aNamed = CondCmpRight()
+			xNamed = CondCmpRight()
 		end
-		aCond = ""
+		xCond = ""
 		if CondPeek()[1] = "word" and CondPeek()[2] = "where"
 			CondNext()
-			aCond = CondOr()
+			xCond = CondOr()
 		end
-		return ["quant", aT[2], aTarget, aNamed, aCond]
+		return ["quant", xT[2], xTarget, xNamed, xCond]
 	end
-	aPath = CondParsePath(aT)
+	xPath = CondParsePath(xT)
 	if CondPeek()[1] = "word" and CondPeek()[2] = "is"
 		CondNext()
-		aV = CondNext()
-		if aV[1] != "word" Raise("condition: is names a VIEW") end
-		if Len(aPath[2]) != 1 or aPath[2][1] != "self"
-			Raise("condition: is asks whether self is a VIEW's declaration; write self is " + aV[2])
+		xV = CondNext()
+		if xV[1] != "word" Raise("condition: is names a VIEW") end
+		if Len(xPath[2]) != 1 or xPath[2][1] != "self"
+			Raise("condition: is asks whether self is a VIEW's declaration; write self is " + xV[2])
 		end
-		return ["is", aV[2]]
+		return ["is", xV[2]]
 	end
-	aOp = CondNext()
-	if aOp[1] = "eq" or aOp[1] = "ne"
-		return ["cmp", aOp[2], aPath, CondCmpRight()]
+	xOp = CondNext()
+	if xOp[1] = "eq" or xOp[1] = "ne"
+		return ["cmp", xOp[2], xPath, CondCmpRight()]
 	end
-	if aOp[1] = "gt" or aOp[1] = "lt"
-		aV = CondValue()
-		if not CondIsNumberText(aV)
-			Raise("condition: " + aOp[2] + " compares numbers, and '" + aV + "' is not one")
+	if xOp[1] = "gt" or xOp[1] = "lt"
+		xV = CondValue()
+		if not CondIsNumberText(xV)
+			Raise("condition: " + xOp[2] + " compares numbers, and '" + xV + "' is not one")
 		end
-		return ["cmp", aOp[2], aPath, ["val", aV]]
+		return ["cmp", xOp[2], xPath, ["val", xV]]
 	end
-	if aOp[1] = "word"
-		if aOp[2] = "present" or aOp[2] = "absent" or aOp[2] = "empty" or aOp[2] = "nonempty" or aOp[2] = "unique" or aOp[2] = "distinct"
-			return ["has", aOp[2], aPath]
+	if xOp[1] = "word"
+		if xOp[2] = "present" or xOp[2] = "absent" or xOp[2] = "empty" or xOp[2] = "nonempty" or xOp[2] = "unique" or xOp[2] = "distinct"
+			return ["has", xOp[2], xPath]
 		end
-		if aOp[2] = "contains"
-			return ["contains", aPath, CondValue()]
+		if xOp[2] = "contains"
+			return ["contains", xPath, CondValue()]
 		end
-		if aOp[2] = "within" or aOp[2] = "host_of" or aOp[2] = "under" or aOp[2] = "covers"
-			return ["rel", aOp[2], aPath, CondRelRight()]
+		if xOp[2] = "within" or xOp[2] = "host_of" or xOp[2] = "under" or xOp[2] = "covers"
+			return ["rel", xOp[2], xPath, CondRelRight()]
 		end
-		if aOp[2] = "cyclic"
-			return ["cyclic", aPath]
+		if xOp[2] = "cyclic"
+			return ["cyclic", xPath]
 		end
 		# v0.8: three closed relations F needs
-		if aOp[2] = "reachable"
-			return ["reach", aPath]
+		if xOp[2] = "reachable"
+			return ["reach", xPath]
 		end
-		if aOp[2] = "referenced"
-			return ["refd", aPath]
+		if xOp[2] = "referenced"
+			return ["refd", xPath]
 		end
-		if aOp[2] = "keyed_by"
-			return ["keyed", aPath, CondRelRight()]
+		if xOp[2] = "keyed_by"
+			return ["keyed", xPath, CondRelRight()]
 		end
-		if aOp[2] = "matches"
-			aF = CondNext()
-			if aF[1] != "word" Raise("condition: matches names a FORMAT") end
-			return ["matches", aPath, aF[2]]
+		if xOp[2] = "matches"
+			xF = CondNext()
+			if xF[1] != "word" Raise("condition: matches names a FORMAT") end
+			return ["matches", xPath, xF[2]]
 		end
 	end
-	Raise("condition: '" + aOp[2] + "' is not an operator of the condition language")
+	Raise("condition: '" + xOp[2] + "' is not an operator of the condition language")
 end
 func CondIsNumberText(xV)
 	if Len(xV) = 0 return false end
@@ -314,105 +314,105 @@ func CondIsNumberText(xV)
 	end
 	return true
 end
-func CondPathText(aP)
+func CondPathText(xP)
 	tOut = ""
-	for i = 1 to Len(aP[2])
+	for i = 1 to Len(xP[2])
 		if i > 1 tOut += "." end
-		tOut += aP[2][i]
+		tOut += xP[2][i]
 	end
 	return tOut
 end
-func CondInList(tS, aL)
-	for i = 1 to Len(aL)
-		if aL[i] = tS return true end
+func CondInList(tS, xL)
+	for i = 1 to Len(xL)
+		if xL[i] = tS return true end
 	end
 	return false
 end
 # ---- the language tables, read by both readers --------------------------------------
 
 func CondLang(tLang)
-	for i = 1 to Len($aCondLangs)
-		if $aCondLangs[i][1] = tLang return $aCondLangs[i] end
+	for i = 1 to Len($xCondLangs)
+		if $xCondLangs[i][1] = tLang return $xCondLangs[i] end
 	end
 	return ""
 end
 # the seats of a declaration kind of a language, or NULL when no such kind
 func CondSeatsIn(tLang, tDecl)
-	aL = CondLang(tLang)
-	if IsEmpty(aL) return "" end
-	aD = aL[2]
-	for i = 1 to Len(aD)
-		if aD[i][1] = tDecl return aD[i][2] end
+	xL = CondLang(tLang)
+	if IsEmpty(xL) return "" end
+	xD = xL[2]
+	for i = 1 to Len(xD)
+		if xD[i][1] = tDecl return xD[i][2] end
 	end
 	return ""
 end
 func CondSeatInfoIn(tLang, tDecl, tSeat)
-	aS = CondSeatsIn(tLang, tDecl)
-	if IsEmpty(aS) return "" end
-	for i = 1 to Len(aS)
-		if aS[i][1] = tSeat return aS[i] end
+	xS = CondSeatsIn(tLang, tDecl)
+	if IsEmpty(xS) return "" end
+	for i = 1 to Len(xS)
+		if xS[i][1] = tSeat return xS[i] end
 	end
 	return ""
 end
 # v0.8: the WORLD's ENTRY kinds and the forms of a language
 func CondEntryIn(tLang)
-	aL = CondLang(tLang)
-	if IsEmpty(aL) return [] end
-	if Len(aL) < 6 return [] end
-	return aL[6]
+	xL = CondLang(tLang)
+	if IsEmpty(xL) return [] end
+	if Len(xL) < 6 return [] end
+	return xL[6]
 end
 func CondFormIn(tLang, tName)
-	aL = CondLang(tLang)
-	if IsEmpty(aL) return "" end
-	if Len(aL) < 7 return "" end
-	for i = 1 to Len(aL[7])
-		if aL[7][i][1] = tName return aL[7][i] end
+	xL = CondLang(tLang)
+	if IsEmpty(xL) return "" end
+	if Len(xL) < 7 return "" end
+	for i = 1 to Len(xL[7])
+		if xL[7][i][1] = tName return xL[7][i] end
 	end
 	return ""
 end
 # a form's seat infos [[seat, of, kind], ...] describe a pair when there are two
 # scalar seats and the first is a name, a MENU or a DECLARATION
-func CondIsPairFormInfo(aInfo)
-	if Len(aInfo) != 2 return false end
-	tK1 = aInfo[1][3]
-	if not ((aInfo[1][2] = "name" and tK1 = "prim") or tK1 = "menu" or tK1 = "decl") return false end
+func CondIsPairFormInfo(xInfo)
+	if Len(xInfo) != 2 return false end
+	tK1 = xInfo[1][3]
+	if not ((xInfo[1][2] = "name" and tK1 = "prim") or tK1 = "menu" or tK1 = "decl") return false end
 	return true
 end
 func CondIsOneIn(tLang, tDecl)
-	aL = CondLang(tLang)
-	if IsEmpty(aL) return false end
-	return CondInList(tDecl, aL[3])
+	xL = CondLang(tLang)
+	if IsEmpty(xL) return false end
+	return CondInList(tDecl, xL[3])
 end
 func CondViewIn(tLang, tName)
-	aL = CondLang(tLang)
-	if IsEmpty(aL) return "" end
-	aV = aL[4]
-	for i = 1 to Len(aV)
-		if aV[i][1] = tName return aV[i] end
+	xL = CondLang(tLang)
+	if IsEmpty(xL) return "" end
+	xV = xL[4]
+	for i = 1 to Len(xV)
+		if xV[i][1] = tName return xV[i] end
 	end
 	return ""
 end
 func CondVerbIn(tLang, tDecl)
-	aL = CondLang(tLang)
-	if IsEmpty(aL) return "" end
-	aV = aL[5]
-	for i = 1 to Len(aV)
-		if aV[i][1] = tDecl return aV[i][2] end
+	xL = CondLang(tLang)
+	if IsEmpty(xL) return "" end
+	xV = xL[5]
+	for i = 1 to Len(xV)
+		if xV[i][1] = tDecl return xV[i][2] end
 	end
 	return ""
 end
 func CondDeclNameIn(tLang, tVerb)
-	aL = CondLang(tLang)
-	if IsEmpty(aL) return "" end
-	aV = aL[5]
-	for i = 1 to Len(aV)
-		if aV[i][2] = tVerb return aV[i][1] end
+	xL = CondLang(tLang)
+	if IsEmpty(xL) return "" end
+	xV = xL[5]
+	for i = 1 to Len(xV)
+		if xV[i][2] = tVerb return xV[i][1] end
 	end
 	return ""
 end
 func CondFormatShape(tName)
-	for i = 1 to Len($aCondFormats)
-		if $aCondFormats[i][1] = tName return $aCondFormats[i][2] end
+	for i = 1 to Len($xCondFormats)
+		if $xCondFormats[i][1] = tName return $xCondFormats[i][2] end
 	end
 	return ""
 end
@@ -423,44 +423,44 @@ end
 # function returns "" or the refusal text; the type walkers return a type
 # (a list) or the refusal text (a string).
 
-func CondCtxCur(aCtx)
-	if aCtx[4] != "" return [aCtx[3], aCtx[4]] end
-	return [aCtx[1], aCtx[2]]
+func CondCtxCur(xCtx)
+	if xCtx[4] != "" return [xCtx[3], xCtx[4]] end
+	return [xCtx[1], xCtx[2]]
 end
 # the type a seat gives, read from a declaration of a language
-func CondSeatType(aInfo, tLang)
-	if aInfo[4] = "decl"
-		if aInfo[3] return ["set", tLang, aInfo[2]] end
-		return ["decl", tLang, aInfo[2]]
+func CondSeatType(xInfo, tLang)
+	if xInfo[4] = "decl"
+		if xInfo[3] return ["set", tLang, xInfo[2]] end
+		return ["decl", tLang, xInfo[2]]
 	end
-	if aInfo[4] = "sentence" return ["sentence", aInfo[5]] end
-	if aInfo[3] return ["list", aInfo[1]] end
-	return ["value", aInfo[1]]
+	if xInfo[4] = "sentence" return ["sentence", xInfo[5]] end
+	if xInfo[3] return ["list", xInfo[1]] end
+	return ["value", xInfo[1]]
 end
-func CondTypeHead(tSeg, aCtx)
-	aCur = CondCtxCur(aCtx)
-	tLang = aCur[1]
-	tDecl = aCur[2]
+func CondTypeHead(tSeg, xCtx)
+	xCur = CondCtxCur(xCtx)
+	tLang = xCur[1]
+	tDecl = xCur[2]
 	if tSeg = "self"
 		if tDecl = "" return "self is read on a declaration, and this VIEW has no ON" end
 		return ["decl", tLang, tDecl]
 	end
 	if tSeg = "this"
-		if aCtx[4] = "" return "this." + " is read inside some or all, where a bare seat is the quantified declaration's" end
-		if aCtx[2] = "" return "this has no declaration here: this VIEW has no ON" end
-		return ["decl", aCtx[1], aCtx[2]]
+		if xCtx[4] = "" return "this." + " is read inside some or all, where a bare seat is the quantified declaration's" end
+		if xCtx[2] = "" return "this has no declaration here: this VIEW has no ON" end
+		return ["decl", xCtx[1], xCtx[2]]
 	end
 	if tDecl != ""
-		aV = CondViewIn(tLang, tSeg)
-		if not IsEmpty(aV)
-			if aV[2] = "" or aV[2] = tDecl return aV[3] end
+		xV = CondViewIn(tLang, tSeg)
+		if not IsEmpty(xV)
+			if xV[2] = "" or xV[2] = tDecl return xV[3] end
 		end
-		aInfo = CondSeatInfoIn(tLang, tDecl, tSeg)
-		if not IsEmpty(aInfo) return CondSeatType(aInfo, tLang) end
+		xInfo = CondSeatInfoIn(tLang, tDecl, tSeg)
+		if not IsEmpty(xInfo) return CondSeatType(xInfo, tLang) end
 	else
-		aV = CondViewIn(tLang, tSeg)
-		if not IsEmpty(aV)
-			if aV[2] = "" return aV[3] end
+		xV = CondViewIn(tLang, tSeg)
+		if not IsEmpty(xV)
+			if xV[2] = "" return xV[3] end
 		end
 	end
 	if not IsEmpty(CondSeatsIn(tLang, tSeg))
@@ -470,208 +470,208 @@ func CondTypeHead(tSeg, aCtx)
 	# inside a quantifier over another language's declarations, a KIND or a
 	# whole-sentence VIEW of the ON declaration's language is still in reach
 	# (fleet.link from a peer); a seat of the ON declaration is this.SEAT
-	if aCtx[4] != "" and aCtx[1] != tLang
-		aV = CondViewIn(aCtx[1], tSeg)
-		if not IsEmpty(aV)
-			if aV[2] = "" return aV[3] end
+	if xCtx[4] != "" and xCtx[1] != tLang
+		xV = CondViewIn(xCtx[1], tSeg)
+		if not IsEmpty(xV)
+			if xV[2] = "" return xV[3] end
 		end
-		if not IsEmpty(CondSeatsIn(aCtx[1], tSeg))
-			if CondIsOneIn(aCtx[1], tSeg) return ["decl", aCtx[1], tSeg] end
-			return ["set", aCtx[1], tSeg]
+		if not IsEmpty(CondSeatsIn(xCtx[1], tSeg))
+			if CondIsOneIn(xCtx[1], tSeg) return ["decl", xCtx[1], tSeg] end
+			return ["set", xCtx[1], tSeg]
 		end
 	end
 	if tDecl != "" return "no seat '" + tSeg + "' on " + tDecl end
 	return "'" + tSeg + "' is neither a kind nor a VIEW of " + tLang
 end
-func CondTypeStep(aT, tPrev, tSeg, aCtx)
-	tK = aT[1]
+func CondTypeStep(xT, tPrev, tSeg, xCtx)
+	tK = xT[1]
 	if tK = "decl"
-		aInfo = CondSeatInfoIn(aT[2], aT[3], tSeg)
-		if not IsEmpty(aInfo) return CondSeatType(aInfo, aT[2]) end
+		xInfo = CondSeatInfoIn(xT[2], xT[3], tSeg)
+		if not IsEmpty(xInfo) return CondSeatType(xInfo, xT[2]) end
 		# a VIEW on that declaration's kind reads as one of its seats
-		aV = CondViewIn(aT[2], tSeg)
-		if not IsEmpty(aV)
-			if aV[2] = aT[3] return aV[3] end
+		xV = CondViewIn(xT[2], tSeg)
+		if not IsEmpty(xV)
+			if xV[2] = xT[3] return xV[3] end
 		end
-		return "no seat '" + tSeg + "' on " + aT[3]
+		return "no seat '" + tSeg + "' on " + xT[3]
 	end
 	if tK = "sentence"
-		if IsEmpty(CondSeatsIn(aT[2], tSeg))
-			return "'" + tSeg + "' is neither a seat nor a kind of " + aT[2]
+		if IsEmpty(CondSeatsIn(xT[2], tSeg))
+			return "'" + tSeg + "' is neither a seat nor a kind of " + xT[2]
 		end
-		if CondIsOneIn(aT[2], tSeg) return ["decl", aT[2], tSeg] end
-		return ["set", aT[2], tSeg]
+		if CondIsOneIn(xT[2], tSeg) return ["decl", xT[2], tSeg] end
+		return ["set", xT[2], tSeg]
 	end
-	aCur = CondCtxCur(aCtx)
+	xCur = CondCtxCur(xCtx)
 	if tK = "set"
-		return "'" + tPrev + "' is not a ONE kind, and neither a reference seat of " + aCur[2] + ": only the one declaration of a ONE kind can be read from a condition, and a set of declarations is quantified over"
+		return "'" + tPrev + "' is not a ONE kind, and neither a reference seat of " + xCur[2] + ": only the one declaration of a ONE kind can be read from a condition, and a set of declarations is quantified over"
 	end
-	return "'" + tPrev + "' is a value, not a declaration: neither a reference seat of " + aCur[2] + " nor a ONE kind, and a path does not continue through a value"
+	return "'" + tPrev + "' is a value, not a declaration: neither a reference seat of " + xCur[2] + " nor a ONE kind, and a path does not continue through a value"
 end
 # a path's type, or the refusal text
-func CondTypePath(aP, aCtx)
-	aSegs = aP[2]
-	aT = CondTypeHead(aSegs[1], aCtx)
-	if IsString(aT) return aT end
-	for i = 2 to Len(aSegs)
-		aT = CondTypeStep(aT, aSegs[i-1], aSegs[i], aCtx)
-		if IsString(aT) return aT end
+func CondTypePath(xP, xCtx)
+	xSegs = xP[2]
+	xT = CondTypeHead(xSegs[1], xCtx)
+	if IsString(xT) return xT end
+	for i = 2 to Len(xSegs)
+		xT = CondTypeStep(xT, xSegs[i-1], xSegs[i], xCtx)
+		if IsString(xT) return xT end
 	end
-	return aT
+	return xT
 end
 # the type of the right side of a comparison or a relation
-func CondTypeRight(aR, aCtx)
-	if aR[1] = "val" return ["value", ""] end
-	return CondTypePath(aR, aCtx)
+func CondTypeRight(xR, xCtx)
+	if xR[1] = "val" return ["value", ""] end
+	return CondTypePath(xR, xCtx)
 end
-func CondValidate(aAst, tOn, aOneDecls, tInner)
+func CondValidate(xAst, tOn, xOneDecls, tInner)
 	# v0.2/v0.3 callers: the ON and the quantified kind are of the language
 	# being validated ($cCondLang); aOneDecls is carried in the tables now
-	return CondValidateIn(aAst, [$tCondLang, tOn, $tCondLang, tInner])
+	return CondValidateIn(xAst, [$tCondLang, tOn, $tCondLang, tInner])
 end
-func CondValidateIn(aAst, aCtx)
-	tK = aAst[1]
-	aCur = CondCtxCur(aCtx)
+func CondValidateIn(xAst, xCtx)
+	tK = xAst[1]
+	xCur = CondCtxCur(xCtx)
 	if tK = "and" or tK = "or"
-		xE = CondValidateIn(aAst[2], aCtx)
+		xE = CondValidateIn(xAst[2], xCtx)
 		if xE != "" return xE end
-		return CondValidateIn(aAst[3], aCtx)
+		return CondValidateIn(xAst[3], xCtx)
 	elseif tK = "not"
-		return CondValidateIn(aAst[2], aCtx)
+		return CondValidateIn(xAst[2], xCtx)
 	elseif tK = "exists"
-		if IsEmpty(CondSeatsIn(aCur[1], aAst[2]))
-			return "'" + aAst[2] + "' resolves to nothing: exists names a declaration of this language"
+		if IsEmpty(CondSeatsIn(xCur[1], xAst[2]))
+			return "'" + xAst[2] + "' resolves to nothing: exists names a declaration of this language"
 		end
 		return ""
 	elseif tK = "cmp"
-		aT = CondTypePath(aAst[3], aCtx)
-		if IsString(aT) return aT end
-		if aT[1] = "set" return "'" + CondPathText(aAst[3]) + "' is a set of declarations, and = compares one value" end
-		if aT[1] = "sentence" return "'" + CondPathText(aAst[3]) + "' is a file, and = compares one value" end
-		aR = CondTypeRight(aAst[4], aCtx)
-		if IsString(aR) return aR end
-		if aR[1] = "set" or aR[1] = "sentence" return "'" + CondPathText(aAst[4]) + "' is not one value" end
+		xT = CondTypePath(xAst[3], xCtx)
+		if IsString(xT) return xT end
+		if xT[1] = "set" return "'" + CondPathText(xAst[3]) + "' is a set of declarations, and = compares one value" end
+		if xT[1] = "sentence" return "'" + CondPathText(xAst[3]) + "' is a file, and = compares one value" end
+		xR = CondTypeRight(xAst[4], xCtx)
+		if IsString(xR) return xR end
+		if xR[1] = "set" or xR[1] = "sentence" return "'" + CondPathText(xAst[4]) + "' is not one value" end
 		return ""
 	elseif tK = "has"
-		aT = CondTypePath(aAst[3], aCtx)
-		if IsString(aT) return aT end
-		tTest = aAst[2]
+		xT = CondTypePath(xAst[3], xCtx)
+		if IsString(xT) return xT end
+		tTest = xAst[2]
 		if tTest = "empty" or tTest = "nonempty" or tTest = "distinct"
 			# a list of values, a list of references (a set), or a UNION seat one
 			# of whose shapes is a list
-			if not CondTypeIsListish(aT, aCtx) return tTest + " reads a list seat, and '" + CondPathText(aAst[3]) + "' is not one" end
+			if not CondTypeIsListish(xT, xCtx) return tTest + " reads a list seat, and '" + CondPathText(xAst[3]) + "' is not one" end
 		end
 		if tTest = "unique"
-			if aT[1] != "value" and aT[1] != "sentence" return "unique reads a scalar seat, and '" + CondPathText(aAst[3]) + "' is not one" end
-			if Len(aAst[3][2]) != 1 return "unique reads a seat of this declaration, and '" + CondPathText(aAst[3]) + "' is a path" end
+			if xT[1] != "value" and xT[1] != "sentence" return "unique reads a scalar seat, and '" + CondPathText(xAst[3]) + "' is not one" end
+			if Len(xAst[3][2]) != 1 return "unique reads a seat of this declaration, and '" + CondPathText(xAst[3]) + "' is a path" end
 		end
 		return ""
 	elseif tK = "contains"
-		aT = CondTypePath(aAst[2], aCtx)
-		if IsString(aT) return aT end
-		if not CondTypeIsListish(aT, aCtx) return "contains reads a list seat, and '" + CondPathText(aAst[2]) + "' is not one" end
+		xT = CondTypePath(xAst[2], xCtx)
+		if IsString(xT) return xT end
+		if not CondTypeIsListish(xT, xCtx) return "contains reads a list seat, and '" + CondPathText(xAst[2]) + "' is not one" end
 		return ""
 	elseif tK = "rel"
-		aT = CondTypePath(aAst[3], aCtx)
-		if IsString(aT) return aT end
-		if aAst[2] = "covers"
+		xT = CondTypePath(xAst[3], xCtx)
+		if IsString(xT) return xT end
+		if xAst[2] = "covers"
 			# a list seat, or a UNION seat (one of whose alternatives may be a
 			# list; a word written there covers nothing)
-			if not CondTypeIsListish(aT, aCtx) return "covers takes a list seat on its left, and '" + CondPathText(aAst[3]) + "' is not one" end
+			if not CondTypeIsListish(xT, xCtx) return "covers takes a list seat on its left, and '" + CondPathText(xAst[3]) + "' is not one" end
 		else
-			if aT[1] != "value" return aAst[2] + " reads a scalar seat, and '" + CondPathText(aAst[3]) + "' is not one" end
+			if xT[1] != "value" return xAst[2] + " reads a scalar seat, and '" + CondPathText(xAst[3]) + "' is not one" end
 		end
-		aR = CondTypeRight(aAst[4], aCtx)
-		if IsString(aR) return aR end
+		xR = CondTypeRight(xAst[4], xCtx)
+		if IsString(xR) return xR end
 		return ""
 	elseif tK = "cyclic"
-		aSegs = aAst[2][2]
+		xSegs = xAst[2][2]
 		bOk = false
-		if Len(aSegs) = 1
-			aInfo = CondSeatInfoIn(aCur[1], aCur[2], aSegs[1])
-			if not IsEmpty(aInfo)
-				if aInfo[3] and aInfo[4] = "decl" and aInfo[2] = aCur[2] bOk = true end
+		if Len(xSegs) = 1
+			xInfo = CondSeatInfoIn(xCur[1], xCur[2], xSegs[1])
+			if not IsEmpty(xInfo)
+				if xInfo[3] and xInfo[4] = "decl" and xInfo[2] = xCur[2] bOk = true end
 			end
 		end
-		if not bOk return "cyclic follows a list of references to the declaration's own kind, and '" + CondPathText(aAst[2]) + "' is not one" end
+		if not bOk return "cyclic follows a list of references to the declaration's own kind, and '" + CondPathText(xAst[2]) + "' is not one" end
 		return ""
 	elseif tK = "reach" or tK = "refd"
 		tWord = "reachable"
 		if tK = "refd" tWord = "referenced" end
-		aSegs = aAst[2][2]
-		if Len(aSegs) != 1 or aSegs[1] != "self"
+		xSegs = xAst[2][2]
+		if Len(xSegs) != 1 or xSegs[1] != "self"
 			return tWord + " asks whether self is " + tWord + "; write self " + tWord
 		end
-		if tK = "reach" and Len(CondEntryIn(aCur[1])) = 0
+		if tK = "reach" and Len(CondEntryIn(xCur[1])) = 0
 			return "reachable walks from the WORLD's ENTRY kinds, and none are declared"
 		end
 		return ""
 	elseif tK = "keyed"
-		aSegs = aAst[2][2]
+		xSegs = xAst[2][2]
 		bPairs = false
-		if Len(aSegs) = 1
-			aInfo = CondSeatInfoIn(aCur[1], aCur[2], aSegs[1])
-			if not IsEmpty(aInfo)
-				if aInfo[3] and aInfo[4] = "form"
-					aF = CondFormIn(aCur[1], aInfo[2])
-					if not IsEmpty(aF) and CondIsPairFormInfo(aF[2]) bPairs = true end
+		if Len(xSegs) = 1
+			xInfo = CondSeatInfoIn(xCur[1], xCur[2], xSegs[1])
+			if not IsEmpty(xInfo)
+				if xInfo[3] and xInfo[4] = "form"
+					xF = CondFormIn(xCur[1], xInfo[2])
+					if not IsEmpty(xF) and CondIsPairFormInfo(xF[2]) bPairs = true end
 				end
 			end
 		end
-		if not bPairs return "keyed_by reads a list of pairs on its left, and '" + CondPathText(aAst[2]) + "' is not one" end
-		aR = aAst[3]
+		if not bPairs return "keyed_by reads a list of pairs on its left, and '" + CondPathText(xAst[2]) + "' is not one" end
+		xR = xAst[3]
 		bList = false
-		if aR[1] = "path" and Len(aR[2]) = 1
-			aInfo = CondSeatInfoIn(aCur[1], aCur[2], aR[2][1])
-			if not IsEmpty(aInfo)
-				if aInfo[3] bList = true end
+		if xR[1] = "path" and Len(xR[2]) = 1
+			xInfo = CondSeatInfoIn(xCur[1], xCur[2], xR[2][1])
+			if not IsEmpty(xInfo)
+				if xInfo[3] bList = true end
 			end
 		end
-		if not bList return "keyed_by reads a list of names on its right, and '" + CondPathText(aR) + "' is not one" end
+		if not bList return "keyed_by reads a list of names on its right, and '" + CondPathText(xR) + "' is not one" end
 		return ""
 	elseif tK = "matches"
-		aT = CondTypePath(aAst[2], aCtx)
-		if IsString(aT) return aT end
-		if aT[1] != "value" and aT[1] != "decl" return "matches reads a value, and '" + CondPathText(aAst[2]) + "' is not one" end
-		if CondFormatShape(aAst[3]) = "" return "'" + aAst[3] + "' must name a FORMAT of this language: matches tests a shape" end
+		xT = CondTypePath(xAst[2], xCtx)
+		if IsString(xT) return xT end
+		if xT[1] != "value" and xT[1] != "decl" return "matches reads a value, and '" + CondPathText(xAst[2]) + "' is not one" end
+		if CondFormatShape(xAst[3]) = "" return "'" + xAst[3] + "' must name a FORMAT of this language: matches tests a shape" end
 		return ""
 	elseif tK = "is"
-		if IsEmpty(CondViewIn(aCur[1], aAst[2])) return "'" + aAst[2] + "' must name a VIEW: is asks whether self is the VIEW's declaration" end
+		if IsEmpty(CondViewIn(xCur[1], xAst[2])) return "'" + xAst[2] + "' must name a VIEW: is asks whether self is the VIEW's declaration" end
 		return ""
 	elseif tK = "quant"
-		tQ = aAst[2]
-		aSegs = aAst[3][2]
+		tQ = xAst[2]
+		xSegs = xAst[3][2]
 		if tQ = "earlier"
-			if Len(aSegs) != 1 or IsEmpty(CondSeatsIn(aCur[1], aSegs[1]))
-				return "earlier quantifies over a kind of this language, the declarations before this one, and '" + CondPathText(aAst[3]) + "' is not one"
+			if Len(xSegs) != 1 or IsEmpty(CondSeatsIn(xCur[1], xSegs[1]))
+				return "earlier quantifies over a kind of this language, the declarations before this one, and '" + CondPathText(xAst[3]) + "' is not one"
 			end
-			aT = ["set", aCur[1], aSegs[1]]
+			xT = ["set", xCur[1], xSegs[1]]
 		else
 			# a quantifier wants a set, so one name that is both a seat and a kind
 			# (a RETIREMENT's member, the kind member) is the kind here
-			if Len(aSegs) = 1 and not IsEmpty(CondSeatsIn(aCur[1], aSegs[1]))
-				aT = ["set", aCur[1], aSegs[1]]
+			if Len(xSegs) = 1 and not IsEmpty(CondSeatsIn(xCur[1], xSegs[1]))
+				xT = ["set", xCur[1], xSegs[1]]
 			else
-				aT = CondTypePath(aAst[3], aCtx)
-				if IsString(aT)
-					if Len(aSegs) = 1 return "'" + aSegs[1] + "' names neither a declaration kind nor a list of references: some and all quantify over a declaration kind or a list of references" end
-					return aT
+				xT = CondTypePath(xAst[3], xCtx)
+				if IsString(xT)
+					if Len(xSegs) = 1 return "'" + xSegs[1] + "' names neither a declaration kind nor a list of references: some and all quantify over a declaration kind or a list of references" end
+					return xT
 				end
-				if aT[1] != "set" return "'" + CondPathText(aAst[3]) + "' is not a set of declarations: some and all quantify over a declaration kind, a list of references, or a kind inside a SENTENCE" end
+				if xT[1] != "set" return "'" + CondPathText(xAst[3]) + "' is not a set of declarations: some and all quantify over a declaration kind, a list of references, or a kind inside a SENTENCE" end
 			end
 		end
-		if not IsEmpty(aAst[4])
-			if Len(aSegs) = 1
-				aInfo = CondSeatInfoIn(aCur[1], aCur[2], aSegs[1])
-				if not IsEmpty(aInfo)
-					if aInfo[4] = "decl" and aInfo[3] return "named goes with a kind, and '" + aSegs[1] + "' is a list of references, already named" end
+		if not IsEmpty(xAst[4])
+			if Len(xSegs) = 1
+				xInfo = CondSeatInfoIn(xCur[1], xCur[2], xSegs[1])
+				if not IsEmpty(xInfo)
+					if xInfo[4] = "decl" and xInfo[3] return "named goes with a kind, and '" + xSegs[1] + "' is a list of references, already named" end
 				end
 			end
-			aR = CondTypeRight(aAst[4], aCtx)
-			if IsString(aR) return aR end
+			xR = CondTypeRight(xAst[4], xCtx)
+			if IsString(xR) return xR end
 		end
-		if not IsEmpty(aAst[5])
-			return CondValidateIn(aAst[5], [aCtx[1], aCtx[2], aT[2], aT[3]])
+		if not IsEmpty(xAst[5])
+			return CondValidateIn(xAst[5], [xCtx[1], xCtx[2], xT[2], xT[3]])
 		end
 		return ""
 	end
@@ -679,40 +679,40 @@ func CondValidateIn(aAst, aCtx)
 end
 # a VIEW: [name, on, onepath (text), named (text or ""), where (text or "")];
 # returns "" or the refusal, and the view's result type through aOut[1]
-func CondValidateView(aView, tLang, aOut)
-	tOn = aView[2]
-	aCtx = [tLang, tOn, tLang, ""]
-	aP = CondParsePathText(aView[3])
-	aT = CondTypePath(aP, aCtx)
-	if IsString(aT) return aT end
-	if aT[1] != "set" return "ONE names a set of declarations, and '" + aView[3] + "' is " + CondTypeWord(aT) end
-	if aView[4] != ""
-		aR = CondParseRightText(aView[4])
-		aRT = CondTypeRight(aR, aCtx)
-		if IsString(aRT) return aRT end
+func CondValidateView(xView, tLang, xOut)
+	tOn = xView[2]
+	xCtx = [tLang, tOn, tLang, ""]
+	xP = CondParsePathText(xView[3])
+	xT = CondTypePath(xP, xCtx)
+	if IsString(xT) return xT end
+	if xT[1] != "set" return "ONE names a set of declarations, and '" + xView[3] + "' is " + CondTypeWord(xT) end
+	if xView[4] != ""
+		xR = CondParseRightText(xView[4])
+		xRT = CondTypeRight(xR, xCtx)
+		if IsString(xRT) return xRT end
 	end
-	if aView[5] != ""
-		aC = CondParse(aView[5])
-		xE = CondValidateIn(aC, [tLang, tOn, aT[2], aT[3]])
+	if xView[5] != ""
+		xC = CondParse(xView[5])
+		xE = CondValidateIn(xC, [tLang, tOn, xT[2], xT[3]])
 		if xE != "" return xE end
 	end
-	aOut[1] = ["decl", aT[2], aT[3]]
+	xOut[1] = ["decl", xT[2], xT[3]]
 	return ""
 end
-func CondTypeWord(aT)
-	if aT[1] = "decl" return "one declaration" end
-	if aT[1] = "sentence" return "a file" end
+func CondTypeWord(xT)
+	if xT[1] = "decl" return "one declaration" end
+	if xT[1] = "sentence" return "a file" end
 	return "a value"
 end
 # a list of values, a set of declarations, or a UNION seat (one of whose shapes
 # may be a list; a word written there is an empty list to these tests)
-func CondTypeIsListish(aT, aCtx)
-	if aT[1] = "list" or aT[1] = "set" return true end
-	if aT[1] = "value"
-		aCur = CondCtxCur(aCtx)
-		aInfo = CondSeatInfoIn(aCur[1], aCur[2], aT[2])
-		if not IsEmpty(aInfo)
-			if aInfo[4] = "union" return true end
+func CondTypeIsListish(xT, xCtx)
+	if xT[1] = "list" or xT[1] = "set" return true end
+	if xT[1] = "value"
+		xCur = CondCtxCur(xCtx)
+		xInfo = CondSeatInfoIn(xCur[1], xCur[2], xT[2])
+		if not IsEmpty(xInfo)
+			if xInfo[4] = "union" return true end
 		end
 	end
 	return false
@@ -724,34 +724,34 @@ end
 # of the sentence the declaration stands in), so a kind, `earlier` and
 # `unique` are read against the right pool.
 
-func CondClauseOf(aDecl, tSeat)
-	aC = aDecl[4]
+func CondClauseOf(xDecl, tSeat)
+	xC = xDecl[4]
 	tN = Upper(tSeat)
-	for i = 1 to Len(aC)
-		if aC[i][1] = tN return aC[i] end
+	for i = 1 to Len(xC)
+		if xC[i][1] = tN return xC[i] end
 	end
 	return ""
 end
 # the text of a scalar value, or NULL when the seat is absent or a list
-func CondScalar(aDecl, tSeat)
-	aC = CondClauseOf(aDecl, tSeat)
-	if IsEmpty(aC) return "" end
-	tShape = aC[3][1]
-	if tShape = "word" or tShape = "string" or tShape = "number" return aC[3][2] end
+func CondScalar(xDecl, tSeat)
+	xC = CondClauseOf(xDecl, tSeat)
+	if IsEmpty(xC) return "" end
+	tShape = xC[3][1]
+	if tShape = "word" or tShape = "string" or tShape = "number" return xC[3][2] end
 	return ""
 end
-func CondListOf(aDecl, tSeat)
-	aC = CondClauseOf(aDecl, tSeat)
-	if IsEmpty(aC) return "" end
-	tShape = aC[3][1]
-	if tShape = "namelist" or tShape = "stringlist" return aC[3][2] end
+func CondListOf(xDecl, tSeat)
+	xC = CondClauseOf(xDecl, tSeat)
+	if IsEmpty(xC) return "" end
+	tShape = xC[3][1]
+	if tShape = "namelist" or tShape = "stringlist" return xC[3][2] end
 	if tShape = "pairlist"
 		# v0.6: a list of name: value pairs reads as its names
-		aNames = []
-		for i = 1 to Len(aC[3][2])
-			aNames + aC[3][2][i][1]
+		xNames = []
+		for i = 1 to Len(xC[3][2])
+			xNames + xC[3][2][i][1]
 		end
-		return aNames
+		return xNames
 	end
 	return ""
 end
@@ -761,281 +761,281 @@ end
 func CondSameDecl(xA, xB)
 	return xA[1] = xB[1] and xA[2] = xB[2] and xA[3] = xB[3]
 end
-func CondCur(aOuter, aInner)
-	if IsEmpty(aInner) return aOuter end
-	return aInner
+func CondCur(xOuter, xInner)
+	if IsEmpty(xInner) return xOuter end
+	return xInner
 end
-func CondPoolOf(aC)
-	if IsEmpty(aC) return $aCondDecls end
-	return aC[4]
+func CondPoolOf(xC)
+	if IsEmpty(xC) return $xCondDecls end
+	return xC[4]
 end
-func CondLangOf(aC)
-	if IsEmpty(aC) return $tCondLang end
-	return aC[2]
+func CondLangOf(xC)
+	if IsEmpty(xC) return $tCondLang end
+	return xC[2]
 end
 # the declarations of a kind in a pool
-func CondOfKind(tLang, tDecl, aPool)
+func CondOfKind(tLang, tDecl, xPool)
 	tVerb = CondVerbIn(tLang, tDecl)
-	aOut = []
-	for i = 1 to Len(aPool)
-		if aPool[i][1] = tVerb aOut + aPool[i] end
+	xOut = []
+	for i = 1 to Len(xPool)
+		if xPool[i][1] = tVerb xOut + xPool[i] end
 	end
-	return aOut
+	return xOut
 end
-func CondFindIn(tLang, tDecl, tName, aPool)
+func CondFindIn(tLang, tDecl, tName, xPool)
 	tVerb = CondVerbIn(tLang, tDecl)
-	for i = 1 to Len(aPool)
-		if aPool[i][1] = tVerb and aPool[i][2] = tName return aPool[i] end
+	for i = 1 to Len(xPool)
+		if xPool[i][1] = tVerb and xPool[i][2] = tName return xPool[i] end
 	end
 	return ""
 end
 # the judged file of a SENTENCE seat: [ownerlang, VERB, name, seat, path, decls, lang]
-func CondSentenceOf(tLang, aDecl, tSeat)
-	for i = 1 to Len($aCourtSentences)
-		aS = $aCourtSentences[i]
-		if aS[1] = tLang and aS[2] = aDecl[1] and aS[3] = aDecl[2] and aS[4] = tSeat return aS end
+func CondSentenceOf(tLang, xDecl, tSeat)
+	for i = 1 to Len($vCourtSentences)
+		xS = $vCourtSentences[i]
+		if xS[1] = tLang and xS[2] = xDecl[1] and xS[3] = xDecl[2] and xS[4] = tSeat return xS end
 	end
 	return ""
 end
 # a seat of a declaration cursor, as a cursor; NULL raises $bCondUnread
-func CondSeatCursor(aC, tSeat)
-	tLang = aC[2]
-	aDecl = aC[3]
-	tDeclName = CondDeclNameIn(tLang, aDecl[1])
-	aInfo = CondSeatInfoIn(tLang, tDeclName, tSeat)
-	if IsEmpty(aInfo) return ["none"] end
-	if aInfo[4] = "decl"
-		if aInfo[3]
-			aL = CondListOf(aDecl, tSeat)
-			if IsEmpty(aL) aL = [] end
-			aOut = []
-			for i = 1 to Len(aL)
-				aT = CondFindIn(tLang, aInfo[2], aL[i], aC[4])
-				if not IsEmpty(aT) aOut + aT end
+func CondSeatCursor(xC, tSeat)
+	tLang = xC[2]
+	xDecl = xC[3]
+	tDeclName = CondDeclNameIn(tLang, xDecl[1])
+	xInfo = CondSeatInfoIn(tLang, tDeclName, tSeat)
+	if IsEmpty(xInfo) return ["none"] end
+	if xInfo[4] = "decl"
+		if xInfo[3]
+			xL = CondListOf(xDecl, tSeat)
+			if IsEmpty(xL) xL = [] end
+			xOut = []
+			for i = 1 to Len(xL)
+				xT = CondFindIn(tLang, xInfo[2], xL[i], xC[4])
+				if not IsEmpty(xT) xOut + xT end
 			end
-			return ["set", tLang, aOut, aC[4]]
+			return ["set", tLang, xOut, xC[4]]
 		end
-		xV = CondScalar(aDecl, tSeat)
+		xV = CondScalar(xDecl, tSeat)
 		if IsEmpty(xV)
 			$bCondUnread = true
 			return ""
 		end
-		aT = CondFindIn(tLang, aInfo[2], xV, aC[4])
-		if IsEmpty(aT)
+		xT = CondFindIn(tLang, xInfo[2], xV, xC[4])
+		if IsEmpty(xT)
 			$bCondUnread = true
 			return ""
 		end
-		return ["decl", tLang, aT, aC[4]]
+		return ["decl", tLang, xT, xC[4]]
 	end
-	if aInfo[4] = "sentence"
-		aS = CondSentenceOf(tLang, aDecl, tSeat)
-		if IsEmpty(aS) return ["none"] end
-		return ["sentence", aS[7], aS[6]]
+	if xInfo[4] = "sentence"
+		xS = CondSentenceOf(tLang, xDecl, tSeat)
+		if IsEmpty(xS) return ["none"] end
+		return ["sentence", xS[7], xS[6]]
 	end
-	if aInfo[3]
-		return ["value", CondListOf(aDecl, tSeat)]
+	if xInfo[3]
+		return ["value", CondListOf(xDecl, tSeat)]
 	end
-	return ["value", CondScalar(aDecl, tSeat)]
+	return ["value", CondScalar(xDecl, tSeat)]
 end
-func CondHeadCursor(tSeg, aOuter, aInner)
-	aCur = CondCur(aOuter, aInner)
+func CondHeadCursor(tSeg, xOuter, xInner)
+	xCur = CondCur(xOuter, xInner)
 	if tSeg = "self"
-		if IsEmpty(aCur)
+		if IsEmpty(xCur)
 			$bCondUnread = true
 			return ""
 		end
-		return aCur
+		return xCur
 	end
 	if tSeg = "this"
-		if IsEmpty(aOuter)
+		if IsEmpty(xOuter)
 			$bCondUnread = true
 			return ""
 		end
-		return aOuter
+		return xOuter
 	end
-	tLang = CondLangOf(aCur)
-	aV = CondViewIn(tLang, tSeg)
-	if not IsEmpty(aV)
-		return CondViewCursor(aV, aCur)
+	tLang = CondLangOf(xCur)
+	xV = CondViewIn(tLang, tSeg)
+	if not IsEmpty(xV)
+		return CondViewCursor(xV, xCur)
 	end
-	if not IsEmpty(aCur)
-		tDeclName = CondDeclNameIn(tLang, aCur[3][1])
+	if not IsEmpty(xCur)
+		tDeclName = CondDeclNameIn(tLang, xCur[3][1])
 		if not IsEmpty(CondSeatInfoIn(tLang, tDeclName, tSeg))
-			return CondSeatCursor(aCur, tSeg)
+			return CondSeatCursor(xCur, tSeg)
 		end
 	end
-	aPool = CondPoolOf(aCur)
+	xPool = CondPoolOf(xCur)
 	if not IsEmpty(CondSeatsIn(tLang, tSeg))
-		aK = CondOfKind(tLang, tSeg, aPool)
+		xK = CondOfKind(tLang, tSeg, xPool)
 		if CondIsOneIn(tLang, tSeg)
-			if Len(aK) = 0 return ["none"] end
-			return ["decl", tLang, aK[1], aPool]
+			if Len(xK) = 0 return ["none"] end
+			return ["decl", tLang, xK[1], xPool]
 		end
-		return ["set", tLang, aK, aPool]
+		return ["set", tLang, xK, xPool]
 	end
 	# inside a quantifier over another language's declarations, a KIND or a
 	# whole-sentence VIEW of the ON declaration's language is still in reach
-	if not IsEmpty(aInner) and not IsEmpty(aOuter)
-		if aOuter[2] != tLang
-			tOL = aOuter[2]
-			aV = CondViewIn(tOL, tSeg)
-			if not IsEmpty(aV)
-				if aV[2] = "" return CondViewCursor(aV, aOuter) end
+	if not IsEmpty(xInner) and not IsEmpty(xOuter)
+		if xOuter[2] != tLang
+			tOL = xOuter[2]
+			xV = CondViewIn(tOL, tSeg)
+			if not IsEmpty(xV)
+				if xV[2] = "" return CondViewCursor(xV, xOuter) end
 			end
 			if not IsEmpty(CondSeatsIn(tOL, tSeg))
-				aPoolO = aOuter[4]
-				aK = CondOfKind(tOL, tSeg, aPoolO)
+				xPoolO = xOuter[4]
+				xK = CondOfKind(tOL, tSeg, xPoolO)
 				if CondIsOneIn(tOL, tSeg)
-					if Len(aK) = 0 return ["none"] end
-					return ["decl", tOL, aK[1], aPoolO]
+					if Len(xK) = 0 return ["none"] end
+					return ["decl", tOL, xK[1], xPoolO]
 				end
-				return ["set", tOL, aK, aPoolO]
+				return ["set", tOL, xK, xPoolO]
 			end
 		end
 	end
 	return ["none"]
 end
-func CondStepCursor(aC, tSeg)
-	if IsEmpty(aC) return "" end
-	tK = aC[1]
+func CondStepCursor(xC, tSeg)
+	if IsEmpty(xC) return "" end
+	tK = xC[1]
 	if tK = "decl"
-		tDeclName = CondDeclNameIn(aC[2], aC[3][1])
-		if not IsEmpty(CondSeatInfoIn(aC[2], tDeclName, tSeg)) return CondSeatCursor(aC, tSeg) end
-		aV = CondViewIn(aC[2], tSeg)
-		if not IsEmpty(aV)
-			if aV[2] = tDeclName return CondViewCursor(aV, aC) end
+		tDeclName = CondDeclNameIn(xC[2], xC[3][1])
+		if not IsEmpty(CondSeatInfoIn(xC[2], tDeclName, tSeg)) return CondSeatCursor(xC, tSeg) end
+		xV = CondViewIn(xC[2], tSeg)
+		if not IsEmpty(xV)
+			if xV[2] = tDeclName return CondViewCursor(xV, xC) end
 		end
 		return ["none"]
 	end
 	if tK = "sentence"
-		tLang = aC[2]
-		aK = CondOfKind(tLang, tSeg, aC[3])
+		tLang = xC[2]
+		xK = CondOfKind(tLang, tSeg, xC[3])
 		if CondIsOneIn(tLang, tSeg)
-			if Len(aK) = 0 return ["none"] end
-			return ["decl", tLang, aK[1], aC[3]]
+			if Len(xK) = 0 return ["none"] end
+			return ["decl", tLang, xK[1], xC[3]]
 		end
-		return ["set", tLang, aK, aC[3]]
+		return ["set", tLang, xK, xC[3]]
 	end
 	return ["none"]
 end
 # a path's cursor: NULL (unread), ["none"], or a cursor
-func CondWalk(aP, aOuter, aInner)
-	aSegs = aP[2]
-	aC = CondHeadCursor(aSegs[1], aOuter, aInner)
-	for i = 2 to Len(aSegs)
-		if IsEmpty(aC) return "" end
-		if aC[1] = "none" return aC end
-		aC = CondStepCursor(aC, aSegs[i])
+func CondWalk(xP, xOuter, xInner)
+	xSegs = xP[2]
+	xC = CondHeadCursor(xSegs[1], xOuter, xInner)
+	for i = 2 to Len(xSegs)
+		if IsEmpty(xC) return "" end
+		if xC[1] = "none" return xC end
+		xC = CondStepCursor(xC, xSegs[i])
 	end
-	return aC
+	return xC
 end
 # a path's text value: a declaration's name, a scalar's text; NULL otherwise
-func CondPathScalar(aP, aOuter, aInner)
-	aC = CondWalk(aP, aOuter, aInner)
-	if IsEmpty(aC) return "" end
-	if aC[1] = "decl" return aC[3][2] end
-	if aC[1] = "value"
-		if IsEmpty(aC[2]) return "" end
-		if IsList(aC[2]) return "" end
-		return aC[2]
+func CondPathScalar(xP, xOuter, xInner)
+	xC = CondWalk(xP, xOuter, xInner)
+	if IsEmpty(xC) return "" end
+	if xC[1] = "decl" return xC[3][2] end
+	if xC[1] = "value"
+		if IsEmpty(xC[2]) return "" end
+		if IsList(xC[2]) return "" end
+		return xC[2]
 	end
 	return ""
 end
 # a path's list: a list seat's items as written (so a list of references reads
 # its names, resolved or not), or the names of a set reached along a path
-func CondPathList(aP, aOuter, aInner)
-	aSegs = aP[2]
-	aCur = CondCur(aOuter, aInner)
-	if Len(aSegs) = 1 and not IsEmpty(aCur)
-		if aSegs[1] != "self" and aSegs[1] != "this"
-			tDeclName = CondDeclNameIn(aCur[2], aCur[3][1])
-			if not IsEmpty(CondSeatInfoIn(aCur[2], tDeclName, aSegs[1]))
-				return CondListOf(aCur[3], aSegs[1])
+func CondPathList(xP, xOuter, xInner)
+	xSegs = xP[2]
+	xCur = CondCur(xOuter, xInner)
+	if Len(xSegs) = 1 and not IsEmpty(xCur)
+		if xSegs[1] != "self" and xSegs[1] != "this"
+			tDeclName = CondDeclNameIn(xCur[2], xCur[3][1])
+			if not IsEmpty(CondSeatInfoIn(xCur[2], tDeclName, xSegs[1]))
+				return CondListOf(xCur[3], xSegs[1])
 			end
 		end
 	end
-	aC = CondWalk(aP, aOuter, aInner)
-	if IsEmpty(aC) return "" end
-	if aC[1] = "value"
-		if IsEmpty(aC[2]) return "" end
-		if IsList(aC[2]) return aC[2] end
+	xC = CondWalk(xP, xOuter, xInner)
+	if IsEmpty(xC) return "" end
+	if xC[1] = "value"
+		if IsEmpty(xC[2]) return "" end
+		if IsList(xC[2]) return xC[2] end
 		return ""
 	end
-	if aC[1] = "set"
-		aOut = []
-		for i = 1 to Len(aC[3])
-			aOut + aC[3][i][2]
+	if xC[1] = "set"
+		xOut = []
+		for i = 1 to Len(xC[3])
+			xOut + xC[3][i][2]
 		end
-		return aOut
+		return xOut
 	end
 	return ""
 end
-func CondRightText(aR, aOuter, aInner)
-	if aR[1] = "val"
-		if aR[2] = "self"
-			aCur = CondCur(aOuter, aInner)
-			if IsEmpty(aCur) return "" end
-			return aCur[3][2]
+func CondRightText(xR, xOuter, xInner)
+	if xR[1] = "val"
+		if xR[2] = "self"
+			xCur = CondCur(xOuter, xInner)
+			if IsEmpty(xCur) return "" end
+			return xCur[3][2]
 		end
-		return aR[2]
+		return xR[2]
 	end
-	return CondPathScalar(aR, aOuter, aInner)
+	return CondPathScalar(xR, xOuter, xInner)
 end
 # a VIEW's declaration for a cursor: ["decl", ...] or ["none"]
-func CondViewCursor(aV, aCur)
-	tOn = aV[2]
-	aOuter = aCur
+func CondViewCursor(xV, xCur)
+	tOn = xV[2]
+	xOuter = xCur
 	if tOn = ""
-		aOuter = ""
+		xOuter = ""
 	else
-		if IsEmpty(aCur) return ["none"] end
-		if CondDeclNameIn(aCur[2], aCur[3][1]) != tOn return ["none"] end
+		if IsEmpty(xCur) return ["none"] end
+		if CondDeclNameIn(xCur[2], xCur[3][1]) != tOn return ["none"] end
 	end
-	aP = CondParsePathText(aV[4])
-	aSet = CondWalk(aP, aOuter, "")
-	if IsEmpty(aSet) return ["none"] end
-	if aSet[1] != "set" return ["none"] end
+	xP = CondParsePathText(xV[4])
+	xSet = CondWalk(xP, xOuter, "")
+	if IsEmpty(xSet) return ["none"] end
+	if xSet[1] != "set" return ["none"] end
 	tNamed = ""
-	if aV[5] != ""
-		tNamed = CondRightText(CondParseRightText(aV[5]), aOuter, "")
+	if xV[5] != ""
+		tNamed = CondRightText(CondParseRightText(xV[5]), xOuter, "")
 		if IsEmpty(tNamed) return ["none"] end
 	end
-	aWhere = ""
-	if aV[6] != "" aWhere = CondParse(aV[6]) end
-	for i = 1 to Len(aSet[3])
-		aD = aSet[3][i]
+	xWhere = ""
+	if xV[6] != "" xWhere = CondParse(xV[6]) end
+	for i = 1 to Len(xSet[3])
+		xD = xSet[3][i]
 		if not IsEmpty(tNamed)
-			if aD[2] != tNamed loop end
+			if xD[2] != tNamed loop end
 		end
-		aIn = ["decl", aSet[2], aD, aSet[4]]
-		if not IsEmpty(aWhere)
-			if not CondEvalIn(aWhere, aOuter, aIn) loop end
+		vIn = ["decl", xSet[2], xD, xSet[4]]
+		if not IsEmpty(xWhere)
+			if not CondEvalIn(xWhere, xOuter, vIn) loop end
 		end
-		return aIn
+		return vIn
 	end
 	return ["none"]
 end
-func CondEval(aAst, aDecl)
-	return CondEvalIn(aAst, ["decl", $tCondLang, aDecl, $aCondDecls], "")
+func CondEval(xAst, xDecl)
+	return CondEvalIn(xAst, ["decl", $tCondLang, xDecl, $xCondDecls], "")
 end
-func CondEvalIn(aAst, aOuter, aInner)
-	aCur = CondCur(aOuter, aInner)
-	tK = aAst[1]
+func CondEvalIn(xAst, xOuter, xInner)
+	xCur = CondCur(xOuter, xInner)
+	tK = xAst[1]
 	if tK = "and"
-		if not CondEvalIn(aAst[2], aOuter, aInner) return false end
-		return CondEvalIn(aAst[3], aOuter, aInner)
+		if not CondEvalIn(xAst[2], xOuter, xInner) return false end
+		return CondEvalIn(xAst[3], xOuter, xInner)
 	elseif tK = "or"
-		if CondEvalIn(aAst[2], aOuter, aInner) return true end
-		return CondEvalIn(aAst[3], aOuter, aInner)
+		if CondEvalIn(xAst[2], xOuter, xInner) return true end
+		return CondEvalIn(xAst[3], xOuter, xInner)
 	elseif tK = "not"
-		return not CondEvalIn(aAst[2], aOuter, aInner)
+		return not CondEvalIn(xAst[2], xOuter, xInner)
 	elseif tK = "exists"
-		return Len(CondOfKind(CondLangOf(aCur), aAst[2], CondPoolOf(aCur))) > 0
+		return Len(CondOfKind(CondLangOf(xCur), xAst[2], CondPoolOf(xCur))) > 0
 	elseif tK = "cmp"
-		xOp = aAst[2]
-		xV = CondPathScalar(aAst[3], aOuter, aInner)
+		xOp = xAst[2]
+		xV = CondPathScalar(xAst[3], xOuter, xInner)
 		if IsEmpty(xV) return false end
-		tW = CondRightText(aAst[4], aOuter, aInner)
+		tW = CondRightText(xAst[4], xOuter, xInner)
 		if IsEmpty(tW) return false end
 		if xOp = "="  return CondSameText(xV, tW) end
 		if xOp = "!=" return not CondSameText(xV, tW) end
@@ -1043,81 +1043,81 @@ func CondEvalIn(aAst, aOuter, aInner)
 		if xOp = ">" return Number(xV) > Number(tW) end
 		return Number(xV) < Number(tW)
 	elseif tK = "contains"
-		aL = CondPathList(aAst[2], aOuter, aInner)
-		if IsEmpty(aL) return false end
-		tW = aAst[3]
+		xL = CondPathList(xAst[2], xOuter, xInner)
+		if IsEmpty(xL) return false end
+		tW = xAst[3]
 		if tW = "self"
-			if IsEmpty(aCur) return false end
-			tW = aCur[3][2]
+			if IsEmpty(xCur) return false end
+			tW = xCur[3][2]
 		end
-		for i = 1 to Len(aL)
-			if aL[i] = tW return true end
+		for i = 1 to Len(xL)
+			if xL[i] = tW return true end
 		end
 		return false
 	elseif tK = "rel"
-		tRel = aAst[2]
+		tRel = xAst[2]
 		if tRel = "covers"
-			aL = CondPathList(aAst[3], aOuter, aInner)
-			if IsEmpty(aL) return false end
-			tR = CondRightText(aAst[4], aOuter, aInner)
+			xL = CondPathList(xAst[3], xOuter, xInner)
+			if IsEmpty(xL) return false end
+			tR = CondRightText(xAst[4], xOuter, xInner)
 			if IsEmpty(tR) return false end
-			return CondCovers(aL, tR)
+			return CondCovers(xL, tR)
 		end
-		xV = CondPathScalar(aAst[3], aOuter, aInner)
+		xV = CondPathScalar(xAst[3], xOuter, xInner)
 		if IsEmpty(xV) return false end
-		tR = CondRightText(aAst[4], aOuter, aInner)
+		tR = CondRightText(xAst[4], xOuter, xInner)
 		if IsEmpty(tR) return false end
 		if tRel = "within" return CondWithin(xV, tR) end
 		if tRel = "host_of" return CondHostOf(xV, tR) end
 		return CondUnder(xV, tR)
 	elseif tK = "reach"
-		aCur = CondCur(aOuter, aInner)
-		if IsEmpty(aCur) return false end
-		return CondReachable(aCur)
+		xCur = CondCur(xOuter, xInner)
+		if IsEmpty(xCur) return false end
+		return CondReachable(xCur)
 	elseif tK = "refd"
-		aCur = CondCur(aOuter, aInner)
-		if IsEmpty(aCur) return false end
-		return CondReferenced(aCur)
+		xCur = CondCur(xOuter, xInner)
+		if IsEmpty(xCur) return false end
+		return CondReferenced(xCur)
 	elseif tK = "keyed"
-		aCur = CondCur(aOuter, aInner)
-		if IsEmpty(aCur) return false end
-		return CondKeyedBy(aCur, aAst[2][2][1], aAst[3][2][1])
+		xCur = CondCur(xOuter, xInner)
+		if IsEmpty(xCur) return false end
+		return CondKeyedBy(xCur, xAst[2][2][1], xAst[3][2][1])
 	elseif tK = "cyclic"
-		if IsEmpty(aCur) return false end
-		return CondCyclic(aCur, aAst[2][2][1])
+		if IsEmpty(xCur) return false end
+		return CondCyclic(xCur, xAst[2][2][1])
 	elseif tK = "matches"
-		xV = CondPathScalar(aAst[2], aOuter, aInner)
+		xV = CondPathScalar(xAst[2], xOuter, xInner)
 		if IsEmpty(xV) return false end
-		return CondHasShape(xV, CondFormatShape(aAst[3]))
+		return CondHasShape(xV, CondFormatShape(xAst[3]))
 	elseif tK = "is"
-		if IsEmpty(aCur) return false end
-		aV = CondViewIn(CondLangOf(aCur), aAst[2])
-		if IsEmpty(aV) return false end
-		aD = CondViewCursor(aV, aCur)
-		if aD[1] != "decl" return false end
-		return CondSameDecl(aD[3], aCur[3])
+		if IsEmpty(xCur) return false end
+		xView = CondViewIn(CondLangOf(xCur), xAst[2])
+		if IsEmpty(xView) return false end
+		xD = CondViewCursor(xView, xCur)
+		if xD[1] != "decl" return false end
+		return CondSameDecl(xD[3], xCur[3])
 	elseif tK = "quant"
-		return CondQuant(aAst, aOuter, aInner)
+		return CondQuant(xAst, xOuter, xInner)
 	else
 		# has
-		tTest = aAst[2]
+		tTest = xAst[2]
 		if tTest = "unique"
 			# against the declarations BEFORE this one, so the later of two
 			# is the one refused and {other} names the earlier ("already a's");
 			# the clause's own text, so a SENTENCE seat's path counts too
-			if IsEmpty(aCur) return true end
-			tSeat = aAst[3][2][1]
-			aD = aCur[3]
-			xV = CondScalar(aD, tSeat)
+			if IsEmpty(xCur) return true end
+			tSeat = xAst[3][2][1]
+			xD = xCur[3]
+			xV = CondScalar(xD, tSeat)
 			if IsEmpty(xV) return true end
-			aPool = aCur[4]
-			for i = 1 to Len(aPool)
-				aO = aPool[i]
-				if CondSameDecl(aO, aD) exit end
-				if aO[1] = aD[1]
-					tW = CondScalar(aO, tSeat)
+			xPool = xCur[4]
+			for i = 1 to Len(xPool)
+				xO = xPool[i]
+				if CondSameDecl(xO, xD) exit end
+				if xO[1] = xD[1]
+					tW = CondScalar(xO, tSeat)
 					if not IsEmpty(tW) and tW = xV
-						$tCondOther = aO[2]
+						$tCondOther = xO[2]
 						return false
 					end
 				end
@@ -1126,20 +1126,20 @@ func CondEvalIn(aAst, aOuter, aInner)
 		end
 		if tTest = "empty" or tTest = "nonempty" or tTest = "distinct"
 			# the list as written: a list of references reads its names, resolved or not
-			aL = CondPathList(aAst[3], aOuter, aInner)
+			xL = CondPathList(xAst[3], xOuter, xInner)
 			if tTest = "empty"
-				if IsEmpty(aL) return false end
-				return Len(aL) = 0
+				if IsEmpty(xL) return false end
+				return Len(xL) = 0
 			end
 			if tTest = "nonempty"
-				if IsEmpty(aL) return false end
-				return Len(aL) > 0
+				if IsEmpty(xL) return false end
+				return Len(xL) > 0
 			end
-			if IsEmpty(aL) return true end
-			for i = 1 to Len(aL)
+			if IsEmpty(xL) return true end
+			for i = 1 to Len(xL)
 				for j = 1 to i - 1
-					if aL[i] = aL[j]
-						$tCondOther = aL[i]
+					if xL[i] = xL[j]
+						$tCondOther = xL[i]
 						return false
 					end
 				end
@@ -1149,32 +1149,32 @@ func CondEvalIn(aAst, aOuter, aInner)
 		# present and absent on a seat of this declaration ask whether the
 		# clause is WRITTEN (a list of references is present when written, even
 		# empty or unresolved); on a view or a kind, whether it resolves
-		aSegs = aAst[3][2]
-		if Len(aSegs) = 1 and not IsEmpty(aCur)
-			if aSegs[1] != "self" and aSegs[1] != "this"
-				tDeclName = CondDeclNameIn(aCur[2], aCur[3][1])
-				if not IsEmpty(CondSeatInfoIn(aCur[2], tDeclName, aSegs[1]))
-					bWritten = not IsEmpty(CondClauseOf(aCur[3], aSegs[1]))
+		xSegs = xAst[3][2]
+		if Len(xSegs) = 1 and not IsEmpty(xCur)
+			if xSegs[1] != "self" and xSegs[1] != "this"
+				tDeclName = CondDeclNameIn(xCur[2], xCur[3][1])
+				if not IsEmpty(CondSeatInfoIn(xCur[2], tDeclName, xSegs[1]))
+					bWritten = not IsEmpty(CondClauseOf(xCur[3], xSegs[1]))
 					if tTest = "present" return bWritten end
 					return not bWritten
 				end
 			end
 		end
-		aC = CondWalk(aAst[3], aOuter, aInner)
-		if IsEmpty(aC) return false end
-		if aC[1] = "none"
+		xC = CondWalk(xAst[3], xOuter, xInner)
+		if IsEmpty(xC) return false end
+		if xC[1] = "none"
 			return tTest = "absent"
 		end
-		if aC[1] = "decl" or aC[1] = "sentence"
+		if xC[1] = "decl" or xC[1] = "sentence"
 			if tTest = "present" return true end
 			return false
 		end
-		if aC[1] = "set"
-			if tTest = "present" return Len(aC[3]) > 0 end
-			if tTest = "absent" return Len(aC[3]) = 0 end
+		if xC[1] = "set"
+			if tTest = "present" return Len(xC[3]) > 0 end
+			if tTest = "absent" return Len(xC[3]) = 0 end
 			return false
 		end
-		xV = aC[2]
+		xV = xC[2]
 		if tTest = "present" return not IsEmpty(xV) end
 		if tTest = "absent" return IsEmpty(xV) end
 		return false
@@ -1188,159 +1188,159 @@ end
 # the names a declaration refers to through its reference seats: a scalar
 # DECLARATION or UNION seat, a list of references, a pair list's keys when
 # they are declarations and its values when they are declarations or unions
-func CondRefNames(tLang, aDecl)
-	aOut = []
-	tDeclName = CondDeclNameIn(tLang, aDecl[1])
-	aSeats = CondSeatsIn(tLang, tDeclName)
-	if IsEmpty(aSeats) return aOut end
-	for i = 1 to Len(aSeats)
-		aInfo = aSeats[i]
-		aC = CondClauseOf(aDecl, aInfo[1])
-		if IsEmpty(aC) loop end
-		tShape = aC[3][1]
-		if aInfo[4] = "decl" or aInfo[4] = "union"
-			if tShape = "word" aOut + aC[3][2] end
+func CondRefNames(tLang, xDecl)
+	xOut = []
+	tDeclName = CondDeclNameIn(tLang, xDecl[1])
+	xSeats = CondSeatsIn(tLang, tDeclName)
+	if IsEmpty(xSeats) return xOut end
+	for i = 1 to Len(xSeats)
+		xInfo = xSeats[i]
+		xC = CondClauseOf(xDecl, xInfo[1])
+		if IsEmpty(xC) loop end
+		tShape = xC[3][1]
+		if xInfo[4] = "decl" or xInfo[4] = "union"
+			if tShape = "word" xOut + xC[3][2] end
 			if tShape = "namelist"
-				for j = 1 to Len(aC[3][2]) aOut + aC[3][2][j] end
+				for j = 1 to Len(xC[3][2]) xOut + xC[3][2][j] end
 			end
-		elseif aInfo[4] = "form" and tShape = "pairlist"
-			aF = CondFormIn(tLang, aInfo[2])
-			if IsEmpty(aF) loop end
-			bKey = aF[2][1][3] = "decl"
-			bVal = aF[2][2][3] = "decl" or aF[2][2][3] = "union"
-			for j = 1 to Len(aC[3][2])
-				if bKey aOut + aC[3][2][j][1] end
-				if bVal aOut + aC[3][2][j][2] end
+		elseif xInfo[4] = "form" and tShape = "pairlist"
+			xF = CondFormIn(tLang, xInfo[2])
+			if IsEmpty(xF) loop end
+			bKey = xF[2][1][3] = "decl"
+			bVal = xF[2][2][3] = "decl" or xF[2][2][3] = "union"
+			for j = 1 to Len(xC[3][2])
+				if bKey xOut + xC[3][2][j][1] end
+				if bVal xOut + xC[3][2][j][2] end
 			end
 		end
 	end
-	return aOut
+	return xOut
 end
 # self is reachable from the entry -- the first declaration of one of the
 # WORLD's ENTRY kinds -- through the reference seats of the ENTRY kinds'
 # declarations (a step's arrows), never through an ending's
-func CondReachable(aCur)
-	tLang = aCur[2]
-	aPool = aCur[4]
-	aEntry = CondEntryIn(tLang)
-	aVerbs = []
-	for i = 1 to Len(aEntry)
-		aVerbs + CondVerbIn(tLang, aEntry[i])
+func CondReachable(xCur)
+	tLang = xCur[2]
+	xPool = xCur[4]
+	xEntry = CondEntryIn(tLang)
+	vVerbs = []
+	for i = 1 to Len(xEntry)
+		vVerbs + CondVerbIn(tLang, xEntry[i])
 	end
 	tStart = ""
-	for i = 1 to Len(aPool)
-		if CondInList(aPool[i][1], aVerbs)
-			tStart = aPool[i][2]
+	for i = 1 to Len(xPool)
+		if CondInList(xPool[i][1], vVerbs)
+			tStart = xPool[i][2]
 			exit
 		end
 	end
 	if tStart = "" return false end
-	aSeen = [tStart]
+	vSeen = [tStart]
 	nN = 1
-	while nN <= Len(aSeen)
-		tCur = aSeen[nN]
+	while nN <= Len(vSeen)
+		tCur = vSeen[nN]
 		nN++
-		for i = 1 to Len(aPool)
-			if aPool[i][2] != tCur loop end
-			if not CondInList(aPool[i][1], aVerbs) loop end
-			aNames = CondRefNames(tLang, aPool[i])
-			for j = 1 to Len(aNames)
-				if not CondInList(aNames[j], aSeen) aSeen + aNames[j] end
+		for i = 1 to Len(xPool)
+			if xPool[i][2] != tCur loop end
+			if not CondInList(xPool[i][1], vVerbs) loop end
+			xNames = CondRefNames(tLang, xPool[i])
+			for j = 1 to Len(xNames)
+				if not CondInList(xNames[j], vSeen) vSeen + xNames[j] end
 			end
 		end
 	end
-	return CondInList(aCur[3][2], aSeen)
+	return CondInList(xCur[3][2], vSeen)
 end
 # self is named by a reference seat of some declaration of the sentence
-func CondReferenced(aCur)
-	tLang = aCur[2]
-	aPool = aCur[4]
-	tMe = aCur[3][2]
-	for i = 1 to Len(aPool)
-		aNames = CondRefNames(tLang, aPool[i])
-		if CondInList(tMe, aNames) return true end
+func CondReferenced(xCur)
+	tLang = xCur[2]
+	xPool = xCur[4]
+	tMe = xCur[3][2]
+	for i = 1 to Len(xPool)
+		xNames = CondRefNames(tLang, xPool[i])
+		if CondInList(tMe, xNames) return true end
 	end
 	return false
 end
 # the keys of a pair list are exactly the names of a list, as sets; the first
 # key with no name, or name with no key, is {other}
-func CondKeyedBy(aCur, tPairs, tNames)
-	aKeys = CondListOf(aCur[3], tPairs)
-	aNames = CondListOf(aCur[3], tNames)
-	if IsEmpty(aKeys) aKeys = [] end
-	if IsEmpty(aNames) aNames = [] end
-	for i = 1 to Len(aKeys)
-		if not CondInList(aKeys[i], aNames)
-			$tCondOther = aKeys[i]
+func CondKeyedBy(xCur, tPairs, tNames)
+	xKeys = CondListOf(xCur[3], tPairs)
+	xNames = CondListOf(xCur[3], tNames)
+	if IsEmpty(xKeys) xKeys = [] end
+	if IsEmpty(xNames) xNames = [] end
+	for i = 1 to Len(xKeys)
+		if not CondInList(xKeys[i], xNames)
+			$tCondOther = xKeys[i]
 			return false
 		end
 	end
-	for i = 1 to Len(aNames)
-		if not CondInList(aNames[i], aKeys)
-			$tCondOther = aNames[i]
+	for i = 1 to Len(xNames)
+		if not CondInList(xNames[i], xKeys)
+			$tCondOther = xNames[i]
 			return false
 		end
 	end
 	return true
 end
-func CondQuant(aAst, aOuter, aInner)
-	aCur = CondCur(aOuter, aInner)
-	tQ = aAst[2]
-	aItems = []
+func CondQuant(xAst, xOuter, xInner)
+	xCur = CondCur(xOuter, xInner)
+	tQ = xAst[2]
+	xItems = []
 	if tQ = "earlier"
-		if IsEmpty(aCur) return false end
-		aPool = aCur[4]
-		tVerb = CondVerbIn(aCur[2], aAst[3][2][1])
-		for i = 1 to Len(aPool)
-			if CondSameDecl(aPool[i], aCur[3]) exit end
-			if aPool[i][1] = tVerb aItems + ["decl", aCur[2], aPool[i], aPool] end
+		if IsEmpty(xCur) return false end
+		xPool = xCur[4]
+		tVerb = CondVerbIn(xCur[2], xAst[3][2][1])
+		for i = 1 to Len(xPool)
+			if CondSameDecl(xPool[i], xCur[3]) exit end
+			if xPool[i][1] = tVerb xItems + ["decl", xCur[2], xPool[i], xPool] end
 		end
 	else
-		aSegs = aAst[3][2]
-		aSet = ""
-		if Len(aSegs) = 1 and not IsEmpty(aCur)
+		xSegs = xAst[3][2]
+		xSet = ""
+		if Len(xSegs) = 1 and not IsEmpty(xCur)
 			# a name that is both a seat and a kind is the kind to a quantifier
-			if not IsEmpty(CondSeatsIn(aCur[2], aSegs[1]))
-				aSet = ["set", aCur[2], CondOfKind(aCur[2], aSegs[1], aCur[4]), aCur[4]]
+			if not IsEmpty(CondSeatsIn(xCur[2], xSegs[1]))
+				xSet = ["set", xCur[2], CondOfKind(xCur[2], xSegs[1], xCur[4]), xCur[4]]
 			end
 		end
-		if IsEmpty(aSet) aSet = CondWalk(aAst[3], aOuter, aInner) end
-		if IsEmpty(aSet) return false end
-		if aSet[1] != "set" return false end
-		for i = 1 to Len(aSet[3])
-			aItems + ["decl", aSet[2], aSet[3][i], aSet[4]]
+		if IsEmpty(xSet) xSet = CondWalk(xAst[3], xOuter, xInner) end
+		if IsEmpty(xSet) return false end
+		if xSet[1] != "set" return false end
+		for i = 1 to Len(xSet[3])
+			xItems + ["decl", xSet[2], xSet[3][i], xSet[4]]
 		end
 	end
 	tNamed = ""
-	if not IsEmpty(aAst[4])
-		tNamed = CondRightText(aAst[4], aOuter, aInner)
+	if not IsEmpty(xAst[4])
+		tNamed = CondRightText(xAst[4], xOuter, xInner)
 		if IsEmpty(tNamed) return false end
 	end
-	aCond = aAst[5]
+	xCond = xAst[5]
 	if tQ = "all"
-		for i = 1 to Len(aItems)
+		for i = 1 to Len(xItems)
 			if not IsEmpty(tNamed)
-				if aItems[i][3][2] != tNamed loop end
+				if xItems[i][3][2] != tNamed loop end
 			end
-			if not IsEmpty(aCond)
-				if not CondEvalIn(aCond, aOuter, aItems[i])
-					$tCondOther = aItems[i][3][2]
+			if not IsEmpty(xCond)
+				if not CondEvalIn(xCond, xOuter, xItems[i])
+					$tCondOther = xItems[i][3][2]
 					return false
 				end
 			end
 		end
 		return true
 	end
-	for i = 1 to Len(aItems)
+	for i = 1 to Len(xItems)
 		if not IsEmpty(tNamed)
-			if aItems[i][3][2] != tNamed loop end
+			if xItems[i][3][2] != tNamed loop end
 		end
-		if IsEmpty(aCond)
-			$tCondOther = aItems[i][3][2]
+		if IsEmpty(xCond)
+			$tCondOther = xItems[i][3][2]
 			return true
 		end
-		if CondEvalIn(aCond, aOuter, aItems[i])
-			$tCondOther = aItems[i][3][2]
+		if CondEvalIn(xCond, xOuter, xItems[i])
+			$tCondOther = xItems[i][3][2]
 			return true
 		end
 	end
@@ -1349,18 +1349,18 @@ end
 # ---- the relations, each total ---------------------------------------------------
 
 func CondSplit(tS, tSep)
-	aOut = []
+	xOut = []
 	tCur = ""
 	for i = 1 to Len(tS)
 		if tS[i] = tSep
-			aOut + tCur
+			xOut + tCur
 			tCur = ""
 		else
 			tCur += tS[i]
 		end
 	end
-	aOut + tCur
-	return aOut
+	xOut + tCur
+	return xOut
 end
 func CondIsHexChar(tC)
 	nN = Ascii(tC)
@@ -1375,10 +1375,10 @@ func CondIsLabelChar(tC)
 	return (nN >= 97 and nN <= 122) or (nN >= 48 and nN <= 57) or nN = 45
 end
 func CondIsIpv4(tS)
-	aParts = CondSplit(tS, ".")
-	if Len(aParts) != 4 return false end
+	xParts = CondSplit(tS, ".")
+	if Len(xParts) != 4 return false end
 	for i = 1 to 4
-		xP = aParts[i]
+		xP = xParts[i]
 		if Len(xP) = 0 or Len(xP) > 3 return false end
 		for j = 1 to Len(xP)
 			if not CondIsDigit(xP[j]) return false end
@@ -1400,18 +1400,18 @@ end
 # day, working days (RingFlex grammar-v0.md 5.4); a landmark is the one form
 # v0 knows, "the Nth working day of next month"; a deadline is either (v0.8)
 func CondWordsOf(tS)
-	aW = []
+	xW = []
 	tCur = ""
 	for i = 1 to Len(tS)
 		if tS[i] = " " or tS[i] = Char(9)
-			if tCur != "" aW + tCur end
+			if tCur != "" xW + tCur end
 			tCur = ""
 		else
 			tCur += tS[i]
 		end
 	end
-	if tCur != "" aW + tCur end
-	return aW
+	if tCur != "" xW + tCur end
+	return xW
 end
 func CondIsAllDigits(tS)
 	if Len(tS) = 0 return false end
@@ -1421,22 +1421,22 @@ func CondIsAllDigits(tS)
 	return true
 end
 func CondIsDuration(tS)
-	aW = CondWordsOf(tS)
-	if Len(aW) < 2 return false end
-	if not CondIsAllDigits(aW[1]) return false end
-	if Len(aW) = 2
-		return CondInList(aW[2], ["seconds", "minutes", "hours", "days"])
+	xW = CondWordsOf(tS)
+	if Len(xW) < 2 return false end
+	if not CondIsAllDigits(xW[1]) return false end
+	if Len(xW) = 2
+		return CondInList(xW[2], ["seconds", "minutes", "hours", "days"])
 	end
-	if Len(aW) = 3
-		return aW[2] = "working" and (aW[3] = "day" or aW[3] = "days")
+	if Len(xW) = 3
+		return xW[2] = "working" and (xW[3] = "day" or xW[3] = "days")
 	end
 	return false
 end
 func CondIsLandmark(tS)
-	aW = CondWordsOf(tS)
-	if Len(aW) != 7 return false end
-	if aW[1] != "the" or aW[3] != "working" or aW[4] != "day" or aW[5] != "of" or aW[6] != "next" or aW[7] != "month" return false end
-	tOrd = aW[2]
+	xW = CondWordsOf(tS)
+	if Len(xW) != 7 return false end
+	if xW[1] != "the" or xW[3] != "working" or xW[4] != "day" or xW[5] != "of" or xW[6] != "next" or xW[7] != "month" return false end
+	tOrd = xW[2]
 	if Len(tOrd) < 3 return false end
 	tSuffix = Right(tOrd, 2)
 	if not CondInList(tSuffix, ["st", "nd", "rd", "th"]) return false end
@@ -1454,28 +1454,28 @@ func CondHasShape(tS, tShape)
 	elseif tShape = "ipv4"
 		return CondIsIpv4(tS)
 	elseif tShape = "cidr"
-		aP = CondSplit(tS, "/")
-		if Len(aP) != 2 return false end
-		if not CondIsIpv4(aP[1]) return false end
-		if Len(aP[2]) = 0 or Len(aP[2]) > 2 return false end
-		for j = 1 to Len(aP[2])
-			if not CondIsDigit(aP[2][j]) return false end
+		xP = CondSplit(tS, "/")
+		if Len(xP) != 2 return false end
+		if not CondIsIpv4(xP[1]) return false end
+		if Len(xP[2]) = 0 or Len(xP[2]) > 2 return false end
+		for j = 1 to Len(xP[2])
+			if not CondIsDigit(xP[2][j]) return false end
 		end
-		return Number(aP[2]) <= 32
+		return Number(xP[2]) <= 32
 	elseif tShape = "mac"
-		aP = CondSplit(tS, ":")
-		if Len(aP) != 6 return false end
+		xP = CondSplit(tS, ":")
+		if Len(xP) != 6 return false end
 		for i = 1 to 6
-			if Len(aP[i]) != 2 return false end
-			if not (CondIsHexChar(aP[i][1]) and CondIsHexChar(aP[i][2])) return false end
+			if Len(xP[i]) != 2 return false end
+			if not (CondIsHexChar(xP[i][1]) and CondIsHexChar(xP[i][2])) return false end
 		end
 		return true
 	elseif tShape = "label"
 		return CondIsLabel(tS)
 	elseif tShape = "domain"
-		aP = CondSplit(tS, ".")
-		for i = 1 to Len(aP)
-			if not CondIsLabel(aP[i]) return false end
+		xP = CondSplit(tS, ".")
+		for i = 1 to Len(xP)
+			if not CondIsLabel(xP[i]) return false end
 		end
 		return true
 	elseif tShape = "hex64"
@@ -1496,8 +1496,8 @@ end
 # an address as a number (0..4294967295), or -1
 func CondIpNum(tS)
 	if not CondIsIpv4(tS) return -1 end
-	aP = CondSplit(tS, ".")
-	return ((Number(aP[1])) * 16777216) + ((Number(aP[2])) * 65536) + ((Number(aP[3])) * 256) + (Number(aP[4]))
+	xP = CondSplit(tS, ".")
+	return ((Number(xP[1])) * 16777216) + ((Number(xP[2])) * 65536) + ((Number(xP[3])) * 256) + (Number(xP[4]))
 end
 func CondBlock(nBits)
 	nN = 1
@@ -1509,25 +1509,25 @@ end
 # a prefix as [first, last], or NULL
 func CondCidrRange(tS)
 	if not CondHasShape(tS, "cidr") return "" end
-	aP = CondSplit(tS, "/")
-	nIp = CondIpNum(aP[1])
-	nBlock = CondBlock(32 - (Number(aP[2])))
+	xP = CondSplit(tS, "/")
+	nIp = CondIpNum(xP[1])
+	nBlock = CondBlock(32 - (Number(xP[2])))
 	nLo = nIp - (nIp % nBlock)
 	return [nLo, nLo + nBlock - 1]
 end
 func CondWithin(tIp, tCidr)
 	xN = CondIpNum(tIp)
 	if xN < 0 return false end
-	aR = CondCidrRange(tCidr)
-	if IsEmpty(aR) return false end
-	return xN >= aR[1] and xN <= aR[2]
+	xR = CondCidrRange(tCidr)
+	if IsEmpty(xR) return false end
+	return xN >= xR[1] and xN <= xR[2]
 end
 func CondHostOf(tIp, tCidr)
 	xN = CondIpNum(tIp)
 	if xN < 0 return false end
 	if not CondHasShape(tCidr, "cidr") return false end
-	aP = CondSplit(tCidr, "/")
-	return xN = CondIpNum(aP[1])
+	xP = CondSplit(tCidr, "/")
+	return xN = CondIpNum(xP[1])
 end
 # a path under a directory: the directory itself, or a path that continues
 # past it at a slash; "/" keeps every absolute path (harb's rule)
@@ -1544,53 +1544,53 @@ func CondUnder(tPath, tDir)
 end
 # a list of prefixes covers a prefix when their ranges, taken together, hold
 # every address of it: sweep the ranges in order of their first address
-func CondCovers(aList, tCidr)
-	aT = CondCidrRange(tCidr)
-	if IsEmpty(aT) return false end
-	aR = []
-	for i = 1 to Len(aList)
-		xR = CondCidrRange(aList[i])
+func CondCovers(xList, tCidr)
+	xT = CondCidrRange(tCidr)
+	if IsEmpty(xT) return false end
+	vR = []
+	for i = 1 to Len(xList)
+		xR = CondCidrRange(xList[i])
 		if not IsEmpty(xR)
-			nAt = Len(aR) + 1
-			for j = 1 to Len(aR)
-				if aR[j][1] > xR[1]
+			nAt = Len(vR) + 1
+			for j = 1 to Len(vR)
+				if vR[j][1] > xR[1]
 					nAt = j
 					exit
 				end
 			end
-			Insert(aR, nAt - 1, xR)
+			Insert(vR, nAt - 1, xR)
 		end
 	end
-	nCur = aT[1]
-	for i = 1 to Len(aR)
-		if aR[i][1] <= nCur and aR[i][2] >= nCur
-			nCur = aR[i][2] + 1
-			if nCur > aT[2] return true end
+	nCur = xT[1]
+	for i = 1 to Len(vR)
+		if vR[i][1] <= nCur and vR[i][2] >= nCur
+			nCur = vR[i][2] + 1
+			if nCur > xT[2] return true end
 		end
 	end
-	return nCur > aT[2]
+	return nCur > xT[2]
 end
 # the references of a list seat, followed through declarations of the same
 # kind in the cursor's pool, return to the declaration they started from
-func CondCyclic(aC, tSeat)
-	tLang = aC[2]
-	aDecl = aC[3]
-	tDeclName = CondDeclNameIn(tLang, aDecl[1])
-	aInfo = CondSeatInfoIn(tLang, tDeclName, tSeat)
-	if IsEmpty(aInfo) return false end
-	aSeen = []
-	return CondReaches(aDecl, tSeat, aDecl[2], tLang, aInfo[2], aC[4], aSeen)
+func CondCyclic(xC, tSeat)
+	tLang = xC[2]
+	xDecl = xC[3]
+	tDeclName = CondDeclNameIn(tLang, xDecl[1])
+	xInfo = CondSeatInfoIn(tLang, tDeclName, tSeat)
+	if IsEmpty(xInfo) return false end
+	vSeen = []
+	return CondReaches(xDecl, tSeat, xDecl[2], tLang, xInfo[2], xC[4], vSeen)
 end
-func CondReaches(aFrom, tSeat, tStart, tLang, tTargetKind, aPool, aSeen)
-	aL = CondListOf(aFrom, tSeat)
-	if IsEmpty(aL) return false end
-	for i = 1 to Len(aL)
-		if aL[i] = tStart return true end
-		if CondInList(aL[i], aSeen) loop end
-		aSeen + aL[i]
-		aT = CondFindIn(tLang, tTargetKind, aL[i], aPool)
-		if IsEmpty(aT) loop end
-		if CondReaches(aT, tSeat, tStart, tLang, tTargetKind, aPool, aSeen) return true end
+func CondReaches(xFrom, tSeat, tStart, tLang, tTargetKind, xPool, vSeen)
+	xL = CondListOf(xFrom, tSeat)
+	if IsEmpty(xL) return false end
+	for i = 1 to Len(xL)
+		if xL[i] = tStart return true end
+		if CondInList(xL[i], vSeen) loop end
+		vSeen + xL[i]
+		xT = CondFindIn(tLang, tTargetKind, xL[i], xPool)
+		if IsEmpty(xT) loop end
+		if CondReaches(xT, tSeat, tStart, tLang, tTargetKind, xPool, vSeen) return true end
 	end
 	return false
 end

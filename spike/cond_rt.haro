@@ -9,7 +9,7 @@
 load "cond_lib.haro"
 load "form_expand.haro"
 
-$aCondToks = []
+$xCondToks = []
 $nCondPos = 1
 
 if Len(sysargv) < 3
@@ -19,18 +19,18 @@ else
 end
 
 func CondRtRun(tBody)
-	aLines = Str2List(tBody)
-	for i = 1 to Len(aLines)
-		tLine = aLines[i]
+	xLines = Str2List(tBody)
+	for i = 1 to Len(xLines)
+		tLine = xLines[i]
 		if Len(tLine) > 0 and tLine[Len(tLine)] = Char(13) tLine = Left(tLine, Len(tLine) - 1) end
 		if Len(tLine) = 0 loop end
 		tOne = ""
 		try
-			aA = CondParse(tLine)
-			tP = CondPrint(aA)
-			aB = CondParse(tP)
-			tP2 = CondPrint(aB)
-			if CondDump(aA) = CondDump(aB) and tP = tP2
+			xA = CondParse(tLine)
+			tP = CondPrint(xA)
+			xB = CondParse(tP)
+			tP2 = CondPrint(xB)
+			if CondDump(xA) = CondDump(xB) and tP = tP2
 				tOne = "ok " + tP
 			else
 				tOne = "DIFFERS " + tLine + " => " + tP

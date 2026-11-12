@@ -2,9 +2,9 @@ f()
 func f
 	? Max([3, 9, 2])
 end
-func Max(aL)
-	nBest = aL[1]
-	for x in aL
+func Max(xL)
+	nBest = xL[1]
+	for x in xL
 		if x > nBest
 			nBest = x
 		end

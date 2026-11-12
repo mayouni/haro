@@ -66,7 +66,7 @@ CASES = [
     # G07 CHANGED AFTER ITS COURT SPOKE, 2026-11-08: `e.Message() = e` answers a boolean in a .haro file and prints `true` (v0.43, D55 T3,
     # the author's ruling of 2026-11-07); the case asks the same question.
     ('G08', 'E3', 'Code() of an error the VM raised is Ring\'s code', [
-        'g()', 'func g', T + 'aL = [1]', T + 'try', T * 2 + '? aL[5]', T + 'catch e', T * 2 + '? e.Code()', T * 2 + '? e', T + 'done', T + 'try',
+        'g()', 'func g', T + 'xL = [1]', T + 'try', T * 2 + '? xL[5]', T + 'catch e', T * 2 + '? e.Code()', T * 2 + '? e', T + 'done', T + 'try',
         T * 2 + 'nX = 1 / 0', T + 'catch e2', T * 2 + '? e2.Code()', T + 'done'],
      ['R2', 'Error (R2) : Array Access (Index out of range)', 'R1']),
     ('G09', 'E3', 'Code() of a raise() is empty', [
@@ -80,8 +80,8 @@ CASES = [
         T * 2 + '? xS[:file]', T + 'done'],
      ['5', 'G11.haro']),
     ('G12', 'E4', 'Span() of a VM error inside a called function is the line of the fault', [
-        'h()', 'func h', T + 'try', T * 2 + 'deep()', T + 'catch e', T * 2 + '? e.Span()[:line]', T + 'done', 'func deep', T + 'aL = []',
-        T + '? aL[1]'],
+        'h()', 'func h', T + 'try', T * 2 + 'deep()', T + 'catch e', T * 2 + '? e.Span()[:line]', T + 'done', 'func deep', T + 'xL = []',
+        T + '? xL[1]'],
      ['10']),
     ('G13', 'E4', 'a finally with no catch raises the held error again, and its Span is still where it began', [
         'h()', 'func h', T + 'try', T * 2 + 'try', T * 3 + 'Raise("origin")', T * 2 + 'finally', T * 3 + '? "cleanup"', T * 2 + 'done', T + 'catch e',
@@ -116,7 +116,7 @@ CASES = [
         T * 2 + 'Raise("instead")', T + 'done'],
      ['instead', '[]']),
     ('G21', 'E5', 'a VM error in finally replaces the held raise too, and the cause is a whole error value', [
-        'h()', 'func h', T + 'aL = []', T + 'try', T * 2 + 'try', T * 3 + 'Raise("held")', T * 2 + 'finally', T * 3 + '? aL[3]', T * 2 + 'done',
+        'h()', 'func h', T + 'xL = []', T + 'try', T * 2 + 'try', T * 3 + 'Raise("held")', T * 2 + 'finally', T * 3 + '? xL[3]', T * 2 + 'done',
         T + 'catch e', T * 2 + '? e.Code()', T * 2 + '? String(e.Cause()) + " " + String(e.Cause().Span()[:line])', T + 'done'],
      ['R2', 'held 6']),
     # G22 CHANGED after the court spoke: plant P13 left the finally's handler armed at a return and this case still passed, because its later raise
@@ -155,7 +155,7 @@ CASES = [
         T * 2 + 'done', T + 'done'],
      ['Bad parameter type!']),
     ('G30', 'E4', 'a VM error a finally raises again, uncaught, is reported as the VM error it is -- not as a raise()', [
-        'h()', 'func h', T + 'aL = []', T + 'try', T * 2 + '? aL[2]', T + 'finally', T * 2 + '? "cleanup"', T + 'done'],
+        'h()', 'func h', T + 'xL = []', T + 'try', T * 2 + '? xL[2]', T + 'finally', T * 2 + '? "cleanup"', T + 'done'],
      ['cleanup', '', 'Line 7 Error (R2) : Array Access (Index out of range) ', 'In function h() in file G30.haro', '',
       'Called from line 1 in file G30.haro '], 1),
 ]

@@ -1,8 +1,8 @@
 g()
 func g
-	aL = [1]
+	xL = [1]
 	try
-		? aL[5]
+		? xL[5]
 	catch e
 		? e.Code()
 		? e

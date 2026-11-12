@@ -7,18 +7,18 @@
 load "expr_lib.haro"
 
 $tExprLang = "w"
-$aExprOperators = ["or", "and", "not", "cmp", "add", "sub", "mul", "div", "mod", "neg"]
-$aExprOperands = ["number", "text", "var"]
-$aExprAggregates = []
-$aExprVariables = ["item", "accumulator"]
-$aExprContexts = [["eval", []], ["map", ["item"]], ["filter", ["item"]], ["count", ["item"]], ["partition", ["item"]], ["groupby", ["item"]], ["reduce", ["accumulator", "item"]], ["reduce_noinit", ["accumulator", "item"]]]
+$xExprOperators = ["or", "and", "not", "cmp", "add", "sub", "mul", "div", "mod", "neg"]
+$xExprOperands = ["number", "text", "var"]
+$xExprAggregates = []
+$xExprVariables = ["item", "accumulator"]
+$xExprContexts = [["eval", []], ["map", ["item"]], ["filter", ["item"]], ["count", ["item"]], ["partition", ["item"]], ["groupby", ["item"]], ["reduce", ["accumulator", "item"]], ["reduce_noinit", ["accumulator", "item"]]]
 $tExprAbsent = ""
 $tExprDivision = ""
 $tExprEquality = ""
-$aExprToks = []
+$xExprToks = []
 $nExprPos = 1
-$aExprAllowed = []
-$aExprRecord = []
-$aExprOverlay = []
+$xExprAllowed = []
+$xExprRecord = []
+$vExprOverlay = []
 
 ExMain()

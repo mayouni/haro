@@ -1,6 +1,6 @@
-$aL = [1, 2]
-within $aL = $aL
-	Add($aL, 3)
-	? Len($aL)
+$xL = [1, 2]
+within $xL = $xL
+	Add($xL, 3)
+	? Len($xL)
 end
-? Len($aL)
+? Len($xL)
