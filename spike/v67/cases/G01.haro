@@ -1,0 +1,8 @@
+mAges = ["ada": 36, "bob": 41]
+mEmpty = [:]
+mAges["cyd"] = 29
+mAges["ada"] = 37
+print mAges["ada"] else 0
+print mAges["eve"] else 0
+print Len(mAges)
+print Len(mEmpty)

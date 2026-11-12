@@ -1,0 +1,5 @@
+mX = ["Ada": 1]
+print mX["ada"] else 0
+print mX["Ada"] else 0
+mN = [1: "one", 2: "two"]
+print mN[2] else ""

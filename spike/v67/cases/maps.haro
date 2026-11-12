@@ -1,0 +1,3 @@
+func Get(pmX)
+	return pmX["b"] else 0
+end

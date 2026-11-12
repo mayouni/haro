@@ -1,0 +1,138 @@
+{
+ "rung": "v0.67",
+ "decision": "HARO-MAP-01: TYPES.md T6 (D55), the Principal's \"A literal with key: value\" and \"A maybe, resolved with else\" (2026-11-12); the desk's readings are D79",
+ "class": "exact: the program's whole stdout and its exit code, byte for byte, on haro and on its checked build",
+ "lines": {
+  "M1": "literal, else, write, Len",
+  "M2": "an unresolved read refused",
+  "M3": "keys",
+  "M4": "Keys, Values, HasKey, Del",
+  "M5": "m holds a map, v no map",
+  "M6": "a value",
+  "M7": "printed as written",
+  "M8": "for-in pairs",
+  "M9": "a .ring pair list at an m parameter",
+  "M10": "a .ring file untouched",
+  "M11": "the pair refusal names the map"
+ },
+ "cases": [
+  {
+   "id": "G01",
+   "kind": "run",
+   "line": "M1",
+   "why": "the literal, the empty map, a read resolved with else, a write, Len",
+   "file": "cases/G01.haro",
+   "stdout": "37\n0\n3\n0\n"
+  },
+  {
+   "id": "G02",
+   "kind": "run",
+   "line": "M2",
+   "why": "a read left unresolved is refused when compiling",
+   "file": "cases/G02.haro",
+   "stdout": "before\n\nLine 5 Haro refused this statement (a map's read may find nothing -- resolve it where it lands: x = E else D; written `mAges[\"eve\"]`, line 5 of G02.haro) and did not compile it -- running past it would give a wrong answer \nIn function f() in file G02.haro\n\nCalled from line 2 in file G02.haro ",
+   "exit": 1
+  },
+  {
+   "id": "G03",
+   "kind": "run",
+   "line": "M3",
+   "why": "a text key in its exact case; an integer key",
+   "file": "cases/G03.haro",
+   "stdout": "0\n1\ntwo\n"
+  },
+  {
+   "id": "G04",
+   "kind": "run",
+   "line": "M3",
+   "why": "any other key is KEY_TYPE",
+   "file": "cases/G04.haro",
+   "stdout": "before\n\nLine 4 Error (KEY_TYPE) : a map's key is a text or an integer, and this is a decimal \nIn function f() in file G04.haro\n\nCalled from line 2 in file G04.haro ",
+   "exit": 1
+  },
+  {
+   "id": "G05",
+   "kind": "run",
+   "line": "M3",
+   "why": "a literal holds a key once",
+   "file": "cases/G05.haro",
+   "stdout": "before\n\nLine 4 Error (DUPLICATE_KEY) : the map holds the key \"a\" once \nIn function f() in file G05.haro\n\nCalled from line 2 in file G05.haro ",
+   "exit": 1
+  },
+  {
+   "id": "G06",
+   "kind": "run",
+   "line": "M4",
+   "why": "Keys, Values, HasKey, Del, in insertion order",
+   "file": "cases/G06.haro",
+   "stdout": "[ada,bob,cyd]\n[36,41,29]\ntrue\nfalse\n[ada,cyd]\n"
+  },
+  {
+   "id": "G07",
+   "kind": "run",
+   "line": "M5",
+   "why": "a vector literal given to an m name is refused when compiling",
+   "file": "cases/G07.haro",
+   "stdout": "before\n\nLine 4 Haro refused this statement (m is the letter of a map, and this literal is a vector; written `mX`, line 4 of G07.haro) and did not compile it -- running past it would give a wrong answer \nIn function f() in file G07.haro\n\nCalled from line 2 in file G07.haro ",
+   "exit": 1
+  },
+  {
+   "id": "G08",
+   "kind": "run",
+   "line": "M5",
+   "why": "a v name holds no map",
+   "file": "cases/G08.haro",
+   "stdout": "before\n\nLine 4 Error (TYPE_LETTER) : `vX` is lettered v, a vector, and is given a map \nIn function f() in file G08.haro\n\nCalled from line 2 in file G08.haro ",
+   "exit": 1
+  },
+  {
+   "id": "G09",
+   "kind": "run",
+   "line": "M6",
+   "why": "a map is a value: assigning it copies it",
+   "file": "cases/G09.haro",
+   "stdout": "1\n2\n"
+  },
+  {
+   "id": "G10",
+   "kind": "run",
+   "line": "M7",
+   "why": "printed as written",
+   "file": "cases/G10.haro",
+   "stdout": "[\"ada\": 36, \"bob\": 41]\n[:]\n[1: \"one\"]\n"
+  },
+  {
+   "id": "G11",
+   "kind": "run",
+   "line": "M8",
+   "why": "for-in gives each [key, value] pair",
+   "file": "cases/G11.haro",
+   "stdout": "a\n1\nb\n2\n"
+  },
+  {
+   "id": "G12",
+   "kind": "run",
+   "line": "M9",
+   "why": "a .ring caller's pair list at an m parameter is a map",
+   "file": "cases/G12.ring",
+   "stdout": "2\n"
+  },
+  {
+   "id": "G13",
+   "kind": "run",
+   "line": "M10",
+   "why": "a .ring file reads its pair lists as it did",
+   "file": "cases/G13.ring",
+   "stdout": "1\n"
+  },
+  {
+   "id": "G14",
+   "kind": "run",
+   "line": "M11",
+   "why": "the refusal of :key = value names the map",
+   "file": "cases/G14.haro",
+   "stdout": "before\n\nLine 4 Haro refused this statement (`:key = value` is no pair in a .haro file: write [\"key\": value] for a map, [:key, value] for a pair, or declare a record for named fields (HARO-SURFACE-01) `:a = 1`, line 4 of G14.haro) and did not compile it -- running past it would give a wrong answer \nIn function f() in file G14.haro\n\nCalled from line 2 in file G14.haro ",
+   "exit": 1
+  }
+ ]
+}

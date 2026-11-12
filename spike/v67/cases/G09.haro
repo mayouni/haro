@@ -1,0 +1,5 @@
+mA = ["a": 1]
+mB = mA
+mB["a"] = 2
+print mA["a"] else 0
+print mB["a"] else 0

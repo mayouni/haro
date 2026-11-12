@@ -1,0 +1,6 @@
+mX = ["ada": 36, "bob": 41]
+print mX
+mE = [:]
+print mE
+mN = [1: "one"]
+print mN

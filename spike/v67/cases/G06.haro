@@ -1,0 +1,17 @@
+mAges = ["ada": 36, "bob": 41, "cyd": 29]
+print Csv(Keys(mAges))
+print Csv(Values(mAges))
+print HasKey(mAges, "bob")
+Del(mAges, "bob")
+print HasKey(mAges, "bob")
+print Csv(Keys(mAges))
+func Csv(vX)
+	tOut = ""
+	for i = 1 to Len(vX)
+		if i > 1
+			tOut += ","
+		end
+		tOut += String(vX[i])
+	end
+	return "[" + tOut + "]"
+end

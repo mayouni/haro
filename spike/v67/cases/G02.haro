@@ -1,0 +1,6 @@
+print "before"
+f()
+func f
+	mAges = ["ada": 36]
+	iAge = mAges["eve"]
+end

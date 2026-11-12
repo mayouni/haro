@@ -1,0 +1,5 @@
+print "before"
+f()
+func f
+	mX = [1, 2]
+end

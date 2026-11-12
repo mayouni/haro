@@ -1,0 +1,5 @@
+mX = ["a": 1, "b": 2]
+for vP in mX
+	print vP[1]
+	print vP[2]
+end
