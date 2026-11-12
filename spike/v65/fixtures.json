@@ -40,6 +40,30 @@
    "why": "the round trip: .ring to .haro is a decimal, and back to .ring a float",
    "file": "cases/O04.ring",
    "stdout": "NUMBER\n1.25\n"
+  },
+  {
+   "id": "O05",
+   "kind": "run",
+   "line": "E5",
+   "why": "StzLib's case: a decimal two levels deep in a returned list, joined into text by .ring code",
+   "file": "cases/O05.ring",
+   "stdout": "b@0.3333\n0.0000\n0.3333\n"
+  },
+  {
+   "id": "O06",
+   "kind": "run",
+   "line": "E6",
+   "why": "a list of decimals printed by .ring code",
+   "file": "cases/O06.ring",
+   "stdout": "0.3333\nb\n"
+  },
+  {
+   "id": "O07",
+   "kind": "run",
+   "line": "E7",
+   "why": "a decimal that passes through .ring code comes back to .haro exact",
+   "file": "cases/O07.haro",
+   "stdout": "DECIMAL\ntrue\n"
   }
  ]
 }

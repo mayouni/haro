@@ -5,15 +5,22 @@ THE FINDING. stzlib-haroport, 2026-11-12 13:10, module 3 on v0.63: stzPattern.ha
 sound_mu3 (.ring) under decimals(4) and print as 0.000000000000001, 0.333333333333334 -- Ring's decimals(n) formats a float, and a
 decimal stayed a decimal in .ring code. The guard expects "c@0 b@0.3333 a@0.6667", as the positions printed when they were floats.
 
-THE READING (D77, StzLib's (a), the mirror of v0.63's D75): a decimal crossing from .haro into .ring code -- a .haro function's answer
-to a .ring caller, a .haro caller's argument at a .ring function's parameter -- is the float nearest it. Ring code holds Ring's one
-number type. A .haro caller keeps its decimals; a .ring file's own numbers are untouched.
+THE READING (D77), AMENDED BEFORE THE CODE WAS WRITTEN, said so. It was StzLib's (a), a decimal converted to a float where it crosses
+into .ring code. StzLib then found (2026-11-12) that the decimals sound_mu3 reads are list items, two levels deep in a returned list,
+which no conversion of a bare answer reaches, and walking every list a .haro function returns would cost each return its size. So: in
+.ring code a decimal is Ring's number, wherever it came from -- an answer, an argument, a list item, an attribute. It prints and becomes
+text as Ring writes a number (decimals(n)), and type() answers NUMBER; Ring's arithmetic already reads it as a number. Nothing is
+converted at a boundary, so a decimal that passes through .ring code and back to .haro is still exact. E5-E7 were added with the
+amendment, before the code.
 
 THE LINES:
-  E1  a .haro function's decimal answered to a .ring caller is a float: decimals(n) formats it, type() is NUMBER
-  E2  a .haro caller's decimal at a .ring function's parameter is a float
+  E1  a .haro function's decimal printed by a .ring caller is formatted by decimals(n), and type() is NUMBER
+  E2  a .haro caller's decimal at a .ring function's parameter is Ring's number there
   E3  a .haro caller keeps its decimal
-  E4  the round trip: a .ring fraction is a decimal in .haro (v0.63) and a float again when it comes back
+  E4  the round trip: a .ring fraction is a decimal in .haro (v0.63) and Ring's number again when it comes back
+  E5  a decimal inside a returned list, joined into text by .ring code: StzLib's case
+  E6  a list of decimals printed by .ring code
+  E7  a decimal that passes through .ring code comes back to .haro exact
 
   python spike/v65/gen_fixtures.py
 """
@@ -22,8 +29,8 @@ import json, os
 HERE = os.path.dirname(os.path.abspath(__file__))
 T = '\t'
 DEC = ['func Third', T + 'return Divide(1, 3, 15)', 'end', 'func Tenth', T + 'return 0.1', 'end', 'func Echo(pxV)', T + 'return pxV',
-       'end']
-KIND = ['func Kind x', T + 'return type(x)', 'func Twice x', T + 'return x * 2']
+       'end', 'func Rows', T + 'return [[0.000000000000001, "c"], [Divide(1, 3, 15), "b"]]', 'end']
+KIND = ['func Kind x', T + 'return type(x)', 'func Twice x', T + 'return x * 2', 'func Same x', T + 'return x']
 
 CASES = [
     ('O01', 'E1', 'the finding: a .haro decimal answered to .ring code is formatted by decimals(n)', '.ring',
@@ -38,6 +45,15 @@ CASES = [
     ('O04', 'E4', 'the round trip: .ring to .haro is a decimal, and back to .ring a float', '.ring',
      ['load "dec.haro"', '? type(Echo(0.25))', '? Echo(0.25) + 1'],
      'NUMBER\n1.25\n', 0),
+    ('O05', 'E5', 'StzLib\'s case: a decimal two levels deep in a returned list, joined into text by .ring code', '.ring',
+     ['load "dec.haro"', 'decimals(4)', 'vR = Rows()', '? vR[2][2] + "@" + vR[2][1]', '? "" + vR[1][1]', '? string(vR[2][1])'],
+     'b@0.3333\n0.0000\n0.3333\n', 0),
+    ('O06', 'E6', 'a list of decimals printed by .ring code', '.ring',
+     ['load "dec.haro"', 'decimals(4)', '? Rows()[2]'],
+     '0.3333\nb\n', 0),
+    ('O07', 'E7', 'a decimal that passes through .ring code comes back to .haro exact', '.haro',
+     ['load "kind.ring"', 'print Type(Same(0.1))', 'print Same(0.1) * 3 = 0.3'],
+     'DECIMAL\ntrue\n', 0),
 ]
 
 
