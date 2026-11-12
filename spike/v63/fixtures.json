@@ -60,6 +60,22 @@
    "exit": 1
   },
   {
+   "id": "M08",
+   "kind": "run",
+   "line": "D4",
+   "why": "a .ring caller's fraction at a .haro f parameter stays a float",
+   "file": "cases/M08.ring",
+   "stdout": "0.50\n"
+  },
+  {
+   "id": "M09",
+   "kind": "run",
+   "line": "D5",
+   "why": "a .ring function's fraction answered to a .ring caller stays a float",
+   "file": "cases/M09.ring",
+   "stdout": "1.50\n"
+  },
+  {
    "id": "M07",
    "kind": "run",
    "line": "D5",

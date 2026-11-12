@@ -26,7 +26,8 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 T = '\t'
 PAT = ['func Within(pxCycles)', T + 'if pxCycles <= 0 or pxCycles >= 1', T + T + 'return "out"', T + 'end', T + 'return "in"', 'end',
        'func Plus(pxV)', T + 'return pxV + 1', 'end',
-       'func IsThird(pxV)', T + 'if pxV * 3 = 0.3', T + T + 'return "exact"', T + 'end', T + 'return "inexact"', 'end']
+       'func IsThird(pxV)', T + 'if pxV * 3 = 0.3', T + T + 'return "exact"', T + 'end', T + 'return "inexact"', 'end',
+       'func Twice(pfV)', T + 'return pfV * 2.0f', 'end']
 OLD = ['func Half n', T + 'return n / 2', 'func Tenth', T + 'return 0.1', 'func Whole', T + 'return 4']
 
 
@@ -54,6 +55,13 @@ CASES = [
      ['print Within(0.25f)'] + PAT[:6],
      err(3, 'NUMBER_MIX', 'float <= integer -- an integer and a float do not mix; convert one: Float(i)', 'M06.haro', 'function within()'),
      1),
+    # M08 and M09 written after the code was edited and before it was built or run, said so
+    ('M08', 'D4', 'a .ring caller\'s fraction at a .haro f parameter stays a float', '.ring',
+     ['load "pat.haro"', '? Twice(0.25)'],
+     '0.50\n', 0),
+    ('M09', 'D5', 'a .ring function\'s fraction answered to a .ring caller stays a float', '.ring',
+     ['load "old.ring"', '? Half(1) * 3'],
+     '1.50\n', 0),
     ('M07', 'D5', 'a .ring file reads its own numbers as it did', '.ring',
      ['x = 0.25', '? x + 1', '? 0.1 * 3'],
      '1.25\n0.30\n', 0),

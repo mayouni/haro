@@ -13,3 +13,6 @@ func IsThird(pxV)
 	end
 	return "inexact"
 end
+func Twice(pfV)
+	return pfV * 2.0f
+end
