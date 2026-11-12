@@ -1,0 +1,3 @@
+load "kind.ring"
+print Kind(0.5)
+print Twice(0.25)

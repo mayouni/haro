@@ -1,0 +1,45 @@
+{
+ "rung": "v0.65",
+ "decision": "HARO-RINGBOUNDARY-DECIMAL-OUT-01 (stzlib-haroport, 2026-11-12), its reading (a); the desk's reading is D77",
+ "class": "exact: the program's whole stdout and its exit code, byte for byte, on haro and on its checked build",
+ "lines": {
+  "E1": "a .haro decimal answered to .ring code is a float",
+  "E2": "a .haro decimal at a .ring parameter is a float",
+  "E3": "a .haro caller keeps its decimal",
+  "E4": "the round trip"
+ },
+ "cases": [
+  {
+   "id": "O01",
+   "kind": "run",
+   "line": "E1",
+   "why": "the finding: a .haro decimal answered to .ring code is formatted by decimals(n)",
+   "file": "cases/O01.ring",
+   "stdout": "0.3333\n0.3000\nNUMBER\n"
+  },
+  {
+   "id": "O02",
+   "kind": "run",
+   "line": "E2",
+   "why": "a .haro caller's decimal at a .ring function's parameter is a float",
+   "file": "cases/O02.haro",
+   "stdout": "NUMBER\n0.5\n"
+  },
+  {
+   "id": "O03",
+   "kind": "run",
+   "line": "E3",
+   "why": "a .haro caller keeps its decimal",
+   "file": "cases/O03.haro",
+   "stdout": "DECIMAL\ntrue\n"
+  },
+  {
+   "id": "O04",
+   "kind": "run",
+   "line": "E4",
+   "why": "the round trip: .ring to .haro is a decimal, and back to .ring a float",
+   "file": "cases/O04.ring",
+   "stdout": "NUMBER\n1.25\n"
+  }
+ ]
+}

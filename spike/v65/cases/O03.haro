@@ -1,0 +1,3 @@
+load "dec.haro"
+print Type(Tenth())
+print Tenth() * 3 = 0.3
