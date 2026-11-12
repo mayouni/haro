@@ -1,0 +1,7 @@
+load "old.ring"
+xH = Half(1)
+if xH < 1
+	print "less"
+end
+print xH + 1
+print Tenth() * 3 = 0.3

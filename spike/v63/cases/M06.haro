@@ -1,0 +1,7 @@
+print Within(0.25f)
+func Within(pxCycles)
+	if pxCycles <= 0 or pxCycles >= 1
+		return "out"
+	end
+	return "in"
+end

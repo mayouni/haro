@@ -1,0 +1,71 @@
+{
+ "rung": "v0.63",
+ "decision": "TYPES.md section 6 (D55); HARO-RINGBOUNDARY-NUMBER-01 (stzlib-haroport, 2026-11-12); the desk's reading is D75",
+ "class": "exact: the program's whole stdout and its exit code, byte for byte, on haro and on its checked build",
+ "lines": {
+  "D1": "a .ring fraction at a .haro parameter is an exact decimal, its shortest text",
+  "D2": "a .ring whole number at a .haro parameter is the integer it was",
+  "D3": "a .ring function's fraction answered to a .haro caller is an exact decimal",
+  "D4": "a .haro caller's float is not converted",
+  "D5": "a .ring file reads its own numbers as it did"
+ },
+ "cases": [
+  {
+   "id": "M01",
+   "kind": "run",
+   "line": "D1",
+   "why": "the finding: a .ring caller's 0.25 meets the library's 0 and 1",
+   "file": "cases/M01.ring",
+   "stdout": "in\nout\n1.25\n"
+  },
+  {
+   "id": "M02",
+   "kind": "run",
+   "line": "D1",
+   "why": "the decimal is the shortest text: 0.1 times 3 is exactly 0.3",
+   "file": "cases/M02.ring",
+   "stdout": "exact\n"
+  },
+  {
+   "id": "M03",
+   "kind": "run",
+   "line": "D2",
+   "why": "a .ring caller's whole number is the integer it was",
+   "file": "cases/M03.ring",
+   "stdout": "out\n3\n"
+  },
+  {
+   "id": "M04",
+   "kind": "run",
+   "line": "D3",
+   "why": "a .ring function's fraction answered to a .haro caller is a decimal",
+   "file": "cases/M04.haro",
+   "stdout": "less\n1.5\ntrue\n"
+  },
+  {
+   "id": "M05",
+   "kind": "run",
+   "line": "D3",
+   "why": "a .ring function's whole number answered to a .haro caller is an integer",
+   "file": "cases/M05.haro",
+   "stdout": "5\n"
+  },
+  {
+   "id": "M06",
+   "kind": "run",
+   "line": "D4",
+   "why": "a .haro caller's float is not converted",
+   "file": "cases/M06.haro",
+   "stdout": "\nLine 3 Error (NUMBER_MIX) : float <= integer -- an integer and a float do not mix; convert one: Float(i) \nIn function within() in file M06.haro\n\nCalled from line 1 in file M06.haro ",
+   "exit": 1
+  },
+  {
+   "id": "M07",
+   "kind": "run",
+   "line": "D5",
+   "why": "a .ring file reads its own numbers as it did",
+   "file": "cases/M07.ring",
+   "stdout": "1.25\n0.30\n"
+  }
+ ]
+}

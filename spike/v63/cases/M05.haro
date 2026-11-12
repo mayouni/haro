@@ -1,0 +1,3 @@
+load "old.ring"
+iW = Whole()
+print iW + 1

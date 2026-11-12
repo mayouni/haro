@@ -1,0 +1,15 @@
+func Within(pxCycles)
+	if pxCycles <= 0 or pxCycles >= 1
+		return "out"
+	end
+	return "in"
+end
+func Plus(pxV)
+	return pxV + 1
+end
+func IsThird(pxV)
+	if pxV * 3 = 0.3
+		return "exact"
+	end
+	return "inexact"
+end
