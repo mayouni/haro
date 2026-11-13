@@ -2,8 +2,8 @@
 
 **PROPOSED 2026-11-13, by the Haro desk, on the Principal's ask of that day: "further think this aspect in a profound manner by
 analysing the reference lanaguges in the field ... the goal is to let Haro benefit from this aspect to be truley empowered as a
-programming languge for governed agents and programs". Nothing here is ruled and nothing is built. Section 8 is the one row of
-questions.**
+programming languge for governed agents and programs". RULED the same day by the Principal: "Yes to PROOF.md as proposed" -- parts
+(a) to (d) of section 8 (CHARTER D81); the two names of (e) stay his to give. Nothing is built.**
 
 Read for it: Haro at 903213a (CHARTER D51, D56, D61, D62; TYPES.md T7; SG1.md 7; PRINCIPLES.md 11); stzlib origin/main 2d3cb7cca,
 `base/testoor/TESTOOR_EVIDENCE_LADDER.md`; the home pages of Lean, Rocq, Dafny and Cedar as they stood on 2026-11-13; the papers
@@ -241,7 +241,8 @@ The one change to what was planned: the solver's first work is on declarations, 
 
 ## 8. The questions, one row
 
-HARO-PROOF-02, to the Principal, class: judgement except (e), which is naming --
+**HARO-PROOF-02: (a) to (d) RULED 2026-11-13, the Principal: "Yes to PROOF.md as proposed". (e) is open: each name is asked when
+its rung starts.** As it was put, class: judgement except (e), which is naming --
 
 - (a) the frame of section 5.1: Haro generates reference monitors, and proof's three jobs are those of the table;
 - (b) the order of section 6: the solver's first customer is a declaration's questions (5.4), before a function's contracts;

@@ -34,7 +34,7 @@ before its code, and every protection is switched off in turn to show the court 
       CHARTER.md       the charter: the alphabet, the decisions (D1-D79), the amendments
       PRINCIPLES.md    the founding principles;  GRAMMAR-SKETCH.md  the first grammar
       TYPES.md         Haro's types, rung by rung;  NUMBERS.md  its numbers;  SG1.md  the system grain
-      PROOF.md         proof in Haro, a proposal
+      PROOF.md         proof in Haro: the court is the kernel, three verdicts, the order of its rungs
       SPIKE.md         every rung, one section each, and what comes next
       FINDINGS.md      HF-1 to HF-173, each one measured
       CODEGRAPH.md     the code-graph memo;  BLOCKS.md  one format and pattern rules
