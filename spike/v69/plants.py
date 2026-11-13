@@ -3,6 +3,10 @@ the fixture that protection exists for. Each plant is text substitutions in vm/s
 one build at a time), the court run on that build alone, the files restored byte for byte -- verified by their digests, and restored even
 when a build fails or the script is stopped.
 
+T03 (L8, a .ring definition holds what follows it) has no plant: it is held by the grammar, which makes those statements the
+definition's own children, and by no line of this rung. Tried as a plant -- every definition read as closed -- the court still
+passed, 23 of 23, so it is listed here and not among the protections.
+
   python spike/v69/plants.py            all plants (about two minutes each)
   python spike/v69/plants.py K1 K3      some
 """
@@ -45,9 +49,7 @@ PLANTS = [
        '        .message = try a.dupe(u8, t.kind),')]),
     ('K11', 'S01', 'a refused form is a warning', HARO,
      [('        .severity = .err,\n        .rule = "haro/refused-form",', '        .severity = .warn,\n        .rule = "haro/refused-form",')]),
-    ('K12', 'T03', 'every definition is read as closed, a .ring file\'s too', TS,
-     [('        return std.mem.eql(u8, k, "end") or std.mem.eql(u8, k, "}");', '        return k.len > 0;')]),
-    ('K13', 'S01', 'the record keeps the line after the trap\'s', COMP,
+    ('K12', 'S01', 'the record keeps the line after the trap\'s', COMP,
      [('        .row = row,\n        .src = c.last_fail_src orelse st.src.ptr,', '        .row = row + 1,\n        .src = c.last_fail_src orelse st.src.ptr,')]),
 ]
 
