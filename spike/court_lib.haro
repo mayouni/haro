@@ -523,8 +523,11 @@ func CtDiagnosticsJson(vDiags)
 	return tC + ']}'
 end
 func CtDiagnose(tFile, tWorldPath)
+	return CtDiagnoseText(Read(tFile), tFile, tWorldPath)
+end
+# v0.70: the same verdict on a text a program holds (judge_lib.haro); tFile is the name its findings carry
+func CtDiagnoseText(tSrc, tFile, tWorldPath)
 	vDiags = []
-	tSrc = Read(tFile)
 	CtSetCode("PARSE", [])
 	$vCourtWarnings = []
 	# v0.14: this verb collects -- every pass goes on past a refusal to its next element
@@ -2215,6 +2218,8 @@ func CtWalk(xDecls, tName, xRecord)
 end
 # the command: check <file> | refine <file> <file.rfn> | eval ... | walk ... | ask ...
 func CtMain
+	# v0.70: loaded by a program that judges (judge_lib.haro), a court is a type's checker and has no main
+	if IsGlobal("$bHaroJudges") return end
 	if Len(sysargv) < 4
 		? "usage: <court>.haro check <file" + $tCourtExt + "> | refine <file" + $tCourtExt + "> <file.rfn> | eval <file> <decl> <seat> <json> | walk <file> <name> <json> | ask <file> <question> <rows json> | audit <file>"
 		return

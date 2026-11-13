@@ -1,0 +1,78 @@
+# judge_lib.haro -- a program that judges (Haro v0.70, TYPES.md T7, D83).
+#
+# A program that loads a language's declaration holds that language's court: the forge's own output, loaded as it is, with
+# court_lib.haro beside it. This file is what stands between the program and the court:
+#
+#   HaroLanguageLoaded(name, version)   called once a forged court has been loaded: keeps its tables under the language's name
+#   HaroJudge(name, text)               the court's verdict on a text: a sentence, or the court's first refusal raised
+#   HaroSentence                        what a sentence is: its language, the language's version, its text, the court's warnings
+#
+# Loaded before any court, it says so: a court's main does nothing when $bHaroJudges exists (court_lib.haro, CtMain).
+
+$bHaroJudges = true
+$vHaroLanguages = []
+
+func HaroLanguageLoaded(ptName, ptVersion)
+	$vHaroLanguages + [ptName, ptVersion, $vCourtLangs]
+end
+
+func HaroLanguageEntry(ptName)
+	for i = 1 to Len($vHaroLanguages)
+		if $vHaroLanguages[i][1] = ptName return $vHaroLanguages[i] end
+	end
+	Raise("no language called '" + ptName + "' is loaded")
+end
+
+# the court of ptName judges ptText: every table of that language is put back first, since each court's load leaves its own
+func HaroJudge(ptName, ptText)
+	vEntry = HaroLanguageEntry(ptName)
+	$vCourtLangs = vEntry[3]
+	CtUseLanguage(ptName)
+	CtBuildCondLangs()
+	$tCourtDir = ""
+	$xCourtWorldFile = ""
+	vFound = CtDiagnoseText(ptText, ptName, "")
+	vWarnings = []
+	for i = 1 to Len(vFound)
+		if vFound[i][2] = "error"
+			HaroRefuse(vFound[i][1], vFound[i][3])
+		end
+		vWarnings + vFound[i]
+	end
+	return new HaroSentence(ptName, vEntry[2], ptText, vWarnings)
+end
+
+# the court's refusal, raised: its code and its message
+func HaroRefuse(ptCode, ptMessage)
+	Raise(ptMessage)
+end
+
+class HaroSentence
+	tLanguage = ""
+	tVersion = ""
+	tText = ""
+	vWarnings = []
+
+	def init(ptLanguage, ptVersion, ptText, pvWarnings)
+		tLanguage = ptLanguage
+		tVersion = ptVersion
+		tText = ptText
+		vWarnings = pvWarnings
+	end
+
+	def Language
+		return tLanguage
+	end
+
+	def Version
+		return tVersion
+	end
+
+	def Text
+		return tText
+	end
+
+	def Warnings
+		return vWarnings
+	end
+end
