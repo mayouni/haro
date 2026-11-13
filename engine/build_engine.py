@@ -17,14 +17,20 @@ from ringpp 98642d9 bench/engine_copy.py, carrying what Haro needs and nothing o
 NOT CARRIED, named: ringpp's Linux patches (libcurl's config, ggml's and tree-sitter's feature macros, setenv) -- this machine builds for
 Windows; a Linux Haro brings them when it is built. The --oracle and --official flavours, which served Ring and the oracle.
 
-  python engine/build_engine.py                  copy and patch from stzlib origin/main
-  python engine/build_engine.py --ref=<commit>   from another ref
-  python engine/build_engine.py --build          copy, patch and build every domain, in batches, ReleaseSafe (the engine's own default)
-  python engine/build_engine.py --build stz_string stz_list   these only
-  python engine/build_engine.py --dst=C:\haro-engine --build  the copy and its build in another folder (STZ_ENGINE_DIR names it)
+A FOLDER IS ALWAYS NAMED. `--dst=<folder>` is where the copy and its build go, and STZ_ENGINE_DIR then names that folder: a desk that
+builds an engine of its own names a folder of its own. `--staging` is runtime/engine of this repository, the Haro desk's staging copy
+of the shared engine: what is built there is what the shared folder receives next, so no other build goes there. With neither, nothing
+is done (2026-11-13: a branch build made there by the default was taken for the shared engine's, and replaced without a notice).
+
+  python engine/build_engine.py --dst=<folder>                    copy and patch from stzlib origin/main
+  python engine/build_engine.py --dst=<folder> --ref=<commit>     from another ref
+  python engine/build_engine.py --dst=<folder> --build            copy, patch and build every domain, in batches, ReleaseSafe (the engine's own default)
+  python engine/build_engine.py --dst=<folder> --build stk_string stz_string   these only (the two string libraries go together:
+                                                                  ring_bridge_string.zig compiles into both)
+  python engine/build_engine.py --staging --build                 the Haro desk's staging copy, runtime/engine
 
 Each batch checks the free space on the drive first and stops below 11 GB (this machine freezes under pressure; a hook refuses builds
-under 10). What built and what did not is written to runtime/engine/BUILT.txt, one line a domain.
+under 10). What built and what did not is written to BUILT.txt in the folder, one line a domain.
 """
 import io, os, shutil, subprocess, sys, tarfile, time
 
@@ -219,6 +225,13 @@ def build(domains):
     return 0 if nb == len(domains) else 1
 
 
+def a_folder(text):
+    """a --dst value names a folder: not empty, and not this repository's staging folder under another spelling"""
+    if not text.strip():
+        return False
+    return os.path.normcase(os.path.abspath(text)) != os.path.normcase(os.path.join(ROOT, 'runtime', 'engine'))
+
+
 def main():
     global DST
     ref = 'origin/main'
@@ -227,7 +240,7 @@ def main():
     if any(a in ('-h', '--help', '/?') for a in sys.argv[1:]):
         print(__doc__)
         return 0
-    unknown = [a for a in sys.argv[1:] if a.startswith('-') and a != '--build' and not a.startswith(('--ref=', '--dst='))]
+    unknown = [a for a in sys.argv[1:] if a.startswith('-') and a not in ('--build', '--staging') and not a.startswith(('--ref=', '--dst='))]
     if unknown:
         print('build_engine: not an option here: ' + ' '.join(unknown) + ' -- `--help` lists them; nothing was done')
         return 2
@@ -238,6 +251,17 @@ def main():
             # another folder for the copy and its build (2026-11-08: D: was at its floor, C:\haro-engine on the author's word);
             # stzlib finds it through STZ_ENGINE_DIR
             DST = os.path.abspath(a[6:])
+    named = [a for a in sys.argv[1:] if a.startswith('--dst=')]
+    if '--staging' in sys.argv[1:] and named:
+        print('build_engine: --staging and --dst name two folders -- give one; nothing was done')
+        return 2
+    if '--staging' not in sys.argv[1:] and not named:
+        print('build_engine: no folder named -- give --dst=<your folder> for an engine of your own (STZ_ENGINE_DIR then names it); '
+              "--staging is the Haro desk's staging copy of the shared engine, runtime/engine. Nothing was done")
+        return 2
+    if named and not a_folder(named[0][6:]):
+        print('build_engine: --dst= names no folder, or names the staging folder (say --staging for that); nothing was done')
+        return 2
     names = [a for a in sys.argv[1:] if not a.startswith('--')]
     if not os.path.isdir(STZLIB):
         print('SKIP: no stzlib at ' + STZLIB)
