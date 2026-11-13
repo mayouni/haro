@@ -1,0 +1,2 @@
+cName = "ada"
+print cName

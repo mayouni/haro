@@ -1,0 +1,4 @@
+iX = 1
+if iX = 1
+    print "one"
+ok

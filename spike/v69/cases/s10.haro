@@ -1,0 +1,7 @@
+class P
+    def Show()
+        print 1
+    end
+end
+oP = new P
+oP.Show()

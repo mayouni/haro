@@ -1,0 +1,12 @@
+func Add(iA, iB)
+    return iA + iB
+end
+class P
+    nX = 1
+    def Show
+        print nX
+    end
+end
+oP = new P
+oP.Show()
+print Add(1, 2)

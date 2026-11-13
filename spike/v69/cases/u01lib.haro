@@ -1,0 +1,4 @@
+func Twice(iX)
+    iY = iX * 2
+    return iy
+end

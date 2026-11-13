@@ -1,0 +1,4 @@
+tA = "x"
+if IsNull(tA)
+    print 1
+end

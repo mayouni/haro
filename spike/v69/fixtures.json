@@ -1,0 +1,719 @@
+{
+ "version": "0.69",
+ "task": "HARO-CHECKRUN-01",
+ "rule": "haro/refused-form",
+ "law": "a form the run refuses is an error of `haro check`, at the same line and in the same words",
+ "cases": [
+  {
+   "id": "S01",
+   "line": "L1",
+   "what": "a definition written with empty parentheses",
+   "file": "cases/s01.haro",
+   "run": {
+    "refuses": [
+     "s01.haro",
+     1,
+     "a definition without parameters has no parentheses; written",
+     "()"
+    ]
+   },
+   "check": {
+    "errors": 1,
+    "found": [
+     [
+      "s01.haro",
+      1,
+      "haro/refused-form"
+     ]
+    ],
+    "refused": [
+     [
+      "s01.haro",
+      1,
+      "a definition without parameters has no parentheses; written",
+      "()"
+     ]
+    ],
+    "library": false
+   }
+  },
+  {
+   "id": "S02",
+   "line": "L1",
+   "what": "`but` for elseif",
+   "file": "cases/s02.haro",
+   "run": {
+    "refuses": [
+     "s02.haro",
+     4,
+     "one spelling: `elseif`; written",
+     "but"
+    ]
+   },
+   "check": {
+    "errors": 1,
+    "found": [
+     [
+      "s02.haro",
+      4,
+      "haro/refused-form"
+     ]
+    ],
+    "refused": [
+     [
+      "s02.haro",
+      4,
+      "one spelling: `elseif`; written",
+      "but"
+     ]
+    ],
+    "library": false
+   }
+  },
+  {
+   "id": "S03",
+   "line": "L1",
+   "what": "`:key = value` in a list",
+   "file": "cases/s03.haro",
+   "run": {
+    "refuses": [
+     "s03.haro",
+     1,
+     "`:key = value` is no pair in a .haro file: write [\"key\": value] for a map, [:key, value] for a pair, or declare a record for named fields (HARO-SURFACE-01)",
+     ":name = \"ada\""
+    ]
+   },
+   "check": {
+    "errors": 1,
+    "found": [
+     [
+      "s03.haro",
+      1,
+      "haro/refused-form"
+     ]
+    ],
+    "refused": [
+     [
+      "s03.haro",
+      1,
+      "`:key = value` is no pair in a .haro file: write [\"key\": value] for a map, [:key, value] for a pair, or declare a record for named fields (HARO-SURFACE-01)",
+      ":name = \"ada\""
+     ]
+    ],
+    "library": false
+   }
+  },
+  {
+   "id": "S04",
+   "line": "L1",
+   "what": "`see` for print",
+   "file": "cases/s04.haro",
+   "run": {
+    "refuses": [
+     "s04.haro",
+     1,
+     "one spelling: `print`; written",
+     "see"
+    ]
+   },
+   "check": {
+    "errors": 1,
+    "found": [
+     [
+      "s04.haro",
+      1,
+      "haro/refused-form"
+     ]
+    ],
+    "refused": [
+     [
+      "s04.haro",
+      1,
+      "one spelling: `print`; written",
+      "see"
+     ]
+    ],
+    "library": false
+   }
+  },
+  {
+   "id": "S05",
+   "line": "L1",
+   "what": "`null`",
+   "file": "cases/s05.haro",
+   "run": {
+    "refuses": [
+     "s05.haro",
+     1,
+     "`null` is no value of Haro -- the empty text is \"\", and absence is none; written",
+     "null"
+    ]
+   },
+   "check": {
+    "errors": 1,
+    "found": [
+     [
+      "s05.haro",
+      1,
+      "haro/refused-form"
+     ]
+    ],
+    "refused": [
+     [
+      "s05.haro",
+      1,
+      "`null` is no value of Haro -- the empty text is \"\", and absence is none; written",
+      "null"
+     ]
+    ],
+    "library": false
+   }
+  },
+  {
+   "id": "S06",
+   "line": "L1",
+   "what": "a block closed with `ok`",
+   "file": "cases/s06.haro",
+   "run": {
+    "refuses": [
+     "s06.haro",
+     4,
+     "a block ends with `end`; written",
+     "ok"
+    ]
+   },
+   "check": {
+    "errors": 1,
+    "found": [
+     [
+      "s06.haro",
+      4,
+      "haro/refused-form"
+     ]
+    ],
+    "refused": [
+     [
+      "s06.haro",
+      4,
+      "a block ends with `end`; written",
+      "ok"
+     ]
+    ],
+    "library": false
+   }
+  },
+  {
+   "id": "S07",
+   "line": "L1",
+   "what": "`==`",
+   "file": "cases/s07.haro",
+   "run": {
+    "refuses": [
+     "s07.haro",
+     3,
+     "`==` is no operator: equality is `=`; written",
+     "iA == iB"
+    ]
+   },
+   "check": {
+    "errors": 1,
+    "found": [
+     [
+      "s07.haro",
+      3,
+      "haro/refused-form"
+     ]
+    ],
+    "refused": [
+     [
+      "s07.haro",
+      3,
+      "`==` is no operator: equality is `=`; written",
+      "iA == iB"
+     ]
+    ],
+    "library": false
+   }
+  },
+  {
+   "id": "S08",
+   "line": "L1",
+   "what": "a name in another spelling",
+   "file": "cases/s08.haro",
+   "run": {
+    "refuses": [
+     "s08.haro",
+     2,
+     "one spelling per name -- declared `nCount` at line 1; written",
+     "ncount"
+    ]
+   },
+   "check": {
+    "errors": 1,
+    "found": [
+     [
+      "s08.haro",
+      2,
+      "haro/refused-form"
+     ]
+    ],
+    "refused": [
+     [
+      "s08.haro",
+      2,
+      "one spelling per name -- declared `nCount` at line 1; written",
+      "ncount"
+     ]
+    ],
+    "library": false
+   }
+  },
+  {
+   "id": "S09",
+   "line": "L1",
+   "what": "a loop closed with `next`",
+   "file": "cases/s09.haro",
+   "run": {
+    "refuses": [
+     "s09.haro",
+     3,
+     "a block ends with `end`; written",
+     "next"
+    ]
+   },
+   "check": {
+    "errors": 1,
+    "found": [
+     [
+      "s09.haro",
+      3,
+      "haro/refused-form"
+     ]
+    ],
+    "refused": [
+     [
+      "s09.haro",
+      3,
+      "a block ends with `end`; written",
+      "next"
+     ]
+    ],
+    "library": false
+   }
+  },
+  {
+   "id": "S10",
+   "line": "L1",
+   "what": "a method written with empty parentheses",
+   "file": "cases/s10.haro",
+   "run": {
+    "refuses": [
+     "s10.haro",
+     2,
+     "a definition without parameters has no parentheses; written",
+     "()"
+    ]
+   },
+   "check": {
+    "errors": 1,
+    "found": [
+     [
+      "s10.haro",
+      2,
+      "haro/refused-form"
+     ]
+    ],
+    "refused": [
+     [
+      "s10.haro",
+      2,
+      "a definition without parameters has no parentheses; written",
+      "()"
+     ]
+    ],
+    "library": false
+   }
+  },
+  {
+   "id": "S11",
+   "line": "L1",
+   "what": "a definition in braces",
+   "file": "cases/s11.haro",
+   "run": {
+    "refuses": [
+     "s11.haro",
+     1,
+     "a definition ends with `end`, and this one has none; written",
+     "Add"
+    ]
+   },
+   "check": {
+    "errors": 1,
+    "found": [
+     [
+      "s11.haro",
+      1,
+      "haro/refused-form"
+     ]
+    ],
+    "refused": [
+     [
+      "s11.haro",
+      1,
+      "a definition ends with `end`, and this one has none; written",
+      "Add"
+     ]
+    ],
+    "library": false
+   }
+  },
+  {
+   "id": "S12",
+   "line": "L1",
+   "what": "the letter c",
+   "file": "cases/s12.haro",
+   "run": {
+    "refuses": [
+     "s12.haro",
+     1,
+     "`c` is Softanza's letter and no type's -- text is t: tName; written",
+     "cName"
+    ]
+   },
+   "check": {
+    "errors": 1,
+    "found": [
+     [
+      "s12.haro",
+      1,
+      "haro/refused-form"
+     ]
+    ],
+    "refused": [
+     [
+      "s12.haro",
+      1,
+      "`c` is Softanza's letter and no type's -- text is t: tName; written",
+      "cName"
+     ]
+    ],
+    "library": false
+   }
+  },
+  {
+   "id": "S13",
+   "line": "L1",
+   "what": "`IsNull`",
+   "file": "cases/s13.haro",
+   "run": {
+    "refuses": [
+     "s13.haro",
+     2,
+     "one spelling: `IsEmpty`; written",
+     "IsNull"
+    ]
+   },
+   "check": {
+    "errors": 1,
+    "found": [
+     [
+      "s13.haro",
+      2,
+      "haro/refused-form"
+     ]
+    ],
+    "refused": [
+     [
+      "s13.haro",
+      2,
+      "one spelling: `IsEmpty`; written",
+      "IsNull"
+     ]
+    ],
+    "library": false
+   }
+  },
+  {
+   "id": "M01",
+   "line": "L2",
+   "what": "three refused forms, one of them in a function: check names the three, the run the first",
+   "file": "cases/m01.haro",
+   "run": {
+    "refuses": [
+     "m01.haro",
+     1,
+     "one spelling: `print`; written",
+     "see"
+    ]
+   },
+   "check": {
+    "errors": 3,
+    "found": [
+     [
+      "m01.haro",
+      1,
+      "haro/refused-form"
+     ],
+     [
+      "m01.haro",
+      5,
+      "haro/refused-form"
+     ],
+     [
+      "m01.haro",
+      10,
+      "haro/refused-form"
+     ]
+    ],
+    "refused": [
+     [
+      "m01.haro",
+      1,
+      "one spelling: `print`; written",
+      "see"
+     ],
+     [
+      "m01.haro",
+      5,
+      "one spelling: `elseif`; written",
+      "but"
+     ],
+     [
+      "m01.haro",
+      10,
+      "`:key = value` is no pair in a .haro file: write [\"key\": value] for a map, [:key, value] for a pair, or declare a record for named fields (HARO-SURFACE-01)",
+      ":name = \"ada\""
+     ]
+    ],
+    "library": false
+   }
+  },
+  {
+   "id": "U01",
+   "line": "L3",
+   "what": "a refused form in a loaded file is named under that file",
+   "file": "cases/u01.haro",
+   "run": {
+    "refuses": [
+     "u01lib.haro",
+     3,
+     "one spelling per name -- declared `iY` at line 2; written",
+     "iy"
+    ]
+   },
+   "check": {
+    "errors": 1,
+    "found": [
+     [
+      "u01lib.haro",
+      3,
+      "haro/refused-form"
+     ]
+    ],
+    "refused": [
+     [
+      "u01lib.haro",
+      3,
+      "one spelling per name -- declared `iY` at line 2; written",
+      "iy"
+     ]
+    ],
+    "library": false
+   }
+  },
+  {
+   "id": "N01",
+   "line": "L4",
+   "what": "a program with no refused form",
+   "file": "cases/n01.haro",
+   "run": {
+    "stdout": "1\n3\n"
+   },
+   "check": {
+    "errors": 0,
+    "found": [],
+    "refused": [],
+    "library": false
+   }
+  },
+  {
+   "id": "N02",
+   "line": "L5",
+   "what": "the same forms in a .ring file are that file's own reading",
+   "file": "cases/n02.ring",
+   "run": {
+    "stdout": "two\n1\n7\n"
+   },
+   "check": {
+    "errors": 0,
+    "found": [],
+    "refused": [],
+    "library": false
+   }
+  },
+  {
+   "id": "G01",
+   "line": "L6",
+   "what": "the facts carry each refused form: two at the file's top, one in its function",
+   "file": "cases/g01.haro",
+   "run": {
+    "refuses": [
+     "g01.haro",
+     1,
+     "one spelling: `print`; written",
+     "see"
+    ]
+   },
+   "check": {
+    "errors": 3,
+    "found": [
+     [
+      "g01.haro",
+      1,
+      "haro/refused-form"
+     ],
+     [
+      "g01.haro",
+      5,
+      "haro/refused-form"
+     ],
+     [
+      "g01.haro",
+      10,
+      "haro/refused-form"
+     ]
+    ],
+    "refused": [
+     [
+      "g01.haro",
+      1,
+      "one spelling: `print`; written",
+      "see"
+     ],
+     [
+      "g01.haro",
+      5,
+      "one spelling: `elseif`; written",
+      "but"
+     ],
+     [
+      "g01.haro",
+      10,
+      "`:key = value` is no pair in a .haro file: write [\"key\": value] for a map, [:key, value] for a pair, or declare a record for named fields (HARO-SURFACE-01)",
+      ":name = \"ada\""
+     ]
+    ],
+    "library": false
+   },
+   "facts": {
+    "top": [
+     [
+      "haro/refused-form",
+      1
+     ],
+     [
+      "haro/refused-form",
+      10
+     ]
+    ],
+    "functions": {
+     "F": {
+      "line": 2,
+      "end_line": 9,
+      "compiled": false,
+      "findings": [
+       [
+        "haro/refused-form",
+        5
+       ]
+      ]
+     }
+    }
+   }
+  },
+  {
+   "id": "T01",
+   "line": "L7",
+   "what": "a statement after a closed function is the program's: the call it makes to no function is reported",
+   "file": "cases/t01.haro",
+   "run": {
+    "raises": "Line 4 Error (R3) : Calling Function without definition: zed"
+   },
+   "check": {
+    "errors": 1,
+    "found": [
+     [
+      "t01.haro",
+      4,
+      "haro/undefined-function"
+     ]
+    ],
+    "refused": [],
+    "library": false
+   }
+  },
+  {
+   "id": "T02",
+   "line": "L7",
+   "what": "a statement after a closed class is the program's: its `new` of no class is reported",
+   "file": "cases/t02.haro",
+   "run": {
+    "raises": "Line 4 Error (R11)"
+   },
+   "check": {
+    "errors": 1,
+    "found": [
+     [
+      "t02.haro",
+      4,
+      "haro/unknown-class"
+     ]
+    ],
+    "refused": [],
+    "library": false
+   }
+  },
+  {
+   "id": "T03",
+   "line": "L8",
+   "what": "a .ring definition holds what follows it: the unit runs nothing and is read as a library",
+   "file": "cases/t03.ring",
+   "run": {
+    "stdout": ""
+   },
+   "check": {
+    "errors": 0,
+    "found": [],
+    "refused": [],
+    "library": true
+   }
+  },
+  {
+   "id": "T04",
+   "line": "L9",
+   "what": "the facts give a closed function its own lines, and the print after it is not its own",
+   "file": "cases/t04.haro",
+   "run": {
+    "stdout": "2\n3\n"
+   },
+   "check": {
+    "errors": 0,
+    "found": [],
+    "refused": [],
+    "library": false
+   },
+   "facts": {
+    "top": [],
+    "functions": {
+     "G": {
+      "line": 2,
+      "end_line": 4,
+      "compiled": true,
+      "findings": [],
+      "impure": null
+     }
+    }
+   }
+  }
+ ]
+}

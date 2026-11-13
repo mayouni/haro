@@ -1,0 +1,6 @@
+iX = 2
+if iX = 1
+    print "one"
+but iX = 2
+    print "two"
+end

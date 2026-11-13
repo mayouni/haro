@@ -1,0 +1,5 @@
+print G()
+func G
+    return 2
+end
+print G() + 1

@@ -1,0 +1,4 @@
+func Add(iA, iB) {
+    return iA + iB
+}
+print Add(1, 2)

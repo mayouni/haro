@@ -1,0 +1,11 @@
+see "top"
+func F(iX)
+    if iX = 1
+        return "one"
+    but iX = 2
+        return "two"
+    end
+    return "many"
+end
+vL = [:name = "ada"]
+print F(2)

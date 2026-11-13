@@ -1,0 +1,4 @@
+class P
+    nX = 1
+end
+oP = new Q

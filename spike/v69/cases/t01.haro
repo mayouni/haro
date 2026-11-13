@@ -1,0 +1,4 @@
+func F
+    return 1
+end
+print Zed()

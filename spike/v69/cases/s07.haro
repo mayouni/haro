@@ -1,0 +1,5 @@
+iA = 1
+iB = 1
+if iA == iB
+    print "same"
+end
