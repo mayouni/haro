@@ -1,0 +1,4 @@
+load "signal.haro"
+print "before"
+sLamp = signal'DEFINE LAMP north AS (SHOWS blue) RATIONALE "x"'
+print "after"

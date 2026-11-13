@@ -1,0 +1,6 @@
+load "signal.haro"
+func Show(psLamp of signal)
+    print psLamp.Text()
+end
+Show(signal'DEFINE LAMP north AS (SHOWS amber) RATIONALE "x"')
+Show(signal.Judge('DEFINE LAMP north AS (SHOWS green) RATIONALE "open in the morning"'))

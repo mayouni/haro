@@ -1,0 +1,12 @@
+load "signal.haro"
+class Box
+    def Of(piN)
+        return piN * 2
+    end
+end
+oBox = new Box
+# the double of four
+print oBox.Of(4)
+print "a lamp of signal"
+sLamp = signal'DEFINE LAMP north AS (SHOWS amber) RATIONALE "x"'
+print sLamp.Language()

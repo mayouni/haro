@@ -1,0 +1,6 @@
+load "signal.haro"
+func Lamp(ptColour) of signal
+    return signal.Judge('DEFINE LAMP north AS (SHOWS ' + ptColour + ') RATIONALE "x"')
+end
+sLamp = Lamp("amber")
+print sLamp

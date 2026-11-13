@@ -1,0 +1,3 @@
+load "signal.haro"
+sLamp = signal'DEFINE LAMP north AS (SHOWS amber) RATIONALE "x"' cName = "x"
+print sLamp

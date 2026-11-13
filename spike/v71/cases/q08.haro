@@ -1,0 +1,12 @@
+load "signal.haro"
+load "gate.haro"
+func Lamp of signal
+    return gate'DEFINE GATE east AS (STATE shut) RATIONALE "x"'
+end
+try
+    sLamp = Lamp()
+    print "answered"
+catch e
+    print e.Code()
+    print e.Message()
+end

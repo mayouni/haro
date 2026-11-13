@@ -1,0 +1,4 @@
+load "signal.haro"
+sLamp = signal'DEFINE LAMP north AS (SHOWS green) RATIONALE "open in the morning"'
+print sLamp
+print sLamp.Language()

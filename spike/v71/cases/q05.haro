@@ -1,0 +1,11 @@
+load "signal.haro"
+load "gate.haro"
+func Show(psLamp of signal)
+    print "shown"
+end
+try
+    Show(gate'DEFINE GATE east AS (STATE shut) RATIONALE "x"')
+catch e
+    print e.Code()
+    print e.Message()
+end

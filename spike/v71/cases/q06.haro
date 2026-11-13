@@ -1,0 +1,5 @@
+load "signal.haro"
+func Show(psLamp of signal)
+    print "shown"
+end
+Show('DEFINE LAMP north AS (SHOWS amber) RATIONALE "x"')

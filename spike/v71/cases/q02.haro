@@ -1,0 +1,7 @@
+load "signal.haro"
+load "gate.haro"
+func Show(psAny)
+    print psAny.Language() + ": " + psAny.Text()
+end
+Show(signal'DEFINE LAMP north AS (SHOWS amber) RATIONALE "x"')
+Show(gate`DEFINE GATE east AS (STATE shut) RATIONALE "x"`)

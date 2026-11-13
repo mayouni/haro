@@ -1,0 +1,5 @@
+load "signal.haro"
+func Show(psLamp of lamp)
+    print "shown"
+end
+print "ran"

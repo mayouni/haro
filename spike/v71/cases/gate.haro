@@ -1,0 +1,18 @@
+-- gate.haro -- a second small language: a gate stands open or shut
+
+DEFINE LANGUAGE gate AS (
+  VERSION "0.3", GRAMMAR "0.3",
+  COURT "spike/v70/fixtures.json",
+  EXTENSION ".gate"
+) RATIONALE "Whether a gate stands open or shut"
+
+DEFINE MENU states AS (
+  WORDS [open, shut],
+  MESSAGE "A gate is open or shut",
+  CODE "UNKNOWN_STATE"
+) RATIONALE "The two states of a gate"
+
+DEFINE DECLARATION barrier AS (
+  VERB "GATE",
+  SEATS [state: states]
+) RATIONALE "A gate and the state it stands in"

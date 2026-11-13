@@ -1,0 +1,231 @@
+{
+ "version": "0.71",
+ "task": "TYPES.md T7: the literal and `of`",
+ "languages": [
+  "signal",
+  "gate"
+ ],
+ "law": "a literal's verdict is the one the language's own forged court answers, standing alone, on the same text",
+ "cases": [
+  {
+   "id": "Q01",
+   "line": "L1",
+   "what": "a literal is a sentence",
+   "file": "cases/q01.haro",
+   "run": {
+    "stdout": "DEFINE LAMP north AS (SHOWS green) RATIONALE \"open in the morning\"\nsignal\n"
+   },
+   "judged": [
+    [
+     "signal",
+     "DEFINE LAMP north AS (SHOWS green) RATIONALE \"open in the morning\"",
+     null,
+     ""
+    ]
+   ],
+   "check": {
+    "errors": 0,
+    "found": []
+   }
+  },
+  {
+   "id": "Q02",
+   "line": "L1",
+   "what": "a literal where a value stands: an argument, and each of the three quotes",
+   "file": "cases/q02.haro",
+   "run": {
+    "stdout": "signal: DEFINE LAMP north AS (SHOWS amber) RATIONALE \"x\"\ngate: DEFINE GATE east AS (STATE shut) RATIONALE \"x\"\n"
+   },
+   "judged": [
+    [
+     "signal",
+     "DEFINE LAMP north AS (SHOWS amber) RATIONALE \"x\"",
+     null,
+     ""
+    ],
+    [
+     "gate",
+     "DEFINE GATE east AS (STATE shut) RATIONALE \"x\"",
+     null,
+     ""
+    ]
+   ]
+  },
+  {
+   "id": "Q03",
+   "line": "L2",
+   "what": "a literal the court refuses is refused when compiling, and nothing runs",
+   "file": "cases/q03.haro",
+   "run": {
+    "refuses": [
+     3,
+     "the court of signal refuses this literal -- UNKNOWN_COLOUR: A lamp shows red, amber or green, not 'blue'; written",
+     "signal'DEFINE LAMP north AS (SHOWS blue) RATIONALE \"x\"'"
+    ],
+    "never": "before"
+   },
+   "judged": [
+    [
+     "signal",
+     "DEFINE LAMP north AS (SHOWS blue) RATIONALE \"x\"",
+     "UNKNOWN_COLOUR",
+     "A lamp shows red, amber or green, not 'blue'"
+    ]
+   ],
+   "check": {
+    "errors": 1,
+    "found": [
+     [
+      3,
+      "haro/refused-form"
+     ]
+    ]
+   }
+  },
+  {
+   "id": "Q04",
+   "line": "L4",
+   "what": "a parameter of a language takes a sentence of it",
+   "file": "cases/q04.haro",
+   "run": {
+    "stdout": "DEFINE LAMP north AS (SHOWS amber) RATIONALE \"x\"\nDEFINE LAMP north AS (SHOWS green) RATIONALE \"open in the morning\"\n"
+   },
+   "check": {
+    "errors": 0,
+    "found": []
+   }
+  },
+  {
+   "id": "Q05",
+   "line": "L4",
+   "what": "a sentence of another language given to it is SENTENCE_OF_ANOTHER",
+   "file": "cases/q05.haro",
+   "run": {
+    "stdout": "SENTENCE_OF_ANOTHER\nError (SENTENCE_OF_ANOTHER) : `psLamp` is a sentence of signal, and is given a sentence of gate\n"
+   }
+  },
+  {
+   "id": "Q06",
+   "line": "L4",
+   "what": "a text given to it is TYPE_LETTER, as for any s name",
+   "file": "cases/q06.haro",
+   "run": {
+    "raises": "Error (TYPE_LETTER) : `psLamp` is lettered s, a sentence, and is given a text",
+    "never": "shown"
+   }
+  },
+  {
+   "id": "Q07",
+   "line": "L5",
+   "what": "a function of a language answers a sentence of it",
+   "file": "cases/q07.haro",
+   "run": {
+    "stdout": "DEFINE LAMP north AS (SHOWS amber) RATIONALE \"x\"\n"
+   }
+  },
+  {
+   "id": "Q08",
+   "line": "L5",
+   "what": "answering a sentence of another language is SENTENCE_OF_ANOTHER",
+   "file": "cases/q08.haro",
+   "run": {
+    "stdout": "SENTENCE_OF_ANOTHER\nError (SENTENCE_OF_ANOTHER) : `Lamp` answers a sentence of signal, and answers a sentence of gate\n"
+   }
+  },
+  {
+   "id": "Q09",
+   "line": "L5",
+   "what": "answering anything else is SENTENCE_EXPECTED",
+   "file": "cases/q09.haro",
+   "run": {
+    "stdout": "SENTENCE_EXPECTED\nError (SENTENCE_EXPECTED) : `Lamp` answers a sentence of signal, and answers a text\n"
+   }
+  },
+  {
+   "id": "Q10",
+   "line": "L6",
+   "what": "`of` names a language the file loads: another word there is refused when compiling",
+   "file": "cases/q10.haro",
+   "run": {
+    "refuses": [
+     2,
+     "`of` names a language this file loads; written",
+     "lamp"
+    ],
+    "never": "ran"
+   },
+   "check": {
+    "errors": 1,
+    "found": [
+     [
+      2,
+      "haro/refused-form"
+     ]
+    ]
+   }
+  },
+  {
+   "id": "Q11",
+   "line": "L7",
+   "what": "a method named Of is a name, and `of` in a text or a comment is what it was",
+   "file": "cases/q11.haro",
+   "run": {
+    "stdout": "8\na lamp of signal\nsignal\n"
+   },
+   "check": {
+    "errors": 0,
+    "found": []
+   }
+  },
+  {
+   "id": "Q12",
+   "line": "L9",
+   "what": "a finding on a line that holds a literal stands at the file's own column",
+   "file": "cases/q12.haro",
+   "run": {
+    "refuses": [
+     2,
+     "`c` is Softanza's letter and no type's -- text is t: tName; written",
+     "cName"
+    ]
+   },
+   "check": {
+    "errors": 1,
+    "found": [
+     [
+      2,
+      "haro/refused-form"
+     ]
+    ],
+    "cols": {
+     "2": 66
+    }
+   }
+  },
+  {
+   "id": "Q13",
+   "line": "L9",
+   "what": "and so does one on a line that holds <language>.Judge(",
+   "file": "cases/q13.haro",
+   "run": {
+    "refuses": [
+     2,
+     "`c` is Softanza's letter and no type's -- text is t: tName; written",
+     "cName"
+    ]
+   },
+   "check": {
+    "errors": 1,
+    "found": [
+     [
+      2,
+      "haro/refused-form"
+     ]
+    ],
+    "cols": {
+     "2": 74
+    }
+   }
+  }
+ ]
+}
