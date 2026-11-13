@@ -172,6 +172,9 @@ built-in name as Softanza writes a name, D58) with the letter doing the work of 
 and `unjudged` are words of their places only, as `maybe` is, so a method named `Of` stays a name -- stzlib calls one 34 times.
 The refusals: SENTENCE_EXPECTED, SENTENCE_OF_ANOTHER; UNJUDGED_RUN, UNJUDGED_DOOR, UNJUDGED_ARGUMENT.
 
+**BUILT 2026-11-13 as v0.70 (D85, `spike/v70/GRAMMAR.md`): a program judges** -- `load` of a declaration, `signal.Judge(tText)`, the
+sentence and what it answers, the letter `s`, and SENTENCE_FIXED for a write into one. The literal and `of` are the next step.
+
 ---
 
 ## 4. The letters, whole

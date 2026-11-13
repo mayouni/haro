@@ -1917,6 +1917,10 @@ D58, the Principal's ruling of 2026-11-09 ("ParentClassName"), revising v0.42's 
 
 **Results.** 9 of 9 cases on both builds; 5 of 5 plants; v36 to v48's courts green. Haro's 2,172 calls re-spelled by a tool (20fc236, listed in v20/tool_commits.txt).
 
+## The seventieth rung -- Haro v0.70, a program judges -- 2026-11-13
+
+D85, the first step of TYPES.md T7 (D83) on the Principal's "then start v0.70": a program loads a language's declaration, the loader forges its court, `signal.Judge(tText)` answers a sentence or raises the court's refusal with its code, the letter `s` holds a sentence alone, and a sentence is made by its court alone. What `Judge` answers is what the language's own forged court answers standing alone. 15 of 15 on both builds, plants K1-K15 (df2f25e, 98ec805). The same day the selection of Haro's spellings became this desk's (D84).
+
 ## The sixty-ninth rung -- Haro v0.69, `haro check` names what the run refuses -- 2026-11-13
 
 D82, from stzlib-security's HARO-CHECKRUN-01: each statement the compiler refuses is an error of `haro check`, rule `haro/refused-form`, at the run's line and in the run's words; a trap rolled back is none; and in a `.haro` file a definition closed by `end` holds nothing after it, for the checker as for the run. 23 of 23 on both builds, plants K1-K12 (eb4b47f, 5a3063e). The five-rules court's cases are `.ring` files. The same day the shared engine was rebuilt twice after a notice (stzlib 8221cdcfd: the credential broker and the shut list; f939470a5: text direction), and `engine/build_engine.py` names its folder (1712d55).
