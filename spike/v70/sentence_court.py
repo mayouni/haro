@@ -32,6 +32,7 @@ LAW_DIR = os.path.join(ROOT, 'runtime', 'v70', 'law')
 def sh(exe, args, cwd):
     env = dict(os.environ)
     env['HARO_NOCACHE'] = '1'
+    env['HARO_HOME'] = SPIKE     # the forge's folder, for a build that does not stand in the repository's vm/
     try:
         r = subprocess.run([exe] + args, capture_output=True, env=env, timeout=120, cwd=cwd)
     except subprocess.TimeoutExpired:
@@ -40,13 +41,14 @@ def sh(exe, args, cwd):
 
 
 def read_check(out, name):
-    """the error findings of the case's own file, [row, rule] in order, and the error count"""
+    """the error findings in order -- [row, rule] in the case's own file, [file, row, rule] in another -- and the error count"""
     found, file, errors = [], '', None
     for ln in out.split('\n'):
         m = FINDING.match(ln)
         if m:
-            if m.group(3) == 'error' and os.path.basename(file) == name:
-                found.append([int(m.group(1)), m.group(4)])
+            if m.group(3) == 'error':
+                own = os.path.basename(file) == name
+                found.append([int(m.group(1)), m.group(4)] if own else [os.path.basename(file), int(m.group(1)), m.group(4)])
             continue
         m = COUNTS.match(ln)
         if m:
@@ -98,6 +100,8 @@ def judge(c, label, exe):
     else:
         if r['raises'] not in out:
             bad.append(f'the run does not print {r["raises"]!r}: {out.strip()[:240]!r}')
+    if 'also' in r and r['also'] not in out:
+        bad.append(f'the run does not print {r["also"]!r}: {out.strip()[:300]!r}')
     if 'never' in r and r['never'] + '\n' in out:
         bad.append(f'the run prints {r["never"]!r}')
     chk = ''

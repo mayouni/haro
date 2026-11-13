@@ -541,6 +541,208 @@ fn ringLoadName(alloc: std.mem.Allocator, lit: []const u8, dir: []const u8, is_r
 /// resolved path, which cannot double-load. That is stricter than Ring, and
 /// it is noted rather than hidden: a library that relies on being loaded
 /// twice would behave differently, and none should.
+/// v0.70 (TYPES.md T7, D83): A PROGRAM THAT JUDGES. A .haro file whose first word is DEFINE is a language's declaration. Loaded by a
+/// program, its court is forged -- this same haro, run as a child on forge.haro in the forge's folder -- and the file's place in the
+/// unit is taken by three lines: load judge_lib.haro, load the forged court, say the language is loaded. The court a program holds is
+/// the forge's own output, byte for byte the one that judges standing alone.
+fn isDeclaration(src: []const u8) bool {
+    var i: usize = 0;
+    while (i < src.len) {
+        while (i < src.len and (src[i] == ' ' or src[i] == '\t' or src[i] == '\r' or src[i] == '\n')) i += 1;
+        const dash = i + 1 < src.len and src[i] == '-' and src[i + 1] == '-';
+        if (i < src.len and (dash or src[i] == '#')) {
+            while (i < src.len and src[i] != '\n') i += 1;
+            continue;
+        }
+        break;
+    }
+    return std.mem.startsWith(u8, src[i..], "DEFINE ") or std.mem.startsWith(u8, src[i..], "DEFINE\t");
+}
+
+fn identByte(b: u8) bool {
+    return std.ascii.isAlphanumeric(b) or b == '_';
+}
+
+/// the name after `DEFINE LANGUAGE`, or null
+fn declaredLanguage(src: []const u8) ?[]const u8 {
+    const key = "DEFINE LANGUAGE";
+    var at = std.mem.indexOf(u8, src, key) orelse return null;
+    at += key.len;
+    while (at < src.len and (src[at] == ' ' or src[at] == '\t')) at += 1;
+    var e = at;
+    while (e < src.len and identByte(src[e])) e += 1;
+    return if (e > at) src[at..e] else null;
+}
+
+/// the text after the first `VERSION`, or ""
+fn declaredVersion(src: []const u8) []const u8 {
+    var at = std.mem.indexOf(u8, src, "VERSION") orelse return "";
+    at = std.mem.indexOfScalarPos(u8, src, at, '"') orelse return "";
+    const e = std.mem.indexOfScalarPos(u8, src, at + 1, '"') orelse return "";
+    return src[at + 1 .. e];
+}
+
+/// The forge's folder: HARO_HOME, or `spike` three folders above this haro (a build in the repository).
+fn forgeHome(alloc: std.mem.Allocator) ?[]const u8 {
+    if (std.process.getEnvVarOwned(alloc, "HARO_HOME")) |v| {
+        if (v.len > 0) return v;
+    } else |_| {}
+    const d = std.fs.path.join(alloc, &.{ exeDir(alloc), "..", "..", "..", "spike" }) catch return null;
+    const f = std.fs.path.join(alloc, &.{ d, "forge.haro" }) catch return null;
+    if (!fileExists(f)) return null;
+    return std.fs.cwd().realpathAlloc(alloc, d) catch d;
+}
+
+fn slashed(alloc: std.mem.Allocator, s: []const u8) []const u8 {
+    const out = alloc.dupe(u8, s) catch return s;
+    for (out) |*ch| {
+        if (ch.* == '\\') ch.* = '/';
+    }
+    return out;
+}
+
+const Forged = struct { glue: []const u8, fault: ?lift.Fault = null };
+
+fn forgeRefused(alloc: std.mem.Allocator, p: []const u8, why: []const u8, row: u32) Forged {
+    // the glue names the file at the meta-court's own line, so the refusal stands there
+    const word = alloc.dupe(u8, std.fs.path.basename(p)) catch "";
+    var g = std.ArrayListUnmanaged(u8){};
+    var k: u32 = 1;
+    while (k < row) : (k += 1) g.append(alloc, '\n') catch {};
+    g.appendSlice(alloc, "# ") catch {};
+    g.appendSlice(alloc, word) catch {};
+    g.appendSlice(alloc, " was not forged\n") catch {};
+    // a fault's row counts from 0 (lift.Fault); the meta-court's line counts from 1
+    return .{ .glue = g.items, .fault = .{ .why = why, .word = word, .row = row -| 1 } };
+}
+
+fn forgeDeclaration(alloc: std.mem.Allocator, p: []const u8, decl: []const u8) Forged {
+    const home = forgeHome(alloc) orelse
+        return forgeRefused(alloc, p, "a declaration is loaded and this haro finds no forge (HARO_HOME names its folder); written", 1);
+    const self = std.fs.selfExePathAlloc(alloc) catch return forgeRefused(alloc, p, "this haro cannot name itself to run the forge; written", 1);
+    const abs = std.fs.cwd().realpathAlloc(alloc, p) catch p;
+    // kept by what it is made from: the declaration's bytes, this haro, and the forge's three files as they stand
+    var h = std.hash.Wyhash.init(0x70);
+    h.update(decl);
+    h.update(self);
+    for ([_][]const u8{ "forge.haro", "haro_lib.haro", "court_lib.haro" }) |f| {
+        const fp = std.fs.path.join(alloc, &.{ home, f }) catch continue;
+        const st = std.fs.cwd().statFile(fp) catch continue;
+        h.update(std.mem.asBytes(&st.size));
+        h.update(std.mem.asBytes(&st.mtime));
+    }
+    const base = if (image.dir(alloc)) |d| (std.fs.path.dirname(d) orelse d) else home;
+    const out = std.fs.path.join(alloc, &.{ base, "forged", std.fmt.allocPrint(alloc, "{x:0>16}", .{h.final()}) catch "0" }) catch
+        return forgeRefused(alloc, p, "no folder to forge into; written", 1);
+    const mark = std.fs.path.join(alloc, &.{ out, "LANGUAGE" }) catch return forgeRefused(alloc, p, "no folder to forge into; written", 1);
+    const fresh = if (std.process.getEnvVarOwned(alloc, "HARO_NOCACHE")) |v| v.len > 0 else |_| false;
+    var lang: []const u8 = "";
+    if (!fresh) {
+        if (std.fs.cwd().readFileAlloc(alloc, mark, 256)) |m| lang = std.mem.trim(u8, m, " \r\n\t") else |_| {}
+    }
+    if (lang.len == 0) {
+        std.fs.cwd().makePath(out) catch return forgeRefused(alloc, p, "no folder to forge into; written", 1);
+        const res = std.process.Child.run(.{
+            .allocator = alloc,
+            .argv = &.{ self, "forge.haro", abs, out },
+            .cwd = home,
+            .max_output_bytes = 1 << 20,
+        }) catch return forgeRefused(alloc, p, "the forge could not be run on this declaration; written", 1);
+        const said = std.mem.trim(u8, res.stdout, " \r\n\t");
+        const line = said[0 .. std.mem.indexOfScalar(u8, said, '\n') orelse said.len];
+        if (!std.mem.startsWith(u8, line, "forged ")) {
+            // the meta-court's own line: `haro (line N): <what it refuses>`
+            var row: u32 = 1;
+            var msg = std.mem.trim(u8, line, " \r");
+            if (std.mem.indexOf(u8, msg, "(line ")) |a| {
+                if (std.mem.indexOfPos(u8, msg, a, "): ")) |b| {
+                    row = std.fmt.parseInt(u32, msg[a + 6 .. b], 10) catch 1;
+                    msg = msg[b + 3 ..];
+                }
+            }
+            if (msg.len == 0) msg = "the forge answered nothing";
+            const why = std.fmt.allocPrint(alloc, "the meta-court refuses this declaration -- {s}; written", .{msg}) catch "the meta-court refuses this declaration; written";
+            return forgeRefused(alloc, p, why, row);
+        }
+        const rest = line["forged ".len..];
+        lang = alloc.dupe(u8, rest[0 .. std.mem.indexOfScalar(u8, rest, ':') orelse rest.len]) catch "";
+        // the court loads its library by name, beside itself: two files there that load the forge's own
+        for ([_][]const u8{ "court_lib.haro", "world_stub.haro" }) |f| {
+            const fwd = std.fs.path.join(alloc, &.{ out, f }) catch continue;
+            const body = std.fmt.allocPrint(alloc, "load \"{s}/{s}\"\n", .{ slashed(alloc, home), f }) catch continue;
+            std.fs.cwd().writeFile(.{ .sub_path = fwd, .data = body }) catch {};
+        }
+        std.fs.cwd().writeFile(.{ .sub_path = mark, .data = lang }) catch {};
+    }
+    const glue = std.fmt.allocPrint(
+        alloc,
+        "load \"{s}/judge_lib.haro\"\nload \"{s}/{s}_court.haro\"\nHaroLanguageLoaded(\"{s}\", \"{s}\")\n",
+        .{ slashed(alloc, home), slashed(alloc, out), lang, lang, declaredVersion(decl) },
+    ) catch return forgeRefused(alloc, p, "the forged court could not be named; written", 1);
+    return .{ .glue = glue };
+}
+
+/// In a .haro file that loads a declaration, the language's name is a type's name: `<language>.Judge(` reads
+/// `HaroLang("<language>").Judge(` (judge_lib.haro). Two insertions around the name, outside every text and comment; a file that loads
+/// no declaration is returned as it is.
+fn languageSugar(alloc: std.mem.Allocator, src: []const u8, dir: []const u8, is_root: bool) []const u8 {
+    var names = std.ArrayListUnmanaged([]const u8){};
+    var ls: usize = 0;
+    while (ls < src.len) {
+        const le = std.mem.indexOfScalarPos(u8, src, ls, '\n') orelse src.len;
+        const ln = std.mem.trim(u8, src[ls..le], " \t\r");
+        ls = le + 1;
+        if (!std.mem.startsWith(u8, ln, "load")) continue;
+        const rest = std.mem.trimLeft(u8, ln[4..], " \t");
+        if (rest.len < 3 or (rest[0] != '"' and rest[0] != '\'' and rest[0] != '`')) continue;
+        const q = std.mem.indexOfScalarPos(u8, rest, 1, rest[0]) orelse continue;
+        if (q <= 1) continue;
+        const target = resolveLoad(alloc, rest[1..q], dir, is_root) catch continue;
+        if (!lift.isHaro(target)) continue;
+        const head = std.fs.cwd().readFileAlloc(alloc, target, 4 << 20) catch continue;
+        if (!isDeclaration(head)) continue;
+        if (declaredLanguage(head)) |nm| names.append(alloc, nm) catch {};
+    }
+    if (names.items.len == 0) return src;
+    var out = std.ArrayListUnmanaged(u8){};
+    var i: usize = 0;
+    while (i < src.len) {
+        const ch = src[i];
+        if (ch == '"' or ch == '\'' or ch == '`') {
+            const e = std.mem.indexOfScalarPos(u8, src, i + 1, ch) orelse src.len - 1;
+            out.appendSlice(alloc, src[i .. e + 1]) catch return src;
+            i = e + 1;
+            continue;
+        }
+        if (ch == '#') {
+            const e = std.mem.indexOfScalarPos(u8, src, i, '\n') orelse src.len;
+            out.appendSlice(alloc, src[i..e]) catch return src;
+            i = e;
+            continue;
+        }
+        if (identByte(ch) and (i == 0 or (!identByte(src[i - 1]) and src[i - 1] != '.' and src[i - 1] != '$'))) {
+            var e = i;
+            while (e < src.len and identByte(src[e])) e += 1;
+            const word = src[i..e];
+            const judged = std.mem.startsWith(u8, src[e..], ".Judge(");
+            var is_lang = false;
+            if (judged) for (names.items) |nm| {
+                if (std.mem.eql(u8, nm, word)) is_lang = true;
+            };
+            if (is_lang) {
+                out.appendSlice(alloc, "HaroLang(\"") catch return src;
+                out.appendSlice(alloc, word) catch return src;
+                out.appendSlice(alloc, "\")") catch return src;
+            } else out.appendSlice(alloc, word) catch return src;
+            i = e;
+            continue;
+        }
+        out.append(alloc, ch) catch return src;
+        i += 1;
+    }
+    return out.items;
+}
+
 fn loadUnit(
     alloc: std.mem.Allocator,
     parser: ts.Parser,
@@ -582,7 +784,19 @@ fn loadUnit(
             continue;
         };
         t_read_ns += tr.read();
-        if (ringScanError(src) != null) u.scan_bad += 1;
+        // v0.70: a declaration a program loads is its forged court, loaded; a file that loads one reads its language's name
+        var text: []const u8 = src;
+        var decl_fault: ?lift.Fault = null;
+        if (u.lift and lift.isHaro(p)) {
+            if (qi > 0 and isDeclaration(src)) {
+                const g = forgeDeclaration(alloc, p, src);
+                text = g.glue;
+                decl_fault = g.fault;
+            } else if (!isDeclaration(src)) {
+                text = languageSugar(alloc, src, std.fs.path.dirname(p) orelse ".", qi == 0);
+            }
+        }
+        if (ringScanError(text) != null) u.scan_bad += 1;
         // C-28: a syntax file beside this one, which Ring would read first
         if (u.implicit == null and !std.ascii.eqlIgnoreCase(std.fs.path.basename(p), "ringsyntax.ring")) {
             const fdir = std.fs.path.dirname(p) orelse ".";
@@ -596,9 +810,11 @@ fn loadUnit(
         if (qi == 0) lift.haro_root = lift.isHaro(p);
         // v0.56 (D68): a .haro file's definitions reach its one parse in braces (lift.parseHaro); a dump reads the file as written
         const braced = u.lift and lift.isHaro(p);
-        const pl = (if (braced) lift.parseHaro(alloc, parser, src, p) else lift.parse(alloc, parser, src, lift.isHaro(p))) orelse continue;
+        const pl = (if (braced) lift.parseHaro(alloc, parser, text, p) else lift.parse(alloc, parser, text, lift.isHaro(p))) orelse continue;
         t_parse_ns += tp.read();
         const lf: lift.Lifted = if (u.lift) lift.apply(alloc, parser, pl.tree, pl.src, p, pl.inserts, braced) else pl;
+        // a declaration the meta-court refused: the program is refused with its words (after the lift, which keeps a file's fault)
+        if (decl_fault) |f| lift.faults.put(std.heap.page_allocator, p, f) catch {};
         const tree = lf.tree;
         try u.trees.append(alloc, tree);
         try u.roots.append(alloc, tree.root());

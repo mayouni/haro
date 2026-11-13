@@ -1143,6 +1143,29 @@ pub fn attrLookup(cls: u16, name: u32) ?u32 {
 /// string build -- Ring lowercases the name too (verified on 1.27:
 /// `classname(new Point)` is "point").
 pub var class_konst: []u32 = &.{};
+/// v0.70 (TYPES.md T7, D83): the class of a sentence -- judge_lib.haro's HaroSentence -- found by its name whenever the class table
+/// has grown; 0xFFFF_FFFF while the program holds none. Its attributes stand in a known order: slot 2 its text, slot 4 whether it
+/// is made (a sentence is fixed once its court has made it).
+pub var sentence_class: u32 = 0xFFFF_FFFF;
+pub var sentence_scanned: usize = 0;
+pub fn sentenceClass() u32 {
+    if (class_konst.len == sentence_scanned) return sentence_class;
+    sentence_scanned = class_konst.len;
+    sentence_class = 0xFFFF_FFFF;
+    for (class_konst, 0..) |ki, ci| {
+        if (ki >= konst.len or konst[ki].tag != .str) continue;
+        const s = konst[ki].p.s;
+        if (std.ascii.eqlIgnoreCase(s.ptr[0..s.len], "harosentence")) sentence_class = @intCast(ci);
+    }
+    return sentence_class;
+}
+pub fn isSentence(v: Value) bool {
+    return v.tag == .obj and v.p.o.class == sentenceClass();
+}
+fn sentenceFixed(o: *Obj) bool {
+    return o.class == sentenceClass() and o.nslots > 4 and o.slots[4].tag == .boolean and o.slots[4].p.i != 0;
+}
+const SENTENCE_FIXED = "Error (SENTENCE_FIXED) : a sentence is not written into -- its text is taken, changed and judged again";
 /// Per class, its parent's id, 0xFFFF for none; per function id, the class
 /// that defines it, 0xFFFF for a plain function. For reflection: `methods`,
 /// `ismethod`, `addmethod` (2026-09-23).
@@ -4003,6 +4026,7 @@ pub const VM = struct {
             'm' => "a map",
             'h' => "a handle",
             'e' => "an error",
+            's' => "a sentence",
             else => "a value",
         };
     }
@@ -4437,6 +4461,12 @@ pub const VM = struct {
                 outPrint("{s}", .{end});
             },
             .obj => {
+                // v0.70: a sentence prints as its text
+                if (isSentence(v) and v.p.o.nslots > 2 and v.p.o.slots[2].tag == .str) {
+                    const st = v.p.o.slots[2].p.s;
+                    outPrint("{s}{s}", .{ st.ptr[0..st.len], end });
+                    return;
+                }
                 self.sayAttrs(v.p.o);
                 outPrint("{s}", .{end});
             },
@@ -9451,6 +9481,8 @@ pub const VM = struct {
                     'r' => v.tag == .obj and v.p.o.rec != 0,
                     'h' => v.tag == .cptr or v.tag == .dll,
                     'e' => v.tag == .str and v.p.s.err != 0,
+                    // v0.70 (TYPES.md T7): a sentence, which only its court makes
+                    's' => isSentence(v),
                     else => true,
                 } or v.tag == .nil or (v.tag == .str and v.p.s.len == 0);
                 if (!ok) {
@@ -9574,6 +9606,10 @@ pub const VM = struct {
                     continue :dispatch .raise;
                 }
                 const o = rv.p.o;
+                if (sentenceFixed(o)) {
+                    self.pending = SENTENCE_FIXED;
+                    continue :dispatch .raise;
+                }
                 const sl: u32 = @intCast(in.d);
                 if (sl >= o.nslots) self.fitObj(o);
                 if (sl >= o.nslots) @panic("sattr: slot out of range");
@@ -9592,6 +9628,10 @@ pub const VM = struct {
                     continue :dispatch .raise;
                 }
                 const o = rv.p.o;
+                if (aop == .sattrn and sentenceFixed(o)) {
+                    self.pending = SENTENCE_FIXED;
+                    continue :dispatch .raise;
+                }
                 const nidx: u32 = @intCast(in.d);
                 const found_slot = attrLookup(o.class, nidx);
                 // THE ATTRIBUTE FIRST, THEN ITS ACCESSOR: a `get<name>`

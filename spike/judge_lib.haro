@@ -6,6 +6,7 @@
 #   HaroLanguageLoaded(name, version)   called once a forged court has been loaded: keeps its tables under the language's name
 #   HaroJudge(name, text)               the court's verdict on a text: a sentence, or the court's first refusal raised
 #   HaroSentence                        what a sentence is: its language, the language's version, its text, the court's warnings
+#   HaroLang(name)                      the language as a program names it: its Judge(text) is HaroJudge(name, text)
 #
 # Loaded before any court, it says so: a court's main does nothing when $bHaroJudges exists (court_lib.haro, CtMain).
 
@@ -42,22 +43,31 @@ func HaroJudge(ptName, ptText)
 	return new HaroSentence(ptName, vEntry[2], ptText, vWarnings)
 end
 
-# the court's refusal, raised: its code and its message
-func HaroRefuse(ptCode, ptMessage)
-	Raise(ptMessage)
+# what a language's name reads as in a program that loads its declaration: `signal.Judge(tText)` is HaroLang("signal").Judge(tText)
+func HaroLang(ptName)
+	return new HaroLanguage(ptName)
 end
 
+# the court's refusal, raised as the VM raises a coded error: `Error (CODE) : message`, so Code() answers the court's code
+func HaroRefuse(ptCode, ptMessage)
+	Raise("Error (" + ptCode + ") : " + ptMessage)
+end
+
+# The VM knows this class by its name and its attributes by their order (vm/src/main.zig, sentenceClass): the third is the text a
+# sentence prints as, and the fifth says it is made -- from then on a write into it is refused (SENTENCE_FIXED). Keep the order.
 class HaroSentence
 	tLanguage = ""
 	tVersion = ""
 	tText = ""
 	vWarnings = []
+	bFixed = false
 
 	def init(ptLanguage, ptVersion, ptText, pvWarnings)
 		tLanguage = ptLanguage
 		tVersion = ptVersion
 		tText = ptText
 		vWarnings = pvWarnings
+		bFixed = true
 	end
 
 	def Language
@@ -74,5 +84,17 @@ class HaroSentence
 
 	def Warnings
 		return vWarnings
+	end
+end
+
+class HaroLanguage
+	tName = ""
+
+	def init(ptName)
+		tName = ptName
+	end
+
+	def Judge(ptText)
+		return HaroJudge(tName, ptText)
 	end
 end

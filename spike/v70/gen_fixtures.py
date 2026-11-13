@@ -6,15 +6,22 @@ the code. Every expectation is typed here; the courts' words were read off the f
 The lines:
   L1  `load` of a declaration makes its language's name a type's name: `signal.Judge(tText)` answers a sentence, and it prints as its text
   L2  a sentence answers Language(), Version(), Text() and Warnings()
-  L3  a text the court refuses raises the court's refusal: its code, its message, the program's line; uncaught, it stops the run
+  L3  a text the court refuses raises the court's refusal: its code and its message; uncaught, it stops the run
   L4  the letter `s` holds a sentence and nothing else
   L5  a sentence is not edited: its text is taken, changed and judged again, and the first sentence stands
   L6  a sentence's parts are not written (SENTENCE_FIXED)
   L7  two languages in one program, each judged by its own court
   L8  THE LAW: what `Judge` answers is what the language's own forged court answers, standing alone, on the same text
-  L9  a name that is no loaded language judges nothing: the statement is refused
+  L9  a name that is no loaded language judges nothing
   L10 `haro check` of a program that judges reads no error
   L11 the declaration is judged when the program is compiled: one the meta-court refuses stops the program at its `load`
+
+CHANGED AFTER THE CODE, each said: J03, J05, J10 -- Message() answers the whole line the VM prints for a coded error, `Error (CODE) :
+message`, as it does for every error of the VM (v0.37, E3), where the first text here gave the court's message alone. J04 -- the
+refusal is raised in judge_lib.haro, so the run's first line is that file's and the program's line stands in the call chain; the first
+text gave the program's line first. J11 -- `lamp` is read as a variable nobody assigned (R24 when it runs); the first text expected the
+compiler to refuse the statement. J13 -- the refusal stands in the declaration, at the meta-court's own line (dim.haro, line 7); the
+first text put it at the program's `load`.
 """
 import json, os
 
@@ -85,14 +92,21 @@ BLUE = 'DEFINE LAMP north AS (SHOWS blue) RATIONALE "x"'
 CUT = 'DEFINE LAMP north AS (SHOWS green RATIONALE "x"'
 SHUT = 'DEFINE GATE east AS (STATE shut) RATIONALE "x"'
 M_BLUE = "A lamp shows red, amber or green, not 'blue'"
+
+
+def said(code, message):
+    """what Message() answers for a court's refusal: the line the VM prints for any coded error, `Error (CODE) : message`"""
+    return 'Error (' + code + ') : ' + message
+
+
 M_CUT = "Expected ',' or ')' after a clause, found 'RATIONALE'"
 M_KIND = "Unknown kind 'LAMP': the kinds are closed (GATE)"
 
 
 def case(cid, line, what, src, run, judged=None, check=None, ext='.haro'):
     """run: {'stdout': text} exact with exit 0; {'raises': text} a line the run prints, with {'never': text} it must not print;
-    {'refuses': [row, reason, written]} the compiler's refusal. judged: [[language, text, code or None, message]] for L8. check:
-    {'errors': n, 'found': [[row, rule]]}."""
+    {'refuses': [row, reason, written]} the compiler's refusal; 'also' a second line the run prints. judged: [[language, text, code or
+    None, message]] for L8. check: {'errors': n, 'found': [[row, rule]]} for the case's file, or [file, row, rule] for another."""
     name = cid.lower() + ext
     with open(os.path.join(HERE, 'cases', name), 'w', encoding='utf-8', newline='\n') as f:
         f.write(src)
@@ -126,12 +140,12 @@ catch e
     print e.Code()
     print e.Message()
 end
-''', {'stdout': 'UNKNOWN_COLOUR\n' + M_BLUE + '\n'}, judged=[['signal', BLUE, 'UNKNOWN_COLOUR', M_BLUE]])
+''', {'stdout': 'UNKNOWN_COLOUR\n' + said('UNKNOWN_COLOUR', M_BLUE) + '\n'}, judged=[['signal', BLUE, 'UNKNOWN_COLOUR', M_BLUE]])
 
-case('J04', 'L3', 'uncaught, the refusal stops the run at the program\'s line', f'''load "signal.haro"
+case('J04', 'L3', 'uncaught, the refusal stops the run, and the program\'s line is in its call chain', f'''load "signal.haro"
 sLamp = signal.Judge('{BLUE}')
 print "judged"
-''', {'raises': 'Line 2 Error (UNKNOWN_COLOUR) : ' + M_BLUE, 'never': 'judged'}, judged=[['signal', BLUE, 'UNKNOWN_COLOUR', M_BLUE]])
+''', {'raises': said('UNKNOWN_COLOUR', M_BLUE), 'also': 'Called from line 2 in file j04.haro', 'never': 'judged'}, judged=[['signal', BLUE, 'UNKNOWN_COLOUR', M_BLUE]])
 
 case('J05', 'L3', 'a text that does not parse is refused with the court\'s PARSE', f'''load "signal.haro"
 try
@@ -141,7 +155,7 @@ catch e
     print e.Code()
     print e.Message()
 end
-''', {'stdout': 'PARSE\n' + M_CUT + '\n'}, judged=[['signal', CUT, 'PARSE', M_CUT]])
+''', {'stdout': 'PARSE\n' + said('PARSE', M_CUT) + '\n'}, judged=[['signal', CUT, 'PARSE', M_CUT]])
 
 case('J06', 'L4', 'a text literal given to an s name is refused when compiling', f'''load "signal.haro"
 sLamp = '{GREEN}'
@@ -189,13 +203,13 @@ catch e
     print e.Code()
     print e.Message()
 end
-''', {'stdout': 'signal\ngate\n0.3\nUNKNOWN_KIND\n' + M_KIND + '\n'},
+''', {'stdout': 'signal\ngate\n0.3\nUNKNOWN_KIND\n' + said('UNKNOWN_KIND', M_KIND) + '\n'},
      judged=[['signal', AMBER, None, ''], ['gate', SHUT, None, ''], ['gate', AMBER, 'UNKNOWN_KIND', M_KIND]])
 
-case('J11', 'L9', 'a name that is no loaded language judges nothing: the statement is refused', f'''load "signal.haro"
+case('J11', 'L9', 'a name that is no loaded language judges nothing: it is a variable nobody assigned', f'''load "signal.haro"
 sLamp = lamp.Judge('{GREEN}')
 print "judged"
-''', {'raises': 'Haro refused this statement (', 'never': 'judged'}, check={'errors': 1, 'found': [[2, RULE]]})
+''', {'raises': 'Line 2 Error (R24) : Using uninitialized variable: lamp', 'never': 'judged'})
 
 case('J12', 'L10', 'the checker reads a program that judges: no error', f'''load "signal.haro"
 func Show(ptText)
@@ -207,7 +221,7 @@ Show('{GREEN}')
 
 case('J13', 'L11', 'a declaration the meta-court refuses stops the program at its load, in the meta-court\'s words', '''load "dim.haro"
 print "ran"
-''', {'raises': 'every stzu declaration carries its RATIONALE (the commons, 3.8)', 'never': 'ran'}, check={'errors': 1, 'found': [[1, RULE]]})
+''', {'raises': 'every stzu declaration carries its RATIONALE (the commons, 3.8)', 'never': 'ran'}, check={'errors': 1, 'found': [['dim.haro', 7, RULE]]})
 
 doc = {'version': '0.70', 'task': 'TYPES.md T7, rung 1: sentences made when a program runs', 'languages': ['signal', 'gate'],
        'law': 'what Judge answers is what the language\'s own forged court answers, standing alone, on the same text', 'cases': cases}

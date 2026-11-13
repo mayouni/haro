@@ -74,9 +74,10 @@ CASES = [
     ('Y08', 'Y2', 'a single letter anywhere else is refused', '.haro', [B, 'f()', 'func f', T + 'x = 3'],
      refused('Y08', 4, 'a name begins with its type\'s letter -- `x` has none; written', 'x'), 1),
     # Y09 CHANGED BY v0.64's RULING (D76), said so: r is a record's letter and checked since v0.64, so the unbuilt letter here is s;
-    # and BY v0.67's (D79): m is a map's and checked since v0.67, so the other is k
+    # and BY v0.67's (D79): m is a map's and checked since v0.67, so the other is k; and BY v0.70's (D83): s is a sentence's and checked
+    # since v0.70, so the third is w
     ('Y09', 'Y4', 'a letter whose type is not built yet is accepted and not checked', '.haro', [
-        'f()', 'func f', T + 'xRows = 5', T + 'kIndex = "k"', T + 'sUser = [1]', T + '? xRows', T + '? kIndex', T + '? Len(sUser)'],
+        'f()', 'func f', T + 'xRows = 5', T + 'kIndex = "k"', T + 'wUser = [1]', T + '? xRows', T + '? kIndex', T + '? Len(wUser)'],
      ['5', 'k', '1']),
     ('Y10', 'Y5', 'null is absence until v0.49, and passes any letter', '.haro', [
         'f()', 'func f', T + 'oDoc = null', T + 'vItems = null', T + 'iN = null', T + '? IsNull(oDoc) and IsNull(vItems) and IsNull(iN)'],

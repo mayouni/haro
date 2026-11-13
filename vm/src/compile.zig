@@ -7356,7 +7356,7 @@ pub const Compiler = struct {
     // refused when compiling (the statement's fault, as a misspelling is); any other value given a checked letter is checked where
     // it is given, by `lchk`. A .ring file is untouched.
     const LETTERS = "bidfntxkvmroehswa";
-    const CHECKED = "bidntfvoherm";
+    const CHECKED = "bidntfvoherms";
 
     fn letterCore(name: []const u8) []const u8 {
         return if (name.len > 0 and (name[0] == '$' or name[0] == '@')) name[1..] else name;
@@ -7408,6 +7408,7 @@ pub const Compiler = struct {
             'r' => "a record",
             'm' => "a map",
             'h' => "a handle",
+            's' => "a sentence",
             else => "a value",
         };
     }
