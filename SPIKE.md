@@ -1917,6 +1917,10 @@ D58, the Principal's ruling of 2026-11-09 ("ParentClassName"), revising v0.42's 
 
 **Results.** 9 of 9 cases on both builds; 5 of 5 plants; v36 to v48's courts green. Haro's 2,172 calls re-spelled by a tool (20fc236, listed in v20/tool_commits.txt).
 
+## The sixty-seventh rung -- Haro v0.67, maps -- 2026-11-12
+
+D79, TYPES.md T6, on the Principal's "A literal with key: value" and "A maybe, resolved with else": `["ada": 36]`, `[:]`, a read resolved with `else` and refused unresolved, a write that adds or replaces; keys a text in its exact case or an integer; `Keys`, `Values`, `HasKey`, `Del`, in insertion order. 16 of 16 on both builds, plants H1-H21 (21b9d2f, 4706055); a read linear in the map's size, measured. T6 is built whole.
+
 ## The sixty-sixth rung -- Haro v0.66, Haro's numbers -- 2026-11-12
 
 D78, the Principal's ruling and his "Build it as proposed" on `NUMBERS.md`: no setting for places in `.haro` code, a float written exactly, `Text`, `Round`, `IntegerPart`, `DecimalPart`, `Decimals`, `Digits`, `Abs`, `Sign`, `Clamp`, `FromHex`; `Decimals(n)` as a setting, `FAbs`, `Dec` refused. 13 of 13 on both builds, plants P1-P18 (44dc55c).
