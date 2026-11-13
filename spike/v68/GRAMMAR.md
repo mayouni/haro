@@ -39,4 +39,4 @@ L9 was found while probing and built in this rung, said so: find's equality had 
 - Stages 47, 48, 57, 70 and 72 (names, booleans, the 1/0 boundary inward, the decimal outward, maps) hold on v0.68's builds.
 - stzlib origin/main 2d3cb7cca, its 194 landed `.haro` files under `haro check --facts`, v0.67 against v0.68: 80 functions refused
   before, 80 after, none newly refused -- the rung adds no refusal. No `.ring` file there tests `type()` against "BOOLEAN" (the three
-  lines that write "BOOLEAN" name a database column type).
+  lines that write "BOOLEAN" are two database column type names and one parameter's documented type, in an archived file).
