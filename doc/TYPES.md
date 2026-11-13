@@ -153,6 +153,25 @@ assignments, not a letter: the text is still a `t`.
 **A handle names its door.** `handle of file`, `handle of network`, letter `h`: a program whose language does not NEED a door (D51) cannot hold
 a handle of it. This is D51's computing altitude, the half that waits for W7's map, expressed as a type.
 
+**The spellings, decided 2026-11-13 on the Principal's delegation (D83; his words: "Decide for me...").** T7 is built in three rungs:
+sentences, `unjudged`, then handles and the seat types.
+
+    load "panel.haro"                     # the declaration: its first word is DEFINE; `panel` is now a type's name here
+    sRule = panel.Judge(tText)            # judged when it runs: a sentence, or the court's refusal raised as an error
+    sRule = panel"WHEN temp > 30 ALERT"   # a literal: judged when compiling
+    def Apply(psRule of panel)            # where no value says the language, `of` does: a parameter,
+    sRule of panel                        #   an attribute,
+    func Parse(ptText) of panel           #   a return
+    print sRule.Language()                # with Version(), Text() and Warnings(); a sentence prints as its text
+
+    func ReadLine unjudged                # its answer came through a door
+    func Store(unjudged ptLine)           # this parameter may take such text
+
+The sketch above wrote `panel.judge(tText)` and `sRule: sentence of panel`; these are the same forms in Haro's one spelling (a
+built-in name as Softanza writes a name, D58) with the letter doing the work of the word `sentence`. No word is reserved: `of`
+and `unjudged` are words of their places only, as `maybe` is, so a method named `Of` stays a name -- stzlib calls one 34 times.
+The refusals: SENTENCE_EXPECTED, SENTENCE_OF_ANOTHER; UNJUDGED_RUN, UNJUDGED_DOOR, UNJUDGED_ARGUMENT.
+
 ---
 
 ## 4. The letters, whole
