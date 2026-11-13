@@ -678,6 +678,73 @@ fn fileExists(p: []const u8) bool {
 
 /// A finding's detail, wrapped. Taken from the library-era CLI so the
 /// diagnostics read exactly as they did.
+/// v0.69 (HARO-CHECKRUN-01): the statements of `root` the compiler refused, each an error at its line of the FILE (the lift keeps
+/// lines; `inserts` gives the file's column), in the words the run gives it.
+fn addRefused(
+    alloc: std.mem.Allocator,
+    report: *check.Report,
+    root: ts.Node,
+    path: []const u8,
+    inserts: []const lift.Insert,
+    trapped: []const co.Trapped,
+    placed: []bool,
+) !void {
+    // this file's, one a statement (the compiler visits a statement more than once and traps it each time), in line order
+    var mine = std.ArrayListUnmanaged(usize){};
+    for (trapped, 0..) |t, k| {
+        if (placed[k] or t.src != root.src.ptr) continue;
+        placed[k] = true;
+        var twice = false;
+        for (mine.items) |j| {
+            const u = trapped[j];
+            if (u.row == t.row and std.mem.eql(u8, u.kind, t.kind) and std.mem.eql(u8, u.text, t.text)) twice = true;
+        }
+        if (!twice) try mine.append(alloc, k);
+    }
+    const byRow = struct {
+        fn lt(all: []const co.Trapped, x: usize, y: usize) bool {
+            return all[x].row < all[y].row;
+        }
+    }.lt;
+    std.mem.sort(usize, mine.items, trapped, byRow);
+    for (mine.items) |k| {
+        const t = trapped[k];
+        // the line's first byte, and the refused text on it where the line holds it
+        var ls: u32 = 0;
+        var row: u32 = 1;
+        var i: u32 = 0;
+        while (i < root.src.len and row < t.row) : (i += 1) {
+            if (root.src[i] == '\n') {
+                row += 1;
+                ls = i + 1;
+            }
+        }
+        var le: u32 = ls;
+        while (le < root.src.len and root.src[le] != '\n') le += 1;
+        var at: u32 = ls;
+        while (at < le and (root.src[at] == ' ' or root.src[at] == '\t')) at += 1;
+        if (t.text.len > 0) {
+            if (std.mem.indexOf(u8, root.src[ls..le], t.text)) |o| at = ls + @as(u32, @intCast(o));
+        }
+        const col = lift.fileByte(inserts, at) - lift.fileByte(inserts, ls) + 1;
+        try addRefusedAt(alloc, report, path, t, col);
+    }
+}
+
+fn addRefusedAt(alloc: std.mem.Allocator, report: *check.Report, path: []const u8, t: co.Trapped, col: u32) !void {
+    const a = report.arena.allocator();
+    try report.findings.append(alloc, .{
+        .file = path,
+        .row = t.row,
+        .col = col,
+        .severity = .err,
+        .rule = "haro/refused-form",
+        .message = if (t.named) try std.fmt.allocPrint(a, "{s} `{s}`", .{ t.kind, t.text }) else try a.dupe(u8, t.kind),
+        .detail = "The compiler refuses this form and does not compile the statement: a run stops at this line, or raises when the " ++
+            "function that holds it is called. The run gives the same line and the same words.",
+    });
+}
+
 fn wrapPrint(w: *std.Io.Writer, text: []const u8, indent: usize, width: usize) !void {
     var it = std.mem.tokenizeAny(u8, text, " \n\r\t");
     var col: usize = 0;
@@ -5014,16 +5081,36 @@ pub fn main() !void {
         // Each file as the unit READ it (origs: the file's bytes on disk, or the text `--subst` gave it) and LIFTED it -- the tree the
         // compiler reads (v0.39: `catch e` binds e, a `within` is a block); the findings name the file's own columns.
         const opts = check.Opts{ .listeners = listeners.items, .validators = validators.items };
-        for (unit.roots.items, 0..) |r, i| {
-            if (unit.origs.items[i].len == 0) continue;
-            const path = unit.paths.items[i];
-            check.checkLifted(alloc, r, path, &report, ctx, opts, unit.inserts.items[i]) catch continue;
-        }
-        // v0.51 (HARO-FACTS-01): the same findings and the compiler's own record, per function, as one JSON document (src/facts.zig)
+        // v0.69 (HARO-CHECKRUN-01): WHAT THE RUN REFUSES, CHECK NAMES. The compiler is asked once (a lenient compile; nothing runs),
+        // and each statement it refused is an error here, at the line and in the words the run gives it, after the file's other
+        // findings. Before, check asked the compiler nothing: a file whose every line was refused read "0 error".
         var want_facts = false;
         if (argv.len > 3) for (argv[3..]) |a| {
             if (std.mem.eql(u8, a, "--facts")) want_facts = true;
         };
+        var compiler_silent = false;
+        const fdata: ?co.FactsData = co.factsData(alloc, unit.roots.items) catch |e| blk: {
+            if (want_facts) {
+                co.reportFailure(e);
+                std.process.exit(1);
+            }
+            compiler_silent = true;
+            break :blk null;
+        };
+        const trapped: []const co.Trapped = if (fdata) |d| d.trapped else &.{};
+        const placed = try alloc.alloc(bool, trapped.len);
+        @memset(placed, false);
+        for (unit.roots.items, 0..) |r, i| {
+            const path = unit.paths.items[i];
+            const read = unit.origs.items[i].len != 0;
+            if (read) check.checkLifted(alloc, r, path, &report, ctx, opts, unit.inserts.items[i]) catch {};
+            try addRefused(alloc, &report, r, path, if (read) unit.inserts.items[i] else &.{}, trapped, placed);
+        }
+        // a refused statement in text no file of the unit holds: named all the same, under the unit's first file
+        for (trapped, 0..) |t, k| {
+            if (!placed[k] and unit.paths.items.len > 0) try addRefusedAt(alloc, &report, unit.paths.items[0], t, 1);
+        }
+        // v0.51 (HARO-FACTS-01): the same findings and the compiler's own record, per function, as one JSON document (src/facts.zig)
         if (want_facts) {
             var nc = std.ArrayListUnmanaged(facts.NotChecked){};
             if (!uni.complete) try nc.append(alloc, .{ .rules = &.{ "haro/undefined-function", "haro/unknown-class", "haro/unknown-package" }, .why = uni.reason });
@@ -5032,10 +5119,7 @@ pub fn main() !void {
             else
                 "an eval() in the unit assigns a name this pass cannot read" });
             if (listeners.items.len == 0) try nc.append(alloc, .{ .rules = &.{"haro/listener-binds-all"}, .why = "no listening native named (--listeners=), so no call was looked at" });
-            const fd = co.factsData(alloc, unit.roots.items) catch |e| {
-                co.reportFailure(e);
-                std.process.exit(1);
-            };
+            const fd = fdata.?;
             try facts.print(alloc, w, unit.roots.items, unit.paths.items, unit.origs.items, report.findings.items, nc.items, fd);
             try w.flush();
             return;
@@ -5079,6 +5163,7 @@ pub fn main() !void {
         }
         // A rule told of nothing looks at nothing, and says so -- in words a gate does not take for a checker shut (v20/refine.py reads
         // "NOT checked --" as that): this rule's silence hides nothing about a body.
+        if (compiler_silent) try w.print("  refused-form: NOT checked -- the compiler stopped before the unit's end, so what it refuses is not listed\n", .{});
         if (listeners.items.len == 0) try w.print("  listener-binds-all: no listening native named (--listeners=), so no call was looked at\n", .{});
         try w.flush();
         return;

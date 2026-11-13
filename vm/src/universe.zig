@@ -334,12 +334,15 @@ fn hasEntryPoint(root: ts.Node) bool {
                 const nm = c.field("name");
                 if (!nm.isNull() and std.ascii.eqlIgnoreCase(nm.text(), "main")) return true;
             }
-            seen_def = true;
+            // v0.69: a definition written with its `end` holds nothing after it -- the statements after it are the program's
+            if (!c.closedByEnd()) seen_def = true;
             continue;
         }
         if (std.mem.eql(u8, k, "class_definition") or std.mem.eql(u8, k, "package_definition")) {
-            seen_def = true;
-            seen_class = true;
+            if (!c.closedByEnd()) {
+                seen_def = true;
+                seen_class = true;
+            }
             continue;
         }
         if (!seen_def) return true;

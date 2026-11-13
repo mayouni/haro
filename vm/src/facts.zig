@@ -208,6 +208,8 @@ pub fn print(
             end = s;
             break;
         };
+        // v0.69: a function written with its `end` stops there; what follows it is the file's, or the next definition's
+        if (f.node.closedByEnd()) end = f.node.endByte();
         while (end > start and std.ascii.isWhitespace(root.src[end - 1])) end -= 1;
         try fns.append(a, .{ .idx = i, .file = fi, .start = start, .end = end, .line = lines[fi].row(start), .end_line = lines[fi].row(end -| 1) });
     }

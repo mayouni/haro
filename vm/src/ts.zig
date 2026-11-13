@@ -86,6 +86,16 @@ pub const Node = struct {
         return .{ .raw = c.ts_node_child(self.raw, i), .src = self.src };
     }
 
+    /// A definition that says where it ends: its last child is `end`, or the closing brace the lift writes in place of a .haro
+    /// definition's `end` (lift.zig, v0.56) -- the tree the checker and the compiler read. A definition without one (a .ring file's,
+    /// written without braces) holds what follows it.
+    pub fn closedByEnd(self: Node) bool {
+        const n = self.childCount();
+        if (n == 0) return false;
+        const k = self.child(n - 1).kind();
+        return std.mem.eql(u8, k, "end") or std.mem.eql(u8, k, "}");
+    }
+
     pub fn namedChildCount(self: Node) u32 {
         return c.ts_node_named_child_count(self.raw);
     }

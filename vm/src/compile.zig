@@ -1389,6 +1389,19 @@ pub const Refusal = struct {
     src: []const u8 = &.{},
 };
 
+/// A statement the compiler refused, as the run names it (v0.69, HARO-CHECKRUN-01): refusalTrap's own reason, text and line, and the
+/// source the fault sits in. One a refused statement, so `haro check` says what the run says. `named` is the trap's own test for
+/// quoting the text after the reason.
+pub const Trapped = struct {
+    kind: []const u8,
+    text: []const u8,
+    row: u32,
+    src: [*]const u8,
+    named: bool,
+    /// the constant that holds the trap's message: the trap stands while a `loadk` of it is followed by a `trap` in the code
+    konst: u32 = 0,
+};
+
 pub const Attr = struct { name: []const u8, slot: u32 };
 
 /// A class body's `nCount = 7` lines are a CONSTRUCTOR, and Ring runs them
@@ -2122,6 +2135,8 @@ pub const Compiler = struct {
     /// says nothing about why is a tool nobody runs twice.
     rank_verbose: bool = false,
     refusals: std.ArrayListUnmanaged(Refusal) = .{},
+    /// v0.69: each refused statement as its trap names it (refusalTrap)
+    trapped: std.ArrayListUnmanaged(Trapped) = .{},
     /// `new K` sites whose class the unit does not define: compiled to
     /// Ring's run-time R11 and counted APART (absentClass).
     absent_classes: std.ArrayListUnmanaged(Refusal) = .{},
@@ -10123,7 +10138,7 @@ pub fn graphData(alloc: std.mem.Allocator, roots: []const ts.Node) !GraphData {
 
 /// What `haro check --facts` reads of a compile (v0.51): the graph's data, and the refusals of each function's own body. A lenient
 /// compile with the census on, so each refusal names its site; nothing runs.
-pub const FactsData = struct { graph: GraphData, refusals: []const Refusal };
+pub const FactsData = struct { graph: GraphData, refusals: []const Refusal, trapped: []const Trapped };
 
 pub fn factsData(alloc: std.mem.Allocator, roots: []const ts.Node) !FactsData {
     var c = Compiler{ .alloc = alloc, .lenient = true, .rank = false, .census = true };
@@ -10133,9 +10148,22 @@ pub fn factsData(alloc: std.mem.Allocator, roots: []const ts.Node) !FactsData {
     c.scratch = scratch_arena.allocator();
     last_fail = .{};
     try compileFront(&c, roots, roots, 0, alloc);
+    // the traps that stand: a statement compiled again after its first attempt was rolled back (a function whose locals share
+    // registers on a second attempt, a statement re-read) left a record and no trap
+    var standing = std.AutoHashMapUnmanaged(u32, void){};
+    const code = c.code.items;
+    var i: usize = 1;
+    while (i < code.len) : (i += 1) {
+        if (code[i].op == .trap and code[i - 1].op == .loadk and code[i - 1].d >= 0) try standing.put(alloc, @intCast(code[i - 1].d), {});
+    }
+    var kept = std.ArrayListUnmanaged(Trapped){};
+    for (c.trapped.items) |t| {
+        if (standing.contains(t.konst)) try kept.append(alloc, t);
+    }
     return .{
         .graph = .{ .funcs = c.funcs.items, .classes = c.classes.items, .fixups = c.fixups.items, .names = c.names.items },
         .refusals = c.refusals.items,
+        .trapped = kept.items,
     };
 }
 
@@ -13141,6 +13169,14 @@ fn refusalTrap(c: *Compiler, st: ts.Node, mark: u32, fxmark: usize) void {
         const fi = c.fileOf(p) orelse break :blk "";
         break :blk if (fi < load_paths.len) std.fs.path.basename(load_paths[fi]) else "";
     };
+    // v0.69 (HARO-CHECKRUN-01): the same reason, text and line, kept for `haro check`
+    var said = Trapped{
+        .kind = kind,
+        .text = c.last_text,
+        .row = row,
+        .src = c.last_fail_src orelse st.src.ptr,
+        .named = where.len > 0 and c.last_text.len > 0,
+    };
     const msg = (if (where.len > 0 and c.last_text.len > 0)
         std.fmt.allocPrint(
             c.alloc,
@@ -13158,6 +13194,8 @@ fn refusalTrap(c: *Compiler, st: ts.Node, mark: u32, fxmark: usize) void {
     c.last_text = "";
     c.last_fail_src = null;
     const k = c.konstIndex(msg) catch return;
+    said.konst = @intCast(k);
+    c.trapped.append(c.alloc, said) catch {};
     const save = c.temp;
     defer c.temp = save;
     const t = c.tmp() catch return; // no register to build it in: leave the hole
