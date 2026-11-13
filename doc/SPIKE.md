@@ -1917,6 +1917,10 @@ D58, the Principal's ruling of 2026-11-09 ("ParentClassName"), revising v0.42's 
 
 **Results.** 9 of 9 cases on both builds; 5 of 5 plants; v36 to v48's courts green. Haro's 2,172 calls re-spelled by a tool (20fc236, listed in v20/tool_commits.txt).
 
+## The sixty-eighth rung -- Haro v0.68, in .ring code a boolean is the number 1 or 0 -- 2026-11-13
+
+D80, from stzlib-haroport's HARO-RINGBOUNDARY-BOOL-OUT-01, the boolean mirror of v0.65: `.ring` code prints, joins, types, finds and sorts a boolean as its number, wherever it came from; `.haro` code keeps `true` and `false`. With it, `Find` in a `.haro` file finds a boolean. 11 of 11 on both builds, plants K1-K13 (903213a, 4989cac). The same day the design documents moved to `doc/` (17f9a4e), and proof in Haro was ruled (`doc/PROOF.md`, D81).
+
 ## The sixty-seventh rung -- Haro v0.67, maps -- 2026-11-12
 
 D79, TYPES.md T6, on the Principal's "A literal with key: value" and "A maybe, resolved with else": `["ada": 36]`, `[:]`, a read resolved with `else` and refused unresolved, a write that adds or replaces; keys a text in its exact case or an integer; `Keys`, `Values`, `HasKey`, `Del`, in insertion order. 16 of 16 on both builds, plants H1-H21 (21b9d2f, 4706055); a read linear in the map's size, measured. T6 is built whole.
