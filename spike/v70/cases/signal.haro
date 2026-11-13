@@ -1,0 +1,18 @@
+-- signal.haro -- a small language for v0.70's cases: a lamp shows one of three colours
+
+DEFINE LANGUAGE signal AS (
+  VERSION "1.2", GRAMMAR "1.0",
+  COURT "spike/v70/fixtures.json",
+  EXTENSION ".signal"
+) RATIONALE "What a lamp may show, declared before it shows it"
+
+DEFINE MENU colours AS (
+  WORDS [red, amber, green],
+  MESSAGE "A lamp shows red, amber or green",
+  CODE "UNKNOWN_COLOUR"
+) RATIONALE "The three colours a lamp may show"
+
+DEFINE DECLARATION lamp AS (
+  VERB "LAMP",
+  SEATS [shows: colours, label: text?]
+) RATIONALE "A lamp and the colour it shows"

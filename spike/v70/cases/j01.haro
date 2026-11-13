@@ -1,0 +1,4 @@
+load "signal.haro"
+tText = 'DEFINE LAMP north AS (SHOWS green) RATIONALE "open in the morning"'
+sLamp = signal.Judge(tText)
+print sLamp

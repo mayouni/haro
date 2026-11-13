@@ -1,0 +1,3 @@
+load "signal.haro"
+sLamp = lamp.Judge('DEFINE LAMP north AS (SHOWS green) RATIONALE "open in the morning"')
+print "judged"

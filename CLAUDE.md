@@ -438,7 +438,7 @@ the cut say `haro/X`, `X.ring`, `rnxc` and "the oracle"**: read them as this rep
 
 The records, all in `doc/` (moved from the root 2026-11-13, on the Principal's word: the root holds README, CLAUDE and LICENSE, as in
 every Softanza project; a record named below or in an older text by its bare name is `doc/<name>`): `CHARTER.md` (section 13 the
-decisions, D1 to D83; section 15 the v0.3 amendments), `PRINCIPLES.md`,
+decisions, D1 to D84; section 15 the v0.3 amendments), `PRINCIPLES.md`,
 `GRAMMAR-SKETCH.md`, `FINDINGS.md` (HF-1 to HF-152, each measured), `SPIKE.md` (every rung, one section each, and "Next"),
 `CODEGRAPH.md` (the code-graph memo), `TYPES.md` (Haro's types: D55, RULED 2026-11-07, nothing built yet), `BLOCKS.md` (one format and pattern rules, REBOL-06/07: its four questions RULED 2026-11-02),
 `FROM-RINGPP.md`, `NUMBERS.md`, `SG1.md`, `STANDALONE.md`, `PROOF.md` (proof in Haro: PROPOSED 2026-11-13, nothing ruled).
@@ -564,7 +564,10 @@ Each `%NAME%` in this file is a folder of this machine; its value is in `.centra
   direction); a refresh is built with `engine/build_engine.py --staging` first, announced, and the shared folder changes after its notice.
   The spellings of judged types are DECIDED (D83, on the Principal's "Decide for me..."; delegated): `load` of a declaration, `panel.Judge(tText)`,
   the literal `panel"..."`, `psRule of panel`, `unjudged` after a header and before a parameter; no word reserved; three rungs. Nothing built.
-  Next: sentences, v0.70 (fixtures first); then `unjudged`; then handles and the seat types; then `uses` and `total`.
+  **The selection of Haro's spellings is this desk's** (D84, the Principal 2026-11-13: "I delegate to to full taks of spelling selection"): chosen
+  when a rung starts, counted on stzlib first, recorded as delegated; the two words of D81 (e) come under it. **v0.70 is started**: sentences made
+  when a program runs -- `spike/v70/` holds its fixtures (13 cases, `signal` and `gate` its two languages) and its court, written before the code.
+  Next: v0.70's code; then the literal and `of`; then `unjudged`; then handles and the seat types; then `uses` and `total`.
 - D43 is the twin-court clause. Of BLOCKS.md's four questions: Q-B1 is built (`?` is C6, and `OPTIONAL` sees it in a rule); Q-B2's two amendments are refused by name until Ringua's text
   lands; Q-B3 the block export of a program is not started; Q-B4 the round-trip court the elders waited for exists -- asking their owners is Central's.
 - **Answered 2026-11-05**: HARO-DISTANCE-01 (HF-141; D50, the author's ruling: no part of Ring is carried with Haro), HARO-ONEHOUR-01 (D51) and -02 (D52). **Next**: what stzlib's sweep on haro.exe sends; zip.zig out (stzlib calls no zip_* since cb6f5de65) with

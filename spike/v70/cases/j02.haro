@@ -1,0 +1,6 @@
+load "signal.haro"
+sLamp = signal.Judge('DEFINE LAMP north AS (SHOWS amber) RATIONALE "x"')
+print sLamp.Language()
+print sLamp.Version()
+print sLamp.Text()
+print Len(sLamp.Warnings())

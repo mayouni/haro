@@ -1,0 +1,6 @@
+load "signal.haro"
+sFirst = signal.Judge('DEFINE LAMP north AS (SHOWS amber) RATIONALE "x"')
+tNext = SubStr(sFirst.Text(), "amber", "red")
+sNext = signal.Judge(tNext)
+print sNext
+print sFirst

@@ -1,0 +1,9 @@
+load "signal.haro"
+sLamp = signal.Judge('DEFINE LAMP north AS (SHOWS amber) RATIONALE "x"')
+try
+    sLamp.tText = 'DEFINE LAMP north AS (SHOWS blue) RATIONALE "x"'
+    print "written"
+catch e
+    print e.Code()
+end
+print sLamp

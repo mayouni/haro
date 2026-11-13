@@ -1,0 +1,10 @@
+DEFINE LANGUAGE dim AS (
+  VERSION "1.0", GRAMMAR "1.0",
+  COURT "spike/v70/fixtures.json",
+  EXTENSION ".dim"
+)
+
+DEFINE DECLARATION bulb AS (
+  VERB "BULB",
+  SEATS [label: text?]
+) RATIONALE "A bulb"

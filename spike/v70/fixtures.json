@@ -1,0 +1,249 @@
+{
+ "version": "0.70",
+ "task": "TYPES.md T7, rung 1: sentences made when a program runs",
+ "languages": [
+  "signal",
+  "gate"
+ ],
+ "law": "what Judge answers is what the language's own forged court answers, standing alone, on the same text",
+ "cases": [
+  {
+   "id": "J01",
+   "line": "L1",
+   "what": "a declaration loaded, a text judged, the sentence printed as its text",
+   "file": "cases/j01.haro",
+   "run": {
+    "stdout": "DEFINE LAMP north AS (SHOWS green) RATIONALE \"open in the morning\"\n"
+   },
+   "judged": [
+    [
+     "signal",
+     "DEFINE LAMP north AS (SHOWS green) RATIONALE \"open in the morning\"",
+     null,
+     ""
+    ]
+   ]
+  },
+  {
+   "id": "J02",
+   "line": "L2",
+   "what": "what a sentence answers",
+   "file": "cases/j02.haro",
+   "run": {
+    "stdout": "signal\n1.2\nDEFINE LAMP north AS (SHOWS amber) RATIONALE \"x\"\n0\n"
+   },
+   "judged": [
+    [
+     "signal",
+     "DEFINE LAMP north AS (SHOWS amber) RATIONALE \"x\"",
+     null,
+     ""
+    ]
+   ]
+  },
+  {
+   "id": "J03",
+   "line": "L3",
+   "what": "a refused text raises the court's refusal, caught: its code and its message",
+   "file": "cases/j03.haro",
+   "run": {
+    "stdout": "UNKNOWN_COLOUR\nA lamp shows red, amber or green, not 'blue'\n"
+   },
+   "judged": [
+    [
+     "signal",
+     "DEFINE LAMP north AS (SHOWS blue) RATIONALE \"x\"",
+     "UNKNOWN_COLOUR",
+     "A lamp shows red, amber or green, not 'blue'"
+    ]
+   ]
+  },
+  {
+   "id": "J04",
+   "line": "L3",
+   "what": "uncaught, the refusal stops the run at the program's line",
+   "file": "cases/j04.haro",
+   "run": {
+    "raises": "Line 2 Error (UNKNOWN_COLOUR) : A lamp shows red, amber or green, not 'blue'",
+    "never": "judged"
+   },
+   "judged": [
+    [
+     "signal",
+     "DEFINE LAMP north AS (SHOWS blue) RATIONALE \"x\"",
+     "UNKNOWN_COLOUR",
+     "A lamp shows red, amber or green, not 'blue'"
+    ]
+   ]
+  },
+  {
+   "id": "J05",
+   "line": "L3",
+   "what": "a text that does not parse is refused with the court's PARSE",
+   "file": "cases/j05.haro",
+   "run": {
+    "stdout": "PARSE\nExpected ',' or ')' after a clause, found 'RATIONALE'\n"
+   },
+   "judged": [
+    [
+     "signal",
+     "DEFINE LAMP north AS (SHOWS green RATIONALE \"x\"",
+     "PARSE",
+     "Expected ',' or ')' after a clause, found 'RATIONALE'"
+    ]
+   ]
+  },
+  {
+   "id": "J06",
+   "line": "L4",
+   "what": "a text literal given to an s name is refused when compiling",
+   "file": "cases/j06.haro",
+   "run": {
+    "refuses": [
+     2,
+     "s is the letter of a sentence, and this literal is a text; written",
+     "sLamp"
+    ]
+   },
+   "check": {
+    "errors": 1,
+    "found": [
+     [
+      2,
+      "haro/refused-form"
+     ]
+    ]
+   }
+  },
+  {
+   "id": "J07",
+   "line": "L4",
+   "what": "a text given to an s name when the program runs is TYPE_LETTER",
+   "file": "cases/j07.haro",
+   "run": {
+    "raises": "Line 3 Error (TYPE_LETTER) : `sLamp` is lettered s, a sentence, and is given a text",
+    "never": "held"
+   }
+  },
+  {
+   "id": "J08",
+   "line": "L5",
+   "what": "the text taken, changed and judged again; the first sentence stands",
+   "file": "cases/j08.haro",
+   "run": {
+    "stdout": "DEFINE LAMP north AS (SHOWS red) RATIONALE \"x\"\nDEFINE LAMP north AS (SHOWS amber) RATIONALE \"x\"\n"
+   },
+   "judged": [
+    [
+     "signal",
+     "DEFINE LAMP north AS (SHOWS amber) RATIONALE \"x\"",
+     null,
+     ""
+    ],
+    [
+     "signal",
+     "DEFINE LAMP north AS (SHOWS red) RATIONALE \"x\"",
+     null,
+     ""
+    ]
+   ]
+  },
+  {
+   "id": "J09",
+   "line": "L6",
+   "what": "a write into a sentence is refused, and the sentence is what it was",
+   "file": "cases/j09.haro",
+   "run": {
+    "stdout": "SENTENCE_FIXED\nDEFINE LAMP north AS (SHOWS amber) RATIONALE \"x\"\n"
+   }
+  },
+  {
+   "id": "J10",
+   "line": "L7",
+   "what": "two languages, each judged by its own court; a lamp is no sentence of gate",
+   "file": "cases/j10.haro",
+   "run": {
+    "stdout": "signal\ngate\n0.3\nUNKNOWN_KIND\nUnknown kind 'LAMP': the kinds are closed (GATE)\n"
+   },
+   "judged": [
+    [
+     "signal",
+     "DEFINE LAMP north AS (SHOWS amber) RATIONALE \"x\"",
+     null,
+     ""
+    ],
+    [
+     "gate",
+     "DEFINE GATE east AS (STATE shut) RATIONALE \"x\"",
+     null,
+     ""
+    ],
+    [
+     "gate",
+     "DEFINE LAMP north AS (SHOWS amber) RATIONALE \"x\"",
+     "UNKNOWN_KIND",
+     "Unknown kind 'LAMP': the kinds are closed (GATE)"
+    ]
+   ]
+  },
+  {
+   "id": "J11",
+   "line": "L9",
+   "what": "a name that is no loaded language judges nothing: the statement is refused",
+   "file": "cases/j11.haro",
+   "run": {
+    "raises": "Haro refused this statement (",
+    "never": "judged"
+   },
+   "check": {
+    "errors": 1,
+    "found": [
+     [
+      2,
+      "haro/refused-form"
+     ]
+    ]
+   }
+  },
+  {
+   "id": "J12",
+   "line": "L10",
+   "what": "the checker reads a program that judges: no error",
+   "file": "cases/j12.haro",
+   "run": {
+    "stdout": "signal\n"
+   },
+   "judged": [
+    [
+     "signal",
+     "DEFINE LAMP north AS (SHOWS green) RATIONALE \"open in the morning\"",
+     null,
+     ""
+    ]
+   ],
+   "check": {
+    "errors": 0,
+    "found": []
+   }
+  },
+  {
+   "id": "J13",
+   "line": "L11",
+   "what": "a declaration the meta-court refuses stops the program at its load, in the meta-court's words",
+   "file": "cases/j13.haro",
+   "run": {
+    "raises": "every stzu declaration carries its RATIONALE (the commons, 3.8)",
+    "never": "ran"
+   },
+   "check": {
+    "errors": 1,
+    "found": [
+     [
+      1,
+      "haro/refused-form"
+     ]
+    ]
+   }
+  }
+ ]
+}

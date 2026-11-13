@@ -1,0 +1,2 @@
+load "dim.haro"
+print "ran"

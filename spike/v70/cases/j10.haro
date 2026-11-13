@@ -1,0 +1,14 @@
+load "signal.haro"
+load "gate.haro"
+sLamp = signal.Judge('DEFINE LAMP north AS (SHOWS amber) RATIONALE "x"')
+sGate = gate.Judge('DEFINE GATE east AS (STATE shut) RATIONALE "x"')
+print sLamp.Language()
+print sGate.Language()
+print sGate.Version()
+try
+    sWrong = gate.Judge(sLamp.Text())
+    print "judged"
+catch e
+    print e.Code()
+    print e.Message()
+end
