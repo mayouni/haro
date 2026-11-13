@@ -4099,6 +4099,25 @@ def stage73():
     return 0
 
 
+CHECKRUN_COURT = os.path.join(HERE, 'v69', 'checkrun_court.py')
+
+
+def stage74():
+    """Haro v0.69, `haro check` names what the run refuses (HARO-CHECKRUN-01, D82; v69/GRAMMAR.md): each statement the compiler refused
+    is an error of the check, at the run's line and in the run's words, read off the run's own output; and in a .haro file a definition
+    closed by `end` holds nothing after it. v69/checkrun_court.py on haro and its checked build."""
+    print('stage 74 -- check names what the run refuses: v69/checkrun_court.py on haro and its checked build')
+    p = subprocess.run([sys.executable, CHECKRUN_COURT] + (['--plant'] if PLANT else []), capture_output=True, cwd=HERE, timeout=900)
+    out = p.stdout.decode('utf-8', 'replace').replace(chr(13) + chr(10), chr(10))
+    for line in out.splitlines():
+        if line.startswith(('  FAIL', '       ', 'CHECKRUN COURT')):
+            print(line)
+    if p.returncode != 0:
+        print(f'  FAIL the check-and-run court exited {p.returncode}' + ('' if out.strip() else ': ' + p.stderr.decode('utf-8', 'replace')[-400:]))
+        return 1
+    return 0
+
+
 PORT_COURT = os.path.join(os.path.dirname(HERE), 'port', 'port_court.py')
 
 
@@ -4358,5 +4377,7 @@ if __name__ == '__main__':
         failures += stage72()
     if stage in (None, 73) and os.path.exists(BOOLOUT_COURT):
         failures += stage73()
+    if stage in (None, 74) and os.path.exists(CHECKRUN_COURT):
+        failures += stage74()
     print(f'haro_forge: {"FAIL" if failures else "PASS"} ({failures} failure(s), {time.perf_counter()-t0:.1f} s)')
     sys.exit(1 if failures else 0)

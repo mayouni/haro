@@ -3,14 +3,7 @@ f()
 func f
 	cOld = $g
 	$g = "b"
-	try
-		work()
-	catch e
-		$g = cOld
-		raise(e)
-	end
+	work()
 	$g = cOld
-end
 func work
 	return 0
-end

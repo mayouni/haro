@@ -3,5 +3,4 @@ f()
 func f
 	within $g = cCatchError
 		? $g
-	end
-end
+	done

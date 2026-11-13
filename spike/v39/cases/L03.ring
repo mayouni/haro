@@ -4,16 +4,14 @@ func f
 		raise("x")
 	catch e
 		? e
-	end
+	done
 	try
 		raise("y")
 	catch cCatchError
 		? "bound"
-	end
+	done
 	cCatchError = ""
 	o = new K
 	? o.cCatchError
-end
 class K
 	cCatchError = "an attribute"
-end

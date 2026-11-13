@@ -32,7 +32,7 @@ read until it reads 0 (R1); "passed a validator" is a validator called anywhere 
 callers validate is reported (R2, T05); "" is a bind address only when given to a listener (R3); a by-hand restore that a catch also makes is
 still reported, as A2 says the old shape is a finding (R4).
 
-  python spike/v39/gen_fixtures.py      writes v39/cases/*.haro and v39/fixtures.json
+  python spike/v39/gen_fixtures.py      writes v39/cases/*.ring and v39/fixtures.json
 """
 import json, os
 
@@ -66,7 +66,7 @@ def report(cid, findings, counts, tail):
     """the pinned lines of `haro check`: the file, each finding's two lines, the counts and the closing lines"""
     out = []
     if findings:
-        out.append(f'{cid}.haro')
+        out.append(f'{cid}.ring')
         for rc, sev, rule, msg in findings:
             out.append(f'  {rc}  {sev: <5}  {rule}')
             out.append(f'          {msg}')
@@ -191,7 +191,7 @@ CASES = [
 os.makedirs(os.path.join(HERE, 'cases'), exist_ok=True)
 out = []
 for cid, line, why, prog, args, want in CASES:
-    name = f'cases/{cid}.haro'
+    name = f'cases/{cid}.ring'
     with open(os.path.join(HERE, name), 'w', encoding='utf-8', newline='\n') as fh:
         fh.write('\n'.join(prog) + '\n')
     out.append({'id': cid, 'kind': 'check', 'line': line, 'why': why, 'file': name, 'args': args, 'stdout': '\n'.join(want(cid)) + '\n'})

@@ -14,6 +14,7 @@ The lines:
       runs, and what the run raises there check reports (T01, T02)
   L8  a .ring file's definition holds what follows it, as before (T03)
   L9  the facts give a closed function its own lines (T04)
+  L10 a trap the compiler rolled back is no refusal: a function it compiles a second time has none (W01, written after the code)
 """
 import json, os
 
@@ -204,6 +205,13 @@ end
 print G() + 1
 ''', {'stdout': '2\n3\n'}, {'errors': 0, 'found': [], 'refused': [], 'library': False},
      facts={'top': [], 'functions': {'G': {'line': 2, 'end_line': 4, 'compiled': True, 'findings': [], 'impure': None}}})
+
+# WRITTEN AFTER THE CODE, said so: counting on stzlib showed 63 errors in one function of stzDiagram.ring that the run does not refuse -- its
+# locals pass the register window, so the compiler compiles it a second time with shared registers and throws the first attempt away, traps
+# and all. A trap that was rolled back is no refusal.
+W_SRC = 'func Wide\n' + ''.join(f'    iV{k} = {k}\n' for k in range(1, 261)) + '    return iV1 + iV260\nend\nprint Wide()\n'
+case('W01', 'L10', 'a function compiled twice (260 locals share registers) has no refused form: a trap rolled back is none', 'w01.haro', W_SRC,
+     {'stdout': '261\n'}, {'errors': 0, 'found': [], 'refused': [], 'library': False})
 
 doc = {'version': '0.69', 'task': 'HARO-CHECKRUN-01', 'rule': RULE,
        'law': 'a form the run refuses is an error of `haro check`, at the same line and in the same words', 'cases': cases}

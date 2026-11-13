@@ -714,6 +714,21 @@
      }
     }
    }
+  },
+  {
+   "id": "W01",
+   "line": "L10",
+   "what": "a function compiled twice (260 locals share registers) has no refused form: a trap rolled back is none",
+   "file": "cases/w01.haro",
+   "run": {
+    "stdout": "261\n"
+   },
+   "check": {
+    "errors": 0,
+    "found": [],
+    "refused": [],
+    "library": false
+   }
   }
  ]
 }

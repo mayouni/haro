@@ -3,10 +3,7 @@ g()
 func f
 	nH = StzEngineCacheCreate(8)
 	return nH
-end
 func g
 	$nCache = StzEngineCacheCreate(8)
-end
-func StzEngineCacheCreate(n)
+func StzEngineCacheCreate n
 	return 1
-end

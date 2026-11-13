@@ -6,8 +6,7 @@ func f
 		$g = "b"
 	finally
 		$g = cOld
-	end
+	done
 	within $g = "c"
 		? $g
-	end
-end
+	done

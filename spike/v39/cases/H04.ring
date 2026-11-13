@@ -3,13 +3,9 @@ func f
 	nH = StzEngineCacheCreate(8)
 	use(nH)
 	nX = MakeCreate()
-end
-func StzEngineCacheCreate(n)
+func StzEngineCacheCreate n
 	return 1
-end
 func MakeCreate
 	return 1
-end
-func use(n)
+func use n
 	return 0
-end

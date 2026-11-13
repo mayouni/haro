@@ -5,14 +5,10 @@ func f
 		use(nH)
 	finally
 		StzEngineCacheDestroy(nH)
-	end
-end
-func StzEngineCacheCreate(n)
+	done
+func StzEngineCacheCreate n
 	return 1
-end
-func StzEngineCacheDestroy(n)
+func StzEngineCacheDestroy n
 	return 0
-end
-func use(n)
+func use n
 	return 0
-end

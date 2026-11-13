@@ -1,9 +1,7 @@
 $cHost = "0.0.0.0"
 Serve($cHost, 80)
 Other("0.0.0.0")
-func Serve(cHost, nPort)
+func Serve cHost, nPort
 	return 0
-end
-func Other(c)
+func Other c
 	return 0
-end

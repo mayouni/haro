@@ -1,5 +1,4 @@
 f("1")
-func f(c)
+func f c
 	x = 0
 	eval("x = " + c)
-end

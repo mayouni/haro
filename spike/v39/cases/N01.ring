@@ -2,6 +2,5 @@ Serve("0.0.0.0", 80)
 Serve("::", 80)
 Serve("", 80)
 Serve("127.0.0.1", 80)
-func Serve(cHost, nPort)
+func Serve cHost, nPort
 	return 0
-end

@@ -6,4 +6,3 @@ func f
 	$g = x + "!"
 	y = $g
 	$g = "c"
-end

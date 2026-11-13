@@ -1,10 +1,8 @@
 f("1")
-func f(c)
+func f c
 	x = 0
 	if IsSafe(c)
 		eval("x = " + c)
-	end
-end
-func IsSafe(c)
+	ok
+func IsSafe c
 	return 1
-end
