@@ -1,0 +1,4 @@
+load "kind.ring"
+bX = Same(true)
+print bX
+print Type(Same(false))

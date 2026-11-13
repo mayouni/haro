@@ -1,0 +1,3 @@
+print Find([true, false], false)
+print Find([true, false], true)
+print Find([1, 0], false)

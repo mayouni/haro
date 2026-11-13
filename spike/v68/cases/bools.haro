@@ -1,0 +1,19 @@
+func Yes
+	return true
+end
+func No
+	return false
+end
+func Both
+	return [true, false]
+end
+func Mixed
+	return [true, "a", 2]
+end
+class Flag
+	bOk = true
+	nN = 1
+end
+func MakeFlag
+	return new Flag
+end

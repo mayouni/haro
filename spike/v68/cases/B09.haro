@@ -1,0 +1,5 @@
+load "bools.haro"
+print Yes()
+print String(No())
+print Type(Yes())
+print IsNumber(true)

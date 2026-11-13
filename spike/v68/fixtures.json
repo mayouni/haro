@@ -1,0 +1,106 @@
+{
+ "rung": "v0.68",
+ "decision": "HARO-RINGBOUNDARY-BOOL-OUT-01 (stzlib-haroport, 2026-11-12), its reading (a); the desk's reading is D80",
+ "class": "exact: the program's whole stdout and its exit code, byte for byte, on haro and on its checked build",
+ "lines": {
+  "L1": "printed as 1 or 0",
+  "L2": "type() NUMBER, isNumber 1",
+  "L3": "string, number, list2str, +",
+  "L4": "compares with 1 and 0",
+  "L5": "find and sort",
+  "L6": "StzLib's dispatch",
+  "L7": "at a .ring parameter",
+  "L8": ".haro keeps its booleans",
+  "L9": "Find finds a boolean in .haro"
+ },
+ "cases": [
+  {
+   "id": "B01",
+   "kind": "run",
+   "line": "L1",
+   "why": "printed as 1 or 0 by .ring code: alone, with see, as a list's item",
+   "file": "cases/B01.ring",
+   "stdout": "1\n0\n1\n1\n0\n\n0\n2\n\n"
+  },
+  {
+   "id": "B02",
+   "kind": "run",
+   "line": "L1",
+   "why": "an object's boolean attribute printed by .ring code",
+   "file": "cases/B02.ring",
+   "stdout": "bok: 1\nnn: 1\n\n1\n"
+  },
+  {
+   "id": "B03",
+   "kind": "run",
+   "line": "L2",
+   "why": "type() is NUMBER and isNumber is 1",
+   "file": "cases/B03.ring",
+   "stdout": "NUMBER\n1\n1\n0\n"
+  },
+  {
+   "id": "B04",
+   "kind": "run",
+   "line": "L3",
+   "why": "string(), number(), list2str and + read it as 1 or 0",
+   "file": "cases/B04.ring",
+   "stdout": "1\n1\n2\n1\n0\nv=0\n"
+  },
+  {
+   "id": "B05",
+   "kind": "run",
+   "line": "L4",
+   "why": "it compares with 1 and 0 as before",
+   "file": "cases/B05.ring",
+   "stdout": "yes is 1\nno is 0\nyes is not 0\n2\n"
+  },
+  {
+   "id": "B06",
+   "kind": "run",
+   "line": "L5",
+   "why": "find() and sort() in .ring code take it as its number",
+   "file": "cases/B06.ring",
+   "stdout": "1\n2\n1\n0\n0\n1\n\n"
+  },
+  {
+   "id": "B07",
+   "kind": "run",
+   "line": "L6",
+   "why": "StzLib's case: a dispatch on isNumber and isString over values a .haro function gave",
+   "file": "cases/B07.ring",
+   "stdout": "N1 Sa N2 \n"
+  },
+  {
+   "id": "B08",
+   "kind": "run",
+   "line": "L7",
+   "why": "a .haro caller's boolean at a .ring function's parameter is the number there",
+   "file": "cases/B08.haro",
+   "stdout": "NUMBER\n2\n"
+  },
+  {
+   "id": "B09",
+   "kind": "run",
+   "line": "L8",
+   "why": ".haro code keeps true and false",
+   "file": "cases/B09.haro",
+   "stdout": "true\nfalse\nBOOLEAN\nfalse\n"
+  },
+  {
+   "id": "B10",
+   "kind": "run",
+   "line": "L8",
+   "why": "a boolean that passes through .ring code comes back a boolean",
+   "file": "cases/B10.haro",
+   "stdout": "true\nBOOLEAN\n"
+  },
+  {
+   "id": "B11",
+   "kind": "run",
+   "line": "L9",
+   "why": "Find in a .haro file finds a boolean, and a boolean meets no number",
+   "file": "cases/B11.haro",
+   "stdout": "2\n1\n0\n"
+  }
+ ]
+}
