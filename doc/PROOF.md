@@ -40,7 +40,7 @@ named in section 9, from the desk's own reading.
 | `haro check --facts`: per function, what the checker establishes, with the checker's commit and each file's sha256; a fact not established is absent | D61, v0.51 | built |
 | `requires`, `ensures`, `invariant` in the closed, total condition language; checked when the program runs until a prover discharges them | D62, delegated | v0.70, then v0.71 |
 | `uses [door]`, pure without it, the closure checked; `total`; `budget`; `personal` | D56, SG1.md 7 | ruled, not built |
-| a sentence is a value only its court makes; text through a door is `unjudged` | D55, TYPES.md T7 | v0.69 |
+| a sentence is a value only its court makes; text through a door is `unjudged` | D55, TYPES.md T7 | v0.70 |
 | a language declares the doors its worlds may open (`NEEDS`, `OPENS`) | D51 | declared half built (v0.40) |
 | a `.ring` file is outside every proof claim | HARO-PROOF-01 (e) | confirmed |
 
@@ -219,7 +219,7 @@ it. Haro checks nothing there: it records {checker, version, spec sha256, source
 
 | rung | what | why here |
 |---|---|---|
-| v0.69 | judged types and `unjudged` (as planned) | the first half of "always invoked" |
+| v0.70 (it was v0.69 here; D82 took that number) | judged types and `unjudged` (as planned) | the first half of "always invoked" |
 | then | `uses` and `total` (T9), the proof profile's first refusals | completes "always invoked" and "bounded"; no solver |
 | then | the encoder and the enumerator, with **5.4's questions on a declaration** as their first customer | smallest trusted base; what serves governed agents first |
 | then | contracts written and checked when they run (D62's v0.70) | unchanged |

@@ -438,7 +438,7 @@ the cut say `haro/X`, `X.ring`, `rnxc` and "the oracle"**: read them as this rep
 
 The records, all in `doc/` (moved from the root 2026-11-13, on the Principal's word: the root holds README, CLAUDE and LICENSE, as in
 every Softanza project; a record named below or in an older text by its bare name is `doc/<name>`): `CHARTER.md` (section 13 the
-decisions, D1 to D81; section 15 the v0.3 amendments), `PRINCIPLES.md`,
+decisions, D1 to D82; section 15 the v0.3 amendments), `PRINCIPLES.md`,
 `GRAMMAR-SKETCH.md`, `FINDINGS.md` (HF-1 to HF-152, each measured), `SPIKE.md` (every rung, one section each, and "Next"),
 `CODEGRAPH.md` (the code-graph memo), `TYPES.md` (Haro's types: D55, RULED 2026-11-07, nothing built yet), `BLOCKS.md` (one format and pattern rules, REBOL-06/07: its four questions RULED 2026-11-02),
 `FROM-RINGPP.md`, `NUMBERS.md`, `SG1.md`, `STANDALONE.md`, `PROOF.md` (proof in Haro: PROPOSED 2026-11-13, nothing ruled).
@@ -558,9 +558,11 @@ Each `%NAME%` in this file is a folder of this machine; its value is in `.centra
   or an integer, `Keys`, `Values`, `HasKey`, `Del`, in insertion order; `m` holds a map, `v` no map. **v0.68 is built** (D80, HF-174,
   stage 73): in `.ring` code a boolean is the number 1 or 0 wherever it came from (`isNumber` 1, `type()` NUMBER, printed and
   joined as 1 or 0); `.haro` code keeps `true` and `false`. Proof in Haro is RULED (D81, `doc/PROOF.md`): the court is the kernel; three verdicts; nothing built.
-  The engine at %HAROENGINE% is built from stzlib 8221cdcfd (2026-11-13, HARO-ENGINE-REFRESH-01: all 92 domains, the credential broker and the
-  shut list; stzlib's two guards for them 38 of 38 and 43 of 43 on it); a refresh is built in `runtime/engine` first, and the shared folder changes after its notice.
-  Next: judged types, v0.69; then `uses` and `total`; then a declaration asked about all its sentences.
+  **v0.69 is built** (D82, HF-175, stage 74): `haro check` names what the run refuses -- each statement the compiler refused is an
+  error, `haro/refused-form`, at the run's line and in its words; in a `.haro` file a definition closed by `end` holds nothing after it.
+  The engine at %HAROENGINE% is built from stzlib f939470a5 (2026-11-13: all 92 domains; the credential broker, the shut list, text
+  direction); a refresh is built with `engine/build_engine.py --staging` first, announced, and the shared folder changes after its notice.
+  Next: judged types, v0.70; then `uses` and `total`; then a declaration asked about all its sentences.
 - D43 is the twin-court clause. Of BLOCKS.md's four questions: Q-B1 is built (`?` is C6, and `OPTIONAL` sees it in a rule); Q-B2's two amendments are refused by name until Ringua's text
   lands; Q-B3 the block export of a program is not started; Q-B4 the round-trip court the elders waited for exists -- asking their owners is Central's.
 - **Answered 2026-11-05**: HARO-DISTANCE-01 (HF-141; D50, the author's ruling: no part of Ring is carried with Haro), HARO-ONEHOUR-01 (D51) and -02 (D52). **Next**: what stzlib's sweep on haro.exe sends; zip.zig out (stzlib calls no zip_* since cb6f5de65) with

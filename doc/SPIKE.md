@@ -1917,6 +1917,10 @@ D58, the Principal's ruling of 2026-11-09 ("ParentClassName"), revising v0.42's 
 
 **Results.** 9 of 9 cases on both builds; 5 of 5 plants; v36 to v48's courts green. Haro's 2,172 calls re-spelled by a tool (20fc236, listed in v20/tool_commits.txt).
 
+## The sixty-ninth rung -- Haro v0.69, `haro check` names what the run refuses -- 2026-11-13
+
+D82, from stzlib-security's HARO-CHECKRUN-01: each statement the compiler refuses is an error of `haro check`, rule `haro/refused-form`, at the run's line and in the run's words; a trap rolled back is none; and in a `.haro` file a definition closed by `end` holds nothing after it, for the checker as for the run. 23 of 23 on both builds, plants K1-K12 (eb4b47f, 5a3063e). The five-rules court's cases are `.ring` files. The same day the shared engine was rebuilt twice after a notice (stzlib 8221cdcfd: the credential broker and the shut list; f939470a5: text direction), and `engine/build_engine.py` names its folder (1712d55).
+
 ## The sixty-eighth rung -- Haro v0.68, in .ring code a boolean is the number 1 or 0 -- 2026-11-13
 
 D80, from stzlib-haroport's HARO-RINGBOUNDARY-BOOL-OUT-01, the boolean mirror of v0.65: `.ring` code prints, joins, types, finds and sorts a boolean as its number, wherever it came from; `.haro` code keeps `true` and `false`. With it, `Find` in a `.haro` file finds a boolean. 11 of 11 on both builds, plants K1-K13 (903213a, 4989cac). The same day the design documents moved to `doc/` (17f9a4e), and proof in Haro was ruled (`doc/PROOF.md`, D81).
