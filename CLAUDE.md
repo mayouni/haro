@@ -558,6 +558,8 @@ Each `%NAME%` in this file is a folder of this machine; its value is in `.centra
   or an integer, `Keys`, `Values`, `HasKey`, `Del`, in insertion order; `m` holds a map, `v` no map. **v0.68 is built** (D80, HF-174,
   stage 73): in `.ring` code a boolean is the number 1 or 0 wherever it came from (`isNumber` 1, `type()` NUMBER, printed and
   joined as 1 or 0); `.haro` code keeps `true` and `false`. Proof in Haro is RULED (D81, `doc/PROOF.md`): the court is the kernel; three verdicts; nothing built.
+  The engine at %HAROENGINE% is built from stzlib 8221cdcfd (2026-11-13, HARO-ENGINE-REFRESH-01: all 92 domains, the credential broker and the
+  shut list; stzlib's two guards for them 38 of 38 and 43 of 43 on it); a refresh is built in `runtime/engine` first, and the shared folder changes after its notice.
   Next: judged types, v0.69; then `uses` and `total`; then a declaration asked about all its sentences.
 - D43 is the twin-court clause. Of BLOCKS.md's four questions: Q-B1 is built (`?` is C6, and `OPTIONAL` sees it in a rule); Q-B2's two amendments are refused by name until Ringua's text
   lands; Q-B3 the block export of a program is not started; Q-B4 the round-trip court the elders waited for exists -- asking their owners is Central's.
