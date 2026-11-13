@@ -19,7 +19,7 @@ archive holds the `haro` binary, its LICENSE (MIT) and THIRD-PARTY-NOTICES.txt, 
     python paths.py                                                     what this checkout runs on
     cd vm && zig build -Doptimize=ReleaseFast -j2                       the Haro VM            vm/zig-out/bin/haro.exe
     cd vm && zig build -Doptimize=ReleaseSafe -j2 -p zig-out-safe       its checked build      vm/zig-out-safe/bin/haro.exe
-    python spike/haro_forge.py                                          the guard: every rung's court on both builds (55 stages)
+    python spike/haro_forge.py                                          the guard: every rung's court on both builds (72 stages)
     python spike/haro_forge.py --stage=N                                one stage
     python spike/haro_forge.py --plant                                  must FAIL: a check that cannot fail is no check
     python release/build_release.py windows | linux | macos             a release archive
@@ -30,12 +30,14 @@ before its code, and every protection is switched off in turn to show the court 
 ## Where to read
 
     CLAUDE.md        the brief, and what is where
-    CHARTER.md       the charter: the alphabet, the decisions (D1-D63), the amendments
-    PRINCIPLES.md    the founding principles;  GRAMMAR-SKETCH.md  the first grammar
-    TYPES.md         Haro's types, rung by rung
-    SPIKE.md         every rung, one section each, and what comes next
-    FINDINGS.md      HF-1 to HF-157, each one measured
-    CODEGRAPH.md     the code-graph memo;  BLOCKS.md  one format and pattern rules
+    doc/             the design documents:
+      CHARTER.md       the charter: the alphabet, the decisions (D1-D79), the amendments
+      PRINCIPLES.md    the founding principles;  GRAMMAR-SKETCH.md  the first grammar
+      TYPES.md         Haro's types, rung by rung;  NUMBERS.md  its numbers;  SG1.md  the system grain
+      PROOF.md         proof in Haro, a proposal
+      SPIKE.md         every rung, one section each, and what comes next
+      FINDINGS.md      HF-1 to HF-173, each one measured
+      CODEGRAPH.md     the code-graph memo;  BLOCKS.md  one format and pattern rules
     vm/NOTES.md      the VM and its compiler
     spike/           the meta-court, the forge, the courts, each rung's fixtures and grammar
     study/           the measurements behind the memos

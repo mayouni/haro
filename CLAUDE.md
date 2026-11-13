@@ -379,7 +379,7 @@ Full law: `%CENTRAL%\protocol\PERCEPTION.md`.
 **Haro is the foundational language of the Softanza project: the language of languages** (Ringua realised) -- a closed, judged
 grammar family in which a world is declared, constrained, asked, moved, stepped and spoken to (the alphabet Z W Q F A N), every
 sentence judged by a court the forge emits from its declaration, every refusal named and cited, refinement the change model at
-every altitude. It runs on its own VM, `haro`. This file is the whole brief for an AI session working here; `CHARTER.md` is the law.
+every altitude. It runs on its own VM, `haro`. This file is the whole brief for an AI session working here; `doc/CHARTER.md` is the law.
 
 **PUBLIC since 2026-11-10, on the author's word** ("you should have proposed to make Haro public and I would agree! remove this
 haro-releases and work on one repo"). `github.com/mayouni/haro` is public, its history whole; its releases page carries the builds
@@ -420,12 +420,15 @@ the cut say `haro/X`, `X.ring`, `rnxc` and "the oracle"**: read them as this rep
                      STZ_ENGINE_DIR. No part of Ring is carried (D50)
     study/           the measurements behind design memos (codegraph, phase15, rebol). Studies and probes OF Ring keep Ring 1.27 as
                      their subject (paths.RING_ORACLE), never as a judge
+    doc/             the design documents and records, every one: a new one is written here, never at the root
     runtime/         gitignored: what runs write (the second judge's forge folder, scratch)
 
-The records: `CHARTER.md` (section 13 the decisions, D1 to D55; section 15 the v0.3 amendments), `PRINCIPLES.md`,
+The records, all in `doc/` (moved from the root 2026-11-13, on the Principal's word: the root holds README, CLAUDE and LICENSE, as in
+every Softanza project; a record named below or in an older text by its bare name is `doc/<name>`): `CHARTER.md` (section 13 the
+decisions, D1 to D79; section 15 the v0.3 amendments), `PRINCIPLES.md`,
 `GRAMMAR-SKETCH.md`, `FINDINGS.md` (HF-1 to HF-152, each measured), `SPIKE.md` (every rung, one section each, and "Next"),
 `CODEGRAPH.md` (the code-graph memo), `TYPES.md` (Haro's types: D55, RULED 2026-11-07, nothing built yet), `BLOCKS.md` (one format and pattern rules, REBOL-06/07: its four questions RULED 2026-11-02),
-`FROM-RINGPP.md`.
+`FROM-RINGPP.md`, `NUMBERS.md`, `SG1.md`, `STANDALONE.md`, `PROOF.md` (proof in Haro: PROPOSED 2026-11-13, nothing ruled).
 
 ## The neighbours
 
