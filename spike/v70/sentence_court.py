@@ -7,6 +7,7 @@ A case passes when, on both builds:
   THE LAW     for each text the case judges, the language's own court -- forged from the same declaration by the build under test and
               run standing alone, as `haro <language>_court.haro diagnose <file>` -- answers the fixture's verdict: no finding, or the
               fixture's code and message first. So what a program's `Judge` is held to is what the standalone court says
+  the image   (J14) with the compiled image kept, a second run answers the same; a declaration edited between runs is forged again
   D41         the two builds print the same bytes, run and check
 
   python spike/v70/sentence_court.py              haro and the checked build, as paths.py finds them
@@ -83,7 +84,48 @@ def standalone(exe, label, lang, text):
     return (ds[0]['code'], ds[0]['message']) if ds else (None, '')
 
 
+def kept(c, exe):
+    """L12: the case and its declaration in a folder of their own, the image cache on and in that folder: two runs print the first
+    answer and write an image; the declaration edited, two more print the second"""
+    import shutil, tempfile
+    k, bad, said = c['kept'], [], ''
+    name = os.path.basename(c['file'])
+    with tempfile.TemporaryDirectory() as td:
+        for f in [name] + k['beside']:
+            shutil.copyfile(os.path.join(HERE, 'cases', f), os.path.join(td, f))
+        env = dict(os.environ)
+        env.pop('HARO_NOCACHE', None)
+        env['HARO_HOME'] = SPIKE
+        env['HARO_CACHE'] = os.path.join(td, 'cache', 'images')
+
+        def go():
+            r = subprocess.run([exe, name], capture_output=True, env=env, timeout=120, cwd=td)
+            return r.stdout.decode('utf-8', 'replace').replace('\r\n', '\n')
+        for n, want in ((1, k['first']), (2, k['first'])):
+            out = go()
+            said += out
+            if out != want:
+                bad.append(f'run {n} prints {out[:200]!r}, not {want!r}')
+        images = sum(len(fs) for d, _, fs in os.walk(os.path.join(td, 'cache', 'images')))
+        if not images:
+            bad.append('no image was kept')
+        f, old, new = k['edit']
+        text = open(os.path.join(td, f), encoding='utf-8').read()
+        if text.count(old) != 1:
+            bad.append(f'the edit finds {text.count(old)} of {old!r}')
+        with open(os.path.join(td, f), 'w', encoding='utf-8', newline='\n') as fh:
+            fh.write(text.replace(old, new))
+        for n, want in ((3, k['then']), (4, k['then'])):
+            out = go()
+            said += out
+            if out != want:
+                bad.append(f'run {n}, after the edit, prints {out[:200]!r}, not {want!r}')
+    return bad, said
+
+
 def judge(c, label, exe):
+    if 'kept' in c:
+        return kept(c, exe)
     bad = []
     cwd = os.path.join(HERE, os.path.dirname(c['file']))
     name = os.path.basename(c['file'])

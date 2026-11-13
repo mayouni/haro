@@ -6715,6 +6715,17 @@ pub const Compiler = struct {
             _ = try self.emit(.loadk, dst, 0, 0, try self.konstIndex("\"\""));
             return;
         }
+        // v0.70 (TYPES.md T7): a sentence is made by its court alone -- HaroJudge, in judge_lib.haro -- and never by `new`: through an
+        // o or x name it would reach an s name unjudged
+        if (std.ascii.eqlIgnoreCase(ci.name, "harosentence")) {
+            const fi = self.fileOf(n.src.ptr);
+            const own = if (fi) |f| f < load_paths.len and std.ascii.eqlIgnoreCase(std.fs.path.basename(load_paths[f]), "judge_lib.haro") else false;
+            if (!own) {
+                if (self.spellIn(n.text())) self.spellSet(n.text(), "a sentence is made by its court -- <language>.Judge(text); written");
+                _ = try self.emit(.loadk, dst, 0, 0, try self.konstIndex("\"\""));
+                return;
+            }
+        }
 
         const save = self.temp;
         defer self.temp = save;

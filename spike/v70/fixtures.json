@@ -237,6 +237,47 @@
      ]
     ]
    }
+  },
+  {
+   "id": "J15",
+   "line": "L13",
+   "what": "a sentence is made by its court alone: `new` of one is refused when compiling",
+   "file": "cases/j15.haro",
+   "run": {
+    "refuses": [
+     2,
+     "a sentence is made by its court -- <language>.Judge(text); written",
+     "new HaroSentence(\"signal\", \"1.2\", \"anything at all\", [])"
+    ],
+    "never": "anything at all"
+   },
+   "check": {
+    "errors": 1,
+    "found": [
+     [
+      2,
+      "haro/refused-form"
+     ]
+    ]
+   }
+  },
+  {
+   "id": "J14",
+   "line": "L12",
+   "what": "the image kept: a second run answers the same, and an edited declaration is forged again",
+   "file": "cases/j14.haro",
+   "kept": {
+    "beside": [
+     "signal.haro"
+    ],
+    "first": "UNKNOWN_COLOUR\n",
+    "edit": [
+     "signal.haro",
+     "WORDS [red, amber, green]",
+     "WORDS [red, amber, green, white]"
+    ],
+    "then": "DEFINE LAMP north AS (SHOWS white) RATIONALE \"x\"\n"
+   }
   }
  ]
 }

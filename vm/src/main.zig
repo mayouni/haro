@@ -9606,10 +9606,6 @@ pub const VM = struct {
                     continue :dispatch .raise;
                 }
                 const o = rv.p.o;
-                if (sentenceFixed(o)) {
-                    self.pending = SENTENCE_FIXED;
-                    continue :dispatch .raise;
-                }
                 const sl: u32 = @intCast(in.d);
                 if (sl >= o.nslots) self.fitObj(o);
                 if (sl >= o.nslots) @panic("sattr: slot out of range");

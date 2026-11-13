@@ -1,0 +1,4 @@
+load "signal.haro"
+xFake = new HaroSentence("signal", "1.2", "anything at all", [])
+sFake = xFake
+print sFake

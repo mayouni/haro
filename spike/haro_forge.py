@@ -4118,6 +4118,25 @@ def stage74():
     return 0
 
 
+SENTENCE_COURT = os.path.join(HERE, 'v70', 'sentence_court.py')
+
+
+def stage75():
+    """Haro v0.70, a program judges (TYPES.md T7, D83, D85; v70/GRAMMAR.md): `load` of a declaration forges its court, `signal.Judge(tText)`
+    answers a sentence or raises the court's refusal, the letter s holds a sentence alone, and what a program's Judge answers is what the
+    language's own forged court answers standing alone. v70/sentence_court.py on haro and its checked build."""
+    print('stage 75 -- a program judges: v70/sentence_court.py on haro and its checked build')
+    p = subprocess.run([sys.executable, SENTENCE_COURT] + (['--plant'] if PLANT else []), capture_output=True, cwd=HERE, timeout=900)
+    out = p.stdout.decode('utf-8', 'replace').replace(chr(13) + chr(10), chr(10))
+    for line in out.splitlines():
+        if line.startswith(('  FAIL', '       ', 'SENTENCE COURT')):
+            print(line)
+    if p.returncode != 0:
+        print(f'  FAIL the sentence court exited {p.returncode}' + ('' if out.strip() else ': ' + p.stderr.decode('utf-8', 'replace')[-400:]))
+        return 1
+    return 0
+
+
 PORT_COURT = os.path.join(os.path.dirname(HERE), 'port', 'port_court.py')
 
 
@@ -4379,5 +4398,7 @@ if __name__ == '__main__':
         failures += stage73()
     if stage in (None, 74) and os.path.exists(CHECKRUN_COURT):
         failures += stage74()
+    if stage in (None, 75) and os.path.exists(SENTENCE_COURT):
+        failures += stage75()
     print(f'haro_forge: {"FAIL" if failures else "PASS"} ({failures} failure(s), {time.perf_counter()-t0:.1f} s)')
     sys.exit(1 if failures else 0)

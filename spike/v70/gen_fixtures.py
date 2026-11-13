@@ -15,6 +15,8 @@ The lines:
   L9  a name that is no loaded language judges nothing
   L10 `haro check` of a program that judges reads no error
   L11 the declaration is judged when the program is compiled: one the meta-court refuses stops the program at its `load`
+  L12 the compiled image is kept as any program's is, and an edited declaration is forged again (J14, written after the code)
+  L13 a sentence is made by its court alone: `new` of one is refused outside the judging library (J15, written after the code)
 
 CHANGED AFTER THE CODE, each said: J03, J05, J10 -- Message() answers the whole line the VM prints for a coded error, `Error (CODE) :
 message`, as it does for every error of the VM (v0.37, E3), where the first text here gave the court's message alone. J04 -- the
@@ -222,6 +224,36 @@ Show('{GREEN}')
 case('J13', 'L11', 'a declaration the meta-court refuses stops the program at its load, in the meta-court\'s words', '''load "dim.haro"
 print "ran"
 ''', {'raises': 'every stzu declaration carries its RATIONALE (the commons, 3.8)', 'never': 'ran'}, check={'errors': 1, 'found': [['dim.haro', 7, RULE]]})
+
+# WRITTEN AFTER THE CODE, said so: a plant that caught nothing (a write into a sentence by its slot) sent the desk to look for a way
+# round the court, and there was one -- `new HaroSentence(...)` held by an x name, then given to an s name, passed the letter's check
+# unjudged. A sentence is made by its court alone: the `new` is refused when compiling, outside the judging library.
+FAKE = 'new HaroSentence("signal", "1.2", "anything at all", [])'
+case('J15', 'L13', 'a sentence is made by its court alone: `new` of one is refused when compiling', f'''load "signal.haro"
+xFake = {FAKE}
+sFake = xFake
+print sFake
+''', {'refuses': [2, 'a sentence is made by its court -- <language>.Judge(text); written', FAKE], 'never': 'anything at all'},
+     check={'errors': 1, 'found': [[2, RULE]]})
+
+# WRITTEN AFTER THE CODE, said so: the courts run with the image cache off, and a program that judges is one whose compiled image
+# is kept like any other. With the image kept, the second run answers what the first did; and a declaration edited between two runs
+# is forged again -- the text the first court refused is a sentence for the second.
+WHITE = 'DEFINE LAMP north AS (SHOWS white) RATIONALE "x"'
+K_SRC = f'''load "signal.haro"
+try
+    sLamp = signal.Judge('{WHITE}')
+    print sLamp
+catch e
+    print e.Code()
+end
+'''
+with open(os.path.join(HERE, 'cases', 'j14.haro'), 'w', encoding='utf-8', newline='\n') as f:
+    f.write(K_SRC)
+cases.append({'id': 'J14', 'line': 'L12', 'what': 'the image kept: a second run answers the same, and an edited declaration is forged again',
+              'file': 'cases/j14.haro', 'kept': {'beside': ['signal.haro'], 'first': 'UNKNOWN_COLOUR\n',
+                                                 'edit': ['signal.haro', 'WORDS [red, amber, green]', 'WORDS [red, amber, green, white]'],
+                                                 'then': WHITE + '\n'}})
 
 doc = {'version': '0.70', 'task': 'TYPES.md T7, rung 1: sentences made when a program runs', 'languages': ['signal', 'gate'],
        'law': 'what Judge answers is what the language\'s own forged court answers, standing alone, on the same text', 'cases': cases}
