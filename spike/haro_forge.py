@@ -4082,6 +4082,23 @@ def stage72():
     return 0
 
 
+BOOLOUT_COURT = os.path.join(HERE, 'v68', 'boolout_court.py')
+
+
+def stage73():
+    """Haro v0.68, in .ring code a boolean is the number 1 or 0 (HARO-RINGBOUNDARY-BOOL-OUT-01, D80; v68/GRAMMAR.md). v68/boolout_court.py on haro and its checked build."""
+    print('stage 73 -- a boolean in .ring code: v68/boolout_court.py on haro and its checked build')
+    p = subprocess.run([sys.executable, BOOLOUT_COURT] + (['--plant'] if PLANT else []), capture_output=True, cwd=HERE, timeout=900)
+    out = p.stdout.decode('utf-8', 'replace').replace(chr(13) + chr(10), chr(10))
+    for line in out.splitlines():
+        if line.startswith(('  FAIL', '       ', 'BOOLOUT COURT')):
+            print(line)
+    if p.returncode != 0:
+        print(f'  FAIL the boolean court exited {p.returncode}' + ('' if out.strip() else ': ' + p.stderr.decode('utf-8', 'replace')[-400:]))
+        return 1
+    return 0
+
+
 PORT_COURT = os.path.join(os.path.dirname(HERE), 'port', 'port_court.py')
 
 
@@ -4339,5 +4356,7 @@ if __name__ == '__main__':
         failures += stage71()
     if stage in (None, 72) and os.path.exists(MAP_COURT):
         failures += stage72()
+    if stage in (None, 73) and os.path.exists(BOOLOUT_COURT):
+        failures += stage73()
     print(f'haro_forge: {"FAIL" if failures else "PASS"} ({failures} failure(s), {time.perf_counter()-t0:.1f} s)')
     sys.exit(1 if failures else 0)
