@@ -3871,6 +3871,8 @@ pub const VM = struct {
     /// finds itself (find(n, [3,4]) is 0 on Ring).
     fn strictEq(a: Value, b: Value) bool {
         if (isNum(a) and isNum(b)) return asF64(a) == asF64(b);
+        // v0.68: a boolean finds a boolean (Find([true, false], false) answered 0)
+        if (a.tag == .boolean and b.tag == .boolean) return a.p.i == b.p.i;
         if (a.tag == .str and b.tag == .str) {
             const x = a.p.s;
             const y = b.p.s;
@@ -3894,9 +3896,14 @@ pub const VM = struct {
         if (col >= 1 and v.tag == .vec and col <= v.p.v.len) return v.p.v.ptr[@intCast(col - 1)];
         return v;
     }
-    fn sortLess(col: i64, a: Value, b: Value) bool {
-        const x = sortKey(a, col);
-        const y = sortKey(b, col);
+    const SortBy = struct { col: i64, ring: bool };
+    /// v0.68 (D80): in .ring code a boolean is the number 1 or 0
+    inline fn ringBool(v: Value) Value {
+        return if (v.tag == .boolean) Value.int(v.p.i) else v;
+    }
+    fn sortLess(by: SortBy, a: Value, b: Value) bool {
+        const x = if (by.ring) ringBool(sortKey(a, by.col)) else sortKey(a, by.col);
+        const y = if (by.ring) ringBool(sortKey(b, by.col)) else sortKey(b, by.col);
         if (isNum(x) and isNum(y)) return asF64(x) < asF64(y);
         if (x.tag == .str and y.tag == .str) return std.mem.order(u8, x.p.s.ptr[0..x.p.s.len], y.p.s.ptr[0..y.p.s.len]) == .lt;
         if (isNum(x) and y.tag == .str) return true;
@@ -4393,8 +4400,8 @@ pub const VM = struct {
                 var db: [48]u8 = undefined;
                 outPrint("{s}{s}", .{ decimal.text(.{ .c = v.p.i, .s = v._r }, &db), end });
             },
-            // v0.43: a boolean prints its word wherever it is printed
-            .boolean => outPrint("{s}{s}", .{ if (v.p.i != 0) "true" else "false", end }),
+            // v0.43: a boolean prints its word -- and in .ring code the number 1 or 0 (v0.68, D80)
+            .boolean => if (self.say_ring) outPrint("{d}{s}", .{ v.p.i, end }) else outPrint("{s}{s}", .{ if (v.p.i != 0) "true" else "false", end }),
             // Ring prints a whole-valued number without a point (`? 1.5*2`
             // is `3`), and otherwise to decimals() places -- 2 by default,
             // verified on 1.27 (`? 0.1+0.2` is `0.30`). decimals() being a
@@ -6278,9 +6285,11 @@ pub const VM = struct {
                 const in = code[pc];
                 // v0.65 (D77): .ring code prints a decimal as Ring prints a number, an item of a list too
                 const pv = regs[base + in.a];
-                const strict_say = (pv.tag == .dec or pv.tag == .num or pv.tag == .vec or pv.tag == .obj) and self.strictAt(pc);
+                // v0.68 (D80): and a boolean as the number 1 or 0
+                const wide = pv.tag == .dec or pv.tag == .num or pv.tag == .vec or pv.tag == .obj or pv.tag == .boolean;
+                const strict_say = wide and self.strictAt(pc);
                 // (v0.67: a map is printed whole, as written, so the flag reaches it)
-                self.say_ring = (pv.tag == .dec or pv.tag == .vec or pv.tag == .obj) and !strict_say;
+                self.say_ring = wide and pv.tag != .num and !strict_say;
                 // v0.66 (D78): .haro code writes a float as its shortest exact text, and no setting reaches it
                 self.say_haro = strict_say;
                 self.sayValue(pv, in.c == 0); // c=1 is `see`: no newline
@@ -7201,7 +7210,8 @@ pub const VM = struct {
                         }
                     },
                     .number => {
-                        if (!isNum(regs[A]) and regs[A].tag != .str) {
+                        // v0.68 (D80): in .ring code a boolean is the number 1 or 0
+                        if (!isNum(regs[A]) and regs[A].tag != .str and !(regs[A].tag == .boolean and !self.strictAt(pc))) {
                             self.pending = BADPARAM;
                             continue :dispatch .raise;
                         }
@@ -7283,7 +7293,8 @@ pub const VM = struct {
                     // a lambda is a STRING on Ring and answers so here (Vec.closure)
                     .islist => out = Value.int(if (regs[A].tag == .vec and !regs[A].p.v.closure) 1 else 0),
                     .isstring => out = Value.int(if (regs[A].tag == .str or (regs[A].tag == .vec and regs[A].p.v.closure)) 1 else 0),
-                    .isnumber => out = Value.int(if (regs[A].tag == .int or regs[A].tag == .num or regs[A].tag == .dec) 1 else 0),
+                    .isnumber => out = Value.int(if (regs[A].tag == .int or regs[A].tag == .num or regs[A].tag == .dec or
+                        (regs[A].tag == .boolean and !self.strictAt(pc))) 1 else 0),
                     .float1 => {
                         const v = regs[A];
                         if (v.tag == .str) {
@@ -7415,7 +7426,8 @@ pub const VM = struct {
                         if (v.tag == .str) {
                             out = v;
                         } else if (v.tag == .boolean) {
-                            out = Value.str(self.newStr(if (v.p.i != 0) "true" else "false"));
+                            // v0.68 (D80): in .ring code the number 1 or 0
+                            out = Value.str(self.newStr(if (!self.strictAt(pc)) (if (v.p.i != 0) "1" else "0") else if (v.p.i != 0) "true" else "false"));
                         } else if (isNum(v)) {
                             var buf: [400]u8 = undefined;
                             // v0.66 (D78): .haro code writes a float as its shortest exact text
@@ -7440,7 +7452,8 @@ pub const VM = struct {
                             .int, .num => "NUMBER",
                             // v0.65 (D77): in .ring code a decimal is Ring's number
                             .dec => if (self.strictAt(pc)) "DECIMAL" else "NUMBER",
-                            .boolean => "BOOLEAN",
+                            // v0.68 (D80): in .ring code a boolean is the number 1 or 0
+                            .boolean => if (self.strictAt(pc)) "BOOLEAN" else "NUMBER",
                             .str, .nil => "STRING",
                             .vec => if (regs[A].p.v.closure) "STRING" else "LIST",
                             .obj => "OBJECT",
@@ -7468,6 +7481,8 @@ pub const VM = struct {
                             continue :dispatch .raise;
                         }
                         const col: i64 = if (fk == .find3) (if (isNum(regs[A + 2])) asInt(regs[A + 2]) else 0) else 0;
+                        // v0.68 (D80): in .ring code a boolean is the number 1 or 0, the needle and each item
+                        const ring = !self.strictAt(pc);
                         var found: i64 = 0;
                         var i: u32 = 0;
                         while (i < lv.p.v.len) : (i += 1) {
@@ -7476,7 +7491,7 @@ pub const VM = struct {
                                 if (item.tag != .vec or col < 1 or col > item.p.v.len) continue;
                                 item = item.p.v.ptr[@intCast(col - 1)];
                             }
-                            if (strictEq(item, needle)) {
+                            if (strictEq(if (ring) ringBool(item) else item, if (ring) ringBool(needle) else needle)) {
                                 found = i + 1;
                                 break;
                             }
@@ -7559,7 +7574,7 @@ pub const VM = struct {
                             nv.ptr[i] = e;
                         }
                         nv.len = src.len;
-                        std.sort.pdq(Value, nv.ptr[0..nv.len], col, sortLess);
+                        std.sort.pdq(Value, nv.ptr[0..nv.len], SortBy{ .col = col, .ring = !self.strictAt(pc) }, sortLess);
                         out = Value.vec(nv);
                     },
                     .reverse => {
@@ -8559,6 +8574,9 @@ pub const VM = struct {
                                     var nb: [400]u8 = undefined;
                                     const et = if (e.tag == .num and self.strictAt(pc)) floatText(e.p.d, &nb) else numText(self.ringNum(e, pc), &nb);
                                     acc.appendSlice(self.alloc, et) catch @panic("oom");
+                                } else if (e.tag == .boolean and !self.strictAt(pc)) {
+                                    // v0.68 (D80): in .ring code a boolean is the number 1 or 0
+                                    acc.append(self.alloc, if (e.p.i != 0) '1' else '0') catch @panic("oom");
                                 }
                             }
                             out = Value.str(self.newStr(acc.items));
