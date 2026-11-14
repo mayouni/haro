@@ -84,6 +84,11 @@ four cases the plants called for, the plants and stage 77 in 8220562 and 7893527
 
 ## What stands at its present size
 
+- A forged court's folder is named by the declaration, by where haro stands and by the forge's files. A folder a v0.70 or v0.71
+  haro made keeps the forwarding files it wrote, and `haro check` then lists the court's libraries in another order; the verdicts
+  are the same. The installed builds met one such folder, of this desk's own probes: the court read 14 of 18 for the two builds
+  differing, the stale files were removed (126, all this desk's), and it reads 18 of 18. The folder's name takes the haro's own
+  identity in the next rung.
 - `Place` reads the sentence's roots through its court at each call.
 - Six doors take a place: `Read`, `FExists`, `DirExists`, `Dir`, `Write`, `Remove`. `FOpen`, `Rename` and the other built-ins of
   files take text, as every door still does until `unjudged` is built (DOORS.md rung 4).
