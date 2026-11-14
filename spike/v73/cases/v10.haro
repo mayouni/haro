@@ -1,0 +1,5 @@
+load "doors.haro"
+sDoors = doors'DEFINE COMMAND other AS (RUNS "haro", TAKES [word, text]) RATIONALE "a haro found as the platform finds a program"'
+hCall = sDoors.Invocation("other", ["echo.haro", "found by name"])
+print hCall
+print SystemCmd(hCall)

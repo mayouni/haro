@@ -1,0 +1,13 @@
+load "doors.haro"
+sDoors = doors'DEFINE COMMAND gone AS (RUNS "no-such-program-of-haro-v73", TAKES [word]) RATIONALE "a program that is not there"'
+hCall = sDoors.Invocation("gone", ["x"])
+try
+    print SystemCmd(hCall)
+catch e
+    print e.Message()
+end
+try
+    print System(hCall)
+catch e
+    print e.Code()
+end

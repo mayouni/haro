@@ -1,0 +1,22 @@
+load "doors.haro"
+sDoors = doors'DEFINE COMMAND a AS (RUNS "cmd", TAKES [text]) RATIONALE "x"
+DEFINE COMMAND b AS (RUNS "sh", TAKES [text]) RATIONALE "x"
+DEFINE COMMAND c AS (RUNS "/bin/bash", TAKES [text]) RATIONALE "x"
+DEFINE COMMAND d AS (RUNS "PowerShell.exe", TAKES [text]) RATIONALE "x"
+DEFINE COMMAND e AS (RUNS "tools/run.bat", TAKES [text]) RATIONALE "x"
+DEFINE COMMAND f AS (RUNS "build.CMD", TAKES [text]) RATIONALE "x"
+DEFINE COMMAND g AS (RUNS "go.sh", TAKES [text]) RATIONALE "x"'
+vNames = ["a", "b", "c", "d", "e", "f", "g"]
+for i = 1 to Len(vNames)
+    try
+        hAny = sDoors.Invocation(vNames[i], ["dir"])
+        print "judged"
+    catch e
+        print e.Code()
+    end
+end
+try
+    hAny = sDoors.Invocation("c", ["dir"])
+catch e
+    print e.Message()
+end

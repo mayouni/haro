@@ -1,0 +1,3 @@
+load "doors.haro"
+print "before"
+sDoors = doors'DEFINE COMMAND a AS (TAKES [word]) RATIONALE "x"'

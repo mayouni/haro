@@ -1,0 +1,7 @@
+load "doors.haro"
+sDoors = doors'DEFINE COMMAND show AS (ITSELF yes, TAKES [word, text, text, text]) RATIONALE "this haro, printing what it is given"'
+tQuote = Char(34)
+hCall = sDoors.Invocation("show", ["echo.haro", "two words & more | less > out.txt", "%PATH% $HOME `id` ; rm *", "say " + tQuote + "hi" + tQuote + " back" + Char(92)])
+tOut = SystemCmd(hCall)
+print tOut
+print FExists("out.txt")

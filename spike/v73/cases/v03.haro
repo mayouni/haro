@@ -1,0 +1,5 @@
+load "doors.haro"
+sDoors = doors'DEFINE COMMAND hush AS (ITSELF yes, TAKES [word], QUIET yes) RATIONALE "the same child, its standard error dropped"'
+print "before"
+iCode = System(sDoors.Invocation("hush", ["fail.haro"]))
+print iCode

@@ -1,0 +1,3 @@
+load "doors.haro"
+xFake = new HaroInvocation("show", false, "show", ["cmd", "/c", "dir"])
+print "made"

@@ -1,0 +1,3 @@
+for i = 3 to Len(sysargv)
+    print "[" + sysargv[i] + "]"
+end

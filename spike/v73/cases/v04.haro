@@ -1,0 +1,6 @@
+load "doors.haro"
+sDoors = doors'DEFINE COMMAND all AS (ITSELF yes, TAKES [word, option, number, place, words, text]) RATIONALE "one argument of each shape"
+DEFINE ROOT data AS (AT "data", ALLOWS [read]) RATIONALE "the notes this program reads"'
+hNote = sDoors.Place("data", "note.txt")
+print SystemCmd(sDoors.Invocation("all", ["echo.haro", "--deep", 42, hNote, "a", "b,c", "d=1", "free text, as it is"]))
+print SystemCmd(sDoors.Invocation("all", ["echo.haro", "-x", 2.5, hNote, "one", ""]))

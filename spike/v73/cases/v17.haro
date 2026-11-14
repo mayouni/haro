@@ -1,0 +1,9 @@
+load "doors.haro"
+load "../../v70/cases/signal.haro"
+sLamp = signal'DEFINE LAMP north AS (SHOWS green) RATIONALE "x"'
+try
+    hAny = sLamp.Invocation("show", [])
+    print "judged"
+catch e
+    print e.Message()
+end

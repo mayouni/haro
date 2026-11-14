@@ -1,0 +1,11 @@
+load "doors.haro"
+sDoors = doors'DEFINE COMMAND show AS (ITSELF yes, TAKES [word, text, text, text]) RATIONALE "this haro, printing what it is given"
+DEFINE COMMAND fails AS (ITSELF yes, TAKES [word]) RATIONALE "a child that ends with 3"
+DEFINE ROOT data AS (AT "data", ALLOWS [read]) RATIONALE "the notes this program reads"'
+try
+    hAny = sDoors.Invocation("format", ["c"])
+    print "judged"
+catch e
+    print e.Code()
+    print e.Message()
+end

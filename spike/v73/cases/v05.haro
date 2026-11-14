@@ -1,0 +1,27 @@
+load "doors.haro"
+sDoors = doors'DEFINE COMMAND all AS (ITSELF yes, TAKES [word, option, number, place, words, text]) RATIONALE "one argument of each shape"
+DEFINE ROOT data AS (AT "data", ALLOWS [read]) RATIONALE "the notes this program reads"'
+hNote = sDoors.Place("data", "note.txt")
+vGood = ["echo.haro", "--deep", 42, hNote, "a", "free"]
+vBad = [[1, "two words"], [1, "-rf"], [1, ""], [2, "deep"], [2, "--a b"], [3, "42"], [4, "data/note.txt"], [5, "a b"], [6, "-o"], [6, "a" + Char(10) + "b"]]
+for i = 1 to Len(vBad)
+    vArgs = []
+    for k = 1 to Len(vGood)
+        if k = vBad[i][1]
+            vArgs + vBad[i][2]
+        else
+            vArgs + vGood[k]
+        end
+    end
+    try
+        hAny = sDoors.Invocation("all", vArgs)
+        print "judged"
+    catch e
+        print e.Message()
+    end
+end
+try
+    hAny = sDoors.Invocation("all", "echo.haro")
+catch e
+    print e.Message()
+end

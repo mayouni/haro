@@ -1,0 +1,251 @@
+{
+ "version": "0.73",
+ "task": "doc/DOORS.md rung 2: the command and the invocation",
+ "languages": [
+  "doors"
+ ],
+ "law": "the verdict on a sentence of doors is the one its own forged court answers, standing alone, on the same text",
+ "cases": [
+  {
+   "id": "V01",
+   "line": "L1",
+   "what": "a command declared, an invocation judged and held by an h name",
+   "file": "cases/v01.haro",
+   "run": {
+    "stdout": "show echo.haro one \"two words\" \"\"\nshow\n4\ntwo words\n"
+   },
+   "judged": [
+    [
+     "doors",
+     "DEFINE COMMAND show AS (ITSELF yes, TAKES [word, text, text, text]) RATIONALE \"this haro, printing what it is given\"",
+     null,
+     ""
+    ]
+   ],
+   "check": {
+    "errors": 0,
+    "found": []
+   }
+  },
+  {
+   "id": "V02",
+   "line": "L2",
+   "what": "no shell: each argument arrives as one argument, byte for byte, whatever a shell would read in it",
+   "file": "cases/v02.haro",
+   "run": {
+    "stdout": "[two words & more | less > out.txt]\n[%PATH% $HOME `id` ; rm *]\n[say \"hi\" back\\]\nfalse\n"
+   }
+  },
+  {
+   "id": "V03",
+   "line": "L3",
+   "what": "`System` of an invocation answers the exit code; what the child writes passes through, in order",
+   "file": "cases/v03.haro",
+   "run": {
+    "stdout": "before\nout\n3\n"
+   }
+  },
+  {
+   "id": "V04",
+   "line": "L4",
+   "what": "each shape, rightly given: a word, an option, a number, a place, some words, a text",
+   "file": "cases/v04.haro",
+   "run": {
+    "stdout": "[--deep]\n[42]\n[data/note.txt]\n[a]\n[b,c]\n[d=1]\n[free text, as it is]\n[-x]\n[2.5]\n[data/note.txt]\n[one]\n[]\n"
+   }
+  },
+  {
+   "id": "V05",
+   "line": "L4",
+   "what": "an argument that is not its shape is INVOCATION_SHAPE, and says which",
+   "file": "cases/v05.haro",
+   "run": {
+    "stdout": "Error (INVOCATION_SHAPE) : argument 1 of `all` is no word\nError (INVOCATION_SHAPE) : argument 1 of `all` is no word\nError (INVOCATION_SHAPE) : argument 1 of `all` is no word\nError (INVOCATION_SHAPE) : argument 2 of `all` is no option\nError (INVOCATION_SHAPE) : argument 2 of `all` is no option\nError (INVOCATION_SHAPE) : argument 3 of `all` is no number\nError (INVOCATION_SHAPE) : argument 4 of `all` is no place\nError (INVOCATION_SHAPE) : argument 5 of `all` is no word\nError (INVOCATION_SHAPE) : argument 6 of `all` is no text\nError (INVOCATION_SHAPE) : argument 6 of `all` is no text\nError (INVOCATION_SHAPE) : the arguments of `all` are given as a vector\n"
+   }
+  },
+  {
+   "id": "V06",
+   "line": "L4",
+   "what": "the count of arguments is the declaration's: INVOCATION_COUNT",
+   "file": "cases/v06.haro",
+   "run": {
+    "stdout": "Error (INVOCATION_COUNT) : `show` takes 4 arguments, and is given 2\nError (INVOCATION_COUNT) : `show` takes 4 arguments, and is given 5\nError (INVOCATION_COUNT) : `all` takes at least 6 arguments, and is given 5\n"
+   }
+  },
+  {
+   "id": "V07",
+   "line": "L5",
+   "what": "a command the sentence does not declare is COMMAND_UNKNOWN, and names the ones it does",
+   "file": "cases/v07.haro",
+   "run": {
+    "stdout": "COMMAND_UNKNOWN\nError (COMMAND_UNKNOWN) : no command called `format` is declared here; the commands are show, fails\n"
+   },
+   "judged": [
+    [
+     "doors",
+     "DEFINE COMMAND show AS (ITSELF yes, TAKES [word, text, text, text]) RATIONALE \"this haro, printing what it is given\"\nDEFINE COMMAND fails AS (ITSELF yes, TAKES [word]) RATIONALE \"a child that ends with 3\"\nDEFINE ROOT data AS (AT \"data\", ALLOWS [read]) RATIONALE \"the notes this program reads\"",
+     null,
+     ""
+    ]
+   ]
+  },
+  {
+   "id": "V08",
+   "line": "L6",
+   "what": "no shell: a command that runs a shell, or a file a shell reads, is COMMAND_SHELL",
+   "file": "cases/v08.haro",
+   "run": {
+    "stdout": "COMMAND_SHELL\nCOMMAND_SHELL\nCOMMAND_SHELL\nCOMMAND_SHELL\nCOMMAND_SHELL\nCOMMAND_SHELL\nCOMMAND_SHELL\nError (COMMAND_SHELL) : the command `c` runs a shell, `/bin/bash`: a command is a program and its arguments\n"
+   }
+  },
+  {
+   "id": "V09",
+   "line": "L7",
+   "what": "a command that runs nothing is refused when the program is compiled",
+   "file": "cases/v09.haro",
+   "run": {
+    "refuses": [
+     3,
+     "the court of doors refuses this literal -- COMMAND_NOTHING: COMMAND a runs nothing: give it RUNS, or say ITSELF for this haro; written",
+     "'DEFINE COMMAND a AS (TAKES [word]) RATIONALE \"x\"'"
+    ],
+    "never": "before"
+   },
+   "judged": [
+    [
+     "doors",
+     "DEFINE COMMAND a AS (TAKES [word]) RATIONALE \"x\"",
+     "COMMAND_NOTHING",
+     "COMMAND a runs nothing: give it RUNS, or say ITSELF for this haro"
+    ],
+    [
+     "doors",
+     "DEFINE COMMAND b AS (ITSELF yes, RUNS \"x\") RATIONALE \"x\"",
+     "COMMAND_TWICE",
+     "COMMAND b says ITSELF and RUNS: it is one or the other"
+    ],
+    [
+     "doors",
+     "DEFINE COMMAND c AS (RUNS \"x\", TAKES [word, line]) RATIONALE \"x\"",
+     "UNKNOWN_SHAPE",
+     "An argument is a word, an option, a number, a place, a text or words, not 'line'"
+    ]
+   ],
+   "check": {
+    "errors": 1,
+    "found": [
+     [
+      3,
+      "haro/refused-form"
+     ]
+    ]
+   }
+  },
+  {
+   "id": "V10",
+   "line": "L8",
+   "what": "RUNS names a program found as the platform finds one",
+   "file": "cases/v10.haro",
+   "run": {
+    "stdout": "other echo.haro \"found by name\"\n[found by name]\n"
+   }
+  },
+  {
+   "id": "V11",
+   "line": "L8",
+   "what": "a program that cannot be started is COMMAND_NOT_STARTED, at either door",
+   "file": "cases/v11.haro",
+   "run": {
+    "stdout": "Error (COMMAND_NOT_STARTED) : the command `gone` runs `no-such-program-of-haro-v73`, which could not be started\nCOMMAND_NOT_STARTED\n"
+   }
+  },
+  {
+   "id": "V12",
+   "line": "L9",
+   "what": "an invocation is made by its judge alone: `new` of one is refused when compiling",
+   "file": "cases/v12.haro",
+   "run": {
+    "refuses": [
+     2,
+     "an invocation is made by its judge -- <doors>.Invocation(command, arguments); written",
+     "new HaroInvocation(\"show\", false, \"show\", [\"cmd\", \"/c\", \"dir\"])"
+    ],
+    "never": "made"
+   },
+   "check": {
+    "errors": 1,
+    "found": [
+     [
+      2,
+      "haro/refused-form"
+     ]
+    ]
+   }
+  },
+  {
+   "id": "V13",
+   "line": "L9",
+   "what": "a write into an invocation is refused, and it is what it was",
+   "file": "cases/v13.haro",
+   "run": {
+    "stdout": "INVOCATION_FIXED\nshow echo.haro a b c\n"
+   }
+  },
+  {
+   "id": "V14",
+   "line": "L10",
+   "what": "without QUIET what the child writes to its standard error passes through",
+   "file": "cases/v14.haro",
+   "run": {
+    "stdout": "out\nout\n3\n",
+    "stderr": {
+     "has": "said on its standard error"
+    }
+   }
+  },
+  {
+   "id": "V15",
+   "line": "L10",
+   "what": "QUIET yes: what the child writes to its standard error is dropped, at either door",
+   "file": "cases/v15.haro",
+   "run": {
+    "stdout": "out\nout\n3\n",
+    "stderr": {
+     "never": "said on its standard error"
+    }
+   }
+  },
+  {
+   "id": "V16",
+   "line": "L11",
+   "what": "a door still takes text as it did: a literal and a built command line run through the shell",
+   "file": "cases/v16.haro",
+   "run": {
+    "stdout": "literal\nbuilt\npassed\n0\n"
+   },
+   "check": {
+    "errors": 0,
+    "found": []
+   }
+  },
+  {
+   "id": "V17",
+   "line": "L1",
+   "what": "an invocation is judged by a sentence of doors: a sentence of another language answers INVOCATION_NO_DOORS",
+   "file": "cases/v17.haro",
+   "run": {
+    "stdout": "Error (INVOCATION_NO_DOORS) : an invocation is judged by a sentence of doors, and this is a sentence of signal\n"
+   }
+  },
+  {
+   "id": "V18",
+   "line": "L12",
+   "what": "a forged court's folder is named by which haro forged it: another haro at the same place forges its own",
+   "file": "cases/v18.haro",
+   "run": {
+    "stdout": "show echo.haro a b c\n"
+   },
+   "kind": "identity"
+  }
+ ]
+}

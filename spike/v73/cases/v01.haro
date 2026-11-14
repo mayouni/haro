@@ -1,0 +1,7 @@
+load "doors.haro"
+sDoors = doors'DEFINE COMMAND show AS (ITSELF yes, TAKES [word, text, text, text]) RATIONALE "this haro, printing what it is given"'
+hCall = sDoors.Invocation("show", ["echo.haro", "one", "two words", ""])
+print hCall
+print hCall.Command()
+print Len(hCall.Arguments())
+print hCall.Arguments()[3]

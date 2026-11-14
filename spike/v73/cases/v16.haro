@@ -1,0 +1,4 @@
+tWord = "built"
+print SystemCmd("echo literal")
+print SystemCmd("echo " + tWord)
+print System("echo passed")
