@@ -1,0 +1,3 @@
+print SystemCmd("echo literal")
+print SystemCmd("echo " + "joined")
+print System("echo passed")

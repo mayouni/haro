@@ -1,0 +1,10 @@
+load "doors.haro"
+sDoors = doors'DEFINE ROOT data AS (AT "data", ALLOWS [read]) RATIONALE "the notes this program reads"
+DEFINE COMMAND show AS (ITSELF yes, TAKES [word, text]) RATIONALE "this haro, printing what it is given"'
+for i = 1 to 40
+    hNote = sDoors.Place("data", "note.txt")
+    hCall = sDoors.Invocation("show", ["echo.haro", "again"])
+end
+print hNote
+print hCall
+print HaroDoorsReads()

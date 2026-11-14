@@ -1,0 +1,154 @@
+{
+ "version": "0.75",
+ "task": "a command line is not built as text (D88 (d)); Haro's own run of a program converted",
+ "languages": [
+  "doors"
+ ],
+ "cases": [
+  {
+   "id": "X01",
+   "line": "L1",
+   "what": "a text written at the call runs as it did: a literal, and literals joined",
+   "file": "cases/x01.haro",
+   "run": {
+    "stdout": "literal\njoined\npassed\n0\n"
+   },
+   "check": {
+    "errors": 0,
+    "found": []
+   }
+  },
+  {
+   "id": "X02",
+   "line": "L2",
+   "what": "System given a text joined with a name is refused when the program is compiled",
+   "file": "cases/x02.haro",
+   "run": {
+    "refuses": [
+     3,
+     "a command line is written at the call, or is an invocation of a declared COMMAND; written",
+     "\"echo \" + tWord"
+    ],
+    "never": "after"
+   },
+   "check": {
+    "errors": 1,
+    "found": [
+     [
+      3,
+      "haro/refused-form"
+     ]
+    ]
+   }
+  },
+  {
+   "id": "X03",
+   "line": "L2",
+   "what": "SystemCmd given a text joined with a call is refused when the program is compiled",
+   "file": "cases/x03.haro",
+   "run": {
+    "refuses": [
+     2,
+     "a command line is written at the call, or is an invocation of a declared COMMAND; written",
+     "\"echo \" + Upper(\"built\")"
+    ],
+    "never": "after"
+   },
+   "check": {
+    "errors": 1,
+    "found": [
+     [
+      2,
+      "haro/refused-form"
+     ]
+    ]
+   }
+  },
+  {
+   "id": "X04",
+   "line": "L2",
+   "what": "a name lettered as a text is refused when the program is compiled, at either door",
+   "file": "cases/x04.haro",
+   "run": {
+    "refuses": [
+     3,
+     "a command line is written at the call, or is an invocation of a declared COMMAND; written",
+     "tLine"
+    ],
+    "never": "after"
+   },
+   "check": {
+    "errors": 1,
+    "found": [
+     [
+      3,
+      "haro/refused-form"
+     ]
+    ]
+   }
+  },
+  {
+   "id": "X05",
+   "line": "L3",
+   "what": "a text that reaches the door another way is COMMAND_LINE_BUILT when the program runs",
+   "file": "cases/x05.haro",
+   "run": {
+    "stdout": "COMMAND_LINE_BUILT\nError (COMMAND_LINE_BUILT) : a command line is written at the call, or is an invocation of a declared COMMAND; this text was made elsewhere\nCOMMAND_LINE_BUILT\nCOMMAND_LINE_BUILT\n"
+   },
+   "check": {
+    "errors": 0,
+    "found": []
+   }
+  },
+  {
+   "id": "X06",
+   "line": "L4",
+   "what": "an invocation passes, by any way it reaches the door",
+   "file": "cases/x06.haro",
+   "run": {
+    "stdout": "[held by a name]\n[a function's answer]\n[a name that may hold anything]\n[passed through]\n0\n"
+   },
+   "check": {
+    "errors": 0,
+    "found": []
+   }
+  },
+  {
+   "id": "X07",
+   "line": "L5",
+   "what": "a .ring file reads as it did: a built command line runs through the shell",
+   "file": "cases/x07.ring",
+   "run": {
+    "stdout": "built\npassed\n"
+   }
+  },
+  {
+   "id": "X08",
+   "line": "L5",
+   "what": "a program's own function named System or SystemCmd is the program's",
+   "file": "cases/x08.haro",
+   "run": {
+    "stdout": "mine: echo built\nalso mine: echo built\n"
+   }
+  },
+  {
+   "id": "X09",
+   "line": "L6",
+   "what": "a court whose library holds a sentence of doors still judges, and asks its sibling court with no shell",
+   "file": "cases/x09.haro",
+   "run": {
+    "stdout": "n (line 157): FRAME ledger_under: the surface 'ledger' refuses the query 'SELECT member FROM collect WHERE amount < {num}': z (line 1): Expected '*' after SELECT: a question asks for whole records (SELECT * only), found 'member'\n"
+   },
+   "kind": "ncourt"
+  },
+  {
+   "id": "X10",
+   "line": "L7",
+   "what": "a sentence of doors is read once: its judges answer from what was read",
+   "file": "cases/x10.haro",
+   "run": {
+    "stdout": "data/note.txt\nshow echo.haro again\n1\n"
+   }
+  }
+ ]
+}

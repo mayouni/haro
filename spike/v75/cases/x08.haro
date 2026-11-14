@@ -1,0 +1,9 @@
+func SystemCmd(ptLine)
+    return "mine: " + ptLine
+end
+func System(ptLine)
+    print "also mine: " + ptLine
+end
+tWord = "built"
+print SystemCmd("echo " + tWord)
+System("echo " + tWord)

@@ -1,0 +1,21 @@
+func Line(ptWord)
+    return "echo " + ptWord
+end
+xAny = "echo any"
+try
+    System(Line("made"))
+    print "ran"
+catch e
+    print e.Code()
+    print e.Message()
+end
+try
+    print SystemCmd(xAny)
+catch e
+    print e.Code()
+end
+try
+    print SystemCmd(Line("made"))
+catch e
+    print e.Code()
+end

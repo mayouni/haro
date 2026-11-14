@@ -1,0 +1,4 @@
+tWord = "built"
+print "before"
+System("echo " + tWord)
+print "after"

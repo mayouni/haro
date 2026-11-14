@@ -1,0 +1,11 @@
+load "doors.haro"
+sDoors = doors'DEFINE COMMAND show AS (ITSELF yes, TAKES [word, text]) RATIONALE "this haro, printing what it is given"'
+func MakeCall(psDoors, ptText)
+    return psDoors.Invocation("show", ["echo.haro", ptText])
+end
+hCall = sDoors.Invocation("show", ["echo.haro", "held by a name"])
+print SystemCmd(hCall)
+print SystemCmd(MakeCall(sDoors, "a function's answer"))
+xAny = MakeCall(sDoors, "a name that may hold anything")
+print SystemCmd(xAny)
+print System(MakeCall(sDoors, "passed through"))
