@@ -9,6 +9,7 @@
 #   HaroLang(name)                      the language as a program names it: its Judge(text) is HaroJudge(name, text)
 #   HaroPlaceOf(doors, root, text)      v0.72: a place beneath a root a sentence of doors declares; HaroPlace is what a place is
 #   HaroInvocationOf(doors, command, arguments)   v0.73: a command of a sentence of doors with its arguments judged; HaroInvocation
+#   HaroEndpointOf(doors, peer, text)   v0.76: an address judged against a peer a sentence of doors declares; HaroEndpoint
 #
 # A court loaded this way is not the program, and its main does nothing (court_lib.haro, CtIsTheProgram).
 
@@ -128,6 +129,11 @@ class HaroSentence
 	# v0.73: a sentence of doors judges the arguments of one of the commands it declares
 	def Invocation(ptCommand, pxArguments)
 		return HaroInvocationOf(this, ptCommand, pxArguments)
+	end
+
+	# v0.76: a sentence of doors judges an address against one of the peers it declares
+	def Endpoint(ptPeer, ptText)
+		return HaroEndpointOf(this, ptPeer, ptText)
 	end
 end
 
@@ -623,4 +629,232 @@ record HaroRun
 	iCode
 	tOutput
 	tErrors
+end
+
+# ---- v0.76: the endpoint (doc/DOORS.md rung 3) -----------------------------------------------------------------------------------
+#
+# A sentence of doors declares peers: a host by its exact name, or a network by its prefix, and how it may be reached.
+# HaroEndpointOf judges an outside text against one of them and answers an endpoint -- the peer's name, the scheme, the address
+# made plain, the host, the port, the path -- or raises its refusal:
+#   PEER_UNKNOWN       the sentence declares no peer of that name
+#   ENDPOINT_FORM      the text is no address: no scheme, a name and a secret before the host, a blank, a control byte, a
+#                      backslash, a bracket, a byte past ASCII, a port that is no port
+#   ENDPOINT_SCHEME    the peer is not reached by that scheme
+#   ENDPOINT_HOST      the host is not the peer's -- compared whole, never by what it holds or ends with; for a network, the
+#                      address is not four plain numbers inside the prefix
+#   ENDPOINT_PORT      the port is not the peer's: the one it names, else the scheme's own
+# Haro judges the text. The check after a name is resolved, and at a redirect, is made where the socket is (D88 (e)).
+
+func HaroEndpointOf(psDoors, ptPeer, ptText)
+	if psDoors.Language() != "doors"
+		Raise("Error (ENDPOINT_NO_DOORS) : an endpoint is judged by a sentence of doors, and this is a sentence of " + psDoors.Language())
+	end
+	xDecls = HaroDoorsDeclared(psDoors)
+	tHost = ""
+	tNet = ""
+	vSchemes = []
+	iPeerPort = 0
+	bFound = false
+	tNames = ""
+	for i = 1 to Len(xDecls)
+		if xDecls[i][1] != "PEER" loop end
+		if tNames != "" tNames = tNames + ", " end
+		tNames = tNames + xDecls[i][2]
+		if xDecls[i][2] != ptPeer loop end
+		bFound = true
+		xClauses = xDecls[i][4]
+		for k = 1 to Len(xClauses)
+			tKey = Lower(xClauses[k][1])
+			if tKey = "host" tHost = Lower(xClauses[k][3][2]) end
+			if tKey = "net" tNet = xClauses[k][3][2] end
+			if tKey = "schemes" vSchemes = xClauses[k][3][2] end
+			if tKey = "port"
+				xPort = xClauses[k][3][2]
+				if IsString(xPort)
+					iPeerPort = HaroDigits(xPort)
+				else
+					iPeerPort = xPort
+				end
+			end
+		end
+	end
+	if not bFound
+		Raise("Error (PEER_UNKNOWN) : no peer called `" + ptPeer + "` is declared here; the peers are " + tNames)
+	end
+	if Len(vSchemes) = 0 vSchemes = ["https"] end
+	tNo = "Error (ENDPOINT_FORM) : `" + ptText + "` is no address a peer is reached at"
+	if ptText = "" Raise(tNo) end
+	for i = 1 to Len(ptText)
+		iByte = Ascii(ptText[i])
+		if iByte < 33 or iByte > 126 or iByte = 92 Raise(tNo) end
+	end
+	iCut = SubStr(ptText, "://")
+	if iCut < 2 Raise(tNo) end
+	tScheme = Lower(Left(ptText, iCut - 1))
+	for i = 1 to Len(tScheme)
+		if not IsAlpha(tScheme[i]) Raise(tNo) end
+	end
+	tRest = ""
+	if Len(ptText) > iCut + 2 tRest = SubStr(ptText, iCut + 3, Len(ptText) - iCut - 2) end
+	iEnd = Len(tRest) + 1
+	for i = 1 to Len(tRest)
+		if tRest[i] = "/" or tRest[i] = "?" or tRest[i] = "#"
+			iEnd = i
+			exit
+		end
+	end
+	tWhere = Left(tRest, iEnd - 1)
+	tPath = ""
+	if iEnd <= Len(tRest) tPath = SubStr(tRest, iEnd, Len(tRest) - iEnd + 1) end
+	if tWhere = "" Raise(tNo) end
+	if SubStr(tWhere, "@") > 0 or SubStr(tWhere, "[") > 0 or SubStr(tWhere, "]") > 0 Raise(tNo) end
+	tName = tWhere
+	iPort = 0
+	iColon = 0
+	for i = 1 to Len(tWhere)
+		if tWhere[i] = ":" iColon = i end
+	end
+	if iColon > 0
+		tName = Left(tWhere, iColon - 1)
+		tDigits = ""
+		if iColon < Len(tWhere) tDigits = SubStr(tWhere, iColon + 1, Len(tWhere) - iColon) end
+		if tDigits = "" or Len(tDigits) > 5 Raise(tNo) end
+		iPort = HaroDigits(tDigits)
+		if iPort < 1 or iPort > 65535 Raise(tNo) end
+	end
+	if tName = "" Raise(tNo) end
+	tName = Lower(tName)
+	bReached = false
+	for i = 1 to Len(vSchemes)
+		if vSchemes[i] = tScheme bReached = true end
+	end
+	if not bReached
+		Raise("Error (ENDPOINT_SCHEME) : the peer `" + ptPeer + "` is not reached by " + tScheme)
+	end
+	if tNet != ""
+		if not HaroInNet(tName, tNet)
+			Raise("Error (ENDPOINT_HOST) : `" + tName + "` is not in the network of the peer `" + ptPeer + "`")
+		end
+	elseif tName != tHost
+		Raise("Error (ENDPOINT_HOST) : `" + tName + "` is not the host of the peer `" + ptPeer + "`")
+	end
+	iOwn = 0
+	if tScheme = "https" or tScheme = "wss" iOwn = 443 end
+	if tScheme = "http" or tScheme = "ws" iOwn = 80 end
+	iAllowed = iPeerPort
+	if iAllowed = 0 iAllowed = iOwn end
+	if iAllowed = 0
+		Raise("Error (ENDPOINT_PORT) : the peer `" + ptPeer + "` names no port, and " + tScheme + " has none of its own")
+	end
+	if iPort = 0 iPort = iAllowed end
+	if iPort != iAllowed
+		Raise("Error (ENDPOINT_PORT) : the peer `" + ptPeer + "` is not reached at port " + String(iPort))
+	end
+	tUrl = tScheme + "://" + tName
+	if iPort != iOwn tUrl = tUrl + ":" + String(iPort) end
+	tUrl = tUrl + tPath
+	return new HaroEndpoint(ptPeer, tScheme, tUrl, tName, iPort, tPath)
+end
+
+# the number a text of digits writes; -1 when it is not digits alone (a first zero only for zero itself)
+func HaroDigits(ptDigits)
+	if ptDigits = "" return -1 end
+	if Len(ptDigits) > 1 and ptDigits[1] = "0" return -1 end
+	iValue = 0
+	for i = 1 to Len(ptDigits)
+		iDigit = Ascii(ptDigits[i]) - 48
+		if iDigit < 0 or iDigit > 9 return -1 end
+		iValue = iValue * 10 + iDigit
+	end
+	return iValue
+end
+
+# an address as four plain numbers, each 0 to 255 with no zero before it: the four, or an empty vector
+func HaroFourNumbers(ptAddress)
+	vParts = []
+	tPart = ""
+	tAll = ptAddress + "."
+	for i = 1 to Len(tAll)
+		if tAll[i] != "."
+			tPart = tPart + tAll[i]
+			loop
+		end
+		iPart = HaroDigits(tPart)
+		if iPart < 0 or iPart > 255 or Len(tPart) > 3 return [] end
+		vParts + iPart
+		tPart = ""
+	end
+	if Len(vParts) != 4 return [] end
+	return vParts
+end
+
+# is the address inside the network a.b.c.d/n? Read part by part: the whole parts the prefix covers, then the bits of the next
+func HaroInNet(ptAddress, ptNet)
+	iSlash = SubStr(ptNet, "/")
+	if iSlash < 2 return false end
+	vNet = HaroFourNumbers(Left(ptNet, iSlash - 1))
+	iBits = HaroDigits(SubStr(ptNet, iSlash + 1, Len(ptNet) - iSlash))
+	vOne = HaroFourNumbers(ptAddress)
+	if Len(vNet) != 4 or Len(vOne) != 4 or iBits < 0 or iBits > 32 return false end
+	for k = 1 to 4
+		if iBits >= 8
+			if vOne[k] != vNet[k] return false end
+			iBits = iBits - 8
+			loop
+		end
+		if iBits = 0 return true end
+		iStep = 1
+		for r = 1 to 8 - iBits
+			iStep = iStep * 2
+		end
+		return (vOne[k] - (vOne[k] % iStep)) = (vNet[k] - (vNet[k] % iStep))
+	end
+	return true
+end
+
+# The VM knows this class by its name and its attributes by their order, as it knows a place's (vm/src/main.zig): the third is
+# the address an endpoint prints as, the fifth says it is made -- from then on a write into it is refused (ENDPOINT_FIXED). Keep
+# the order.
+class HaroEndpoint
+	tPeer = ""
+	tScheme = ""
+	tUrl = ""
+	tHost = ""
+	bFixed = false
+	iPort = 0
+	tPath = ""
+
+	def init(ptPeer, ptScheme, ptUrl, ptHost, piPort, ptPath)
+		tPeer = ptPeer
+		tScheme = ptScheme
+		tUrl = ptUrl
+		tHost = ptHost
+		iPort = piPort
+		tPath = ptPath
+		bFixed = true
+	end
+
+	def Peer
+		return tPeer
+	end
+
+	def Scheme
+		return tScheme
+	end
+
+	def Url
+		return tUrl
+	end
+
+	def Host
+		return tHost
+	end
+
+	def Port
+		return iPort
+	end
+
+	def Path
+		return tPath
+	end
 end

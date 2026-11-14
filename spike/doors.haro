@@ -1,10 +1,10 @@
--- doors.haro -- Haro's standard language of doors (v0.72, v0.73; DOORS.md, D88): what a program opens, declared once.
+-- doors.haro -- Haro's standard language of doors (v0.72, v0.73, v0.76; DOORS.md, D88): what a program opens, declared once.
 
 DEFINE LANGUAGE doors AS (
-  VERSION "0.73", GRAMMAR "0.73",
+  VERSION "0.76", GRAMMAR "0.76",
   COURT "spike/v72/fixtures.json",
   EXTENSION ".doors",
-  NEEDS [filesystem, process]
+  NEEDS [filesystem, process, network]
 ) RATIONALE "The doors a program opens, declared before it opens one"
 
 DEFINE MENU permissions AS (
@@ -60,3 +60,35 @@ DEFINE CONSTRAINT itself_is_no_other AS (
   MESSAGE "COMMAND {name} says ITSELF and RUNS: it is one or the other",
   CODE "COMMAND_TWICE"
 ) RATIONALE "A command runs one program"
+
+DEFINE FORMAT host_name AS (
+  SHAPE domain, MESSAGE "'{value}' cannot be a host: a name on the wire is lowercase letters, digits and the hyphen, in labels separated by dots"
+) RATIONALE "A host is a name, written as the wire carries it"
+
+DEFINE FORMAT net_prefix AS (
+  SHAPE cidr, MESSAGE "'{value}' is not an address/prefix (a.b.c.d/n)"
+) RATIONALE "A network is an address and the size of its prefix"
+
+DEFINE MENU schemes AS (
+  WORDS [https, http, wss, ws, tcp],
+  MESSAGE "A peer is reached by https, http, wss, ws or tcp",
+  CODE "UNKNOWN_SCHEME"
+) RATIONALE "How a peer may be reached"
+
+DEFINE DECLARATION peer AS (
+  VERB "PEER",
+  SEATS [host: host_name?, net: net_prefix?, schemes: [schemes]?, port: number?],
+  OPENS network
+) RATIONALE "A host by its exact name, or a network by its prefix, and how it may be reached"
+
+DEFINE CONSTRAINT a_peer_is_somewhere AS (
+  ON peer, WHEN "net absent", THEN "host present",
+  MESSAGE "PEER {name} names no host: give it HOST, or NET for a network by its prefix",
+  CODE "PEER_NOWHERE"
+) RATIONALE "A peer is a host or a network"
+
+DEFINE CONSTRAINT a_peer_is_one_thing AS (
+  ON peer, WHEN "net present", THEN "host absent",
+  MESSAGE "PEER {name} says HOST and NET: it is one or the other",
+  CODE "PEER_TWICE"
+) RATIONALE "A peer is one host or one network"
