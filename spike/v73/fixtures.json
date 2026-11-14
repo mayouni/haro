@@ -60,7 +60,7 @@
    "what": "an argument that is not its shape is INVOCATION_SHAPE, and says which",
    "file": "cases/v05.haro",
    "run": {
-    "stdout": "Error (INVOCATION_SHAPE) : argument 1 of `all` is no word\nError (INVOCATION_SHAPE) : argument 1 of `all` is no word\nError (INVOCATION_SHAPE) : argument 1 of `all` is no word\nError (INVOCATION_SHAPE) : argument 2 of `all` is no option\nError (INVOCATION_SHAPE) : argument 2 of `all` is no option\nError (INVOCATION_SHAPE) : argument 3 of `all` is no number\nError (INVOCATION_SHAPE) : argument 4 of `all` is no place\nError (INVOCATION_SHAPE) : argument 5 of `all` is no word\nError (INVOCATION_SHAPE) : argument 6 of `all` is no text\nError (INVOCATION_SHAPE) : argument 6 of `all` is no text\nError (INVOCATION_SHAPE) : the arguments of `all` are given as a vector\n"
+    "stdout": "Error (INVOCATION_SHAPE) : argument 1 of `all` is no word\nError (INVOCATION_SHAPE) : argument 1 of `all` is no word\nError (INVOCATION_SHAPE) : argument 1 of `all` is no word\nError (INVOCATION_SHAPE) : argument 2 of `all` is no option\nError (INVOCATION_SHAPE) : argument 2 of `all` is no option\nError (INVOCATION_SHAPE) : argument 3 of `all` is no number\nError (INVOCATION_SHAPE) : argument 4 of `all` is no place\nError (INVOCATION_SHAPE) : argument 5 of `all` is no word\nError (INVOCATION_SHAPE) : argument 6 of `all` is no text\nError (INVOCATION_SHAPE) : argument 6 of `all` is no text\nError (INVOCATION_SHAPE) : argument 1 of `all` is no word\nError (INVOCATION_SHAPE) : argument 2 of `all` is no option\nError (INVOCATION_SHAPE) : argument 6 of `all` is no text\nError (INVOCATION_SHAPE) : the arguments of `all` are given as a vector\n"
    }
   },
   {
@@ -194,22 +194,23 @@
   {
    "id": "V14",
    "line": "L10",
-   "what": "without QUIET what the child writes to its standard error passes through",
+   "what": "without QUIET what the child writes to its standard error passes through, at either door",
    "file": "cases/v14.haro",
    "run": {
     "stdout": "out\nout\n3\n",
     "stderr": {
-     "has": "said on its standard error"
+     "has": "said on its standard error",
+     "times": 2
     }
    }
   },
   {
    "id": "V15",
    "line": "L10",
-   "what": "QUIET yes: what the child writes to its standard error is dropped, at either door",
+   "what": "QUIET yes: nothing the child writes reaches the program's output; System answers the exit code alone",
    "file": "cases/v15.haro",
    "run": {
-    "stdout": "out\nout\n3\n",
+    "stdout": "out\n3\n",
     "stderr": {
      "never": "said on its standard error"
     }
@@ -255,6 +256,40 @@
    "run": {
     "stdout": "Error (COMMAND_WORDS) : the command `two` takes words twice: one run of words has a place\n"
    }
+  },
+  {
+   "id": "V20",
+   "line": "L13",
+   "what": "a command runs IN a root: the child stands in the root's folder, and a place it is given is given whole",
+   "file": "cases/v20.haro",
+   "run": {
+    "stdout": "data\ntrue\ntrue\nhello\ntrue\ntrue\nhello\n0\n"
+   },
+   "judged": [
+    [
+     "doors",
+     "DEFINE ROOT data AS (AT \"data\", ALLOWS [read]) RATIONALE \"the notes this program reads\"\nDEFINE COMMAND inside AS (ITSELF yes, TAKES [text, place], IN data) RATIONALE \"this haro, run in the folder of the notes\"",
+     null,
+     ""
+    ]
+   ]
+  },
+  {
+   "id": "V21",
+   "line": "L13",
+   "what": "IN names a root that has a folder: a root with none is COMMAND_IN; one not declared is the court's DANGLING",
+   "file": "cases/v21.haro",
+   "run": {
+    "stdout": "Error (COMMAND_IN) : the command `loose` runs in the root `given`, which has no folder\n"
+   },
+   "judged": [
+    [
+     "doors",
+     "DEFINE COMMAND adrift AS (ITSELF yes, TAKES [word], IN nowhere) RATIONALE \"x\"",
+     "DANGLING",
+     "adrift IN 'nowhere', which resolves to nothing: no such ROOT"
+    ]
+   ]
   }
  ]
 }

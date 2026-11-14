@@ -4175,6 +4175,25 @@ def stage77():
     return 0
 
 
+INVOCATION_COURT = os.path.join(HERE, 'v73', 'invocation_court.py')
+
+
+def stage78():
+    """Haro v0.73, the command and the invocation (doc/DOORS.md rung 2, D88 (d), D90; v73/GRAMMAR.md): a sentence of doors declares
+    commands and judges their arguments into an invocation; System and SystemCmd take one and start the program from its vector,
+    with no shell. v73/invocation_court.py on haro and its checked build."""
+    print('stage 78 -- the command and the invocation: v73/invocation_court.py on haro and its checked build')
+    p = subprocess.run([sys.executable, INVOCATION_COURT] + (['--plant'] if PLANT else []), capture_output=True, cwd=HERE, timeout=900)
+    out = p.stdout.decode('utf-8', 'replace').replace(chr(13) + chr(10), chr(10))
+    for line in out.splitlines():
+        if line.startswith(('  FAIL', '       ', 'INVOCATION COURT')):
+            print(line)
+    if p.returncode != 0:
+        print(f'  FAIL the invocation court exited {p.returncode}' + ('' if out.strip() else ': ' + p.stderr.decode('utf-8', 'replace')[-400:]))
+        return 1
+    return 0
+
+
 PORT_COURT = os.path.join(os.path.dirname(HERE), 'port', 'port_court.py')
 
 
@@ -4442,5 +4461,7 @@ if __name__ == '__main__':
         failures += stage76()
     if stage in (None, 77) and os.path.exists(PLACE_COURT):
         failures += stage77()
+    if stage in (None, 78) and os.path.exists(INVOCATION_COURT):
+        failures += stage78()
     print(f'haro_forge: {"FAIL" if failures else "PASS"} ({failures} failure(s), {time.perf_counter()-t0:.1f} s)')
     sys.exit(1 if failures else 0)

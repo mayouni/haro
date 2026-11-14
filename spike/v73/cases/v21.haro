@@ -1,0 +1,9 @@
+load "doors.haro"
+sDoors = doors'DEFINE ROOT given AS (ANYWHERE yes) RATIONALE "the file a person names"
+DEFINE COMMAND loose AS (ITSELF yes, TAKES [word], IN given) RATIONALE "a command in a root that has no folder"'
+try
+    hAny = sDoors.Invocation("loose", ["x"])
+    print "judged"
+catch e
+    print e.Message()
+end

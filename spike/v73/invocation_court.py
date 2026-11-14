@@ -13,8 +13,9 @@ A case passes when, on both builds:
   D41         the two builds print the same bytes, run and check
 
   python spike/v73/invocation_court.py             haro and the checked build, as paths.py finds them
-  python spike/v73/invocation_court.py--vm X.exe   one build only (the plants)
-  python spike/v73/invocation_court.py--plant      the guard's own plant: one fixture's expected bytes doctored, so the court must fail
+  python spike/v73/invocation_court.py --vm X.exe   one build only (the plants)
+  python spike/v73/invocation_court.py --only V05     one case alone (a plant asks for its fixture)
+  python spike/v73/invocation_court.py --plant        the guard's own plant: one fixture's expected bytes doctored, so the court must fail
 """
 import json, os, re, subprocess, sys
 
@@ -24,6 +25,7 @@ ROOT = os.path.dirname(SPIKE)
 sys.path.insert(0, ROOT)
 PLANT = '--plant' in sys.argv
 VM = os.path.abspath(sys.argv[sys.argv.index('--vm') + 1]) if '--vm' in sys.argv else None
+ONLY = sys.argv[sys.argv.index('--only') + 1] if '--only' in sys.argv else None     # one case: the plants ask for their fixture alone
 sys.argv = [sys.argv[0]]
 import paths
 
@@ -217,6 +219,8 @@ def judge(c, label, exe):
         bad.append(f'the run prints {r["never"]!r}')
     err = ERR['last']
     if 'stderr' in r:
+        if 'times' in r['stderr'] and err.count(r['stderr']['has']) != r['stderr']['times']:
+            bad.append('the run writes ' + repr(r['stderr']['has']) + ' to its standard error ' + str(err.count(r['stderr']['has'])) + ' time(s), not ' + str(r['stderr']['times']))
         if 'has' in r['stderr'] and r['stderr']['has'] not in err:
             bad.append(f'the run does not write {r["stderr"]["has"]!r} to its standard error: {err.strip()[:200]!r}')
         if 'never' in r['stderr'] and r['stderr']['never'] in err:
@@ -244,6 +248,8 @@ def main():
         vm, twin = paths.need_bins()
         builds = [('haro', vm), ('checked', twin)]
     failed = []
+    if ONLY:
+        doc['cases'] = [c for c in doc['cases'] if c['id'] == ONLY]
     for c in doc['cases']:
         if PLANT and c['id'] == 'V01':
             c = json.loads(json.dumps(c))

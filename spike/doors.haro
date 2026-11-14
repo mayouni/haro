@@ -45,7 +45,7 @@ DEFINE MENU shapes AS (
 
 DEFINE DECLARATION command AS (
   VERB "COMMAND",
-  SEATS [runs: text?, itself: flag?, takes: [shapes]?, quiet: flag?],
+  SEATS [runs: text?, itself: flag?, takes: [shapes]?, quiet: flag?, in: root?],
   OPENS process
 ) RATIONALE "A program and the shapes of the arguments it may be given; never a line for a shell to read"
 

@@ -347,6 +347,7 @@ end
 #   COMMAND_UNKNOWN     the sentence declares no command of that name
 #   COMMAND_SHELL       the command runs a shell, or a file a shell reads: a command is a program and its arguments
 #   COMMAND_WORDS       the command takes `words` twice, which has no one reading
+#   COMMAND_IN          the command runs IN a root that has no folder
 #   INVOCATION_COUNT    the arguments are not as many as the command takes
 #   INVOCATION_SHAPE    an argument is not the shape declared for its place
 # No shell reads an invocation: a door starts the program from the vector, and each argument arrives as it is.
@@ -361,6 +362,7 @@ func HaroInvocationOf(psDoors, ptCommand, pxArguments)
 	bQuiet = false
 	bFound = false
 	vTakes = []
+	tIn = ""
 	tNames = ""
 	for i = 1 to Len(xDecls)
 		if xDecls[i][1] != "COMMAND" loop end
@@ -375,6 +377,7 @@ func HaroInvocationOf(psDoors, ptCommand, pxArguments)
 			if tKey = "itself" bItself = (xClauses[k][3][2] = "yes") end
 			if tKey = "quiet" bQuiet = (xClauses[k][3][2] = "yes") end
 			if tKey = "takes" vTakes = xClauses[k][3][2] end
+			if tKey = "in" tIn = xClauses[k][3][2] end
 		end
 	end
 	if not bFound
@@ -385,6 +388,21 @@ func HaroInvocationOf(psDoors, ptCommand, pxArguments)
 		tProgram = ExeFileName()
 	else
 		HaroNoShell(ptCommand, tRuns)
+	end
+	# IN a root: the child stands in the root's folder. The court holds that the root is declared (DANGLING); a root with no
+	# folder is refused here
+	tFolder = ""
+	if tIn != ""
+		for i = 1 to Len(xDecls)
+			if xDecls[i][1] != "ROOT" or xDecls[i][2] != tIn loop end
+			xClauses = xDecls[i][4]
+			for k = 1 to Len(xClauses)
+				if Lower(xClauses[k][1]) = "at" tFolder = HaroTrimSlash(xClauses[k][3][2]) end
+			end
+		end
+		if tFolder = ""
+			Raise("Error (COMMAND_IN) : the command `" + ptCommand + "` runs in the root `" + tIn + "`, which has no folder")
+		end
 	end
 	iRuns = 0
 	for k = 1 to Len(vTakes)
@@ -413,12 +431,21 @@ func HaroInvocationOf(psDoors, ptCommand, pxArguments)
 		if tShape = "words" iTimes = 1 + iGiven - iTakes end
 		for r = 1 to iTimes
 			tArgument = HaroArgument(ptCommand, iAt, tShape, pxArguments[iAt])
+			# a child that stands in another folder is given a place whole
+			if tShape = "place" and tFolder != "" tArgument = HaroWholePath(tArgument) end
 			vArgv + tArgument
 			tLine = tLine + " " + HaroShown(tArgument)
 			iAt = iAt + 1
 		end
 	end
-	return new HaroInvocation(ptCommand, bQuiet, tLine, vArgv)
+	return new HaroInvocation(ptCommand, bQuiet, tLine, vArgv, tIn, tFolder)
+end
+
+# a path from where this program stands, made whole: either slash read as one
+func HaroWholePath(ptPath)
+	if Left(ptPath, 1) = "/" return ptPath end
+	if Len(ptPath) >= 2 and ptPath[2] = ":" return ptPath end
+	return HaroTrimSlash(CurrentDir()) + "/" + ptPath
 end
 
 # one argument, judged by its shape: the text the program is given, or the refusal
@@ -521,21 +548,30 @@ end
 
 # The VM knows this class by its name and its attributes by their order, as it knows a sentence's and a place's (vm/src/main.zig):
 # the second says whether the child's standard error is dropped, the third is the line an invocation prints as, the fourth the
-# vector a door starts the program from, the fifth says it is made -- from then on a write into it is refused (INVOCATION_FIXED).
-# Keep the order.
+# vector a door starts the program from, the fifth says it is made -- from then on a write into it is refused (INVOCATION_FIXED),
+# the sixth is the folder the child stands in, the empty text for where this program stands. Keep the order.
 class HaroInvocation
 	tCommand = ""
 	bQuiet = false
 	tLine = ""
 	vArgv = []
 	bFixed = false
+	tFolder = ""
+	tIn = ""
 
-	def init(ptCommand, pbQuiet, ptLine, pvArgv)
+	def init(ptCommand, pbQuiet, ptLine, pvArgv, ptIn, ptFolder)
 		tCommand = ptCommand
 		bQuiet = pbQuiet
 		tLine = ptLine
 		vArgv = pvArgv
+		tIn = ptIn
+		tFolder = ptFolder
 		bFixed = true
+	end
+
+	# the root the child stands in, by its name; the empty text when it stands where this program does
+	def In
+		return tIn
 	end
 
 	def Command

@@ -1,0 +1,7 @@
+load "doors.haro"
+sDoors = doors'DEFINE ROOT data AS (AT "data", ALLOWS [read]) RATIONALE "the notes this program reads"
+DEFINE COMMAND inside AS (ITSELF yes, TAKES [text, place], IN data) RATIONALE "this haro, run in the folder of the notes"'
+hCall = sDoors.Invocation("inside", ["../where.haro", sDoors.Place("data", "note.txt")])
+print hCall.In()
+print SystemCmd(hCall)
+print System(hCall)

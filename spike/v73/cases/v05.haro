@@ -3,7 +3,7 @@ sDoors = doors'DEFINE COMMAND all AS (ITSELF yes, TAKES [word, option, number, p
 DEFINE ROOT data AS (AT "data", ALLOWS [read]) RATIONALE "the notes this program reads"'
 hNote = sDoors.Place("data", "note.txt")
 vGood = ["echo.haro", "--deep", 42, hNote, "a", "free"]
-vBad = [[1, "two words"], [1, "-rf"], [1, ""], [2, "deep"], [2, "--a b"], [3, "42"], [4, "data/note.txt"], [5, "a b"], [6, "-o"], [6, "a" + Char(10) + "b"]]
+vBad = [[1, "two words"], [1, "-rf"], [1, ""], [2, "deep"], [2, "--a b"], [3, "42"], [4, "data/note.txt"], [5, "a b"], [6, "-o"], [6, "a" + Char(10) + "b"], [1, 7], [2, 7], [6, 7]]
 for i = 1 to Len(vBad)
     vArgs = []
     for k = 1 to Len(vGood)

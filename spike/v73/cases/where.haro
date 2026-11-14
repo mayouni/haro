@@ -1,0 +1,3 @@
+print FExists("note.txt")
+print FExists(sysargv[3])
+print Read(sysargv[3])

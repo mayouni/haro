@@ -1153,7 +1153,8 @@ pub var sentence_class: u32 = 0xFFFF_FFFF;
 pub var place_class: u32 = 0xFFFF_FFFF;
 /// v0.73 (doc/DOORS.md rung 2): the class of an invocation -- judge_lib.haro's HaroInvocation. Slot 0 its command's name, slot 1
 /// whether the child's standard error is dropped, slot 2 the line it prints as, slot 3 the vector a door starts the program from
-/// (the program, then each argument, texts), slot 4 whether it is made.
+/// (the program, then each argument, texts), slot 4 whether it is made, slot 5 the folder the child stands in (the empty text
+/// for where this program stands).
 pub var invocation_class: u32 = 0xFFFF_FFFF;
 pub var sentence_scanned: usize = 0;
 pub fn sentenceClass() u32 {
@@ -3289,7 +3290,9 @@ pub const VM = struct {
     /// the program, then each argument as it is -- and no shell reads a line. `capture`: SystemCmd's door, the answer what the
     /// child wrote to its standard output with the last line end dropped; else System's, the child writing where this program
     /// writes and the answer its exit code (-1 when it did not end by itself). What the child writes to its standard error
-    /// passes through, or is dropped when the command is QUIET. A program that cannot be started is COMMAND_NOT_STARTED.
+    /// passes through; when the command is QUIET nothing it writes reaches this program's output -- SystemCmd still answers its
+    /// standard output, System sends both away. The child stands in the invocation's folder when it names one. A program that
+    /// cannot be started is COMMAND_NOT_STARTED.
     fn runInvocation(self: *VM, v: Value, capture: bool) ?Value {
         const o = v.p.o;
         if (o.nslots < 5 or o.slots[3].tag != .vec or o.slots[3].p.v.len == 0) {
@@ -3298,6 +3301,8 @@ pub const VM = struct {
         }
         const name = if (o.slots[0].tag == .str) strOf(o.slots[0]) else "";
         const quiet = o.slots[1].tag == .boolean and o.slots[1].p.i != 0;
+        // IN a root: the child stands in the root's folder
+        const folder: ?[]const u8 = if (o.nslots > 5 and o.slots[5].tag == .str and strOf(o.slots[5]).len > 0) strOf(o.slots[5]) else null;
         const vv = o.slots[3].p.v;
         var argv: std.ArrayListUnmanaged([]const u8) = .{};
         defer argv.deinit(self.alloc);
@@ -3312,7 +3317,7 @@ pub const VM = struct {
         }
         outFlush();
         if (capture) {
-            const res = std.process.Child.run(.{ .allocator = self.alloc, .argv = argv.items, .max_output_bytes = 1 << 30 }) catch {
+            const res = std.process.Child.run(.{ .allocator = self.alloc, .argv = argv.items, .cwd = folder, .max_output_bytes = 1 << 30 }) catch {
                 self.pending = self.haroMsg("Error (COMMAND_NOT_STARTED) : the command `{s}` runs `{s}`, which could not be started", .{ name, argv.items[0] });
                 return null;
             };
@@ -3325,7 +3330,9 @@ pub const VM = struct {
         }
         var child = std.process.Child.init(argv.items, self.alloc);
         child.stdin_behavior = .Inherit;
-        child.stdout_behavior = .Inherit;
+        child.cwd = folder;
+        // QUIET: nothing the child writes reaches this program's output
+        child.stdout_behavior = if (quiet) .Ignore else .Inherit;
         child.stderr_behavior = if (quiet) .Ignore else .Inherit;
         const term = child.spawnAndWait() catch {
             self.pending = self.haroMsg("Error (COMMAND_NOT_STARTED) : the command `{s}` runs `{s}`, which could not be started", .{ name, argv.items[0] });
