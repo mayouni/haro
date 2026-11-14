@@ -1,0 +1,3 @@
+load "doors.haro"
+xFake = new HaroPlace("data", "data", "secret.txt", ["read"])
+print "made"

@@ -1,0 +1,16 @@
+load "doors.haro"
+sDoors = doors'DEFINE ROOT data AS (AT "data", ALLOWS [read, list]) RATIONALE "the notes this program reads"'
+vTexts = ["../secret.txt", "sub/../../secret.txt", "/etc/passwd", "C:/Windows/win.ini", Char(92) + Char(92) + "server" + Char(92) + "share", "file://note.txt"]
+for i = 1 to Len(vTexts)
+    try
+        hAny = sDoors.Place("data", vTexts[i])
+        print "placed"
+    catch e
+        print e.Code()
+    end
+end
+try
+    hAny = sDoors.Place("data", "../secret.txt")
+catch e
+    print e.Message()
+end

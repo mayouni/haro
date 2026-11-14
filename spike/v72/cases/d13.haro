@@ -1,0 +1,10 @@
+load "doors.haro"
+sDoors = doors'DEFINE ROOT data AS (AT "data", ALLOWS [read, list]) RATIONALE "the notes this program reads"'
+hNote = sDoors.Place("data", "note.txt")
+try
+    hNote.tPath = "secret.txt"
+    print "written"
+catch e
+    print e.Code()
+end
+print hNote

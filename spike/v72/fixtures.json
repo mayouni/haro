@@ -1,0 +1,227 @@
+{
+ "version": "0.72",
+ "task": "doc/DOORS.md rung 1: the language of doors and the place",
+ "languages": [
+  "doors"
+ ],
+ "law": "the verdict on a sentence of doors is the one its own forged court answers, standing alone, on the same text",
+ "cases": [
+  {
+   "id": "D01",
+   "line": "L1",
+   "what": "the standard language loaded, a root declared, a place judged and held by an h name",
+   "file": "cases/d01.haro",
+   "run": {
+    "stdout": "data/note.txt\ndata\ndata/note.txt\n2\n"
+   },
+   "judged": [
+    [
+     "doors",
+     "DEFINE ROOT data AS (AT \"data\", ALLOWS [read, list]) RATIONALE \"the notes this program reads\"",
+     null,
+     ""
+    ]
+   ],
+   "check": {
+    "errors": 0,
+    "found": []
+   }
+  },
+  {
+   "id": "D02",
+   "line": "L2",
+   "what": "the path made plain: a folder beneath, a dot, a step back inside the root, either slash",
+   "file": "cases/d02.haro",
+   "run": {
+    "stdout": "data/sub/inner.txt\ndata/sub/inner.txt\ndata/sub/inner.txt\ndata/note.txt\n"
+   }
+  },
+  {
+   "id": "D03",
+   "line": "L3",
+   "what": "a text that leaves its root is PLACE_ESCAPES: a step back out, a rooted path, a drive, a share, a scheme",
+   "file": "cases/d03.haro",
+   "run": {
+    "stdout": "PLACE_ESCAPES\nPLACE_ESCAPES\nPLACE_ESCAPES\nPLACE_ESCAPES\nPLACE_ESCAPES\nPLACE_ESCAPES\nError (PLACE_ESCAPES) : `../secret.txt` leaves the root `data`\n"
+   }
+  },
+  {
+   "id": "D04",
+   "line": "L3",
+   "what": "a name a place cannot hold is PLACE_NAME: nothing, a control byte, a device, a trailing dot or blank, a stream",
+   "file": "cases/d04.haro",
+   "run": {
+    "stdout": "PLACE_NAME\nPLACE_NAME\nPLACE_NAME\nPLACE_NAME\nPLACE_NAME\nPLACE_NAME\nPLACE_NAME\nError (PLACE_NAME) : `name.` is no name a place can hold\n"
+   }
+  },
+  {
+   "id": "D05",
+   "line": "L4",
+   "what": "a root the sentence does not declare is ROOT_UNKNOWN, and names the ones it does",
+   "file": "cases/d05.haro",
+   "run": {
+    "stdout": "ROOT_UNKNOWN\nError (ROOT_UNKNOWN) : no root called `nowhere` is declared here; the roots are data, out\n"
+   },
+   "judged": [
+    [
+     "doors",
+     "DEFINE ROOT data AS (AT \"data\", ALLOWS [read, list]) RATIONALE \"the notes this program reads\"\nDEFINE ROOT out AS (AT \"out\", ALLOWS [read, write, remove]) RATIONALE \"what this program makes\"",
+     null,
+     ""
+    ]
+   ]
+  },
+  {
+   "id": "D06",
+   "line": "L5",
+   "what": "a root ANYWHERE takes the file a person names, wherever it is, and reads only",
+   "file": "cases/d06.haro",
+   "run": {
+    "stdout": "C:/some/where/else.txt\ndata/note.txt\nread\n1\nPLACE_NAME\n"
+   },
+   "judged": [
+    [
+     "doors",
+     "DEFINE ROOT given AS (ANYWHERE yes) RATIONALE \"the file a person names\"",
+     null,
+     ""
+    ]
+   ]
+  },
+  {
+   "id": "D07",
+   "line": "L6",
+   "what": "a root with no folder that does not say ANYWHERE is refused when the program is compiled",
+   "file": "cases/d07.haro",
+   "run": {
+    "refuses": [
+     3,
+     "the court of doors refuses this literal -- ROOT_NOWHERE: ROOT a names no folder: give it AT, or say ANYWHERE for the files a person names; written",
+     "'DEFINE ROOT a AS (ALLOWS [read]) RATIONALE \"x\"'"
+    ],
+    "never": "before"
+   },
+   "judged": [
+    [
+     "doors",
+     "DEFINE ROOT a AS (ALLOWS [read]) RATIONALE \"x\"",
+     "ROOT_NOWHERE",
+     "ROOT a names no folder: give it AT, or say ANYWHERE for the files a person names"
+    ],
+    [
+     "doors",
+     "DEFINE ROOT b AS (ANYWHERE yes, AT \"x\") RATIONALE \"x\"",
+     "ROOT_TWICE",
+     "ROOT b says ANYWHERE and AT: it is one or the other"
+    ],
+    [
+     "doors",
+     "DEFINE ROOT c AS (ANYWHERE yes, ALLOWS [write]) RATIONALE \"x\"",
+     "ROOT_ANYWHERE_READS",
+     "ROOT c is ANYWHERE and lists what it allows: a root with no folder reads, and nothing more"
+    ],
+    [
+     "doors",
+     "DEFINE ROOT d AS (AT \"x\", ALLOWS [execute]) RATIONALE \"x\"",
+     "UNKNOWN_PERMISSION",
+     "A root allows read, write, list or remove, not 'execute'"
+    ]
+   ],
+   "check": {
+    "errors": 1,
+    "found": [
+     [
+      3,
+      "haro/refused-form"
+     ]
+    ]
+   }
+  },
+  {
+   "id": "D08",
+   "line": "L7",
+   "what": "a door takes a place: Read, FExists and Dir beneath a root that allows them",
+   "file": "cases/d08.haro",
+   "run": {
+    "stdout": "hello\ntrue\nfalse\n1\n"
+   },
+   "check": {
+    "errors": 0,
+    "found": []
+   }
+  },
+  {
+   "id": "D09",
+   "line": "L7",
+   "what": "a door the root does not allow is PLACE_NOT_ALLOWED, and nothing is done",
+   "file": "cases/d09.haro",
+   "run": {
+    "stdout": "PLACE_NOT_ALLOWED\nError (PLACE_NOT_ALLOWED) : the root `data` does not allow write\nPLACE_NOT_ALLOWED\nhello\n"
+   }
+  },
+  {
+   "id": "D10",
+   "line": "L7",
+   "what": "beneath a root that allows them: Write, Read, Remove",
+   "file": "cases/d10.haro",
+   "run": {
+    "stdout": "made\nfalse\n"
+   }
+  },
+  {
+   "id": "D11",
+   "line": "L8",
+   "what": "the door checks again where it opens: a link beneath the root that leads out of it",
+   "file": "cases/d11.haro",
+   "run": {
+    "stdout": "data/way_out/secret.txt\nPLACE_ESCAPES\n"
+   },
+   "setup": "link"
+  },
+  {
+   "id": "D12",
+   "line": "L9",
+   "what": "a place is made by its judge alone: `new` of one is refused when compiling",
+   "file": "cases/d12.haro",
+   "run": {
+    "refuses": [
+     2,
+     "a place is made by its judge -- <doors>.Place(root, text); written",
+     "new HaroPlace(\"data\", \"data\", \"secret.txt\", [\"read\"])"
+    ],
+    "never": "made"
+   },
+   "check": {
+    "errors": 1,
+    "found": [
+     [
+      2,
+      "haro/refused-form"
+     ]
+    ]
+   }
+  },
+  {
+   "id": "D13",
+   "line": "L9",
+   "what": "a write into a place is refused, and the place is what it was",
+   "file": "cases/d13.haro",
+   "run": {
+    "stdout": "PLACE_FIXED\ndata/note.txt\n"
+   }
+  },
+  {
+   "id": "D14",
+   "line": "L10",
+   "what": "a door still takes text as it did",
+   "file": "cases/d14.haro",
+   "run": {
+    "stdout": "hello\nhello\ntrue\n"
+   },
+   "check": {
+    "errors": 0,
+    "found": []
+   }
+  }
+ ]
+}

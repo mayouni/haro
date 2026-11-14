@@ -1,0 +1,4 @@
+tName = "data/" + "note.txt"
+print Read("data/note.txt")
+print Read(tName)
+print FExists(tName)

@@ -1,0 +1,38 @@
+-- doors.haro -- Haro's standard language of doors (v0.72, DOORS.md, D88): what a program opens, declared once.
+
+DEFINE LANGUAGE doors AS (
+  VERSION "0.72", GRAMMAR "0.72",
+  COURT "spike/v72/fixtures.json",
+  EXTENSION ".doors",
+  NEEDS [filesystem]
+) RATIONALE "The doors a program opens, declared before it opens one"
+
+DEFINE MENU permissions AS (
+  WORDS [read, write, list, remove],
+  MESSAGE "A root allows read, write, list or remove",
+  CODE "UNKNOWN_PERMISSION"
+) RATIONALE "What may be done beneath a root"
+
+DEFINE DECLARATION root AS (
+  VERB "ROOT",
+  SEATS [at: text?, anywhere: flag?, allows: [permissions]?],
+  OPENS filesystem
+) RATIONALE "A folder and what may be done beneath it; or, anywhere, the files a person names, read and nothing more"
+
+DEFINE CONSTRAINT a_root_stands_somewhere AS (
+  ON root, WHEN "anywhere absent", THEN "at present",
+  MESSAGE "ROOT {name} names no folder: give it AT, or say ANYWHERE for the files a person names",
+  CODE "ROOT_NOWHERE"
+) RATIONALE "A root is a folder, unless it says it is none"
+
+DEFINE CONSTRAINT anywhere_is_no_folder AS (
+  ON root, WHEN "anywhere present", THEN "at absent",
+  MESSAGE "ROOT {name} says ANYWHERE and AT: it is one or the other",
+  CODE "ROOT_TWICE"
+) RATIONALE "A root that is anywhere has no folder"
+
+DEFINE CONSTRAINT anywhere_only_reads AS (
+  ON root, WHEN "anywhere present", THEN "allows absent",
+  MESSAGE "ROOT {name} is ANYWHERE and lists what it allows: a root with no folder reads, and nothing more",
+  CODE "ROOT_ANYWHERE_READS"
+) RATIONALE "Without a folder to hold it in, a root may only read"

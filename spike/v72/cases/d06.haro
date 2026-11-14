@@ -1,0 +1,13 @@
+load "doors.haro"
+sDoors = doors'DEFINE ROOT given AS (ANYWHERE yes) RATIONALE "the file a person names"'
+hFar = sDoors.Place("given", "C:/some/where/else.txt")
+print hFar
+hNear = sDoors.Place("given", "data/../data/note.txt")
+print hNear
+print hNear.Allows()[1]
+print Len(hNear.Allows())
+try
+    hAny = sDoors.Place("given", "name.")
+catch e
+    print e.Code()
+end

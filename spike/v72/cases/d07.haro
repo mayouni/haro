@@ -1,0 +1,3 @@
+load "doors.haro"
+print "before"
+sDoors = doors'DEFINE ROOT a AS (ALLOWS [read]) RATIONALE "x"'

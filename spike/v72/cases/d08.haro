@@ -1,0 +1,7 @@
+load "doors.haro"
+sDoors = doors'DEFINE ROOT data AS (AT "data", ALLOWS [read, list]) RATIONALE "the notes this program reads"'
+hNote = sDoors.Place("data", "note.txt")
+print Read(hNote)
+print FExists(hNote)
+print FExists(sDoors.Place("data", "absent.txt"))
+print Len(Dir(sDoors.Place("data", "sub")))

@@ -1,0 +1,10 @@
+load "doors.haro"
+sDoors = doors'DEFINE ROOT data AS (AT "data", ALLOWS [read, list]) RATIONALE "the notes this program reads"
+DEFINE ROOT out AS (AT "out", ALLOWS [read, write, remove]) RATIONALE "what this program makes"'
+try
+    hAny = sDoors.Place("nowhere", "note.txt")
+    print "placed"
+catch e
+    print e.Code()
+    print e.Message()
+end

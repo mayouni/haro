@@ -1,0 +1,7 @@
+load "doors.haro"
+sDoors = doors'DEFINE ROOT out AS (AT "out", ALLOWS [read, write, remove]) RATIONALE "what this program makes"'
+hMade = sDoors.Place("out", "made.txt")
+Write(hMade, "made")
+print Read(hMade)
+Remove(hMade)
+print FExists(hMade)
