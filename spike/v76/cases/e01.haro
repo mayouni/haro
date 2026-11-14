@@ -1,0 +1,10 @@
+load "doors.haro"
+sDoors = doors'DEFINE PEER github AS (HOST "api.github.com", SCHEMES [https]) RATIONALE "where releases are read from"'
+hApi = sDoors.Endpoint("github", "https://api.github.com/user?per_page=5")
+print hApi
+print hApi.Peer()
+print hApi.Scheme()
+print hApi.Host()
+print hApi.Port()
+print hApi.Path()
+print hApi.Url()

@@ -1,0 +1,12 @@
+load "doors.haro"
+sDoors = doors'DEFINE PEER github AS (HOST "api.github.com", SCHEMES [https]) RATIONALE "where releases are read from"
+DEFINE PEER db AS (HOST "db.internal", SCHEMES [tcp], PORT 5432) RATIONALE "the database of this program"'
+vTries = [["github", "http://api.github.com/"], ["github", "ftp://api.github.com/"], ["github", "https://api.github.com:8443/"], ["db", "tcp://db.internal:22"], ["db", "https://db.internal:5432"]]
+for i = 1 to Len(vTries)
+    try
+        hAny = sDoors.Endpoint(vTries[i][1], vTries[i][2])
+        print "judged"
+    catch e
+        print e.Message()
+    end
+end

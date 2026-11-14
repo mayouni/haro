@@ -1,0 +1,10 @@
+load "doors.haro"
+sDoors = doors'DEFINE PEER github AS (HOST "api.github.com", SCHEMES [https]) RATIONALE "where releases are read from"
+DEFINE PEER db AS (HOST "db.internal", SCHEMES [tcp], PORT 5432) RATIONALE "the database of this program"'
+try
+    hAny = sDoors.Endpoint("gitlab", "https://gitlab.com/")
+    print "judged"
+catch e
+    print e.Code()
+    print e.Message()
+end

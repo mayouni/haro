@@ -1,0 +1,3 @@
+load "doors.haro"
+print "before"
+sDoors = doors'DEFINE PEER a AS (SCHEMES [https]) RATIONALE "x"'

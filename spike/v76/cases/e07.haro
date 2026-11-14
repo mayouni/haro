@@ -1,0 +1,18 @@
+load "doors.haro"
+sDoors = doors'DEFINE PEER lan AS (NET "10.9.0.0/16", SCHEMES [http], PORT 8080) RATIONALE "the machines of the house"'
+print sDoors.Endpoint("lan", "http://10.9.3.7:8080/status")
+print sDoors.Endpoint("lan", "http://10.9.255.255/")
+vTexts = ["http://10.10.0.1/", "http://10.8.255.255/", "http://printer.local/", "http://010.9.3.7/", "http://10.9.3/", "http://168363783/", "http://0x0a.9.3.7/", "http://10.9.3.256/", "http://10.9.3.7.1/"]
+for i = 1 to Len(vTexts)
+    try
+        hAny = sDoors.Endpoint("lan", vTexts[i])
+        print "judged"
+    catch e
+        print e.Code()
+    end
+end
+try
+    hAny = sDoors.Endpoint("lan", "http://10.10.0.1/")
+catch e
+    print e.Message()
+end
