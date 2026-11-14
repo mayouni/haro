@@ -63,7 +63,13 @@ pub const names = [_][]const u8{
 
 /// `lowname` must already be lower-cased, which is how every caller in
 /// types.zig holds names.
+/// Haro's own natives, published at start-up with no library (syscmd.zig): the checker knows them as it knows the names above.
+pub const own = [_][]const u8{"systemcmd"};
+
 pub fn isBuiltin(lowname: []const u8) bool {
+    for (own) |n| {
+        if (std.mem.eql(u8, n, lowname)) return true;
+    }
     // 258 entries: linear scan is ~microseconds and runs once per UNRESOLVED
     // call, which a healthy file has none of. Not worth a hash table.
     for (names) |n| {

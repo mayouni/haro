@@ -1151,17 +1151,23 @@ pub var sentence_class: u32 = 0xFFFF_FFFF;
 /// a known order too: slot 0 its root's name, slot 1 the root's folder (the empty text for a root ANYWHERE), slot 2 its path,
 /// slot 3 what the root allows, slot 4 whether it is made.
 pub var place_class: u32 = 0xFFFF_FFFF;
+/// v0.73 (doc/DOORS.md rung 2): the class of an invocation -- judge_lib.haro's HaroInvocation. Slot 0 its command's name, slot 1
+/// whether the child's standard error is dropped, slot 2 the line it prints as, slot 3 the vector a door starts the program from
+/// (the program, then each argument, texts), slot 4 whether it is made.
+pub var invocation_class: u32 = 0xFFFF_FFFF;
 pub var sentence_scanned: usize = 0;
 pub fn sentenceClass() u32 {
     if (class_konst.len == sentence_scanned) return sentence_class;
     sentence_scanned = class_konst.len;
     sentence_class = 0xFFFF_FFFF;
     place_class = 0xFFFF_FFFF;
+    invocation_class = 0xFFFF_FFFF;
     for (class_konst, 0..) |ki, ci| {
         if (ki >= konst.len or konst[ki].tag != .str) continue;
         const s = konst[ki].p.s;
         if (std.ascii.eqlIgnoreCase(s.ptr[0..s.len], "harosentence")) sentence_class = @intCast(ci);
         if (std.ascii.eqlIgnoreCase(s.ptr[0..s.len], "haroplace")) place_class = @intCast(ci);
+        if (std.ascii.eqlIgnoreCase(s.ptr[0..s.len], "haroinvocation")) invocation_class = @intCast(ci);
     }
     return sentence_class;
 }
@@ -1181,6 +1187,15 @@ fn placeFixed(o: *Obj) bool {
     return o.class == place_class and o.nslots > 4 and o.slots[4].tag == .boolean and o.slots[4].p.i != 0;
 }
 const PLACE_FIXED = "Error (PLACE_FIXED) : a place is not written into -- its text is judged again by its root";
+pub fn isInvocation(v: Value) bool {
+    _ = sentenceClass();
+    return v.tag == .obj and v.p.o.class == invocation_class;
+}
+fn invocationFixed(o: *Obj) bool {
+    _ = sentenceClass();
+    return o.class == invocation_class and o.nslots > 4 and o.slots[4].tag == .boolean and o.slots[4].p.i != 0;
+}
+const INVOCATION_FIXED = "Error (INVOCATION_FIXED) : an invocation is not written into -- its arguments are judged again by its command";
 /// Per class, its parent's id, 0xFFFF for none; per function id, the class
 /// that defines it, 0xFFFF for a plain function. For reflection: `methods`,
 /// `ismethod`, `addmethod` (2026-09-23).
@@ -3270,6 +3285,58 @@ pub const VM = struct {
     /// and std.fs takes a slice, so this is just a bounds-checked copy
     /// into scratch -- but it keeps the file builtins from aliasing a
     /// string the program still owns.
+    /// v0.73 (doc/DOORS.md rung 2, D88 (d)): an invocation at a door. The program is started from the invocation's vector --
+    /// the program, then each argument as it is -- and no shell reads a line. `capture`: SystemCmd's door, the answer what the
+    /// child wrote to its standard output with the last line end dropped; else System's, the child writing where this program
+    /// writes and the answer its exit code (-1 when it did not end by itself). What the child writes to its standard error
+    /// passes through, or is dropped when the command is QUIET. A program that cannot be started is COMMAND_NOT_STARTED.
+    fn runInvocation(self: *VM, v: Value, capture: bool) ?Value {
+        const o = v.p.o;
+        if (o.nslots < 5 or o.slots[3].tag != .vec or o.slots[3].p.v.len == 0) {
+            self.pending = BADPARAM;
+            return null;
+        }
+        const name = if (o.slots[0].tag == .str) strOf(o.slots[0]) else "";
+        const quiet = o.slots[1].tag == .boolean and o.slots[1].p.i != 0;
+        const vv = o.slots[3].p.v;
+        var argv: std.ArrayListUnmanaged([]const u8) = .{};
+        defer argv.deinit(self.alloc);
+        var k: usize = 0;
+        while (k < vv.len) : (k += 1) {
+            const it = vv.ptr[k];
+            if (it.tag != .str) {
+                self.pending = BADPARAM;
+                return null;
+            }
+            argv.append(self.alloc, strOf(it)) catch @panic("oom");
+        }
+        outFlush();
+        if (capture) {
+            const res = std.process.Child.run(.{ .allocator = self.alloc, .argv = argv.items, .max_output_bytes = 1 << 30 }) catch {
+                self.pending = self.haroMsg("Error (COMMAND_NOT_STARTED) : the command `{s}` runs `{s}`, which could not be started", .{ name, argv.items[0] });
+                return null;
+            };
+            defer self.alloc.free(res.stdout);
+            defer self.alloc.free(res.stderr);
+            if (!quiet and res.stderr.len > 0) std.debug.print("{s}", .{res.stderr});
+            var s: []const u8 = res.stdout;
+            if (std.mem.endsWith(u8, s, "\r\n")) s = s[0 .. s.len - 2] else if (std.mem.endsWith(u8, s, "\n")) s = s[0 .. s.len - 1];
+            return Value.str(self.newStr(s));
+        }
+        var child = std.process.Child.init(argv.items, self.alloc);
+        child.stdin_behavior = .Inherit;
+        child.stdout_behavior = .Inherit;
+        child.stderr_behavior = if (quiet) .Ignore else .Inherit;
+        const term = child.spawnAndWait() catch {
+            self.pending = self.haroMsg("Error (COMMAND_NOT_STARTED) : the command `{s}` runs `{s}`, which could not be started", .{ name, argv.items[0] });
+            return null;
+        };
+        return Value.int(switch (term) {
+            .Exited => |c| @intCast(c),
+            else => -1,
+        });
+    }
+
     /// v0.72 (doc/DOORS.md): a place at a door. Refused by name when its root does not allow what the door does
     /// (PLACE_NOT_ALLOWED), and when what its path leads to does not stand beneath the root's folder -- a link or a junction that
     /// leads out (PLACE_ESCAPES): the path itself is asked where it exists, else the nearest folder above it that does. A root
@@ -4525,7 +4592,7 @@ pub const VM = struct {
             },
             .obj => {
                 // v0.70: a sentence prints as its text
-                if ((isSentence(v) or isPlace(v)) and v.p.o.nslots > 2 and v.p.o.slots[2].tag == .str) {
+                if ((isSentence(v) or isPlace(v) or isInvocation(v)) and v.p.o.nslots > 2 and v.p.o.slots[2].tag == .str) {
                     const st = v.p.o.slots[2].p.s;
                     outPrint("{s}{s}", .{ st.ptr[0..st.len], end });
                     return;
@@ -7034,6 +7101,14 @@ pub const VM = struct {
                     }
                 }
                 const nm = self.names[ld];
+                // v0.73 (D88 (d)): SystemCmd given an invocation -- no shell: the program is started from its vector, and what
+                // it wrote is the answer, its last line end dropped as the native drops it
+                if (in.c == 1 and isInvocation(regs[base + in.b]) and std.ascii.eqlIgnoreCase(nm, "systemcmd")) {
+                    const cv = self.runInvocation(regs[base + in.b], true) orelse continue :dispatch .raise;
+                    self.setRegB(base + in.a, cv, true);
+                    pc += 1;
+                    continue :dispatch code[pc].op;
+                }
                 // `nchk` has normally found it already; a call reached
                 // without one (a brace's method-miss fallback) raises the
                 // same R3 here.
@@ -8392,15 +8467,20 @@ pub const VM = struct {
                         // writes to OUR stdout directly, so what this program
                         // printed first is flushed first, or it would come out
                         // after the command's own output.
-                        if (regs[A].tag != .str) {
+                        // v0.73 (D88 (d)): given an invocation, no shell -- the program is started from its vector and its
+                        // exit code is the answer
+                        if (isInvocation(regs[A])) {
+                            out = self.runInvocation(regs[A], false) orelse continue :dispatch .raise;
+                        } else if (regs[A].tag != .str) {
                             self.pending = BADPARAM;
                             continue :dispatch .raise;
-                        }
+                        } else {
                         const s = strOf(regs[A]);
                         const buf = self.alloc.alloc(u8, s.len + 1) catch @panic("oom");
                         defer self.alloc.free(buf);
                         outFlush();
                         out = Value.int(if (cz(buf, s)) |cmd| system(cmd) else -1);
+                        }
                     },
                     .rename => {
                         // C's rename answers 0 or -1 and, on Windows, will not
@@ -9558,7 +9638,8 @@ pub const VM = struct {
                     'o' => v.tag == .obj and v.p.o.rec == 0,
                     'r' => v.tag == .obj and v.p.o.rec != 0,
                     // v0.72 (doc/DOORS.md 3.4): a place is a handle of the filesystem, held before the door is opened
-                    'h' => v.tag == .cptr or v.tag == .dll or isPlace(v),
+                    // v0.73: and an invocation, a handle of the process door
+                    'h' => v.tag == .cptr or v.tag == .dll or isPlace(v) or isInvocation(v),
                     'e' => v.tag == .str and v.p.s.err != 0,
                     // v0.70 (TYPES.md T7): a sentence, which only its court makes
                     's' => isSentence(v),
@@ -9709,6 +9790,10 @@ pub const VM = struct {
                 }
                 if (aop == .sattrn and placeFixed(o)) {
                     self.pending = PLACE_FIXED;
+                    continue :dispatch .raise;
+                }
+                if (aop == .sattrn and invocationFixed(o)) {
+                    self.pending = INVOCATION_FIXED;
                     continue :dispatch .raise;
                 }
                 const nidx: u32 = @intCast(in.d);

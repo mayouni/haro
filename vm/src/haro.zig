@@ -644,6 +644,12 @@ fn forgeDeclarationNow(alloc: std.mem.Allocator, p: []const u8, decl: []const u8
     var h = std.hash.Wyhash.init(0x70);
     h.update(decl);
     h.update(self);
+    // v0.73: and which haro it is -- its own file's size and time. A haro put where another stood forges its own folder; the
+    // folder was named by the place alone, and the next haro there met what the last one left (HF-178 (9))
+    if (std.fs.cwd().statFile(self)) |st| {
+        h.update(std.mem.asBytes(&st.size));
+        h.update(std.mem.asBytes(&st.mtime));
+    } else |_| {}
     for ([_][]const u8{ "forge.haro", "haro_lib.haro", "court_lib.haro" }) |f| {
         const fp = std.fs.path.join(alloc, &.{ home, f }) catch continue;
         const st = std.fs.cwd().statFile(fp) catch continue;

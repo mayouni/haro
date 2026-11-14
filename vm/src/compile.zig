@@ -6726,12 +6726,16 @@ pub const Compiler = struct {
         // o or x name it would reach an s name unjudged
         // v0.72 (doc/DOORS.md): and a place by its judge alone
         const a_place = std.ascii.eqlIgnoreCase(ci.name, "haroplace");
-        if (a_place or std.ascii.eqlIgnoreCase(ci.name, "harosentence")) {
+        // v0.73: and an invocation likewise
+        const an_invocation = std.ascii.eqlIgnoreCase(ci.name, "haroinvocation");
+        if (a_place or an_invocation or std.ascii.eqlIgnoreCase(ci.name, "harosentence")) {
             const fi = self.fileOf(n.src.ptr);
             const own = if (fi) |f| f < load_paths.len and std.ascii.eqlIgnoreCase(std.fs.path.basename(load_paths[f]), "judge_lib.haro") else false;
             if (!own) {
                 if (self.spellIn(n.text())) self.spellSet(n.text(), if (a_place)
                     "a place is made by its judge -- <doors>.Place(root, text); written"
+                else if (an_invocation)
+                    "an invocation is made by its judge -- <doors>.Invocation(command, arguments); written"
                 else
                     "a sentence is made by its court -- <language>.Judge(text); written");
                 _ = try self.emit(.loadk, dst, 0, 0, try self.konstIndex("\"\""));
