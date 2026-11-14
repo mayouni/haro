@@ -33,7 +33,7 @@ e3587d3.
 Read on stzlib origin/main 2a5b3ca7f before a word was chosen (HF-179 (9)):
 
 - **`MakeDir`** is the name stzlib's own function bears (`core/common/stkRingStdFuncs.haro`: it runs the shell's `mkdir`, and its
-  desk counts 108 calls of it, 92 in its tests). A program's own function of a built-in's name is the program's -- also when it
+  desk counted 108 calls of it; a search for the exact name finds 1, in a `.ring` test -- HF-181 (10)). A program's own function of a built-in's name is the program's -- also when it
   is defined in a file loaded after the file that calls it (W14) -- so stzlib reads as it did; when its function is taken out, its
   `.haro` callers reach the built-in, with no shell. Its meaning is kept: the folders above are made too, and a folder that
   stands is no fault.
@@ -69,8 +69,7 @@ the folder the command says.
 
 - **`MakeDir` is Haro's own**: a built-in of `.haro` code alone. A `.ring` file reads the name as it did.
 - **A folder that cannot be made is refused by name.** stzlib's function sent the shell's answer away and so could not fail; the
-  built-in says what happened. For stzlib that is a new answer at its 108 calls on the day its function is taken out: a file in
-  the way, or the platform refusing.
+  built-in says what happened: a file in the way, or the platform refusing.
 - **A run answered whole is asked of its invocation**, and has no form that takes a text: there is no shell beneath it.
 - **The record is data**: `HaroRun(0, "", "")` may be written by any program. An invocation is made by its judge alone; what a run
   answered is a value like any other.
