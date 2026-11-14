@@ -1,0 +1,4 @@
+load "own/doors.haro"
+load "doors.haro"
+sDoors = doors'DEFINE ROOT data AS (AT "data", ALLOWS [read, list]) RATIONALE "the notes this program reads"'
+print sDoors.Place("data", "note.txt")

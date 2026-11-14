@@ -1,0 +1,3 @@
+load "doors.haro"
+load "absent.haro"
+print "ran"

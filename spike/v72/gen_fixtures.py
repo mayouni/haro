@@ -24,9 +24,10 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 cases = []
 RULE = 'haro/refused-form'
 CASES = os.path.join(HERE, 'cases')
-for d in ('data', os.path.join('data', 'sub'), 'out'):
+for d in ('data', os.path.join('data', 'sub'), 'out', 'own'):
     os.makedirs(os.path.join(CASES, d), exist_ok=True)
-for name, text in (('data/note.txt', 'hello'), ('data/sub/inner.txt', 'inner'), ('secret.txt', 'outside the root'), ('out/.keep', '')):
+for name, text in (('data/note.txt', 'hello'), ('data/sub/inner.txt', 'inner'), ('secret.txt', 'outside the root'), ('out/.keep', ''),
+                   ('own/doors.haro', 'print "a file of the program"\n')):
     with open(os.path.join(CASES, *name.split('/')), 'w', encoding='utf-8', newline='\n') as f:
         f.write(text)
 
@@ -272,6 +273,20 @@ catch e
 end
 """, {'stdout': 'true\nfalse\n' + said('PLACE_NOT_ALLOWED', 'the root `out` does not allow list') + '\n'
       + said('PLACE_NOT_ALLOWED', 'the root `drop` does not allow read') + '\nPLACE_NOT_ALLOWED\nPLACE_NAME\n'})
+
+# added after the code, when the plants were written: the compiler's look in the forge's folder failed no case, because a load is
+# also matched by the end of its name; here two loaded files end alike, and each load must find its own
+case('D17', 'L1', 'the standard language is found by where it stands: a file of its name in a folder of the program is another file', f"""load "own/doors.haro"
+load "doors.haro"
+sDoors = doors'{DATA}'
+print sDoors.Place("data", "note.txt")
+""", {'stdout': 'a file of the program\ndata/note.txt\n'})
+
+# added after the code, likewise: the report of a load that cannot be opened read the loaded declaration as code
+case('D18', 'L1', 'a declaration a program loads is no code: a load that cannot be opened is reported for itself alone', """load "doors.haro"
+load "absent.haro"
+print "ran"
+""", {'raises': "Can't open file absent.haro", 'also': 'd18.haro errors count : 1', 'never': 'ran'})
 
 doc = {'version': '0.72', 'task': 'doc/DOORS.md rung 1: the language of doors and the place', 'languages': ['doors'],
        'law': 'the verdict on a sentence of doors is the one its own forged court answers, standing alone, on the same text', 'cases': cases}

@@ -685,22 +685,7 @@ fn forgeDeclarationNow(alloc: std.mem.Allocator, p: []const u8, decl: []const u8
         }
         const rest = line["forged ".len..];
         lang = alloc.dupe(u8, rest[0 .. std.mem.indexOfScalar(u8, rest, ':') orelse rest.len]) catch "";
-        // the court loads its libraries by name, beside itself: for each `load` it writes, a file there that loads the forge's own
-        // (a court with constraints, a world or doors loads more than the two every court does)
-        const court_path = std.fs.path.join(alloc, &.{ out, std.fmt.allocPrint(alloc, "{s}_court.haro", .{lang}) catch "" }) catch "";
-        const court_text = std.fs.cwd().readFileAlloc(alloc, court_path, 16 << 20) catch "";
-        var cl: usize = 0;
-        while (cl < court_text.len) {
-            const ce = std.mem.indexOfScalarPos(u8, court_text, cl, '\n') orelse court_text.len;
-            const ln = std.mem.trim(u8, court_text[cl..ce], " \t\r");
-            cl = ce + 1;
-            if (!std.mem.startsWith(u8, ln, "load \"")) continue;
-            const q = std.mem.indexOfScalarPos(u8, ln, 6, '"') orelse continue;
-            const f = ln[6..q];
-            const fwd = std.fs.path.join(alloc, &.{ out, f }) catch continue;
-            const body = std.fmt.allocPrint(alloc, "load \"{s}/{s}\"\n", .{ slashed(alloc, home), f }) catch continue;
-            std.fs.cwd().writeFile(.{ .sub_path = fwd, .data = body }) catch {};
-        }
+        // the court loads its libraries by name: they stand in the forge's folder, the last place a load is looked for (resolveLoad)
         std.fs.cwd().writeFile(.{ .sub_path = mark, .data = lang }) catch {};
     }
     const glue = std.fmt.allocPrint(

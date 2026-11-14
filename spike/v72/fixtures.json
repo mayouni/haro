@@ -240,6 +240,26 @@
    "run": {
     "stdout": "true\nfalse\nError (PLACE_NOT_ALLOWED) : the root `out` does not allow list\nError (PLACE_NOT_ALLOWED) : the root `drop` does not allow read\nPLACE_NOT_ALLOWED\nPLACE_NAME\n"
    }
+  },
+  {
+   "id": "D17",
+   "line": "L1",
+   "what": "the standard language is found by where it stands: a file of its name in a folder of the program is another file",
+   "file": "cases/d17.haro",
+   "run": {
+    "stdout": "a file of the program\ndata/note.txt\n"
+   }
+  },
+  {
+   "id": "D18",
+   "line": "L1",
+   "what": "a declaration a program loads is no code: a load that cannot be opened is reported for itself alone",
+   "file": "cases/d18.haro",
+   "run": {
+    "raises": "Can't open file absent.haro",
+    "also": "d18.haro errors count : 1",
+    "never": "ran"
+   }
   }
  ]
 }
