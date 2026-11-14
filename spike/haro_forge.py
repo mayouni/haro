@@ -4220,6 +4220,13 @@ def stage80():
     """Haro v0.75, a command line is not built as text (doc/DOORS.md, D88 (d), D92; v75/GRAMMAR.md): in a .haro file System and
     SystemCmd take a text written at the call, or an invocation; a court whose library holds a sentence of doors still judges.
     v75/line_court.py on haro and its checked build."""
+    # v0.75 is built and not installed: the shared runtime takes it when stzlib's lines are converted. Until then the installed
+    # builds are older than this stage's rule, and the stage says so by name; on builds named by HARO_VM it always runs
+    marker = os.path.join(HERE, 'v75', 'NOT-INSTALLED.txt')
+    if os.path.exists(marker) and not os.environ.get('HARO_VM'):
+        print('stage 80 -- NOT RUN on the installed runtime: v0.75 is built and not installed (spike/v75/NOT-INSTALLED.txt). '
+              'It runs on runtime/v75/build and build-safe, named by HARO_VM and HARO_TWIN')
+        return 0
     print('stage 80 -- a command line is not built as text: v75/line_court.py on haro and its checked build')
     p = subprocess.run([sys.executable, LINE_COURT] + (['--plant'] if PLANT else []), capture_output=True, cwd=HERE, timeout=900)
     out = p.stdout.decode('utf-8', 'replace').replace(chr(13) + chr(10), chr(10))

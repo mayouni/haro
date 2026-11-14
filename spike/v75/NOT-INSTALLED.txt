@@ -1,0 +1,6 @@
+Haro v0.75 is built and stands in runtime/v75/build and runtime/v75/build-safe (vm/ at 55cabe9).
+The shared runtime, vm/zig-out, is v0.74: it takes v0.75, after its notice, when stzlib's desk says its 11 lines that build a
+command line are converted (CHARTER D92; the list is in the journal's note of 2026-11-14 20:48).
+
+While this file stands, the guard's stage 80 is run on the builds HARO_VM and HARO_TWIN name, and says so by name on the
+installed runtime. The file is taken out with the install.
