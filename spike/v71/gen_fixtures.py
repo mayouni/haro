@@ -11,7 +11,8 @@ The lines:
       as for any s name
   L5  `of` on a return: the function answers a sentence of that language; a sentence of another is SENTENCE_OF_ANOTHER, anything
       else SENTENCE_EXPECTED
-  L6  `of` names a language the file loads: any other word there is refused when compiling
+  L6  `of` names a language the file loads: any other word there is refused when compiling; and `of` has one place, a definition's
+      header (Q14, written after the code)
   L7  no word is reserved: a method named Of is a name, and `of` in a text or a comment is what it was
   L8  `haro check` lists a refused literal and reads no error in a program whose literals and declarations hold
   L9  a finding on a line that holds a literal or `<language>.Judge(` stands at the file's own column
@@ -178,6 +179,13 @@ sLamp = signal.Judge('{AMBER}') cName = "x"
 print sLamp
 ''', {'refuses': [2, "`c` is Softanza's letter and no type's -- text is t: tName; written", 'cName']},
      check={'errors': 1, 'found': [[2, RULE]], 'cols': {'2': len("sLamp = signal.Judge('" + AMBER + "') ") + 1}})
+
+# WRITTEN AFTER THE CODE, said so: a plant that let `of` be read away from a header caught nothing -- no case said what `of` is
+# there. It is refused by name: `of` has one place, a definition's header.
+case('Q14', 'L6', '`of` away from a definition\'s header is refused by name', f'''load "signal.haro"
+sLamp of signal = signal'{AMBER}'
+print "ran"
+''', {'refuses': [2, "`of` stands on a definition's header, for a parameter or for its answer; written", 'of'], 'never': 'ran'})
 
 doc = {'version': '0.71', 'task': 'TYPES.md T7: the literal and `of`', 'languages': ['signal', 'gate'],
        'law': 'a literal\'s verdict is the one the language\'s own forged court answers, standing alone, on the same text', 'cases': cases}

@@ -4137,6 +4137,25 @@ def stage75():
     return 0
 
 
+LITERAL_COURT = os.path.join(HERE, 'v71', 'literal_court.py')
+
+
+def stage76():
+    """Haro v0.71, the literal and `of` (TYPES.md T7, D83 (4) and (5), D86; v71/GRAMMAR.md): a language's name with a text right after it
+    is a sentence judged when the program is compiled, refused at its line in its court's words; `of` on a definition's header says the
+    language of a parameter or of the answer. v71/literal_court.py on haro and its checked build."""
+    print('stage 76 -- the literal and of: v71/literal_court.py on haro and its checked build')
+    p = subprocess.run([sys.executable, LITERAL_COURT] + (['--plant'] if PLANT else []), capture_output=True, cwd=HERE, timeout=900)
+    out = p.stdout.decode('utf-8', 'replace').replace(chr(13) + chr(10), chr(10))
+    for line in out.splitlines():
+        if line.startswith(('  FAIL', '       ', 'LITERAL COURT')):
+            print(line)
+    if p.returncode != 0:
+        print(f'  FAIL the literal court exited {p.returncode}' + ('' if out.strip() else ': ' + p.stderr.decode('utf-8', 'replace')[-400:]))
+        return 1
+    return 0
+
+
 PORT_COURT = os.path.join(os.path.dirname(HERE), 'port', 'port_court.py')
 
 
@@ -4400,5 +4419,7 @@ if __name__ == '__main__':
         failures += stage74()
     if stage in (None, 75) and os.path.exists(SENTENCE_COURT):
         failures += stage75()
+    if stage in (None, 76) and os.path.exists(LITERAL_COURT):
+        failures += stage76()
     print(f'haro_forge: {"FAIL" if failures else "PASS"} ({failures} failure(s), {time.perf_counter()-t0:.1f} s)')
     sys.exit(1 if failures else 0)

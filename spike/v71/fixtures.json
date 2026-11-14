@@ -226,6 +226,20 @@
      "2": 74
     }
    }
+  },
+  {
+   "id": "Q14",
+   "line": "L6",
+   "what": "`of` away from a definition's header is refused by name",
+   "file": "cases/q14.haro",
+   "run": {
+    "refuses": [
+     2,
+     "`of` stands on a definition's header, for a parameter or for its answer; written",
+     "of"
+    ],
+    "never": "ran"
+   }
   }
  ]
 }

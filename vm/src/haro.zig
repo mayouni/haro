@@ -854,7 +854,7 @@ fn languageSugar(alloc: std.mem.Allocator, p: []const u8, src: []const u8, dir: 
             // `of <word>` on a definition's header
             const head = std.mem.trimLeft(u8, src[line_start..i], " \t");
             const on_header = std.mem.startsWith(u8, head, "func ") or std.mem.startsWith(u8, head, "def ");
-            if (on_header and std.mem.eql(u8, word, "of") and prev_word.len > 0) {
+            if (std.mem.eql(u8, word, "of") and prev_word.len > 0) {
                 var w = e;
                 while (w < src.len and (src[w] == ' ' or src[w] == '\t')) w += 1;
                 var we = w;
@@ -864,7 +864,10 @@ fn languageSugar(alloc: std.mem.Allocator, p: []const u8, src: []const u8, dir: 
                 for (langs.items) |l| {
                     if (std.mem.eql(u8, l.name, named)) is_lang = true;
                 }
-                if (is_lang) {
+                if (is_lang and !on_header) {
+                    // one place: a definition's header. Anywhere else it is refused by name, and the text is left as it stands
+                    if (fault == null) fault = .{ .why = "`of` stands on a definition's header, for a parameter or for its answer; written", .word = "of", .row = row };
+                } else if (is_lang) {
                     // inside the parentheses it is the parameter before it; after them, the definition's answer
                     var depth: i32 = 0;
                     for (src[line_start..i]) |c| {
@@ -876,7 +879,7 @@ fn languageSugar(alloc: std.mem.Allocator, p: []const u8, src: []const u8, dir: 
                     i = we;
                     continue;
                 }
-                if (named.len > 0) {
+                if (on_header and !is_lang and named.len > 0) {
                     // the fault names the word; the header is read as it would be without the two, so nothing else is said of it.
                     // The word stays in the text -- the fault's line is found by it -- as a comment the parser passes over
                     if (fault == null) fault = .{ .why = "`of` names a language this file loads; written", .word = alloc.dupe(u8, named) catch "", .row = row };
