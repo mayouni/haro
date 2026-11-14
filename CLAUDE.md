@@ -438,7 +438,7 @@ the cut say `haro/X`, `X.ring`, `rnxc` and "the oracle"**: read them as this rep
 
 The records, all in `doc/` (moved from the root 2026-11-13, on the Principal's word: the root holds README, CLAUDE and LICENSE, as in
 every Softanza project; a record named below or in an older text by its bare name is `doc/<name>`): `CHARTER.md` (section 13 the
-decisions, D1 to D86; section 15 the v0.3 amendments), `PRINCIPLES.md`,
+decisions, D1 to D87; section 15 the v0.3 amendments), `PRINCIPLES.md`,
 `GRAMMAR-SKETCH.md`, `FINDINGS.md` (HF-1 to HF-152, each measured), `SPIKE.md` (every rung, one section each, and "Next"),
 `CODEGRAPH.md` (the code-graph memo), `TYPES.md` (Haro's types: D55, RULED 2026-11-07, nothing built yet), `BLOCKS.md` (one format and pattern rules, REBOL-06/07: its four questions RULED 2026-11-02),
 `FROM-RINGPP.md`, `NUMBERS.md`, `SG1.md`, `STANDALONE.md`, `PROOF.md` (proof in Haro: PROPOSED 2026-11-13, nothing ruled).
@@ -571,7 +571,9 @@ Each `%NAME%` in this file is a folder of this machine; its value is in `.centra
   `spike/judge_lib.haro` stands between program and court, and a haro outside `vm/` finds the forge by `HARO_HOME`.
   **v0.71 is built** (D86, HF-177, stage 76): the literal `signal'...'`, judged when the program is compiled and refused there in its court's
   words; `def Show(psLamp of signal)` and `func Lamp(ptColour) of signal` (SENTENCE_OF_ANOTHER, SENTENCE_EXPECTED); `of` has one place, a header.
-  Next: `of` on an attribute and `unjudged`; then handles and the seat types; then `uses` and `total`.
+  **`unjudged` waits for the doors' languages** (D87, the Principal 2026-11-14: "Option 3"): `doc/DOORS.md` (HARO-DOORS-01, a proposal) designs
+  them -- a program's one declaration of roots, peers and commands; a place, an endpoint, an invocation; the judged value as T7's handle.
+  Next: his answers to DOORS.md's five questions; then its rungs, `unjudged` whole among them; then the seat types; then `uses` and `total`.
 - D43 is the twin-court clause. Of BLOCKS.md's four questions: Q-B1 is built (`?` is C6, and `OPTIONAL` sees it in a rule); Q-B2's two amendments are refused by name until Ringua's text
   lands; Q-B3 the block export of a program is not started; Q-B4 the round-trip court the elders waited for exists -- asking their owners is Central's.
 - **Answered 2026-11-05**: HARO-DISTANCE-01 (HF-141; D50, the author's ruling: no part of Ring is carried with Haro), HARO-ONEHOUR-01 (D51) and -02 (D52). **Next**: what stzlib's sweep on haro.exe sends; zip.zig out (stzlib calls no zip_* since cb6f5de65) with

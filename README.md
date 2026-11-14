@@ -31,10 +31,11 @@ before its code, and every protection is switched off in turn to show the court 
 
     CLAUDE.md        the brief, and what is where
     doc/             the design documents:
-      CHARTER.md       the charter: the alphabet, the decisions (D1-D86), the amendments
+      CHARTER.md       the charter: the alphabet, the decisions (D1-D87), the amendments
       PRINCIPLES.md    the founding principles;  GRAMMAR-SKETCH.md  the first grammar
       TYPES.md         Haro's types, rung by rung;  NUMBERS.md  its numbers;  SG1.md  the system grain
       PROOF.md         proof in Haro: the court is the kernel, three verdicts, the order of its rungs
+      DOORS.md         what a door takes: a place, an endpoint or an invocation, judged against a program's declared roots, peers and commands
       SPIKE.md         every rung, one section each, and what comes next
       FINDINGS.md      HF-1 to HF-177, each one measured
       CODEGRAPH.md     the code-graph memo;  BLOCKS.md  one format and pattern rules
