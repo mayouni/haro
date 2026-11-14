@@ -8,6 +8,7 @@
 #   HaroSentence                        what a sentence is: its language, the language's version, its text, the court's warnings
 #   HaroLang(name)                      the language as a program names it: its Judge(text) is HaroJudge(name, text)
 #   HaroPlaceOf(doors, root, text)      v0.72: a place beneath a root a sentence of doors declares; HaroPlace is what a place is
+#   HaroInvocationOf(doors, command, arguments)   v0.73: a command of a sentence of doors with its arguments judged; HaroInvocation
 #
 # Loaded before any court, it says so: a court's main does nothing when $bHaroJudges exists (court_lib.haro, CtMain).
 
@@ -121,6 +122,11 @@ class HaroSentence
 	def Place(ptRoot, ptText)
 		return HaroPlaceOf(this, ptRoot, ptText)
 	end
+
+	# v0.73: a sentence of doors judges the arguments of one of the commands it declares
+	def Invocation(ptCommand, pxArguments)
+		return HaroInvocationOf(this, ptCommand, pxArguments)
+	end
 end
 
 class HaroLanguage
@@ -148,11 +154,7 @@ func HaroPlaceOf(psDoors, ptRoot, ptText)
 	if psDoors.Language() != "doors"
 		Raise("Error (PLACE_NO_DOORS) : a place is judged by a sentence of doors, and this is a sentence of " + psDoors.Language())
 	end
-	vEntry = HaroLanguageEntry("doors")
-	$vCourtLangs = vEntry[3]
-	CtUseLanguage("doors")
-	CtBuildCondLangs()
-	xDecls = CtDeclare(psDoors.Text())
+	xDecls = HaroDoorsDeclared(psDoors)
 	tAt = ""
 	bAnywhere = false
 	bFound = false
@@ -188,6 +190,15 @@ func HaroPlaceOf(psDoors, ptRoot, ptText)
 		end
 	end
 	return new HaroPlace(ptRoot, tAt, tPath, vAllows)
+end
+
+# what a sentence of doors declares, read through its own court: [verb, name, ?, clauses, rationale] each, a clause [NAME, ?, [shape, value]]
+func HaroDoorsDeclared(psDoors)
+	vEntry = HaroLanguageEntry("doors")
+	$vCourtLangs = vEntry[3]
+	CtUseLanguage("doors")
+	CtBuildCondLangs()
+	return CtDeclare(psDoors.Text())
 end
 
 func HaroTrimSlash(ptFolder)
@@ -325,5 +336,225 @@ class HaroPlace
 
 	def Allows
 		return vAllows
+	end
+end
+
+# ---- v0.73: the invocation (doc/DOORS.md rung 2) ---------------------------------------------------------------------------------
+#
+# A sentence of doors declares commands: a program and the shapes of the arguments it may be given. HaroInvocationOf judges the
+# arguments of one of them and answers an invocation -- the command's name, whether it is quiet, the line it prints as, and the
+# vector a door starts it from: the program, then each argument as a text -- or raises its refusal:
+#   COMMAND_UNKNOWN     the sentence declares no command of that name
+#   COMMAND_SHELL       the command runs a shell, or a file a shell reads: a command is a program and its arguments
+#   COMMAND_WORDS       the command takes `words` twice, which has no one reading
+#   INVOCATION_COUNT    the arguments are not as many as the command takes
+#   INVOCATION_SHAPE    an argument is not the shape declared for its place
+# No shell reads an invocation: a door starts the program from the vector, and each argument arrives as it is.
+
+func HaroInvocationOf(psDoors, ptCommand, pxArguments)
+	if psDoors.Language() != "doors"
+		Raise("Error (INVOCATION_NO_DOORS) : an invocation is judged by a sentence of doors, and this is a sentence of " + psDoors.Language())
+	end
+	xDecls = HaroDoorsDeclared(psDoors)
+	tRuns = ""
+	bItself = false
+	bQuiet = false
+	bFound = false
+	vTakes = []
+	tNames = ""
+	for i = 1 to Len(xDecls)
+		if xDecls[i][1] != "COMMAND" loop end
+		if tNames != "" tNames = tNames + ", " end
+		tNames = tNames + xDecls[i][2]
+		if xDecls[i][2] != ptCommand loop end
+		bFound = true
+		xClauses = xDecls[i][4]
+		for k = 1 to Len(xClauses)
+			tKey = Lower(xClauses[k][1])
+			if tKey = "runs" tRuns = xClauses[k][3][2] end
+			if tKey = "itself" bItself = (xClauses[k][3][2] = "yes") end
+			if tKey = "quiet" bQuiet = (xClauses[k][3][2] = "yes") end
+			if tKey = "takes" vTakes = xClauses[k][3][2] end
+		end
+	end
+	if not bFound
+		Raise("Error (COMMAND_UNKNOWN) : no command called `" + ptCommand + "` is declared here; the commands are " + tNames)
+	end
+	tProgram = tRuns
+	if bItself
+		tProgram = ExeFileName()
+	else
+		HaroNoShell(ptCommand, tRuns)
+	end
+	iRuns = 0
+	for k = 1 to Len(vTakes)
+		if vTakes[k] = "words" iRuns = iRuns + 1 end
+	end
+	if iRuns > 1
+		Raise("Error (COMMAND_WORDS) : the command `" + ptCommand + "` takes words twice: one run of words has a place")
+	end
+	if not IsList(pxArguments)
+		Raise("Error (INVOCATION_SHAPE) : the arguments of `" + ptCommand + "` are given as a vector")
+	end
+	iGiven = Len(pxArguments)
+	iTakes = Len(vTakes)
+	if iRuns = 0 and iGiven != iTakes
+		Raise("Error (INVOCATION_COUNT) : `" + ptCommand + "` takes " + String(iTakes) + " arguments, and is given " + String(iGiven))
+	end
+	if iRuns = 1 and iGiven < iTakes
+		Raise("Error (INVOCATION_COUNT) : `" + ptCommand + "` takes at least " + String(iTakes) + " arguments, and is given " + String(iGiven))
+	end
+	vArgv = [tProgram]
+	tLine = ptCommand
+	iAt = 1
+	for k = 1 to iTakes
+		tShape = vTakes[k]
+		iTimes = 1
+		if tShape = "words" iTimes = 1 + iGiven - iTakes end
+		for r = 1 to iTimes
+			tArgument = HaroArgument(ptCommand, iAt, tShape, pxArguments[iAt])
+			vArgv + tArgument
+			tLine = tLine + " " + HaroShown(tArgument)
+			iAt = iAt + 1
+		end
+	end
+	return new HaroInvocation(ptCommand, bQuiet, tLine, vArgv)
+end
+
+# one argument, judged by its shape: the text the program is given, or the refusal
+func HaroArgument(ptCommand, piAt, ptShape, pxValue)
+	tNo = "Error (INVOCATION_SHAPE) : argument " + String(piAt) + " of `" + ptCommand + "` is no "
+	if ptShape = "number"
+		if not IsNumber(pxValue) Raise(tNo + "number") end
+		return String(pxValue)
+	end
+	if ptShape = "place"
+		if not HaroIsPlace(pxValue) Raise(tNo + "place") end
+		return pxValue.Path()
+	end
+	if ptShape = "word" or ptShape = "words"
+		if not IsString(pxValue) Raise(tNo + "word") end
+		if not HaroIsWord(pxValue) Raise(tNo + "word") end
+		return pxValue
+	end
+	if ptShape = "option"
+		if not IsString(pxValue) Raise(tNo + "option") end
+		tRest = pxValue
+		if Left(tRest, 2) = "--"
+			tRest = SubStr(tRest, 3, Len(tRest) - 2)
+			if Len(pxValue) = 2 tRest = "" end
+		elseif Left(tRest, 1) = "-"
+			tRest = SubStr(tRest, 2, Len(tRest) - 1)
+			if Len(pxValue) = 1 tRest = "" end
+		else
+			Raise(tNo + "option")
+		end
+		if not HaroIsWord(tRest) Raise(tNo + "option") end
+		return pxValue
+	end
+	# a text: any text a program can be given as one argument, that no program reads as an option
+	if not IsString(pxValue) Raise(tNo + "text") end
+	if Left(pxValue, 1) = "-" Raise(tNo + "text") end
+	for i = 1 to Len(pxValue)
+		iByte = Ascii(pxValue[i])
+		if iByte < 32 or iByte = 127 Raise(tNo + "text") end
+	end
+	return pxValue
+end
+
+# a word: letters, digits and _ - . , = with no blank, and no dash first
+func HaroIsWord(ptWord)
+	if Len(ptWord) = 0 return false end
+	if ptWord[1] = "-" return false end
+	for i = 1 to Len(ptWord)
+		if IsAlnum(ptWord[i]) loop end
+		if SubStr("_-.,=", ptWord[i]) > 0 loop end
+		return false
+	end
+	return true
+end
+
+func HaroIsPlace(pxValue)
+	if not IsObject(pxValue) return false end
+	return Lower(ClassName(pxValue)) = "haroplace"
+end
+
+# an argument as an invocation prints it: in quotes where it is empty or holds a blank or a quote
+func HaroShown(ptArgument)
+	tQuote = Char(34)
+	if ptArgument = "" or SubStr(ptArgument, " ") > 0 or SubStr(ptArgument, tQuote) > 0
+		return tQuote + ptArgument + tQuote
+	end
+	return ptArgument
+end
+
+# D88 (d), no shell: a command names a program; a shell, or a file a shell reads, is none
+func HaroNoShell(ptCommand, ptRuns)
+	tBase = Lower(ptRuns)
+	for i = Len(tBase) to 1 step -1
+		if tBase[i] = "/" or Ascii(tBase[i]) = 92
+			tBase = SubStr(tBase, i + 1, Len(tBase) - i)
+			exit
+		end
+	end
+	tKind = ""
+	for i = Len(tBase) to 1 step -1
+		if tBase[i] = "."
+			tKind = SubStr(tBase, i + 1, Len(tBase) - i)
+			tBase = Left(tBase, i - 1)
+			exit
+		end
+	end
+	bShell = false
+	vKinds = ["bat", "cmd", "ps1", "sh"]
+	for i = 1 to Len(vKinds)
+		if tKind = vKinds[i] bShell = true end
+	end
+	vShells = ["cmd", "command", "powershell", "pwsh", "sh", "bash", "zsh", "dash", "ksh", "csh", "tcsh", "fish"]
+	for i = 1 to Len(vShells)
+		if tBase = vShells[i] bShell = true end
+	end
+	if bShell
+		Raise("Error (COMMAND_SHELL) : the command `" + ptCommand + "` runs a shell, `" + ptRuns + "`: a command is a program and its arguments")
+	end
+end
+
+# The VM knows this class by its name and its attributes by their order, as it knows a sentence's and a place's (vm/src/main.zig):
+# the second says whether the child's standard error is dropped, the third is the line an invocation prints as, the fourth the
+# vector a door starts the program from, the fifth says it is made -- from then on a write into it is refused (INVOCATION_FIXED).
+# Keep the order.
+class HaroInvocation
+	tCommand = ""
+	bQuiet = false
+	tLine = ""
+	vArgv = []
+	bFixed = false
+
+	def init(ptCommand, pbQuiet, ptLine, pvArgv)
+		tCommand = ptCommand
+		bQuiet = pbQuiet
+		tLine = ptLine
+		vArgv = pvArgv
+		bFixed = true
+	end
+
+	def Command
+		return tCommand
+	end
+
+	def Program
+		return vArgv[1]
+	end
+
+	def Arguments
+		vOut = []
+		for i = 2 to Len(vArgv)
+			vOut + vArgv[i]
+		end
+		return vOut
+	end
+
+	def Quiet
+		return bQuiet
 	end
 end

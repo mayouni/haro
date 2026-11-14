@@ -1,10 +1,10 @@
--- doors.haro -- Haro's standard language of doors (v0.72, DOORS.md, D88): what a program opens, declared once.
+-- doors.haro -- Haro's standard language of doors (v0.72, v0.73; DOORS.md, D88): what a program opens, declared once.
 
 DEFINE LANGUAGE doors AS (
-  VERSION "0.72", GRAMMAR "0.72",
+  VERSION "0.73", GRAMMAR "0.73",
   COURT "spike/v72/fixtures.json",
   EXTENSION ".doors",
-  NEEDS [filesystem]
+  NEEDS [filesystem, process]
 ) RATIONALE "The doors a program opens, declared before it opens one"
 
 DEFINE MENU permissions AS (
@@ -36,3 +36,27 @@ DEFINE CONSTRAINT anywhere_only_reads AS (
   MESSAGE "ROOT {name} is ANYWHERE and lists what it allows: a root with no folder reads, and nothing more",
   CODE "ROOT_ANYWHERE_READS"
 ) RATIONALE "Without a folder to hold it in, a root may only read"
+
+DEFINE MENU shapes AS (
+  WORDS [word, option, number, place, text, words],
+  MESSAGE "An argument is a word, an option, a number, a place, a text or words",
+  CODE "UNKNOWN_SHAPE"
+) RATIONALE "What an argument of a command may be"
+
+DEFINE DECLARATION command AS (
+  VERB "COMMAND",
+  SEATS [runs: text?, itself: flag?, takes: [shapes]?, quiet: flag?],
+  OPENS process
+) RATIONALE "A program and the shapes of the arguments it may be given; never a line for a shell to read"
+
+DEFINE CONSTRAINT a_command_runs_something AS (
+  ON command, WHEN "itself absent", THEN "runs present",
+  MESSAGE "COMMAND {name} runs nothing: give it RUNS, or say ITSELF for this haro",
+  CODE "COMMAND_NOTHING"
+) RATIONALE "A command is a program"
+
+DEFINE CONSTRAINT itself_is_no_other AS (
+  ON command, WHEN "itself present", THEN "runs absent",
+  MESSAGE "COMMAND {name} says ITSELF and RUNS: it is one or the other",
+  CODE "COMMAND_TWICE"
+) RATIONALE "A command runs one program"
