@@ -116,10 +116,10 @@
   {
    "id": "X07",
    "line": "L5",
-   "what": "a .ring file reads as it did: a built command line runs through the shell",
+   "what": "a .ring file reads as it did: a built command line runs through the shell, at either door",
    "file": "cases/x07.ring",
    "run": {
-    "stdout": "built\npassed\n"
+    "stdout": "built\nbuilt\n"
    }
   },
   {

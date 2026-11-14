@@ -115,10 +115,12 @@ print SystemCmd(xAny)
 print System(MakeCall(sDoors, "passed through"))
 ''', {'stdout': '[held by a name]\n[a function\'s answer]\n[a name that may hold anything]\n[passed through]\n0\n'}, check={'errors': 0, 'found': []})
 
-case('X07', 'L5', 'a .ring file reads as it did: a built command line runs through the shell', '''cWord = "built"
+# sharpened after the code, when the plants were written: System's line was a literal, so the .ring file's reading of a built
+# command line was asked at one door only
+case('X07', 'L5', 'a .ring file reads as it did: a built command line runs through the shell, at either door', '''cWord = "built"
 see systemcmd("echo " + cWord) + nl
-system("echo passed")
-''', {'stdout': 'built\npassed\n'}, ext='.ring')
+system("echo " + cWord)
+''', {'stdout': 'built\nbuilt\n'}, ext='.ring')
 
 case('X08', 'L5', 'a program\'s own function named System or SystemCmd is the program\'s', '''func SystemCmd(ptLine)
     return "mine: " + ptLine
