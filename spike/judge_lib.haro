@@ -10,10 +10,12 @@
 #   HaroPlaceOf(doors, root, text)      v0.72: a place beneath a root a sentence of doors declares; HaroPlace is what a place is
 #   HaroInvocationOf(doors, command, arguments)   v0.73: a command of a sentence of doors with its arguments judged; HaroInvocation
 #
-# Loaded before any court, it says so: a court's main does nothing when $bHaroJudges exists (court_lib.haro, CtMain).
+# A court loaded this way is not the program, and its main does nothing (court_lib.haro, CtIsTheProgram).
 
-$bHaroJudges = true
 $vHaroLanguages = []
+# v0.75: what each sentence of doors declares, read once -- [text, declarations] -- and how many readings there were
+$vHaroDoorsRead = []
+$iHaroDoorsReads = 0
 
 func HaroLanguageLoaded(ptName, ptVersion)
 	$vHaroLanguages + [ptName, ptVersion, $vCourtLangs]
@@ -193,12 +195,26 @@ func HaroPlaceOf(psDoors, ptRoot, ptText)
 end
 
 # what a sentence of doors declares, read through its own court: [verb, name, ?, clauses, rationale] each, a clause [NAME, ?, [shape, value]]
+# v0.75: read once for each sentence. The reading goes through the court's own tables; a judge asked again answers from what
+# was read, so a court that holds a sentence of doors in its library is not disturbed while it judges
 func HaroDoorsDeclared(psDoors)
+	tText = psDoors.Text()
+	for i = 1 to Len($vHaroDoorsRead)
+		if $vHaroDoorsRead[i][1] = tText return $vHaroDoorsRead[i][2] end
+	end
 	vEntry = HaroLanguageEntry("doors")
 	$vCourtLangs = vEntry[3]
 	CtUseLanguage("doors")
 	CtBuildCondLangs()
-	return CtDeclare(psDoors.Text())
+	xRead = CtDeclare(tText)
+	$vHaroDoorsRead + [tText, xRead]
+	$iHaroDoorsReads = $iHaroDoorsReads + 1
+	return xRead
+end
+
+# how many sentences of doors were read
+func HaroDoorsReads
+	return $iHaroDoorsReads
 end
 
 func HaroTrimSlash(ptFolder)

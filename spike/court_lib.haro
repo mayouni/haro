@@ -2217,9 +2217,19 @@ func CtWalk(xDecls, tName, xRecord)
 	return xOut
 end
 # the command: check <file> | refine <file> <file.rfn> | eval ... | walk ... | ask ...
+# v0.75: is this court the program? The file haro was given is this court's own, <language>_court.haro -- the language being the
+# first of the table the court file has just set. Loaded by a program that judges, or by another court's library, it is not
+func CtIsTheProgram
+	if Len(sysargv) < 2 return false end
+	if Len($vCourtLangs) = 0 return false end
+	tGiven = sysargv[2]
+	tDir = CtDirOf(tGiven)
+	if tDir != "" tGiven = SubStr(tGiven, Len(tDir) + 2, Len(tGiven) - Len(tDir) - 1) end
+	return Lower(tGiven) = Lower($vCourtLangs[1][1]) + "_court.haro"
+end
 func CtMain
-	# v0.70: loaded by a program that judges (judge_lib.haro), a court is a type's checker and has no main
-	if IsGlobal("$bHaroJudges") return end
+	# v0.70, v0.75: a court that is not the program is a type's checker and has no main
+	if not CtIsTheProgram() return end
 	if Len(sysargv) < 4
 		? "usage: <court>.haro check <file" + $tCourtExt + "> | refine <file" + $tCourtExt + "> <file.rfn> | eval <file> <decl> <seat> <json> | walk <file> <name> <json> | ask <file> <question> <rows json> | audit <file>"
 		return

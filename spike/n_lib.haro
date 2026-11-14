@@ -25,6 +25,12 @@
 
 # ---- bytes and words ---------------------------------------------------------------------------------
 
+# v0.75: what this library opens -- one program, this haro, run on a sibling court (NatSurfaceCheck). The sentence is judged and
+# read here, when the library is loaded: the court that loads it sets its own tables after, and is not disturbed while it judges
+load "doors.haro"
+$sNatDoors = doors'DEFINE COMMAND sibling AS (ITSELF yes, TAKES [text, words, text, text, text], QUIET yes) RATIONALE "the court of a surface, asked whether it takes a query"'
+HaroDoorsDeclared($sNatDoors)
+
 func NatFold(tS)
 	tOut = ""
 	nLen = Len(tS)
@@ -891,16 +897,20 @@ func NatSurfaceCheck(xN, xSf, tQuery)
 		if i > 2 tVerbs += " " end
 		tVerbs += xCw[i]
 	end
-	tTmp = NatTempFile()
-	# the surface's answer is what it writes to its stdout; what a runtime says of itself on stderr is not an answer
-	tNoErr = " 2>/dev/null"
-	if IsWindows() tNoErr = " 2>NUL" end
-	tInner = NatQuote(ExeFileName()) + " " + NatQuote(tCourt) + " " + tVerbs + " " + NatQuote(NatPath(NatText(xSf, "world"))) + " " + NatQuote(tQuery) + " [] > " + NatQuote(tTmp) + tNoErr
-	System(NatQuote(tInner))
+	# v0.75: the sibling court is run from an invocation, with no shell -- this haro, the court, its verbs, the world, the query.
+	# The surface's answer is what it writes to its stdout; what a runtime says of itself on stderr is not an answer (QUIET)
+	vArguments = [tCourt]
+	for i = 2 to Len(xCw)
+		vArguments + xCw[i]
+	end
+	vArguments + NatPath(NatText(xSf, "world"))
+	vArguments + tQuery
+	vArguments + "[]"
 	tOut = ""
-	if FExists(tTmp)
-		tOut = NatTrim(Read(tTmp))
-		Remove(tTmp)
+	try
+		tOut = NatTrim(SystemCmd($sNatDoors.Invocation("sibling", vArguments)))
+	catch e
+		return [false, Left(e.Message(), 200)]
 	end
 	if Left(tOut, 1) = "[" return [true, ""] end
 	nNl = SubStr(tOut, Char(10))
