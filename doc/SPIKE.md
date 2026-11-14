@@ -1917,6 +1917,10 @@ D58, the Principal's ruling of 2026-11-09 ("ParentClassName"), revising v0.42's 
 
 **Results.** 9 of 9 cases on both builds; 5 of 5 plants; v36 to v48's courts green. Haro's 2,172 calls re-spelled by a tool (20fc236, listed in v20/tool_commits.txt).
 
+## The seventy-fifth rung -- Haro v0.75, a command line is not built as text -- 2026-11-14
+
+D92, D88 (d): in a `.haro` file `System` and `SystemCmd` take a text written at the call, or an invocation; a text joined with anything else, or a name lettered as a text, is refused when compiling, and a text that reaches the door another way is COMMAND_LINE_BUILT when the program runs. Haro's own run of a program, in `n_lib.haro`, is an invocation; a court's main runs when the court is the program; a sentence of doors is read once. 10 of 10 on both builds, 14 plants (55cabe9, a550430). The shared runtime takes it when stzlib's 11 lines are converted.
+
 ## The seventy-fourth rung -- Haro v0.74, a folder made and a run answered whole -- 2026-11-14
 
 D91, the two debts of the seventy-third rung: `MakeDir`, a built-in of `.haro` code that makes a folder and the folders above it and takes a place as the doors of files do (FOLDER_NOT_MADE), and `hCall.Run()`, which starts an invocation's program with no shell and answers a record -- `iCode`, `tOutput`, `tErrors`. 14 of 14 on both builds, 15 plants (a221bdf, e3587d3).
