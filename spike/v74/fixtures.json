@@ -144,6 +144,42 @@
    "run": {
     "raises": "Error (RUN_TAKES_INVOCATION) : a run is asked of an invocation -- hCall.Run()",
     "never": "after"
+   },
+   "check": {
+    "errors": 0,
+    "found": []
+   }
+  },
+  {
+   "id": "W13",
+   "line": "L5",
+   "what": "in a .haro file the built-in has its one spelling",
+   "file": "cases/w13.haro",
+   "run": {
+    "refuses": [
+     2,
+     "a built-in is spelled `MakeDir`; written",
+     "makedir"
+    ],
+    "never": "after"
+   },
+   "check": {
+    "errors": 1,
+    "found": [
+     [
+      2,
+      "haro/refused-form"
+     ]
+    ]
+   }
+  },
+  {
+   "id": "W14",
+   "line": "L5",
+   "what": "a library's own MakeDir is the one that runs, though it is defined in a file loaded after its caller",
+   "file": "cases/w14.haro",
+   "run": {
+    "stdout": "the library's own: made/never\nthe library's own: made/never2\nfalse\nfalse\n"
    }
   }
  ]

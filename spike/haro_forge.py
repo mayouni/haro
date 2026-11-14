@@ -4194,6 +4194,25 @@ def stage78():
     return 0
 
 
+MADE_COURT = os.path.join(HERE, 'v74', 'made_court.py')
+
+
+def stage79():
+    """Haro v0.74, a folder made and a run answered whole (D91; v74/GRAMMAR.md): MakeDir, a built-in of .haro code that takes a
+    place as the doors of files do, and hCall.Run(), which answers the exit code, what the child wrote and what it wrote to its
+    standard error. v74/made_court.py on haro and its checked build."""
+    print('stage 79 -- a folder made, a run answered whole: v74/made_court.py on haro and its checked build')
+    p = subprocess.run([sys.executable, MADE_COURT] + (['--plant'] if PLANT else []), capture_output=True, cwd=HERE, timeout=900)
+    out = p.stdout.decode('utf-8', 'replace').replace(chr(13) + chr(10), chr(10))
+    for line in out.splitlines():
+        if line.startswith(('  FAIL', '       ', 'MADE COURT')):
+            print(line)
+    if p.returncode != 0:
+        print(f'  FAIL the made court exited {p.returncode}' + ('' if out.strip() else ': ' + p.stderr.decode('utf-8', 'replace')[-400:]))
+        return 1
+    return 0
+
+
 PORT_COURT = os.path.join(os.path.dirname(HERE), 'port', 'port_court.py')
 
 
@@ -4463,5 +4482,7 @@ if __name__ == '__main__':
         failures += stage77()
     if stage in (None, 78) and os.path.exists(INVOCATION_COURT):
         failures += stage78()
+    if stage in (None, 79) and os.path.exists(MADE_COURT):
+        failures += stage79()
     print(f'haro_forge: {"FAIL" if failures else "PASS"} ({failures} failure(s), {time.perf_counter()-t0:.1f} s)')
     sys.exit(1 if failures else 0)

@@ -1,0 +1,3 @@
+func MakeDir(ptFolder)
+    print "the library's own: " + ptFolder
+end

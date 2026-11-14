@@ -11,7 +11,8 @@ The lines:
   L2  `MakeDir(hPlace)` takes a place: its root allows write, or PLACE_NOT_ALLOWED and nothing is made
   L3  the door checks again where it opens: a place that leads out of its root through a link is PLACE_ESCAPES, and nothing is made
   L4  a folder that cannot be made is FOLDER_NOT_MADE; what is neither a text nor a place is a bad parameter
-  L5  a program's own function named MakeDir is the program's; a .ring file reads the name as it did
+  L5  a program's own function named MakeDir is the program's, wherever in the program it is defined; a .ring file reads the name
+      as it did; in a .haro file the built-in has its one spelling
   L6  `hCall.Run()` runs the invocation with no shell and answers a record: `iCode` the exit code, `tOutput` what the child wrote,
       `tErrors` what it wrote to its standard error -- the last line end of each dropped; nothing of the child's reaches the
       program's output; the child stands where the command says (IN)
@@ -47,6 +48,19 @@ ABSENT = 'DEFINE COMMAND gone AS (RUNS "no-such-program-of-haro-v74", TAKES [wor
 
 def said(code, message):
     return 'Error (' + code + ') : ' + message
+
+
+LIB_FIRST = '''func MakeUnder(ptPath)
+    MakeDir(ptPath)
+end
+'''
+LIB_SECOND = '''func MakeDir(ptFolder)
+    print "the library's own: " + ptFolder
+end
+'''
+for name, text in (('lib_first.haro', LIB_FIRST), ('lib_second.haro', LIB_SECOND)):
+    with open(os.path.join(CASES, name), 'w', encoding='utf-8', newline='\n') as f:
+        f.write(text)
 
 
 def case(cid, line, what, src, run, check=None, setup=None, ext='.haro'):
@@ -175,7 +189,23 @@ print "ran"
 case('W12', 'L8', 'the door beneath, given what is no invocation, has nothing to run and says so', '''see "before" + nl
 systemrun("dir")
 see "after" + nl
-''', {'raises': 'Error (RUN_TAKES_INVOCATION) : a run is asked of an invocation -- hCall.Run()', 'never': 'after'}, ext='.ring')
+''', {'raises': 'Error (RUN_TAKES_INVOCATION) : a run is asked of an invocation -- hCall.Run()', 'never': 'after'}, ext='.ring',
+     check={'errors': 0, 'found': []})     # the check was added after the code: the checker's knowing the name had no case
+
+# added after the code, when a plant caught nothing: the one spelling of the built-in in a .haro file had no case
+case('W13', 'L5', 'in a .haro file the built-in has its one spelling', '''print "before"
+makedir("made/low")
+print "after"
+''', {'refuses': [2, 'a built-in is spelled `MakeDir`; written', 'makedir'], 'never': 'after'}, check={'errors': 1, 'found': [[2, RULE]]})
+
+# added after the code: the shape stzlib has -- its own MakeDir defined in a file loaded after the file that calls it
+case('W14', 'L5', 'a library\'s own MakeDir is the one that runs, though it is defined in a file loaded after its caller', '''load "lib_first.haro"
+load "lib_second.haro"
+MakeUnder("made/never")
+MakeDir("made/never2")
+print DirExists("made/never")
+print DirExists("made/never2")
+''', {'stdout': 'the library\'s own: made/never\nthe library\'s own: made/never2\nfalse\nfalse\n'})
 
 doc = {'version': '0.74', 'task': 'a folder made and a run answered whole: the two debts of DOORS.md rung 2', 'languages': ['doors'], 'cases': cases}
 with open(os.path.join(HERE, 'fixtures.json'), 'w', encoding='utf-8', newline='\n') as f:

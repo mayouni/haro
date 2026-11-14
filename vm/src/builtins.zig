@@ -387,9 +387,8 @@ pub const pascal = [_][2][]const u8{
     .{ "keys", "Keys" },
     .{ "values", "Values" },
     .{ "haskey", "HasKey" },
-    // v0.74: a folder made; the door beneath a run answered whole
+    // v0.74: a folder made
     .{ "makedir", "MakeDir" },
-    .{ "systemrun", "SystemRun" },
 };
 
 /// The spelling a .haro file writes for the native registered as `low` (lowercase, underscores as registered), or null for no native

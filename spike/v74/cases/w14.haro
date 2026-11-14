@@ -1,0 +1,6 @@
+load "lib_first.haro"
+load "lib_second.haro"
+MakeUnder("made/never")
+MakeDir("made/never2")
+print DirExists("made/never")
+print DirExists("made/never2")
