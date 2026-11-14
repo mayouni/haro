@@ -181,6 +181,53 @@ fn compose(alloc: std.mem.Allocator, prior: []const Insert, edits: []const Edit)
 /// A parenthesis to put in at `pos`, or, when `text` is given, that text.
 const Edit = struct { pos: u32, close: bool, text: []const u8 = "" };
 
+/// v0.71 (TYPES.md T7, D83 (5)): `of <language>` on a definition's header, as the loader marked it (haro.zig, languageSugar): the
+/// header's row, the parameter it follows -- or no name, for the definition's answer -- and the language.
+pub const OfMark = struct { row: u32, name: []const u8, lang: []const u8 };
+/// the marks of each .haro file read, by its name
+pub var of_marks: std.StringHashMapUnmanaged([]const OfMark) = .{};
+pub const R_OFCHECK = "the check `of` asks for could not be written into this definition; written";
+
+/// The checks `of` asks for, as text the compiler reads (judge_lib.haro): a parameter's where the body begins -- after the brace the
+/// lift gave the header -- and the answer's around what each `return` of the definition gives, a nested definition's left alone.
+fn findOf(alloc: std.mem.Allocator, n: ts.Node, ofs: []const OfMark, out: *std.ArrayListUnmanaged(Edit)) !void {
+    if (eq(n.kind(), "function_definition")) {
+        const row = n.start().row;
+        const nm = n.field("name");
+        const fname = if (nm.isNull()) "?" else nm.text();
+        for (ofs) |m| {
+            if (m.row != row) continue;
+            if (m.name.len == 0) {
+                try ofReturns(alloc, n, true, m.lang, fname, out);
+                continue;
+            }
+            var i: u32 = 0;
+            while (i < n.childCount()) : (i += 1) {
+                const ch = n.child(i);
+                if (!eq(ch.kind(), "{")) continue;
+                const text = try std.fmt.allocPrint(alloc, " HaroOfGiven({s}, \"{s}\", \"{s}\")", .{ m.name, m.lang, m.name });
+                try out.append(alloc, .{ .pos = ch.endByte(), .close = false, .text = text });
+                break;
+            }
+        }
+    }
+    var i: u32 = 0;
+    while (i < n.namedChildCount()) : (i += 1) try findOf(alloc, n.namedChild(i), ofs, out);
+}
+
+fn ofReturns(alloc: std.mem.Allocator, n: ts.Node, top: bool, lang: []const u8, fname: []const u8, out: *std.ArrayListUnmanaged(Edit)) !void {
+    if (!top and eq(n.kind(), "function_definition")) return;
+    if (eq(n.kind(), "return_statement") and n.namedChildCount() > 0) {
+        const first = n.namedChild(0);
+        const last = n.namedChild(n.namedChildCount() - 1);
+        try out.append(alloc, .{ .pos = first.startByte(), .close = false, .text = "HaroOfAnswer(" });
+        try out.append(alloc, .{ .pos = last.endByte(), .close = true, .text = try std.fmt.allocPrint(alloc, ", \"{s}\", \"{s}\")", .{ lang, fname }) });
+        return;
+    }
+    var i: u32 = 0;
+    while (i < n.namedChildCount()) : (i += 1) try ofReturns(alloc, n.namedChild(i), false, lang, fname, out);
+}
+
 fn piece(e: Edit) []const u8 {
     return if (e.text.len > 0) e.text else if (e.close) ")" else "(";
 }
@@ -1012,6 +1059,23 @@ pub fn apply(alloc: std.mem.Allocator, parser: ts.Parser, tree_in: ts.Tree, src_
     var tree = bl.tree;
     var src = bl.src;
     var ins = bl.inserts;
+    // v0.71: the checks `of` asks for
+    if (of_marks.get(name)) |ofs| {
+        var edits = std.ArrayListUnmanaged(Edit){};
+        defer edits.deinit(alloc);
+        findOf(alloc, tree.root(), ofs, &edits) catch {};
+        if (edits.items.len > 0) {
+            if (splice(alloc, parser, tree, src, edits.items, ins)) |r| {
+                tree.deinit();
+                tree = r.tree;
+                src = r.src;
+                ins = r.inserts;
+            } else if (ofs.len > 0 and !faults.contains(name)) {
+                // never silently: a check that could not be written refuses the program
+                faults.put(std.heap.page_allocator, name, .{ .why = R_OFCHECK, .word = "of", .row = ofs[0].row }) catch {};
+            }
+        }
+    }
     if (std.ascii.indexOfIgnoreCase(src, "catch") != null) {
         var edits = std.ArrayListUnmanaged(Edit){};
         defer edits.deinit(alloc);

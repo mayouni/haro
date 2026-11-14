@@ -60,7 +60,7 @@
     "refuses": [
      3,
      "the court of signal refuses this literal -- UNKNOWN_COLOUR: A lamp shows red, amber or green, not 'blue'; written",
-     "signal'DEFINE LAMP north AS (SHOWS blue) RATIONALE \"x\"'"
+     "'DEFINE LAMP north AS (SHOWS blue) RATIONALE \"x\"'"
     ],
     "never": "before"
    },

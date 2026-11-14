@@ -48,6 +48,36 @@ func HaroLang(ptName)
 	return new HaroLanguage(ptName)
 end
 
+# v0.71, `of`: what the lift writes where a definition's header names a language (lift.zig, findOf).
+func HaroIsSentence(pxValue)
+	return IsObject(pxValue) and ClassName(pxValue) = "harosentence"
+end
+
+# a parameter `psName of language`, where the body begins: a sentence of another language is refused (a value that is no
+# sentence never reaches here -- the letter s refused it at the entry)
+func HaroOfGiven(pxValue, ptLanguage, ptName)
+	if HaroIsSentence(pxValue)
+		if pxValue.Language() != ptLanguage
+			Raise("Error (SENTENCE_OF_ANOTHER) : `" + ptName + "` is a sentence of " + ptLanguage + ", and is given a sentence of " + pxValue.Language())
+		end
+	end
+end
+
+# a definition `... of language`, around what each return gives: a sentence of that language, or nothing at all
+func HaroOfAnswer(pxValue, ptLanguage, ptName)
+	if HaroIsSentence(pxValue)
+		if pxValue.Language() != ptLanguage
+			Raise("Error (SENTENCE_OF_ANOTHER) : `" + ptName + "` answers a sentence of " + ptLanguage + ", and answers a sentence of " + pxValue.Language())
+		end
+		return pxValue
+	end
+	if IsString(pxValue)
+		if pxValue = "" return pxValue end
+		Raise("Error (SENTENCE_EXPECTED) : `" + ptName + "` answers a sentence of " + ptLanguage + ", and answers a text")
+	end
+	Raise("Error (SENTENCE_EXPECTED) : `" + ptName + "` answers a sentence of " + ptLanguage + ", and answers no sentence")
+end
+
 # the court's refusal, raised as the VM raises a coded error: `Error (CODE) : message`, so Code() answers the court's code
 func HaroRefuse(ptCode, ptMessage)
 	Raise("Error (" + ptCode + ") : " + ptMessage)

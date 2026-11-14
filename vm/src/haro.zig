@@ -601,7 +601,9 @@ fn slashed(alloc: std.mem.Allocator, s: []const u8) []const u8 {
     return out;
 }
 
-const Forged = struct { glue: []const u8, fault: ?lift.Fault = null };
+const Forged = struct { glue: []const u8, fault: ?lift.Fault = null, home: []const u8 = "", out: []const u8 = "", lang: []const u8 = "" };
+/// one forge a declaration a process: the loader asks when it reads the file, and before that when a literal of it is judged
+var forged_memo: std.StringHashMapUnmanaged(Forged) = .{};
 
 fn forgeRefused(alloc: std.mem.Allocator, p: []const u8, why: []const u8, row: u32) Forged {
     // the glue names the file at the meta-court's own line, so the refusal stands there
@@ -617,6 +619,14 @@ fn forgeRefused(alloc: std.mem.Allocator, p: []const u8, why: []const u8, row: u
 }
 
 fn forgeDeclaration(alloc: std.mem.Allocator, p: []const u8, decl: []const u8) Forged {
+    const key = normalisePath(alloc, p) catch p;
+    if (forged_memo.get(key)) |f| return f;
+    const f = forgeDeclarationNow(alloc, p, decl);
+    forged_memo.put(std.heap.page_allocator, std.heap.page_allocator.dupe(u8, key) catch key, f) catch {};
+    return f;
+}
+
+fn forgeDeclarationNow(alloc: std.mem.Allocator, p: []const u8, decl: []const u8) Forged {
     const home = forgeHome(alloc) orelse
         return forgeRefused(alloc, p, "a declaration is loaded and this haro finds no forge (HARO_HOME names its folder); written", 1);
     const self = std.fs.selfExePathAlloc(alloc) catch return forgeRefused(alloc, p, "this haro cannot name itself to run the forge; written", 1);
@@ -679,14 +689,69 @@ fn forgeDeclaration(alloc: std.mem.Allocator, p: []const u8, decl: []const u8) F
         "load \"{s}/judge_lib.haro\"\nload \"{s}/{s}_court.haro\"\nHaroLanguageLoaded(\"{s}\", \"{s}\")\n",
         .{ slashed(alloc, home), slashed(alloc, out), lang, lang, declaredVersion(decl) },
     ) catch return forgeRefused(alloc, p, "the forged court could not be named; written", 1);
-    return .{ .glue = glue };
+    return .{ .glue = glue, .home = home, .out = out, .lang = lang };
 }
 
-/// In a .haro file that loads a declaration, the language's name is a type's name: `<language>.Judge(` reads
-/// `HaroLang("<language>").Judge(` (judge_lib.haro). Two insertions around the name, outside every text and comment; a file that loads
-/// no declaration is returned as it is.
-fn languageSugar(alloc: std.mem.Allocator, src: []const u8, dir: []const u8, is_root: bool) []const u8 {
-    var names = std.ArrayListUnmanaged([]const u8){};
+/// A language a file loads: its name, and its declaration's forged court.
+const FileLang = struct { name: []const u8, forged: Forged };
+
+/// v0.71: the court of `lang` on a literal's text, when the program is compiled: null when it is a sentence, else the court's first
+/// refusal as `CODE: message`. The forged court is run as a child, standing alone -- the court that would judge the text in a file.
+var literal_memo: std.StringHashMapUnmanaged(?[]const u8) = .{};
+fn judgeLiteral(alloc: std.mem.Allocator, lang: FileLang, text: []const u8) ?[]const u8 {
+    const key = std.fmt.allocPrint(std.heap.page_allocator, "{s}\x00{s}", .{ lang.name, text }) catch return null;
+    if (literal_memo.get(key)) |v| return v;
+    const v = judgeLiteralNow(alloc, lang, text);
+    literal_memo.put(std.heap.page_allocator, key, v) catch {};
+    return v;
+}
+
+fn judgeLiteralNow(alloc: std.mem.Allocator, lang: FileLang, text: []const u8) ?[]const u8 {
+    const f = lang.forged;
+    if (f.out.len == 0) return "the language's court was not forged";
+    const self = std.fs.selfExePathAlloc(alloc) catch return "this haro cannot name itself to run the court";
+    var hh = std.hash.Wyhash.init(0x71);
+    hh.update(text);
+    const file = std.fs.path.join(alloc, &.{ f.out, std.fmt.allocPrint(alloc, "literal-{x:0>16}.{s}", .{ hh.final(), lang.name }) catch return null }) catch return null;
+    const body = std.fmt.allocPrint(alloc, "{s}\n", .{text}) catch return null;
+    std.fs.cwd().writeFile(.{ .sub_path = file, .data = body }) catch return "the literal could not be given to its court";
+    const court = std.fs.path.join(alloc, &.{ f.out, std.fmt.allocPrint(alloc, "{s}_court.haro", .{lang.name}) catch return null }) catch return null;
+    const res = std.process.Child.run(.{
+        .allocator = alloc,
+        .argv = &.{ self, court, "diagnose", file },
+        .cwd = f.home,
+        .max_output_bytes = 4 << 20,
+    }) catch return "the court could not be run on this literal";
+    const parsed = std.json.parseFromSlice(std.json.Value, alloc, std.mem.trim(u8, res.stdout, " \r\n\t"), .{}) catch
+        return "the court answered nothing that can be read";
+    const ds = switch (parsed.value) {
+        .object => |o| o.get("diagnostics") orelse return "the court answered no verdict",
+        else => return "the court answered no verdict",
+    };
+    if (ds != .array) return "the court answered no verdict";
+    for (ds.array.items) |d| {
+        if (d != .object) continue;
+        const sev = d.object.get("severity") orelse continue;
+        if (sev != .string or !std.mem.eql(u8, sev.string, "error")) continue;
+        const code = if (d.object.get("code")) |c| (if (c == .string) c.string else "?") else "?";
+        const msg = if (d.object.get("message")) |m| (if (m == .string) m.string else "") else "";
+        return std.fmt.allocPrint(std.heap.page_allocator, "{s}: {s}", .{ code, msg }) catch "refused";
+    }
+    return null;
+}
+
+const Sugar = struct { text: []const u8, inserts: []const lift.Insert = &.{}, fault: ?lift.Fault = null };
+
+/// In a .haro file that loads a declaration, the language's name is a type's name (v0.70, v0.71):
+///   `<language>.Judge(`      reads `HaroLang("<language>").Judge(`
+///   `<language>'text'`       a literal, in any of the three quotes: `HaroLang("<language>").Judge('text')`, and judged here, when the
+///                            program is compiled -- a text its court refuses is the file's fault, at its line, in the court's words
+///   `of <language>`          on a definition's header: blanked, and kept as a mark (lift.of_marks) the lift writes the check from;
+///                            `of` before a word that is no language of the file is the file's fault
+/// Outside every text and comment. What is put in is kept as inserts, in the file's coordinates. A file that loads no declaration is
+/// returned as it is.
+fn languageSugar(alloc: std.mem.Allocator, p: []const u8, src: []const u8, dir: []const u8, is_root: bool) Sugar {
+    var langs = std.ArrayListUnmanaged(FileLang){};
     var ls: usize = 0;
     while (ls < src.len) {
         const le = std.mem.indexOfScalarPos(u8, src, ls, '\n') orelse src.len;
@@ -701,22 +766,50 @@ fn languageSugar(alloc: std.mem.Allocator, src: []const u8, dir: []const u8, is_
         if (!lift.isHaro(target)) continue;
         const head = std.fs.cwd().readFileAlloc(alloc, target, 4 << 20) catch continue;
         if (!isDeclaration(head)) continue;
-        if (declaredLanguage(head)) |nm| names.append(alloc, nm) catch {};
+        if (declaredLanguage(head)) |nm| langs.append(alloc, .{ .name = nm, .forged = forgeDeclaration(alloc, target, head) }) catch {};
     }
-    if (names.items.len == 0) return src;
+    _ = lift.of_marks.remove(p);
+    if (langs.items.len == 0) return .{ .text = src };
     var out = std.ArrayListUnmanaged(u8){};
+    var ins = std.ArrayListUnmanaged(lift.Insert){};
+    var marks = std.ArrayListUnmanaged(lift.OfMark){};
+    var fault: ?lift.Fault = null;
+    const put = struct {
+        fn f(al: std.mem.Allocator, o: *std.ArrayListUnmanaged(u8), n: *std.ArrayListUnmanaged(lift.Insert), at: usize, s: []const u8) void {
+            o.appendSlice(al, s) catch {};
+            n.append(al, .{ .pos = @intCast(at), .len = @intCast(s.len) }) catch {};
+        }
+    }.f;
     var i: usize = 0;
+    var row: u32 = 0;
+    var line_start: usize = 0;
+    var prev_word: []const u8 = "";
     while (i < src.len) {
         const ch = src[i];
+        if (ch == '\n') {
+            row += 1;
+            line_start = i + 1;
+            prev_word = "";
+            out.append(alloc, ch) catch return .{ .text = src };
+            i += 1;
+            continue;
+        }
         if (ch == '"' or ch == '\'' or ch == '`') {
             const e = std.mem.indexOfScalarPos(u8, src, i + 1, ch) orelse src.len - 1;
-            out.appendSlice(alloc, src[i .. e + 1]) catch return src;
+            for (src[i .. e + 1]) |c| {
+                if (c == '\n') {
+                    row += 1;
+                    line_start = 0; // set below, after the text
+                }
+            }
+            if (std.mem.lastIndexOfScalar(u8, src[i .. e + 1], '\n')) |nl| line_start = i + nl + 1;
+            out.appendSlice(alloc, src[i .. e + 1]) catch return .{ .text = src };
             i = e + 1;
             continue;
         }
         if (ch == '#') {
             const e = std.mem.indexOfScalarPos(u8, src, i, '\n') orelse src.len;
-            out.appendSlice(alloc, src[i..e]) catch return src;
+            out.appendSlice(alloc, src[i..e]) catch return .{ .text = src };
             i = e;
             continue;
         }
@@ -724,23 +817,104 @@ fn languageSugar(alloc: std.mem.Allocator, src: []const u8, dir: []const u8, is_
             var e = i;
             while (e < src.len and identByte(src[e])) e += 1;
             const word = src[i..e];
-            const judged = std.mem.startsWith(u8, src[e..], ".Judge(");
-            var is_lang = false;
-            if (judged) for (names.items) |nm| {
-                if (std.mem.eql(u8, nm, word)) is_lang = true;
-            };
-            if (is_lang) {
-                out.appendSlice(alloc, "HaroLang(\"") catch return src;
-                out.appendSlice(alloc, word) catch return src;
-                out.appendSlice(alloc, "\")") catch return src;
-            } else out.appendSlice(alloc, word) catch return src;
+            var lang: ?FileLang = null;
+            for (langs.items) |l| {
+                if (std.mem.eql(u8, l.name, word)) lang = l;
+            }
+            if (lang != null and std.mem.startsWith(u8, src[e..], ".Judge(")) {
+                put(alloc, &out, &ins, i, "HaroLang(\"");
+                out.appendSlice(alloc, word) catch {};
+                put(alloc, &out, &ins, e, "\")");
+                i = e;
+                prev_word = word;
+                continue;
+            }
+            if (lang != null and e < src.len and (src[e] == '"' or src[e] == '\'' or src[e] == '`')) {
+                // a literal: the text runs to the next quote of its kind
+                const q = std.mem.indexOfScalarPos(u8, src, e + 1, src[e]) orelse src.len - 1;
+                if (fault == null) if (judgeLiteral(alloc, lang.?, src[e + 1 .. q])) |refusal| {
+                    const why = std.fmt.allocPrint(alloc, "the court of {s} refuses this literal -- {s}; written", .{ word, refusal }) catch "the court refuses this literal; written";
+                    // the fault's word is the text as it stands on its first line, quote and all
+                    const eol = std.mem.indexOfScalarPos(u8, src, e, '\n') orelse src.len;
+                    fault = .{ .why = why, .word = alloc.dupe(u8, src[e..@min(q + 1, eol)]) catch "", .row = row };
+                };
+                put(alloc, &out, &ins, i, "HaroLang(\"");
+                out.appendSlice(alloc, word) catch {};
+                put(alloc, &out, &ins, e, "\").Judge(");
+                for (src[e .. q + 1]) |c| {
+                    if (c == '\n') row += 1;
+                }
+                if (std.mem.lastIndexOfScalar(u8, src[e .. q + 1], '\n')) |nl| line_start = e + nl + 1;
+                out.appendSlice(alloc, src[e .. q + 1]) catch {};
+                put(alloc, &out, &ins, q + 1, ")");
+                i = q + 1;
+                prev_word = word;
+                continue;
+            }
+            // `of <word>` on a definition's header
+            const head = std.mem.trimLeft(u8, src[line_start..i], " \t");
+            const on_header = std.mem.startsWith(u8, head, "func ") or std.mem.startsWith(u8, head, "def ");
+            if (on_header and std.mem.eql(u8, word, "of") and prev_word.len > 0) {
+                var w = e;
+                while (w < src.len and (src[w] == ' ' or src[w] == '\t')) w += 1;
+                var we = w;
+                while (we < src.len and identByte(src[we])) we += 1;
+                const named = src[w..we];
+                var is_lang = false;
+                for (langs.items) |l| {
+                    if (std.mem.eql(u8, l.name, named)) is_lang = true;
+                }
+                if (is_lang) {
+                    // inside the parentheses it is the parameter before it; after them, the definition's answer
+                    var depth: i32 = 0;
+                    for (src[line_start..i]) |c| {
+                        if (c == '(') depth += 1;
+                        if (c == ')') depth -= 1;
+                    }
+                    marks.append(alloc, .{ .row = row, .name = if (depth > 0) prev_word else "", .lang = alloc.dupe(u8, named) catch named }) catch {};
+                    out.appendNTimes(alloc, ' ', we - i) catch {};
+                    i = we;
+                    continue;
+                }
+                if (named.len > 0) {
+                    // the fault names the word; the header is read as it would be without the two, so nothing else is said of it.
+                    // The word stays in the text -- the fault's line is found by it -- as a comment the parser passes over
+                    if (fault == null) fault = .{ .why = "`of` names a language this file loads; written", .word = alloc.dupe(u8, named) catch "", .row = row };
+                    out.appendNTimes(alloc, ' ', we - i) catch {};
+                    const eol = std.mem.indexOfScalarPos(u8, src, we, '\n') orelse src.len;
+                    out.appendSlice(alloc, src[we..eol]) catch {};
+                    put(alloc, &out, &ins, eol, " # ");
+                    put(alloc, &out, &ins, eol, named);
+                    i = eol;
+                    continue;
+                }
+            }
+            out.appendSlice(alloc, word) catch {};
+            prev_word = word;
             i = e;
             continue;
         }
-        out.append(alloc, ch) catch return src;
+        out.append(alloc, ch) catch return .{ .text = src };
         i += 1;
     }
-    return out.items;
+    if (marks.items.len > 0) lift.of_marks.put(std.heap.page_allocator, std.heap.page_allocator.dupe(u8, p) catch p, std.heap.page_allocator.dupe(lift.OfMark, marks.items) catch &.{}) catch {};
+    return .{ .text = out.items, .inserts = ins.items, .fault = fault };
+}
+
+/// What the loader's pass put in (the file's coordinates) and what the lift's first pass put in (the coordinates of the loader's
+/// text), as one list in the file's coordinates.
+fn mergeInserts(alloc: std.mem.Allocator, mine: []const lift.Insert, theirs: []const lift.Insert) []const lift.Insert {
+    if (mine.len == 0) return theirs;
+    var all = std.ArrayListUnmanaged(lift.Insert){};
+    all.appendSlice(alloc, mine) catch return theirs;
+    for (theirs) |x| all.append(alloc, .{ .pos = lift.fileByte(mine, x.pos), .len = x.len }) catch return theirs;
+    const byPos = struct {
+        fn lt(_: void, x: lift.Insert, y: lift.Insert) bool {
+            return x.pos < y.pos;
+        }
+    }.lt;
+    std.mem.sort(lift.Insert, all.items, {}, byPos);
+    return all.items;
 }
 
 fn loadUnit(
@@ -787,13 +961,17 @@ fn loadUnit(
         // v0.70: a declaration a program loads is its forged court, loaded; a file that loads one reads its language's name
         var text: []const u8 = src;
         var decl_fault: ?lift.Fault = null;
+        var pre_inserts: []const lift.Insert = &.{};
         if (u.lift and lift.isHaro(p)) {
             if (qi > 0 and isDeclaration(src)) {
                 const g = forgeDeclaration(alloc, p, src);
                 text = g.glue;
                 decl_fault = g.fault;
             } else if (!isDeclaration(src)) {
-                text = languageSugar(alloc, src, std.fs.path.dirname(p) orelse ".", qi == 0);
+                const sg = languageSugar(alloc, p, src, std.fs.path.dirname(p) orelse ".", qi == 0);
+                text = sg.text;
+                pre_inserts = sg.inserts;
+                decl_fault = sg.fault;
             }
         }
         if (ringScanError(text) != null) u.scan_bad += 1;
@@ -812,8 +990,9 @@ fn loadUnit(
         const braced = u.lift and lift.isHaro(p);
         const pl = (if (braced) lift.parseHaro(alloc, parser, text, p) else lift.parse(alloc, parser, text, lift.isHaro(p))) orelse continue;
         t_parse_ns += tp.read();
-        const lf: lift.Lifted = if (u.lift) lift.apply(alloc, parser, pl.tree, pl.src, p, pl.inserts, braced) else pl;
-        // a declaration the meta-court refused: the program is refused with its words (after the lift, which keeps a file's fault)
+        const lf: lift.Lifted = if (u.lift) lift.apply(alloc, parser, pl.tree, pl.src, p, mergeInserts(alloc, pre_inserts, pl.inserts), braced) else pl;
+        // a declaration the meta-court refused, a literal its court refused, an `of` that names no language: the program is refused
+        // with those words (after the lift, which keeps a file's fault)
         if (decl_fault) |f| lift.faults.put(std.heap.page_allocator, p, f) catch {};
         const tree = lf.tree;
         try u.trees.append(alloc, tree);

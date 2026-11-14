@@ -15,6 +15,9 @@ The lines:
   L7  no word is reserved: a method named Of is a name, and `of` in a text or a comment is what it was
   L8  `haro check` lists a refused literal and reads no error in a program whose literals and declarations hold
   L9  a finding on a line that holds a literal or `<language>.Judge(` stands at the file's own column
+
+CHANGED AFTER THE CODE, said: Q03 -- what the refusal quotes is the literal's text in its quotes, as it stands in the file; the
+first text here quoted the language's name with it.
 """
 import json, os
 
@@ -76,7 +79,7 @@ case('Q03', 'L2', 'a literal the court refuses is refused when compiling, and no
 print "before"
 sLamp = {LIT_BLUE}
 print "after"
-''', {'refuses': [3, 'the court of signal refuses this literal -- UNKNOWN_COLOUR: ' + M_BLUE + '; written', LIT_BLUE],
+''', {'refuses': [3, 'the court of signal refuses this literal -- UNKNOWN_COLOUR: ' + M_BLUE + '; written', "'" + BLUE + "'"],
       'never': 'before'},
      judged=[['signal', BLUE, 'UNKNOWN_COLOUR', M_BLUE]], check={'errors': 1, 'found': [[3, RULE]]})
 
