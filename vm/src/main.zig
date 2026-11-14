@@ -1290,6 +1290,7 @@ pub const Builtin = enum(u16) {
     values1, // Values(mX): its values, in order
     haskey2, // HasKey(mX, k)
     makedir1, // v0.74: MakeDir(path or place) -> makes the folder and the folders above it; "" ; FOLDER_NOT_MADE
+    cmdguard1, // v0.75: no name -- the compiler puts it before System or SystemCmd in a .haro file: a text is COMMAND_LINE_BUILT
     isnull, // isNull(x)     -> 1 for "" and for the string "NULL" in any case, else 0 (probed on 1.27: 0, [], an object are 0)
     string, // string(x)      -> decimal text of a number
     typeof, // type(x)        -> NUMBER / STRING / LIST / OBJECT, as Ring names them
@@ -1531,7 +1532,7 @@ pub fn builtinRingName(b: Builtin) ?[]const u8 {
         // v0.52: Haro's own, no C function of Ring's: an error inside one names the line alone
         .float1, .decimal1, .decimal2, .integer1, .divide3, .near3, .isempty1 => null,
         .text2, .round1, .round2, .integerpart1, .decimalpart1, .decimals1h, .digits1, .abs1, .sign1, .clamp3, .fromhex1 => null,
-        .mapof1, .keys1, .values1, .haskey2, .makedir1 => null,
+        .mapof1, .keys1, .values1, .haskey2, .makedir1, .cmdguard1 => null,
         .copystr => "copy",
         .typeof => "type",
         .find2, .find3, .find4 => "find",
@@ -7871,6 +7872,17 @@ pub const VM = struct {
                             self.pending = E7;
                             continue :dispatch .raise;
                         };
+                    },
+                    // v0.75 (D88 (d)): the guard the compiler puts before a door that runs a program, where the argument is not a
+                    // text written at the call. An invocation goes on as it is; a text was made elsewhere and is refused by name;
+                    // anything else goes on, and the door says what it is
+                    .cmdguard1 => {
+                        if (regs[A].tag == .str) {
+                            self.pending = "Error (COMMAND_LINE_BUILT) : a command line is written at the call, or is an invocation of a declared COMMAND; this text was made elsewhere";
+                            continue :dispatch .raise;
+                        }
+                        pc += 1;
+                        continue :dispatch code[pc].op;
                     },
                     // v0.74: the folder and the folders above it that are missing; one that stands is left as it is. A file where
                     // a folder would stand, or a folder the platform will not make, is refused by name

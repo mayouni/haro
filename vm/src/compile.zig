@@ -271,6 +271,28 @@ const builtin_table = [_]BuiltinEntry{
     .{ .name = "admitfinish", .id = .admitfinish, .argc = 0 },
 };
 
+/// v0.75 (D88 (b), (d)): the form of what a .haro file gives a door that runs a program. `written`: a text literal, or text
+/// literals joined -- the program's own text, at the call. `built`: a text joined with anything else, or a name lettered as a
+/// text -- a command line made as text. `other`: any other form, which may be an invocation; the guard reads it when it runs.
+const LineForm = enum { written, built, other };
+fn lineForm(a: ts.Node) LineForm {
+    var e = a;
+    while (std.mem.eql(u8, e.kind(), "parenthesized_expression") and e.namedChildCount() == 1) e = e.namedChild(0);
+    const k = e.kind();
+    if (std.mem.eql(u8, k, "string")) return .written;
+    if (std.mem.eql(u8, k, "binary_expression") and e.namedChildCount() >= 2 and std.mem.eql(u8, Compiler.opText(e), "+")) {
+        if (lineForm(e.namedChild(0)) == .written and lineForm(e.namedChild(1)) == .written) return .written;
+        return .built;
+    }
+    if (std.mem.eql(u8, k, "identifier")) {
+        if (Compiler.letterOf(e.text())) |l| {
+            if (l == 't') return .built;
+        }
+    }
+    return .other;
+}
+const LINE_WHY = "a command line is written at the call, or is an invocation of a declared COMMAND; written";
+
 /// v0.52: a built-in of Haro's own numbers -- a .ring file reads these names as Ring reads them, no built-in
 fn haroOnlyBuiltin(id: vm.Builtin) bool {
     return switch (id) {
@@ -5629,6 +5651,20 @@ pub const Compiler = struct {
                 name_seen = true;
                 continue;
             }
+            // v0.75: System in a .haro file -- the form of what it is given
+            var guarded = false;
+            if (bi.id == .system and argc == 1 and self.haroNode(n)) {
+                const a = args.namedChild(0);
+                switch (lineForm(a)) {
+                    .written => {},
+                    .built => {
+                        if (self.spellIn(a.text())) self.spellSet(a.text(), LINE_WHY);
+                        _ = try self.emit(.loadk, dst, 0, 0, try self.konstIndex("\"\""));
+                        return;
+                    },
+                    .other => guarded = true,
+                }
+            }
             const save2 = self.temp;
             defer self.temp = save2;
             // Arguments land in consecutive registers, as the opcode expects.
@@ -5639,6 +5675,7 @@ pub const Compiler = struct {
                 try self.expr(args.namedChild(ai2), r);
             }
             self.atNode(n);
+            if (guarded) _ = try self.emit(.bcall, abase, abase, 1, @intFromEnum(vm.Builtin.cmdguard1));
             _ = try self.emit(.bcall, dst, abase, @intCast(argc), @intFromEnum(bi.id));
             return;
         }
@@ -5730,6 +5767,20 @@ pub const Compiler = struct {
                 return;
             }
         }
+        // v0.75: SystemCmd in a .haro file -- the form of what it is given, as System's
+        var guarded3 = false;
+        if (std.ascii.eqlIgnoreCase(callee, "systemcmd") and argc == 1 and self.haroNode(n)) {
+            const a = args.namedChild(0);
+            switch (lineForm(a)) {
+                .written => {},
+                .built => {
+                    if (self.spellIn(a.text())) self.spellSet(a.text(), LINE_WHY);
+                    _ = try self.emit(.loadk, dst, 0, 0, try self.konstIndex("\"\""));
+                    return;
+                },
+                .other => guarded3 = true,
+            }
+        }
         try self.natives.append(self.alloc, ni2);
         try self.cur.calls_late.append(self.alloc, try self.nameIndex(callee));
         self.stmts_native += 1;
@@ -5744,6 +5795,7 @@ pub const Compiler = struct {
             try self.expr(args.namedChild(na), r);
         }
         self.atNode(n);
+        if (guarded3) _ = try self.emit(.bcall, abase, abase, 1, @intFromEnum(vm.Builtin.cmdguard1));
         _ = try self.emit(.ncall, dst, abase, @intCast(argc), ni2);
     }
 

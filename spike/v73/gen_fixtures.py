@@ -26,7 +26,7 @@ The lines:
   L9  an invocation is made by its judge alone, and is not written into
   L10 QUIET yes: nothing the child writes reaches the program's output -- SystemCmd still answers what it wrote, System answers its
       exit code alone; without it, the child's standard error passes through, and under System its standard output too
-  L11 a door still takes text as it did: the rung refuses nothing that ran
+  L11 a door still takes text as it did: the rung refuses nothing that ran (a built command line ran until v0.75, which refuses it)
   L12 a forged court's folder is named by which haro forged it too: another haro at the same place forges its own
   L13 a command runs IN a root: the child's working folder is the root's folder, and a place it is given is given whole; a root
       that is not declared is the court's DANGLING, a root with no folder COMMAND_IN
@@ -269,11 +269,11 @@ print SystemCmd(sDoors.Invocation("hush", ["fail.haro"]))
 print System(sDoors.Invocation("hush", ["fail.haro"]))
 ''', {'stdout': 'out\n3\n', 'stderr': {'never': 'said on its standard error'}})
 
-case('V16', 'L11', 'a door still takes text as it did: a literal and a built command line run through the shell', '''tWord = "built"
-print SystemCmd("echo literal")
-print SystemCmd("echo " + tWord)
+# CHANGED AT v0.75: until then this case also ran a built command line, `SystemCmd("echo " + tWord)`, which v0.73 and v0.74 took
+# and v0.75 refuses when compiling (D88 (d); spike/v75). What still holds is kept: a text written at the call runs as it did
+case('V16', 'L11', 'a door still takes a text written at the call, as it did', '''print SystemCmd("echo literal")
 print System("echo passed")
-''', {'stdout': 'literal\nbuilt\npassed\n0\n'}, check={'errors': 0, 'found': []})
+''', {'stdout': 'literal\npassed\n0\n'}, check={'errors': 0, 'found': []})
 
 LAMP = 'DEFINE LAMP north AS (SHOWS green) RATIONALE "x"'
 case('V17', 'L1', 'an invocation is judged by a sentence of doors: a sentence of another language answers INVOCATION_NO_DOORS', f'''load "doors.haro"
