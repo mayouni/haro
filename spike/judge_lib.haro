@@ -7,6 +7,7 @@
 #   HaroJudge(name, text)               the court's verdict on a text: a sentence, or the court's first refusal raised
 #   HaroSentence                        what a sentence is: its language, the language's version, its text, the court's warnings
 #   HaroLang(name)                      the language as a program names it: its Judge(text) is HaroJudge(name, text)
+#   HaroPlaceOf(doors, root, text)      v0.72: a place beneath a root a sentence of doors declares; HaroPlace is what a place is
 #
 # Loaded before any court, it says so: a court's main does nothing when $bHaroJudges exists (court_lib.haro, CtMain).
 
@@ -115,6 +116,11 @@ class HaroSentence
 	def Warnings
 		return vWarnings
 	end
+
+	# v0.72: a sentence of doors judges a place beneath one of the roots it declares
+	def Place(ptRoot, ptText)
+		return HaroPlaceOf(this, ptRoot, ptText)
+	end
 end
 
 class HaroLanguage
@@ -126,5 +132,201 @@ class HaroLanguage
 
 	def Judge(ptText)
 		return HaroJudge(tName, ptText)
+	end
+end
+
+# ---- v0.72: the place (doc/DOORS.md rung 1) -----------------------------------------------------------------------------------
+#
+# A sentence of Haro's standard language of doors declares roots. HaroPlaceOf judges an outside text against one of them and answers
+# a place -- the root's name, its folder, the path made plain, what the root allows -- or raises its refusal:
+#   ROOT_UNKNOWN     the sentence declares no root of that name
+#   PLACE_ESCAPES    the text leaves the root: a step back out of it, a rooted path, a drive, a share, a scheme
+#   PLACE_NAME       a name no place can hold: nothing, a control byte, a device, a trailing dot or blank, a colon, a wildcard
+# A root that says ANYWHERE has no folder to leave: it takes a rooted path and a drive, and allows read alone.
+
+func HaroPlaceOf(psDoors, ptRoot, ptText)
+	if psDoors.Language() != "doors"
+		Raise("Error (PLACE_NO_DOORS) : a place is judged by a sentence of doors, and this is a sentence of " + psDoors.Language())
+	end
+	vEntry = HaroLanguageEntry("doors")
+	$vCourtLangs = vEntry[3]
+	CtUseLanguage("doors")
+	CtBuildCondLangs()
+	xDecls = CtDeclare(psDoors.Text())
+	tAt = ""
+	bAnywhere = false
+	bFound = false
+	vAllows = []
+	tNames = ""
+	for i = 1 to Len(xDecls)
+		if xDecls[i][1] != "ROOT" loop end
+		if tNames != "" tNames = tNames + ", " end
+		tNames = tNames + xDecls[i][2]
+		if xDecls[i][2] != ptRoot loop end
+		bFound = true
+		xClauses = xDecls[i][4]
+		for k = 1 to Len(xClauses)
+			tKey = Lower(xClauses[k][1])
+			if tKey = "at" tAt = xClauses[k][3][2] end
+			if tKey = "anywhere" bAnywhere = (xClauses[k][3][2] = "yes") end
+			if tKey = "allows" vAllows = xClauses[k][3][2] end
+		end
+	end
+	if not bFound
+		Raise("Error (ROOT_UNKNOWN) : no root called `" + ptRoot + "` is declared here; the roots are " + tNames)
+	end
+	if bAnywhere vAllows = ["read"] end
+	if Len(vAllows) = 0 vAllows = ["read"] end
+	tPlain = HaroPlainPath(ptText, ptRoot, bAnywhere)
+	tPath = tPlain
+	if not bAnywhere
+		tFolder = HaroTrimSlash(tAt)
+		if tPlain = ""
+			tPath = tFolder
+		else
+			tPath = tFolder + "/" + tPlain
+		end
+	end
+	return new HaroPlace(ptRoot, tAt, tPath, vAllows)
+end
+
+func HaroTrimSlash(ptFolder)
+	tOut = ""
+	for i = 1 to Len(ptFolder)
+		if Ascii(ptFolder[i]) = 92
+			tOut = tOut + "/"
+		else
+			tOut = tOut + ptFolder[i]
+		end
+	end
+	while Len(tOut) > 1 and Right(tOut, 1) = "/"
+		tOut = Left(tOut, Len(tOut) - 1)
+	end
+	return tOut
+end
+
+func HaroEscapes(ptText, ptRoot)
+	Raise("Error (PLACE_ESCAPES) : `" + ptText + "` leaves the root `" + ptRoot + "`")
+end
+
+func HaroNoName(ptText)
+	Raise("Error (PLACE_NAME) : `" + ptText + "` is no name a place can hold")
+end
+
+# the text as a path made plain: either slash read as one, `.` dropped, `..` taken where it stays inside
+func HaroPlainPath(ptText, ptRoot, pbAnywhere)
+	if ptText = "" HaroNoName(ptText) end
+	tAll = ""
+	for i = 1 to Len(ptText)
+		nByte = Ascii(ptText[i])
+		if nByte < 32 or nByte = 127 HaroNoName(ptText) end
+		if nByte = 92
+			tAll = tAll + "/"
+		else
+			tAll = tAll + ptText[i]
+		end
+	end
+	# a scheme is no path of a root; with no folder to leave, it is no name of a file
+	if SubStr(tAll, "://") > 0
+		if pbAnywhere HaroNoName(ptText) end
+		HaroEscapes(ptText, ptRoot)
+	end
+	tHead = ""
+	tRest = tAll
+	if Len(tAll) >= 2 and tAll[2] = ":" and IsAlpha(tAll[1])
+		# a drive
+		if not pbAnywhere HaroEscapes(ptText, ptRoot) end
+		if Len(tAll) < 3 or tAll[3] != "/" HaroNoName(ptText) end
+		tHead = Left(tAll, 2) + "/"
+		tRest = SubStr(tAll, 4, Len(tAll) - 3)
+		if Len(tAll) = 3 tRest = "" end
+	elseif Left(tAll, 1) = "/"
+		# a rooted path, a share
+		if not pbAnywhere HaroEscapes(ptText, ptRoot) end
+		tHead = "/"
+		if Left(tAll, 2) = "//" tHead = "//" end
+		tRest = SubStr(tAll, Len(tHead) + 1, Len(tAll) - Len(tHead))
+		if Len(tAll) = Len(tHead) tRest = "" end
+	end
+	vSegs = []
+	tSeg = ""
+	tRest = tRest + "/"
+	for i = 1 to Len(tRest)
+		if tRest[i] != "/"
+			tSeg = tSeg + tRest[i]
+			loop
+		end
+		if tSeg = "" or tSeg = "."
+			tSeg = ""
+			loop
+		end
+		if tSeg = ".."
+			if Len(vSegs) > 0 and vSegs[Len(vSegs)] != ".."
+				Del(vSegs, Len(vSegs))
+			elseif not pbAnywhere
+				HaroEscapes(ptText, ptRoot)
+			elseif tHead = ""
+				vSegs + ".."
+			end
+			tSeg = ""
+			loop
+		end
+		HaroNameHolds(tSeg, ptText)
+		vSegs + tSeg
+		tSeg = ""
+	end
+	tOut = tHead
+	for i = 1 to Len(vSegs)
+		if i > 1 tOut = tOut + "/" end
+		tOut = tOut + vSegs[i]
+	end
+	return tOut
+end
+
+# one name of a path: what a platform reads otherwise is refused
+func HaroNameHolds(ptSeg, ptText)
+	tLast = Right(ptSeg, 1)
+	if tLast = "." or tLast = " " HaroNoName(ptText) end
+	tBad = ":<>|?*" + Char(34)
+	for i = 1 to Len(ptSeg)
+		if SubStr(tBad, ptSeg[i]) > 0 HaroNoName(ptText) end
+	end
+	tBase = Lower(ptSeg)
+	nDot = SubStr(tBase, ".")
+	if nDot > 0 tBase = Left(tBase, nDot - 1) end
+	vDevices = ["con", "prn", "aux", "nul", "com1", "com2", "com3", "com4", "com5", "com6", "com7", "com8", "com9", "lpt1", "lpt2", "lpt3", "lpt4", "lpt5", "lpt6", "lpt7", "lpt8", "lpt9"]
+	for i = 1 to Len(vDevices)
+		if tBase = vDevices[i] HaroNoName(ptText) end
+	end
+end
+
+# The VM knows this class by its name and its attributes by their order, as it knows a sentence's (vm/src/main.zig): the second is
+# the root's folder (the empty text for a root ANYWHERE), the third the path a place prints as and a door opens, the fourth what
+# the root allows, the fifth says it is made -- from then on a write into it is refused (PLACE_FIXED). Keep the order.
+class HaroPlace
+	tRoot = ""
+	tAt = ""
+	tPath = ""
+	vAllows = []
+	bFixed = false
+
+	def init(ptRoot, ptAt, ptPath, pvAllows)
+		tRoot = ptRoot
+		tAt = ptAt
+		tPath = ptPath
+		vAllows = pvAllows
+		bFixed = true
+	end
+
+	def Root
+		return tRoot
+	end
+
+	def Path
+		return tPath
+	end
+
+	def Allows
+		return vAllows
 	end
 end
