@@ -102,6 +102,8 @@ const builtin_table = [_]BuiltinEntry{
     .{ .name = "keys", .id = .keys1, .argc = 1 },
     .{ .name = "values", .id = .values1, .argc = 1 },
     .{ .name = "haskey", .id = .haskey2, .argc = 2 },
+    // v0.74: a folder made, a door of files that takes a place
+    .{ .name = "makedir", .id = .makedir1, .argc = 1 },
     .{ .name = "read", .id = .readf, .argc = 1 },
     .{ .name = "write", .id = .writef, .argc = 2 },
     .{ .name = "LoadLib", .id = .loadlib, .argc = 1 },
@@ -275,6 +277,7 @@ fn haroOnlyBuiltin(id: vm.Builtin) bool {
         .float1, .decimal1, .decimal2, .integer1, .divide3, .near3, .isempty1 => true,
         .text2, .round1, .round2, .integerpart1, .decimalpart1, .decimals1h, .digits1, .abs1, .sign1, .clamp3, .fromhex1 => true,
         .mapof1, .keys1, .values1, .haskey2 => true,
+        .makedir1 => true,
         else => false,
     };
 }
@@ -5717,6 +5720,16 @@ pub const Compiler = struct {
             }
             break :blk try self.nameIndex(callee);
         };
+        // v0.74: SystemRun is the door beneath `hCall.Run()`, and the judging library's alone -- one spelling for a run answered whole
+        if (std.ascii.eqlIgnoreCase(callee, "systemrun") and self.spellIn(n.text())) {
+            const fi = self.fileOf(n.src.ptr);
+            const own = if (fi) |f| f < load_paths.len and std.ascii.eqlIgnoreCase(std.fs.path.basename(load_paths[f]), "judge_lib.haro") else false;
+            if (!own) {
+                self.spellSet(n.text(), "a run is asked of its invocation -- hCall.Run(); written");
+                _ = try self.emit(.loadk, dst, 0, 0, try self.konstIndex("\"\""));
+                return;
+            }
+        }
         try self.natives.append(self.alloc, ni2);
         try self.cur.calls_late.append(self.alloc, try self.nameIndex(callee));
         self.stmts_native += 1;

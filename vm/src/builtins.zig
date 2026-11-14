@@ -64,7 +64,7 @@ pub const names = [_][]const u8{
 /// `lowname` must already be lower-cased, which is how every caller in
 /// types.zig holds names.
 /// Haro's own natives, published at start-up with no library (syscmd.zig): the checker knows them as it knows the names above.
-pub const own = [_][]const u8{"systemcmd"};
+pub const own = [_][]const u8{ "systemcmd", "systemrun", "makedir" };
 
 pub fn isBuiltin(lowname: []const u8) bool {
     for (own) |n| {
@@ -387,6 +387,9 @@ pub const pascal = [_][2][]const u8{
     .{ "keys", "Keys" },
     .{ "values", "Values" },
     .{ "haskey", "HasKey" },
+    // v0.74: a folder made; the door beneath a run answered whole
+    .{ "makedir", "MakeDir" },
+    .{ "systemrun", "SystemRun" },
 };
 
 /// The spelling a .haro file writes for the native registered as `low` (lowercase, underscores as registered), or null for no native

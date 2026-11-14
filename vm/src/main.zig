@@ -1289,6 +1289,7 @@ pub const Builtin = enum(u16) {
     keys1, // Keys(mX): its keys, in order
     values1, // Values(mX): its values, in order
     haskey2, // HasKey(mX, k)
+    makedir1, // v0.74: MakeDir(path or place) -> makes the folder and the folders above it; "" ; FOLDER_NOT_MADE
     isnull, // isNull(x)     -> 1 for "" and for the string "NULL" in any case, else 0 (probed on 1.27: 0, [], an object are 0)
     string, // string(x)      -> decimal text of a number
     typeof, // type(x)        -> NUMBER / STRING / LIST / OBJECT, as Ring names them
@@ -1530,7 +1531,7 @@ pub fn builtinRingName(b: Builtin) ?[]const u8 {
         // v0.52: Haro's own, no C function of Ring's: an error inside one names the line alone
         .float1, .decimal1, .decimal2, .integer1, .divide3, .near3, .isempty1 => null,
         .text2, .round1, .round2, .integerpart1, .decimalpart1, .decimals1h, .digits1, .abs1, .sign1, .clamp3, .fromhex1 => null,
-        .mapof1, .keys1, .values1, .haskey2 => null,
+        .mapof1, .keys1, .values1, .haskey2, .makedir1 => null,
         .copystr => "copy",
         .typeof => "type",
         .find2, .find3, .find4 => "find",
@@ -3287,13 +3288,19 @@ pub const VM = struct {
     /// into scratch -- but it keeps the file builtins from aliasing a
     /// string the program still owns.
     /// v0.73 (doc/DOORS.md rung 2, D88 (d)): an invocation at a door. The program is started from the invocation's vector --
-    /// the program, then each argument as it is -- and no shell reads a line. `capture`: SystemCmd's door, the answer what the
+    /// the program, then each argument as it is -- and no shell reads a line. `.output`: SystemCmd's door, the answer what the
     /// child wrote to its standard output with the last line end dropped; else System's, the child writing where this program
     /// writes and the answer its exit code (-1 when it did not end by itself). What the child writes to its standard error
     /// passes through; when the command is QUIET nothing it writes reaches this program's output -- SystemCmd still answers its
     /// standard output, System sends both away. The child stands in the invocation's folder when it names one. A program that
     /// cannot be started is COMMAND_NOT_STARTED.
-    fn runInvocation(self: *VM, v: Value, capture: bool) ?Value {
+    const RunMode = enum { pass, output, whole };
+    fn dropLineEnd(s: []const u8) []const u8 {
+        if (std.mem.endsWith(u8, s, "\r\n")) return s[0 .. s.len - 2];
+        if (std.mem.endsWith(u8, s, "\n")) return s[0 .. s.len - 1];
+        return s;
+    }
+    fn runInvocation(self: *VM, v: Value, mode: RunMode) ?Value {
         const o = v.p.o;
         if (o.nslots < 5 or o.slots[3].tag != .vec or o.slots[3].p.v.len == 0) {
             self.pending = BADPARAM;
@@ -3316,17 +3323,26 @@ pub const VM = struct {
             argv.append(self.alloc, strOf(it)) catch @panic("oom");
         }
         outFlush();
-        if (capture) {
+        if (mode != .pass) {
             const res = std.process.Child.run(.{ .allocator = self.alloc, .argv = argv.items, .cwd = folder, .max_output_bytes = 1 << 30 }) catch {
                 self.pending = self.haroMsg("Error (COMMAND_NOT_STARTED) : the command `{s}` runs `{s}`, which could not be started", .{ name, argv.items[0] });
                 return null;
             };
             defer self.alloc.free(res.stdout);
             defer self.alloc.free(res.stderr);
+            // v0.74: the run answered whole -- nothing of the child's is written by this program
+            if (mode == .whole) {
+                const wv = self.newVec(3);
+                self.vecPushB(wv, Value.int(switch (res.term) {
+                    .Exited => |c| @intCast(c),
+                    else => -1,
+                }), false);
+                self.vecPushB(wv, Value.str(self.newStr(dropLineEnd(res.stdout))), true);
+                self.vecPushB(wv, Value.str(self.newStr(dropLineEnd(res.stderr))), true);
+                return Value.vec(wv);
+            }
             if (!quiet and res.stderr.len > 0) std.debug.print("{s}", .{res.stderr});
-            var s: []const u8 = res.stdout;
-            if (std.mem.endsWith(u8, s, "\r\n")) s = s[0 .. s.len - 2] else if (std.mem.endsWith(u8, s, "\n")) s = s[0 .. s.len - 1];
-            return Value.str(self.newStr(s));
+            return Value.str(self.newStr(dropLineEnd(res.stdout)));
         }
         var child = std.process.Child.init(argv.items, self.alloc);
         child.stdin_behavior = .Inherit;
@@ -7110,8 +7126,16 @@ pub const VM = struct {
                 const nm = self.names[ld];
                 // v0.73 (D88 (d)): SystemCmd given an invocation -- no shell: the program is started from its vector, and what
                 // it wrote is the answer, its last line end dropped as the native drops it
+                // v0.74: SystemRun, the door beneath `hCall.Run()` -- the exit code, what the child wrote, what it wrote to its
+                // standard error, a vector of three
+                if (in.c == 1 and isInvocation(regs[base + in.b]) and std.ascii.eqlIgnoreCase(nm, "systemrun")) {
+                    const wv = self.runInvocation(regs[base + in.b], .whole) orelse continue :dispatch .raise;
+                    self.setRegB(base + in.a, wv, true);
+                    pc += 1;
+                    continue :dispatch code[pc].op;
+                }
                 if (in.c == 1 and isInvocation(regs[base + in.b]) and std.ascii.eqlIgnoreCase(nm, "systemcmd")) {
-                    const cv = self.runInvocation(regs[base + in.b], true) orelse continue :dispatch .raise;
+                    const cv = self.runInvocation(regs[base + in.b], .output) orelse continue :dispatch .raise;
                     self.setRegB(base + in.a, cv, true);
                     pc += 1;
                     continue :dispatch code[pc].op;
@@ -7284,8 +7308,9 @@ pub const VM = struct {
                 // v0.72 (doc/DOORS.md 3.3, 3.5): a door of the filesystem given a place -- what its root allows, the second check
                 // where the door opens, then its path, which the door takes as it takes any text
                 switch (which) {
-                    .readf, .fexists, .direxists, .dir, .writef, .removefile => if (in.c > 0 and isPlace(regs[A])) {
+                    .readf, .fexists, .direxists, .dir, .writef, .removefile, .makedir1 => if (in.c > 0 and isPlace(regs[A])) {
                         const need: []const u8 = switch (which) {
+                            .makedir1 => "write",
                             .writef => "write",
                             .removefile => "remove",
                             .dir => "list",
@@ -7846,6 +7871,20 @@ pub const VM = struct {
                             self.pending = E7;
                             continue :dispatch .raise;
                         };
+                    },
+                    // v0.74: the folder and the folders above it that are missing; one that stands is left as it is. A file where
+                    // a folder would stand, or a folder the platform will not make, is refused by name
+                    .makedir1 => {
+                        if (regs[A].tag != .str) {
+                            self.pending = BADPARAM;
+                            continue :dispatch .raise;
+                        }
+                        const p = strOf(regs[A]);
+                        std.fs.cwd().makePath(p) catch {
+                            self.pending = self.haroMsg("Error (FOLDER_NOT_MADE) : the folder `{s}` could not be made", .{p});
+                            continue :dispatch .raise;
+                        };
+                        out = Value.str(&empty_str);
                     },
                     .removefile => {
                         // Ring's `remove` takes ONE argument and is C's remove():
@@ -8477,7 +8516,7 @@ pub const VM = struct {
                         // v0.73 (D88 (d)): given an invocation, no shell -- the program is started from its vector and its
                         // exit code is the answer
                         if (isInvocation(regs[A])) {
-                            out = self.runInvocation(regs[A], false) orelse continue :dispatch .raise;
+                            out = self.runInvocation(regs[A], .pass) orelse continue :dispatch .raise;
                         } else if (regs[A].tag != .str) {
                             self.pending = BADPARAM;
                             continue :dispatch .raise;

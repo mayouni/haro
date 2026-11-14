@@ -67,11 +67,12 @@ SPLIT_VM = """
 admitapp Admit-App | admitcode Admit-Code | admitfile Admit-File | admitfinish Admit-Finish | admitstart Admit-Start | admitstate Admit-State
 releasecode Release-Code | releasefile Release-File | replaceapp Replace-App | replacecode Replace-Code | replacefile Replace-File
 tui_done TUI-Done | tui_init TUI-Init | tui_key TUI-Key | tui_size TUI-Size | web_bye Web-Bye | web_done Web-Done | web_serve Web-Serve
-web_wait Web-Wait | systemcmd System-Cmd
+web_wait Web-Wait | systemcmd System-Cmd | systemrun System-Run
 decimal Decimal | divide Divide | float Float | integer Integer | near Near
 text Text | round Round | integerpart Integer-Part | decimalpart Decimal-Part | digits Digits | abs Abs | sign Sign | clamp Clamp
 fromhex From-Hex
 keys Keys | values Values | haskey Has-Key
+makedir Make-Dir
 """
 
 

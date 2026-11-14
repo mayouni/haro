@@ -66,9 +66,18 @@ fn systemCmd(args: [*]const RppVal, argc: u32, out: *RppVal) callconv(.c) c_int 
     return 0;
 }
 
+/// v0.74: `SystemRun`, the door beneath `hCall.Run()`. Given an invocation it never reaches this function: the VM takes the call
+/// where a native is called (main.zig) and starts the program with no shell. Given anything else there is nothing to run -- no
+/// shell form exists -- and it says so.
+fn systemRun(_: [*]const RppVal, _: u32, out: *RppVal) callconv(.c) c_int {
+    retStr(out, "Error (RUN_TAKES_INVOCATION) : a run is asked of an invocation -- hCall.Run()");
+    return 1;
+}
+
 /// Publish it through the same table `rpp_init` fills, at start-up.
 pub fn registerAll(a: std.mem.Allocator) void {
     alloc = a;
     native.reg_alloc = a;
     native.register("systemcmd", &systemCmd);
+    native.register("systemrun", &systemRun);
 }

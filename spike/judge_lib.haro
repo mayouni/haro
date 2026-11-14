@@ -593,4 +593,18 @@ class HaroInvocation
 	def Quiet
 		return bQuiet
 	end
+
+	# v0.74: the run answered whole -- no shell, and nothing of the child's reaches this program's output
+	def Run
+		vGot = SystemRun(this)
+		return HaroRun(vGot[1], vGot[2], vGot[3])
+	end
+end
+
+# v0.74: what a run answers -- the child's exit code (-1 when it did not end by itself), what it wrote, and what it wrote to its
+# standard error, the last line end of each dropped
+record HaroRun
+	iCode
+	tOutput
+	tErrors
 end
