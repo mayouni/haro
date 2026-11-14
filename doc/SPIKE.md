@@ -1917,6 +1917,10 @@ D58, the Principal's ruling of 2026-11-09 ("ParentClassName"), revising v0.42's 
 
 **Results.** 9 of 9 cases on both builds; 5 of 5 plants; v36 to v48's courts green. Haro's 2,172 calls re-spelled by a tool (20fc236, listed in v20/tool_commits.txt).
 
+## The seventy-fourth rung -- Haro v0.74, a folder made and a run answered whole -- 2026-11-14
+
+D91, the two debts of the seventy-third rung: `MakeDir`, a built-in of `.haro` code that makes a folder and the folders above it and takes a place as the doors of files do (FOLDER_NOT_MADE), and `hCall.Run()`, which starts an invocation's program with no shell and answers a record -- `iCode`, `tOutput`, `tErrors`. 14 of 14 on both builds, 15 plants (a221bdf, e3587d3).
+
 ## The seventy-third rung -- Haro v0.73, the command and the invocation -- 2026-11-14
 
 D90, `doc/DOORS.md` rung 2: a sentence of doors declares commands -- RUNS a program or ITSELF, TAKES the shapes of its arguments, QUIET -- and `sDoors.Invocation(command, vArguments)` judges the arguments into an invocation, held by an `h` name, or refuses (COMMAND_UNKNOWN, COMMAND_SHELL, COMMAND_WORDS, COMMAND_IN, INVOCATION_COUNT, INVOCATION_SHAPE, INVOCATION_NO_DOORS); `System` and `SystemCmd` take one and start the program from its vector, with no shell. A door still takes text. A forged court's folder is named by which haro forged it too. 21 of 21 on both builds, 53 plants (c459605, 115dc85).

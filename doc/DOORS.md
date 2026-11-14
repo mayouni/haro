@@ -132,7 +132,7 @@ fifteen lines become this one declaration in the court library and one judged re
 | rung | what | converts |
 |---|---|---|
 | 1 | the standard language of doors; ROOT and the place; the filesystem doors take a place -- **built, v0.72** | nothing yet refused |
-| 2 | COMMAND and the invocation; a child is run from a vector -- **built, v0.73**; the refusal of a command line built as text is a step of its own, next | Haro's run of a program and stzlib's 10 lines, with that step |
+| 2 | COMMAND and the invocation; a child is run from a vector -- **built, v0.73**; the refusal of a command line built as text is a step of its own, next; **v0.74** built what it waited for, `MakeDir` and a run answered whole (`hCall.Run()`) | Haro's run of a program and stzlib's 10 lines, with that step |
 | 3 | PEER and the endpoint, judged by Haro and held by the engine | with stzlib's engine desk |
 | 4 | `unjudged`, whole: the mark, where it ends, its three refusals | Haro's 15 reads; stzlib's 19 uses of the command line, counted and sent first |
 | 5 | `of` on an attribute, and handles written with `of` | -- |
