@@ -173,7 +173,9 @@ and `unjudged` are words of their places only, as `maybe` is, so a method named 
 The refusals: SENTENCE_EXPECTED, SENTENCE_OF_ANOTHER; UNJUDGED_RUN, UNJUDGED_DOOR, UNJUDGED_ARGUMENT.
 
 **BUILT 2026-11-13 as v0.70 (D85, `spike/v70/GRAMMAR.md`): a program judges** -- `load` of a declaration, `signal.Judge(tText)`, the
-sentence and what it answers, the letter `s`, and SENTENCE_FIXED for a write into one. The literal and `of` are the next step.
+sentence and what it answers, the letter `s`, and SENTENCE_FIXED for a write into one. **BUILT 2026-11-14 as v0.71 (D86,
+`spike/v71/GRAMMAR.md`): the literal and `of`** -- `signal'...'` judged when the program is compiled, `of` on a parameter and on an
+answer. SENTENCE_EXPECTED is an answer's: a text given to an `s` parameter is TYPE_LETTER. An attribute's `of` and `unjudged` are next.
 
 ---
 

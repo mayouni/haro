@@ -1917,6 +1917,10 @@ D58, the Principal's ruling of 2026-11-09 ("ParentClassName"), revising v0.42's 
 
 **Results.** 9 of 9 cases on both builds; 5 of 5 plants; v36 to v48's courts green. Haro's 2,172 calls re-spelled by a tool (20fc236, listed in v20/tool_commits.txt).
 
+## The seventy-first rung -- Haro v0.71, the literal and `of` -- 2026-11-14
+
+D86, the second step of TYPES.md T7's first rung: `signal'...'` is a sentence judged when the program is compiled, refused at its line in its court's words; `of` on a definition's header says the language of a parameter or of the answer, with SENTENCE_OF_ANOTHER and SENTENCE_EXPECTED; and a finding on a line that holds either stands at the file's own column. 14 of 14 on both builds, plants P1-P11 (3a624a5, dde15f7).
+
 ## The seventieth rung -- Haro v0.70, a program judges -- 2026-11-13
 
 D85, the first step of TYPES.md T7 (D83) on the Principal's "then start v0.70": a program loads a language's declaration, the loader forges its court, `signal.Judge(tText)` answers a sentence or raises the court's refusal with its code, the letter `s` holds a sentence alone, and a sentence is made by its court alone. What `Judge` answers is what the language's own forged court answers standing alone. 15 of 15 on both builds, plants K1-K15 (df2f25e, 98ec805). The same day the selection of Haro's spellings became this desk's (D84).
