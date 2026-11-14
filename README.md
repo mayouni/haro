@@ -31,7 +31,7 @@ before its code, and every protection is switched off in turn to show the court 
 
     CLAUDE.md        the brief, and what is where
     doc/             the design documents:
-      CHARTER.md       the charter: the alphabet, the decisions (D1-D87), the amendments
+      CHARTER.md       the charter: the alphabet, the decisions (D1-D88), the amendments
       PRINCIPLES.md    the founding principles;  GRAMMAR-SKETCH.md  the first grammar
       TYPES.md         Haro's types, rung by rung;  NUMBERS.md  its numbers;  SG1.md  the system grain
       PROOF.md         proof in Haro: the court is the kernel, three verdicts, the order of its rungs

@@ -2,7 +2,8 @@
 
 **Status: a proposal (HARO-DOORS-01), written 2026-11-14 on the Principal's word. Asked how `unjudged` should be brought in -- staged,
 enforced at once, or after the languages its refusals need -- he answered "Option 3": design the languages for paths, hosts and
-commands first, then build `unjudged` whole (CHARTER D87). Nothing here is built. Section 7 is the one row of questions.**
+commands first, then build `unjudged` whole (CHARTER D87). RULED the same day: "Yes, as recommended" -- the five parts of section 7,
+each as this document recommends (CHARTER D88). Nothing here is built.**
 
 ## 0. The question
 
@@ -158,15 +159,17 @@ D84, chosen when each rung starts and counted on stzlib first.
 
 ## 7. The questions
 
-HARO-DOORS-01, to the Principal, class: judgement --
+**HARO-DOORS-01: (a) to (e) RULED 2026-11-14, the Principal: "Yes, as recommended".** As it was put, class: judgement, with what
+was recommended and is now ruled after each --
 
 - **(a) The frame.** A door takes what the program itself wrote, or a value judged against the program's one declaration of its
-  doors: roots, peers, commands. Outside text reaches a door no other way.
+  doors: roots, peers, commands. Outside text reaches a door no other way. **Ruled: yes.**
 - **(b) The program's own literals.** They stay allowed at a door in an ordinary program -- only outside text is refused -- and
   the strict form, where a literal too goes through the declaration, is the proof profile's. Or strict for every program.
+  **Ruled: literals stay allowed in an ordinary program; the strict form is the proof profile's.**
 - **(c) `AT anywhere`.** A program may declare a root with no folder, read only, so a tool that reads any file a person names says
-  so in one line. Or every root is a folder.
+  so in one line. Or every root is a folder. **Ruled: it may.**
 - **(d) No shell.** A command is a declared program with judged arguments; in `.haro` code a command line built as text is refused
-  once invocations are built.
+  once invocations are built. **Ruled: yes.**
 - **(e) The network's door is the engine's.** Haro judges an endpoint and names its refusal; the check after a name is resolved, and
-  at a redirect, is made where the socket is -- stzlib's engine, as its broker does today.
+  at a redirect, is made where the socket is -- stzlib's engine, as its broker does today. **Ruled: yes.**
