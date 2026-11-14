@@ -1917,6 +1917,10 @@ D58, the Principal's ruling of 2026-11-09 ("ParentClassName"), revising v0.42's 
 
 **Results.** 9 of 9 cases on both builds; 5 of 5 plants; v36 to v48's courts green. Haro's 2,172 calls re-spelled by a tool (20fc236, listed in v20/tool_commits.txt).
 
+## The seventy-third rung -- Haro v0.73, the command and the invocation -- 2026-11-14
+
+D90, `doc/DOORS.md` rung 2: a sentence of doors declares commands -- RUNS a program or ITSELF, TAKES the shapes of its arguments, QUIET -- and `sDoors.Invocation(command, vArguments)` judges the arguments into an invocation, held by an `h` name, or refuses (COMMAND_UNKNOWN, COMMAND_SHELL, COMMAND_WORDS, COMMAND_IN, INVOCATION_COUNT, INVOCATION_SHAPE, INVOCATION_NO_DOORS); `System` and `SystemCmd` take one and start the program from its vector, with no shell. A door still takes text. A forged court's folder is named by which haro forged it too. 21 of 21 on both builds, 53 plants (c459605, 115dc85).
+
 ## The seventy-second rung -- Haro v0.72, the language of doors and the place -- 2026-11-14
 
 D89, `doc/DOORS.md` rung 1: `load "doors.haro"` is Haro's standard language of doors; a sentence of it declares roots, and `sDoors.Place(root, text)` judges an outside text into a place -- held by an `h` name, printed as its path, made by its judge alone -- or refuses it (ROOT_UNKNOWN, PLACE_ESCAPES, PLACE_NAME, PLACE_NO_DOORS); `Read`, `FExists`, `DirExists`, `Dir`, `Write` and `Remove` take a place, each asking its root one permission (PLACE_NOT_ALLOWED) and checking again where the door opens. A door still takes text. 18 of 18 on both builds, 30 plants (ffc90ae, 8220562, 7893527).

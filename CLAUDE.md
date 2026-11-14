@@ -438,7 +438,7 @@ the cut say `haro/X`, `X.ring`, `rnxc` and "the oracle"**: read them as this rep
 
 The records, all in `doc/` (moved from the root 2026-11-13, on the Principal's word: the root holds README, CLAUDE and LICENSE, as in
 every Softanza project; a record named below or in an older text by its bare name is `doc/<name>`): `CHARTER.md` (section 13 the
-decisions, D1 to D89; section 15 the v0.3 amendments), `PRINCIPLES.md`,
+decisions, D1 to D90; section 15 the v0.3 amendments), `PRINCIPLES.md`,
 `GRAMMAR-SKETCH.md`, `FINDINGS.md` (HF-1 to HF-152, each measured), `SPIKE.md` (every rung, one section each, and "Next"),
 `CODEGRAPH.md` (the code-graph memo), `TYPES.md` (Haro's types: D55, RULED 2026-11-07, nothing built yet), `BLOCKS.md` (one format and pattern rules, REBOL-06/07: its four questions RULED 2026-11-02),
 `FROM-RINGPP.md`, `NUMBERS.md`, `SG1.md`, `STANDALONE.md`, `PROOF.md` (proof in Haro: PROPOSED 2026-11-13, nothing ruled).
@@ -578,8 +578,13 @@ Each `%NAME%` in this file is a folder of this machine; its value is in `.centra
   **v0.72 is built** (D89, HF-178, stage 77; DOORS.md rung 1): `load "doors.haro"`, `sDoors = doors'DEFINE ROOT data AS (AT "data", ALLOWS
   [read, list]) RATIONALE "..."'`, `hNote = sDoors.Place("data", tGiven)` -- a place, held by `h`, or ROOT_UNKNOWN, PLACE_ESCAPES, PLACE_NAME;
   `Read`, `FExists`, `DirExists`, `Dir`, `Write`, `Remove` take one (PLACE_NOT_ALLOWED; PLACE_ESCAPES at a link that leads out). A door
-  still takes text. A forged court's libraries are found in the forge's folder (no forwarding files). Next: DOORS.md's rungs 2 to 5 --
-  commands, hosts, `unjudged` whole, `of` on attributes; then the seat types; then `uses` and `total`.
+  still takes text. A forged court's libraries are found in the forge's folder (no forwarding files). **v0.73 is built** (D90, HF-179,
+  stage 78; DOORS.md rung 2): `DEFINE COMMAND check AS (RUNS "haro", TAKES [word, place])` (or `ITSELF yes`; `IN root`; `QUIET yes`),
+  `hCall = sDoors.Invocation("check", vArguments)` -- shapes word, option, number, place, text, words -- and `System(hCall)`,
+  `SystemCmd(hCall)` start the program from its vector with no shell (COMMAND_SHELL, INVOCATION_SHAPE, INVOCATION_COUNT). A door
+  still takes text. Next: the refusal, in `.haro` code, of a command line built as text (D88 (d)) -- stzlib's 10 lines listed to its
+  desk first, `n_lib.haro` converted with it; then DOORS.md's rungs 3 to 5 -- hosts, `unjudged` whole, `of` on attributes; then the
+  seat types; then `uses` and `total`.
 - D43 is the twin-court clause. Of BLOCKS.md's four questions: Q-B1 is built (`?` is C6, and `OPTIONAL` sees it in a rule); Q-B2's two amendments are refused by name until Ringua's text
   lands; Q-B3 the block export of a program is not started; Q-B4 the round-trip court the elders waited for exists -- asking their owners is Central's.
 - **Answered 2026-11-05**: HARO-DISTANCE-01 (HF-141; D50, the author's ruling: no part of Ring is carried with Haro), HARO-ONEHOUR-01 (D51) and -02 (D52). **Next**: what stzlib's sweep on haro.exe sends; zip.zig out (stzlib calls no zip_* since cb6f5de65) with

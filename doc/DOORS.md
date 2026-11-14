@@ -3,7 +3,7 @@
 **Status: a proposal (HARO-DOORS-01), written 2026-11-14 on the Principal's word. Asked how `unjudged` should be brought in -- staged,
 enforced at once, or after the languages its refusals need -- he answered "Option 3": design the languages for paths, hosts and
 commands first, then build `unjudged` whole (CHARTER D87). RULED the same day: "Yes, as recommended" -- the five parts of section 7,
-each as this document recommends (CHARTER D88). Rung 1 is built, 2026-11-14, as v0.72 (CHARTER D89, `spike/v72/GRAMMAR.md`): the language `doors`, ROOT, the judge `Place`, and six doors of the filesystem taking a place. Rungs 2 to 5 are designed here.**
+each as this document recommends (CHARTER D88). Rung 1 is built, 2026-11-14, as v0.72 (CHARTER D89, `spike/v72/GRAMMAR.md`): the language `doors`, ROOT, the judge `Place`, and six doors of the filesystem taking a place. Rung 2 is built the same day, as v0.73 (CHARTER D90, `spike/v73/GRAMMAR.md`): COMMAND (RUNS or ITSELF, TAKES, IN, QUIET), the judge `Invocation`, and `System` and `SystemCmd` taking an invocation with no shell; the refusal of a command line built as text is its next step. Rungs 3 to 5 are designed here.**
 
 ## 0. The question
 
@@ -132,7 +132,7 @@ fifteen lines become this one declaration in the court library and one judged re
 | rung | what | converts |
 |---|---|---|
 | 1 | the standard language of doors; ROOT and the place; the filesystem doors take a place -- **built, v0.72** | nothing yet refused |
-| 2 | COMMAND and the invocation; a child is run from a vector | Haro's 3 runs of a program |
+| 2 | COMMAND and the invocation; a child is run from a vector -- **built, v0.73**; the refusal of a command line built as text is a step of its own, next | Haro's run of a program and stzlib's 10 lines, with that step |
 | 3 | PEER and the endpoint, judged by Haro and held by the engine | with stzlib's engine desk |
 | 4 | `unjudged`, whole: the mark, where it ends, its three refusals | Haro's 15 reads; stzlib's 19 uses of the command line, counted and sent first |
 | 5 | `of` on an attribute, and handles written with `of` | -- |
