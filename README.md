@@ -19,7 +19,7 @@ archive holds the `haro` binary, its LICENSE (MIT) and THIRD-PARTY-NOTICES.txt, 
     python paths.py                                                     what this checkout runs on
     cd vm && zig build -Doptimize=ReleaseFast -j2                       the Haro VM            vm/zig-out/bin/haro.exe
     cd vm && zig build -Doptimize=ReleaseSafe -j2 -p zig-out-safe       its checked build      vm/zig-out-safe/bin/haro.exe
-    python spike/haro_forge.py                                          the guard: every rung's court on both builds (76 stages)
+    python spike/haro_forge.py                                          the guard: every rung's court on both builds (77 stages)
     python spike/haro_forge.py --stage=N                                one stage
     python spike/haro_forge.py --plant                                  must FAIL: a check that cannot fail is no check
     python release/build_release.py windows | linux | macos             a release archive
@@ -31,13 +31,13 @@ before its code, and every protection is switched off in turn to show the court 
 
     CLAUDE.md        the brief, and what is where
     doc/             the design documents:
-      CHARTER.md       the charter: the alphabet, the decisions (D1-D88), the amendments
+      CHARTER.md       the charter: the alphabet, the decisions (D1-D89), the amendments
       PRINCIPLES.md    the founding principles;  GRAMMAR-SKETCH.md  the first grammar
       TYPES.md         Haro's types, rung by rung;  NUMBERS.md  its numbers;  SG1.md  the system grain
       PROOF.md         proof in Haro: the court is the kernel, three verdicts, the order of its rungs
       DOORS.md         what a door takes: a place, an endpoint or an invocation, judged against a program's declared roots, peers and commands
       SPIKE.md         every rung, one section each, and what comes next
-      FINDINGS.md      HF-1 to HF-177, each one measured
+      FINDINGS.md      HF-1 to HF-178, each one measured
       CODEGRAPH.md     the code-graph memo;  BLOCKS.md  one format and pattern rules
     vm/NOTES.md      the VM and its compiler
     spike/           the meta-court, the forge, the courts, each rung's fixtures and grammar

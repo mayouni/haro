@@ -1917,6 +1917,10 @@ D58, the Principal's ruling of 2026-11-09 ("ParentClassName"), revising v0.42's 
 
 **Results.** 9 of 9 cases on both builds; 5 of 5 plants; v36 to v48's courts green. Haro's 2,172 calls re-spelled by a tool (20fc236, listed in v20/tool_commits.txt).
 
+## The seventy-second rung -- Haro v0.72, the language of doors and the place -- 2026-11-14
+
+D89, `doc/DOORS.md` rung 1: `load "doors.haro"` is Haro's standard language of doors; a sentence of it declares roots, and `sDoors.Place(root, text)` judges an outside text into a place -- held by an `h` name, printed as its path, made by its judge alone -- or refuses it (ROOT_UNKNOWN, PLACE_ESCAPES, PLACE_NAME, PLACE_NO_DOORS); `Read`, `FExists`, `DirExists`, `Dir`, `Write` and `Remove` take a place, each asking its root one permission (PLACE_NOT_ALLOWED) and checking again where the door opens. A door still takes text. 18 of 18 on both builds, 30 plants (ffc90ae, 8220562, 7893527).
+
 ## The seventy-first rung -- Haro v0.71, the literal and `of` -- 2026-11-14
 
 D86, the second step of TYPES.md T7's first rung: `signal'...'` is a sentence judged when the program is compiled, refused at its line in its court's words; `of` on a definition's header says the language of a parameter or of the answer, with SENTENCE_OF_ANOTHER and SENTENCE_EXPECTED; and a finding on a line that holds either stands at the file's own column. 14 of 14 on both builds, plants P1-P11 (3a624a5, dde15f7).
