@@ -642,6 +642,9 @@ fn pathKey(alloc: std.mem.Allocator, p: []const u8) ![]const u8 {
 /// The two must agree about which file a load names, or the loaded file's
 /// top level runs in the wrong place.
 pub var exe_dir: []const u8 = ".";
+/// v0.72: the forge's folder, where Haro's standard languages stand; set by the loader when it looks there. The last place a
+/// load is looked for, by the loader and here alike.
+pub var forge_home: []const u8 = "";
 
 /// Which root does this `load` name? THE SAME RULE THE LOADER USED, and it
 /// has to be: when the loader resolved against the current directory and
@@ -656,7 +659,7 @@ fn loadTarget(alloc: std.mem.Allocator, from: u32, n: ts.Node) ?u32 {
 
     const rooted = (lit[0] == '/' or lit[0] == '\\') and
         !(lit.len > 1 and (lit[1] == '/' or lit[1] == '\\'));
-    var cands: [4][]const u8 = undefined;
+    var cands: [5][]const u8 = undefined;
     var n_cands: usize = 0;
     if (rooted) {
         // F-127, the loader's order: as written, beside the exe, in load/
@@ -683,6 +686,10 @@ fn loadTarget(alloc: std.mem.Allocator, from: u32, n: ts.Node) ?u32 {
         cands[n_cands] = std.fs.path.join(alloc, &.{ exe_dir, lit }) catch return null;
         cands[n_cands + 1] = std.fs.path.join(alloc, &.{ exe_dir, "load", lit }) catch return null;
         n_cands += 2;
+        if (forge_home.len > 0) {
+            cands[n_cands] = std.fs.path.join(alloc, &.{ forge_home, lit }) catch return null;
+            n_cands += 1;
+        }
     }
 
     for (cands[0..n_cands]) |c| {
@@ -6717,11 +6724,16 @@ pub const Compiler = struct {
         }
         // v0.70 (TYPES.md T7): a sentence is made by its court alone -- HaroJudge, in judge_lib.haro -- and never by `new`: through an
         // o or x name it would reach an s name unjudged
-        if (std.ascii.eqlIgnoreCase(ci.name, "harosentence")) {
+        // v0.72 (doc/DOORS.md): and a place by its judge alone
+        const a_place = std.ascii.eqlIgnoreCase(ci.name, "haroplace");
+        if (a_place or std.ascii.eqlIgnoreCase(ci.name, "harosentence")) {
             const fi = self.fileOf(n.src.ptr);
             const own = if (fi) |f| f < load_paths.len and std.ascii.eqlIgnoreCase(std.fs.path.basename(load_paths[f]), "judge_lib.haro") else false;
             if (!own) {
-                if (self.spellIn(n.text())) self.spellSet(n.text(), "a sentence is made by its court -- <language>.Judge(text); written");
+                if (self.spellIn(n.text())) self.spellSet(n.text(), if (a_place)
+                    "a place is made by its judge -- <doors>.Place(root, text); written"
+                else
+                    "a sentence is made by its court -- <language>.Judge(text); written");
                 _ = try self.emit(.loadk, dst, 0, 0, try self.konstIndex("\"\""));
                 return;
             }

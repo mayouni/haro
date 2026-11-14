@@ -358,6 +358,13 @@ fn resolveLoad(alloc: std.mem.Allocator, lit: []const u8, dir: []const u8, is_ro
         if (fileExists(at_exe)) break :blk at_exe;
         const in_load = try std.fs.path.join(alloc, &.{ exeDir(alloc), "load", lit });
         if (fileExists(in_load)) break :blk in_load;
+        // v0.72: Haro's standard languages stand in the forge's folder -- `load "doors.haro"` from wherever the program stands. Last,
+        // so a file of that name beside the program is the program's; the compiler resolves the same way (compile.zig, loadTarget)
+        if (forgeHome(alloc)) |h| {
+            co.forge_home = h;
+            const at_home = try std.fs.path.join(alloc, &.{ h, lit });
+            if (fileExists(at_home)) break :blk at_home;
+        }
         break :blk beside; // reported, by name, as unreadable below
     };
 }
@@ -422,6 +429,8 @@ fn loadReport(
     w: *std.Io.Writer,
 ) !bool {
     const src = std.fs.cwd().readFileAlloc(alloc, path, 64 << 20) catch return false;
+    // v0.72: a declaration a program loads is no code: its text is the meta-court's to read, and nothing of it is scanned here
+    if (!is_root and lift.isHaro(path) and isDeclaration(src)) return false;
     // a loaded file that does not scan: the scanner's report, then the
     // loading file's C27 at its load line, which the caller prints (F-109)
     if (!is_root) {
@@ -676,8 +685,18 @@ fn forgeDeclarationNow(alloc: std.mem.Allocator, p: []const u8, decl: []const u8
         }
         const rest = line["forged ".len..];
         lang = alloc.dupe(u8, rest[0 .. std.mem.indexOfScalar(u8, rest, ':') orelse rest.len]) catch "";
-        // the court loads its library by name, beside itself: two files there that load the forge's own
-        for ([_][]const u8{ "court_lib.haro", "world_stub.haro" }) |f| {
+        // the court loads its libraries by name, beside itself: for each `load` it writes, a file there that loads the forge's own
+        // (a court with constraints, a world or doors loads more than the two every court does)
+        const court_path = std.fs.path.join(alloc, &.{ out, std.fmt.allocPrint(alloc, "{s}_court.haro", .{lang}) catch "" }) catch "";
+        const court_text = std.fs.cwd().readFileAlloc(alloc, court_path, 16 << 20) catch "";
+        var cl: usize = 0;
+        while (cl < court_text.len) {
+            const ce = std.mem.indexOfScalarPos(u8, court_text, cl, '\n') orelse court_text.len;
+            const ln = std.mem.trim(u8, court_text[cl..ce], " \t\r");
+            cl = ce + 1;
+            if (!std.mem.startsWith(u8, ln, "load \"")) continue;
+            const q = std.mem.indexOfScalarPos(u8, ln, 6, '"') orelse continue;
+            const f = ln[6..q];
             const fwd = std.fs.path.join(alloc, &.{ out, f }) catch continue;
             const body = std.fmt.allocPrint(alloc, "load \"{s}/{s}\"\n", .{ slashed(alloc, home), f }) catch continue;
             std.fs.cwd().writeFile(.{ .sub_path = fwd, .data = body }) catch {};

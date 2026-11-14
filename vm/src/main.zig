@@ -1147,15 +1147,21 @@ pub var class_konst: []u32 = &.{};
 /// has grown; 0xFFFF_FFFF while the program holds none. Its attributes stand in a known order: slot 2 its text, slot 4 whether it
 /// is made (a sentence is fixed once its court has made it).
 pub var sentence_class: u32 = 0xFFFF_FFFF;
+/// v0.72 (doc/DOORS.md): the class of a place -- judge_lib.haro's HaroPlace -- found with the sentence's. Its attributes stand in
+/// a known order too: slot 0 its root's name, slot 1 the root's folder (the empty text for a root ANYWHERE), slot 2 its path,
+/// slot 3 what the root allows, slot 4 whether it is made.
+pub var place_class: u32 = 0xFFFF_FFFF;
 pub var sentence_scanned: usize = 0;
 pub fn sentenceClass() u32 {
     if (class_konst.len == sentence_scanned) return sentence_class;
     sentence_scanned = class_konst.len;
     sentence_class = 0xFFFF_FFFF;
+    place_class = 0xFFFF_FFFF;
     for (class_konst, 0..) |ki, ci| {
         if (ki >= konst.len or konst[ki].tag != .str) continue;
         const s = konst[ki].p.s;
         if (std.ascii.eqlIgnoreCase(s.ptr[0..s.len], "harosentence")) sentence_class = @intCast(ci);
+        if (std.ascii.eqlIgnoreCase(s.ptr[0..s.len], "haroplace")) place_class = @intCast(ci);
     }
     return sentence_class;
 }
@@ -1166,6 +1172,15 @@ fn sentenceFixed(o: *Obj) bool {
     return o.class == sentenceClass() and o.nslots > 4 and o.slots[4].tag == .boolean and o.slots[4].p.i != 0;
 }
 const SENTENCE_FIXED = "Error (SENTENCE_FIXED) : a sentence is not written into -- its text is taken, changed and judged again";
+pub fn isPlace(v: Value) bool {
+    _ = sentenceClass();
+    return v.tag == .obj and v.p.o.class == place_class;
+}
+fn placeFixed(o: *Obj) bool {
+    _ = sentenceClass();
+    return o.class == place_class and o.nslots > 4 and o.slots[4].tag == .boolean and o.slots[4].p.i != 0;
+}
+const PLACE_FIXED = "Error (PLACE_FIXED) : a place is not written into -- its text is judged again by its root";
 /// Per class, its parent's id, 0xFFFF for none; per function id, the class
 /// that defines it, 0xFFFF for a plain function. For reflection: `methods`,
 /// `ismethod`, `addmethod` (2026-09-23).
@@ -3255,6 +3270,54 @@ pub const VM = struct {
     /// and std.fs takes a slice, so this is just a bounds-checked copy
     /// into scratch -- but it keeps the file builtins from aliasing a
     /// string the program still owns.
+    /// v0.72 (doc/DOORS.md): a place at a door. Refused by name when its root does not allow what the door does
+    /// (PLACE_NOT_ALLOWED), and when what its path leads to does not stand beneath the root's folder -- a link or a junction that
+    /// leads out (PLACE_ESCAPES): the path itself is asked where it exists, else the nearest folder above it that does. A root
+    /// ANYWHERE has no folder to compare with. The answer is the place's path, a text.
+    fn placeDoor(self: *VM, v: Value, need: []const u8) ?Value {
+        const o = v.p.o;
+        if (o.nslots < 5 or o.slots[2].tag != .str) {
+            self.pending = BADPARAM;
+            return null;
+        }
+        const root = if (o.slots[0].tag == .str) strOf(o.slots[0]) else "";
+        const at = if (o.slots[1].tag == .str) strOf(o.slots[1]) else "";
+        const path = strOf(o.slots[2]);
+        var allowed = false;
+        if (o.slots[3].tag == .vec) {
+            const vv = o.slots[3].p.v;
+            var k: usize = 0;
+            while (k < vv.len) : (k += 1) {
+                const it = vv.ptr[k];
+                if (it.tag == .str and std.mem.eql(u8, strOf(it), need)) allowed = true;
+            }
+        }
+        if (!allowed) {
+            self.pending = self.haroMsg("Error (PLACE_NOT_ALLOWED) : the root `{s}` does not allow {s}", .{ root, need });
+            return null;
+        }
+        if (at.len > 0) {
+            if (std.fs.cwd().realpathAlloc(self.alloc, at)) |rr| {
+                defer self.alloc.free(rr);
+                var probe: []const u8 = path;
+                var real: ?[]u8 = std.fs.cwd().realpathAlloc(self.alloc, probe) catch null;
+                while (real == null) {
+                    probe = std.fs.path.dirname(probe) orelse break;
+                    real = std.fs.cwd().realpathAlloc(self.alloc, probe) catch null;
+                }
+                if (real) |r| {
+                    defer self.alloc.free(r);
+                    const inside = std.mem.startsWith(u8, r, rr) and (r.len == rr.len or r[rr.len] == std.fs.path.sep);
+                    if (!inside) {
+                        self.pending = self.haroMsg("Error (PLACE_ESCAPES) : `{s}` leads out of the root `{s}`", .{ path, root });
+                        return null;
+                    }
+                }
+            } else |_| {}
+        }
+        return o.slots[2];
+    }
+
     fn zpath(self: *VM, p: []const u8) []const u8 {
         self.scratch.clearRetainingCapacity();
         self.scratch.appendSlice(self.alloc, p) catch @panic("oom");
@@ -4462,7 +4525,7 @@ pub const VM = struct {
             },
             .obj => {
                 // v0.70: a sentence prints as its text
-                if (isSentence(v) and v.p.o.nslots > 2 and v.p.o.slots[2].tag == .str) {
+                if ((isSentence(v) or isPlace(v)) and v.p.o.nslots > 2 and v.p.o.slots[2].tag == .str) {
                     const st = v.p.o.slots[2].p.s;
                     outPrint("{s}{s}", .{ st.ptr[0..st.len], end });
                     return;
@@ -7136,6 +7199,21 @@ pub const VM = struct {
                 const in = code[pc];
                 const A = base + in.b; // first argument register
                 const which: Builtin = @enumFromInt(@as(u16, @intCast(in.d)));
+                // v0.72 (doc/DOORS.md 3.3, 3.5): a door of the filesystem given a place -- what its root allows, the second check
+                // where the door opens, then its path, which the door takes as it takes any text
+                switch (which) {
+                    .readf, .fexists, .direxists, .dir, .writef, .removefile => if (in.c > 0 and isPlace(regs[A])) {
+                        const need: []const u8 = switch (which) {
+                            .writef => "write",
+                            .removefile => "remove",
+                            .dir => "list",
+                            else => "read",
+                        };
+                        const pv = self.placeDoor(regs[A], need) orelse continue :dispatch .raise;
+                        self.setRegB(A, pv, true);
+                    },
+                    else => {},
+                }
                 // Builtins whose first argument MUST be a string. `strOf`
                 // panics on anything else and is a plain function, so it
                 // cannot reach the unwind -- the check belongs here, where
@@ -9479,7 +9557,8 @@ pub const VM = struct {
                     'm' => v.tag == .vec and v.p.v.map,
                     'o' => v.tag == .obj and v.p.o.rec == 0,
                     'r' => v.tag == .obj and v.p.o.rec != 0,
-                    'h' => v.tag == .cptr or v.tag == .dll,
+                    // v0.72 (doc/DOORS.md 3.4): a place is a handle of the filesystem, held before the door is opened
+                    'h' => v.tag == .cptr or v.tag == .dll or isPlace(v),
                     'e' => v.tag == .str and v.p.s.err != 0,
                     // v0.70 (TYPES.md T7): a sentence, which only its court makes
                     's' => isSentence(v),
@@ -9626,6 +9705,10 @@ pub const VM = struct {
                 const o = rv.p.o;
                 if (aop == .sattrn and sentenceFixed(o)) {
                     self.pending = SENTENCE_FIXED;
+                    continue :dispatch .raise;
+                }
+                if (aop == .sattrn and placeFixed(o)) {
+                    self.pending = PLACE_FIXED;
                     continue :dispatch .raise;
                 }
                 const nidx: u32 = @intCast(in.d);
