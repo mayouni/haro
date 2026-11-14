@@ -172,6 +172,11 @@ print "ran"
 ''', {'refuses': [4, 'a run is asked of its invocation -- hCall.Run(); written', DOOR], 'never': 'ran'},
      check={'errors': 1, 'found': [[4, RULE]]})
 
+case('W12', 'L8', 'the door beneath, given what is no invocation, has nothing to run and says so', '''see "before" + nl
+systemrun("dir")
+see "after" + nl
+''', {'raises': 'Error (RUN_TAKES_INVOCATION) : a run is asked of an invocation -- hCall.Run()', 'never': 'after'}, ext='.ring')
+
 doc = {'version': '0.74', 'task': 'a folder made and a run answered whole: the two debts of DOORS.md rung 2', 'languages': ['doors'], 'cases': cases}
 with open(os.path.join(HERE, 'fixtures.json'), 'w', encoding='utf-8', newline='\n') as f:
     json.dump(doc, f, indent=1, ensure_ascii=False)

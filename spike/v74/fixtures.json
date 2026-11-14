@@ -135,6 +135,16 @@
      ]
     ]
    }
+  },
+  {
+   "id": "W12",
+   "line": "L8",
+   "what": "the door beneath, given what is no invocation, has nothing to run and says so",
+   "file": "cases/w12.ring",
+   "run": {
+    "raises": "Error (RUN_TAKES_INVOCATION) : a run is asked of an invocation -- hCall.Run()",
+    "never": "after"
+   }
   }
  ]
 }
