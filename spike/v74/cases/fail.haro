@@ -1,0 +1,4 @@
+print "out"
+print "more"
+FWrite(stderr, "said on its standard error" + Char(10))
+Shutdown(3)

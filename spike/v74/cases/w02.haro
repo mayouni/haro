@@ -1,0 +1,12 @@
+load "doors.haro"
+sDoors = doors'DEFINE ROOT made AS (AT "made", ALLOWS [read, write]) RATIONALE "what this program makes"
+DEFINE ROOT data AS (AT "data", ALLOWS [read]) RATIONALE "the notes this program reads"'
+MakeDir(sDoors.Place("made", "x/y"))
+print DirExists("made/x/y")
+try
+    MakeDir(sDoors.Place("data", "new"))
+    print "made"
+catch e
+    print e.Message()
+end
+print DirExists("data/new")

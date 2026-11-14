@@ -1,0 +1,14 @@
+try
+    MakeDir("data/note.txt/under")
+    print "made"
+catch e
+    print e.Code()
+    print e.Message()
+end
+try
+    MakeDir("data/note.txt")
+    print "made"
+catch e
+    print e.Code()
+end
+print Read("data/note.txt")

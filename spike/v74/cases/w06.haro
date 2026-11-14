@@ -1,0 +1,5 @@
+func MakeDir(ptPath)
+    print "mine: " + ptPath
+end
+MakeDir("made/never")
+print DirExists("made/never")

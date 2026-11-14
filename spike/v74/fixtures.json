@@ -1,0 +1,140 @@
+{
+ "version": "0.74",
+ "task": "a folder made and a run answered whole: the two debts of DOORS.md rung 2",
+ "languages": [
+  "doors"
+ ],
+ "cases": [
+  {
+   "id": "W01",
+   "line": "L1",
+   "what": "MakeDir makes the folder and the folders above it; one that stands is left as it is",
+   "file": "cases/w01.haro",
+   "run": {
+    "stdout": "false\ntrue\nkept\n"
+   },
+   "check": {
+    "errors": 0,
+    "found": []
+   }
+  },
+  {
+   "id": "W02",
+   "line": "L2",
+   "what": "MakeDir takes a place: beneath a root that allows write it is made; beneath one that does not, PLACE_NOT_ALLOWED",
+   "file": "cases/w02.haro",
+   "run": {
+    "stdout": "true\nError (PLACE_NOT_ALLOWED) : the root `data` does not allow write\nfalse\n"
+   },
+   "check": {
+    "errors": 0,
+    "found": []
+   }
+  },
+  {
+   "id": "W03",
+   "line": "L3",
+   "what": "the door checks again where it opens: a link beneath the root that leads out of it",
+   "file": "cases/w03.haro",
+   "run": {
+    "stdout": "made/way_out/new\nPLACE_ESCAPES\nfalse\n"
+   },
+   "setup": "link"
+  },
+  {
+   "id": "W04",
+   "line": "L4",
+   "what": "a folder that cannot be made is FOLDER_NOT_MADE: a file stands where a folder would",
+   "file": "cases/w04.haro",
+   "run": {
+    "stdout": "FOLDER_NOT_MADE\nError (FOLDER_NOT_MADE) : the folder `data/note.txt/under` could not be made\nFOLDER_NOT_MADE\nhello\n"
+   }
+  },
+  {
+   "id": "W05",
+   "line": "L4",
+   "what": "what is neither a text nor a place is a bad parameter",
+   "file": "cases/w05.haro",
+   "run": {
+    "raises": "Bad parameter type!",
+    "never": "after"
+   }
+  },
+  {
+   "id": "W06",
+   "line": "L5",
+   "what": "a program's own function named MakeDir is the program's",
+   "file": "cases/w06.haro",
+   "run": {
+    "stdout": "mine: made/never\nfalse\n"
+   }
+  },
+  {
+   "id": "W07",
+   "line": "L5",
+   "what": "a .ring file reads the name as it did: no built-in",
+   "file": "cases/w07.ring",
+   "run": {
+    "raises": "Error (R3) : Calling Function without definition: makedir",
+    "never": "after"
+   }
+  },
+  {
+   "id": "W08",
+   "line": "L6",
+   "what": "Run answers a record: the exit code, what the child wrote, what it wrote to its standard error",
+   "file": "cases/w08.haro",
+   "run": {
+    "stdout": "before\n3\n[out\nmore]\n[said on its standard error]\n",
+    "stderr": {
+     "never": "said on its standard error"
+    }
+   },
+   "check": {
+    "errors": 0,
+    "found": []
+   }
+  },
+  {
+   "id": "W09",
+   "line": "L6",
+   "what": "the child stands where the command says, and a child that ends well answers 0",
+   "file": "cases/w09.haro",
+   "run": {
+    "stdout": "0\ntrue\ntrue\n"
+   }
+  },
+  {
+   "id": "W10",
+   "line": "L7",
+   "what": "a program that cannot be started is COMMAND_NOT_STARTED",
+   "file": "cases/w10.haro",
+   "run": {
+    "stdout": "Error (COMMAND_NOT_STARTED) : the command `gone` runs `no-such-program-of-haro-v74`, which could not be started\n"
+   }
+  },
+  {
+   "id": "W11",
+   "line": "L8",
+   "what": "the door beneath is the judging library's alone: SystemRun written in a program is refused when compiling",
+   "file": "cases/w11.haro",
+   "run": {
+    "refuses": [
+     4,
+     "a run is asked of its invocation -- hCall.Run(); written",
+     "SystemRun(hCall)"
+    ],
+    "never": "ran"
+   },
+   "check": {
+    "errors": 1,
+    "found": [
+     [
+      4,
+      "haro/refused-form"
+     ]
+    ]
+   }
+  }
+ ]
+}

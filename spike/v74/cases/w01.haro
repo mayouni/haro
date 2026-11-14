@@ -1,0 +1,7 @@
+print DirExists("made/a/b/c")
+MakeDir("made/a/b/c")
+print DirExists("made/a/b/c")
+Write("made/a/b/c/kept.txt", "kept")
+MakeDir("made/a/b/c")
+MakeDir("made/a")
+print Read("made/a/b/c/kept.txt")

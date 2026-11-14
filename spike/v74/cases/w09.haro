@@ -1,0 +1,7 @@
+load "doors.haro"
+sDoors = doors'DEFINE ROOT data AS (AT "data", ALLOWS [read]) RATIONALE "the notes this program reads"
+DEFINE COMMAND inside AS (ITSELF yes, TAKES [text], IN data) RATIONALE "this haro, run in the folder of the notes"'
+rRun = sDoors.Invocation("inside", ["../where.haro"]).Run()
+print rRun.iCode
+print rRun.tOutput
+print rRun.tErrors = ""

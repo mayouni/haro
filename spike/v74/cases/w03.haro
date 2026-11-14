@@ -1,0 +1,11 @@
+load "doors.haro"
+sDoors = doors'DEFINE ROOT made AS (AT "made", ALLOWS [read, write]) RATIONALE "what this program makes"'
+hOut = sDoors.Place("made", "way_out/new")
+print hOut
+try
+    MakeDir(hOut)
+    print "made"
+catch e
+    print e.Code()
+end
+print DirExists("outside/new")

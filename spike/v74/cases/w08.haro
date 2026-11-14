@@ -1,0 +1,8 @@
+load "doors.haro"
+sDoors = doors'DEFINE COMMAND fails AS (ITSELF yes, TAKES [word]) RATIONALE "a child that ends with 3"'
+hCall = sDoors.Invocation("fails", ["fail.haro"])
+print "before"
+rRun = hCall.Run()
+print rRun.iCode
+print "[" + rRun.tOutput + "]"
+print "[" + rRun.tErrors + "]"
