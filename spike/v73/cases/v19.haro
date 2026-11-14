@@ -1,0 +1,8 @@
+load "doors.haro"
+sDoors = doors'DEFINE COMMAND two AS (ITSELF yes, TAKES [word, words, text, words]) RATIONALE "two runs of words"'
+try
+    hAny = sDoors.Invocation("two", ["echo.haro", "a", "b", "c", "d"])
+    print "judged"
+catch e
+    print e.Message()
+end

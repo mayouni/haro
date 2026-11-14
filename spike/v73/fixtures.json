@@ -246,6 +246,15 @@
     "stdout": "show echo.haro a b c\n"
    },
    "kind": "identity"
+  },
+  {
+   "id": "V19",
+   "line": "L4",
+   "what": "a command that takes `words` twice has no one reading: COMMAND_WORDS",
+   "file": "cases/v19.haro",
+   "run": {
+    "stdout": "Error (COMMAND_WORDS) : the command `two` takes words twice: one run of words has a place\n"
+   }
   }
  ]
 }

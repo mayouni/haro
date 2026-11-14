@@ -12,7 +12,7 @@ The lines:
       byte, whatever a shell would read in it
   L3  `System(hCall)` runs it and answers its exit code; what the child writes passes through, after what the program wrote first
   L4  each argument is judged by its declared shape -- word, option, number, place, text, words -- or INVOCATION_SHAPE; the count
-      of arguments is the declaration's, or INVOCATION_COUNT
+      of arguments is the declaration's, or INVOCATION_COUNT; `words` stands once in a command, or COMMAND_WORDS
   L5  a command the sentence does not declare is COMMAND_UNKNOWN, and the refusal names the ones it does
   L6  no shell: a command that runs a shell, or a file a shell reads, is COMMAND_SHELL
   L7  the declaration's court: a command that runs nothing (COMMAND_NOTHING), one that says RUNS and ITSELF (COMMAND_TWICE), a shape
@@ -277,6 +277,17 @@ case('V18', 'L12', 'a forged court\'s folder is named by which haro forged it: a
 sDoors = doors'{SHOW}'
 print sDoors.Invocation("show", ["echo.haro", "a", "b", "c"])
 ''', {'stdout': 'show echo.haro a b c\n'}, kind='identity')
+
+TWICE = 'DEFINE COMMAND two AS (ITSELF yes, TAKES [word, words, text, words]) RATIONALE "two runs of words"'
+case('V19', 'L4', 'a command that takes `words` twice has no one reading: COMMAND_WORDS', f"""load "doors.haro"
+sDoors = doors'{TWICE}'
+try
+    hAny = sDoors.Invocation("two", ["echo.haro", "a", "b", "c", "d"])
+    print "judged"
+catch e
+    print e.Message()
+end
+""", {'stdout': said('COMMAND_WORDS', 'the command `two` takes words twice: one run of words has a place') + '\n'})
 
 doc = {'version': '0.73', 'task': 'doc/DOORS.md rung 2: the command and the invocation', 'languages': ['doors'],
        'law': 'the verdict on a sentence of doors is the one its own forged court answers, standing alone, on the same text', 'cases': cases}
