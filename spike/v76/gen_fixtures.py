@@ -200,6 +200,17 @@ print hApi.Host()
 print hApi
 ''', {'stdout': 'ENDPOINT_FIXED\napi.github.com\nhttps://api.github.com/user\n'})
 
+RAW = 'DEFINE PEER raw AS (HOST "queue.internal", SCHEMES [tcp]) RATIONALE "a peer reached by tcp that names no port"'
+case('E12', 'L4', 'a peer that names no port, reached by a scheme that has none of its own, is ENDPOINT_PORT', f'''load "doors.haro"
+sDoors = doors'{RAW}'
+try
+    hAny = sDoors.Endpoint("raw", "tcp://queue.internal:9000")
+    print "judged"
+catch e
+    print e.Message()
+end
+''', {'stdout': said('ENDPOINT_PORT', 'the peer `raw` names no port, and tcp has none of its own') + '\n'})
+
 LAMP = 'DEFINE LAMP north AS (SHOWS green) RATIONALE "x"'
 case('E11', 'L1', 'an endpoint is judged by a sentence of doors: a sentence of another language answers ENDPOINT_NO_DOORS', f'''load "doors.haro"
 load "../../v70/cases/signal.haro"

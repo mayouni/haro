@@ -1,0 +1,8 @@
+load "doors.haro"
+sDoors = doors'DEFINE PEER raw AS (HOST "queue.internal", SCHEMES [tcp]) RATIONALE "a peer reached by tcp that names no port"'
+try
+    hAny = sDoors.Endpoint("raw", "tcp://queue.internal:9000")
+    print "judged"
+catch e
+    print e.Message()
+end

@@ -185,6 +185,15 @@
    }
   },
   {
+   "id": "E12",
+   "line": "L4",
+   "what": "a peer that names no port, reached by a scheme that has none of its own, is ENDPOINT_PORT",
+   "file": "cases/e12.haro",
+   "run": {
+    "stdout": "Error (ENDPOINT_PORT) : the peer `raw` names no port, and tcp has none of its own\n"
+   }
+  },
+  {
    "id": "E11",
    "line": "L1",
    "what": "an endpoint is judged by a sentence of doors: a sentence of another language answers ENDPOINT_NO_DOORS",
