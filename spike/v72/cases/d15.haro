@@ -1,0 +1,10 @@
+load "doors.haro"
+load "../../v70/cases/signal.haro"
+sLamp = signal'DEFINE LAMP north AS (SHOWS green) RATIONALE "x"'
+try
+    hAny = sLamp.Place("data", "note.txt")
+    print "placed"
+catch e
+    print e.Code()
+    print e.Message()
+end

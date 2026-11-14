@@ -222,6 +222,24 @@
     "errors": 0,
     "found": []
    }
+  },
+  {
+   "id": "D15",
+   "line": "L2",
+   "what": "a place is judged by a sentence of doors: a sentence of another language answers PLACE_NO_DOORS",
+   "file": "cases/d15.haro",
+   "run": {
+    "stdout": "PLACE_NO_DOORS\nError (PLACE_NO_DOORS) : a place is judged by a sentence of doors, and this is a sentence of signal\n"
+   }
+  },
+  {
+   "id": "D16",
+   "line": "L7",
+   "what": "each door asks its own permission: Dir asks list, Read and FExists ask read; DirExists takes a place",
+   "file": "cases/d16.haro",
+   "run": {
+    "stdout": "true\nfalse\nError (PLACE_NOT_ALLOWED) : the root `out` does not allow list\nError (PLACE_NOT_ALLOWED) : the root `drop` does not allow read\nPLACE_NOT_ALLOWED\nPLACE_NAME\n"
+   }
   }
  ]
 }

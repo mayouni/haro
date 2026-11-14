@@ -175,7 +175,7 @@ func HaroPlaceOf(psDoors, ptRoot, ptText)
 	if not bFound
 		Raise("Error (ROOT_UNKNOWN) : no root called `" + ptRoot + "` is declared here; the roots are " + tNames)
 	end
-	if bAnywhere vAllows = ["read"] end
+	# a root that lists nothing reads; a root ANYWHERE lists nothing (its court: ROOT_ANYWHERE_READS)
 	if Len(vAllows) = 0 vAllows = ["read"] end
 	tPlain = HaroPlainPath(ptText, ptRoot, bAnywhere)
 	tPath = tPlain
@@ -226,11 +226,8 @@ func HaroPlainPath(ptText, ptRoot, pbAnywhere)
 			tAll = tAll + ptText[i]
 		end
 	end
-	# a scheme is no path of a root; with no folder to leave, it is no name of a file
-	if SubStr(tAll, "://") > 0
-		if pbAnywhere HaroNoName(ptText) end
-		HaroEscapes(ptText, ptRoot)
-	end
+	# a scheme is no path of a root; with no folder to leave, its colon makes it no name of a file (below)
+	if SubStr(tAll, "://") > 0 and not pbAnywhere HaroEscapes(ptText, ptRoot) end
 	tHead = ""
 	tRest = tAll
 	if Len(tAll) >= 2 and tAll[2] = ":" and IsAlpha(tAll[1])

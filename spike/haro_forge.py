@@ -4156,6 +4156,25 @@ def stage76():
     return 0
 
 
+PLACE_COURT = os.path.join(HERE, 'v72', 'place_court.py')
+
+
+def stage77():
+    """Haro v0.72, the language of doors and the place (doc/DOORS.md rung 1, D88, D89; v72/GRAMMAR.md): `load "doors.haro"` is Haro's
+    standard language of doors; a sentence of it declares roots and judges a text into a place, which a door of the filesystem takes --
+    what its root allows, and a second check where the door opens. v72/place_court.py on haro and its checked build."""
+    print('stage 77 -- the doors and the place: v72/place_court.py on haro and its checked build')
+    p = subprocess.run([sys.executable, PLACE_COURT] + (['--plant'] if PLANT else []), capture_output=True, cwd=HERE, timeout=900)
+    out = p.stdout.decode('utf-8', 'replace').replace(chr(13) + chr(10), chr(10))
+    for line in out.splitlines():
+        if line.startswith(('  FAIL', '       ', 'PLACE COURT')):
+            print(line)
+    if p.returncode != 0:
+        print(f'  FAIL the place court exited {p.returncode}' + ('' if out.strip() else ': ' + p.stderr.decode('utf-8', 'replace')[-400:]))
+        return 1
+    return 0
+
+
 PORT_COURT = os.path.join(os.path.dirname(HERE), 'port', 'port_court.py')
 
 
@@ -4421,5 +4440,7 @@ if __name__ == '__main__':
         failures += stage75()
     if stage in (None, 76) and os.path.exists(LITERAL_COURT):
         failures += stage76()
+    if stage in (None, 77) and os.path.exists(PLACE_COURT):
+        failures += stage77()
     print(f'haro_forge: {"FAIL" if failures else "PASS"} ({failures} failure(s), {time.perf_counter()-t0:.1f} s)')
     sys.exit(1 if failures else 0)

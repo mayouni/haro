@@ -7,7 +7,7 @@ ROOT (AT a folder, or ANYWHERE yes; ALLOWS read, write, list, remove), the judge
 The lines:
   L1  `load "doors.haro"` is Haro's standard language of doors, found wherever the program stands; a sentence of it declares roots
   L2  `sDoors.Place(root, text)` answers a place: its root, its path beneath the root made plain, what the root allows; it prints
-      as its path; the letter h holds it
+      as its path; the letter h holds it; a sentence of another language judges none
   L3  a text that leaves its root is PLACE_ESCAPES; a name a place cannot hold is PLACE_NAME
   L4  a root the sentence does not declare is ROOT_UNKNOWN
   L5  a root ANYWHERE takes the file a person names, wherever it is, and reads only
@@ -223,6 +223,55 @@ print Read("data/note.txt")
 print Read(tName)
 print FExists(tName)
 ''', {'stdout': 'hello\nhello\ntrue\n'}, check={'errors': 0, 'found': []})
+
+LAMP = 'DEFINE LAMP north AS (SHOWS green) RATIONALE "x"'
+# added after the code, when the plants were written: the judge's first refusal had no case of its own
+case('D15', 'L2', 'a place is judged by a sentence of doors: a sentence of another language answers PLACE_NO_DOORS', f'''load "doors.haro"
+load "../../v70/cases/signal.haro"
+sLamp = signal'{LAMP}'
+try
+    hAny = sLamp.Place("data", "note.txt")
+    print "placed"
+catch e
+    print e.Code()
+    print e.Message()
+end
+''', {'stdout': 'PLACE_NO_DOORS\n' + said('PLACE_NO_DOORS', 'a place is judged by a sentence of doors, and this is a sentence of signal') + '\n'})
+
+DROP = 'DEFINE ROOT drop AS (AT "out", ALLOWS [write]) RATIONALE "what is left here and not read back"'
+# added after the code, when the plants were written: no root of the cases withheld read or list, DirExists stood in no case, and a
+# scheme under a root ANYWHERE was typed nowhere
+case('D16', 'L7', 'each door asks its own permission: Dir asks list, Read and FExists ask read; DirExists takes a place', f"""load "doors.haro"
+sDoors = doors'{DATA}
+{OUT}
+{DROP}
+{GIVEN}'
+print DirExists(sDoors.Place("data", "sub"))
+print DirExists(sDoors.Place("data", "absent"))
+try
+    Dir(sDoors.Place("out", "."))
+    print "listed"
+catch e
+    print e.Message()
+end
+try
+    print Read(sDoors.Place("drop", ".keep"))
+catch e
+    print e.Message()
+end
+try
+    print FExists(sDoors.Place("drop", ".keep"))
+catch e
+    print e.Code()
+end
+try
+    hAny = sDoors.Place("given", "file://note.txt")
+    print "placed"
+catch e
+    print e.Code()
+end
+""", {'stdout': 'true\nfalse\n' + said('PLACE_NOT_ALLOWED', 'the root `out` does not allow list') + '\n'
+      + said('PLACE_NOT_ALLOWED', 'the root `drop` does not allow read') + '\nPLACE_NOT_ALLOWED\nPLACE_NAME\n'})
 
 doc = {'version': '0.72', 'task': 'doc/DOORS.md rung 1: the language of doors and the place', 'languages': ['doors'],
        'law': 'the verdict on a sentence of doors is the one its own forged court answers, standing alone, on the same text', 'cases': cases}

@@ -1,0 +1,29 @@
+load "doors.haro"
+sDoors = doors'DEFINE ROOT data AS (AT "data", ALLOWS [read, list]) RATIONALE "the notes this program reads"
+DEFINE ROOT out AS (AT "out", ALLOWS [read, write, remove]) RATIONALE "what this program makes"
+DEFINE ROOT drop AS (AT "out", ALLOWS [write]) RATIONALE "what is left here and not read back"
+DEFINE ROOT given AS (ANYWHERE yes) RATIONALE "the file a person names"'
+print DirExists(sDoors.Place("data", "sub"))
+print DirExists(sDoors.Place("data", "absent"))
+try
+    Dir(sDoors.Place("out", "."))
+    print "listed"
+catch e
+    print e.Message()
+end
+try
+    print Read(sDoors.Place("drop", ".keep"))
+catch e
+    print e.Message()
+end
+try
+    print FExists(sDoors.Place("drop", ".keep"))
+catch e
+    print e.Code()
+end
+try
+    hAny = sDoors.Place("given", "file://note.txt")
+    print "placed"
+catch e
+    print e.Code()
+end
