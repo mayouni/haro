@@ -15,6 +15,8 @@
 //!                                        A name is `Class.method` for a method and `name` for a function; `<top>` is a file's own statements
 //!   CALL|<caller>|<name>|dynamic|<n>     a method call it could only dispatch by name; n is how many methods of the unit carry the name --
 //!                                        an over-approximation, and the number says how large
+//!   CALL|<caller>|*|late|<n>             v0.77: n calls by a name built when the program runs (`call x()`): no edge can be drawn, and
+//!                                        the line says the caller's edges have a hole and how large
 //!   UNFINISHED|<function>                the compiler could not finish this function: its edges are MISSING, which is not the same as absent
 //!
 //! The extra fields are ignored by stzCodeGraph's ingestion (it reads fields 2 and 3), so the stream is still its protocol. A lambda's calls
@@ -36,6 +38,8 @@ pub const Stats = struct {
     functions: usize = 0,
     static_edges: usize = 0,
     dynamic_edges: usize = 0,
+    late_calls: usize = 0,
+    late_funcs: usize = 0,
     poisoned: usize = 0,
 };
 
@@ -146,6 +150,12 @@ pub fn print(a: Alloc, d: co.GraphData, roots: []const ts.Node, paths: []const [
         // static: the compiler's own bindings -- fixups name the caller and the target of each call it patched, and a method it proved
         // but dispatched by name is in calls_static
         for (f.calls_static.items) |t| try staticEdge(a, d, &seen, &calls[fi], &st, caller, t);
+        // v0.77 (HARO-GRAPH-LATECALL-01): late -- by a name built when the program runs
+        if (f.late_calls > 0) {
+            st.late_calls += f.late_calls;
+            st.late_funcs += 1;
+            try calls[fi].append(a, .{ .key = 0, .text = try std.fmt.allocPrint(a, "CALL|{s}|*|late|{d}", .{ caller, f.late_calls }) });
+        }
         // dynamic: by name
         for (f.calls_named.items) |ni| {
             if (ni >= d.names.len) continue;

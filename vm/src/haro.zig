@@ -1714,6 +1714,10 @@ fn isSubcommand(a: []const u8) bool {
 /// requires the bytes to match.
 fn runImage(p: image.Parts, root_as_typed: []const u8) !void {
     const H = vmheap;
+    // v0.77 (HARO-IMAGE-EVAL-LENIENT-01): a program served from its image is the program a fresh load compiles. The load says
+    // which surface the root is read by, and Eval reads its text by that; the image path said nothing, so Eval read a .haro
+    // program's text by the other surface's rules and took what a fresh compile refuses
+    lift.haro_root = lift.isHaro(root_as_typed);
     vm.dispatch = p.dispatch;
     vm.method_tab = p.method_tab;
     vm.class_slots = p.class_slots;
@@ -4710,6 +4714,8 @@ pub fn main() !void {
         };
         const gs = try graph.print(alloc, gd, unit.roots.items, unit.paths.items, w);
         try w.flush();
+        // v0.77 (HARO-GRAPH-LATECALL-01): said only where the unit holds one, so a unit without is summed up as it was
+        if (gs.late_calls > 0) std.debug.print("graph: {d} call(s) by a name built when the program runs, in {d} function(s)\n", .{ gs.late_calls, gs.late_funcs });
         std.debug.print("graph: {d} file(s), {d} class(es), {d} method(s), {d} function(s); {d} static and {d} dynamic call edge(s); {d} function(s) the compiler could not finish\n", .{
             gs.files, gs.classes, gs.methods, gs.functions, gs.static_edges, gs.dynamic_edges, gs.poisoned,
         });

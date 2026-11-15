@@ -466,6 +466,9 @@ pub const Func = struct {
     /// function they can reach. These do not take part in the same-name
     /// poison rule -- they have a real edge instead.
     calls_static: std.ArrayListUnmanaged(u32) = .{},
+    /// v0.77 (HARO-GRAPH-LATECALL-01): how many calls this function makes by a name built when the program runs -- `call x()`.
+    /// No edge can be drawn for one, and a reader of the graph is told there is a hole and how large
+    late_calls: u32 = 0,
     /// Calls resolved by name when the program runs -- a native the VM or a loaded library publishes, or nothing (R3): the name
     /// table's index of each, for `haro check --facts` (v0.51)
     calls_late: std.ArrayListUnmanaged(u16) = .{},
@@ -9130,6 +9133,7 @@ pub const Compiler = struct {
             try self.expr(ar.namedChild(a), r);
         }
         _ = self.reg(win + @as(u8, @intCast(argc)) + 8);
+        self.cur.late_calls += 1;
         _ = try self.emit(.calli, win, @intCast(argc), 0, 0);
         _ = try self.emit(.move, dst, win, 1, 0);
     }
@@ -10142,6 +10146,7 @@ pub fn census(alloc: std.mem.Allocator, roots: []const ts.Node) !Census {
     c.natives.clearRetainingCapacity();
     for (c.funcs.items) |*f| {
         f.poisoned = false;
+        f.late_calls = 0;
         f.calls_named.clearRetainingCapacity();
         f.calls_static.clearRetainingCapacity();
         f.calls_late.clearRetainingCapacity();
@@ -10957,6 +10962,7 @@ fn compileFrontAfterCollect(c: *Compiler, alloc: std.mem.Allocator) Error!void {
     c.natives.clearRetainingCapacity();
     for (c.funcs.items[c.prefix_funcs..]) |*f| {
         f.poisoned = false;
+        f.late_calls = 0;
         f.calls_named.clearRetainingCapacity();
         f.calls_static.clearRetainingCapacity();
         f.calls_late.clearRetainingCapacity();

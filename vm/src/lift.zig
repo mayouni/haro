@@ -598,6 +598,8 @@ pub var faults: std.StringHashMapUnmanaged(Fault) = .{};
 pub const R_NOEND = "a definition ends with `end`, and this one has none; written";
 pub const R_STRAY = "an `end` closes nothing here; written";
 pub const R_ONELINE = "a definition's body starts on the line after its header; written";
+/// v0.77 (HARO-SIGLINE-01): a parameter list its line does not close -- the grammar reads none across lines
+pub const R_HEADLINE = "a definition's header is written on one line; written";
 pub const R_ENDWORD = "one spelling: `end`; written";
 /// v0.64 (D76, HARO-RECORD-01): a record is its fields
 pub const R_RECDEF = "a record holds fields and no method; written";
@@ -798,6 +800,44 @@ fn bracesText(alloc: std.mem.Allocator, src: []const u8, name: []const u8) ?Brac
                         }
                         break;
                     }
+                }
+            }
+            // v0.77 (HARO-SIGLINE-01): a function's or a method's header ends with its name, its parameter list and `maybe`.
+            // Anything else on its line was read as part of the header -- the brace this pass gives a header went after it --
+            // and the program ran as something else and said nothing. A brace there is left to the rule that names it.
+            if (!rec and e > k and (eq(w, "func") or eq(w, "def"))) {
+                var h = e;
+                while (h < last and (src[h] == ' ' or src[h] == '\t')) h += 1;
+                if (h < last and src[h] == '(') {
+                    var depth: u32 = 0;
+                    var closed = false;
+                    while (h < last) : (h += 1) {
+                        const b = src[h];
+                        if (b == '"' or b == '\'' or b == '`') {
+                            h = std.mem.indexOfScalarPos(u8, src[0..last], h + 1, b) orelse break;
+                            continue;
+                        }
+                        if (b == '(') depth += 1;
+                        if (b == ')') {
+                            depth -= 1;
+                            if (depth == 0) {
+                                h += 1;
+                                closed = true;
+                                break;
+                            }
+                        }
+                    }
+                    if (!closed) {
+                        if (fault == null) fault = .{ .why = R_HEADLINE, .word = src[k..e], .row = row };
+                        break :scan;
+                    }
+                }
+                while (h < last and (src[h] == ' ' or src[h] == '\t')) h += 1;
+                if (h + 5 <= last and eq(src[h .. h + 5], "maybe") and (h + 5 == last or !wordByte(src[h + 5]))) h += 5;
+                while (h < last and (src[h] == ' ' or src[h] == '\t')) h += 1;
+                if (h < last and src[h] != '{') {
+                    if (fault == null) fault = .{ .why = R_ONELINE, .word = src[k..e], .row = row };
+                    break :scan;
                 }
             }
             if (rec) {
