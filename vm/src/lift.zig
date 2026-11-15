@@ -805,8 +805,13 @@ fn bracesText(alloc: std.mem.Allocator, src: []const u8, name: []const u8) ?Brac
             // v0.77 (HARO-SIGLINE-01): a function's or a method's header ends with its name, its parameter list and `maybe`.
             // Anything else on its line was read as part of the header -- the brace this pass gives a header went after it --
             // and the program ran as something else and said nothing. A brace there is left to the rule that names it.
-            if (!rec and e > k and (eq(w, "func") or eq(w, "def"))) {
-                var h = e;
+            // The name is read to its end by the grammar's own bytes (nameByte): a name holds `@`, and starts with it. Read as
+            // letters, digits and underscores, `func Stz@(tType)` was a header with a statement after it, and `func @N(iN)` was
+            // not looked at (found by the count on stzlib's files, 2026-11-16).
+            var ne = k;
+            while (ne < last and nameByte(src[ne])) ne += 1;
+            if (!rec and ne > k and (eq(w, "func") or eq(w, "def"))) {
+                var h = ne;
                 while (h < last and (src[h] == ' ' or src[h] == '\t')) h += 1;
                 if (h < last and src[h] == '(') {
                     var depth: u32 = 0;
@@ -828,7 +833,7 @@ fn bracesText(alloc: std.mem.Allocator, src: []const u8, name: []const u8) ?Brac
                         }
                     }
                     if (!closed) {
-                        if (fault == null) fault = .{ .why = R_HEADLINE, .word = src[k..e], .row = row };
+                        if (fault == null) fault = .{ .why = R_HEADLINE, .word = src[k..ne], .row = row };
                         break :scan;
                     }
                 }
@@ -836,7 +841,7 @@ fn bracesText(alloc: std.mem.Allocator, src: []const u8, name: []const u8) ?Brac
                 if (h + 5 <= last and eq(src[h .. h + 5], "maybe") and (h + 5 == last or !wordByte(src[h + 5]))) h += 5;
                 while (h < last and (src[h] == ' ' or src[h] == '\t')) h += 1;
                 if (h < last and src[h] != '{') {
-                    if (fault == null) fault = .{ .why = R_ONELINE, .word = src[k..e], .row = row };
+                    if (fault == null) fault = .{ .why = R_ONELINE, .word = src[k..ne], .row = row };
                     break :scan;
                 }
             }

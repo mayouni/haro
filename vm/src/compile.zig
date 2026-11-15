@@ -10146,7 +10146,6 @@ pub fn census(alloc: std.mem.Allocator, roots: []const ts.Node) !Census {
     c.natives.clearRetainingCapacity();
     for (c.funcs.items) |*f| {
         f.poisoned = false;
-        f.late_calls = 0;
         f.calls_named.clearRetainingCapacity();
         f.calls_static.clearRetainingCapacity();
         f.calls_late.clearRetainingCapacity();

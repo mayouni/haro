@@ -25,7 +25,7 @@ PLANTS = [
     ('K1', 'F01', 'a statement after a header on its line is let through', LIFT,
      [("                if (h < last and src[h] != '{') {\n", "                if (h < last and src[h] == 0) {\n")]),
     ('K2', 'F03', 'a method\'s header is not read', LIFT,
-     [('            if (!rec and e > k and (eq(w, "func") or eq(w, "def"))) {', '            if (!rec and e > k and eq(w, "func")) {')]),
+     [('            if (!rec and ne > k and (eq(w, "func") or eq(w, "def"))) {', '            if (!rec and ne > k and eq(w, "func")) {')]),
     ('K3', 'F04', 'a parameter list its line does not close is let through', LIFT,
      [('                    if (!closed) {\n', '                    if (!closed and depth == 99) {\n')]),
     ('K4', 'F05', '`maybe` after a header is read as a statement', LIFT,
@@ -37,7 +37,12 @@ PLANTS = [
     ('K7', 'F09', 'the graph does not print a call by a built name', GRAPH,
      [('        if (f.late_calls > 0) {\n', '        if (f.late_calls > 99) {\n')]),
     ('K8', 'F09', 'the count of a function\'s calls by a built name is kept from one pass to the next', COMPILE,
-     [('    for (c.funcs.items) |*f| {\n        f.poisoned = false;\n        f.late_calls = 0;\n', '    for (c.funcs.items) |*f| {\n        f.poisoned = false;\n')]),
+     [('    for (c.funcs.items[c.prefix_funcs..]) |*f| {\n        f.poisoned = false;\n        f.late_calls = 0;\n',
+       '    for (c.funcs.items[c.prefix_funcs..]) |*f| {\n        f.poisoned = false;\n')]),
+    ('K9', 'F11', 'a name is read as letters, digits and underscores, so one that holds `@` ends early', LIFT,
+     [('            while (ne < last and nameByte(src[ne])) ne += 1;\n', '            while (ne < last and wordByte(src[ne])) ne += 1;\n')]),
+    ('K10', 'F13', 'the refusal writes the name to its first `@`', LIFT,
+     [('fault = .{ .why = R_ONELINE, .word = src[k..ne], .row = row };', 'fault = .{ .why = R_ONELINE, .word = src[k..e], .row = row };')]),
 ]
 
 
