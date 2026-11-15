@@ -1,6 +1,6 @@
 load "doors.haro"
 sDoors = doors'DEFINE PEER github AS (HOST "api.github.com", SCHEMES [https]) RATIONALE "where releases are read from"'
-vTexts = ["", "api.github.com/user", "https:/api.github.com", "https://", "https://token:x@api.github.com/", "https://api.github.com@evil.org/", "https://api.github.com /user", "https://api.github.com/a" + Char(10) + "b", "https://api.github.com" + Char(92) + "@evil.org/", "https://[::1]/", "https://api.github.com:port/", "https://api.github.com:0/", "https://api.github.com:70000/", "https://api.github.com/caf" + Char(233), "1https://api.github.com/"]
+vTexts = ["", "api.github.com/user", "https:/api.github.com", "https://", "https://token:x@api.github.com/", "https://api.github.com@evil.org/", "https://api.github.com /user", "https://api.github.com/a" + Char(10) + "b", "https://api.github.com/a" + Char(92) + "b", "https://[::1]/", "https://[api.github.com]/", "https://api.github.com:port/", "https://api.github.com:0/", "https://api.github.com:70000/", "https://api.github.com/caf" + Char(233), "1https://api.github.com/"]
 for i = 1 to Len(vTexts)
     try
         hAny = sDoors.Endpoint("github", vTexts[i])

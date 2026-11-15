@@ -706,7 +706,6 @@ func HaroEndpointOf(psDoors, ptPeer, ptText)
 	tWhere = Left(tRest, iEnd - 1)
 	tPath = ""
 	if iEnd <= Len(tRest) tPath = SubStr(tRest, iEnd, Len(tRest) - iEnd + 1) end
-	if tWhere = "" Raise(tNo) end
 	if SubStr(tWhere, "@") > 0 or SubStr(tWhere, "[") > 0 or SubStr(tWhere, "]") > 0 Raise(tNo) end
 	tName = tWhere
 	iPort = 0
@@ -718,7 +717,6 @@ func HaroEndpointOf(psDoors, ptPeer, ptText)
 		tName = Left(tWhere, iColon - 1)
 		tDigits = ""
 		if iColon < Len(tWhere) tDigits = SubStr(tWhere, iColon + 1, Len(tWhere) - iColon) end
-		if tDigits = "" or Len(tDigits) > 5 Raise(tNo) end
 		iPort = HaroDigits(tDigits)
 		if iPort < 1 or iPort > 65535 Raise(tNo) end
 	end
@@ -769,7 +767,7 @@ func HaroDigits(ptDigits)
 	return iValue
 end
 
-# an address as four plain numbers, each 0 to 255 with no zero before it: the four, or an empty vector
+# an address as plain numbers between dots, each 0 to 255 with no zero before it: the numbers, or an empty vector
 func HaroFourNumbers(ptAddress)
 	vParts = []
 	tPart = ""
@@ -784,7 +782,6 @@ func HaroFourNumbers(ptAddress)
 		vParts + iPart
 		tPart = ""
 	end
-	if Len(vParts) != 4 return [] end
 	return vParts
 end
 

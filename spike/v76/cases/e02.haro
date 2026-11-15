@@ -1,7 +1,9 @@
 load "doors.haro"
 sDoors = doors'DEFINE PEER github AS (HOST "api.github.com", SCHEMES [https]) RATIONALE "where releases are read from"
 DEFINE PEER db AS (HOST "db.internal", SCHEMES [tcp], PORT 5432) RATIONALE "the database of this program"
-DEFINE PEER site AS (HOST "example.org", SCHEMES [https, http]) RATIONALE "a site reached either way"'
+DEFINE PEER site AS (HOST "example.org", SCHEMES [https, http]) RATIONALE "a site reached either way"
+DEFINE PEER plain AS (HOST "plain.example.org") RATIONALE "a peer that lists no scheme is reached by https"'
+print sDoors.Endpoint("plain", "https://plain.example.org/")
 print sDoors.Endpoint("github", "HTTPS://API.GitHub.com/Repos/Haro")
 print sDoors.Endpoint("github", "https://api.github.com:443/user")
 print sDoors.Endpoint("github", "https://api.github.com")

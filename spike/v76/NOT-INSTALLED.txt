@@ -1,0 +1,6 @@
+Haro v0.76, the peer and the endpoint, is built and stands in runtime/v77/build and runtime/v77/build-safe.
+The shared runtime, vm/zig-out, is v0.74: it takes this rung with v0.75, after their notice, when stzlib's desk says its lines
+that build a command line are converted (CHARTER D92).
+
+While this file stands, the guard runs this rung's stage on the builds HARO_VM and HARO_TWIN name, and says so by name on the
+installed runtime. The file is taken out with the install.

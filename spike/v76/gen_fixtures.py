@@ -38,6 +38,7 @@ GITHUB = 'DEFINE PEER github AS (HOST "api.github.com", SCHEMES [https]) RATIONA
 DB = 'DEFINE PEER db AS (HOST "db.internal", SCHEMES [tcp], PORT 5432) RATIONALE "the database of this program"'
 LAN = 'DEFINE PEER lan AS (NET "10.9.0.0/16", SCHEMES [http], PORT 8080) RATIONALE "the machines of the house"'
 BOTH = 'DEFINE PEER site AS (HOST "example.org", SCHEMES [https, http]) RATIONALE "a site reached either way"'
+PLAIN = 'DEFINE PEER plain AS (HOST "plain.example.org") RATIONALE "a peer that lists no scheme is reached by https"'
 
 
 def said(code, message):
@@ -81,7 +82,9 @@ print hApi.Url()
 case('E02', 'L2', 'the address made plain: small letters for the scheme and the host, the scheme\'s own port left out, the path as given', f'''load "doors.haro"
 sDoors = doors'{GITHUB}
 {DB}
-{BOTH}'
+{BOTH}
+{PLAIN}'
+print sDoors.Endpoint("plain", "https://plain.example.org/")
 print sDoors.Endpoint("github", "HTTPS://API.GitHub.com/Repos/Haro")
 print sDoors.Endpoint("github", "https://api.github.com:443/user")
 print sDoors.Endpoint("github", "https://api.github.com")
@@ -90,19 +93,22 @@ print sDoors.Endpoint("db", "tcp://db.internal")
 print sDoors.Endpoint("db", "tcp://db.internal").Port()
 print sDoors.Endpoint("site", "http://example.org/a#b")
 print sDoors.Endpoint("site", "http://example.org/a#b").Port()
-''', {'stdout': 'https://api.github.com/Repos/Haro\nhttps://api.github.com/user\nhttps://api.github.com\ntcp://db.internal:5432\ntcp://db.internal:5432\n5432\nhttp://example.org/a#b\n80\n'})
+''', {'stdout': 'https://plain.example.org/\nhttps://api.github.com/Repos/Haro\nhttps://api.github.com/user\nhttps://api.github.com\ntcp://db.internal:5432\ntcp://db.internal:5432\n5432\nhttp://example.org/a#b\n80\n'})
 
 BS = 'Char(92)'
+# CHANGED AFTER THE CODE, when the plants were written: the backslash stood beside an `@`, which is refused by itself, so the rule of
+# the backslash had no case of its own; it stands alone now, in the path. And E02 gained a peer that lists no scheme.
+# And a host in brackets that holds no colon: the bracket's rule was answered by the port's for `[::1]`.
 case('E03', 'L3', 'an address that is no address is ENDPOINT_FORM', tries(GITHUB, 'github', [
     '""', '"api.github.com/user"', '"https:/api.github.com"', '"https://"', '"https://token:x@api.github.com/"', '"https://api.github.com@evil.org/"',
-    '"https://api.github.com /user"', '"https://api.github.com/a" + Char(10) + "b"', '"https://api.github.com" + ' + BS + ' + "@evil.org/"',
-    '"https://[::1]/"', '"https://api.github.com:port/"', '"https://api.github.com:0/"', '"https://api.github.com:70000/"',
+    '"https://api.github.com /user"', '"https://api.github.com/a" + Char(10) + "b"', '"https://api.github.com/a" + ' + BS + ' + "b"',
+    '"https://[::1]/"', '"https://[api.github.com]/"', '"https://api.github.com:port/"', '"https://api.github.com:0/"', '"https://api.github.com:70000/"',
     '"https://api.github.com/caf" + Char(233)', '"1https://api.github.com/"']) + '''try
     hAny = sDoors.Endpoint("github", "api.github.com/user")
 catch e
     print e.Message()
 end
-''', {'stdout': 'ENDPOINT_FORM\n' * 15 + said('ENDPOINT_FORM', '`api.github.com/user` is no address a peer is reached at') + '\n'})
+''', {'stdout': 'ENDPOINT_FORM\n' * 16 + said('ENDPOINT_FORM', '`api.github.com/user` is no address a peer is reached at') + '\n'})
 
 case('E04', 'L4', 'a host that is not the peer\'s is ENDPOINT_HOST, whatever it holds or ends with', tries(GITHUB, 'github', [
     '"https://evil.org/"', '"https://api.github.com.evil.org/"', '"https://evilapi.github.com/"', '"https://uploads.api.github.com/"',

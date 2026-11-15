@@ -33,7 +33,7 @@
    "what": "the address made plain: small letters for the scheme and the host, the scheme's own port left out, the path as given",
    "file": "cases/e02.haro",
    "run": {
-    "stdout": "https://api.github.com/Repos/Haro\nhttps://api.github.com/user\nhttps://api.github.com\ntcp://db.internal:5432\ntcp://db.internal:5432\n5432\nhttp://example.org/a#b\n80\n"
+    "stdout": "https://plain.example.org/\nhttps://api.github.com/Repos/Haro\nhttps://api.github.com/user\nhttps://api.github.com\ntcp://db.internal:5432\ntcp://db.internal:5432\n5432\nhttp://example.org/a#b\n80\n"
    }
   },
   {
@@ -42,7 +42,7 @@
    "what": "an address that is no address is ENDPOINT_FORM",
    "file": "cases/e03.haro",
    "run": {
-    "stdout": "ENDPOINT_FORM\nENDPOINT_FORM\nENDPOINT_FORM\nENDPOINT_FORM\nENDPOINT_FORM\nENDPOINT_FORM\nENDPOINT_FORM\nENDPOINT_FORM\nENDPOINT_FORM\nENDPOINT_FORM\nENDPOINT_FORM\nENDPOINT_FORM\nENDPOINT_FORM\nENDPOINT_FORM\nENDPOINT_FORM\nError (ENDPOINT_FORM) : `api.github.com/user` is no address a peer is reached at\n"
+    "stdout": "ENDPOINT_FORM\nENDPOINT_FORM\nENDPOINT_FORM\nENDPOINT_FORM\nENDPOINT_FORM\nENDPOINT_FORM\nENDPOINT_FORM\nENDPOINT_FORM\nENDPOINT_FORM\nENDPOINT_FORM\nENDPOINT_FORM\nENDPOINT_FORM\nENDPOINT_FORM\nENDPOINT_FORM\nENDPOINT_FORM\nENDPOINT_FORM\nError (ENDPOINT_FORM) : `api.github.com/user` is no address a peer is reached at\n"
    }
   },
   {

@@ -4239,6 +4239,55 @@ def stage80():
     return 0
 
 
+ENDPOINT_COURT = os.path.join(HERE, 'v76', 'endpoint_court.py')
+
+
+def stage81():
+    """Haro v0.76, the peer and the endpoint (doc/DOORS.md rung 3, D88 (e), D93; v76/GRAMMAR.md): a sentence of doors declares peers and
+    judges an address into an endpoint; no door of the VM changes. v76/endpoint_court.py on haro and its checked build."""
+    # built and not installed (see stage 80): on the installed runtime the stage says so by name; on builds HARO_VM names it runs
+    marker = os.path.join(HERE, 'v76', 'NOT-INSTALLED.txt')
+    if os.path.exists(marker) and not os.environ.get('HARO_VM'):
+        print('stage 81 -- NOT RUN on the installed runtime: v0.76 is built and not installed (spike/v76/NOT-INSTALLED.txt). '
+              'It runs on runtime/v77/build and build-safe, named by HARO_VM and HARO_TWIN')
+        return 0
+    print('stage 81 -- the peer and the endpoint: v76/endpoint_court.py on haro and its checked build')
+    p = subprocess.run([sys.executable, ENDPOINT_COURT] + (['--plant'] if PLANT else []), capture_output=True, cwd=HERE, timeout=900)
+    out = p.stdout.decode('utf-8', 'replace').replace(chr(13) + chr(10), chr(10))
+    for line in out.splitlines():
+        if line.startswith(('  FAIL', '       ', 'ENDPOINT COURT')):
+            print(line)
+    if p.returncode != 0:
+        print(f'  FAIL the endpoint court exited {p.returncode}' + ('' if out.strip() else ': ' + p.stderr.decode('utf-8', 'replace')[-400:]))
+        return 1
+    return 0
+
+
+FINDINGS_COURT = os.path.join(HERE, 'v77', 'findings_court.py')
+
+
+def stage82():
+    """Haro v0.77, three findings of the desks (D94; v77/GRAMMAR.md): a definition's header stands alone on one line; a program run
+    from its kept image is the program a fresh compile runs; `haro graph` names a call by a name built when the program runs.
+    v77/findings_court.py on haro and its checked build."""
+    # built and not installed (see stage 80): on the installed runtime the stage says so by name; on builds HARO_VM names it runs
+    marker = os.path.join(HERE, 'v77', 'NOT-INSTALLED.txt')
+    if os.path.exists(marker) and not os.environ.get('HARO_VM'):
+        print('stage 82 -- NOT RUN on the installed runtime: v0.77 is built and not installed (spike/v77/NOT-INSTALLED.txt). '
+              'It runs on runtime/v77/build and build-safe, named by HARO_VM and HARO_TWIN')
+        return 0
+    print('stage 82 -- three findings of the desks: v77/findings_court.py on haro and its checked build')
+    p = subprocess.run([sys.executable, FINDINGS_COURT] + (['--plant'] if PLANT else []), capture_output=True, cwd=HERE, timeout=900)
+    out = p.stdout.decode('utf-8', 'replace').replace(chr(13) + chr(10), chr(10))
+    for line in out.splitlines():
+        if line.startswith(('  FAIL', '       ', 'FINDINGS COURT')):
+            print(line)
+    if p.returncode != 0:
+        print(f'  FAIL the findings court exited {p.returncode}' + ('' if out.strip() else ': ' + p.stderr.decode('utf-8', 'replace')[-400:]))
+        return 1
+    return 0
+
+
 PORT_COURT = os.path.join(os.path.dirname(HERE), 'port', 'port_court.py')
 
 
@@ -4512,5 +4561,9 @@ if __name__ == '__main__':
         failures += stage79()
     if stage in (None, 80) and os.path.exists(LINE_COURT):
         failures += stage80()
+    if stage in (None, 81) and os.path.exists(ENDPOINT_COURT):
+        failures += stage81()
+    if stage in (None, 82) and os.path.exists(FINDINGS_COURT):
+        failures += stage82()
     print(f'haro_forge: {"FAIL" if failures else "PASS"} ({failures} failure(s), {time.perf_counter()-t0:.1f} s)')
     sys.exit(1 if failures else 0)
