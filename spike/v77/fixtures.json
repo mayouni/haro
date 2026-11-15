@@ -156,6 +156,65 @@
     "stdout": "FILE|f10.haro\nFUNC|Hello|1\nFUNC|Go|4\nCALL|<top>|Go|static\nCALL|Go|Hello|static\n"
    },
    "kind": "graph"
+  },
+  {
+   "id": "F11",
+   "line": "L3",
+   "what": "a name holds `@`, and starts with it: the header ends where the name ends",
+   "file": "cases/f11.haro",
+   "run": {
+    "stdout": "true\n2\ntext:a\n42\n0\n"
+   },
+   "check": {
+    "errors": 0,
+    "found": []
+   }
+  },
+  {
+   "id": "F12",
+   "line": "L1",
+   "what": "a statement after the header of a name that starts with `@`",
+   "file": "cases/f12.haro",
+   "run": {
+    "refuses": [
+     2,
+     "a definition's body starts on the line after its header; written",
+     "@Twice"
+    ],
+    "never": "before"
+   },
+   "check": {
+    "errors": 1,
+    "found": [
+     [
+      2,
+      "haro/refused-form"
+     ]
+    ]
+   }
+  },
+  {
+   "id": "F13",
+   "line": "L1",
+   "what": "a statement after the header of a name that holds `@`: the refusal writes the name whole",
+   "file": "cases/f13.haro",
+   "run": {
+    "refuses": [
+     2,
+     "a definition's body starts on the line after its header; written",
+     "Stz@"
+    ],
+    "never": "before"
+   },
+   "check": {
+    "errors": 1,
+    "found": [
+     [
+      2,
+      "haro/refused-form"
+     ]
+    ]
+   }
   }
  ]
 }

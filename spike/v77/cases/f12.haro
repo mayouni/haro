@@ -1,0 +1,4 @@
+print "before"
+func @Twice(iN) return iN * 2
+end
+print @Twice(7)

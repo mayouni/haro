@@ -161,6 +161,53 @@ end
 Go()
 ''', {'stdout': 'FILE|f10.haro\nFUNC|Hello|1\nFUNC|Go|4\nCALL|<top>|Go|static\nCALL|Go|Hello|static\n'}, kind='graph')
 
+# Added 2026-11-16, after the court spoke and before the fix: the count on stzlib's files found that the header's rule ended a
+# name at its first byte that is no letter, digit or underscore. A name holds `@` (497 of stzlib's definitions write one after
+# their first word), and a name that starts with `@` was not looked at. The three cases below say both.
+case('F11', 'L3', 'a name holds `@`, and starts with it: the header ends where the name ends', """class Box
+    iSide = 2
+
+    def Is@(iWanted)
+        return iSide = iWanted
+    end
+
+    def @Side
+        return iSide
+    end
+end
+
+func Stz@(tType, tGiven)
+    return tType + ":" + tGiven
+end
+
+func @Twice(iN) maybe      # a name that starts with the mark
+    if iN = 0 return none end
+    return iN * 2
+end
+
+func Main
+    oBox = new Box
+    print oBox.Is@(2)
+    print oBox.@Side()
+    print Stz@("text", "a")
+    print @Twice(21) else 0
+    print @Twice(0) else 0
+end
+""", {'stdout': 'true\n2\ntext:a\n42\n0\n'}, check={'errors': 0, 'found': []})
+
+case('F12', 'L1', 'a statement after the header of a name that starts with `@`', """print "before"
+func @Twice(iN) return iN * 2
+end
+print @Twice(7)
+""", {'refuses': [2, ONELINE, '@Twice'], 'never': 'before'}, check={'errors': 1, 'found': [[2, RULE]]})
+
+case('F13', 'L1', 'a statement after the header of a name that holds `@`: the refusal writes the name whole', """print "before"
+func Stz@(tType) print "hit"
+    return tType
+end
+print Stz@("a")
+""", {'refuses': [2, ONELINE, 'Stz@'], 'never': 'before'}, check={'errors': 1, 'found': [[2, RULE]]})
+
 doc = {'version': '0.77', 'task': 'three findings of the desks: HARO-SIGLINE-01, HARO-IMAGE-EVAL-LENIENT-01, HARO-GRAPH-LATECALL-01', 'cases': cases}
 with open(os.path.join(HERE, 'fixtures.json'), 'w', encoding='utf-8', newline='\n') as f:
     json.dump(doc, f, indent=1, ensure_ascii=False)

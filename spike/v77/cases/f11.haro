@@ -1,0 +1,29 @@
+class Box
+    iSide = 2
+
+    def Is@(iWanted)
+        return iSide = iWanted
+    end
+
+    def @Side
+        return iSide
+    end
+end
+
+func Stz@(tType, tGiven)
+    return tType + ":" + tGiven
+end
+
+func @Twice(iN) maybe      # a name that starts with the mark
+    if iN = 0 return none end
+    return iN * 2
+end
+
+func Main
+    oBox = new Box
+    print oBox.Is@(2)
+    print oBox.@Side()
+    print Stz@("text", "a")
+    print @Twice(21) else 0
+    print @Twice(0) else 0
+end

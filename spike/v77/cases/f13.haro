@@ -1,0 +1,5 @@
+print "before"
+func Stz@(tType) print "hit"
+    return tType
+end
+print Stz@("a")
