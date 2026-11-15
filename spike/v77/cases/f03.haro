@@ -1,0 +1,7 @@
+class Box
+    iSide = 2
+
+    def Twice(iTimes) return iSide * iTimes
+    end
+end
+print "before"

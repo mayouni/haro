@@ -1,0 +1,7 @@
+tCode = "v = [:name = 5]"
+try
+    Eval(tCode)
+    print "evaluated"
+catch e
+    print e.Message()
+end

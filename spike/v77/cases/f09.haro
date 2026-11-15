@@ -1,0 +1,9 @@
+func Hello
+    print "hi"
+end
+func Go(ptName)
+    call ptName()
+    call ptName()
+    Hello()
+end
+Go("Hello")

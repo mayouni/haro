@@ -1,0 +1,8 @@
+tCode = "x = Len(" + Char(34) + "abc" + Char(34) + ")"
+try
+    Eval(tCode)
+    print "evaluated"
+catch e
+    print e.Message()
+end
+print Eval("return 2 + 3")

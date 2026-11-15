@@ -1,0 +1,7 @@
+func Hello
+    print "hi"
+end
+func Go
+    Hello()
+end
+Go()

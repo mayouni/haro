@@ -1,0 +1,28 @@
+class Shape
+    tName = "shape"
+
+    def Name      # a method with no parameter
+        return tName
+    end
+end
+
+class Square from Shape      # a class and its parent
+    iSide = 3
+
+    def Area(iScale)      # (a comment that holds a parenthesis)
+        return iSide * iSide * iScale
+    end
+end
+
+func Find(iWanted) maybe      # an answer that may be none
+    if iWanted = 1 return "one" end
+    return none
+end
+
+func Main
+    oSquare = new Square
+    print oSquare.Name()
+    print oSquare.Area(2)
+    print Find(1) else "nothing"
+    print Find(2) else "nothing"
+end

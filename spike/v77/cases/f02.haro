@@ -1,0 +1,4 @@
+print "before"
+func Quick(nX) return nX
+end
+print Quick(7)

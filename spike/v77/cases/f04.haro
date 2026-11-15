@@ -1,0 +1,6 @@
+print "before"
+func Label(tName,
+    nNet)
+    return tName
+end
+print Label("a", 1)
