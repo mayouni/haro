@@ -1156,6 +1156,9 @@ pub var place_class: u32 = 0xFFFF_FFFF;
 /// (the program, then each argument, texts), slot 4 whether it is made, slot 5 the folder the child stands in (the empty text
 /// for where this program stands).
 pub var invocation_class: u32 = 0xFFFF_FFFF;
+/// v0.76 (doc/DOORS.md rung 3): the class of an endpoint -- judge_lib.haro's HaroEndpoint. Slot 0 its peer's name, slot 1 its
+/// scheme, slot 2 the address it prints as, slot 3 its host, slot 4 whether it is made, slot 5 its port, slot 6 its path.
+pub var endpoint_class: u32 = 0xFFFF_FFFF;
 pub var sentence_scanned: usize = 0;
 pub fn sentenceClass() u32 {
     if (class_konst.len == sentence_scanned) return sentence_class;
@@ -1163,12 +1166,14 @@ pub fn sentenceClass() u32 {
     sentence_class = 0xFFFF_FFFF;
     place_class = 0xFFFF_FFFF;
     invocation_class = 0xFFFF_FFFF;
+    endpoint_class = 0xFFFF_FFFF;
     for (class_konst, 0..) |ki, ci| {
         if (ki >= konst.len or konst[ki].tag != .str) continue;
         const s = konst[ki].p.s;
         if (std.ascii.eqlIgnoreCase(s.ptr[0..s.len], "harosentence")) sentence_class = @intCast(ci);
         if (std.ascii.eqlIgnoreCase(s.ptr[0..s.len], "haroplace")) place_class = @intCast(ci);
         if (std.ascii.eqlIgnoreCase(s.ptr[0..s.len], "haroinvocation")) invocation_class = @intCast(ci);
+        if (std.ascii.eqlIgnoreCase(s.ptr[0..s.len], "haroendpoint")) endpoint_class = @intCast(ci);
     }
     return sentence_class;
 }
@@ -1197,6 +1202,15 @@ fn invocationFixed(o: *Obj) bool {
     return o.class == invocation_class and o.nslots > 4 and o.slots[4].tag == .boolean and o.slots[4].p.i != 0;
 }
 const INVOCATION_FIXED = "Error (INVOCATION_FIXED) : an invocation is not written into -- its arguments are judged again by its command";
+pub fn isEndpoint(v: Value) bool {
+    _ = sentenceClass();
+    return v.tag == .obj and v.p.o.class == endpoint_class;
+}
+fn endpointFixed(o: *Obj) bool {
+    _ = sentenceClass();
+    return o.class == endpoint_class and o.nslots > 4 and o.slots[4].tag == .boolean and o.slots[4].p.i != 0;
+}
+const ENDPOINT_FIXED = "Error (ENDPOINT_FIXED) : an endpoint is not written into -- its address is judged again by its peer";
 /// Per class, its parent's id, 0xFFFF for none; per function id, the class
 /// that defines it, 0xFFFF for a plain function. For reflection: `methods`,
 /// `ismethod`, `addmethod` (2026-09-23).
@@ -4616,7 +4630,7 @@ pub const VM = struct {
             },
             .obj => {
                 // v0.70: a sentence prints as its text
-                if ((isSentence(v) or isPlace(v) or isInvocation(v)) and v.p.o.nslots > 2 and v.p.o.slots[2].tag == .str) {
+                if ((isSentence(v) or isPlace(v) or isInvocation(v) or isEndpoint(v)) and v.p.o.nslots > 2 and v.p.o.slots[2].tag == .str) {
                     const st = v.p.o.slots[2].p.s;
                     outPrint("{s}{s}", .{ st.ptr[0..st.len], end });
                     return;
@@ -9697,7 +9711,8 @@ pub const VM = struct {
                     'r' => v.tag == .obj and v.p.o.rec != 0,
                     // v0.72 (doc/DOORS.md 3.4): a place is a handle of the filesystem, held before the door is opened
                     // v0.73: and an invocation, a handle of the process door
-                    'h' => v.tag == .cptr or v.tag == .dll or isPlace(v) or isInvocation(v),
+                    // v0.76: and an endpoint, a handle of the network door
+                    'h' => v.tag == .cptr or v.tag == .dll or isPlace(v) or isInvocation(v) or isEndpoint(v),
                     'e' => v.tag == .str and v.p.s.err != 0,
                     // v0.70 (TYPES.md T7): a sentence, which only its court makes
                     's' => isSentence(v),
@@ -9852,6 +9867,10 @@ pub const VM = struct {
                 }
                 if (aop == .sattrn and invocationFixed(o)) {
                     self.pending = INVOCATION_FIXED;
+                    continue :dispatch .raise;
+                }
+                if (aop == .sattrn and endpointFixed(o)) {
+                    self.pending = ENDPOINT_FIXED;
                     continue :dispatch .raise;
                 }
                 const nidx: u32 = @intCast(in.d);

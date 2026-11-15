@@ -6793,7 +6793,9 @@ pub const Compiler = struct {
         const a_place = std.ascii.eqlIgnoreCase(ci.name, "haroplace");
         // v0.73: and an invocation likewise
         const an_invocation = std.ascii.eqlIgnoreCase(ci.name, "haroinvocation");
-        if (a_place or an_invocation or std.ascii.eqlIgnoreCase(ci.name, "harosentence")) {
+        // v0.76: and an endpoint
+        const an_endpoint = std.ascii.eqlIgnoreCase(ci.name, "haroendpoint");
+        if (a_place or an_invocation or an_endpoint or std.ascii.eqlIgnoreCase(ci.name, "harosentence")) {
             const fi = self.fileOf(n.src.ptr);
             const own = if (fi) |f| f < load_paths.len and std.ascii.eqlIgnoreCase(std.fs.path.basename(load_paths[f]), "judge_lib.haro") else false;
             if (!own) {
@@ -6801,6 +6803,8 @@ pub const Compiler = struct {
                     "a place is made by its judge -- <doors>.Place(root, text); written"
                 else if (an_invocation)
                     "an invocation is made by its judge -- <doors>.Invocation(command, arguments); written"
+                else if (an_endpoint)
+                    "an endpoint is made by its judge -- <doors>.Endpoint(peer, text); written"
                 else
                     "a sentence is made by its court -- <language>.Judge(text); written");
                 _ = try self.emit(.loadk, dst, 0, 0, try self.konstIndex("\"\""));
