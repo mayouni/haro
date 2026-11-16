@@ -237,6 +237,29 @@
      ]
     ]
    }
+  },
+  {
+   "id": "F15",
+   "line": "L1",
+   "what": "names and commas after a parameter list are a statement on the header's line",
+   "file": "cases/f15.haro",
+   "run": {
+    "refuses": [
+     2,
+     "a definition's body starts on the line after its header; written",
+     "Pair"
+    ],
+    "never": "before"
+   },
+   "check": {
+    "errors": 1,
+    "found": [
+     [
+      2,
+      "haro/refused-form"
+     ]
+    ]
+   }
   }
  ]
 }

@@ -219,6 +219,14 @@ func Add iA, iB
 end
 """, {'refuses': [3, PARAMS, 'iA, iB']}, check={'errors': 1, 'found': [[3, RULE]]})
 
+# With F14: names and commas after a parameter list in parentheses are no older parameter list; the header's rule answers.
+case('F15', 'L1', 'names and commas after a parameter list are a statement on the header\'s line', """print "before"
+func Pair(nX) nY, nZ
+    return nX
+end
+print Pair(1)
+""", {'refuses': [2, ONELINE, 'Pair'], 'never': 'before'}, check={'errors': 1, 'found': [[2, RULE]]})
+
 doc = {'version': '0.77', 'task': 'three findings of the desks: HARO-SIGLINE-01, HARO-IMAGE-EVAL-LENIENT-01, HARO-GRAPH-LATECALL-01', 'cases': cases}
 with open(os.path.join(HERE, 'fixtures.json'), 'w', encoding='utf-8', newline='\n') as f:
     json.dump(doc, f, indent=1, ensure_ascii=False)

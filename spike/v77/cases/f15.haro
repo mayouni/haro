@@ -1,0 +1,5 @@
+print "before"
+func Pair(nX) nY, nZ
+    return nX
+end
+print Pair(1)
