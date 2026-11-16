@@ -621,6 +621,25 @@ fn wordByte(b: u8) bool {
     return std.ascii.isAlphanumeric(b) or b == '_';
 }
 
+/// Where a list of names with commas between starts, when src[from..last] is one and nothing else: `from` itself. Any other text
+/// answers `last`. The first name is no keyword, since a keyword there starts a statement.
+fn bareList(src: []const u8, from: usize, last: usize) usize {
+    var g = from;
+    var names: u32 = 0;
+    while (true) {
+        const s0 = g;
+        while (g < last and nameByte(src[g])) g += 1;
+        if (g == s0) return last;
+        if (names == 0 and (ringKeyword(src[s0..g]) or std.mem.eql(u8, src[s0..g], "print") or std.mem.eql(u8, src[s0..g], "maybe"))) return last;
+        names += 1;
+        while (g < last and (src[g] == ' ' or src[g] == '\t')) g += 1;
+        if (g == last) return from;
+        if (src[g] != ',') return last;
+        g += 1;
+        while (g < last and (src[g] == ' ' or src[g] == '\t')) g += 1;
+    }
+}
+
 const Braced = struct { text: []const u8, inserts: []const Insert };
 
 /// A .haro file read once, its definitions already in braces (v0.56): the load path's parse, so a file is never parsed twice
@@ -813,7 +832,8 @@ fn bracesText(alloc: std.mem.Allocator, src: []const u8, name: []const u8) ?Brac
             if (!rec and ne > k and (eq(w, "func") or eq(w, "def"))) {
                 var h = ne;
                 while (h < last and (src[h] == ' ' or src[h] == '\t')) h += 1;
-                if (h < last and src[h] == '(') {
+                const listed = h < last and src[h] == '(';
+                if (listed) {
                     var depth: u32 = 0;
                     var closed = false;
                     while (h < last) : (h += 1) {
@@ -837,6 +857,10 @@ fn bracesText(alloc: std.mem.Allocator, src: []const u8, name: []const u8) ?Brac
                         break :scan;
                     }
                 }
+                // Names with commas between and no parentheses are a parameter list written the older way: the refusal that
+                // names it (v0.55, a definition's parameters stand in parentheses) is the compiler's, said where the function
+                // is called, and stays. A first word that is a keyword starts a statement.
+                if (!listed and h < last and h == bareList(src, h, last)) h = last;
                 while (h < last and (src[h] == ' ' or src[h] == '\t')) h += 1;
                 if (h + 5 <= last and eq(src[h .. h + 5], "maybe") and (h + 5 == last or !wordByte(src[h + 5]))) h += 5;
                 while (h < last and (src[h] == ' ' or src[h] == '\t')) h += 1;
