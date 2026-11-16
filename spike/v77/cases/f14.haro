@@ -1,0 +1,5 @@
+print "before"
+print Add(1, 2)
+func Add iA, iB
+    return iA + iB
+end

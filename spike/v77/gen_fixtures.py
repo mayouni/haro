@@ -208,6 +208,17 @@ end
 print Stz@("a")
 """, {'refuses': [2, ONELINE, 'Stz@'], 'never': 'before'}, check={'errors': 1, 'found': [[2, RULE]]})
 
+# Added 2026-11-16, after the guard spoke: stage 60's O26 (v0.55) failed on the build of ee8416a. Parameters written without
+# parentheses have had their own refusal since v0.55, said where the function is called; the header's rule answered first, in
+# other words. The case says the older refusal stays.
+PARAMS = "a definition's parameters stand in parentheses; written"
+case('F14', 'L3', 'parameters written without parentheses keep the refusal that names them', """print "before"
+print Add(1, 2)
+func Add iA, iB
+    return iA + iB
+end
+""", {'refuses': [3, PARAMS, 'iA, iB']}, check={'errors': 1, 'found': [[3, RULE]]})
+
 doc = {'version': '0.77', 'task': 'three findings of the desks: HARO-SIGLINE-01, HARO-IMAGE-EVAL-LENIENT-01, HARO-GRAPH-LATECALL-01', 'cases': cases}
 with open(os.path.join(HERE, 'fixtures.json'), 'w', encoding='utf-8', newline='\n') as f:
     json.dump(doc, f, indent=1, ensure_ascii=False)

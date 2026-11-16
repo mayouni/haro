@@ -215,6 +215,28 @@
      ]
     ]
    }
+  },
+  {
+   "id": "F14",
+   "line": "L3",
+   "what": "parameters written without parentheses keep the refusal that names them",
+   "file": "cases/f14.haro",
+   "run": {
+    "refuses": [
+     3,
+     "a definition's parameters stand in parentheses; written",
+     "iA, iB"
+    ]
+   },
+   "check": {
+    "errors": 1,
+    "found": [
+     [
+      3,
+      "haro/refused-form"
+     ]
+    ]
+   }
   }
  ]
 }
