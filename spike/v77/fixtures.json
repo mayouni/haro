@@ -260,6 +260,29 @@
      ]
     ]
    }
+  },
+  {
+   "id": "F16",
+   "line": "L1",
+   "what": "the same with no blank after the list",
+   "file": "cases/f16.haro",
+   "run": {
+    "refuses": [
+     2,
+     "a definition's body starts on the line after its header; written",
+     "Pair"
+    ],
+    "never": "before"
+   },
+   "check": {
+    "errors": 1,
+    "found": [
+     [
+      2,
+      "haro/refused-form"
+     ]
+    ]
+   }
   }
  ]
 }

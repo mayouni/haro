@@ -227,6 +227,15 @@ end
 print Pair(1)
 """, {'refuses': [2, ONELINE, 'Pair'], 'never': 'before'}, check={'errors': 1, 'found': [[2, RULE]]})
 
+# Added 2026-11-16 after plant K12 missed: with a blank after the list F15 is answered whether or not the reading of F14 stops
+# at a parenthesised list. Written with no blank, only that stop refuses it.
+case('F16', 'L1', 'the same with no blank after the list', """print "before"
+func Pair(nX)nY, nZ
+    return nX
+end
+print Pair(1)
+""", {'refuses': [2, ONELINE, 'Pair'], 'never': 'before'}, check={'errors': 1, 'found': [[2, RULE]]})
+
 doc = {'version': '0.77', 'task': 'three findings of the desks: HARO-SIGLINE-01, HARO-IMAGE-EVAL-LENIENT-01, HARO-GRAPH-LATECALL-01', 'cases': cases}
 with open(os.path.join(HERE, 'fixtures.json'), 'w', encoding='utf-8', newline='\n') as f:
     json.dump(doc, f, indent=1, ensure_ascii=False)

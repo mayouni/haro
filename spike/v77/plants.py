@@ -43,7 +43,7 @@ PLANTS = [
      [('            while (ne < last and nameByte(src[ne])) ne += 1;\n', '            while (ne < last and wordByte(src[ne])) ne += 1;\n')]),
     ('K11', 'F14', 'parameters without parentheses are answered by the header\'s rule', LIFT,
      [('                if (!listed and h < last and h == bareList(src, h, last)) h = last;\n', '')]),
-    ('K12', 'F15', 'names and commas after a parameter list in parentheses are read as an older parameter list', LIFT,
+    ('K12', 'F16', 'names and commas after a parameter list in parentheses are read as an older parameter list', LIFT,
      [('                if (!listed and h < last and h == bareList(src, h, last)) h = last;\n',
        '                if (h < last and h == bareList(src, h, last)) h = last;\n')]),
     ('K10', 'F13', 'the refusal writes the name to its first `@`', LIFT,
