@@ -1917,6 +1917,14 @@ D58, the Principal's ruling of 2026-11-09 ("ParentClassName"), revising v0.42's 
 
 **Results.** 9 of 9 cases on both builds; 5 of 5 plants; v36 to v48's courts green. Haro's 2,172 calls re-spelled by a tool (20fc236, listed in v20/tool_commits.txt).
 
+## The seventy-seventh rung -- Haro v0.77, three findings of the desks -- 2026-11-16
+
+D94: a function's or a method's header stands alone on one line -- a statement after it on that line and a parameter list over two lines are refused when compiling, where both were read as something else in silence (HARO-SIGLINE-01); a program run from its kept image is the program a fresh compile runs, `Eval` reading its text by the same rules (HARO-IMAGE-EVAL-LENIENT-01); `haro graph` prints `CALL|<caller>|*|late|<n>` for a call by a built name (HARO-GRAPH-LATECALL-01). A definition's name is read to its end, `@` with it: the count on stzlib asked for it before any install (f019780, ee8416a); parameters written without parentheses keep the refusal of v0.55, which the guard asked for (41978e1, 0867d4c, 83d2d99, d50ae85). 16 of 16 on both builds, 12 plants (966e123, ee5b871, ee8416a, 83d2d99).
+
+## The seventy-sixth rung -- Haro v0.76, the peer and the endpoint -- 2026-11-15
+
+D93, `doc/DOORS.md` rung 3: a sentence of doors declares peers -- HOST a name or NET a prefix, SCHEMES, PORT -- and `sDoors.Endpoint(peer, text)` judges an address into an endpoint, held by an `h` name, or refuses (PEER_UNKNOWN, ENDPOINT_FORM, ENDPOINT_SCHEME, ENDPOINT_HOST, ENDPOINT_PORT, ENDPOINT_NO_DOORS). No door of the VM changes: the network's door is the engine's. 12 of 12 on both builds, 32 plants (b1962e1, ab32ec2, ee5b871).
+
 ## The seventy-fifth rung -- Haro v0.75, a command line is not built as text -- 2026-11-14
 
 D92, D88 (d): in a `.haro` file `System` and `SystemCmd` take a text written at the call, or an invocation; a text joined with anything else, or a name lettered as a text, is refused when compiling, and a text that reaches the door another way is COMMAND_LINE_BUILT when the program runs. Haro's own run of a program, in `n_lib.haro`, is an invocation; a court's main runs when the court is the program; a sentence of doors is read once. 10 of 10 on both builds, 14 plants (55cabe9, a550430). The shared runtime takes it when stzlib's 11 lines are converted.
