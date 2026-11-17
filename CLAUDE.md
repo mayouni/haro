@@ -588,8 +588,8 @@ Each `%NAME%` in this file is a folder of this machine; its value is in `.centra
   joined as 1 or 0); `.haro` code keeps `true` and `false`. Proof in Haro is RULED (D81, `doc/PROOF.md`): the court is the kernel; three verdicts; nothing built.
   **v0.69 is built** (D82, HF-175, stage 74): `haro check` names what the run refuses -- each statement the compiler refused is an
   error, `haro/refused-form`, at the run's line and in its words; in a `.haro` file a definition closed by `end` holds nothing after it.
-  The engine at %HAROENGINE% is built from stzlib f939470a5 (2026-11-13: all 92 domains; the credential broker, the shut list, text
-  direction); a refresh is built with `engine/build_engine.py --staging` first, announced, and the shared folder changes after its notice.
+  The engine at %HAROENGINE% is built from stzlib 448013c92 (2026-11-17: all 92 domains; the security plane's process boundary, the
+  file replace and tree delete, the Whisper builtins); a refresh is built with `engine/build_engine.py --staging` first, announced, and the shared folder changes after its notice.
   The spellings of judged types are DECIDED (D83, on the Principal's "Decide for me..."; delegated): `load` of a declaration, `panel.Judge(tText)`,
   the literal `panel"..."`, `psRule of panel`, `unjudged` after a header and before a parameter; no word reserved; three rungs. Nothing built.
   **The selection of Haro's spellings is this desk's** (D84, the Principal 2026-11-13: "I delegate to to full taks of spelling selection"): chosen
@@ -623,8 +623,9 @@ Each `%NAME%` in this file is a folder of this machine; its value is in `.centra
   lines, is refused when compiling); a program run from its kept image reads `Eval`'s text as a fresh compile does; `haro graph`
   prints `CALL|<caller>|*|late|<n>`. **The shared haro.exe is v0.74**: v0.75, v0.76 and v0.77 are in `runtime/v77/build` and
   `build-safe`, and are installed together, after their notice, when `haro check` of that build names no built command
-  line in stzlib's `.haro` files -- 36 statements in 13 files on its main 1d63b0f97, 28 of them the security plane's
-  (HARO-CMDLINE-SURFACE-01); its general desk's 11 lines are converted.
+  line in stzlib's `.haro` files (HARO-CMDLINE-SURFACE-01): 4 statements in 3 files are left on its main c3880c267 --
+  `_measure_ready.haro`, `codebench/local.haro`, `door/door.haro` -- of 36 in 13 files on 2026-11-16, the security plane's 30,
+  the GPU guard's 2 and, before them, the general desk's 11 being converted.
   Next: DOORS.md's rungs 4 and 5 -- `unjudged` whole, `of` on attributes; then the seat types; then `uses` and `total`.
 - D43 is the twin-court clause. Of BLOCKS.md's four questions: Q-B1 is built (`?` is C6, and `OPTIONAL` sees it in a rule); Q-B2's two amendments are refused by name until Ringua's text
   lands; Q-B3 the block export of a program is not started; Q-B4 the round-trip court the elders waited for exists -- asking their owners is Central's.
