@@ -60,7 +60,7 @@ def sh(exe, args, cwd, extra=None, mb=0, cache=None):
     if mb:
         cmd = [sys.executable, LIMIT, str(mb)] + cmd
     try:
-        r = subprocess.run(cmd, capture_output=True, env=env, timeout=300, cwd=cwd)
+        r = subprocess.run(cmd, capture_output=True, env=env, timeout=90, cwd=cwd)
     except subprocess.TimeoutExpired:
         return 'TIMEOUT', '', -1
     out = r.stdout.decode('utf-8', 'replace').replace('\r\n', '\n')
