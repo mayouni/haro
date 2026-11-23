@@ -37,7 +37,7 @@ before its code, and every protection is switched off in turn to show the court 
       PROOF.md         proof in Haro: the court is the kernel, three verdicts, the order of its rungs
       DOORS.md         what a door takes: a place, an endpoint or an invocation, judged against a program's declared roots, peers and commands
       SPIKE.md         every rung, one section each, and what comes next
-      FINDINGS.md      HF-1 to HF-183, each one measured
+      FINDINGS.md      HF-1 to HF-184, each one measured
       CODEGRAPH.md     the code-graph memo;  BLOCKS.md  one format and pattern rules
     vm/NOTES.md      the VM and its compiler
     spike/           the meta-court, the forge, the courts, each rung's fixtures and grammar
