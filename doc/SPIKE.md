@@ -1919,7 +1919,7 @@ D58, the Principal's ruling of 2026-11-09 ("ParentClassName"), revising v0.42's 
 
 ## The seventy-eighth rung -- Haro v0.78, three more findings of the desks -- 2026-11-23
 
-D95: a compile that fails ends haro.exe with 1 where it ended with 0 (HARO-COMPILE-EXIT-01), and a check whose compiler stopped ends with 1; the library compiled once and kept is held by a court -- a run says the path it took (`HARO_PATH`), a root's image is neither used nor written when asked (`HARO_NOIMAGE`), the usage text names `haro prefix` (HARO-LIBIMAGE-01); a declared command's child reads its standard input from a place, `hCall.RunReading(hPlace)` (HARO-INVOCATION-STDIN-01). Read on the installed v0.77 before any code: 5 of 24. 24 of 24 on both builds, 17 plants (6575ee4, 478f772, 9e01ea4, 0f755e7).
+D95: a compile that fails ends haro.exe with 1 where it ended with 0 (HARO-COMPILE-EXIT-01), and a check whose compiler stopped ends with 1; the library compiled once and kept is held by a court -- a run says the path it took (`HARO_PATH`), a root's image is neither used nor written when asked (`HARO_NOIMAGE`), the usage text names `haro prefix` (HARO-LIBIMAGE-01); a declared command's child reads its standard input from a place, `hCall.RunReading(hPlace)` (HARO-INVOCATION-STDIN-01). Read on the installed v0.77 before any code: 5 of 24. 24 of 24 on both builds, 17 plants (6575ee4, 478f772, 9e01ea4, 0f755e7). Installed 2026-11-23 18:12:45 after its notice in ten desks' mailboxes; on the installed builds stages 55, 60 and 80 to 83 pass (15, 30, 10, 12, 16 and 24 cases, each on both).
 
 ## The install of v0.75, v0.76 and v0.77 -- 2026-11-23
 

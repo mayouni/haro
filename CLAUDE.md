@@ -635,8 +635,8 @@ Each `%NAME%` in this file is a folder of this machine; its value is in `.centra
   joined as 1 or 0); `.haro` code keeps `true` and `false`. Proof in Haro is RULED (D81, `doc/PROOF.md`): the court is the kernel; three verdicts; nothing built.
   **v0.69 is built** (D82, HF-175, stage 74): `haro check` names what the run refuses -- each statement the compiler refused is an
   error, `haro/refused-form`, at the run's line and in its words; in a `.haro` file a definition closed by `end` holds nothing after it.
-  The engine at %HAROENGINE% is built from stzlib 8cb11031c (2026-11-23: all 92 domains; the security plane's process boundary, the
-  file replace, tree delete and cache drop, the Whisper builtins); a refresh is built with `engine/build_engine.py --staging` first, announced, and the shared folder changes after its notice.
+  The engine at %HAROENGINE% is built from stzlib c2b930b71 (2026-11-23: all 92 domains; the security plane's process boundary, the
+  file replace, tree delete and cache drop, the Whisper builtins, the GPU's lanes kernel); a refresh is built with `engine/build_engine.py --staging` first, announced, and the shared folder changes after its notice.
   The spellings of judged types are DECIDED (D83, on the Principal's "Decide for me..."; delegated): `load` of a declaration, `panel.Judge(tText)`,
   the literal `panel"..."`, `psRule of panel`, `unjudged` after a header and before a parameter; no word reserved; three rungs. Nothing built.
   **The selection of Haro's spellings is this desk's** (D84, the Principal 2026-11-13: "I delegate to to full taks of spelling selection"): chosen
@@ -670,8 +670,8 @@ Each `%NAME%` in this file is a folder of this machine; its value is in `.centra
   lines, is refused when compiling); a program run from its kept image reads `Eval`'s text as a fresh compile does; `haro graph`
   prints `CALL|<caller>|*|late|<n>`. **The shared haro.exe is v0.77** since 2026-11-23 07:31:32 (haro 83d2d99; HF-184): v0.75,
   v0.76 and v0.77 were installed together once `haro check` named no built command line on stzlib's main (47 statements
-  converted by four of its desks). **v0.78 is built** (D95, HF-185, stage 83) and stands in `runtime/v78/build` and `build-safe`,
-  not installed: a compile that fails ends haro.exe with 1 (HARO-COMPILE-EXIT-01), and so does a check whose compiler stopped;
+  converted by four of its desks). **v0.78 is built and installed** (D95, HF-185, stage 83): the shared haro.exe is v0.78 since
+  2026-11-23 18:12:45 (haro 9e01ea4), its notice written into the mailbox of every desk whose repository tracks `.haro` files. A compile that fails ends haro.exe with 1 (HARO-COMPILE-EXIT-01), and so does a check whose compiler stopped;
   `haro prefix <library>` keeps a library compiled once and a root whose first statement loads it is compiled on top --
   `HARO_PATH=1` makes a run say its path on the standard error (`path: kept image`, `kept library`, `whole`, and why), and
   `HARO_NOIMAGE=1` neither uses nor writes a root's own image (HARO-LIBIMAGE-01); `rRun = hCall.RunReading(hPlace)` gives a
