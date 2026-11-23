@@ -4288,6 +4288,31 @@ def stage82():
     return 0
 
 
+DESKS_COURT = os.path.join(HERE, 'v78', 'desks_court.py')
+
+
+def stage83():
+    """Haro v0.78, three findings of the desks (D95; v78/GRAMMAR.md): a compile that fails ends haro.exe with 1; the library compiled
+    once and kept is held by a court, a run says the path it took and can write no image of its root; a declared command's child
+    reads its standard input from a place. v78/desks_court.py on haro and its checked build."""
+    # built and not installed (see stage 80): on the installed runtime the stage says so by name; on builds HARO_VM names it runs
+    marker = os.path.join(HERE, 'v78', 'NOT-INSTALLED.txt')
+    if os.path.exists(marker) and not os.environ.get('HARO_VM'):
+        print('stage 83 -- NOT RUN on the installed runtime: v0.78 is built and not installed (spike/v78/NOT-INSTALLED.txt). '
+              'It runs on runtime/v78/build and build-safe, named by HARO_VM and HARO_TWIN')
+        return 0
+    print('stage 83 -- three findings of the desks, the second three: v78/desks_court.py on haro and its checked build')
+    p = subprocess.run([sys.executable, DESKS_COURT] + (['--plant'] if PLANT else []), capture_output=True, cwd=HERE, timeout=1800)
+    out = p.stdout.decode('utf-8', 'replace').replace(chr(13) + chr(10), chr(10))
+    for line in out.splitlines():
+        if line.startswith(('  FAIL', '       ', 'DESKS COURT')):
+            print(line)
+    if p.returncode != 0:
+        print(f'  FAIL the desks court exited {p.returncode}' + ('' if out.strip() else ': ' + p.stderr.decode('utf-8', 'replace')[-400:]))
+        return 1
+    return 0
+
+
 PORT_COURT = os.path.join(os.path.dirname(HERE), 'port', 'port_court.py')
 
 
@@ -4565,5 +4590,7 @@ if __name__ == '__main__':
         failures += stage81()
     if stage in (None, 82) and os.path.exists(FINDINGS_COURT):
         failures += stage82()
+    if stage in (None, 83) and os.path.exists(DESKS_COURT):
+        failures += stage83()
     print(f'haro_forge: {"FAIL" if failures else "PASS"} ({failures} failure(s), {time.perf_counter()-t0:.1f} s)')
     sys.exit(1 if failures else 0)
