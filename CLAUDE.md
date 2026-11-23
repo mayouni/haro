@@ -513,7 +513,7 @@ the cut say `haro/X`, `X.ring`, `rnxc` and "the oracle"**: read them as this rep
 
 The records, all in `doc/` (moved from the root 2026-11-13, on the Principal's word: the root holds README, CLAUDE and LICENSE, as in
 every Softanza project; a record named below or in an older text by its bare name is `doc/<name>`): `CHARTER.md` (section 13 the
-decisions, D1 to D94; section 15 the v0.3 amendments), `PRINCIPLES.md`,
+decisions, D1 to D95; section 15 the v0.3 amendments), `PRINCIPLES.md`,
 `GRAMMAR-SKETCH.md`, `FINDINGS.md` (HF-1 to HF-152, each measured), `SPIKE.md` (every rung, one section each, and "Next"),
 `CODEGRAPH.md` (the code-graph memo), `TYPES.md` (Haro's types: D55, RULED 2026-11-07, nothing built yet), `BLOCKS.md` (one format and pattern rules, REBOL-06/07: its four questions RULED 2026-11-02),
 `FROM-RINGPP.md`, `NUMBERS.md`, `SG1.md`, `STANDALONE.md`, `PROOF.md` (proof in Haro: PROPOSED 2026-11-13, nothing ruled).
@@ -670,11 +670,15 @@ Each `%NAME%` in this file is a folder of this machine; its value is in `.centra
   lines, is refused when compiling); a program run from its kept image reads `Eval`'s text as a fresh compile does; `haro graph`
   prints `CALL|<caller>|*|late|<n>`. **The shared haro.exe is v0.77** since 2026-11-23 07:31:32 (haro 83d2d99; HF-184): v0.75,
   v0.76 and v0.77 were installed together once `haro check` named no built command line on stzlib's main (47 statements
-  converted by four of its desks). **Next is v0.78**: a compile that fails ends haro.exe with a non-zero exit code
-  (HARO-COMPILE-EXIT-01, ruled for the Principal by stzlib-security's desk on his delegation of 2026-11-17); and the kept
-  library (`haro prefix <library>`: a root whose first statement loads it is compiled on top, HARO-LIBIMAGE-01) gets a stage of
-  the guard, a setting that writes no image for the root, the path a run took said after the compile, and its line in the
-  usage text. Then DOORS.md's rungs 4 and 5 -- `unjudged` whole, `of` on attributes; then the seat types; then `uses` and `total`.
+  converted by four of its desks). **v0.78 is built** (D95, HF-185, stage 83) and stands in `runtime/v78/build` and `build-safe`,
+  not installed: a compile that fails ends haro.exe with 1 (HARO-COMPILE-EXIT-01), and so does a check whose compiler stopped;
+  `haro prefix <library>` keeps a library compiled once and a root whose first statement loads it is compiled on top --
+  `HARO_PATH=1` makes a run say its path on the standard error (`path: kept image`, `kept library`, `whole`, and why), and
+  `HARO_NOIMAGE=1` neither uses nor writes a root's own image (HARO-LIBIMAGE-01); `rRun = hCall.RunReading(hPlace)` gives a
+  declared command's child the file at a place as its standard input (RUN_INPUT, INPUT_NOT_READ; HARO-INVOCATION-STDIN-01).
+  **A refusal is counted with `haro check` on every repository of this machine that tracks `.haro` files, and a notice is
+  written into each such desk's mailbox** (HARO-CMDLINE-SIBLINGS-01: v0.77 was counted on stzlib alone).
+  Next: DOORS.md's rungs 4 and 5 -- `unjudged` whole, `of` on attributes; then the seat types; then `uses` and `total`.
 - D43 is the twin-court clause. Of BLOCKS.md's four questions: Q-B1 is built (`?` is C6, and `OPTIONAL` sees it in a rule); Q-B2's two amendments are refused by name until Ringua's text
   lands; Q-B3 the block export of a program is not started; Q-B4 the round-trip court the elders waited for exists -- asking their owners is Central's.
 - **Answered 2026-11-05**: HARO-DISTANCE-01 (HF-141; D50, the author's ruling: no part of Ring is carried with Haro), HARO-ONEHOUR-01 (D51) and -02 (D52). **Next**: what stzlib's sweep on haro.exe sends; zip.zig out (stzlib calls no zip_* since cb6f5de65) with

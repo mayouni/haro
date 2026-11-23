@@ -90,3 +90,21 @@ what the child writes, so a child that writes much before it has read all does n
 - A run without `HARO_PATH` and `HARO_NOIMAGE` reads, keeps and prints what it did.
 - `Run` gives its child no standard input.
 - The rung refuses no form that runs today.
+
+## Measured
+
+- On the installed v0.77, before any code: 5 of 24 on both builds -- the five cases that say what stays. The other nineteen
+  failed for what the rung adds and for nothing else.
+- The court: 24 of 24 on both builds, on the first build, with no expectation changed.
+- 17 plants, each caught by its fixture (`plants.py`): sixteen in `vm/src`, each built; one in the judging library, which is
+  not built. Three plants were corrected after their first run -- two did not build, one was restored before its case was
+  judged -- and no protection was missed.
+- The 83-stage guard on builds made from the commit: PASS, 0 failures, 83 stages, 2164.3 s, 2026-11-23 13:05 to 13:41 on the builds of 9e01ea4; its stage 6 read 136.3 ms cold and 20.7 ms for an edit, under ceilings of 150 and 50, on a machine that read fit to measure
+
+## What stands at its present size
+
+- The kept library is taken when the library's load is the root's first statement, and for a run; `haro check` compiles whole.
+- A kept library is written for one haro.exe: after an install `haro prefix` is run again.
+- `haro resident` ends with the code it had; an admission it refuses is said in its own report.
+- The memory cases run on Windows, where a job limits what a process may commit.
+- `RunReading` reads the whole file before it starts the child.

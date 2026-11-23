@@ -1917,6 +1917,10 @@ D58, the Principal's ruling of 2026-11-09 ("ParentClassName"), revising v0.42's 
 
 **Results.** 9 of 9 cases on both builds; 5 of 5 plants; v36 to v48's courts green. Haro's 2,172 calls re-spelled by a tool (20fc236, listed in v20/tool_commits.txt).
 
+## The seventy-eighth rung -- Haro v0.78, three more findings of the desks -- 2026-11-23
+
+D95: a compile that fails ends haro.exe with 1 where it ended with 0 (HARO-COMPILE-EXIT-01), and a check whose compiler stopped ends with 1; the library compiled once and kept is held by a court -- a run says the path it took (`HARO_PATH`), a root's image is neither used nor written when asked (`HARO_NOIMAGE`), the usage text names `haro prefix` (HARO-LIBIMAGE-01); a declared command's child reads its standard input from a place, `hCall.RunReading(hPlace)` (HARO-INVOCATION-STDIN-01). Read on the installed v0.77 before any code: 5 of 24. 24 of 24 on both builds, 17 plants (6575ee4, 478f772, 9e01ea4, 0f755e7).
+
 ## The install of v0.75, v0.76 and v0.77 -- 2026-11-23
 
 The three rungs were built and guarded on 2026-11-16 and waited seven days for one condition: no `.haro` file of stzlib's main builds a command line as text. Four of its desks converted 47 statements (11, 30, 2 and 4). On 2026-11-23, on stzlib 8cb11031c, `haro check` of the build names none in the 9 files that name `System` or `SystemCmd`, and none of the three rules new in these rungs refuses a statement in the 24 `.haro` files changed since the last whole comparison. The notice was filed at 07:31 and the builds of 83d2d99 were copied into `vm/zig-out` and `vm/zig-out-safe` at 07:31:31 and 07:31:32, with no haro.exe running. On the installed builds: the guard's stages 55, 60, 80, 81 and 82, 2026-11-23 07:32 -- the facts court 15 of 15, the one-form court 30 of 30, v0.75's court 10 of 10, v0.76's 12 of 12, v0.77's 16 of 16, each on both builds. The same morning the shared engine moved to stzlib 8cb11031c (one new function of `stz_file`). HF-184 says what the wait found.
