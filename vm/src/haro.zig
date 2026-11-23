@@ -301,7 +301,13 @@ fn tryPrefix(
     sa.* = std.heap.ArenaAllocator.init(std.heap.page_allocator);
     c.scratch_arena = sa;
     c.scratch = sa.allocator();
-    if (!prefix.load(alloc, p, image.ExeStamp.ofSelf(alloc), c, stamps, names)) return null;
+    if (!prefix.load(alloc, p, image.ExeStamp.ofSelf(alloc), c, stamps, names)) {
+        // v0.78: a kept library that is there and was not taken -- any doubt is a miss, and the miss is named (HARO_PATH)
+        if (std.fs.cwd().access(p, .{})) |_| {
+            prefix_stale = true;
+        } else |_| {}
+        return null;
+    }
     // the library's own entry is named by THIS program's load of it, which
     // the prefix could not know: the folder it was found from, as written
     if (names.items.len > 0) {
@@ -1686,6 +1692,27 @@ var g_verbose = false;
 
 fn status(comptime text: []const u8, args: anytype) void {
     if (g_verbose) std.debug.print(text, args);
+}
+
+/// v0.78 (HARO-COMPILE-EXIT-01; ruled for the Principal on his delegation of 2026-11-17): a compile that fails, for memory or for
+/// any other reason, ends haro.exe with a non-zero exit code. Every command that compiles came here to say `compile failed` and
+/// then returned, which ended the process with 0: a supervisor read success from a program that never ran (measured under a
+/// memory limit, 2026-11-14 and 2026-11-23). The code is 1, the code every other way a program does not complete has already.
+fn compileFailed(e: anyerror) noreturn {
+    co.reportFailure(e);
+    vm.outFlush();
+    std.process.exit(1);
+}
+
+/// v0.78 (HARO-LIBIMAGE-01): HARO_PATH -- the path a run took, said in one line on the standard error after the compile and
+/// before the program's first statement: `path: kept image`, `path: kept library`, `path: whole`, and for a whole compile beside
+/// a kept library that was not taken, why. HARO_IMAGE's text says what was READ and is printed before the compiler has decided;
+/// a sweep that records its path asks this. Unset, a run writes nothing of it.
+var say_path = false;
+/// a kept library was found for this root's library and was not taken: its files, or this haro.exe, changed since it was kept
+var prefix_stale = false;
+fn pathSay(comptime text: []const u8, args: anytype) void {
+    if (say_path) std.debug.print("path: " ++ text ++ "\n", args);
 }
 
 /// Every name `rnxc` accepts in argv[1]. Listed so a bare `rnxc file.ring`
@@ -4516,6 +4543,8 @@ pub fn main() !void {
         std.debug.print("                                   migrate, shadows, attrs\n", .{});
         std.debug.print("       haro resident <file.haro>...  one program, each file admitted into it\n", .{});
         std.debug.print("                                     (--replace <file>: it may redefine a function it holds)\n", .{});
+        std.debug.print("       haro prefix <library.haro>    compile a library once and keep it: a program whose first statement loads it\n", .{});
+        std.debug.print("                                     is compiled on top of it (HARO_PATH=1: a run says which path it took)\n", .{});
         return;
     }
 
@@ -4560,6 +4589,16 @@ pub fn main() !void {
     if (std.process.getEnvVarOwned(alloc, "HARO_ONTO")) |v| {
         want_onto = !(v.len == 0 or std.mem.eql(u8, v, "0"));
     } else |_| {}
+    if (std.process.getEnvVarOwned(alloc, "HARO_PATH")) |v| {
+        say_path = !(v.len == 0 or std.mem.eql(u8, v, "0"));
+    } else |_| {}
+    // v0.78 (HARO-LIBIMAGE-01): HARO_NOIMAGE -- a root's own image is neither used nor written, and a kept library is taken as
+    // it is without the setting. A sweep of many small programs over one library wants the library compiled once and each root
+    // compiled on it and thrown away: an image a root is 50 MB of a library it shares with every other root.
+    var no_image = false;
+    if (std.process.getEnvVarOwned(alloc, "HARO_NOIMAGE")) |v| {
+        no_image = !(v.len == 0 or std.mem.eql(u8, v, "0"));
+    } else |_| {}
     // C-28: before any image is trusted -- an image built before a syntax
     // file appeared must not run past it. Four existence checks.
     if (std.mem.eql(u8, argv[1], "exec")) {
@@ -4571,9 +4610,10 @@ pub fn main() !void {
         // the freeze has thrown the arena away, and an arena-allocated one
         // is a dangling pointer by then (found the hard way -- the write
         // took an access violation on a path that had already been freed).
-        img_path = image.pathFor(vmheap, root_abs);
+        img_path = if (no_image) null else image.pathFor(vmheap, root_abs);
         if (img_path) |p| {
             if (image.load(vmheap, p, image.ExeStamp.ofSelf(alloc))) |parts| {
+                pathSay("kept image", .{});
                 try runImage(parts, argv[2]);
                 return;
             }
@@ -4709,8 +4749,7 @@ pub fn main() !void {
     // classes, methods and functions, and the calls the compiler bound to one target or could only dispatch by name (src/graph.zig).
     if (std.mem.eql(u8, argv[1], "graph")) {
         const gd = co.graphData(alloc, unit.roots.items) catch |e| {
-            co.reportFailure(e);
-            return;
+            compileFailed(e);
         };
         const gs = try graph.print(alloc, gd, unit.roots.items, unit.paths.items, w);
         try w.flush();
@@ -4735,8 +4774,7 @@ pub fn main() !void {
         c.scratch_arena = &sa;
         c.scratch = sa.allocator();
         co.compilePrefixWhole(c, unit.roots.items, alloc) catch |e| {
-            co.reportFailure(e);
-            return;
+            compileFailed(e);
         };
         const abs = std.fs.cwd().realpathAlloc(alloc, argv[2]) catch argv[2];
         const p = prefix.pathFor(alloc, abs) orelse {
@@ -4779,8 +4817,7 @@ pub fn main() !void {
 
     if (std.mem.eql(u8, argv[1], "dis")) {
         const prog = co.compileLenient(alloc, unit.roots.items) catch |e| {
-            co.reportFailure(e);
-            return;
+            compileFailed(e);
         };
         try disasm(prog, w);
         try w.flush();
@@ -4806,19 +4843,23 @@ pub fn main() !void {
         // is how the two paths are compared. What it proves is the
         // SEMANTICS; the saving arrives when the prefix comes from a file.
         var prefix_used = false;
+        // v0.78: on a kept library read from its file (not HARO_ONTO's comparison in one process), and what stopped one
+        var from_kept = false;
+        var blocked: []const u8 = "";
         const prog = blk: {
             if (pre_c) |c| {
                 if (co.compileOnto(c, unit.roots.items, pre_start, alloc)) |p| {
                     prefix_used = true;
+                    from_kept = true;
                     break :blk p;
                 } else |e| {
                     if (e != co.Error.PrefixInapplicable) {
-                        co.reportFailure(e);
-                        return;
+                        compileFailed(e);
                     }
                     // Rare, and it costs the parse of one file: everything
                     // below is the path taken before prefixes existed.
                     status("onto: the prefix does not apply here ({s}); compiling whole\n", .{co.prefix_blocked_by});
+                    blocked = alloc.dupe(u8, if (co.prefix_blocked_by.len > 0) co.prefix_blocked_by else "its own reason") catch "";
                     unit = Unit{};
                     try loadUnit(alloc, parser, argv[2], &unit, false, &.{});
                     if (unit.missing > 0) refuseMissingLoads(alloc, parser, argv[2]);
@@ -4828,8 +4869,7 @@ pub fn main() !void {
                     co.load_srcs = srcs;
                     pre_stamps.clearRetainingCapacity();
                     break :blk co.compileLenient(alloc, unit.roots.items) catch |e2| {
-                        co.reportFailure(e2);
-                        return;
+                        compileFailed(e2);
                     };
                 }
             }
@@ -4845,21 +4885,25 @@ pub fn main() !void {
                         break :blk p;
                     } else |e| {
                         if (e != co.Error.PrefixInapplicable) {
-                            co.reportFailure(e);
-                            return;
+                            compileFailed(e);
                         }
                         std.debug.print("onto: the prefix does not apply here ({s} is defined by both, or is called by the library); compiling whole\n", .{co.prefix_blocked_by});
                     }
                 } else |e| {
-                    co.reportFailure(e);
-                    return;
+                    compileFailed(e);
                 }
             }
             break :blk co.compileLenient(alloc, unit.roots.items) catch |e| {
-                co.reportFailure(e);
-                return;
+                compileFailed(e);
             };
         };
+        if (from_kept) {
+            pathSay("kept library", .{});
+        } else if (blocked.len > 0) {
+            pathSay("whole, the kept library does not apply ({s})", .{blocked});
+        } else if (prefix_stale) {
+            pathSay("whole, the kept library is stale", .{});
+        } else pathSay("whole", .{});
         // A file with NO top-level statement is not an empty program: Ring
         // calls Main(), and compileFinish builds an entry that does. `mf`
         // is read below only for its trampoline -- which the entry
@@ -5157,8 +5201,7 @@ pub fn main() !void {
     // next piece of work is chosen by leverage instead of by frequency.
     if (std.mem.eql(u8, argv[1], "poison")) {
         const prog = co.compileRanked(alloc, unit.roots.items) catch |e| {
-            co.reportFailure(e);
-            return;
+            compileFailed(e);
         };
         const total = prog.funcs.len;
         const ok = prog.usableCount();
@@ -5214,8 +5257,7 @@ pub fn main() !void {
 
     if (std.mem.eql(u8, argv[1], "usable")) {
         const prog = co.compileLenient(alloc, unit.roots.items) catch |e| {
-            co.reportFailure(e);
-            return;
+            compileFailed(e);
         };
         const total = prog.funcs.len;
         const ok = prog.usableCount();
@@ -5248,8 +5290,7 @@ pub fn main() !void {
     // use inside its class, as one TSV for the applier with `--sigil @`.
     if (std.mem.eql(u8, argv[1], "attrs")) {
         const sites = co.attrSites(alloc, unit.roots.items) catch |e| {
-            co.reportFailure(e);
-            return;
+            compileFailed(e);
         };
         var n_out: usize = 0;
         for (sites) |s| {
@@ -5281,8 +5322,7 @@ pub fn main() !void {
         }
         var loops: usize = 0;
         const sh = co.shadows(alloc, unit.roots.items, &loops) catch |e| {
-            co.reportFailure(e);
-            return;
+            compileFailed(e);
         };
         // The verdict per name goes to stderr; only the CROSS-FUNCTION
         // names' sites go to stdout, in the TSV the applier reads.
@@ -5407,8 +5447,7 @@ pub fn main() !void {
     // textual rename would turn thousands of locals into globals.
     if (std.mem.eql(u8, argv[1], "migrate")) {
         const cs = co.census(alloc, unit.roots.items) catch |e| {
-            co.reportFailure(e);
-            return;
+            compileFailed(e);
         };
         var n_out: usize = 0;
         for (cs.refusals) |r| {
@@ -5580,13 +5619,15 @@ pub fn main() !void {
         if (compiler_silent) try w.print("  refused-form: NOT checked -- the compiler stopped before the unit's end, so what it refuses is not listed\n", .{});
         if (listeners.items.len == 0) try w.print("  listener-binds-all: no listening native named (--listeners=), so no call was looked at\n", .{});
         try w.flush();
+        // v0.78 (HARO-COMPILE-EXIT-01): the report above is what could be read; the compile behind it failed, and a gate that
+        // reads this command's exit code must not take a part of a check for the whole of it
+        if (compiler_silent) std.process.exit(1);
         return;
     }
     if (std.mem.eql(u8, argv[1], "census")) {
         var t_census = try std.time.Timer.start();
         const cs = co.census(alloc, unit.roots.items) catch |e| {
-            co.reportFailure(e);
-            return;
+            compileFailed(e);
         };
         const t_census_ns = t_census.read();
         // `--natives`: every name compiled as a native call, most sites
@@ -5735,8 +5776,7 @@ pub fn main() !void {
             return;
         }
         const prog = co.compileLenient(alloc, unit.roots.items) catch |e| {
-            co.reportFailure(e);
-            return;
+            compileFailed(e);
         };
         const arg = std.fmt.parseInt(i64, argv[4], 10) catch 0;
         const reps: usize = if (argv.len > 5) (std.fmt.parseInt(usize, argv[5], 10) catch 3) else 3;
@@ -5751,8 +5791,7 @@ pub fn main() !void {
             return;
         }
         const prog = co.compileLenient(alloc, unit.roots.items) catch |e| {
-            co.reportFailure(e);
-            return;
+            compileFailed(e);
         };
         try callOne(alloc, prog, argv[3], argv[4..]);
         try w.flush();
@@ -5761,8 +5800,7 @@ pub fn main() !void {
 
     if (std.mem.eql(u8, argv[1], "bench")) {
         const prog = co.compileLenient(alloc, unit.roots.items) catch |e| {
-            co.reportFailure(e);
-            return;
+            compileFailed(e);
         };
         try benchKernels(alloc, prog);
         try w.flush();
@@ -5775,8 +5813,7 @@ pub fn main() !void {
             return;
         }
         const prog = co.compileLenient(alloc, unit.roots.items) catch |e| {
-            co.reportFailure(e);
-            return;
+            compileFailed(e);
         };
         std.debug.print("compiled {d} functions, {d} instructions\n\n", .{ prog.funcs.len, prog.code.len });
         try runKernels(alloc, prog);

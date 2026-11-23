@@ -3375,6 +3375,88 @@ pub const VM = struct {
         });
     }
 
+    /// v0.78 (HARO-INVOCATION-STDIN-01, stzradar): a run answered whole whose child reads its standard input -- the bytes of the
+    /// file at a place. Some programs read their subject there and take no file's name (a signature checked by ssh-keygen); with
+    /// no shell there is no `< file`, so the door takes the place. What is given must be a place (RUN_INPUT), its root must
+    /// allow read and it must not lead out of its root (the place's own refusals), and its file must be read (INPUT_NOT_READ)
+    /// before the child is started. The bytes are written by a thread of their own while this one reads what the child writes:
+    /// a child that writes much before it has read all would otherwise stop on a full pipe, and this program with it.
+    fn runReading(self: *VM, v: Value, input: Value) ?Value {
+        const o = v.p.o;
+        if (o.nslots < 5 or o.slots[3].tag != .vec or o.slots[3].p.v.len == 0) {
+            self.pending = BADPARAM;
+            return null;
+        }
+        const name = if (o.slots[0].tag == .str) strOf(o.slots[0]) else "";
+        if (!isPlace(input)) {
+            self.pending = self.haroMsg("Error (RUN_INPUT) : a run reads its standard input from a place -- <doors>.Place(root, text); given {s}", .{typeArticle(input)});
+            return null;
+        }
+        const pv = self.placeDoor(input, "read") orelse return null;
+        const path = strOf(pv);
+        const bytes = std.fs.cwd().readFileAlloc(self.alloc, path, 1 << 30) catch {
+            self.pending = self.haroMsg("Error (INPUT_NOT_READ) : the command `{s}` reads `{s}` as its standard input, which could not be read", .{ name, path });
+            return null;
+        };
+        defer self.alloc.free(bytes);
+        const folder: ?[]const u8 = if (o.nslots > 5 and o.slots[5].tag == .str and strOf(o.slots[5]).len > 0) strOf(o.slots[5]) else null;
+        const vv = o.slots[3].p.v;
+        var argv: std.ArrayListUnmanaged([]const u8) = .{};
+        defer argv.deinit(self.alloc);
+        var k: usize = 0;
+        while (k < vv.len) : (k += 1) {
+            const it = vv.ptr[k];
+            if (it.tag != .str) {
+                self.pending = BADPARAM;
+                return null;
+            }
+            argv.append(self.alloc, strOf(it)) catch @panic("oom");
+        }
+        outFlush();
+        var child = std.process.Child.init(argv.items, self.alloc);
+        child.stdin_behavior = .Pipe;
+        child.stdout_behavior = .Pipe;
+        child.stderr_behavior = .Pipe;
+        child.cwd = folder;
+        child.spawn() catch {
+            self.pending = self.haroMsg("Error (COMMAND_NOT_STARTED) : the command `{s}` runs `{s}`, which could not be started", .{ name, argv.items[0] });
+            return null;
+        };
+        const Feeder = struct {
+            fn feed(f: std.fs.File, b: []const u8) void {
+                f.writeAll(b) catch {};
+                f.close();
+            }
+        };
+        const to_child = child.stdin.?;
+        child.stdin = null;
+        const feeder: ?std.Thread = std.Thread.spawn(.{}, Feeder.feed, .{ to_child, bytes }) catch null;
+        if (feeder == null) Feeder.feed(to_child, bytes);
+        var so: std.ArrayListUnmanaged(u8) = .{};
+        defer so.deinit(self.alloc);
+        var se: std.ArrayListUnmanaged(u8) = .{};
+        defer se.deinit(self.alloc);
+        const collected = child.collectOutput(self.alloc, &so, &se, 1 << 30);
+        if (feeder) |t| t.join();
+        collected catch {
+            _ = child.kill() catch {};
+            self.pending = self.haroMsg("Error (COMMAND_NOT_STARTED) : the command `{s}` runs `{s}`, whose output could not be read", .{ name, argv.items[0] });
+            return null;
+        };
+        const term = child.wait() catch {
+            self.pending = self.haroMsg("Error (COMMAND_NOT_STARTED) : the command `{s}` runs `{s}`, which could not be waited for", .{ name, argv.items[0] });
+            return null;
+        };
+        const wv = self.newVec(3);
+        self.vecPushB(wv, Value.int(switch (term) {
+            .Exited => |c| @intCast(c),
+            else => -1,
+        }), false);
+        self.vecPushB(wv, Value.str(self.newStr(dropLineEnd(so.items))), true);
+        self.vecPushB(wv, Value.str(self.newStr(dropLineEnd(se.items))), true);
+        return Value.vec(wv);
+    }
+
     /// v0.72 (doc/DOORS.md): a place at a door. Refused by name when its root does not allow what the door does
     /// (PLACE_NOT_ALLOWED), and when what its path leads to does not stand beneath the root's folder -- a link or a junction that
     /// leads out (PLACE_ESCAPES): the path itself is asked where it exists, else the nearest folder above it that does. A root
@@ -7143,6 +7225,13 @@ pub const VM = struct {
                 // it wrote is the answer, its last line end dropped as the native drops it
                 // v0.74: SystemRun, the door beneath `hCall.Run()` -- the exit code, what the child wrote, what it wrote to its
                 // standard error, a vector of three
+                // v0.78: SystemRun given an invocation and what its child reads -- the door beneath `hCall.RunReading(hPlace)`
+                if (in.c == 2 and isInvocation(regs[base + in.b]) and std.ascii.eqlIgnoreCase(nm, "systemrun")) {
+                    const wv = self.runReading(regs[base + in.b], regs[base + in.b + 1]) orelse continue :dispatch .raise;
+                    self.setRegB(base + in.a, wv, true);
+                    pc += 1;
+                    continue :dispatch code[pc].op;
+                }
                 if (in.c == 1 and isInvocation(regs[base + in.b]) and std.ascii.eqlIgnoreCase(nm, "systemrun")) {
                     const wv = self.runInvocation(regs[base + in.b], .whole) orelse continue :dispatch .raise;
                     self.setRegB(base + in.a, wv, true);
