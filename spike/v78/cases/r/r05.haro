@@ -1,0 +1,15 @@
+load "doors.haro"
+sDoors = doors'DEFINE ROOT made AS (AT "made", ALLOWS [read, write]) RATIONALE "a large input this program writes and its child reads"
+DEFINE COMMAND echo AS (ITSELF yes, TAKES [word]) RATIONALE "a child that writes back each line it reads"'
+tAll = ""
+for i = 1 to 5000
+	tAll = tAll + "line " + String(i) + " of the large input, a line of some length" + Char(10)
+end
+MakeDir("made")
+hBig = sDoors.Place("made", "big.txt")
+Write(hBig, tAll)
+hCall = sDoors.Invocation("echo", ["echo.haro"])
+rRun = hCall.RunReading(hBig)
+print rRun.iCode
+print Len(tAll) > 200000
+print Len(rRun.tOutput) > 200000

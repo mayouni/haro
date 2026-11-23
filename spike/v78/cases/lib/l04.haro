@@ -1,0 +1,4 @@
+load "lib.haro"
+iX = 0
+Eval("iX = Twice(5)")
+print iX

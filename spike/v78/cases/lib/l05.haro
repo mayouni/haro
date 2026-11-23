@@ -1,0 +1,3 @@
+print "before the load"
+load "lib.haro"
+print Twice(1)

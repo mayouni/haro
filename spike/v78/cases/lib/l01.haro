@@ -1,0 +1,6 @@
+load "lib.haro"
+print Twice(21)
+print Greet("ada")
+oC = new Counter
+oC.Add(3).Add(4)
+print oC.Total()

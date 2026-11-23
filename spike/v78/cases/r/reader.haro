@@ -1,0 +1,12 @@
+iLines = 0
+tAll = ""
+while not FEOF(stdin)
+	give tLine
+	if FEOF(stdin) and tLine = ""
+		exit
+	end
+	iLines = iLines + 1
+	tAll = tAll + Upper(tLine) + "|"
+end
+print iLines
+print tAll

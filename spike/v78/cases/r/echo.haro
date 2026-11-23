@@ -1,0 +1,7 @@
+while not FEOF(stdin)
+	give tLine
+	if FEOF(stdin) and tLine = ""
+		exit
+	end
+	print tLine
+end

@@ -1,0 +1,8 @@
+load "lib.haro"
+try
+	oC = new Counter
+	oC.NoSuchMethod()
+catch e
+	print "caught"
+end
+print Greet("after")

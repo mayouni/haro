@@ -1,0 +1,5 @@
+load "lib.haro"
+print Twice(4)
+oC = new Counter
+oC.NoSuchMethod()
+print "not reached"

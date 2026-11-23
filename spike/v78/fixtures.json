@@ -1,0 +1,456 @@
+{
+ "version": "v0.78",
+ "task": "three findings of the desks: a failed compile ends with a non-zero code (HARO-COMPILE-EXIT-01); the kept library is held by a court, says its path and can write no image (HARO-LIBIMAGE-01); a run reads its standard input from a place (HARO-INVOCATION-STDIN-01)",
+ "big": {
+  "functions": 6000,
+  "stdout": "4\n"
+ },
+ "cases": [
+  {
+   "id": "L01",
+   "line": "L1",
+   "what": "a root whose first statement loads the kept library is compiled on top of it, and prints what its whole compile prints",
+   "kind": "library",
+   "root": "l01.haro",
+   "stdout": "the library is loaded\n42\nhello, ada\n7\n",
+   "exit": 0,
+   "steps": [
+    [
+     "fresh",
+     "path: whole"
+    ],
+    [
+     "prefix",
+     null
+    ],
+    [
+     "run",
+     "path: kept library"
+    ],
+    [
+     "run",
+     "path: kept image"
+    ]
+   ]
+  },
+  {
+   "id": "L02",
+   "line": "L1",
+   "what": "a root that dies part-way dies the same on the kept library: the same bytes, the same exit code",
+   "kind": "library",
+   "root": "l02.haro",
+   "has": [
+    "the library is loaded\n8\n",
+    "Error (R14)"
+   ],
+   "never": "not reached",
+   "exit": 1,
+   "steps": [
+    [
+     "fresh",
+     "path: whole"
+    ],
+    [
+     "prefix",
+     null
+    ],
+    [
+     "run",
+     "path: kept library"
+    ]
+   ]
+  },
+  {
+   "id": "L03",
+   "line": "L1",
+   "what": "an error caught in a root that stands on the kept library is caught, and the root goes on",
+   "kind": "library",
+   "root": "l03.haro",
+   "stdout": "the library is loaded\ncaught\nhello, after\n",
+   "exit": 0,
+   "steps": [
+    [
+     "fresh",
+     "path: whole"
+    ],
+    [
+     "prefix",
+     null
+    ],
+    [
+     "run",
+     "path: kept library"
+    ]
+   ]
+  },
+  {
+   "id": "L04",
+   "line": "L1",
+   "what": "text run as code in a root on the kept library reaches the library's functions",
+   "kind": "library",
+   "root": "l04.haro",
+   "stdout": "the library is loaded\n10\n",
+   "exit": 0,
+   "steps": [
+    [
+     "fresh",
+     "path: whole"
+    ],
+    [
+     "prefix",
+     null
+    ],
+    [
+     "run",
+     "path: kept library"
+    ]
+   ]
+  },
+  {
+   "id": "L05",
+   "line": "L2",
+   "what": "a root that writes before it loads the library is compiled whole, and the path says so",
+   "kind": "library",
+   "root": "l05.haro",
+   "stdout": "before the load\nthe library is loaded\n2\n",
+   "exit": 0,
+   "steps": [
+    [
+     "prefix",
+     null
+    ],
+    [
+     "run",
+     "path: whole"
+    ]
+   ]
+  },
+  {
+   "id": "L06",
+   "line": "L2",
+   "what": "a root that defines a function the library defines is compiled whole -- its own definition answers -- and the path names the function",
+   "kind": "library",
+   "root": "l06.ring",
+   "stdout": "the library is loaded\n60\n",
+   "exit": 0,
+   "steps": [
+    [
+     "fresh",
+     "path: whole"
+    ],
+    [
+     "prefix",
+     null
+    ],
+    [
+     "run",
+     "path: whole, the kept library does not apply (Twice)"
+    ]
+   ]
+  },
+  {
+   "id": "L07",
+   "line": "L2",
+   "what": "a kept library whose file changed since is not taken: the root is compiled whole on the library as it is now, and the path says stale",
+   "kind": "library",
+   "root": "l01.haro",
+   "stdout": "the library is loaded\nchanged\n42\nhello, ada\n7\n",
+   "exit": 0,
+   "steps": [
+    [
+     "prefix",
+     null
+    ],
+    [
+     "append",
+     "print \"changed\"\n"
+    ],
+    [
+     "run",
+     "path: whole, the kept library is stale"
+    ]
+   ]
+  },
+  {
+   "id": "L08",
+   "line": "L3",
+   "what": "HARO_NOIMAGE: the root stands on the kept library at every run, and no image of the root is written",
+   "kind": "library",
+   "root": "l01.haro",
+   "stdout": "the library is loaded\n42\nhello, ada\n7\n",
+   "exit": 0,
+   "env": {
+    "HARO_NOIMAGE": "1"
+   },
+   "steps": [
+    [
+     "prefix",
+     null
+    ],
+    [
+     "run",
+     "path: kept library"
+    ],
+    [
+     "run",
+     "path: kept library"
+    ],
+    [
+     "images",
+     0
+    ]
+   ]
+  },
+  {
+   "id": "L09",
+   "line": "L3",
+   "what": "what stays: without the setting a root on the kept library writes its image, one file",
+   "kind": "library",
+   "root": "l01.haro",
+   "stdout": "the library is loaded\n42\nhello, ada\n7\n",
+   "exit": 0,
+   "steps": [
+    [
+     "prefix",
+     null
+    ],
+    [
+     "run",
+     "path: kept library"
+    ],
+    [
+     "images",
+     1
+    ]
+   ]
+  },
+  {
+   "id": "L10",
+   "line": "L3",
+   "what": "HARO_NOIMAGE with no kept library: compiled whole at every run, and no image is written",
+   "kind": "library",
+   "root": "l01.haro",
+   "stdout": "the library is loaded\n42\nhello, ada\n7\n",
+   "exit": 0,
+   "env": {
+    "HARO_NOIMAGE": "1"
+   },
+   "steps": [
+    [
+     "fresh",
+     "path: whole"
+    ],
+    [
+     "run",
+     "path: whole"
+    ],
+    [
+     "images",
+     0
+    ]
+   ]
+  },
+  {
+   "id": "L11",
+   "line": "L4",
+   "what": "what stays: without HARO_PATH a run writes no line about its path",
+   "kind": "library",
+   "root": "l01.haro",
+   "stdout": "the library is loaded\n42\nhello, ada\n7\n",
+   "exit": 0,
+   "silent": true,
+   "steps": [
+    [
+     "prefix",
+     null
+    ],
+    [
+     "run",
+     null
+    ],
+    [
+     "run",
+     null
+    ]
+   ]
+  },
+  {
+   "id": "L12",
+   "line": "L4",
+   "what": "`haro prefix <library>` says what it kept and ends with 0",
+   "kind": "prefix",
+   "library": "lib.haro",
+   "has": [
+    "prefix: 1 file(s), ",
+    " class(es), "
+   ],
+   "exit": 0
+  },
+  {
+   "id": "L13",
+   "line": "L4",
+   "what": "the usage text names `prefix` and what it is for",
+   "kind": "usage",
+   "has": [
+    "haro prefix <library.haro>",
+    "a program whose first statement loads it"
+   ]
+  },
+  {
+   "id": "X01",
+   "line": "L5",
+   "what": "a run whose compile fails for memory ends with 1, where it ended with 0",
+   "kind": "limit",
+   "args": [
+    "{big}"
+   ],
+   "ladder": [
+    160,
+    130,
+    110,
+    100,
+    90,
+    80,
+    70
+   ],
+   "says": "compile failed",
+   "exit": 1
+  },
+  {
+   "id": "X02",
+   "line": "L5",
+   "what": "what stays: the same program with the memory it needs prints its answer and ends with 0",
+   "kind": "limit",
+   "args": [
+    "{big}"
+   ],
+   "ladder": [
+    0
+   ],
+   "stdout": "4\n",
+   "exit": 0
+  },
+  {
+   "id": "X03",
+   "line": "L5",
+   "what": "another command whose compile fails ends with 1 too: the code is the driver's, not one command's",
+   "kind": "limit",
+   "args": [
+    "dis",
+    "{big}"
+   ],
+   "ladder": [
+    160,
+    130,
+    110,
+    100,
+    90,
+    80,
+    70
+   ],
+   "says": "compile failed",
+   "exit": 1
+  },
+  {
+   "id": "X04",
+   "line": "L5",
+   "what": "`haro check` whose compiler stopped before the unit's end says so and ends with 1: a gate that reads 0 reads a whole check",
+   "kind": "limit",
+   "args": [
+    "check",
+    "{big}"
+   ],
+   "ladder": [
+    160,
+    130,
+    110,
+    100,
+    90,
+    80,
+    70
+   ],
+   "says": "the compiler stopped before the unit's end",
+   "exit": 1
+  },
+  {
+   "id": "X05",
+   "line": "L5",
+   "what": "what stays: a check that reads the whole unit ends with 0",
+   "kind": "limit",
+   "args": [
+    "check",
+    "{big}"
+   ],
+   "ladder": [
+    0
+   ],
+   "has": [
+    " 0 error, "
+   ],
+   "exit": 0
+  },
+  {
+   "id": "R01",
+   "line": "L6",
+   "what": "RunReading gives the child the file at the place as its standard input, and answers what Run answers",
+   "kind": "run",
+   "dir": "r",
+   "file": "r01.haro",
+   "stdout": "0\n3\nONE|TWO|THREE|\n[]\n",
+   "exit": 0
+  },
+  {
+   "id": "R02",
+   "line": "L6",
+   "what": "a place whose root does not allow read is refused by name, and the child is not started",
+   "kind": "run",
+   "dir": "r",
+   "file": "r02.haro",
+   "stdout": "PLACE_NOT_ALLOWED\n",
+   "exit": 0
+  },
+  {
+   "id": "R03",
+   "line": "L6",
+   "what": "a text is no place: refused by name, in words that say what a run reads from",
+   "kind": "run",
+   "dir": "r",
+   "file": "r03.haro",
+   "stdout": "RUN_INPUT\nError (RUN_INPUT) : a run reads its standard input from a place -- <doors>.Place(root, text); given a text\n",
+   "exit": 0
+  },
+  {
+   "id": "R04",
+   "line": "L6",
+   "what": "a place that names no file is refused by name, and the child is not started",
+   "kind": "run",
+   "dir": "r",
+   "file": "r04.haro",
+   "stdout": "INPUT_NOT_READ\n",
+   "exit": 0
+  },
+  {
+   "id": "R05",
+   "line": "L6",
+   "what": "a large input and a large output pass whole: the child reads 5,000 lines and writes each back",
+   "kind": "run",
+   "dir": "r",
+   "file": "r05.haro",
+   "stdout": "0\ntrue\ntrue\n",
+   "exit": 0,
+   "clean": [
+    "made"
+   ]
+  },
+  {
+   "id": "R06",
+   "line": "L6",
+   "what": "what stays: Run gives the child no standard input -- it reads its end at once",
+   "kind": "run",
+   "dir": "r",
+   "file": "r06.haro",
+   "stdout": "0\n[0\n]\n",
+   "exit": 0
+  }
+ ]
+}

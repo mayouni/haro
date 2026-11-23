@@ -1,0 +1,10 @@
+load "doors.haro"
+sDoors = doors'DEFINE ROOT data AS (AT "data", ALLOWS [read]) RATIONALE "what the child reads"
+DEFINE ROOT made AS (AT "made", ALLOWS [write]) RATIONALE "what this program writes and may not read"
+DEFINE COMMAND count AS (ITSELF yes, TAKES [word]) RATIONALE "a child that counts the lines of its standard input"'
+hCall = sDoors.Invocation("count", ["reader.haro"])
+hIn = sDoors.Place("data", "three.txt")
+rRun = hCall.RunReading(hIn)
+print rRun.iCode
+print rRun.tOutput
+print "[" + rRun.tErrors + "]"

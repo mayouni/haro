@@ -1,0 +1,22 @@
+print "the library is loaded"
+
+func Twice(iN)
+	return iN * 2
+end
+
+func Greet(tName)
+	return "hello, " + tName
+end
+
+class Counter
+	iCount = 0
+
+	def Add(iN)
+		iCount = iCount + iN
+		return this
+	end
+
+	def Total
+		return iCount
+	end
+end
