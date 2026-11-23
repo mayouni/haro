@@ -1,7 +1,8 @@
 """Every protection of v0.78 (three findings of the desks) switched off in turn: the court must fail, for the fixture that protection
 exists for. A plant is text substitutions in one file -- vm/src/haro.zig, vm/src/main.zig, or the judging library spike/judge_lib.haro
 -- built into runtime/v78/plant-build (ReleaseFast, -j2, one build at a time, and only when the machine has 8 GB free) and its
-fixture's case run on that build alone. Every file is restored byte for byte, verified by its digest, and restored even when a
+fixture's case run on that build alone; a plant in the judging library is not built, and stands while its case is judged on
+runtime/v78/build. Every file is restored byte for byte, verified by its digest, and restored even when a
 build fails or the script is stopped.
 
   python spike/v78/plants.py            all plants (about two minutes each)
@@ -36,9 +37,9 @@ PLANTS = [
     ('K5', 'L01', 'a run from its kept image does not say so', HARO,
      [('                pathSay("kept image", .{});\n', '')]),
     ('K6', 'L01', 'a run on the kept library says it was compiled whole', HARO,
-     [('                    from_kept = true;\n', '')]),
+     [('                    from_kept = true;\n', '                    from_kept = false;\n')]),
     ('K7', 'L06', 'the name that stopped the kept library is not kept', HARO,
-     [('                    blocked = alloc.dupe(u8, if (co.prefix_blocked_by.len > 0) co.prefix_blocked_by else "its own reason") catch "";\n', '')]),
+     [('                    blocked = alloc.dupe(u8, if (co.prefix_blocked_by.len > 0) co.prefix_blocked_by else "its own reason") catch "";\n', '                    blocked = "";\n')]),
     ('K8', 'L07', 'a kept library that was there and not taken is not called stale', HARO,
      [('            prefix_stale = true;\n', '            prefix_stale = false;\n')]),
     ('K9', 'L08', 'HARO_NOIMAGE is not asked where a root\'s image is used and written', HARO,
@@ -125,13 +126,18 @@ def main():
             for o, n in subs:
                 planted = planted.replace(o, n)
             open(path, 'wb').write((planted.replace('\n', '\r\n') if crlf else planted).encode('utf-8'))
-            b = subprocess.run(['zig', 'build', '-Doptimize=ReleaseFast', '-j2', '-p', OUT], cwd=VM_DIR, capture_output=True, timeout=1800)
-            restore()
-            if b.returncode != 0:
-                print(f'{pid} BUILD FAILED: {b.stderr.decode("utf-8", "replace")[-400:]}', flush=True)
-                results.append((pid, 'BUILD FAILED'))
-                continue
-            exe = os.path.join(OUT, 'bin', 'haro.exe')
+            if path == JUDGE:
+                # the judging library is Haro code, read when a program runs: nothing is built, the plant stands while its case
+                # is judged on the rung's own build, and the file is restored after
+                exe = os.path.join(ROOT, 'runtime', 'v78', 'build', 'bin', 'haro.exe')
+            else:
+                b = subprocess.run(['zig', 'build', '-Doptimize=ReleaseFast', '-j2', '-p', OUT], cwd=VM_DIR, capture_output=True, timeout=1800)
+                restore()
+                if b.returncode != 0:
+                    print(f'{pid} BUILD FAILED: {b.stderr.decode("utf-8", "replace")[-400:]}', flush=True)
+                    results.append((pid, 'BUILD FAILED'))
+                    continue
+                exe = os.path.join(OUT, 'bin', 'haro.exe')
             cache = os.path.join(CACHE, 'v78-' + pid)
             shutil.rmtree(cache, ignore_errors=True)
             env = dict(os.environ)
