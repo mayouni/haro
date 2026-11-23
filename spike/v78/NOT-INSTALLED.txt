@@ -1,6 +1,0 @@
-Haro v0.78, three findings of the desks, is built and stands in runtime/v78/build and runtime/v78/build-safe.
-The shared runtime, vm/zig-out, is v0.77: it takes this rung after its notice, written into the mailbox of every desk whose
-repository tracks .haro files, and after `haro check` of the new build has been run on each of those repositories.
-
-While this file stands, the guard runs this rung's stage on the builds HARO_VM and HARO_TWIN name, and says so by name on the
-installed runtime. The file is taken out with the install.
