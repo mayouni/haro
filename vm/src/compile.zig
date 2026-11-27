@@ -33,6 +33,12 @@ const CFN: i32 = 1;
 /// the classify pre-pass can ask the same question codegen does: is this
 /// callee a builtin, or does the list it is handed escape into a call?
 const BuiltinEntry = struct { name: []const u8, id: vm.Builtin, argc: u32 };
+/// v0.79: whether `low` (lowercase) is one of this compiler's built-ins -- `haro check` asks, so it knows what a run answers
+pub fn isIntrinsic(low: []const u8) bool {
+    for (builtin_table) |bi| if (std.mem.eql(u8, bi.name, low)) return true;
+    return false;
+}
+
 const builtin_table = [_]BuiltinEntry{
     .{ .name = "char", .id = .char, .argc = 1 },
     .{ .name = "lower", .id = .lower, .argc = 1 },
@@ -5226,6 +5232,9 @@ pub const Compiler = struct {
             try self.predeclareEval(args.namedChild(0));
         }
         if (self.findFunc(callee)) |uf| return self.userCall(n, uf, args, argc, dst);
+        // v0.79 (HARO-GRAPH-LATEEVAL-01): Eval's text may call any function, so no edge can be drawn: it counts with the
+        // calls by a name built when the program runs, and `haro graph` prints the caller's late line
+        if (std.ascii.eqlIgnoreCase(callee, "eval")) self.cur.late_calls += 1;
         // v0.48: a .haro file reaches a native registered with an underscore by its spelling without one (`TUISize` -> `tui_size`)
         if (self.spell_on) if (builtins.underscoreOf(callee)) |registered| {
             callee = registered;
@@ -5233,6 +5242,11 @@ pub const Compiler = struct {
         if (self.spell_on) self.spellNative(written, callee);
 
         // ---- builtins -------------------------------------------------
+        // v0.79 (HARO-BUILTIN-ARITY-CRASH-01): Len and Add are compiled by hand below, and read their arguments without
+        // counting them -- Len() and Add() read a node that is not there and Add(x) a second one, a segmentation fault in
+        // `check` and in a run alike. Refused by name, as every built-in of the table is when its count is wrong.
+        if ((std.ascii.eqlIgnoreCase(callee, "len") and argc != 1) or (std.ascii.eqlIgnoreCase(callee, "add") and argc < 2))
+            return self.nopeKind(n, "a builtin called with the wrong number of arguments");
         if (std.ascii.eqlIgnoreCase(callee, "len")) {
             const save = self.temp;
             defer self.temp = save;
@@ -7482,7 +7496,7 @@ pub const Compiler = struct {
     }
 
     /// The letter of a lettered name, or null: a lowercase letter, then a capital -- after a p mark when it has one
-    fn letterOf(name: []const u8) ?u8 {
+    pub fn letterOf(name: []const u8) ?u8 {
         return (letterParts(name) orelse return null).l;
     }
 
@@ -7550,7 +7564,7 @@ pub const Compiler = struct {
     }
 
     /// The type of a literal: i integer, n number, t text, b boolean, v vector, o object, 0 the empty text (null); null for no literal
-    fn literalLetter(n: ts.Node) ?u8 {
+    pub fn literalLetter(n: ts.Node) ?u8 {
         const k = n.kind();
         if (std.mem.eql(u8, k, "number")) {
             const s = std.mem.trim(u8, n.text(), " \t\r\n");
@@ -7617,6 +7631,18 @@ pub const Compiler = struct {
     fn assign(self: *Compiler, n: ts.Node) Error!void {
         const lhs = n.namedChild(0);
         const rhs = n.namedChild(1);
+        // v0.79 (HARO-NAME-RESERVED-01): six names every older file of the program reads as built in -- the line end, the
+        // tab, the carriage return and the three streams. A top-level assignment makes a global that replaces them for every
+        // file from then on: `nL = 5` made a .ring file's `"x" + nl + "y"` print x5y, and nothing said so. A function's local
+        // of that name replaces nothing and stays allowed; a .ring file reads as it always has.
+        if (self.spell_on and self.eval == null and std.mem.eql(u8, lhs.kind(), "identifier") and self.topGlobal(lhs.text())) {
+            const nm = lhs.text();
+            for ([_][]const u8{ "nl", "tab", "cr", "stdin", "stdout", "stderr" }) |r| {
+                if (!std.ascii.eqlIgnoreCase(nm, r)) continue;
+                const why = std.fmt.allocPrint(self.alloc, "NAME_RESERVED -- `{s}` is `{s}`, which every older file of the program reads as built in; a top-level value of that name would replace it for all of them: name it otherwise", .{ nm, r }) catch return Error.OutOfMemory;
+                return self.nopeKind(n, why);
+            }
+        }
         // the name a value is given: a variable, or an attribute through This
         const named: ?[]const u8 = if (self.eval != null or !self.spell_on) null else if (std.mem.eql(u8, lhs.kind(), "identifier"))
             lhs.text()
@@ -10249,6 +10275,26 @@ pub fn factsData(alloc: std.mem.Allocator, roots: []const ts.Node) !FactsData {
     c.scratch = scratch_arena.allocator();
     last_fail = .{};
     try compileFront(&c, roots, roots, 0, alloc);
+    return factsOf(&c, alloc);
+}
+
+/// v0.79 (IRIS-NEED-HARO-02): `haro check` on a kept library -- the library compiled once and read from its file (`c`, from
+/// tryPrefix), the files from `start` on compiled on top of it as a run compiles them (compileOnto), and what the compiler
+/// refused named as factsData names it. PrefixInapplicable when the root cannot stand on the library, as for a run.
+pub fn factsOnto(c: *Compiler, roots: []const ts.Node, start: u32, alloc: std.mem.Allocator) !FactsData {
+    last_fail = .{};
+    c.census = true;
+    c.rank = false;
+    for (roots[start..]) |r| try collectAll(c, r, alloc);
+    try resolveAllSlots(c, alloc);
+    if (roots.len - start > 1) try spliceMain(c, roots, start, alloc);
+    try prefixApplies(c, roots, start, alloc);
+    try compileFrontAfterCollect(c, alloc);
+    return factsOf(c, alloc);
+}
+
+fn factsOf(cp: *Compiler, alloc: std.mem.Allocator) !FactsData {
+    const c = cp.*;
     // the traps that stand: a statement compiled again after its first attempt was rolled back (a function whose locals share
     // registers on a second attempt, a statement re-read) left a record and no trap
     var standing = std.AutoHashMapUnmanaged(u32, void){};

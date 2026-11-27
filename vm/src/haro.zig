@@ -4545,6 +4545,7 @@ pub fn main() !void {
         std.debug.print("                                     (--replace <file>: it may redefine a function it holds)\n", .{});
         std.debug.print("       haro prefix <library.haro>    compile a library once and keep it: a program whose first statement loads it\n", .{});
         std.debug.print("                                     is compiled on top of it (HARO_PATH=1: a run says which path it took)\n", .{});
+        std.debug.print("       haro check <file.haro> [--all]  what the run will refuse, in the file's folder (--all: every file loaded)\n", .{});
         return;
     }
 
@@ -4635,7 +4636,16 @@ pub fn main() !void {
     var pre_stamps = std.ArrayListUnmanaged(image.Stamp){};
     var pre_names = std.ArrayListUnmanaged([]const u8){};
     var on_top = Unit{};
-    if (std.mem.eql(u8, argv[1], "exec") and image.enabled(alloc)) {
+    // v0.79 (IRIS-NEED-HARO-02): `haro check` stands on the kept library too -- its compile is the run's, and a library compiled
+    // once is not compiled again to be checked. Not for `--all`, which reports the library's own files and so needs their
+    // trees, nor for `--facts` or `--subst=`, which describe or replace the unit's every file.
+    const check_on_kept = std.mem.eql(u8, argv[1], "check") and argv.len > 2 and !std.mem.startsWith(u8, argv[2], "--") and blk: {
+        for (argv[3..]) |a| {
+            if (std.mem.eql(u8, a, "--all") or std.mem.eql(u8, a, "--facts") or std.mem.startsWith(u8, a, "--subst=")) break :blk false;
+        }
+        break :blk true;
+    };
+    if ((std.mem.eql(u8, argv[1], "exec") or check_on_kept) and image.enabled(alloc)) {
         pre_c = tryPrefix(alloc, parser, argv[2], &pre_stamps, &pre_names, &on_top);
     }
 
@@ -4754,7 +4764,7 @@ pub fn main() !void {
         const gs = try graph.print(alloc, gd, unit.roots.items, unit.paths.items, w);
         try w.flush();
         // v0.77 (HARO-GRAPH-LATECALL-01): said only where the unit holds one, so a unit without is summed up as it was
-        if (gs.late_calls > 0) std.debug.print("graph: {d} call(s) by a name built when the program runs, in {d} function(s)\n", .{ gs.late_calls, gs.late_funcs });
+        if (gs.late_calls > 0) std.debug.print("graph: {d} call(s) by a name built or a text run (Eval) when the program runs, in {d} function(s)\n", .{ gs.late_calls, gs.late_funcs });
         std.debug.print("graph: {d} file(s), {d} class(es), {d} method(s), {d} function(s); {d} static and {d} dynamic call edge(s); {d} function(s) the compiler could not finish\n", .{
             gs.files, gs.classes, gs.methods, gs.functions, gs.static_edges, gs.dynamic_edges, gs.poisoned,
         });
@@ -5516,8 +5526,21 @@ pub fn main() !void {
         // universe is right for all of them. This was `.{}` -- every map
         // null -- and the four absence rules sat silent for fourteen days
         // while the gate counted them (src/universe.zig).
-        var uni = try universe.Universe.build(alloc, unit.roots.items, unit.missing, closed);
-        if (closed) try uni.addUnitSigs(alloc, unit.roots.items, unit.paths.items);
+        // v0.79: on a kept library the library's entries are placeholders (never parsed), so the universe is built from the files
+        // on top, and every name the kept library defines -- its functions, classes and globals -- is added as defined
+        const walked = unit.roots.items[pre_start..];
+        var uni = try universe.Universe.build(alloc, walked, unit.missing, closed);
+        if (closed) try uni.addUnitSigs(alloc, walked, unit.paths.items[pre_start..]);
+        if (pre_c) |kc| {
+            var lib_names = std.ArrayListUnmanaged([]const u8){};
+            for (kc.funcs.items) |f| {
+                const dot = std.mem.lastIndexOfScalar(u8, f.name, '.');
+                try lib_names.append(alloc, if (dot) |d| f.name[d + 1 ..] else f.name);
+            }
+            for (kc.globals.items) |g| try lib_names.append(alloc, g);
+            try uni.addNatives(alloc, lib_names.items);
+            for (kc.classes.items) |cl| try uni.all_classes.put(try std.ascii.allocLowerString(alloc, cl.name), {});
+        }
         var n_natives: usize = 0;
         if (natives_path) |np| {
             const txt = std.fs.cwd().readFileAlloc(alloc, np, 64 << 20) catch {
@@ -5542,18 +5565,72 @@ pub fn main() !void {
             if (std.mem.eql(u8, a, "--facts")) want_facts = true;
         };
         var compiler_silent = false;
-        const fdata: ?co.FactsData = co.factsData(alloc, unit.roots.items) catch |e| blk: {
+        var check_blocked: []const u8 = "";
+        const fdata: ?co.FactsData = (if (pre_c) |kc| co.factsOnto(kc, unit.roots.items, pre_start, alloc) else co.factsData(alloc, unit.roots.items)) catch |e| blk: {
             if (want_facts) {
                 co.reportFailure(e);
                 std.process.exit(1);
             }
+            // a root that cannot stand on the kept library (it defines a name the library has): the unit loaded and compiled
+            // whole, as a run then compiles it
+            if (pre_c != null and e == co.Error.PrefixInapplicable) {
+                check_blocked = alloc.dupe(u8, if (co.prefix_blocked_by.len > 0) co.prefix_blocked_by else "its own reason") catch "";
+                pre_c = null;
+                pre_start = 0;
+                unit = Unit{};
+                try loadUnit(alloc, parser, argv[2], &unit, false, &.{});
+                co.load_paths = unit.paths.items;
+                const srcs = try alloc.alloc([*]const u8, unit.roots.items.len);
+                for (unit.roots.items, 0..) |r, i| srcs[i] = r.src.ptr;
+                co.load_srcs = srcs;
+                break :blk co.factsData(alloc, unit.roots.items) catch {
+                    compiler_silent = true;
+                    break :blk null;
+                };
+            }
             compiler_silent = true;
             break :blk null;
         };
+        if (pre_c != null) {
+            pathSay("kept library", .{});
+        } else if (check_blocked.len > 0) {
+            pathSay("whole, the kept library does not apply ({s})", .{check_blocked});
+        } else if (prefix_stale) {
+            pathSay("whole, the kept library is stale", .{});
+        } else pathSay("whole", .{});
+        // v0.79 (IRIS-NEED-HARO-02): what is reported -- the named file's folder and below; `--all`, every file of the unit. A
+        // file loaded from elsewhere (and every file of a kept library) is read for its names and counted, never reported.
+        var check_all = false;
+        for (argv[3..]) |a| {
+            if (std.mem.eql(u8, a, "--all")) check_all = true;
+        }
+        const named_dir = blk: {
+            const abs = std.fs.cwd().realpathAlloc(alloc, argv[2]) catch break :blk "";
+            break :blk std.fs.path.dirname(abs) orelse "";
+        };
+        const in_scope = try alloc.alloc(bool, unit.paths.items.len);
+        var outside: usize = 0;
+        for (unit.paths.items, 0..) |p, i| {
+            in_scope[i] = check_all or (i >= pre_start and blk: {
+                if (named_dir.len == 0) break :blk true;
+                const abs = std.fs.cwd().realpathAlloc(alloc, p) catch break :blk true;
+                if (!std.ascii.startsWithIgnoreCase(abs, named_dir)) break :blk false;
+                break :blk abs.len > named_dir.len and (abs[named_dir.len] == '\\' or abs[named_dir.len] == '/');
+            });
+            if (!in_scope[i]) outside += 1;
+        }
         const trapped: []const co.Trapped = if (fdata) |d| d.trapped else &.{};
         const placed = try alloc.alloc(bool, trapped.len);
         @memset(placed, false);
         for (unit.roots.items, 0..) |r, i| {
+            if (!in_scope[i]) {
+                // its refused statements are its own, and not reported: claimed here, so none is taken for a statement no file holds
+                if (i >= pre_start) {
+                    var unseen = check.Report.init(alloc);
+                    try addRefused(alloc, &unseen, r, unit.paths.items[i], unit.inserts.items[i], trapped, placed);
+                }
+                continue;
+            }
             const path = unit.paths.items[i];
             const read = unit.origs.items[i].len != 0;
             if (read) check.checkLifted(alloc, r, path, &report, ctx, opts, unit.inserts.items[i]) catch {};
@@ -5594,8 +5671,9 @@ pub fn main() !void {
         const c = report.counts();
         try w.print(
             "\n  {d} error, {d} warn, {d} perf, {d} note   in {d} file(s)\n",
-            .{ c.err, c.warn, c.perf, c.note, unit.roots.items.len },
+            .{ c.err, c.warn, c.perf, c.note, unit.roots.items.len - outside },
         );
+        if (outside > 0) try w.print("  {d} file(s) loaded from outside its folder: read for their names, not reported (--all reports them)\n", .{outside});
         if (c.adv > 0 and !advise) {
             try w.print("  {d} place(s) where a measured idiom is faster -- add --advise to see them\n", .{c.adv});
         }

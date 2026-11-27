@@ -75,6 +75,15 @@ pub fn isBuiltin(lowname: []const u8) bool {
     for (names) |n| {
         if (std.mem.eql(u8, n, lowname)) return true;
     }
+    // v0.79 (MARBOOHA-HARO-01): every other name haro.exe answers with no load -- its compiler's built-ins (Divide, Float,
+    // Keys, ...), the spellings of this file's table (a registered underscore dropped: TUISize), and the natives haro.exe
+    // publishes when it starts (rpp_http_*, systemcmd), which are registered before `check` reads a file
+    if (@import("compile.zig").isIntrinsic(lowname)) return true;
+    for (pascal) |e| {
+        if (std.mem.eql(u8, e[0], lowname)) return true;
+        if (std.ascii.eqlIgnoreCase(e[1], lowname)) return true;
+    }
+    if (@import("native.zig").find(lowname) != null) return true;
     return false;
 }
 

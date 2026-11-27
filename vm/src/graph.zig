@@ -15,7 +15,8 @@
 //!                                        A name is `Class.method` for a method and `name` for a function; `<top>` is a file's own statements
 //!   CALL|<caller>|<name>|dynamic|<n>     a method call it could only dispatch by name; n is how many methods of the unit carry the name --
 //!                                        an over-approximation, and the number says how large
-//!   CALL|<caller>|*|late|<n>             v0.77: n calls by a name built when the program runs (`call x()`): no edge can be drawn, and
+//!   CALL|<caller>|*|late|<n>             v0.77: n calls by a name built when the program runs (`call x()`), and v0.79 each Eval no
+//!                                        function of the unit answers (its text may call anything): no edge can be drawn, and
 //!                                        the line says the caller's edges have a hole and how large
 //!   UNFINISHED|<function>                the compiler could not finish this function: its edges are MISSING, which is not the same as absent
 //!

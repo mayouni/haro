@@ -41,6 +41,7 @@ const builtins = @import("builtins.zig");
 const ts = @import("ts.zig");
 const lift = @import("lift.zig");
 const chk = @import("check.zig");
+const Comp = @import("compile.zig").Compiler;
 // src/project.zig held the package model of the library era and went with
 // it (52ed663). This module used exactly ONE function out of its 753
 // lines, so that function is here rather than the file being resurrected.
@@ -812,11 +813,113 @@ const Walker = struct {
             return;
         }
 
+        if (lift.isHaro(self.file)) try self.checkHaroTypes(n, kind);
         if (std.mem.eql(u8, kind, "function_definition")) try self.checkFunction(n);
         if (std.mem.eql(u8, kind, "call_expression")) try self.checkCall(n, now_in_class);
 
         var i: u32 = 0;
         while (i < n.childCount()) : (i += 1) try self.visit(n.child(i), now_in_class);
+    }
+
+    // ---- v0.79: what the run of a .haro file will refuse, where the file alone shows it -------------------------------
+    // stzlib-gpu and marbooha, 2026-11-27: text + a number, a decimal + a float, a float + an integer, 1 / 3, a quotient given
+    // to an i name and a decimal index were all refused by the run and passed here. A side shows its type by a literal, by a
+    // name's type letter, or by a call whose answer has one type; a name lettered x, or anything else, shows none, and then
+    // nothing is said -- the run still refuses what it finds.
+
+    /// The type a side of an expression shows: 't', 'i', 'd', 'f', 'n' (a number of unknown kind), or null
+    fn sideType(n: ts.Node) ?u8 {
+        const k = n.kind();
+        if (std.mem.eql(u8, k, "parenthesized_expression") and n.namedChildCount() == 1) return sideType(n.namedChild(0));
+        if (std.mem.eql(u8, k, "identifier")) {
+            const l = Comp.letterOf(n.text()) orelse return null;
+            return switch (l) {
+                't', 'i', 'd', 'f', 'n' => l,
+                else => null,
+            };
+        }
+        if (std.mem.eql(u8, k, "call_expression") and n.namedChildCount() > 0) {
+            const callee = n.namedChild(0);
+            if (!std.mem.eql(u8, callee.kind(), "identifier")) return null;
+            const c = callee.text();
+            if (std.ascii.eqlIgnoreCase(c, "String")) return 't';
+            if (std.ascii.eqlIgnoreCase(c, "Float")) return 'f';
+            if (std.ascii.eqlIgnoreCase(c, "Integer")) return 'i';
+            if (std.ascii.eqlIgnoreCase(c, "Decimal")) return 'd';
+            return null;
+        }
+        const lit = Comp.literalLetter(n) orelse return null;
+        return switch (lit) {
+            't', 'i', 'd', 'f' => lit,
+            else => null,
+        };
+    }
+
+    fn typeWordOf(l: u8) []const u8 {
+        return switch (l) {
+            't' => "text",
+            'i' => "integer",
+            'd' => "decimal",
+            'f' => "float",
+            else => "number",
+        };
+    }
+
+    fn isNumberType(l: u8) bool {
+        return l == 'i' or l == 'd' or l == 'f' or l == 'n';
+    }
+
+    /// Two integer literals whose quotient has no exact decimal: reduced, the divisor has a prime factor other than 2 and 5
+    fn inexactQuotient(a: ts.Node, b: ts.Node) bool {
+        if (!std.mem.eql(u8, a.kind(), "number") or !std.mem.eql(u8, b.kind(), "number")) return false;
+        const x = std.fmt.parseInt(i64, std.mem.trim(u8, a.text(), " \t"), 10) catch return false;
+        var y = std.fmt.parseInt(i64, std.mem.trim(u8, b.text(), " \t"), 10) catch return false;
+        if (y == 0) return false;
+        y = @divTrunc(y, @as(i64, @intCast(std.math.gcd(@abs(x), @abs(y)))));
+        if (y < 0) y = -y;
+        while (@rem(y, 2) == 0) y = @divTrunc(y, 2);
+        while (@rem(y, 5) == 0) y = @divTrunc(y, 5);
+        return y != 1;
+    }
+
+    fn checkHaroTypes(self: *Walker, n: ts.Node, kind: []const u8) !void {
+        if (std.mem.eql(u8, kind, "binary_expression") and n.namedChildCount() == 2) {
+            const op = Comp.opText(n);
+            const arith = std.mem.eql(u8, op, "+") or std.mem.eql(u8, op, "-") or std.mem.eql(u8, op, "*") or std.mem.eql(u8, op, "/");
+            if (!arith) return;
+            const a = n.namedChild(0);
+            const b = n.namedChild(1);
+            if (sideType(a)) |ta| if (sideType(b)) |tb| {
+                if ((ta == 't' and isNumberType(tb)) or (tb == 't' and isNumberType(ta))) {
+                    try self.report.add(self.gpa, self.file, n, .err, "haro/no-coercion", "{s} {s} {s} — Error (NO_COERCION) the moment this line runs", .{ typeWordOf(ta), op, typeWordOf(tb) }, "In a .haro file a value changes type only when asked: String(x) makes text of a number, Number(t) a number of a text. Both sides of this expression show their type -- a literal, a type letter, or a call that answers one type -- so the run's refusal is certain here.");
+                    return;
+                }
+                const mix = (ta == 'f' and (tb == 'd' or tb == 'i')) or (tb == 'f' and (ta == 'd' or ta == 'i'));
+                if (mix) {
+                    try self.report.add(self.gpa, self.file, n, .err, "haro/number-mix", "{s} {s} {s} — Error (NUMBER_MIX) the moment this line runs", .{ typeWordOf(ta), op, typeWordOf(tb) }, "A float mixes with no other number: convert one side -- Float(x) for a float, Decimal(f, iPlaces) for a decimal. Both sides of this expression show their type, so the run's refusal is certain here.");
+                    return;
+                }
+            };
+            if (std.mem.eql(u8, op, "/") and inexactQuotient(a, b)) {
+                try self.report.add(self.gpa, self.file, n, .err, "haro/decimal-inexact", "{s} has no exact decimal — Error (DECIMAL_INEXACT) the moment this line runs", .{n.text()}, "A quotient of two integers in a .haro file is an exact decimal or refused. Round it, Divide(a, b, iPlaces), or divide floats, Float(a) / Float(b).");
+            }
+            return;
+        }
+        if (std.mem.eql(u8, kind, "assignment_expression") and n.namedChildCount() >= 2 and std.mem.eql(u8, Comp.opText(n), "=")) {
+            const lhs = n.namedChild(0);
+            var rhs = n.namedChild(1);
+            while (std.mem.eql(u8, rhs.kind(), "parenthesized_expression") and rhs.namedChildCount() == 1) rhs = rhs.namedChild(0);
+            if (!std.mem.eql(u8, lhs.kind(), "identifier") or !std.mem.eql(u8, rhs.kind(), "binary_expression")) return;
+            if ((Comp.letterOf(lhs.text()) orelse 0) != 'i' or !std.mem.eql(u8, Comp.opText(rhs), "/")) return;
+            try self.report.add(self.gpa, self.file, rhs, .err, "haro/type-letter", "`{s}` is lettered i, an integer, and is given a quotient, which is a decimal — Error (TYPE_LETTER) the moment this line runs", .{lhs.text()}, "In a .haro file `/` answers a decimal (or refuses), whatever its two sides: give the quotient to a d name, or make it an integer when it is whole, Integer(a / b).");
+            return;
+        }
+        if (std.mem.eql(u8, kind, "subscript_expression") and n.namedChildCount() >= 2) {
+            const ix = n.namedChild(1);
+            const t = sideType(ix) orelse return;
+            if (t != 'd' and t != 'f') return;
+            try self.report.add(self.gpa, self.file, ix, .err, "haro/index-not-integer", "the index `{s}` is a {s} — Error (INDEX_NOT_INTEGER) the moment this line runs", .{ ix.text(), typeWordOf(t) }, "A list is indexed by an integer: Integer(x) makes one of a whole decimal or float.");
+        }
     }
 
     fn checkFunction(self: *Walker, n: ts.Node) !void {

@@ -4292,6 +4292,14 @@ pub const VM = struct {
         };
         return self.haroMsg("Error (BOOLEAN_EXPECTED) : a condition takes a boolean, and this is {s} -- say what is meant: {s}", .{ typeArticle(v), todo });
     }
+    /// v0.79 (MARBOOHA-HARO-01): a list's index that is not an integer. In .haro code a decimal or a float is named, with its
+    /// value and the conversion that makes it one; anywhere else it stays Ring's "Bad parameter type!"
+    fn badIndex(self: *VM, pc: u32, iv: Value) []const u8 {
+        if (!self.strictAt(pc) or (iv.tag != .dec and iv.tag != .num)) return BADPARAM;
+        var buf: [64]u8 = undefined;
+        const t = numText(iv, &buf);
+        return self.haroMsg("Error (INDEX_NOT_INTEGER) : a list is indexed by an integer, and this index is {s} {s}{s} -- Integer(x) when it is whole", .{ if (iv.tag == .dec) @as([]const u8, "the decimal") else "the float", t, if (iv.tag == .num) @as([]const u8, "f") else "" });
+    }
     fn coerceErr(self: *VM, op: []const u8, x: Value, y: Value) []const u8 {
         const todo: []const u8 = if (x.tag == .boolean or y.tag == .boolean) "a comparison, or string(b)" else "string(x) or number(x)";
         return self.haroMsg("Error (NO_COERCION) : {s} {s} {s} -- a value changes type only when asked: {s}", .{ typeWord(x), op, typeWord(y), todo });
@@ -6385,7 +6393,7 @@ pub const VM = struct {
                 // same instruction from here on.
                 if (iv.tag == .str) continue :dispatch .hget;
                 if (iv.tag != .int) {
-                    self.pending = BADPARAM;
+                    self.pending = self.badIndex(pc, iv);
                     continue :dispatch .raise;
                 }
                 const v = vv.p.v;
@@ -6425,7 +6433,7 @@ pub const VM = struct {
                 // sit in the same registers (a=container, b=key, c=value).
                 if (iv.tag == .str) continue :dispatch .hset;
                 if (iv.tag != .int) {
-                    self.pending = BADPARAM;
+                    self.pending = self.badIndex(pc, iv);
                     continue :dispatch .raise;
                 }
                 const v = self.cowFor(base + in.a, vv);
@@ -9600,7 +9608,7 @@ pub const VM = struct {
                     continue :dispatch .opcall;
                 }
                 if (iv.tag != .int) {
-                    self.pending = BADPARAM;
+                    self.pending = self.badIndex(pc, iv);
                     continue :dispatch .raise;
                 }
                 const idx = iv.p.i;
@@ -9662,7 +9670,7 @@ pub const VM = struct {
                     e = pair.p.v.ptr[1];
                 } else {
                     if (iv.tag != .int) {
-                        self.pending = BADPARAM;
+                        self.pending = self.badIndex(pc, iv);
                         continue :dispatch .raise;
                     }
                     const idx = iv.p.i;

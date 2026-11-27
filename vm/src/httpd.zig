@@ -284,9 +284,21 @@ fn httpReply(args: [*]const RppVal, argc: u32, out: *RppVal) callconv(.c) c_int 
         out.* = RppVal.int(0);
         return 0;
     };
+    // v0.79 (MARBOOHA-HARO-01): the type goes into the head, so a CR or an LF in it would end the Content-Type line and
+    // write a header the program never wrote; and a type over 200 bytes was cut where it stood. Both are refused, the
+    // reply is not sent, and the request stays open for the program to answer again.
+    if (std.mem.indexOfAny(u8, ctype, "\r\n") != null or ctype.len > 200) {
+        out_buf.clearRetainingCapacity();
+        const why = if (ctype.len > 200) "is longer than 200 bytes" else "holds a line break (CR or LF), which would end the header and begin another";
+        var mb: [256]u8 = undefined;
+        const msg = std.fmt.bufPrint(&mb, "Error (HEADER_VALUE) : a reply's type {s} -- give the type alone, such as \"text/plain; charset=utf-8\"; the reply is not sent", .{why}) catch return 1;
+        out_buf.appendSlice(alloc, msg) catch return 1;
+        out.* = RppVal.str(out_buf.items);
+        return 1;
+    }
     const status: u16 = if (st >= 100 and st <= 999) @intFromFloat(st) else 500;
     var hdr: [512]u8 = undefined;
-    const h = std.fmt.bufPrint(&hdr, "HTTP/1.1 {d} {s}\r\nContent-Type: {s}\r\nContent-Length: {d}\r\nConnection: close\r\n\r\n", .{ status, reason(status), ctype[0..@min(ctype.len, 200)], text.len }) catch return 1;
+    const h = std.fmt.bufPrint(&hdr, "HTTP/1.1 {d} {s}\r\nContent-Type: {s}\r\nContent-Length: {d}\r\nConnection: close\r\n\r\n", .{ status, reason(status), ctype, text.len }) catch return 1;
     // ONE send, head and body together. Measured 2026-10-31: as two, every
     // request took a Windows timer tick (~15 ms) -- Nagle held the body until
     // the head was acknowledged, and the client delays its ACK
