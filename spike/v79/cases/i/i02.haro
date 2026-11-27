@@ -1,0 +1,3 @@
+vL = ["a", "b", "c"]
+fI = 2.0f
+print vL[fI]

@@ -1,0 +1,4 @@
+load "show.ring"
+nLines = 5
+Show()
+print nLines

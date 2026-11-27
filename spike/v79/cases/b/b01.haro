@@ -1,0 +1,14 @@
+dA = 7 / 2
+dB = Divide(1, 3, 4)
+fC = Float(dA)
+dD = Decimal(fC, 2)
+iE = Integer(4.0)
+bF = Near(fC, 3.5f, 0.01f)
+tG = Text(dB, 4)
+dH = Round(dB, 2)
+mI = ["k": 1]
+vJ = Keys(mI)
+bK = HasKey(mI, "k")
+bL = IsEmpty("")
+print tG
+print bK

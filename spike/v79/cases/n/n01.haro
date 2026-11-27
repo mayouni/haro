@@ -1,0 +1,3 @@
+load "show.ring"
+nL = 5
+Show()

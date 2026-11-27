@@ -1,0 +1,7 @@
+func Twice(iN)
+	return iN * 2
+end
+
+func Broken
+	NoSuchInLib()
+end

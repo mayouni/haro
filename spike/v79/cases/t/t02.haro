@@ -1,0 +1,4 @@
+tA = "count "
+iB = 3
+tC = tA + iB
+print tC

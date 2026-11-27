@@ -1,0 +1,5 @@
+func Main
+	tA = "a"
+	iN = 2
+	print tA + iN
+end

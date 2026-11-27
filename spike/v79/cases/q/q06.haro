@@ -1,0 +1,4 @@
+iA = 10
+iB = 5
+iN = iA / iB
+print iN

@@ -1,0 +1,922 @@
+{
+ "rung": "v0.79",
+ "written": "before any code",
+ "cases": [
+  {
+   "id": "H01",
+   "line": "H1",
+   "kind": "http",
+   "file": "h/h01.haro",
+   "what": "a reply with a plain type is sent as it was: the head and the body",
+   "reply": "HTTP/1.1 200 OK\r\nContent-Type: text/plain; charset=utf-8\r\nContent-Length: 5\r\nConnection: close\r\n\r\nhello",
+   "stdout": "listening 1\nreplied\n",
+   "exit": 0
+  },
+  {
+   "id": "H02",
+   "line": "H1",
+   "kind": "http",
+   "file": "h/h02.haro",
+   "what": "a type holding CR LF is refused with HEADER_VALUE, nothing is sent, and the program answers the request again",
+   "reply": "HTTP/1.1 400 Bad Request\r\nContent-Type: text/plain\r\nContent-Length: 7\r\nConnection: close\r\n\r\nrefused",
+   "stdout": "listening 1\nHEADER_VALUE\nreplied\n",
+   "exit": 0,
+   "never": "X-Injected"
+  },
+  {
+   "id": "H03",
+   "line": "H1",
+   "kind": "http",
+   "file": "h/h03.haro",
+   "what": "a type holding LF alone is refused with HEADER_VALUE",
+   "reply": "HTTP/1.1 400 Bad Request\r\nContent-Type: text/plain\r\nContent-Length: 7\r\nConnection: close\r\n\r\nrefused",
+   "stdout": "listening 1\nHEADER_VALUE\n",
+   "exit": 0,
+   "never": "X-Injected"
+  },
+  {
+   "id": "H04",
+   "line": "H1",
+   "kind": "http",
+   "file": "h/h04.haro",
+   "what": "a type holding CR alone is refused with HEADER_VALUE",
+   "reply": "HTTP/1.1 400 Bad Request\r\nContent-Type: text/plain\r\nContent-Length: 7\r\nConnection: close\r\n\r\nrefused",
+   "stdout": "listening 1\nHEADER_VALUE\n",
+   "exit": 0,
+   "never": "X-Injected"
+  },
+  {
+   "id": "H05",
+   "line": "H1",
+   "kind": "http",
+   "file": "h/h05.haro",
+   "what": "a type of 201 bytes is refused with HEADER_VALUE, where v0.78 cut it at 200",
+   "reply": "HTTP/1.1 400 Bad Request\r\nContent-Type: text/plain\r\nContent-Length: 7\r\nConnection: close\r\n\r\nrefused",
+   "stdout": "listening 1\n201\nHEADER_VALUE\n",
+   "exit": 0
+  },
+  {
+   "id": "H06",
+   "line": "H1",
+   "kind": "http",
+   "file": "h/h06.haro",
+   "what": "a type of 200 bytes is sent whole",
+   "reply": "HTTP/1.1 200 OK\r\nContent-Type: text/plain; x=aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa\r\nContent-Length: 5\r\nConnection: close\r\n\r\nwhole",
+   "stdout": "listening 1\n200\nreplied\n",
+   "exit": 0
+  },
+  {
+   "id": "H07",
+   "line": "H1",
+   "kind": "http",
+   "file": "h/h07.haro",
+   "what": "a refusal nobody catches ends the program with 1, naming HEADER_VALUE, and no reply carries the header",
+   "reply": "",
+   "has": [
+    "HEADER_VALUE"
+   ],
+   "never_out": "not reached",
+   "exit": 1,
+   "never": "X-Injected"
+  },
+  {
+   "id": "B01",
+   "line": "B1",
+   "kind": "check",
+   "file": "b/b01.haro",
+   "what": "`check` knows Divide, Float, Decimal, Integer, Near, Text, Round, Keys, HasKey and IsEmpty, which haro.exe runs",
+   "never": [
+    "haro/undefined-function"
+   ],
+   "run": {
+    "stdout": "0.3333\ntrue\n",
+    "exit": 0
+   }
+  },
+  {
+   "id": "B02",
+   "line": "B1",
+   "kind": "check",
+   "file": "b/b02.haro",
+   "what": "`check` knows the eight rpp_http_ natives and SystemCmd, which haro.exe publishes at start-up",
+   "never": [
+    "haro/undefined-function"
+   ],
+   "run": {
+    "stdout": "named\n",
+    "exit": 0
+   }
+  },
+  {
+   "id": "B03",
+   "line": "B2",
+   "kind": "check",
+   "file": "b/b03.haro",
+   "what": "a name haro.exe does not answer is still undefined: one letter off a built-in, one off a native",
+   "rules": [
+    [
+     1,
+     "haro/undefined-function"
+    ],
+    [
+     2,
+     "haro/undefined-function"
+    ]
+   ]
+  },
+  {
+   "id": "B04",
+   "line": "B1",
+   "kind": "check",
+   "file": "b/b04.ring",
+   "what": "a .ring file reaches the natives too, and `check` knows them there",
+   "never": [
+    "haro/undefined-function"
+   ],
+   "run": {
+    "stdout": "named\n",
+    "exit": 0
+   }
+  },
+  {
+   "id": "B05",
+   "line": "B1",
+   "kind": "check",
+   "file": "b/b05.haro",
+   "what": "`check` knows every one of the 283 names the compiler's table and the spelling table name, as written today (Eval, LoadLib and the calls that admit code apart: any one switches the rule off for its file, as it always has)",
+   "never": [
+    "haro/undefined-function"
+   ]
+  },
+  {
+   "id": "T01",
+   "line": "T1",
+   "kind": "check",
+   "file": "t/t01.haro",
+   "what": "text + an integer literal: `check` says NO_COERCION where the run refuses it",
+   "rules": [
+    [
+     1,
+     "haro/no-coercion"
+    ]
+   ],
+   "says": [
+    "NO_COERCION"
+   ],
+   "run": {
+    "has": [
+     "Error (NO_COERCION)"
+    ],
+    "exit": 1
+   }
+  },
+  {
+   "id": "T02",
+   "line": "T1",
+   "kind": "check",
+   "file": "t/t02.haro",
+   "what": "a t name + an i name: the letters show it, and `check` says NO_COERCION",
+   "rules": [
+    [
+     3,
+     "haro/no-coercion"
+    ]
+   ],
+   "says": [
+    "NO_COERCION"
+   ],
+   "run": {
+    "has": [
+     "Error (NO_COERCION)"
+    ],
+    "exit": 1
+   }
+  },
+  {
+   "id": "T03",
+   "line": "T2",
+   "kind": "check",
+   "file": "t/t03.haro",
+   "what": "text + String(i) is text + text: no finding, and the run prints it",
+   "never": [
+    "haro/no-coercion"
+   ],
+   "run": {
+    "stdout": "count 3\n",
+    "exit": 0
+   }
+  },
+  {
+   "id": "T04",
+   "line": "T2",
+   "kind": "check",
+   "file": "t/t04.haro",
+   "what": "a name lettered x shows no type: `check` says nothing, and the run still refuses it -- what stays",
+   "never": [
+    "haro/no-coercion"
+   ],
+   "run": {
+    "has": [
+     "Error (NO_COERCION)"
+    ],
+    "exit": 1
+   }
+  },
+  {
+   "id": "T05",
+   "line": "T1",
+   "kind": "check",
+   "file": "t/t05.haro",
+   "what": "a d name + an f name: `check` says NUMBER_MIX where the run refuses it",
+   "rules": [
+    [
+     3,
+     "haro/number-mix"
+    ]
+   ],
+   "says": [
+    "NUMBER_MIX"
+   ],
+   "run": {
+    "has": [
+     "Error (NUMBER_MIX)"
+    ],
+    "exit": 1
+   }
+  },
+  {
+   "id": "T06",
+   "line": "T1",
+   "kind": "check",
+   "file": "t/t06.haro",
+   "what": "an f name * an integer literal: NUMBER_MIX in `check` and in the run",
+   "rules": [
+    [
+     2,
+     "haro/number-mix"
+    ]
+   ],
+   "says": [
+    "NUMBER_MIX"
+   ],
+   "run": {
+    "has": [
+     "Error (NUMBER_MIX)"
+    ],
+    "exit": 1
+   }
+  },
+  {
+   "id": "T07",
+   "line": "T2",
+   "kind": "check",
+   "file": "t/t07.haro",
+   "what": "an f name * Float(3) is two floats: no finding, and the run prints it",
+   "never": [
+    "haro/number-mix"
+   ],
+   "run": {
+    "stdout": "6\n",
+    "exit": 0
+   }
+  },
+  {
+   "id": "T08",
+   "line": "T1",
+   "kind": "check",
+   "file": "t/t08.haro",
+   "what": "inside a function as at the top level: a t local + an i local is NO_COERCION in `check`",
+   "rules": [
+    [
+     4,
+     "haro/no-coercion"
+    ]
+   ],
+   "says": [
+    "NO_COERCION"
+   ],
+   "run": {
+    "has": [
+     "Error (NO_COERCION)"
+    ],
+    "exit": 1
+   }
+  },
+  {
+   "id": "Q01",
+   "line": "Q1",
+   "kind": "check",
+   "file": "q/q01.haro",
+   "what": "1 / 3 has no exact decimal: `check` says DECIMAL_INEXACT where the run refuses it",
+   "rules": [
+    [
+     1,
+     "haro/decimal-inexact"
+    ]
+   ],
+   "says": [
+    "DECIMAL_INEXACT"
+   ],
+   "run": {
+    "has": [
+     "Error (DECIMAL_INEXACT)"
+    ],
+    "exit": 1
+   }
+  },
+  {
+   "id": "Q02",
+   "line": "Q2",
+   "kind": "check",
+   "file": "q/q02.haro",
+   "what": "1 / 4 is exactly 0.25: no finding, and the run prints it",
+   "never": [
+    "haro/decimal-inexact"
+   ],
+   "run": {
+    "stdout": "0.25\n",
+    "exit": 0
+   }
+  },
+  {
+   "id": "Q03",
+   "line": "Q1",
+   "kind": "check",
+   "file": "q/q03.haro",
+   "what": "a quotient given to an i name, even 10 / 5: `check` says TYPE_LETTER where the run refuses it",
+   "rules": [
+    [
+     1,
+     "haro/type-letter"
+    ]
+   ],
+   "says": [
+    "TYPE_LETTER"
+   ],
+   "run": {
+    "has": [
+     "Error (TYPE_LETTER)"
+    ],
+    "exit": 1
+   }
+  },
+  {
+   "id": "Q04",
+   "line": "Q2",
+   "kind": "check",
+   "file": "q/q04.haro",
+   "what": "10 / 5 given to a d name: no finding, and the run prints 2",
+   "never": [
+    "haro/type-letter",
+    "haro/decimal-inexact"
+   ],
+   "run": {
+    "stdout": "2\n",
+    "exit": 0
+   }
+  },
+  {
+   "id": "Q05",
+   "line": "Q2",
+   "kind": "check",
+   "file": "q/q05.haro",
+   "what": "a quotient of two names: their values are the run's, so `check` says nothing and the run still refuses 1 / 3 -- what stays",
+   "never": [
+    "haro/decimal-inexact"
+   ],
+   "run": {
+    "has": [
+     "Error (DECIMAL_INEXACT)"
+    ],
+    "exit": 1
+   }
+  },
+  {
+   "id": "Q06",
+   "line": "Q1",
+   "kind": "check",
+   "file": "q/q06.haro",
+   "what": "a quotient of two names given to an i name: the letter shows it whatever the values",
+   "rules": [
+    [
+     3,
+     "haro/type-letter"
+    ]
+   ],
+   "says": [
+    "TYPE_LETTER"
+   ],
+   "run": {
+    "has": [
+     "Error (TYPE_LETTER)"
+    ],
+    "exit": 1
+   }
+  },
+  {
+   "id": "N01",
+   "line": "N1",
+   "kind": "check",
+   "file": "n/n01.haro",
+   "what": "a top-level `nL = 5` is refused when compiling, NAME_RESERVED, and `check` names it at the run's line",
+   "rules": [
+    [
+     2,
+     "haro/refused-form"
+    ]
+   ],
+   "says": [
+    "NAME_RESERVED"
+   ],
+   "run": {
+    "has": [
+     "NAME_RESERVED"
+    ],
+    "never": "x5y",
+    "exit": 1
+   }
+  },
+  {
+   "id": "N02",
+   "line": "N1",
+   "kind": "check",
+   "file": "n/n02.haro",
+   "what": "a top-level `tAb` is refused the same: it would replace the tab every older file reads",
+   "rules": [
+    [
+     2,
+     "haro/refused-form"
+    ]
+   ],
+   "says": [
+    "NAME_RESERVED"
+   ],
+   "run": {
+    "has": [
+     "NAME_RESERVED"
+    ],
+    "never": "xTy",
+    "exit": 1
+   }
+  },
+  {
+   "id": "N03",
+   "line": "N2",
+   "kind": "check",
+   "file": "n/n03.haro",
+   "what": "a function's own `nL` is its local: no refusal, and the older file's line end is untouched",
+   "never": [
+    "NAME_RESERVED"
+   ],
+   "run": {
+    "stdout": "5\nx\ty\nz\n",
+    "exit": 0
+   }
+  },
+  {
+   "id": "N04",
+   "line": "N2",
+   "kind": "check",
+   "file": "n/n04.haro",
+   "what": "`nLines` is another name: no refusal",
+   "never": [
+    "NAME_RESERVED"
+   ],
+   "run": {
+    "stdout": "x\ty\nz\n5\n",
+    "exit": 0
+   }
+  },
+  {
+   "id": "N05",
+   "line": "N1",
+   "kind": "check",
+   "file": "n/n05.haro",
+   "what": "a top-level `nL` is refused in a file that loads no older file too: the name is reserved, wherever it would land",
+   "rules": [
+    [
+     1,
+     "haro/refused-form"
+    ]
+   ],
+   "says": [
+    "NAME_RESERVED"
+   ],
+   "run": {
+    "has": [
+     "NAME_RESERVED"
+    ],
+    "never": "after",
+    "exit": 1
+   }
+  },
+  {
+   "id": "N06",
+   "line": "N2",
+   "kind": "check",
+   "file": "n/n06.ring",
+   "what": "a .ring file reads as it did: its own `nl = \"|\"` replaces the line end, as it always has",
+   "never": [
+    "NAME_RESERVED"
+   ],
+   "run": {
+    "stdout": "x\ty|z\n",
+    "exit": 0
+   }
+  },
+  {
+   "id": "I01",
+   "line": "I1",
+   "kind": "check",
+   "file": "i/i01.haro",
+   "what": "a d name as an index: INDEX_NOT_INTEGER in `check` and in the run, naming the decimal",
+   "rules": [
+    [
+     3,
+     "haro/index-not-integer"
+    ]
+   ],
+   "says": [
+    "INDEX_NOT_INTEGER"
+   ],
+   "run": {
+    "has": [
+     "Error (INDEX_NOT_INTEGER)",
+     "2.0"
+    ],
+    "never": "Bad parameter type",
+    "exit": 1
+   }
+  },
+  {
+   "id": "I02",
+   "line": "I1",
+   "kind": "check",
+   "file": "i/i02.haro",
+   "what": "an f name as an index: INDEX_NOT_INTEGER, naming the float",
+   "rules": [
+    [
+     3,
+     "haro/index-not-integer"
+    ]
+   ],
+   "says": [
+    "INDEX_NOT_INTEGER"
+   ],
+   "run": {
+    "has": [
+     "Error (INDEX_NOT_INTEGER)"
+    ],
+    "never": "Bad parameter type",
+    "exit": 1
+   }
+  },
+  {
+   "id": "I03",
+   "line": "I1",
+   "kind": "check",
+   "file": "i/i03.haro",
+   "what": "a decimal literal as an index: INDEX_NOT_INTEGER",
+   "rules": [
+    [
+     2,
+     "haro/index-not-integer"
+    ]
+   ],
+   "says": [
+    "INDEX_NOT_INTEGER"
+   ],
+   "run": {
+    "has": [
+     "Error (INDEX_NOT_INTEGER)"
+    ],
+    "exit": 1
+   }
+  },
+  {
+   "id": "I04",
+   "line": "I2",
+   "kind": "check",
+   "file": "i/i04.haro",
+   "what": "Integer(dI) is an integer: no finding, and the run prints b",
+   "never": [
+    "haro/index-not-integer"
+   ],
+   "run": {
+    "stdout": "b\n",
+    "exit": 0
+   }
+  },
+  {
+   "id": "I05",
+   "line": "I2",
+   "kind": "check",
+   "file": "i/i05.haro",
+   "what": "an x name holding a decimal: `check` cannot see it, and the run names it -- INDEX_NOT_INTEGER, not \"Bad parameter type!\"",
+   "never": [
+    "haro/index-not-integer"
+   ],
+   "run": {
+    "has": [
+     "Error (INDEX_NOT_INTEGER)"
+    ],
+    "never": "Bad parameter type",
+    "exit": 1
+   }
+  },
+  {
+   "id": "I06",
+   "line": "I1",
+   "kind": "check",
+   "file": "i/i06.haro",
+   "what": "a decimal index written into is refused the same",
+   "rules": [
+    [
+     3,
+     "haro/index-not-integer"
+    ]
+   ],
+   "says": [
+    "INDEX_NOT_INTEGER"
+   ],
+   "run": {
+    "has": [
+     "Error (INDEX_NOT_INTEGER)"
+    ],
+    "exit": 1
+   }
+  },
+  {
+   "id": "C01",
+   "line": "C1",
+   "kind": "check",
+   "file": "c/c01.haro",
+   "what": "Add(vA), the value to add missing: refused by name in `check` and in the run, where v0.78 crashed both",
+   "rules": [
+    [
+     2,
+     "haro/refused-form"
+    ]
+   ],
+   "says": [
+    "a builtin called with the wrong number of arguments"
+   ],
+   "never": [
+    "Segmentation fault"
+   ],
+   "run": {
+    "has": [
+     "a builtin called with the wrong number of arguments"
+    ],
+    "never": "Segmentation fault",
+    "exit": 1
+   }
+  },
+  {
+   "id": "C02",
+   "line": "C1",
+   "kind": "check",
+   "file": "c/c02.haro",
+   "what": "Add() with nothing: refused by name in `check` and in the run, where v0.78 crashed both",
+   "rules": [
+    [
+     2,
+     "haro/refused-form"
+    ]
+   ],
+   "says": [
+    "a builtin called with the wrong number of arguments"
+   ],
+   "never": [
+    "Segmentation fault"
+   ],
+   "run": {
+    "has": [
+     "a builtin called with the wrong number of arguments"
+    ],
+    "never": "Segmentation fault",
+    "exit": 1
+   }
+  },
+  {
+   "id": "C03",
+   "line": "C1",
+   "kind": "check",
+   "file": "c/c03.haro",
+   "what": "Len() with nothing: refused by name in `check` and in the run, where v0.78 crashed both",
+   "rules": [
+    [
+     1,
+     "haro/refused-form"
+    ]
+   ],
+   "says": [
+    "a builtin called with the wrong number of arguments"
+   ],
+   "never": [
+    "Segmentation fault"
+   ],
+   "run": {
+    "has": [
+     "a builtin called with the wrong number of arguments"
+    ],
+    "never": "Segmentation fault",
+    "exit": 1
+   }
+  },
+  {
+   "id": "C04",
+   "line": "C1",
+   "kind": "check",
+   "file": "c/c04.ring",
+   "what": "add(a) in a .ring file: refused by name in `check` and in the run, where v0.78 crashed both",
+   "rules": [
+    [
+     2,
+     "haro/refused-form"
+    ]
+   ],
+   "says": [
+    "a builtin called with the wrong number of arguments"
+   ],
+   "never": [
+    "Segmentation fault"
+   ],
+   "run": {
+    "has": [
+     "a builtin called with the wrong number of arguments"
+    ],
+    "never": "Segmentation fault",
+    "exit": 1
+   }
+  },
+  {
+   "id": "C05",
+   "line": "C1",
+   "kind": "check",
+   "file": "c/c05.haro",
+   "what": "Add(vA) on a function's local: refused by name in `check` and in the run, where v0.78 crashed both",
+   "rules": [
+    [
+     3,
+     "haro/refused-form"
+    ]
+   ],
+   "says": [
+    "a builtin called with the wrong number of arguments"
+   ],
+   "never": [
+    "Segmentation fault"
+   ],
+   "run": {
+    "has": [
+     "a builtin called with the wrong number of arguments"
+    ],
+    "never": "Segmentation fault",
+    "exit": 1
+   }
+  },
+  {
+   "id": "E01",
+   "line": "E1",
+   "kind": "graph",
+   "file": "e/e01.haro",
+   "what": "an Eval in a function is a late call of that function",
+   "stdout": "FILE|e01.haro\nFUNC|Hello|1\nFUNC|Go|4\nCALL|<top>|Go|static\nCALL|Go|*|late|1\nCALL|Go|Hello|static\n"
+  },
+  {
+   "id": "E02",
+   "line": "E1",
+   "kind": "graph",
+   "file": "e/e02.haro",
+   "what": "two Evals and a call by a built name: late, 3",
+   "stdout": "FILE|e02.haro\nFUNC|Go|1\nFUNC|Hello|6\nCALL|<top>|Go|static\nCALL|Go|*|late|3\n"
+  },
+  {
+   "id": "E03",
+   "line": "E2",
+   "kind": "graph",
+   "file": "e/e03.ring",
+   "what": "a function of the unit named eval answers the call: a static edge, no late line",
+   "stdout": "FILE|e03.ring\nFUNC|eval|2\nFUNC|go|4\nCALL|<top>|go|static\nCALL|go|eval|static\n"
+  },
+  {
+   "id": "E04",
+   "line": "E1",
+   "kind": "graph",
+   "file": "e/e04.haro",
+   "what": "an Eval of the file's own statements is a late call of <top>",
+   "stdout": "FILE|e04.haro\nCALL|<top>|*|late|1\n"
+  },
+  {
+   "id": "L01",
+   "line": "L1",
+   "kind": "scope",
+   "file": "l/app/root.haro",
+   "what": "`check` reports the named file and the files of its folder; the library loaded from outside is not reported, and one line says so",
+   "args": [],
+   "rules": [
+    [
+     "root.haro",
+     5,
+     "haro/undefined-function"
+    ],
+    [
+     "helper.haro",
+     2,
+     "haro/undefined-function"
+    ]
+   ],
+   "never": [
+    "lib.haro"
+   ],
+   "says": [
+    "1 file(s) loaded from outside its folder: read for their names, not reported (--all reports them)"
+   ]
+  },
+  {
+   "id": "L02",
+   "line": "L1",
+   "kind": "scope",
+   "file": "l/app/root.haro",
+   "what": "`check --all` reports every file of the unit, the library too, as v0.78 did",
+   "args": [
+    "--all"
+   ],
+   "rules": [
+    [
+     "root.haro",
+     5,
+     "haro/undefined-function"
+    ],
+    [
+     "helper.haro",
+     2,
+     "haro/undefined-function"
+    ],
+    [
+     "lib.haro",
+     6,
+     "haro/undefined-function"
+    ]
+   ],
+   "never": [
+    "loaded from outside its folder: read for their names, not reported (--all reports them)"
+   ]
+  },
+  {
+   "id": "L03",
+   "line": "L2",
+   "kind": "scope",
+   "file": "l/app/root.haro",
+   "what": "with the library kept (`haro prefix`), `check` compiles on top of it and says so with HARO_PATH=1",
+   "args": [],
+   "prefix": "../lib/lib.haro",
+   "path": "path: kept library",
+   "rules": [
+    [
+     "root.haro",
+     5,
+     "haro/undefined-function"
+    ]
+   ],
+   "never": [
+    "lib.haro"
+   ]
+  },
+  {
+   "id": "L04",
+   "line": "L2",
+   "kind": "scope",
+   "file": "l/app/root.haro",
+   "what": "with no library kept, HARO_PATH=1 says `check` compiled whole",
+   "args": [],
+   "path": "path: whole",
+   "rules": [
+    [
+     "root.haro",
+     5,
+     "haro/undefined-function"
+    ]
+   ],
+   "never": [
+    "lib.haro"
+   ]
+  },
+  {
+   "id": "L05",
+   "line": "L1",
+   "kind": "scope",
+   "file": "l/lib/lib.haro",
+   "what": "`check` of the library itself: it loads nothing from outside, so no scope line, and a library's calls are still left to the program that loads it",
+   "args": [],
+   "says": [
+    "a library's calls resolve through whoever loads it"
+   ],
+   "never": [
+    "loaded from outside its folder: read for their names, not reported (--all reports them)",
+    "haro/undefined-function"
+   ]
+  }
+ ]
+}

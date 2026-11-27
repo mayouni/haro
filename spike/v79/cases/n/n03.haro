@@ -1,0 +1,9 @@
+load "show.ring"
+func Main
+	Work()
+	Show()
+end
+func Work
+	nL = 5
+	print nL
+end

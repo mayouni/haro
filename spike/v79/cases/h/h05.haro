@@ -1,0 +1,14 @@
+iOk = rpp_http_listen({PORT})
+print "listening " + String(iOk)
+iGot = rpp_http_next()
+tType = "text/plain; x="
+for iK = 1 to 187
+	tType = tType + "a"
+end
+print Len(tType)
+try
+	rpp_http_reply(200, tType, "hello")
+catch e
+	print e.Code()
+end
+rpp_http_reply(400, "text/plain", "refused")

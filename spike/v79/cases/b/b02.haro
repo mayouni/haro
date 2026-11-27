@@ -1,0 +1,12 @@
+if false
+	iA = rpp_http_listen(8080)
+	iB = rpp_http_next()
+	tC = rpp_http_method()
+	tD = rpp_http_path()
+	tE = rpp_http_query()
+	tF = rpp_http_header("Host")
+	tG = rpp_http_body()
+	iH = rpp_http_reply(200, "text/plain", "ok")
+	tI = SystemCmd("haro")
+end
+print "named"

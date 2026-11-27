@@ -1,0 +1,4 @@
+func Main
+	vA = [1]
+	Add(vA)
+end

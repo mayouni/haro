@@ -1,0 +1,11 @@
+iOk = rpp_http_listen({PORT})
+print "listening " + String(iOk)
+iGot = rpp_http_next()
+try
+	rpp_http_reply(200, "text/plain" + Char(13) + Char(10) + "X-Injected: yes", "hello")
+	print "sent with the header"
+catch e
+	print e.Code()
+end
+rpp_http_reply(400, "text/plain", "refused")
+print "replied"

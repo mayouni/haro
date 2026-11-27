@@ -1,0 +1,4 @@
+dA = 1.5
+fB = 2.0f
+fC = dA + fB
+print fC

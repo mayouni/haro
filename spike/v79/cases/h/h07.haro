@@ -1,0 +1,5 @@
+iOk = rpp_http_listen({PORT})
+print "listening " + String(iOk)
+iGot = rpp_http_next()
+rpp_http_reply(200, "text/plain" + Char(13) + Char(10) + "X-Injected: yes", "hello")
+print "not reached"

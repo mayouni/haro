@@ -1,0 +1,4 @@
+iA = 1
+iB = 3
+dQ = iA / iB
+print dQ

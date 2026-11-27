@@ -1,0 +1,3 @@
+fA = 2.0f
+fC = fA * 3
+print fC

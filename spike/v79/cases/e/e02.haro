@@ -1,0 +1,9 @@
+func Go(ptCode)
+	Eval(ptCode)
+	Eval(ptCode)
+	call ptCode()
+end
+func Hello
+	print "hi"
+end
+Go("Hello")
