@@ -79,8 +79,10 @@ pub fn isBuiltin(lowname: []const u8) bool {
     // Keys, ...), the spellings of this file's table (a registered underscore dropped: TUISize), and the natives haro.exe
     // publishes when it starts (rpp_http_*, systemcmd), which are registered before `check` reads a file
     if (@import("compile.zig").isIntrinsic(lowname)) return true;
+    // the one spelling a .haro file writes for a name registered with an underscore (`TUISize` for tui_size): the only names
+    // of the table that the compiler's own does not answer as written
     for (pascal) |e| {
-        if (std.mem.eql(u8, e[0], lowname)) return true;
+        if (std.mem.indexOfScalar(u8, e[0], '_') == null) continue;
         if (std.ascii.eqlIgnoreCase(e[1], lowname)) return true;
     }
     if (@import("native.zig").find(lowname) != null) return true;

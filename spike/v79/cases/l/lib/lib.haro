@@ -5,3 +5,7 @@ end
 func Broken
 	NoSuchInLib()
 end
+
+func Refused
+	Two = 1
+end

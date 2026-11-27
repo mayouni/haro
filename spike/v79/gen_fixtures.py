@@ -340,18 +340,23 @@ case(id='E04', line='E1', kind='graph', file='e/e04.haro', what='an Eval of the 
 # named file's own folder and below; a file loaded from elsewhere is read for its names and not reported, and one line says how
 # many (`--all` reports every file, as v0.78 did). Its compile stands on a kept library where there is one, and HARO_PATH=1
 # says which path it took, as a run's does.
-put('l/lib/lib.haro', 'func Twice(iN)\n\treturn iN * 2\nend\n\nfunc Broken\n\tNoSuchInLib()\nend\n')
+put('l/lib/lib.haro', 'func Twice(iN)\n\treturn iN * 2\nend\n\nfunc Broken\n\tNoSuchInLib()\nend\n\nfunc Refused\n\tTwo = 1\nend\n')
+put('l/app/root6.haro', 'load "../lib/lib.haro"\nfunc Twice(iN)\n\treturn iN\nend\nprint Twice(2)\nif false\n\tNoSuchInRoot()\nend\n')
 put('l/app/helper.haro', 'func Help\n\tNoSuchInHelper()\nend\n')
 put('l/app/root.haro', 'load "../lib/lib.haro"\nload "helper.haro"\nprint Twice(21)\nif false\n\tNoSuchInRoot()\nend\n')
 SCOPE = 'loaded from outside its folder: read for their names, not reported (--all reports them)'
 case(id='L01', line='L1', kind='scope', file='l/app/root.haro', what='`check` reports the named file and the files of its folder; the library loaded from outside is not reported, and one line says so',
      args=[], rules=[['root.haro', 5, 'haro/undefined-function'], ['helper.haro', 2, 'haro/undefined-function']],
-     never=['lib.haro'], says=['1 file(s) ' + SCOPE])
+     never=['lib.haro', 'haro/refused-form', 'Twice()'], says=['1 file(s) ' + SCOPE])
 case(id='L02', line='L1', kind='scope', file='l/app/root.haro', what='`check --all` reports every file of the unit, the library too, as v0.78 did',
      args=['--all'], rules=[['root.haro', 5, 'haro/undefined-function'], ['helper.haro', 2, 'haro/undefined-function'],
-                            ['lib.haro', 6, 'haro/undefined-function']], never=[SCOPE])
+                            ['lib.haro', 6, 'haro/undefined-function'], ['lib.haro', 10, 'haro/refused-form']], never=[SCOPE])
 case(id='L03', line='L2', kind='scope', file='l/app/root.haro', what='with the library kept (`haro prefix`), `check` compiles on top of it and says so with HARO_PATH=1',
-     args=[], prefix='../lib/lib.haro', path='path: kept library', rules=[['root.haro', 5, 'haro/undefined-function']], never=['lib.haro'])
+     args=[], prefix='../lib/lib.haro', path='path: kept library', rules=[['root.haro', 5, 'haro/undefined-function']],
+     never=['lib.haro', 'haro/refused-form', 'Twice()'], says=['1 file(s) ' + SCOPE])
+case(id='L06', line='L2', kind='scope', file='l/app/root6.haro', what='a root that defines a name the kept library has is checked whole, and HARO_PATH=1 names the name',
+     args=[], prefix='../lib/lib.haro', path_starts='path: whole, the kept library does not apply (', rules=[['root6.haro', 7, 'haro/undefined-function']],
+     never=['lib.haro', 'haro/refused-form'])
 case(id='L04', line='L2', kind='scope', file='l/app/root.haro', what='with no library kept, HARO_PATH=1 says `check` compiled whole',
      args=[], path='path: whole', rules=[['root.haro', 5, 'haro/undefined-function']], never=['lib.haro'])
 case(id='L05', line='L1', kind='scope', file='l/lib/lib.haro', what='`check` of the library itself: it loads nothing from outside, so no scope line, and a library\'s calls are still left to the program that loads it',

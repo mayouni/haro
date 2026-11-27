@@ -35,6 +35,12 @@ fixture has one), `http` (a real request on 127.0.0.1 and the reply's bytes whol
 `check` or a run that crashes -- exit 3, a segmentation fault, a panic -- fails its case whatever it printed: B05 passed its
 first run on v0.78 because `check` died on `Add(x)` before printing anything, and that is how C was found.
 
+**Fixtures changed after the code** (haro 4bb7307 held them before it): writing the plants showed three protections of the L
+family that no case held -- the names a kept library gives `check`, a library file's own refused statements claimed and not
+reported, and the fall-back to a whole compile when a root defines a name the library has. The library gained a refused
+statement (`Two = 1`, line 10), L01 and L03 now say that no refusal and no undefined `Twice` is reported, L02 names the
+library's refusal, and L06 is new: 53 cases. No expectation an earlier case held was changed.
+
 On the installed v0.78, before any code: 16 of 52 cases pass -- the cases that say what stays, and H01 and H06, the replies
 v0.78 already sends right. Every other case fails for the reason its fixture names.
 

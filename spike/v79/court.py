@@ -158,6 +158,8 @@ def scope(c, label, exe):
     paths_said = [ln for ln in err.split('\n') if ln.startswith('path:')]
     if c.get('path') and paths_said != [c['path']]:
         bad.append(f'the path line is {paths_said!r}, not {[c["path"]]!r}')
+    if c.get('path_starts') and not (len(paths_said) == 1 and paths_said[0].startswith(c['path_starts'])):
+        bad.append(f'the path line is {paths_said!r}, not one line beginning {c["path_starts"]!r}')
     return bad, repr(sorted(found, key=str)) + repr(paths_said)
 
 

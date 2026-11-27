@@ -828,7 +828,9 @@
     ]
    ],
    "never": [
-    "lib.haro"
+    "lib.haro",
+    "haro/refused-form",
+    "Twice()"
    ],
    "says": [
     "1 file(s) loaded from outside its folder: read for their names, not reported (--all reports them)"
@@ -858,6 +860,11 @@
      "lib.haro",
      6,
      "haro/undefined-function"
+    ],
+    [
+     "lib.haro",
+     10,
+     "haro/refused-form"
     ]
    ],
    "never": [
@@ -881,7 +888,33 @@
     ]
    ],
    "never": [
-    "lib.haro"
+    "lib.haro",
+    "haro/refused-form",
+    "Twice()"
+   ],
+   "says": [
+    "1 file(s) loaded from outside its folder: read for their names, not reported (--all reports them)"
+   ]
+  },
+  {
+   "id": "L06",
+   "line": "L2",
+   "kind": "scope",
+   "file": "l/app/root6.haro",
+   "what": "a root that defines a name the kept library has is checked whole, and HARO_PATH=1 names the name",
+   "args": [],
+   "prefix": "../lib/lib.haro",
+   "path_starts": "path: whole, the kept library does not apply (",
+   "rules": [
+    [
+     "root6.haro",
+     7,
+     "haro/undefined-function"
+    ]
+   ],
+   "never": [
+    "lib.haro",
+    "haro/refused-form"
    ]
   },
   {

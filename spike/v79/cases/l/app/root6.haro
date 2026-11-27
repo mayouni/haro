@@ -1,0 +1,8 @@
+load "../lib/lib.haro"
+func Twice(iN)
+	return iN
+end
+print Twice(2)
+if false
+	NoSuchInRoot()
+end
