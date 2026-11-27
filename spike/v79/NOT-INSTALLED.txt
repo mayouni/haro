@@ -1,0 +1,2 @@
+Haro v0.79 is built and not installed: the shared haro.exe is v0.78. While this file stands, the guard's stage 84 runs on the
+builds HARO_VM and HARO_TWIN name and says so by name on the installed runtime. It is taken out by the install.

@@ -4313,6 +4313,33 @@ def stage83():
     return 0
 
 
+V79_COURT = os.path.join(HERE, 'v79', 'court.py')
+
+
+def stage84():
+    """Haro v0.79 (D96; v79/GRAMMAR.md): `haro check` says what the run will refuse, and a reply carries only the head its program
+    writes -- rpp_http_reply refuses a type holding CR or LF (HEADER_VALUE); the checker knows every name haro.exe answers; text +
+    a number, a mixed float, an inexact quotient, a quotient given to an i name and a decimal index named where the file shows them;
+    a .haro top-level nl, tab, cr or stream refused (NAME_RESERVED); a decimal index named by the run (INDEX_NOT_INTEGER); Len and
+    Add with a missing argument refused where they crashed; an Eval a late call; `check` reports the named file's folder and
+    stands on a kept library. v79/court.py on haro and its checked build."""
+    marker = os.path.join(HERE, 'v79', 'NOT-INSTALLED.txt')
+    if os.path.exists(marker) and not os.environ.get('HARO_VM'):
+        print('stage 84 -- NOT RUN on the installed runtime: v0.79 is built and not installed (spike/v79/NOT-INSTALLED.txt). '
+              'It runs on runtime/v79/build and build-safe, named by HARO_VM and HARO_TWIN')
+        return 0
+    print('stage 84 -- check says what the run refuses, and the reply\'s head: v79/court.py on haro and its checked build')
+    p = subprocess.run([sys.executable, V79_COURT] + (['--plant'] if PLANT else []), capture_output=True, cwd=HERE, timeout=1800)
+    out = p.stdout.decode('utf-8', 'replace').replace(chr(13) + chr(10), chr(10))
+    for line in out.splitlines():
+        if line.startswith(('  FAIL', '       ', 'V79 COURT')):
+            print(line)
+    if p.returncode != 0:
+        print(f'  FAIL the v0.79 court exited {p.returncode}' + ('' if out.strip() else ': ' + p.stderr.decode('utf-8', 'replace')[-400:]))
+        return 1
+    return 0
+
+
 PORT_COURT = os.path.join(os.path.dirname(HERE), 'port', 'port_court.py')
 
 
@@ -4592,5 +4619,7 @@ if __name__ == '__main__':
         failures += stage82()
     if stage in (None, 83) and os.path.exists(DESKS_COURT):
         failures += stage83()
+    if stage in (None, 84) and os.path.exists(V79_COURT):
+        failures += stage84()
     print(f'haro_forge: {"FAIL" if failures else "PASS"} ({failures} failure(s), {time.perf_counter()-t0:.1f} s)')
     sys.exit(1 if failures else 0)
