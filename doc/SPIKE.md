@@ -1917,6 +1917,10 @@ D58, the Principal's ruling of 2026-11-09 ("ParentClassName"), revising v0.42's 
 
 **Results.** 9 of 9 cases on both builds; 5 of 5 plants; v36 to v48's courts green. Haro's 2,172 calls re-spelled by a tool (20fc236, listed in v20/tool_commits.txt).
 
+## The seventy-ninth rung -- Haro v0.79, `check` says what the run refuses -- 2026-11-27
+
+D96: `rpp_http_reply` refuses a type holding CR or LF, or over 200 bytes (HEADER_VALUE), and sends nothing; `check` knows every name haro.exe answers and names text + a number, a mixed float, an inexact quotient, a quotient given to an `i` name and a decimal index where the file shows both sides; `check <file>` reports the named file's folder and stands on a kept library, `--all` the whole unit; a `.haro` top-level `nl`, `tab`, `cr` or stream is NAME_RESERVED; a decimal index is INDEX_NOT_INTEGER; `Len` and `Add` with a wrong count are refused where they crashed the compiler; an `Eval` is a late call. Read on the installed v0.78 before any code: 16 of 52. 53 of 53 on both builds, 21 plants (4bb7307, 68ddd9d, e25fb80, ecc2bf6). The 84-stage guard passes every stage but stage 6, whose timings were not measured: the CPU held at about 20 per cent of its clock. Built, not installed.
+
 ## The seventy-eighth rung -- Haro v0.78, three more findings of the desks -- 2026-11-23
 
 D95: a compile that fails ends haro.exe with 1 where it ended with 0 (HARO-COMPILE-EXIT-01), and a check whose compiler stopped ends with 1; the library compiled once and kept is held by a court -- a run says the path it took (`HARO_PATH`), a root's image is neither used nor written when asked (`HARO_NOIMAGE`), the usage text names `haro prefix` (HARO-LIBIMAGE-01); a declared command's child reads its standard input from a place, `hCall.RunReading(hPlace)` (HARO-INVOCATION-STDIN-01). Read on the installed v0.77 before any code: 5 of 24. 24 of 24 on both builds, 17 plants (6575ee4, 478f772, 9e01ea4, 0f755e7). Installed 2026-11-23 18:12:45 after its notice in ten desks' mailboxes; on the installed builds stages 55, 60 and 80 to 83 pass (15, 30, 10, 12, 16 and 24 cases, each on both).

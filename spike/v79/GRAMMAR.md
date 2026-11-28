@@ -56,3 +56,9 @@ whose answer has one type (`String`, `Float`, `Integer`). A name lettered `x`, o
 - `Eval`, `LoadLib` and the calls that admit code while a program runs switch the undefined-function rule off for their file.
 - An integer `1` held in a `.haro` list and used as a condition is refused by the run, `BOOLEAN_EXPECTED`: only the run can know
   the value (stzlib-gpu's fourth reading, corrected by its desk on 2026-11-27).
+
+## Measured
+
+- The court: 52 of 52 on the trial build of 68ddd9d; 53 of 53 on both builds of e25fb80 (haro 7705d92f04d8a149, checked d88011773593ac49).
+- The plants: 21 of 21 caught, each by its fixture, each built (`plants.py`, P1 to P21).
+- The guard, 84 stages, 2026-11-28 08:51 to 10:46, 6921.9 s: every stage passes but stage 6, whose two timings are not measured. The CPU read 20 per cent of its clock before the run and 22 after; harb, which no rung of Haro changes, read 90.8 ms for its own check. Every subprocess timeout was multiplied by 10 from outside the guard (`runtime/v79/slowcpu`), on the Principal's "Run the guard throttled and mark the timings not measured".

@@ -686,6 +686,12 @@ Each `%NAME%` in this file is a folder of this machine; its value is in `.centra
   declared command's child the file at a place as its standard input (RUN_INPUT, INPUT_NOT_READ; HARO-INVOCATION-STDIN-01).
   **A refusal is counted with `haro check` on every repository of this machine that tracks `.haro` files, and a notice is
   written into each such desk's mailbox** (HARO-CMDLINE-SIBLINGS-01: v0.77 was counted on stzlib alone).
+  **v0.79 is built, not installed** (D96, HF-186, stage 84): `rpp_http_reply` refuses a type holding CR or LF, or over
+  200 bytes (HEADER_VALUE); `haro check` knows every name haro.exe answers and names text + a number, a mixed float, an
+  inexact quotient, a quotient given to an `i` name and a decimal index where the file shows both sides; `check <file>`
+  reports the named file's folder (`--all` every file) and stands on a kept library; in a `.haro` file a top-level
+  `nl`, `tab`, `cr`, `stdin`, `stdout` or `stderr` is NAME_RESERVED and a decimal index INDEX_NOT_INTEGER; `Len` and
+  `Add` with a wrong count are refused where they crashed the compiler; an `Eval` is a late call in `haro graph`.
   Next: DOORS.md's rungs 4 and 5 -- `unjudged` whole, `of` on attributes; then the seat types; then `uses` and `total`.
 - D43 is the twin-court clause. Of BLOCKS.md's four questions: Q-B1 is built (`?` is C6, and `OPTIONAL` sees it in a rule); Q-B2's two amendments are refused by name until Ringua's text
   lands; Q-B3 the block export of a program is not started; Q-B4 the round-trip court the elders waited for exists -- asking their owners is Central's.
